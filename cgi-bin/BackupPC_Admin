@@ -603,10 +603,10 @@ sub Action_Browse
             my($dirOpen, $gotDir, $imgStr, $img);
             my $fURI = $f;                             # URI escaped $f
             my $shareURI = $share;                     # URI escaped $share
-            my $path = "$relDir/$f";
+            (my $path = "$relDir/$f") =~ s{//+}{/}g;
 	    if ( $shareURI eq "" ) {
 		$shareURI = $path;
-		$path  = "";
+		$path  = "/";
 	    }
             $path =~ s{^/+}{/};
             $path     =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
@@ -713,9 +713,10 @@ EOF
         # Prune the last directory off $relDir, or at the very end
 	# do the top-level directory.
         #
-	if ( $relDir eq "" ) {
+	if ( $relDir eq "" || $relDir eq "/" ) {
 	    $currDir = $share;
 	    $share = "";
+	    $relDir = "";
 	} else {
 	    $relDir =~ s/(.*)\/(.*)/$1/;
 	    $currDir = $2;

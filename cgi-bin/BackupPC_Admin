@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta0, released 23 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -733,6 +733,7 @@ EOF
     my $dirDisplay = "$share/$dir";
     $dirDisplay =~ s{//+}{/}g;
     $dirDisplay =~ s{/+$}{}g;
+    $dirDisplay = "/" if ( $dirDisplay eq "" );
     my $filledBackup;
 
     if ( (my @mergeNums = @{$view->mergeNums}) > 1 ) {

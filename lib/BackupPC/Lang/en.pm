@@ -671,8 +671,6 @@ $Lang{Only_privileged_users_can_view_email_summaries} = "Only privileged users c
 $Lang{Only_privileged_users_can_browse_backup_files} = "Only privileged users can browse backup files"
                 . " for host \${EscapeHTML(\$In{host})}.";
 $Lang{Empty_host_name} = "Empty host name.";
-$Lang{Can_t_browse_bad_directory_name} = "Can\'t browse bad directory name"
-	            . " \${EscapeHTML(\"\$TopDir/pc/\$host/\$num\")}";
 $Lang{Directory___EscapeHTML} = "Directory \${EscapeHTML(\"\$TopDir/pc/\$host/\$num\")}"
 		    . " is empty";
 $Lang{Can_t_browse_bad_directory_name2} = "Can\'t browse bad directory name"
@@ -691,7 +689,6 @@ $Lang{Can_t_open_create} = "Can\'t open/create "
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Only privileged users can restore backup files"
                 . " for host \${EscapeHTML(\$host)}.";
 $Lang{Empty_host_name} = "Empty host name";
-$Lang{Can_t_restore_bad_file} = "Can\'t restore bad file \${EscapeHTML(\$fullPath)}";
 $Lang{Unknown_host_or_user} = "Unknown host or user \${EscapeHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} = "Only privileged users can view information about"
                 . " host \${EscapeHTML(\$host)}." ;
@@ -707,7 +704,6 @@ $Lang{Unable_to_connect_to_BackupPC_server} = "Unable to connect to BackupPC ser
           . " configuration error.  Please report this to your Sys Admin.";
 
 $Lang{Can_t_find_IP_address_for} = "Can\'t find IP address for \${EscapeHTML(\$host)}";
-
 $Lang{host_is_a_DHCP_host} = <<EOF;
 \$host is a DHCP host, and I don\'t know its IP address.  I checked the
 netbios name of \$ENV{REMOTE_ADDR}\$tryIP, and found that that machine

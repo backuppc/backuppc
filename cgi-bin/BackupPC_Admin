@@ -126,7 +126,7 @@ my %ActionDispatch = (
     "browse"              	 => \&Action_Browse,
     $Lang->{Restore}        	 => \&Action_Restore,
     "RestoreFile"         	 => \&Action_RestoreFile,
-    $Lang->{hostInfo}       	 => \&Action_HostInfo,
+    "hostInfo"		       	 => \&Action_HostInfo,
     "generalInfo"         	 => \&Action_GeneralInfo,
     "restoreInfo"         	 => \&Action_RestoreInfo,
 );
@@ -134,7 +134,7 @@ my %ActionDispatch = (
 #
 # Set default actions, then call sub handler
 #
-$In{action} ||= $Lang->{hostInfo}    if ( defined($In{host}) );
+$In{action} ||= "hostInfo"    if ( defined($In{host}) );
 $In{action}   = "generalInfo" if ( !defined($ActionDispatch{$In{action}}) );
 $ActionDispatch{$In{action}}();
 exit(0);
@@ -1810,7 +1810,7 @@ EOF
     <tr><td>$Lang->{Host_or_User_name}</td>
     <tr><td><form action="$MyURL" method="get"><small>
     <input type="text" name="host" size="10" maxlength="64">
-    <input type="hidden" name="action" value="$Lang->{hostInfo}"><input type="submit" value="$Lang->{Go}" name="ignore">
+    <input type="hidden" name="action" value="hostInfo"><input type="submit" value="$Lang->{Go}" name="ignore">
     </small></form></td></tr>
 </table>
 EOF

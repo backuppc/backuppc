@@ -672,9 +672,6 @@ $Lang{Only_privileged_users_can_view_log_files} = "Seuls les utilisateurs privil
 $Lang{Only_privileged_users_can_view_email_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les compte-rendu des courriels.";
 $Lang{Only_privileged_users_can_browse_backup_files} = "Seuls les utilisateurs privilégiés peuvent parcourir les fichiers de sauvegarde pour l'hôte \${EscapeHTML(\$In{host})}.";
 $Lang{Empty_host_name} = "Nom d\'hôte vide.";
-$Lang{Can_t_browse_bad_directory_name} = "Ne peut pas parcourir " 
-	            . " \${EscapeHTML(\"\$TopDir/pc/\$host/\$num\")}:"
-                    . " mauvais nom de répertoire";
 $Lang{Directory___EscapeHTML} = "Le répertoire \${EscapeHTML(\"\$TopDir/pc/\$host/\$num\")}"
 		    . " est vide";
 $Lang{Can_t_browse_bad_directory_name2} = "Ne peut pas parcourir "
@@ -696,7 +693,6 @@ $Lang{Only_privileged_users_can_restore_backup_files2} = "Seuls les utilisateurs
                 . " des fichiers de sauvegarde"
                 . " pour l\'hôte \${EscapeHTML(\$host)}.";
 $Lang{Empty_host_name} = "Nom d\'hôte vide";
-$Lang{Can_t_restore_bad_file} = "Ne peut pas restaurer le fichier corrompu \${EscapeHTML(\$fullPath)}";
 $Lang{Unknown_host_or_user} = "\${EscapeHTML(\$host)}, hôte ou utilisateur inconnu.";
 $Lang{Only_privileged_users_can_view_information_about} = "Seuls les utilisateurs privilégiés peuvent accéder aux "
                 . " informations sur l\'hôte \${EscapeHTML(\$host)}." ;
@@ -712,7 +708,6 @@ $Lang{Unable_to_connect_to_BackupPC_server} = "Impossible de se connecter au ser
           . " de configuration. Veuillez faire suivre ce message à votre administrateur système.";
 
 $Lang{Can_t_find_IP_address_for} = "Ne peut pas trouver d\'adresse IP pour \${EscapeHTML(\$host)}";
-
 $Lang{host_is_a_DHCP_host} = <<EOF;
 L\'hôte est un serveur DHCP, et je ne connais pas son adresse IP. J\'ai 
 vérifié le nom netbios de \$ENV{REMOTE_ADDR}\$tryIP, et j\'ai trouvé que 

@@ -356,7 +356,8 @@ exit unless prompt("--> Do you want to continue?", "y") =~ /y/i;
 #
 # Create install directories
 #
-foreach my $dir ( qw(bin lib/BackupPC/Xfer lib/BackupPC/Zip doc) ) {
+foreach my $dir ( qw(bin lib/BackupPC/Xfer lib/BackupPC/Zip
+		     lib/BackupPC/Lang doc) ) {
     next if ( -d "$Conf{InstallDir}/$dir" );
     mkpath("$Conf{InstallDir}/$dir", 0, 0775);
     if ( !-d "$Conf{InstallDir}/$dir"

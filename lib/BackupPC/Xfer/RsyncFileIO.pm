@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 18 Jan 2003.
+# Version 2.0.0_CVS, released 3 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -121,7 +121,6 @@ sub csumStart
     } else {
         delete($fio->{csumDigest});
     }
-    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
 sub csumGet
@@ -179,7 +178,6 @@ sub readStart
         return;
     }
     $fio->log("$f->{name}: opened for read") if ( $fio->{logLevel} >= 4 );
-    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
 sub read
@@ -434,7 +432,7 @@ sub attribWrite
         my $poolWrite = BackupPC::PoolWrite->new($fio->{bpc}, $fileName,
                                      length($data), $fio->{xfer}{compress});
         $poolWrite->write(\$data);
-        $fio->processClose($poolWrite, $fio->{attrib}{$d}->fileName($d),
+        $fio->processClose($poolWrite, $fio->{attrib}{$d}->fileName($dirM),
                            length($data), 0);
     }
     delete($fio->{attrib}{$d});
@@ -623,7 +621,8 @@ sub fileDeltaRxStart
     $fio->{rxRemainder} = $remainder;   # size of the last block
     $fio->{rxMatchBlk}  = 0;            # current start of match
     $fio->{rxMatchNext} = 0;            # current next block of match
-    my $rxSize = ($cnt - 1) * $size + $remainder;
+    $fio->{rxSize}      = 0;            # size of received file
+    my $rxSize = $cnt > 0 ? ($cnt - 1) * $size + $remainder : 0;
     if ( $fio->{rxFile}{size} != $rxSize ) {
         $fio->{rxMatchBlk} = undef;     # size different, so no file match
         $fio->log("$fio->{rxFile}{name}: size doesn't match"
@@ -634,7 +633,6 @@ sub fileDeltaRxStart
     delete($fio->{rxOutFd});
     delete($fio->{rxDigest});
     delete($fio->{rxInData});
-    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
 #
@@ -723,7 +721,7 @@ sub fileDeltaRxNext
                     #
                     unlink("$fio->{outDirSh}RStmp")
                                     if  ( -f "$fio->{outDirSh}RStmp" );
-                    if ( open(F, ">+", "$fio->{outDirSh}RStmp") ) {
+                    if ( open(F, "+>", "$fio->{outDirSh}RStmp") ) {
                         my $data;
                         while ( $fh->read(\$data, 1024 * 1024) > 0 ) {
                             if ( syswrite(F, $data) != length($data) ) {
@@ -784,6 +782,7 @@ sub fileDeltaRxNext
             }
             $fio->{rxOutFd}->write(\$data);
             $fio->{rxDigest}->add($data);
+	    $fio->{rxSize} += length($data);
         }
         $fio->{rxMatchBlk} = undef;
     }
@@ -803,6 +802,7 @@ sub fileDeltaRxNext
                         if ( $fio->{logLevel} >= 10 );
         $fio->{rxOutFd}->write(\$newData);
         $fio->{rxDigest}->add($newData);
+	$fio->{rxSize} += length($newData);
     }
 }
 
@@ -830,6 +830,7 @@ sub fileDeltaRxDone
             my $data;
 	    while ( $fh->read(\$data, 4 * 65536) > 0 ) {
 		$fio->{rxDigest}->add($data);
+		$fio->{rxSize} += length($data);
 	    }
             $fh->close;
         } else {
@@ -859,12 +860,12 @@ sub fileDeltaRxDone
     # One special case is an empty file: if the file size is
     # zero we need to open the output file to create it.
     #
-    if ( $fio->{rxFile}{size} == 0 ) {
+    if ( $fio->{rxSize} == 0 ) {
 	my $rxOutFileRel = "$fio->{shareM}/"
 			 . $fio->{bpc}->fileNameMangle($name);
         my $rxOutFile    = $fio->{outDir} . $rxOutFileRel;
         $fio->{rxOutFd}  = BackupPC::PoolWrite->new($fio->{bpc},
-					   $rxOutFile, $fio->{rxFile}{size},
+					   $rxOutFile, $fio->{rxSize},
                                            $fio->{xfer}{compress});
     }
     if ( !defined($fio->{rxOutFd}) ) {
@@ -897,19 +898,22 @@ sub fileDeltaRxDone
 	    # Cumulate the stats
 	    #
 	    $fio->{stats}{TotalFileCnt}++;
-	    $fio->{stats}{TotalFileSize} += $fio->{rxFile}{size};
+	    $fio->{stats}{TotalFileSize} += $fio->{rxSize};
 	    $fio->{stats}{ExistFileCnt}++;
-	    $fio->{stats}{ExistFileSize} += $fio->{rxFile}{size};
+	    $fio->{stats}{ExistFileSize} += $fio->{rxSize};
 	    $fio->{stats}{ExistFileCompSize} += -s $rxOutFile;
-            return;
+	    $fio->{rxFile}{size} = $fio->{rxSize};
+	    return $fio->attribSet($fio->{rxFile});
         }
     }
     if ( defined($fio->{rxOutFd}) ) {
 	my $exist = $fio->processClose($fio->{rxOutFd},
 				       $fio->{rxOutFileRel},
-				       $fio->{rxFile}{size}, 1);
+				       $fio->{rxSize}, 1);
 	$fio->logFileAction($exist ? "pool" : "create", $fio->{rxFile})
 			    if ( $fio->{logLevel} >= 1 );
+	$fio->{rxFile}{size} = $fio->{rxSize};
+	return $fio->attribSet($fio->{rxFile});
     }
     delete($fio->{rxDigest});
     delete($fio->{rxInData});
@@ -984,7 +988,6 @@ sub fileListEltSend
 	$fio->{stats}{TotalFileCnt}++;
 	$fio->{stats}{TotalFileSize} += $a->{size};
     }
-    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
 sub fileListSend
@@ -1013,7 +1016,6 @@ sub finish
     # Flush the attributes if this is the child
     #
     $fio->attribWrite(undef);
-    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
 #sub is_tainted

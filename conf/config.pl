@@ -226,6 +226,17 @@ $Conf{InstallDir}   = '';
 #
 $Conf{BackupPCUserVerify} = 1;
 
+#
+# Maximum number of hardlinks supported by the $TopDir file system
+# that BackupPC uses.  Most linux or unix file systems should support
+# at least 32000 hardlinks per file, or 64K in other cases.  If a pool
+# file already has this number of hardlinks, a new pool file is created
+# so that new hardlinks can be accommodated.  This limit will only
+# be hit if an identical file appears at least this number of times
+# across all the backups.
+#
+$Conf{HardLinkMax} = 31999;
+
 ###########################################################################
 # What to backup and when to do it
 # (can be overridden in the per-PC config.pl)

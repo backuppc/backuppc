@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 18 Jan 2003.
+# Version 2.0.0_CVS, released 3 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -249,8 +249,8 @@ sub Main_Initialize
         exit(1);
     }
     foreach my $progName ( qw(SmbClientPath NmbLookupPath PingPath DfPath
-                              SendmailPath) ) {
-        next if ( !defined($Conf{$progName}) || -x $Conf{$progName} );
+                              SendmailPath SshPath) ) {
+        next if ( $Conf{$progName} eq "" || -x $Conf{$progName} );
         print(STDERR $bpc->timeStamp,
                      "\$Conf{$progName} = '$Conf{$progName}' is not a"
                    . " valid executable program\n");

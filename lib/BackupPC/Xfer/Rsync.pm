@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 18 Jan 2003.
+# Version 2.0.0_CVS, released 3 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -268,6 +268,7 @@ sub start
 			},
 	rsyncCmdType => "full",
 	rsyncArgs    => $rsyncArgs,
+	timeout      => $conf->{ClientTimeout},
 	logHandler   => sub {
 			  my($str) = @_;
 			  $str .= "\n";
@@ -279,7 +280,6 @@ sub start
 			    conf       => $t->{conf},
 			    backups    => $t->{backups},
 			    logLevel   => $conf->{RsyncLogLevel},
-			    timeout    => $conf->{ClientTimeout},
 			    logHandler => sub {
 					      my($str) = @_;
 					      $str .= "\n";

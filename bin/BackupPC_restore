@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 18 Jan 2003.
+# Version 2.0.0_CVS, released 3 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -417,7 +417,8 @@ exit(RestoreCleanup($client));
 sub CorrectHostCheck
 {
     my($hostIP, $host) = @_;
-    return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck} );
+    return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck}
+		|| $Conf{NmbLookupCmd} eq "" );
     my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($hostIP);
     return "host $host has mismatching netbios name $netBiosHost"
             if ( $netBiosHost ne $host );

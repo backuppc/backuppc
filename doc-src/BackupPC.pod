@@ -151,13 +151,6 @@ on increasingly better RAID systems.
 At other sites a secondary tape backup will be required. This tape
 backup can be done perhaps weekly from the BackupPC pool file system.
 
-One comment: in the US in particular, permanent backups of things like
-email are becoming strongly discouraged by lawyers because of discovery
-prior to possible litigation.  Using BackupPC without tape backup allows
-recent file changes or losses to be restored, but without keeping a
-history more than a month or two old (although this doesn't avoid the
-problem of old emails languishing in user's email folders forever).
-
 =back
 
 =head2 Resources
@@ -184,20 +177,25 @@ This page has links to the current releases of BackupPC.
 
 =item Mail lists
 
-Two BackupPC mailing lists exist for announcements (backuppc-announce)
-and reporting information, asking questions, discussing development or
-any other topic relevant to BackupPC (backuppc-users).
+Three BackupPC mailing lists exist for announcements (backuppc-announce),
+developers (backuppc-devel), and a general user list for support, asking
+questions or any other topic relevant to BackupPC (backuppc-users).
 
-You are encouraged to subscribe to either the backuppc-announce
-or backuppc-users mail list on sourceforge.net at either:
+You can subscribe to these lists by visiting:
 
     http://lists.sourceforge.net/lists/listinfo/backuppc-announce
     http://lists.sourceforge.net/lists/listinfo/backuppc-users
+    http://lists.sourceforge.net/lists/listinfo/backuppc-devel
 
 The backuppc-announce list is moderated and is used only for
 important announcements (eg: new versions).  It is low traffic.
-You only need to subscribe to one list: backuppc-users also
-receives any messages on backuppc-announce.
+You only need to subscribe to one of backuppc-announce and
+backuppc-users: backuppc-users also receives any messages on
+backuppc-announce.
+
+The backuppc-devel list is only for developers who are working on BackupPC.
+Do not post questions or support requests there.  But detailed technical
+discussions should happen on this list.
 
 To post a message to the backuppc-users list, send an email to
 
@@ -208,7 +206,7 @@ Do not send subscription requests to this address!
 =item Other Programs of Interest
 
 If you want to mirror linux or unix files or directories to a remote server
-you should consider rsync, L<http://rsync.samba.org>.  BackupPC uses
+you should consider rsync, L<http://rsync.samba.org>.  BackupPC now uses
 rsync as a transport mechanism; if you are already an rsync user you
 can think of BackupPC as adding efficient storage (compression and
 pooling) and a convenient user interface to rsync.
@@ -216,12 +214,22 @@ pooling) and a convenient user interface to rsync.
 Unison is a utility that can do two-way, interactive, synchronization.
 See L<http://www.cis.upenn.edu/~bcpierce/unison>.
 
-Two popular open source packages that do tape backup are
-Amanda (L<http://www.amanda.org>) and
-afbackup (L<http://sourceforge.net/projects/afbackup>).
+Three popular open source packages that do tape backup are
+Amanda (L<http://www.amanda.org>),
+afbackup (L<http://sourceforge.net/projects/afbackup>), and
+Bacula (L<http://www.bacula.org>).
 Amanda can also backup WinXX machines to tape using samba.
 These packages can be used as back ends to BackupPC to backup the
 BackupPC server data to tape.
+
+Various programs and scripts use rsync to provide hardlinked backups.
+See, for example, Mike Rubel's site (L<http://www.mikerubel.org>),
+J. W. Schultz's dirvish (L<http://www.pegasys.ws/dirvish>),
+and John Bowman's rlbackup (L<http://www.math.ualberta.ca/imaging/rlbackup>).
+BackupPC provides many additional features, such as compressed storage,
+hardlinking any matching files (rather than just files with the same name),
+and storing special files without root priviliges.  But these other scripts
+provide simple and effective solutions and are worthy of consideration.
 
 =back
 

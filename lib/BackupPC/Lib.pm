@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 18 Jan 2003.
+# Version 2.0.0_CVS, released 3 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -124,6 +124,13 @@ sub adminJob
 sub trashJob
 {
     return " trashClean ";
+}
+
+sub ConfValue
+{
+    my($bpc, $param) = @_;
+
+    return $bpc->{Conf}{$param};
 }
 
 sub timeStamp
@@ -693,6 +700,11 @@ sub CheckHostAlive
     my($bpc, $host) = @_;
     my($s, $pingCmd);
 
+    #
+    # Return success if the ping cmd is undefined or empty.
+    #
+    return 0 if ( $bpc->{Conf}{PingCmd} eq "" );
+
     my $args = {
 	pingPath => $bpc->{Conf}{PingPath},
 	host     => $host,
@@ -721,6 +733,7 @@ sub CheckFileSystemUsage
     my($topDir) = $bpc->{TopDir};
     my($s, $dfCmd);
 
+    return 0 if ( $bpc->{Conf}{DfCmd} eq "" );
     my $args = {
 	dfPath   => $bpc->{Conf}{DfPath},
 	topDir   => $bpc->{TopDir},
@@ -740,6 +753,11 @@ sub NetBiosInfoGet
     my($bpc, $host) = @_;
     my($netBiosHostName, $netBiosUserName);
     my($s, $nmbCmd);
+
+    #
+    # Skip NetBios check if NmbLookupCmd is emtpy
+    #
+    return ($host, undef) if ( $bpc->{Conf}{NmbLookupCmd} eq "" );
 
     my $args = {
 	nmbLookupPath => $bpc->{Conf}{NmbLookupPath},
@@ -763,6 +781,11 @@ sub NetBiosHostIPFind
     my($bpc, $host) = @_;
     my($netBiosHostName, $netBiosUserName);
     my($s, $nmbCmd);
+
+    #
+    # Skip NetBios lookup if NmbLookupFindHostCmd is emtpy
+    #
+    return $host if ( $bpc->{Conf}{NmbLookupFindHostCmd} eq "" );
 
     my $args = {
 	nmbLookupPath => $bpc->{Conf}{NmbLookupPath},
@@ -936,10 +959,14 @@ sub cmdExecOrEval
     
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", $cmd) if ( ref($cmd) eq "ARRAY" );
-        eval($cmd)
+        eval($cmd);
+        print(STDERR "Perl code fragment for exec shouldn't return!!\n");
+        exit(1);
     } else {
         $cmd = [split(/\s+/, $cmd)] if ( ref($cmd) ne "ARRAY" );
         exec(@$cmd);
+        print(STDERR "Exec failed for @$cmd\n");
+        exit(1);
     }
 }
 

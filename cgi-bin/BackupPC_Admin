@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 18 Jan 2003.
+# Version 2.0.0_CVS, released 3 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -601,10 +601,14 @@ sub Action_Browse
         # Loop over each of the files in this directory
         #
 	foreach my $f ( sort(keys(%$attr)) ) {
-            my($dirOpen, $gotDir, $imgStr, $img);
+            my($dirOpen, $gotDir, $imgStr, $img, $path);
             my $fURI = $f;                             # URI escaped $f
             my $shareURI = $share;                     # URI escaped $share
-            (my $path = "$relDir/$f") =~ s{//+}{/}g;
+	    if ( $relDir eq "" ) {
+		$path = $f;
+	    } else {
+		($path = "$relDir/$f") =~ s{//+}{/}g;
+	    }
 	    if ( $shareURI eq "" ) {
 		$shareURI = $path;
 		$path  = "/";

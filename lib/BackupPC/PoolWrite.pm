@@ -56,7 +56,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 18 Jan 2003.
+# Version 2.0.0_CVS, released 3 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -88,6 +88,8 @@ sub new
         data     => "",
         eof      => undef,
     }, $class;
+
+    $self->{hardLinkMax} = $bpc->ConfValue("HardLinkMax");
 
     #
     # Always unlink any current file in case it is already linked
@@ -122,7 +124,8 @@ sub write
                 my $fileName = $a->{fileCnt} < 0 ? $a->{base}
                                         : "$a->{base}_$a->{fileCnt}";
                 last if ( !-f $fileName );
-                if ( !defined($fh = BackupPC::FileZIO->open($fileName, 0,
+                if ( (stat(_))[3] >= $a->{hardLinkMax}
+		    || !defined($fh = BackupPC::FileZIO->open($fileName, 0,
                                                      $a->{compress})) ) {
                     $a->{fileCnt}++;
                     next;
@@ -176,7 +179,8 @@ sub write
             #
             while ( -f $fileName ) {
                 my $fh;
-                if ( !defined($fh = BackupPC::FileZIO->open($fileName, 0,
+                if ( (stat(_))[3] >= $a->{hardLinkMax}
+		    || !defined($fh = BackupPC::FileZIO->open($fileName, 0,
                                                      $a->{compress})) ) {
                     $a->{fileCnt}++;
                     #print("   Discarding $fileName (open failed)\n");
@@ -273,12 +277,16 @@ sub write
             push(@{$a->{errors}}, "Botch, no matches on $a->{fileName}"
                                 . " ($a->{digest})\n");
         } elsif ( @{$a->{files}} > 1 ) {
-            my $str = "Unexpected multiple matches on"
-                   . " $a->{fileName} ($a->{digest})\n";
-            for ( my $i = 0 ; $i < @{$a->{files}} ; $i++ ) {
-                $str .= "     -> $a->{files}[$i]->{name}\n";
-            }
-            push(@{$a->{errors}}, $str);
+	    #
+	    # This is no longer a real error because $Conf{HardLinkMax}
+	    # could be hit, thereby creating identical pool files
+	    #
+            #my $str = "Unexpected multiple matches on"
+            #       . " $a->{fileName} ($a->{digest})\n";
+            #for ( my $i = 0 ; $i < @{$a->{files}} ; $i++ ) {
+            #    $str .= "     -> $a->{files}[$i]->{name}\n";
+            #}
+            #push(@{$a->{errors}}, $str);
         }
         #print("   Linking $a->{fileName} to $a->{files}[0]->{name}\n");
         if ( @{$a->{files}} && !link($a->{files}[0]->{name}, $a->{fileName}) ) {

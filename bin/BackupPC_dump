@@ -68,7 +68,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 18 Jan 2003.
+# Version 2.0.0_CVS, released 3 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -119,7 +119,8 @@ if ( $opts{d} ) {
     # host name via NetBios using nmblookup.
     #
     $hostIP = $client;
-    exit(1) if ( $bpc->CheckHostAlive($hostIP) < 0 );
+    exit(1) if ( $bpc->CheckHostAlive($hostIP) < 0
+		    || $Conf{NmbLookupCmd} eq "" );
     ($client, $user) = $bpc->NetBiosInfoGet($hostIP);
     exit(1) if ( $host !~ /^([\w\.\s-]+)$/ );
     my $hosts = $bpc->HostInfoRead($client);
@@ -147,6 +148,8 @@ if ( defined(my $error = $bpc->ConfigRead($client)) ) {
 $SIG{INT}  = \&catch_signal;
 $SIG{ALRM} = \&catch_signal;
 $SIG{TERM} = \&catch_signal;
+$SIG{PIPE} = \&catch_signal;
+my $Pid = $$;
 
 #
 # Make sure we eventually timeout if there is no activity from
@@ -771,7 +774,13 @@ sub catch_signal
     my $signame = shift;
     my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
 
+    #
+    # Ignore signals in children
+    #
+    return if ( $Pid != $$ );
+
     print(LOG $bpc->timeStamp, "cleaning up after signal $signame\n");
+    $SIG{$signame} = 'IGNORE';
     UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
     $XferLOG->write(\"exiting after signal $signame\n");
     $XferLOG->close();
@@ -890,10 +899,11 @@ sub BackupExpire
 sub CorrectHostCheck
 {
     my($hostIP, $host) = @_;
-    return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck} );
+    return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck}
+		|| $Conf{NmbLookupCmd} eq "" );
     my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($hostIP);
     return "host $host has mismatching netbios name $netBiosHost"
-            if ( $netBiosHost ne $host );
+		if ( $netBiosHost ne $host );
     return;
 }
 

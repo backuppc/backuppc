@@ -93,21 +93,6 @@ sub NewRequest
     $Cgi = new CGI;
     %In = $Cgi->Vars;
 
-    #
-    # Default REMOTE_USER so in a miminal installation the user
-    # has a sensible default.
-    #
-    $ENV{REMOTE_USER} = $Conf{BackupPCUser} if ( !defined($ENV{REMOTE_USER}) );
-
-    #
-    # We require that Apache pass in $ENV{SCRIPT_NAME} and $ENV{REMOTE_USER}.
-    # The latter requires .ht_access style authentication.  Replace this
-    # code if you are using some other type of authentication, and have
-    # a different way of getting the user name.
-    #
-    $MyURL  = $ENV{SCRIPT_NAME};
-    $User   = $ENV{REMOTE_USER};
-
     if ( !defined($bpc) ) {
 	ErrorExit($Lang->{BackupPC__Lib__new_failed__check_apache_error_log})
 	    if ( !($bpc = BackupPC::Lib->new(undef, undef, 1)) );
@@ -120,6 +105,21 @@ sub NewRequest
         $bpc->ServerMesg("log Re-read config file because mtime changed");
         $bpc->ServerMesg("server reload");
     }
+
+    #
+    # Default REMOTE_USER so in a miminal installation the user
+    # has a sensible default.
+    #
+    $ENV{REMOTE_USER} = $Conf{BackupPCUser} if ( $ENV{REMOTE_USER} eq "" );
+
+    #
+    # We require that Apache pass in $ENV{SCRIPT_NAME} and $ENV{REMOTE_USER}.
+    # The latter requires .ht_access style authentication.  Replace this
+    # code if you are using some other type of authentication, and have
+    # a different way of getting the user name.
+    #
+    $MyURL  = $ENV{SCRIPT_NAME};
+    $User   = $ENV{REMOTE_USER};
 
     #
     # Clean up %ENV for taint checking
@@ -264,8 +264,8 @@ sub ServerConnect
         if ( CheckPermission() 
           && -f $Conf{ServerInitdPath}
           && $Conf{ServerInitdStartCmd} ne "" ) {
-            Header(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"));
-            print (eval("qq{$Lang->{Admin_Start_Server}}"));
+            my $content = eval("qq{$Lang->{Admin_Start_Server}}");
+            Header(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"), $content);
             Trailer();
             exit(1);
         } else {
@@ -328,27 +328,22 @@ sub CheckPermission
 
 #
 # Returns the list of hosts that should appear in the navigation bar
-# for this user.  If $Conf{CgiNavBarAdminAllHosts} is set, the admin
-# gets all the hosts.  Otherwise, regular users get hosts for which
-# they are the user or are listed in the moreUsers column in the
-# hosts file.
+# for this user.  If $getAll is set, the admin gets all the hosts.
+# Otherwise, regular users get hosts for which they are the user or
+# are listed in the moreUsers column in the hosts file.
 #
 sub GetUserHosts
 {
-    my($host) = @_;
+    my($host, $getAll) = @_;
     my @hosts;
 
-    if ( $Conf{CgiNavBarAdminAllHosts} && CheckPermission() ) {
+    if ( $getAll && CheckPermission() ) {
         @hosts = sort keys %$Hosts;
     } else {
         @hosts = sort grep { $Hosts->{$_}{user} eq $User ||
                        defined($Hosts->{$_}{moreUsers}{$User}) } keys(%$Hosts);
     }
-    #
-    # return the selected host first (if present)
-    #
-    return @hosts if ( !defined($host) || !grep(/^$host$/, @hosts) );
-    return ($host, grep(!/^$host$/, @hosts));
+    return @hosts;
 }
 
 #
@@ -397,7 +392,8 @@ sub Header
         { link => "",                         name => $Lang->{Status},
                                               priv => 1},
         { link => "?action=adminOpts",        name => $Lang->{Admin_Options} },
-        { link => "?action=summary",          name => $Lang->{PC_Summary} },
+        { link => "?action=summary",          name => $Lang->{PC_Summary},
+                                              priv => 1},
         { link => "?action=view&type=LOG",    name => $Lang->{LOG_file} },
         { link => "?action=LOGlist",          name => $Lang->{Old_LOGs} },
         { link => "?action=emailSummary",     name => $Lang->{Email_summary} },
@@ -411,6 +407,8 @@ sub Header
         { link => "http://backuppc.sourceforge.net", name => "SourceForge",
                                               priv => 1},
     );
+    my $host = $In{host};
+
     print $Cgi->header();
     print <<EOF;
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
@@ -421,7 +419,45 @@ $Conf{CgiHeaders}
 </head><body onLoad="document.getElementById('NavMenu').style.height=document.body.scrollHeight">
 <img src="$Conf{CgiImageDirURL}/logo.gif" hspace="5" vspace="7"><br>
 EOF
-    if (!defined($In{host})) {
+
+    if ( defined($Hosts) && defined($host) && defined($Hosts->{$host}) ) {
+	print "<div class=\"NavMenu\">";
+	NavSectionTitle("${EscURI($host)}");
+	print <<EOF;
+</div>
+<div class="NavMenu">
+EOF
+	NavLink("?host=${EscURI($host)}",
+		"$host $Lang->{Home}", " class=\"navbar\"");
+	NavLink("?action=browse&host=${EscURI($host)}",
+		$Lang->{Browse}, " class=\"navbar\"");
+	NavLink("?action=view&type=LOG&host=${EscURI($host)}",
+		$Lang->{LOG_file}, " class=\"navbar\"");
+	NavLink("?action=LOGlist&host=${EscURI($host)}",
+		$Lang->{LOG_files}, " class=\"navbar\"");
+	if ( -f "$TopDir/pc/$host/SmbLOG.bad"
+		    || -f "$TopDir/pc/$host/SmbLOG.bad.z"
+		    || -f "$TopDir/pc/$host/XferLOG.bad"
+		    || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
+	   NavLink("?action=view&type=XferLOGbad&host=${EscURI($host)}",
+		    $Lang->{Last_bad_XferLOG}, " class=\"navbar\"");
+	   NavLink("?action=view&type=XferErrbad&host=${EscURI($host)}",
+		    $Lang->{Last_bad_XferLOG_errors_only},
+		    " class=\"navbar\"");
+	}
+	if ( -f "$TopDir/pc/$host/config.pl" ) {
+	    NavLink("?action=view&type=config&host=${EscURI($host)}",
+		    $Lang->{Config_file}, " class=\"navbar\"");
+	}
+	print <<EOF;
+</div>
+<div id="Content">
+$content
+<br><br><br>
+</div>
+<div class="NavMenu" style="height:100%" id="NavMenu">
+EOF
+    } else {
         print <<EOF;
 <div id="Content">
 $content
@@ -429,59 +465,20 @@ $content
 </div>
 <div class="NavMenu" id="NavMenu" style="height:100%">
 EOF
-    } else {
-        print "<div class=\"NavMenu\">";
     }
-    NavSectionTitle($Lang->{Hosts});
     my $hostSelectbox = "<option value=\"#\">Select a host...</option>";
-    my @hosts;
-    if ( defined($Hosts) && %$Hosts > 0 ) {
-        @hosts = GetUserHosts($In{host});
+    my @hosts = GetUserHosts($In{host}, $Conf{CgiNavBarAdminAllHosts});
+    if ( defined($Hosts) && %$Hosts > 0 && @hosts ) {
+	NavSectionTitle($Lang->{Hosts});
         foreach my $host ( @hosts ) {
-            if ($In{host} eq $host) {
-                print <<EOF;
-</div>
-<div class="HostOn"> <a href="?host=${EscURI($host)}">$host</a> <br>
-<div class="HostOnContent">
-EOF
-                NavLink("?host=${EscURI($host)}",
-                        "$host $Lang->{Home}", " class=\"navbar\"");
-                NavLink("?action=browse&host=${EscURI($host)}",
-                        $Lang->{Browse}, " class=\"navbar\"");
-                NavLink("?action=view&type=LOG&host=${EscURI($host)}",
-                        $Lang->{LOG_file}, " class=\"navbar\"");
-                NavLink("?action=LOGlist&host=${EscURI($host)}",
-                        $Lang->{LOG_files}, " class=\"navbar\"");
-                if ( -f "$TopDir/pc/$host/SmbLOG.bad"
-                            || -f "$TopDir/pc/$host/SmbLOG.bad.z"
-                            || -f "$TopDir/pc/$host/XferLOG.bad"
-                            || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
-                   NavLink("?action=view&type=XferLOGbad&host=${EscURI($host)}",
-                            $Lang->{Last_bad_XferLOG}, " class=\"navbar\"");
-                   NavLink("?action=view&type=XferErrbad&host=${EscURI($host)}",
-                            $Lang->{Last_bad_XferLOG_errors_only},
-                            " class=\"navbar\"");
-                }
-                if ( -f "$TopDir/pc/$host/config.pl" ) {
-                    NavLink("?action=view&type=config&host=${EscURI($host)}",
-                            $Lang->{Config_file}, " class=\"navbar\"");
-                }
-                print <<EOF;
-</div></div>
-<div id="Content">
-$content
-<br><br><br>
-</div>
-<div class="NavMenu" style="height:100%" id="NavMenu">
-EOF
-            } else {
-                NavLink("?host=${EscURI($host)}", $host) if ( @hosts < 6 );
-                $hostSelectbox .= "<option value=\"?host=${EscURI($host)}\">"
-                                . "$host</option>";
-            }
+	    NavLink("?host=${EscURI($host)}", $host)
+		    if ( @hosts < $Conf{CgiNavBarAdminAllHosts} );
+	    my $sel = " selected" if ( $host eq $In{host} );
+	    $hostSelectbox .= "<option value=\"?host=${EscURI($host)}\"$sel>"
+			    . "$host</option>";
         }
     }
-    if ( @hosts >= 6 ) {
+    if ( @hosts >= $Conf{CgiNavBarAdminAllHosts} ) {
         print <<EOF;
 <br>
 <select onChange="document.location=this.value">
@@ -490,10 +487,9 @@ $hostSelectbox
 <br><br>
 EOF
     }
-    NavSectionTitle($Lang->{Host_or_User_name});
     print <<EOF;
 <form action="$MyURL" method="get">
-    <input type="text" name="host" size="10" maxlength="64">
+    <input type="text" name="host" size="14" maxlength="64">
     <input type="hidden" name="action" value="hostInfo"><input type="submit" value="$Lang->{Go}" name="ignore">
     </form>
 EOF
@@ -522,9 +518,7 @@ sub NavSectionTitle
 {
     my($head) = @_;
     print <<EOF;
-<div class="NavTitle">
-$head
-</div>
+<div class="NavTitle">$head</div>
 EOF
 }
 

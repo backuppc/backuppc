@@ -218,11 +218,7 @@ EOF
                 if ( $gotDir ) {
                     $fileStr .= <<EOF;
 <tr><td class="fviewborder">
-    <table cellpadding="0" cellspacing="0" border="0"><tr><td>
-    <input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;$iconStr
-    </td><td>
-        &nbsp;<a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a>
-    </td></tr></table>
+    <input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;$iconStr&nbsp;<a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a>
 </td>
 $attrStr
 </tr>
@@ -230,11 +226,7 @@ EOF
                 } else {
                     $fileStr .= <<EOF;
 <tr><td class="fviewborder">
-    <table cellpadding="0" cellspacing="0" border="0"><tr><td>
-    <input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;$iconStr
-    </td><td>
-        &nbsp;<a href="$MyURL?action=RestoreFile&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a>
-    </td></tr></table>
+    <input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;$iconStr&nbsp;<a href="$MyURL?action=RestoreFile&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a>
 </td>
 $attrStr
 </tr>
@@ -290,23 +282,18 @@ EOF
     } else {
 	$fileStr = eval("qq{$Lang->{The_directory_is_empty}}");
     }
-    my @otherDirs;
     my $pathURI  = $dir;
     my $shareURI = $share;
     $pathURI  =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
     $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-    foreach my $i ( $view->backupList($share, $dir) ) {
-        push(@otherDirs, $i);
-    }
-    if ( @otherDirs ) {
-	my $otherDirs  = join(",\n", @otherDirs);
-        my $inc = 0;
-        foreach my $value (@otherDirs) {
-            my $selected = undef;
-            my $showDate = timeStamp2($Backups[$inc]{startTime});
-            $selected = " selected" if ($value == $num);
-            $otherDirs .= "<option value=\"$MyURL?action=browse&host=${EscURI($host)}&num=$value\"$selected>#$value - ($showDate)</option>\n";
-            $inc++;
+    if ( my @otherDirs = $view->backupList($share, $dir) ) {
+        my $otherDirs;
+        foreach my $i ( @otherDirs ) {
+            my $selected;
+            my $showDate  = timeStamp2($Backups[$i]{startTime});
+	    my $backupNum = $Backups[$i]{num};
+            $selected   = " selected" if ( $backupNum == $num );
+            $otherDirs .= "<option value=\"$MyURL?action=browse&host=${EscURI($host)}&num=$backupNum&share=$shareURI&dir=$pathURI\"$selected>#$backupNum - ($showDate)</option>\n";
         }
         $filledBackup .= eval("qq{$Lang->{Visit_this_directory_in_backup}}");
     }

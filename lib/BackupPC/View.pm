@@ -268,6 +268,9 @@ sub dirAttrib
     return $m->{files};
 }
 
+#
+# Return a listref of backup numbers that are merged to create this view
+#
 sub mergeNums
 {
     my($m) = @_;
@@ -275,6 +278,9 @@ sub mergeNums
     return $m->{mergeNums};
 }
 
+#
+# Return a list of backup indexes for which the directory exists
+#
 sub backupList
 {
     my($m, $share, $dir) = @_;
@@ -296,7 +302,7 @@ sub backupList
         }
         $path .= $sharePathM;
         next if ( !-d $path );
-        push(@backupList, $backupNum);
+        push(@backupList, $i);
     }
     return @backupList;
 }

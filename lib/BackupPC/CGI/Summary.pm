@@ -48,8 +48,7 @@ sub action
     GetStatusInfo("hosts");
     my $Privileged = CheckPermission();
 
-    foreach my $host ( GetUserHosts() ) { ## give access to users hosts only
-    ## foreach my $host ( sort(keys(%Status)) ) {
+    foreach my $host ( GetUserHosts(undef, 1) ) {
         my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite);
 	my($shortErr);
         my @Backups = $bpc->BackupInfoRead($host);

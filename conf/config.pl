@@ -241,7 +241,7 @@ $Conf{BackupPCUserVerify} = 1;
 #
 # Maximum number of hardlinks supported by the $TopDir file system
 # that BackupPC uses.  Most linux or unix file systems should support
-# at least 32000 hardlinks per file, or 64K in other cases.  If a pool
+# at least 32000 hardlinks per file, or 64000 in other cases.  If a pool
 # file already has this number of hardlinks, a new pool file is created
 # so that new hardlinks can be accommodated.  This limit will only
 # be hit if an identical file appears at least this number of times
@@ -1500,13 +1500,17 @@ h2 {
         
 p {
     font-family:arial,sans-serif;
-    font-size:.8em
+    font-size:.9em
 }
         
 a {
     font-family:arial,sans-serif;
     font-size:1em;
     color:#3333ff
+}
+
+li {
+    font-size:.9em;
 }
         
 a:hover {
@@ -1516,8 +1520,6 @@ a:hover {
         
 a.NavCurrent {
     font-weight:bold;
-    padding-left:5px;
-    padding-right:5px;
 }
         
 a.navbar {
@@ -1544,19 +1546,22 @@ a.navbar {
     padding:3px;
     padding-left:10px
 }
-    
+
 .border {
     border-bottom:1px solid #000000;
-    border-left:1px dotted #666666
+    border-left:1px dotted #666666;
+    font-size:.9em;
 }
 
 .tableheader {
+    font-size:.8em;
     font-weight:bold;
     background-color:#cccccc
 }
     
 .fviewheader {
     font-weight:bold;
+    font-size:.8em;
     color:#ffffff;
     background-color:#999999
 }
@@ -1564,7 +1569,8 @@ a.navbar {
 .fviewborder {
     border-bottom:1px solid #000000;
     border-left:1px dotted #666666;
-    background-color:#dddddd
+    background-color:#dddddd;
+    font-size:.9em;
 }
     
 .fviewon {
@@ -1611,7 +1617,7 @@ div.NavMenu a {
     font-size:.8em;
     display:block;
     margin-left:8px;
-    padding:3px;
+    padding:2px;
 }
              
 div.NavTitle {
@@ -1622,23 +1628,6 @@ div.NavTitle {
     font-weight:bold
 }
              
-div.HostOn {
-    width:18%;
-    background-color:#ddeeee;
-    padding:3px;
-    padding-left:10px;
-}
-
-div.HostOnContent {
-    background-color:#ddeeee;
-    padding:5px;
-}
-
-div.HostOnContent a {
-    font-size:.8em;
-    display:block;
-}
-
 #Content {
     float:right;
     width:80%;

@@ -98,6 +98,15 @@ EOF
 	@fileList = ( $pathHdr );
     }
     if ( $In{type} == 0 ) {
+	#
+	# Build list of hosts
+	#
+	my $hostDestSel;
+	foreach my $h ( GetUserHosts() ) {
+	    my $sel = " selected" if ( $h eq $In{host} );
+	    $hostDestSel .= "<option value=\"$h\"$sel>${EscHTML($h)}</option>";
+	}
+
         #
         # Tell the user what options they have
         #

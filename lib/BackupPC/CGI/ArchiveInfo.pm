@@ -79,8 +79,8 @@ EOF
         $counter++;
     }
 
-    Header(eval("qq{$Lang->{Archive___num_details_for__host}}"));
-    print(eval("qq{$Lang->{Archive___num_details_for__host2 }}"));
+    my $content = eval("qq{$Lang->{Archive___num_details_for__host2 }}");
+    Header(eval("qq{$Lang->{Archive___num_details_for__host}}"),$content);
     Trailer();
 }
 

@@ -70,10 +70,10 @@ sub action
             $fullSizeTot += $fullSize + $incrSizeTot;
             $fullSize = sprintf("%.2f", ($fullSize + $incrSizeTot) / 1000);
             $str = <<EOF;
-<tr bgcolor="#ffffcc">
-<td><input type="hidden" name="backup$checkBoxCnt" value="$backupnumber"><input type="checkbox" name="fcb$checkBoxCnt" value="$host">&nbsp;${HostLink($host)} </td>
-<td align="center"> ${UserLink($Hosts->{$host}{user})} </td>
-<td align="center"> $fullSize </td>
+<tr>
+<td class="border"><input type="hidden" name="backup$checkBoxCnt" value="$backupnumber"><input type="checkbox" name="fcb$checkBoxCnt" value="$host">&nbsp;${HostLink($host)} </td>
+<td align="center" class="border"> ${UserLink($Hosts->{$host}{user})} </td>
+<td align="center" class="border"> $fullSize </td>
 EOF
             $checkBoxCnt++;
             if ( @Backups == 0 ) {
@@ -90,9 +90,8 @@ EOF
         $strGood .= <<EOF;
 <input type="hidden" name="archivehost" value="$In{'archivehost'}">
 EOF
-        Header($Lang->{BackupPC__Archive});
-        print eval ("qq{$Lang->{BackupPC_Archive}}");
-
+        my $content = eval("qq{$Lang->{BackupPC_Archive}}");
+        Header(eval("qq{$Lang->{BackupPC__Archive}}"),$content);
         Trailer();
     } else {
 
@@ -163,8 +162,8 @@ EOF
             # Tell the user what options they have
             #
 
-            Header($Lang->{BackupPC__Archive});
-            print eval ("qq{$Lang->{BackupPC_Archive2}}");
+            my $content = eval("qq{$Lang->{BackupPC_Archive2}}");
+            Header(eval("qq{$Lang->{BackupPC__Archive}}"),$content);
             Trailer();
         } elsif ( $In{type} == 2 ) {
             my $reqFileName;
@@ -223,8 +222,9 @@ EOF
         $reply = $bpc->ServerMesg("archive $User $archivehost $reqFileName");
 
         $str = eval("qq{$Lang->{Archive_requested}}");
-            Header($Lang->{BackupPC__Archive});
-            print eval ("qq{$Lang->{BackupPC_Archive_Reply_from_server}}");
+
+            my $content = eval("qq{$Lang->{BackupPC_Archive_Reply_from_server}}");
+            Header(eval("qq{$Lang->{BackupPC__Archive}}"),$content);
             Trailer();
         }
 

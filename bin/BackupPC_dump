@@ -688,10 +688,10 @@ for my $shareName ( @$ShareNames ) {
 }
 
 #
-# If any share had zero files then consider the dump bad
+# If this is a full, and any share had zero files then consider the dump bad
 #
-if ( $stat{hostError} eq ""
-       && length($noFilesErr) && $Conf{BackupZeroFilesIsFatal} ) {
+if ( $type eq "full" && $stat{hostError} eq ""
+	    && length($noFilesErr) && $Conf{BackupZeroFilesIsFatal} ) {
     $stat{hostError} = $noFilesErr;
     $stat{xferOK} = 0;
 }

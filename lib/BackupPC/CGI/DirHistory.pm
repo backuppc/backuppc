@@ -71,7 +71,8 @@ sub action
         ErrorExit($Lang->{Nice_try__but_you_can_t_put});
     }
 
-    for ( $i = 0 ; $i < @Backups ; $i++ ) {
+    my @backupList = $view->backupList($share, $dir);
+    foreach $i ( @backupList ) {
 	my $backupTime  = timeStamp2($Backups[$i]{startTime});
 	my $num = $Backups[$i]{num};
 	$backupNumStr  .= "<td align=center><a href=\"$MyURL?action=browse"
@@ -87,7 +88,7 @@ sub action
 	$fileStr   .= "<tr><td align=\"left\"  class=\"histView\">$fDisp</td>";
 	my($colSpan, $url, $inode, $type);
 	my $tdClass = ' class="histView"';
-	for ( $i = 0 ; $i < @Backups ; $i++ ) {
+	foreach $i ( @backupList ) {
 	    my($path);
 	    if ( $colSpan > 0 ) {
 		#

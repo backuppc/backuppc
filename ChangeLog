@@ -21,6 +21,15 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* GFK updated fr.pm from en.pm.
+
+* Various tweaks to recent changes, including additional patches
+  from Josh and Paul.  Added host selection list to restore page.
+  Tweak CSS and layout.
+
+* Fixed $Conf{HardLinkMax} limit check in BackupPC::Lib; reported
+  by Ross Skaliotis.
+
 * Major changes from Ryan Kucera to add style sheets to the CGI
   interface, allowing easy customization.  Added new icons and
   BackupPC logo.  Numerous navigation improvements.
@@ -67,7 +76,8 @@
   fatal. This is used to catch miscellaneous Xfer errors that
   result in no files being backed up.  A new config parameter
   $Conf{BackupZeroFilesIsFatal} (defaults to 1) and can be set to
-  zero to turn off this check. Suggested by Guillaume Filion.
+  zero to turn off this check.  Suggested by Guillaume Filion.
+  Additional change: this check only applies to a full dump.
 
 * SMB: now detect NT_STATUS_ACCESS_DENIED on entire share or BackupFilesOnly
   (also ERRDOS - ERRnoaccess (Access denied.) for older versions of

@@ -740,7 +740,8 @@ sub MakeFileLink
         return -2 if ( !defined($rawFile = $bpc->MD52Path($d, $compress)) );
         $rawFile .= "_$i" if ( $i >= 0 );
         if ( -f $rawFile ) {
-            if ( !compare($name, $rawFile) ) {
+            if ( (stat(_))[3] < $bpc->{Conf}{HardLinkMax}
+                    && !compare($name, $rawFile) ) {
                 unlink($name);
                 return -3 if ( !link($rawFile, $name) );
                 return 1;

@@ -199,15 +199,14 @@ Il y a \$hostCntGood hôtes qui ont étés sauvegardés représentant \${fullSizeTot}
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="type" value="1">
 <input type="hidden" name="action" value="Archive">
-<table cellpadding="0" cellspacing="0" bgcolor="#333333"><tr><td>
-<table border="0" width="100%" align="left" cellpadding="2" cellspacing="1">
-<tr bgcolor="#99cc33"><td align=center> Host</td>
+<table cellpadding="3" cellspacing="1">
+<tr class="tableheader"><td align=center> Host</td>
     <td align="center"> Usager </td>
     <td align="center"> Taille </td>
 \$strGood
 \$checkAllHosts
+</form>
 </table>
-</td></tr></table>
 <p>
 
 </table>
@@ -245,6 +244,7 @@ Prêt à démarrer l'archivage des hôtes suivants
 <tr>
     <td colspan=2><input type="submit" value="Démarrer l'archivage" name=""></td>
 </tr>
+</form>
 </table>
 EOF
 
@@ -433,14 +433,14 @@ tous les fichiers correspondant à ceux que vous avez sélectionnés vont être effa
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
 	 name="hostDest">-->
 	 <select name="hostDest" onChange="document.direct.shareDest.value=''">
-	 <!-- hostOpt -->
+	 \$hostDestSel
 	 </select>
 	 <script language="Javascript">
 	 function myOpen(URL) {
-		window.open(URL,'','width=200,height=200');
+		window.open(URL,'','width=500,height=400');
 	}
 	 </script>
-	 <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Chercher les partitions disponibles</a></td>
+	 <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Chercher les partitions disponibles (ENGLISH: NOT IMPLEMENTED)</a></td>
 </tr><tr>
     <td>Restaurer les fichiers vers le partage</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"
@@ -1069,9 +1069,9 @@ $Lang{checkAll} = <<EOF;
 EOF
 
 $Lang{checkAllHosts} = <<EOF;
-<tr bgcolor="#ffffcc"><td> (ENGLISH)
+<tr><td class="fviewborder">
 <input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Select all
-</td><td colspan="2" align="center">
+</td><td colspan="2" align="center" class="fviewborder">
 <input type="submit" name="Submit" value="Archive selected hosts">
 </td></tr>
 EOF

@@ -38,6 +38,7 @@
 use strict;
 use File::Path;
 use File::Copy;
+use Getopt::Std;
 
 umask(0022);
 
@@ -99,6 +100,12 @@ my @PerlSrc = qw(
     cgi-bin/BackupPC_Admin
 );
 
+my %opts;
+if ( !getopts("l", \%opts) || @ARGV != 0 ) {
+    print("usage: $0 [-l]\n");
+    exit(1);
+}
+
 #
 # Check config parameters
 #
@@ -113,8 +120,14 @@ $ConfVars->{CgiImageDir} = 2;
 foreach my $file ( @PerlSrc ) {
     $errCnt += CheckConfigParams($file, $ConfVars, 1);
 }
-$errCnt += CheckLangUsage();
-exit(1) if ( $errCnt );
+if ( !$opts{l} ) {
+    $errCnt += CheckLangUsage();
+    $errCnt += CheckLangTags();
+}
+if ( $errCnt ) {
+    print("Exiting because of errors\n");
+    exit(1)
+}
 
 $errCnt = 0;
 foreach my $var ( sort(keys(%$ConfVars) ) ) {
@@ -122,7 +135,10 @@ foreach my $var ( sort(keys(%$ConfVars) ) ) {
     printf("Unused config parameter $var\n");
     $errCnt++;
 }
-exit(1) if ( $errCnt );
+if ( $errCnt ) {
+    print("Exiting because of errors\n");
+    exit(1)
+}
 
 rmtree($DistDir, 0, 0);
 mkpath($DistDir, 0, 0777);
@@ -347,11 +363,8 @@ sub CheckLangUsage
 	}
 	close(F);
     }
-    # CB: disable other lang checks for now
-    #
-    # foreach my $f ( <lib/BackupPC/Lang/*.pm> ) {
-    #
-    foreach my $f ( <lib/BackupPC/Lang/en.pm> ) {
+
+    foreach my $f ( <lib/BackupPC/Lang/*.pm> ) {
         my $done = {};
         open(F, $f) || die("can't open $f\n");
 	binmode(F);
@@ -380,4 +393,108 @@ sub CheckLangUsage
         }
     }
     return $errors;
+}
+
+#
+# Pedantically check that all the html tags in each language file
+# match.
+#
+sub CheckLangTags
+{
+    my($en, $enVars) = LangParse("lib/BackupPC/Lang/en.pm");
+    my($errors);
+
+    foreach my $lang ( qw(fr.pm de.pm es.pm) ) {
+	my($d, $dVars) = LangParse("lib/BackupPC/Lang/$lang");
+	foreach my $v1 ( @$en ) {
+	    my $v2 = shift(@$d);
+	    if ( $v1->{var} ne $v2->{var} ) {
+		print("Botch: got $lang var $v2->{var} vs en.pm $v1->{var}\n");
+		exit;
+	    }
+	    my $t1 = LangTextStrip($v1->{val});
+	    my $t2 = LangTextStrip($v2->{val});
+	    if ( $t1 ne $t2 ) {
+		print("$v1->{var}: got en.pm $t1\nvs $lang $t2\n\n");
+		$errors++;
+	    }
+	}
+    }
+    return $errors;
+}
+
+sub LangTextStrip
+{
+    my($t) = @_;
+
+    $t = "" if ( $t !~ /<.*>/ );
+    $t =~ s/^[^<]*</</s;
+    $t =~ s/([}>])[^<]*</$1</g;
+    $t =~ s/>[^<]*$/>/;
+    $t =~ s/(value=)"[^"]*"/$1""/sg;
+    $t =~ s/({h[12]\()"[^"]*"/$1""/g;
+    $t =~ s/ENG[\s\n]*//sg;
+    $t =~ s/^(<<EOF;\n)[^<]*/$1/g;
+    return $t;
+}
+
+sub LangParse
+{
+    my($file) = @_;
+    open(C, $file) || die("can't open $file");
+    binmode(C);
+    my($out, @lang, $var);
+    my $comment = 1;
+    my $allVars = {};
+    my $endLine = undef;
+    while ( <C> ) {
+        if ( /^#/ && !defined($endLine) ) {
+            if ( $comment ) {
+                $out .= $_;
+            } else {
+                if ( $out ne "" ) {
+                    $allVars->{$var} = @lang if ( defined($var) );
+                    push(@lang, {
+                        text => $out,
+                        var => $var,
+                    });
+                }
+                $var = undef;
+                $comment = 1;
+                $out = $_;
+            }
+        } elsif ( /^\s*\$Lang\{([^}]*)/ ) {
+            $comment = 0;
+            if ( defined($var) ) {
+                $allVars->{$var} = @lang if ( defined($var) );
+                push(@lang, {
+                    text => $out,
+                    var => $var,
+                });
+                $out = $_;
+            } else {
+                $out .= $_;
+            }
+            $var = $1;
+	    $endLine = $1 if ( /^\s*\$Lang\{[^}]*} *= *<<(.*);/ );
+	    $endLine = $1 if ( /^\s*\$Lang\{[^}]*} *= *<<'(.*)';/ );
+        } else {
+	    $endLine = undef if ( defined($endLine) && /^\Q$endLine[\n\r]*$/ );
+            $out .= $_;
+        }
+    }
+    if ( $out ne "" ) {
+        $allVars->{$var} = @lang if ( defined($var) );
+        push(@lang, {
+            text => $out,
+            var  => $var,
+        });
+    }
+    close(C);
+    foreach my $v ( @lang ) {
+	if ( $v->{text} =~ /\$Lang{$v->{var}}\s*=\s*(.*)/s ) {
+	    $v->{val} = $1;
+	}
+    }
+    return (\@lang, $allVars);
 }

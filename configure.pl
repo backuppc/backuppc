@@ -99,7 +99,7 @@ my $bpc;
 if ( $ConfigPath ne "" && -r $ConfigPath ) {
     (my $topDir = $ConfigPath) =~ s{/[^/]+/[^/]+$}{};
     die("BackupPC::Lib->new failed\n")
-            if ( !($bpc = BackupPC::Lib->new($topDir, ".")) );
+            if ( !($bpc = BackupPC::Lib->new($topDir, ".", 1)) );
     %Conf = $bpc->Conf();
     %OrigConf = %Conf;
     $Conf{TopDir} = $topDir;

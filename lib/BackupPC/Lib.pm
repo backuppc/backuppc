@@ -52,7 +52,7 @@ use Digest::MD5;
 sub new
 {
     my $class = shift;
-    my($topDir, $installDir) = @_;
+    my($topDir, $installDir, $noUserCheck) = @_;
 
     my $bpc = bless {
         TopDir  => $topDir || '/data/BackupPC',
@@ -86,7 +86,8 @@ sub new
     #
     # Verify we are running as the correct user
     #
-    if ( $bpc->{Conf}{BackupPCUserVerify}
+    if ( !$noUserCheck
+	    && $bpc->{Conf}{BackupPCUserVerify}
 	    && $> != (my $uid = (getpwnam($bpc->{Conf}{BackupPCUser}))[2]) ) {
 	print("Wrong user: my userid is $>, instead of $uid"
 	    . " ($bpc->{Conf}{BackupPCUser})\n");

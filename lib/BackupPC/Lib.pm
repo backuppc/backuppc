@@ -255,6 +255,7 @@ sub ConfigRead
         }
         %{$self->{Conf}} = ( %{$self->{Conf} || {}}, %Conf );
     }
+    return if ( !defined($self->{Conf}{Language}) );
     my $langFile = "$self->{LibDir}/BackupPC/Lang/$self->{Conf}{Language}.pm";
     if ( !defined($ret = do $langFile) && ($! || $@) ) {
 	$mesg = "Couldn't open language file $langFile: $!" if ( $! );

@@ -9,7 +9,7 @@ use File::Copy;
 
 umask(0022);
 
-my $Version     = "1.5.0";
+my $Version     = "1.5.0_CVS";
 my $ReleaseDate = "2 Aug 2002";
 my $DistDir     = "dist/BackupPC-$Version";
 
@@ -62,8 +62,8 @@ exit(1) if ( $errCnt );
 rmtree($DistDir, 0, 0);
 mkpath($DistDir, 0, 0777);
 
-foreach my $dir ( qw(bin lib/BackupPC/Xfer lib/BackupPC/Zip doc conf
-		     images init.d/src cgi-bin) ) {
+foreach my $dir ( qw(bin lib/BackupPC/Xfer lib/BackupPC/Zip lib/BackupPC/Lang
+		     doc conf images init.d/src cgi-bin) ) {
     mkpath("$DistDir/$dir", 0, 0777);
 }
 

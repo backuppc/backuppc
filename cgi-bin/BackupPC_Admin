@@ -1460,10 +1460,10 @@ EOF
 
 sub Action_GeneralInfo
 {
-    GetStatusInfo($Lang->{info_jobs_hosts_queueLen});
+    GetStatusInfo("info jobs hosts queueLen");
     my $Privileged = CheckPermission();
 
-    my($jobStr, $statusStr, $tarPidHdr, $ rivLinks);
+    my($jobStr, $statusStr, $tarPidHdr);
     foreach my $host ( sort(keys(%Jobs)) ) {
         my $startTime = timeStamp2($Jobs{$host}{startTime});
         next if ( $host eq $bpc->trashJob

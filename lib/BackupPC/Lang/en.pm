@@ -348,7 +348,8 @@ EOF
 $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 \${h2("Option 2: Download Zip archive")}
 <p>
-You could download a zip archive, but Archive::Zip is not installed.
+Archive::Zip is not installed so you will not be able to download a
+zip archive.
 Please ask your system adminstrator to install Archive::Zip from
 <a href="http://www.cpan.org">www.cpan.org</a>.
 <p>
@@ -831,8 +832,6 @@ $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
 <li>Backups are deferred for \$hours hours
 (<a href=\"\$MyURL?action=Stop/Dequeue%20Backup&host=\$host\">change this number</a>).
 EOF
-
-$Lang{info_jobs_hosts_queueLen} = "info jobs hosts queueLen";
 
 $Lang{tryIP} = " and \$StatusHost{dhcpHostIP}";
 

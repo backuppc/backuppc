@@ -756,9 +756,9 @@ $Lang{Hosts} = "Hosts";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> !Nunca se ha hecho copia de seguridad de este PC! </h2>\n";
 $Lang{This_PC_is_used_by} = "<li>This PC es utilizado por \${UserLink(\$user)}";
 
-$Lang{Extracting_only_Errors} = "(Extracting only Errors)";
-$Lang{XferLOG} = "XferLOG";
-$Lang{Errors}  = "Errors";
+$Lang{Extracting_only_Errors} = "(Extrayendo sólo Errores)";
+$Lang{XferLOG} = "TransfREG";
+$Lang{Errors}  = "Errores";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;

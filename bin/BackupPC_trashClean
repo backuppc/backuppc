@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta1, released 30 Mar 2003.
+# Version 2.0.0beta2, released 13 Apr 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -51,7 +51,9 @@ $bpc->ChildInit();
 ###########################################################################
 while ( 1 ) {
     print("processState running\n");
-    1 while ( $bpc->RmTreeTrashEmpty("$TopDir/trash") );
+    if ( $bpc->RmTreeTrashEmpty("$TopDir/trash") < 0 ) {
+	print("log BackupPC_trashClean failed to empty $TopDir/trash\n");
+    }
     print("processState idle\n");
     sleep($Conf{TrashCleanSleepSec} || 300);
 }

@@ -905,6 +905,10 @@ $Conf{PingPath} = '/bin/ping';
 #   $pingPath      path to ping ($Conf{PingPath})
 #   $host          host name
 #
+# Wade Brown reports that on solaris 2.6 and 2.7 ping -s returns the wrong
+# exit status (0 even on failure).  Replace with "ping $host 1", which
+# gets the correct exit status but we don't get the round-trip time.
+#
 $Conf{PingCmd} = '$pingPath -c 1 $host';
 
 #
@@ -1183,7 +1187,9 @@ $Conf{CgiURL} = undef;
 
 #   
 # Language to use.  See lib/BackupPC/Lang for the list of supported
-# languages, which include English (en), French (fr), and Spanish (es).
+# languages, which include English (en), French (fr), Spanish (es),
+# and German (de).
+#
 # Currently the Language setting applies to the CGI interface and email
 # messages sent to users.  Log files and other text is still in English.
 #

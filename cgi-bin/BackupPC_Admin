@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta1, released 30 Mar 2003.
+# Version 2.0.0beta2, released 13 Apr 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -157,6 +157,7 @@ sub Action_Summary
     }
     foreach my $host ( sort(keys(%Status)) ) {
         my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite);
+	my($shortErr);
         my @Backups = $bpc->BackupInfoRead($host);
         my $fullCnt = $incrCnt = 0;
         my $fullAge = $incrAge = -1;
@@ -196,10 +197,17 @@ sub Action_Summary
 	$incrAge = "&nbsp;" if ( $incrAge eq "" );
 	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}};
 	$reasonHilite = " bgcolor=\"$reasonHilite\"" if ( $reasonHilite ne "" );
+        if ( $Status{$host}{state} ne "Status_backup_in_progress"
+		&& $Status{$host}{state} ne "Status_restore_in_progress"
+		&& $Status{$host}{error} ne "" ) {
+	    ($shortErr = $Status{$host}{error}) =~ s/(.{48}).*/$1.../;
+	    $shortErr = " ($shortErr)";
+	}
 
         $str = <<EOF;
 <tr$reasonHilite><td> ${HostLink($host)} </td>
-    <td align="center"> ${UserLink($Hosts->{$host}{user})} </td>
+    <td align="center"> ${UserLink(defined($Hosts->{$host})
+				    ? $Hosts->{$host}{user} : "")} </td>
     <td align="center"> $fullCnt </td>
     <td align="center"> $fullAge </td>
     <td align="center"> $fullSize </td>
@@ -207,7 +215,7 @@ sub Action_Summary
     <td align="center"> $incrCnt </td>
     <td align="center"> $incrAge </td>
     <td align="center"> $Lang->{$Status{$host}{state}} </td>
-    <td> $Lang->{$Status{$host}{reason}} </td></tr>
+    <td> $Lang->{$Status{$host}{reason}}$shortErr </td></tr>
 EOF
         if ( @Backups == 0 ) {
             $hostCntNone++;
@@ -1343,7 +1351,9 @@ EOF
     }
     $statusStr .= eval("qq{$Lang->{Last_status_is_state_StatusHost_state_reason_as_of_startTime}}");
 
-    if ( $StatusHost{error} ne "" ) {
+    if ( $StatusHost{state} ne "Status_backup_in_progress"
+	    && $StatusHost{state} ne "Status_restore_in_progress"
+	    && $StatusHost{error} ne "" ) {
         $statusStr .= eval("qq{$Lang->{Last_error_is____EscHTML_StatusHost_error}}");
     }
     my $priorStr = "Pings";
@@ -1404,7 +1414,8 @@ sub Action_GeneralInfo
         $jobStr .= <<EOF;
 <tr><td> ${HostLink($host)} </td>
     <td align="center"> $Jobs{$host}{type} </td>
-    <td align="center"> ${UserLink($Hosts->{$host}{user})} </td>
+    <td align="center"> ${UserLink(defined($Hosts->{$host})
+					? $Hosts->{$host}{user} : "")} </td>
     <td> $startTime </td>
     <td> $cmd </td>
     <td align="center"> $Jobs{$host}{pid} </td>
@@ -1414,7 +1425,8 @@ EOF
     }
     foreach my $host ( sort(keys(%Status)) ) {
         next if ( $Status{$host}{reason} ne "Reason_backup_failed"
-	       || $Status{$host}{error} =~ /^Can't find host \Q$host/ );
+		    && (!$Status{$host}{userReq}
+			|| $Status{$host}{reason} ne "Reason_no_ping") );
         my $startTime = timeStamp2($Status{$host}{startTime});
         my($errorTime, $XferViewStr);
         if ( $Status{$host}{errorTime} > 0 ) {
@@ -1436,7 +1448,8 @@ EOF
         $statusStr .= <<EOF;
 <tr><td> ${HostLink($host)} </td>
     <td align="center"> $Status{$host}{type} </td>
-    <td align="center"> ${UserLink($Hosts->{$host}{user})} </td>
+    <td align="center"> ${UserLink(defined($Hosts->{$host})
+					? $Hosts->{$host}{user} : "")} </td>
     <td align="right"> $startTime </td>
     <td> $XferViewStr </td>
     <td align="right"> $errorTime </td>
@@ -1711,7 +1724,7 @@ sub ConfirmIPAddress
     my($host) = @_;
     my $ipAddr = $host;
 
-    if ( $Hosts->{$host}{dhcp}
+    if ( defined($Hosts->{$host}) && $Hosts->{$host}{dhcp}
 	       && $ENV{REMOTE_ADDR} =~ /^(\d+[\.\d]*)$/ ) {
 	$ipAddr = $1;
 	my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($ipAddr);

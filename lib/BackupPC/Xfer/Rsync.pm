@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta1, released 30 Mar 2003.
+# Version 2.0.0beta2, released 13 Apr 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -52,9 +52,9 @@ BEGIN {
         $RsyncLibOK = 0;
         $RsyncLibErr = "File::RsyncP module doesn't exist";
     } else {
-        if ( $File::RsyncP::VERSION < 0.30 ) {
+        if ( $File::RsyncP::VERSION < 0.41 ) {
             $RsyncLibOK = 0;
-            $RsyncLibErr = "File::RsyncP module version too old: need 0.30";
+            $RsyncLibErr = "File::RsyncP module version too old: need 0.41";
         } else {
             $RsyncLibOK = 1;
         }

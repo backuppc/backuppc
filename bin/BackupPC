@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta1, released 30 Mar 2003.
+# Version 2.0.0beta2, released 13 Apr 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -319,6 +319,10 @@ sub Main_Initialize
         }
         $Status{$host}{activeJob} = 0;
     }
+    foreach my $host ( sort(keys(%Status)) ) {
+        next if ( defined($Hosts->{$host}) );
+	delete($Status{$host});
+    }
 
     #
     # Write out our initial status and save our PID
@@ -560,9 +564,12 @@ sub Main_TryToRun_Bg_or_User_Queue
         vec($FDread, $Jobs{$host}{fn}, 1) = 1;
         $Jobs{$host}{startTime}  = time;
         $Jobs{$host}{reqTime}    = $req->{reqTime};
+        $Jobs{$host}{userReq}    = $req->{userReq};
         $Jobs{$host}{cmd}        = join(" ", $progName, @args);
         $Jobs{$host}{user}       = $user;
         $Jobs{$host}{type}       = $type;
+	$Status{$host}{userReq}  = $req->{userReq}
+					if ( defined($Hosts->{$host}) );
         if ( !$req->{dhcp} ) {
             $Status{$host}{state}     = "Status_".$type."_starting";
             $Status{$host}{activeJob} = 1;
@@ -844,10 +851,14 @@ sub Main_Check_Job_Messages
                 $Status{$host}{dhcpCheckCnt}--
                                 if ( $Status{$host}{dhcpCheckCnt} > 0 );
             } elsif ( $mesg =~ /^no ping response/
-                            || $mesg =~ /^ping too slow/ ) {
+                            || $mesg =~ /^ping too slow/
+                            || $mesg =~ /^host not found/ ) {
                 $Status{$host}{state}     = "Status_idle";
-                if ( $Status{$host}{reason} ne "Reason_backup_failed" ) {
+                if ( $Status{$host}{userReq}
+			|| $Status{$host}{reason} ne "Reason_backup_failed"
+			|| $Status{$host}{error} =~ /^aborted by user/ ) {
                     $Status{$host}{reason}    = "Reason_no_ping";
+		    $Status{$host}{error}     = $mesg;
                     $Status{$host}{startTime} = time;
                 }
                 $Status{$host}{deadCnt}++;
@@ -1085,6 +1096,7 @@ sub Main_Check_Client_Messages
                                 user    => $user,
                                 reqTime => time,
                                 doFull  => $doFull,
+                                userReq => 1,
                                 dhcp    => $hostIP eq $host ? 0 : 1,
                         });
                     $UserQueueOn{$hostIP} = 1;
@@ -1113,6 +1125,7 @@ sub Main_Check_Client_Messages
                                 reqTime => time,
                                 dhcp    => 0,
                                 restore => 1,
+				userReq => 1,
                         });
                     $UserQueueOn{$host} = 1;
                     if ( defined($Jobs{$host}) ) {

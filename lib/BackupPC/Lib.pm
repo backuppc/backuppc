@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta1, released 30 Mar 2003.
+# Version 2.0.0beta2, released 13 Apr 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -58,7 +58,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
-        Version => '2.0.0beta1',
+        Version => '2.0.0beta2',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew
@@ -82,6 +82,15 @@ sub new
     if ( defined(my $error = $bpc->ConfigRead()) ) {
         print(STDERR $error, "\n");
         return;
+    }
+    #
+    # Verify we are running as the correct user
+    #
+    if ( $bpc->{Conf}{BackupPCUserVerify}
+	    && $> != (my $uid = (getpwnam($bpc->{Conf}{BackupPCUser}))[2]) ) {
+	print("Wrong user: my userid is $>, instead of $uid"
+	    . " ($bpc->{Conf}{BackupPCUser})\n");
+	return;
     }
     return $bpc;
 }
@@ -440,7 +449,8 @@ sub RmTreeDefer
 }
 
 #
-# Empty the trash directory.  Returns 0 if it did nothing.
+# Empty the trash directory.  Returns 0 if it did nothing, 1 if it
+# did something, -1 if it failed to remove all the files.
 #
 sub RmTreeTrashEmpty
 {
@@ -450,13 +460,15 @@ sub RmTreeTrashEmpty
 
     $cwd = $1 if ( $cwd =~ /(.*)/ );
     return if ( !-d $trashDir );
-    my $d = DirHandle->new($trashDir)
-      or carp "Can't read $trashDir: $!";
+    my $d = DirHandle->new($trashDir) or carp "Can't read $trashDir: $!";
     @files = $d->read;
     $d->close;
     @files = grep $_!~/^\.{1,2}$/, @files;
     return 0 if ( !@files );
     $bpc->RmTreeQuiet($trashDir, \@files);
+    foreach my $f ( @files ) {
+	return -1 if ( -e $f );
+    }
     chdir($cwd) if ( $cwd );
     return 1;
 }

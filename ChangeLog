@@ -31,16 +31,6 @@
 * Fixed directory browsing and top-level directory browsing in 2.0.0beta0.
   Reported by several users.
 
-* Added suse-linux init.d script from Leon Letto.
-
-* Added Gentoo linux init.d script from Tim Demarest.
-
-* Applied additional i18n strings from GFK and the translation team.
-
-* Fixed option parsing so that getopts errors are reported and we exit.
-
-* Changed reporting of Xfer PIDs so that rsync cancel works correctly.
-
 * Added -v option to BackupPC_dump for verbose output (useful when
   you run the command manually).  Added messages for all exits.
 
@@ -60,8 +50,45 @@
 
 * Fixed command queue CGI display; submitted by Tim Demarest.
 
+* BackupPC_trashClean now logs an error if it can't remove all the
+  trash and then goes back to sleep, rather than continually trying.
+
+* Moved correct user (uid) check into BackupPC::Lib so that all
+  applications do a user check if $Cong{BackupPCUserVerify} is
+  set.  The avoids the risk of manually running BackupPC_dump as
+  the wrong user.
+
+* Loss of blackout now applies to "host not found" as well as no ping.
+  Reported by Dale Renton.
+
+* "Host not found" is now treated in a similar manner to "no ping".
+
+* Added suse-linux init.d script from Leon Letto.
+
+* Added Gentoo linux init.d script from Tim Demarest.
+
+* Applied additional i18n strings from GFK and the translation team.
+
+* Fixed option parsing so that getopts errors are reported and we exit.
+
+* Changed reporting of Xfer PIDs so that rsync cancel works correctly.
+
 #------------------------------------------------------------------------
 # Version 2.0.0beta1, 30 Mar 2003
+#------------------------------------------------------------------------
+
+* Added Spanish translation es.pm from Javier Gonzalez.
+
+* Fixed CGI browse navigation bug that causes BackupPC_Admin to wedge
+  when directories were selected in a certain order.
+
+* Added binmode(STDIN) to BackupPC_tarExtract, suggested by Pat LoPresti
+  to fix a problem a RedHat8 with perl 5.8.0.  It's unclear why this
+  helps, but it should be benign.  See:
+    http://sourceforge.net/mailarchive/forum.php?thread_id=1853018&forum_id=503
+
+#------------------------------------------------------------------------
+# Version 2.0.0beta0, 23 Feb 2003
 #------------------------------------------------------------------------
 
 * Support for rsync and rsyncd backup and restore.  Changes to
@@ -72,8 +99,6 @@
   with additions from Guillaume Filion.  Voila!  BackupPC_Admin
   now supports English and French, and adding more languages is
   now easy.  New config paramater $Conf{Language} sets the language.
-
-* Added Spanish translation es.pm from Javieri Gonzalez.
 
 * Added optional user-defined pre/post dump/restore commands, allowing
   things like database shutdown/startup for dumps.
@@ -133,11 +158,6 @@
 
 * Added catching of SIG_PIPE to BackupPC_dump, and changed catch_signal
   to ignore multiple signals of the same type.
-
-* Added binmode(STDIN) to BackupPC_tarExtract, suggested by Pat LoPresti
-  to fix a problem a RedHat8 with perl 5.8.0.  It's unclear why this
-  helps, but it should be benign.  See:
-    http://sourceforge.net/mailarchive/forum.php?thread_id=1853018&forum_id=503
 
 * Added reporting of the largest number of hardlinks in the pool to the
   log file.

@@ -1,5 +1,8 @@
 #!/usr/bin/perl -T
-
+#
+# by Manfred Herrmann (V1.1) (some typo errors + 3 new strings)
+# CVS-> Revision ???
+#
 #my %lang;
 
 #use strict;
@@ -153,7 +156,7 @@ Sie starten ein \$type Backup für \$host.
 <input type="hidden" name="doit" value="1">
 Möchten Sie das wirklich tun?
 <input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="No" name="">
+<input type="submit" value="Nein" name="">
 </form>
 EOF
 # --------------------------------
@@ -174,7 +177,7 @@ Zusätzlich bitte keine Backups starten für die Dauer von
 <p>
 Möchten Sie das wirklich tun?
 <input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="No" name="">
+<input type="submit" value="Nein" name="">
 </form>
 
 EOF
@@ -410,7 +413,7 @@ Backup Nummer \$num:
 \$hiddenStr
 Wollen Sie das wirklich tun?
 <input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="No" name="">
+<input type="submit" value="Nein" name="">
 </form>
 EOF
 
@@ -753,9 +756,9 @@ $Lang{Hosts} = "Computer";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> Dieser Computer wurde nie gesichert!! </h2>\n";
 $Lang{This_PC_is_used_by} = "<li>Dieser Computer wird betreut von \${UserLink(\$user)}";
 
-$Lang{Extracting_only_Errors} = "(Extracting only Errors)";
+$Lang{Extracting_only_Errors} = "(nur Fehler anzeigen)";
 $Lang{XferLOG} = "XferLOG";
-$Lang{Errors}  = "Errors";
+$Lang{Errors}  = "Fehler";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
@@ -920,7 +923,7 @@ Hallo $userName,
 
 Ihr Computer ($host) wurde durch den BackupServer noch nie erfolgreich gesichert.
 
-Backups sollten automatisch erfolgen, wenn Ihr Computer am Netzwerk angschlossen ist.
+Backups sollten automatisch erfolgen, wenn Ihr Computer am Netzwerk angeschlossen ist.
 Sie sollten Ihren Backup-Betreuer oder den IT-Dienstleister kontaktieren, wenn:
 
   - Ihr Computer regelmäßig am Netzwerk angeschlossen ist. Dann handelt es sich
@@ -952,7 +955,7 @@ Ihr Computer ($host) wurde seit $days Tagen nicht mehr erfolgreich gesichert.
 
 Ihr Computer wurde von vor $firstTime Tagen bis vor $days Tagen $numBackups mal
 erfolgreich gesichert.
-Backups sollten automatisch erfolgen, wenn Ihr Computer am Netzwerk angschlossen ist.
+Backups sollten automatisch erfolgen, wenn Ihr Computer am Netzwerk angeschlossen ist.
 
 Wenn Ihr Computer in den letzten $days Tagen mehr als ein paar Stunden am
 Netzwerk angeschlossen war, sollten Sie Ihren Backup-Betreuer oder
@@ -960,7 +963,7 @@ den IT-Dienstleister kontaktieren um die Ursache zu ermitteln und zu beheben.
 Andernfalls, wenn Sie z. B. lange Zeit nicht im Büro sind, können Sie höchstens
 manuell Ihre Dateien sichern (evtl. kopieren auf eine externe Festplatte).
 
-Bitte denken Sie daran, dass alle in den letzten $days Tagen gänderten Dateien (z. B.
+Bitte denken Sie daran, dass alle in den letzten $days Tagen geänderten Dateien (z. B.
 auch e-mails und Anhänge oder Datenbankeinträge) verloren gehen falls Ihre
 Festplatte einen crash erleidet oder Dateien durch versehentliches Löschen oder
 Virenbefall unbrauchbar werden.

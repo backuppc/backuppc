@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta1, released 30 Mar 2003.
+# Version 2.0.0beta2, released 13 Apr 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -215,9 +215,8 @@ if ( !$opts{d} ) {
 	print("Name server doesn't know about $host; trying NetBios\n")
 			if ( $opts{v} );
         if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
-	    print(LOG $bpc->timeStamp,
-			    "dump failed: Can't find host $host\n");
-            print("dump failed: Can't find host $host\n");
+	    print(LOG $bpc->timeStamp, "Can't find host $host via netbios\n");
+            print("host not found\n");
             exit(1);
         }
     } else {

@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta1, released 30 Mar 2003.
+# Version 2.0.0beta2, released 13 Apr 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -719,7 +719,7 @@ sub fileDeltaRxNext
                     #
                     my $data;
                     $fio->{rxInData} = "";
-                    while ( $fh->read(\$data, 30 * 1024 * 1024) > 0 ) {
+                    while ( $fh->read(\$data, 16 * 1024 * 1024) > 0 ) {
                         $fio->{rxInData} .= $data;
                     }
 		    $fio->log("$attr->{fullPath}: cached all $attr->{size}"

@@ -1620,7 +1620,7 @@ sub ErrorExit
     $Conf{CgiNavBarBgColor}  ||= "#ddeeee";
     $Conf{CgiHeaderBgColor}  ||= "#99cc33";
 
-    if ( 1 || !defined($ENV{REMOTE_USER}) ) {
+    if ( !defined($ENV{REMOTE_USER}) ) {
 	$mesg .= <<EOF;
 <p>
 Note: \$ENV{REMOTE_USER} is not set, which could mean there is an

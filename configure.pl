@@ -132,7 +132,7 @@ my %Programs = (
     sendmail   => "SendmailPath",
     hostname   => "HostnamePath",
     split      => "SplitPath",
-    par        => "ParPath",
+    'parchive/par' => "ParPath",
     cat        => "CatPath",
     gzip       => "GzipPath",
     bzip2      => "Bzip2Path",
@@ -154,7 +154,7 @@ I found the following locations for these programs:
 
 EOF
     foreach my $prog ( sort(keys(%Programs)) ) {
-        printf("    %-11s => %s\n", $prog, $Conf{$Programs{$prog}});
+        printf("    %-12s => %s\n", $prog, $Conf{$Programs{$prog}});
     }
     print "\n";
     last if (prompt('--> Are these paths correct?', 'y') =~ /^y/i);

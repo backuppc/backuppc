@@ -573,7 +573,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 \$filledBackup
 <li> Cliquer dans un répertoire ci-dessous pour y naviguer,
 <li> Cliquer dans un fichier ci-dessous pour le restaurer,
-<li> (ENGLISH) You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
+<li> Vous pouvez voir l'<a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">historique</a> de sauvegarde du répertoire courant.
 </ul>
 
 \${h2("Contenu de \${EscHTML(\$dirDisplay)}")}
@@ -612,26 +612,24 @@ This is now in the checkAll row
 EOF
 
 # ------------------------------
-$Lang{DirHistory_backup_for__host} = "(ENGLISH) BackupPC: Directory backup history for \$host";
+$Lang{DirHistory_backup_for__host} = "BackupPC: Historique de sauvegarde des répertoires de \$host";
 
 $Lang{DirHistory_for__host} = <<EOF;
-(ENGLISH)
-\${h1("Backup history for \$host")}
+\${h1("Historique de sauvegarde pour \$host")}
 
-This display shows each unique version of files across all
-the backups:
+Voici les versions des fichiers pour toutes les sauvegardes:
 <ul>
-<li> Click on a backup number to return to the backup browser,
-<li> Click on a directory link to navigate into that directory,
-<li> Click on a file version link to download that file.
+<li> Cliquez sur un numéro de sauvegarde pour revenir à la navigation de sauvegarde,
+<li> Cliquez sur un répertoire pour naviguer dans celui-ci,
+<li> Cliquez sur une version d'un fichier pour la télécharger.
 </ul>
 
-\${h2("History of \${EscHTML(\$dirDisplay)}")}
+\${h2("Historique de \${EscHTML(\$dirDisplay)}")}
 
 <br>
 <table border>
-<tr><td>Backup number</td>\$backupNumStr</tr>
-<tr><td>Backup time</td>\$backupTimeStr</tr>
+<tr><td>No. de sauvegarde</td>\$backupNumStr</tr>
+<tr><td>Date</td>\$backupTimeStr</tr>
 \$fileStr
 </table>
 EOF

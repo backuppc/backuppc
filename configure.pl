@@ -415,7 +415,7 @@ foreach my $lib ( qw(BackupPC/Lib.pm BackupPC/FileZIO.pm BackupPC/Attrib.pm
         BackupPC/PoolWrite.pm BackupPC/View.pm BackupPC/Xfer/Tar.pm
         BackupPC/Xfer/Smb.pm BackupPC/Xfer/Rsync.pm
         BackupPC/Xfer/RsyncFileIO.pm BackupPC/Zip/FileMember.pm
-        BackupPC/Lang/en.pm BackupPC/Lang/fr.pm
+        BackupPC/Lang/en.pm BackupPC/Lang/fr.pm BackupPC/Lang/es.pm
     ) ) {
     InstallFile("lib/$lib", "$Conf{InstallDir}/lib/$lib", 0444);
 }

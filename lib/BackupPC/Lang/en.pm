@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/bin/perl -T
 
 #my %lang;
 
@@ -717,18 +717,6 @@ is not \$host.
 Until I see \$host at a particular DHCP address, you can only
 start this request from the client machine itself.
 EOF
-
-# ------------------------------------
-# !! Server Mesg !!
-# ------------------------------------
-
-# do not translate the firsts, used by server
-$Lang{backup__In_hostIP___host} = "backup \$In{hostIP} \$host"
-                                . " \$User \$doFull";
-$Lang{backup__host__host__User__doFull} = "backup \$host \$host \$User \$doFull";
-$Lang{restore__ipAddr} = "restore \$ipAddr"
-                       . " \$hostDest \$User \$reqFileName";
-$Lang{stop__host__User__In_backoff} = "stop \$host \$User \$In{backoff}";
 
 ########################
 # ok you can do it then

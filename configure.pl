@@ -425,7 +425,7 @@ if ( $Conf{CgiImageDir} ne "" ) {
 }
 
 printf("Making init.d scripts\n");
-foreach my $init ( qw(linux-backuppc solaris-backuppc) ) {
+foreach my $init ( qw(linux-backuppc solaris-backuppc debian-backuppc) ) {
     InstallFile("init.d/src/$init", "init.d/$init", 0444);
 }
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -T
+#!/bin/perl -T
 #============================================================= -*-perl-*-w
 #
 # BackupPC_Admin: Apache/CGI interface for BackupPC.
@@ -38,7 +38,7 @@
 #
 #========================================================================
 #
-# Version 1.5.0beta0, released 30 Jun 2002.
+# Version 1.5.0_CVS, released 2 Aug 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -241,14 +241,15 @@ sub Action_StartStopBackup
     if ( $In{doit} ) {
         if ( $start ) {
 	    if ( $Hosts->{$host}{dhcp} ) {
-		$reply = $bpc->ServerMesg(eval("qq{$Lang->{backup__In_hostIP___host}}"));
+		$reply = $bpc->ServerMesg("backup $In{hostIP} $host"
+					. " $User $doFull");
 		$str = eval("qq{$Lang->{Backup_requested_on_DHCP__host}}");
 	    } else {
-		$reply = $bpc->ServerMesg(eval("qq{$Lang->{backup__host__host__User__doFull}}"));
+		$reply = $bpc->ServerMesg("backup $host $host $User $doFull");
 		$str = eval("qq{$Lang->{Backup_requested_on__host_by__User}}");
 	    }
         } else {
-            $reply = $bpc->ServerMesg(eval("qq{$Lang->{stop__host__User__In_backoff}}"));
+            $reply = $bpc->ServerMesg("stop $host $User $In{backoff}");
             $str = eval("qq{$Lang->{Backup_stopped_dequeued_on__host_by__User}}");
         }
 
@@ -1028,7 +1029,8 @@ EOF
         } else {
             ErrorExit(eval("qq{$Lang->{Can_t_open_create}}"));
         }
-	$reply = $bpc->ServerMesg(eval("qq{$Lang->{restore__ipAddr}}"));
+	$reply = $bpc->ServerMesg("restore $ipAddr"
+			. " $hostDest $User $reqFileName");
 	$str = eval("qq{$Lang->{Restore_requested_to_host__hostDest__backup___num}}");
         Header(eval("qq{$Lang->{Restore_Requested_on__hostDest}}"));
 	print (eval("qq{$Lang->{Reply_from_server_was___reply}}"));

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/bin/perl -T
 
 #my %lang;
 #use strict;
@@ -750,18 +750,6 @@ $Lang{log_User__User_downloaded_zip_archive_for__host}= "log L\'utilisateur \$Us
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restauration demandée pour l\'hôte \$hostDest, "
              . "sauvegarde n° \$num,"
 	     . " par \$User depuis \$ENV{REMOTE_ADDR}";
-
-##########################
-##########################
-
-#$Lang{backup__In_hostIP___host} = "Sauvegarde \$In{hostIP} \$host"
-#                                . " \$User \$doFull";
-#
-#$Lang{backup__host__host__User__doFull} = "backup \$host \$host \$User \$doFull";
-#$Lang{restore__ipAddr} = "Restauration \$ipAddr"
-#                       . " \$hostDest \$User \$reqFileName";
-#$Lang{stop__host__User__In_backoff} = "Arrêt \$host \$User \$In{backoff}";
-
 
 # -------------------------------------------------
 # ------- Stuff that was forgotten ----------------

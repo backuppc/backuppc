@@ -30,6 +30,8 @@ my @PerlSrc = qw(
     lib/BackupPC/Attrib.pm
     lib/BackupPC/FileZIO.pm
     lib/BackupPC/Lib.pm
+    lib/BackupPC/Lang/en.pm
+    lib/BackupPC/Lang/fr.pm
     lib/BackupPC/PoolWrite.pm
     lib/BackupPC/Xfer/Smb.pm
     lib/BackupPC/Xfer/Tar.pm

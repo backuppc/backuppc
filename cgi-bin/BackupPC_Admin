@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/usr/bin/perl -T
 #============================================================= -*-perl-*-w
 #
 # BackupPC_Admin: Apache/CGI interface for BackupPC.
@@ -38,7 +38,7 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version 1.5.0beta0, released 30 Jun 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -46,7 +46,7 @@
 
 use strict;
 use CGI;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 use BackupPC::Attrib qw(:all);
@@ -57,6 +57,8 @@ use vars qw(%Status %Info %Jobs @BgQueue @UserQueue @CmdQueue
             %QueueLen %StatusHost);
 use vars qw($Hosts $HostsMTime $ConfigMTime $PrivAdmin);
 use vars qw(%UserEmailInfo $UserEmailInfoMTime %RestoreReq);
+
+use vars qw ($Lang);
 
 $Cgi = new CGI;
 %In = $Cgi->Vars;
@@ -71,16 +73,18 @@ $MyURL  = $ENV{SCRIPT_NAME};
 $User   = $ENV{REMOTE_USER};
 
 if ( !defined($bpc) ) {
-    ErrorExit("BackupPC::Lib->new failed: check apache error_log\n")
-                                    if ( !($bpc = BackupPC::Lib->new) );
+    ErrorExit($Lang->{BackupPC__Lib__new_failed__check_apache_error_log})
+	if ( !($bpc = BackupPC::Lib->new) );
     $TopDir = $bpc->TopDir();
     $BinDir = $bpc->BinDir();
     %Conf   = $bpc->Conf();
+    $Lang   = $bpc->Lang();
     $ConfigMTime = $bpc->ConfigMTime();
 } elsif ( $bpc->ConfigMTime() != $ConfigMTime ) {
     $bpc->ConfigRead();
     %Conf   = $bpc->Conf();
     $ConfigMTime = $bpc->ConfigMTime();
+    $Lang   = $bpc->Lang();
 }
 
 #
@@ -94,36 +98,41 @@ $ENV{PATH} = $Conf{MyPath};
 #
 if ( $Conf{BackupPCUserVerify}
         && $> != (my $uid = (getpwnam($Conf{BackupPCUser}))[2]) ) {
-    ErrorExit("Wrong user: my userid is $>, instead of $uid"
-            . " ($Conf{BackupPCUser})\n");
+    ErrorExit(eval("qq{$Lang->{Wrong_user__my_userid_is___}}"));
 }
 
 if ( !defined($Hosts) || $bpc->HostsMTime() != $HostsMTime ) {
     $HostsMTime = $bpc->HostsMTime();
     $Hosts = $bpc->HostInfoRead();
+
+    # turn operators list into a hash for quick lookups
+    foreach my $host (keys %$Hosts) {
+       $Hosts->{$host}{moreUsers} =
+           {map {$_, 1} split(",", $Hosts->{$host}{moreUsers}) }
+    }
 }
 
 my %ActionDispatch = (
-    "summary"             => \&Action_Summary,
-    "Start Incr Backup"   => \&Action_StartStopBackup,
-    "Start Full Backup"   => \&Action_StartStopBackup,
-    "Stop/Dequeue Backup" => \&Action_StartStopBackup,
-    "queue"               => \&Action_Queue,
-    "view"                => \&Action_View,
-    "LOGlist"             => \&Action_LOGlist,
-    "emailSummary"        => \&Action_EmailSummary,
-    "browse"              => \&Action_Browse,
-    "Restore"             => \&Action_Restore,
-    "RestoreFile"         => \&Action_RestoreFile,
-    "hostInfo"            => \&Action_HostInfo,
-    "generalInfo"         => \&Action_GeneralInfo,
-    "restoreInfo"         => \&Action_RestoreInfo,
+    "summary"             	 => \&Action_Summary,
+    $Lang->{Start_Incr_Backup}   => \&Action_StartStopBackup,
+    $Lang->{Start_Full_Backup}   => \&Action_StartStopBackup,
+    $Lang->{Stop_Dequeue_Backup} => \&Action_StartStopBackup,
+    "queue"               	 => \&Action_Queue,
+    "view"                	 => \&Action_View,
+    "LOGlist"             	 => \&Action_LOGlist,
+    "emailSummary"        	 => \&Action_EmailSummary,
+    "browse"              	 => \&Action_Browse,
+    $Lang->{Restore}        	 => \&Action_Restore,
+    "RestoreFile"         	 => \&Action_RestoreFile,
+    $Lang->{hostInfo}       	 => \&Action_HostInfo,
+    "generalInfo"         	 => \&Action_GeneralInfo,
+    "restoreInfo"         	 => \&Action_RestoreInfo,
 );
 
 #
 # Set default actions, then call sub handler
 #
-$In{action} ||= "hostInfo"    if ( defined($In{host}) );
+$In{action} ||= $Lang->{hostInfo}    if ( defined($In{host}) );
 $In{action}   = "generalInfo" if ( !defined($ActionDispatch{$In{action}}) );
 $ActionDispatch{$In{action}}();
 exit(0);
@@ -142,7 +151,7 @@ sub Action_Summary
     my $Privileged = CheckPermission();
 
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can view PC summaries." );
+        ErrorExit($Lang->{Only_privileged_users_can_view_PC_summaries} );
     }
     foreach my $host ( sort(keys(%Status)) ) {
         my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate);
@@ -182,6 +191,7 @@ sub Action_Summary
         $fullTot += $fullCnt;
         $incrTot += $incrCnt;
         $fullSize = sprintf("%.2f", $fullSize / 1000);
+	if (! $incrAge) { $incrAge = "&nbsp;"; }
         $str = <<EOF;
 <tr><td> ${HostLink($host)} </td>
     <td align="center"> ${UserLink($Hosts->{$host}{user})} </td>
@@ -206,119 +216,52 @@ EOF
     $incrSizeTot = sprintf("%.2f", $incrSizeTot / 1000);
     my $now      = timeStamp2(time);
 
-    Header("BackupPC: Server Summary");
+    Header($Lang->{BackupPC__Server_Summary});
+    print eval ("qq{$Lang->{BackupPC_Summary}}");
 
-    print <<EOF;
-
-${h1("BackupPC Summary")}
-<p>
-This status was generated at $now.
-<p>
-
-${h2("Hosts with good Backups")}
-<p>
-There are $hostCntGood hosts that have been backed up, for a total of:
-<ul>
-<li> $fullTot full backups of total size ${fullSizeTot}GB
-     (prior to pooling and compression),
-<li> $incrTot incr backups of total size ${incrSizeTot}GB
-     (prior to pooling and compression).
-</ul>
-<table border>
-<tr><td> Host </td>
-    <td align="center"> User </td>
-    <td align="center"> #Full </td>
-    <td align="center"> Full Age/days </td>
-    <td align="center"> Full Size/GB </td>
-    <td align="center"> Speed MB/sec </td>
-    <td align="center"> #Incr </td>
-    <td align="center"> Incr Age/days </td>
-    <td align="center"> State </td>
-    <td align="center"> Last attempt </td></tr>
-$strGood
-</table>
-<p>
-
-${h2("Hosts with no Backups")}
-<p>
-There are $hostCntNone hosts with no backups.
-<p>
-<table border>
-<tr><td> Host </td>
-    <td align="center"> User </td>
-    <td align="center"> #Full </td>
-    <td align="center"> Full Age/days </td>
-    <td align="center"> Full Size/GB </td>
-    <td align="center"> Speed MB/sec </td>
-    <td align="center"> #Incr </td>
-    <td align="center"> Incr Age/days </td>
-    <td align="center"> Current State </td>
-    <td align="center"> Last backup attempt </td></tr>
-$strNone
-</table>
-EOF
     Trailer();
 }
 
 sub Action_StartStopBackup
 {
     my($str, $reply);
-    my $start = 1 if ( $In{action} eq "Start Incr Backup"
-                       || $In{action} eq "Start Full Backup" );
-    my $doFull = $In{action} eq "Start Full Backup" ? 1 : 0;
+
+    my $start = 1 if ( $In{action} eq $Lang->{Start_Incr_Backup}
+                       || $In{action} eq $Lang->{Start_Full_Backup} );
+    my $doFull = $In{action} eq $Lang->{Start_Full_Backup} ? 1 : 0;
     my $type = $doFull ? "full" : "incremental";
     my $host = $In{host};
     my $Privileged = CheckPermission($host);
 
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can stop or start backups on"
-		. " ${EscapeHTML($host)}.");
+        ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_stop_or_start_backups}}"));
     }
     ServerConnect();
 
     if ( $In{doit} ) {
         if ( $start ) {
 	    if ( $Hosts->{$host}{dhcp} ) {
-		$reply = $bpc->ServerMesg("backup $In{hostIP} $host"
-                                        . " $User $doFull");
-		$str = "Backup requested on DHCP $host ($In{hostIP}) by"
-		     . " $User from $ENV{REMOTE_ADDR}";
+		$reply = $bpc->ServerMesg(eval("qq{$Lang->{backup__In_hostIP___host}}"));
+		$str = eval("qq{$Lang->{Backup_requested_on_DHCP__host}}");
 	    } else {
-		$reply = $bpc->ServerMesg("backup $host $host $User $doFull");
-		$str = "Backup requested on $host by $User";
+		$reply = $bpc->ServerMesg(eval("qq{$Lang->{backup__host__host__User__doFull}}"));
+		$str = eval("qq{$Lang->{Backup_requested_on__host_by__User}}");
 	    }
         } else {
-            $reply = $bpc->ServerMesg("stop $host $User $In{backoff}");
-            $str = "Backup stopped/dequeued on $host by $User";
+            $reply = $bpc->ServerMesg(eval("qq{$Lang->{stop__host__User__In_backoff}}"));
+            $str = eval("qq{$Lang->{Backup_stopped_dequeued_on__host_by__User}}");
         }
-        Header("BackupPC: Backup Requested on $host");
-        print <<EOF;
-${h1($str)}
-<p>
-Reply from server was: $reply
-<p>
-Go back to <a href="$MyURL?host=$host">$host home page</a>.
-EOF
+
+        Header(eval ("qq{$Lang->{BackupPC__Backup_Requested_on__host}}") );
+        print (eval ("qq{$Lang->{REPLY_FROM_SERVER}}"));
+
         Trailer();
     } else {
         if ( $start ) {
 	    my $ipAddr = ConfirmIPAddress($host);
 
-            Header("BackupPC: Start Backup Confirm on $host");
-            print <<EOF;
-${h1("Are you sure?")}
-<p>
-You are about to start a $type backup on $host.
-
-<form action="$MyURL" method="get">
-<input type="hidden" name="host" value="$host">
-<input type="hidden" name="hostIP" value="$ipAddr">
-<input type="hidden" name="doit" value="1">
-Do you really want to do this?
-<input type="submit" value="$In{action}" name="action">
-<input type="submit" value="No" name="">
-</form>
-EOF
+            Header($Lang->{BackupPC__Start_Backup_Confirm_on__host});
+            print (eval ("qq{$Lang->{Are_you_sure_start}}"));
         } else {
             my $backoff = "";
             GetStatusInfo("host($host)");
@@ -326,23 +269,8 @@ EOF
                 $backoff = sprintf("%.1f",
                                   ($StatusHost{backoffTime} - time) / 3600);
             }
-            Header("BackupPC: Stop Backup Confirm on $host");
-            print <<EOF;
-${h1("Are you sure?")}
-<p>
-You are about to stop/dequeue backups on $host;
-
-<form action="$MyURL" method="get">
-<input type="hidden" name="host" value="$host">
-<input type="hidden" name="doit" value="1">
-Also, please don't start another backup for
-<input type="text" name="backoff" size="10" value="$backoff"> hours.
-<p>
-Do you really want to do this?
-<input type="submit" value="$In{action}" name="action">
-<input type="submit" value="No" name="">
-</form>
-EOF
+            Header($Lang->{BackupPC__Stop_Backup_Confirm_on__host});
+            print (eval ("qq{$Lang->{Are_you_sure_stop}}"));
         }
         Trailer();
     }
@@ -356,7 +284,7 @@ sub Action_Queue
     my $Privileged = CheckPermission();
 
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can view queues." );
+	ErrorExit($Lang->{Only_privileged_users_can_view_queues_});
     }
 
     while ( @BgQueue ) {
@@ -388,43 +316,10 @@ EOF
     <td> $cmd </td></tr>
 EOF
     }
-    Header("BackupPC: Queue Summary");
-    print <<EOF;
-${h1("Backup Queue Summary")}
-<p>
-${h2("User Queue Summary")}
-<p>
-The following user requests are currently queued:
-<table border>
-<tr><td> Host </td>
-    <td> Req Time </td>
-    <td> User </td></tr>
-$strUser
-</table>
-<p>
+    Header($Lang->{BackupPC__Queue_Summary});
 
-${h2("Background Queue Summary")}
-<p>
-The following background requests are currently queued:
-<table border>
-<tr><td> Host </td>
-    <td> Req Time </td>
-    <td> User </td></tr>
-$strBg
-</table>
-<p>
+    print ( eval ( "qq{$Lang->{Backup_Queue_Summary}}") );
 
-${h2("Command Queue Summary")}
-<p>
-The following command requests are currently queued:
-<table border>
-<tr><td> Host </td>
-    <td> Req Time </td>
-    <td> User </td>
-    <td> Command </td></tr>
-$strCmd
-</table>
-EOF
     Trailer();
 }
 
@@ -440,7 +335,7 @@ sub Action_View
     my($file, $comment);
     my $ext = $num ne "" ? ".$num" : "";
 
-    ErrorExit("Invalid number $num") if ( $num ne "" && $num !~ /^\d+$/ );
+    ErrorExit(eval("qq{$Lang->{Invalid_number__num}}")) if ( $num ne "" && $num !~ /^\d+$/ );
     if ( $type eq "XferLOG" ) {
         $file = "$TopDir/pc/$host/SmbLOG$ext";
         $file = "$TopDir/pc/$host/XferLOG$ext" if ( !-f $file && !-f "$file.z");
@@ -465,12 +360,12 @@ sub Action_View
     } elsif ( $type eq "docs" ) {
         $file = "$BinDir/../doc/BackupPC.html";
         if ( open(LOG, $file) ) {
-            Header("BackupPC: Documentation");
+            Header($Lang->{BackupPC__Documentation});
             print while ( <LOG> );
             close(LOG);
             Trailer();
         } else {
-            ErrorExit("Unable to open $file: configuration problem?");
+            ErrorExit(eval("qq{$Lang->{Unable_to_open__file__configuration_problem}}"));
         }
         return;
     } elsif ( $type eq "config" ) {
@@ -484,22 +379,19 @@ sub Action_View
         $linkHosts = 1;
     }
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can view log or config files." );
+        ErrorExit($Lang->{Only_privileged_users_can_view_log_or_config_files});
     }
     if ( !-f $file && -f "$file.z" ) {
         $file .= ".z";
         $compress = 1;
     }
-    Header("BackupPC: Log File $file");
-    print <<EOF;
-${h1("Log File $file $comment")}
-<p>
-EOF
+    Header(eval("qq{$Lang->{Backup_PC__Log_File__file}}")  );
+    print( eval ("qq{$Lang->{Log_File__file__comment}}"));
     if ( defined($fh = BackupPC::FileZIO->open($file, 0, $compress)) ) {
         my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
-        print <<EOF;
-Contents of log file <tt>$file</tt>, modified $mtimeStr $comment
-EOF
+
+	print ( eval ("qq{$Lang->{Contents_of_log_file}}"));
+
         print "<pre>";
         if ( $type eq "XferErr" || $type eq "XferErrbad"
 				|| $type eq "RestoreErr" ) {
@@ -507,7 +399,7 @@ EOF
             while ( 1 ) {
                 $_ = $fh->readLine();
                 if ( $_ eq "" ) {
-		    print("[ skipped $skipped lines ]\n") if ( $skipped );
+		    print(eval ("qq{$Lang->{skipped__skipped_lines}}"));
 		    last;
 		}
                 if ( /smb: \\>/
@@ -529,7 +421,7 @@ EOF
 		    $skipped++;
 		    next;
 		}
-		print("[ skipped $skipped lines ]\n") if ( $skipped );
+		print(eval("qq{$Lang->{skipped__skipped_lines}}")) if ( $skipped );
 		$skipped = 0;
                 print ${EscapeHTML($_)};
             }
@@ -561,7 +453,7 @@ EOF
         }
         $fh->close();
     } else {
-        printf("<pre>\nCan't open log file $file\n");
+	printf( eval("qq{$Lang->{_pre___Can_t_open_log_file__file}}"));
     }
     print <<EOF;
 </pre>
@@ -574,7 +466,7 @@ sub Action_LOGlist
     my $Privileged = CheckPermission($In{host});
 
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can view log files.");
+        ErrorExit($Lang->{Only_privileged_users_can_view_log_files});
     }
     my $host = $In{host};
     my($url0, $hdr, $root, $str);
@@ -604,18 +496,8 @@ sub Action_LOGlist
     <td> $mtimeStr </td></tr>
 EOF
     }
-    Header("BackupPC: Log File History");
-    print <<EOF;
-
-${h1("Log File History $hdr")}
-<p>
-<table border>
-<tr><td align="center"> File </td>
-    <td align="center"> Size </td>
-    <td align="center"> Modification time </td></tr>
-$str
-</table>
-EOF
+    Header($Lang->{BackupPC__Log_File_History});
+    print (eval("qq{$Lang->{Log_File_History__hdr}}"));
     Trailer();
 }
 
@@ -624,7 +506,7 @@ sub Action_EmailSummary
     my $Privileged = CheckPermission();
 
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can view email summaries." );
+        ErrorExit($Lang->{Only_privileged_users_can_view_email_summaries});
     }
     GetStatusInfo("hosts");
     ReadUserEmailInfo();
@@ -642,18 +524,8 @@ EOF
     foreach my $t ( sort({$b <=> $a} keys(%EmailStr)) ) {
         $str .= $EmailStr{$t};
     }
-    Header("BackupPC: Email Summary");
-    print <<EOF;
-${h1("Recent Email Summary (Reverse time order)")}
-<p>
-<table border>
-<tr><td align="center"> Recipient </td>
-    <td align="center"> Host </td>
-    <td align="center"> Time </td>
-    <td align="center"> Subject </td></tr>
-$str
-</table>
-EOF
+    Header($Lang->{Email_Summary});
+    print (eval("qq{$Lang->{Recent_Email_Summary}}"));
     Trailer();
 }
 
@@ -665,14 +537,13 @@ sub Action_Browse
     my $checkBoxCnt = 0;      # checkbox counter
 
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can browse backup files"
-                . " for host ${EscapeHTML($In{host})}." );
+        ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_browse_backup_files}}"));
     }
     my $host = $In{host};
     my $num  = $In{num};
     my $dir  = $In{dir};
     if ( $host eq "" ) {
-        ErrorExit("Empty host name.");
+        ErrorExit($Lang->{Empty_host_name});
     }
     #
     # Find the requested backup and the previous filled backup
@@ -700,8 +571,7 @@ sub Action_Browse
     $mangle = $Backups[$i]{mangle};
     if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
         if ( !opendir(DIR, "$TopDir/pc/$host/$num") ) {
-            ErrorExit("Can't browse bad directory name"
-	            . " ${EscapeHTML(\"$TopDir/pc/$host/$num\")}");
+            ErrorExit(eval("qq{$Lang->{Can_t_browse_bad_directory_name}}"));
         }
         #
         # Read this directory and find the first directory
@@ -715,8 +585,7 @@ sub Action_Browse
 	}
         closedir(DIR);
 	if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
-            ErrorExit("Directory ${EscapeHTML(\"$TopDir/pc/$host/$num\")}"
-		    . " is empty");
+            ErrorExit(eval("qq{$Lang->{Directory___EscapeHTML}}"));
 	}
     }
     my $relDir   = $dir;
@@ -750,8 +619,7 @@ sub Action_Browse
         my($fLast, $fum, $fLastum, @DirStr);
 
         if ( $fullDir =~ m{(^|/)\.\.(/|$)} || !opendir(DIR, $fullDir) ) {
-            ErrorExit("Can't browse bad directory name"
-	            . " ${EscapeHTML($fullDir)}");
+            ErrorExit(eval("qq{$Lang->{Can_t_browse_bad_directory_name2}}"));
         }
         #
         # Read this directory and optionally the corresponding filled directory
@@ -898,12 +766,9 @@ EOF
     $dirDisplay =~ s{//}{/}g;
     my $filledBackup;
     if ( defined($numF) ) {
-        $filledBackup = <<EOF;
-<li> This display is merged with backup #$numF, the most recent prior
-     filled (full) dump.
-EOF
+        $filledBackup = eval("qq{$Lang->{This_display_is_merged_with_backup}}");
     }
-    Header("BackupPC: Browse backup $num for $host");
+    Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"));
 
     foreach my $d ( @DirStrPrev ) {
 	$dirStr .= "<tr><td$d->{tdArgs}>$d->{link}\n";
@@ -912,104 +777,20 @@ EOF
     ### hide checkall button if there are no files
     my ($topCheckAll, $checkAll, $fileHeader);
     if ( $fileStr ) {
-    	$fileHeader = <<EOF;
-	    <tr bgcolor="$Conf{CgiHeaderBgColor}"><td align=center> Name</td>
-                <td align="center"> Type</td>
-                <td align="center"> Mode</td>
-                <td align="center"> Size</td>
-                <td align="center"> Mod time</td>
-            </tr>
-EOF
-	$checkAll = <<EOF;
-<tr bgcolor="#ffffcc"><td>
-<input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Select all
-</td><td colspan="4" align="center">
-<input type="submit" name="Submit" value="Restore selected files">
-</td></tr>
-EOF
+    	$fileHeader = eval("qq{$Lang->{fileHeader}}");
+
+	$checkAll = $Lang->{checkAll};
+
     	# and put a checkall box on top if there are at least 20 files
 	if ( $checkBoxCnt >= 20 ) {
 	    $topCheckAll = $checkAll;
 	    $topCheckAll =~ s{allFiles}{allFilestop}g;
 	}
     } else {
-	$fileStr = <<EOF;
-<tr><td bgcolor="#ffffff">The directory ${EscapeHTML($dirDisplay)} is empty
-</td></tr>
-EOF
+	$fileStr = eval("qq{$Lang->{The_directory_is_empty}}");
     }
  
-    print <<EOF;
-${h1("Backup browse for $host")}
-
-<script language="javascript" type="text/javascript">
-<!--
-
-    function checkAll(location)
-    {
-      for (var i=0;i<document.form1.elements.length;i++)
-      {
-        var e = document.form1.elements[i];
-        if ((e.checked || !e.checked) && e.name != 'all') {
-            if (eval("document.form1."+location+".checked")) {
-            	e.checked = true;
-            } else {
-            	e.checked = false;
-            }
-        }
-      }
-    }
-    
-    function toggleThis(checkbox)
-    {
-       var cb = eval("document.form1."+checkbox);
-       cb.checked = !cb.checked;	
-    }
-
-//-->
-</script>
-
-<ul>
-<li> You are browsing backup #$num, which started around $backupTime
-        ($backupAge days ago),
-$filledBackup
-<li> Click on a directory below to navigate into that directory,
-<li> Click on a file below to restore that file.
-</ul>
-
-${h2("Contents of ${EscapeHTML($dirDisplay)}")}
-<form name="form1" method="post" action="$MyURL">
-<input type="hidden" name="num" value="$num">
-<input type="hidden" name="host" value="$host">
-<input type="hidden" name="fcbMax" value="$checkBoxCnt">
-<input type="hidden" name="action" value="Restore">
-<br>
-<table>
-<tr><td valign="top">
-    <!--Navigate here:-->
-    <br><table align="center" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
-    $dirStr
-    </table>
-</td><td width="3%">
-</td><td valign="top">
-    <!--Restore files here:-->
-    <br>
-    <table cellpadding="0" cellspacing="0" bgcolor="#333333"><tr><td>
-        <table border="0" width="100%" align="left" cellpadding="2" cellspacing="1">
-        $fileHeader
-        $topCheckAll
-        $fileStr
-        $checkAll
-        </table>
-    </td></tr></table>
-<br>
-<!--
-This is now in the checkAll row
-<input type="submit" name="Submit" value="Restore selected files">
--->
-</td></tr></table>
-</form>
-EOF
+    print (eval("qq{$Lang->{Backup_browse_for__host}}"));
     Trailer();
 }
 
@@ -1018,8 +799,7 @@ sub Action_Restore
     my($str, $reply, $i);
     my $Privileged = CheckPermission($In{host});
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can restore backup files"
-                . " for host ${EscapeHTML($In{host})}." );
+        ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_restore_backup_files}}"));
     }
     my $host = $In{host};
     my $num  = $In{num};
@@ -1032,7 +812,7 @@ sub Action_Restore
     ServerConnect();
 
     if ( !defined($Hosts->{$host}) ) {
-        ErrorExit("Bad host name ${EscapeHTML($host)}");
+        ErrorExit(eval("qq{$Lang->{Bad_host_name}}"));
     }
     for ( my $i = 0 ; $i < $In{fcbMax} ; $i++ ) {
         next if ( !defined($In{"fcb$i"}) );
@@ -1062,11 +842,10 @@ EOF
     $badFileCnt++ if ( $In{pathHdr} =~ m{(^|/)\.\.(/|$)} );
     $badFileCnt++ if ( $In{num} =~ m{(^|/)\.\.(/|$)} );
     if ( @fileList == 0 ) {
-        ErrorExit("You haven't selected any files; please go Back to"
-                . " select some files.");
+        ErrorExit($Lang->{You_haven_t_selected_any_files__please_go_Back_to});
     }
     if ( $badFileCnt ) {
-        ErrorExit("Nice try, but you can't put '..' in any of the file names");
+        ErrorExit($Lang->{Nice_try__but_you_can_t_put});
     }
     if ( @fileList == 1 ) {
 	$pathHdr =~ s/(.*)\/.*/$1/;
@@ -1083,122 +862,19 @@ EOF
         #
         # Tell the user what options they have
         #
-        Header("BackupPC: Restore Options for $host");
-        print <<EOF;
-${h1("Restore Options for $host")}
-<p>
-You have selected the following files/directories from
-share $share, backup number #$num:
-<ul>
-$fileListStr
-</ul>
-<p>
-You have three choices for restoring these files/directories.
-Please select one of the following options.
-<p>
-${h2("Option 1: Direct Restore")}
-<p>
-You can start a restore that will restore these files directly onto
-$host.
-<p>
-<b>Warning:</b> any existing files that match the ones you have
-selected will be overwritten!
-
-<form action="$MyURL" method="post">
-<input type="hidden" name="host" value="${EscapeHTML($host)}">
-<input type="hidden" name="num" value="$num">
-<input type="hidden" name="type" value="3">
-$hiddenStr
-<input type="hidden" value="$In{action}" name="action">
-<table border="0">
-<tr>
-    <td>Restore the files to host</td>
-    <td><input type="text" size="40" value="${EscapeHTML($host)}"
-	 name="hostDest"></td>
-</tr><tr>
-    <td>Restore the files to share</td>
-    <td><input type="text" size="40" value="${EscapeHTML($share)}"
-	 name="shareDest"></td>
-</tr><tr>
-    <td>Restore the files below dir<br>(relative to share)</td>
-    <td valign="top"><input type="text" size="40" maxlength="256"
-	value="${EscapeHTML($pathHdr)}" name="pathHdr"></td>
-</tr><tr>
-    <td><input type="submit" value="Start Restore" name=""></td>
-</table>
-</form>
-EOF
+        Header(eval("qq{$Lang->{Restore_Options_for__host}}"));
+	print(eval("qq{$Lang->{Restore_Options_for__host2}}"));
 
 	#
 	# Verify that Archive::Zip is available before showing the
 	# zip restore option
 	#
 	if ( eval { require Archive::Zip } ) {
-	    print <<EOF;
-
-${h2("Option 2: Download Zip archive")}
-<p>
-You can download a Zip archive containing all the files/directories you have
-selected.  You can then use a local application, such as WinZip,
-to view or extract any of the files.
-<p>
-<b>Warning:</b> depending upon which files/directories you have selected,
-this archive might be very very large.  It might take many minutes to
-create and transfer the archive, and you will need enough local disk
-space to store it.
-<p>
-<form action="$MyURL" method="post">
-<input type="hidden" name="host" value="${EscapeHTML($host)}">
-<input type="hidden" name="num" value="$num">
-<input type="hidden" name="type" value="2">
-$hiddenStr
-<input type="hidden" value="$In{action}" name="action">
-<input type="checkbox" value="1" name="relative" checked> Make archive relative
-to ${EscapeHTML($pathHdr eq "" ? "/" : $pathHdr)}
-(otherwise archive will contain full paths).
-<br>
-Compression (0=off, 1=fast,...,9=best)
-<input type="text" size="6" value="5" name="compressLevel">
-<br>
-<input type="submit" value="Download Zip File" name="">
-</form>
-EOF
+	    print (eval("qq{$Lang->{Option_2__Download_Zip_archive}}"));
 	} else {
-	    print <<EOF;
-
-${h2("Option 2: Download Zip archive")}
-<p>
-You could download a zip archive, but Archive::Zip is not installed.
-Please ask your system adminstrator to install Archive::Zip from
-<a href="http://www.cpan.org">www.cpan.org</a>.
-<p>
-EOF
+	    print (eval("qq{$Lang->{Option_2__Download_Zip_archive2}}"));
 	}
-	print <<EOF;
-${h2("Option 3: Download Tar archive")}
-<p>
-You can download a Tar archive containing all the files/directories you
-have selected.  You can then use a local application, such as tar or
-WinZip to view or extract any of the files.
-<p>
-<b>Warning:</b> depending upon which files/directories you have selected,
-this archive might be very very large.  It might take many minutes to
-create and transfer the archive, and you will need enough local disk
-space to store it.
-<p>
-<form action="$MyURL" method="post">
-<input type="hidden" name="host" value="${EscapeHTML($host)}">
-<input type="hidden" name="num" value="$num">
-<input type="hidden" name="type" value="1">
-$hiddenStr
-<input type="hidden" value="$In{action}" name="action">
-<input type="checkbox" value="1" name="relative" checked> Make archive relative
-to ${EscapeHTML($pathHdr eq "" ? "/" : $pathHdr)}
-(otherwise archive will contain full paths).
-<br>
-<input type="submit" value="Download Tar File" name="">
-</form>
-EOF
+	print (eval("qq{$Lang->{Option_3__Download_Zip_archive}}"));
         Trailer();
     } elsif ( $In{type} == 1 ) {
         #
@@ -1207,8 +883,8 @@ EOF
         $SIG{CHLD} = 'IGNORE';
         my $pid = fork();
         if ( !defined($pid) ) {
-            $bpc->ServerMesg("log Can't fork for tar restore request by $User");
-            ErrorExit("Can't fork for tar restore");
+            $bpc->ServerMesg(eval("qq{$Lang->{log_Can_t_fork_for_tar_restore_request_by__User}}"));
+            ErrorExit($Lang->{Can_t_fork_for_tar_restore});
         }
         if ( $pid ) {
             #
@@ -1218,9 +894,7 @@ EOF
             if ( @fileListTrim > 10 ) {
                 @fileListTrim = (@fileListTrim[0..9], '...');
             }
-            $bpc->ServerMesg("log User $User downloaded tar archive for $host,"
-                           . " backup $num; files were: "
-			   . join(", ", @fileListTrim));
+            $bpc->ServerMesg(eval("qq{$Lang->{log_User__User_downloaded_tar_archive_for__host}}"));
             return;
         }
         #
@@ -1248,8 +922,8 @@ EOF
         $SIG{CHLD} = 'IGNORE';
         my $pid = fork();
         if ( !defined($pid) ) {
-            $bpc->ServerMesg("log Can't fork for zip restore request by $User");
-            ErrorExit("Can't fork for zip restore");
+            $bpc->ServerMesg(eval("qq{$Lang->{log_Can_t_fork_for_zip_restore_request_by__User}}"));
+            ErrorExit($Lang->{Can_t_fork_for_zip_restore});
         }
         if ( $pid ) {
             #
@@ -1259,9 +933,7 @@ EOF
             if ( @fileListTrim > 10 ) {
                 @fileListTrim = (@fileListTrim[0..9], '...');
             }
-            $bpc->ServerMesg("log User $User downloaded zip archive for $host,"
-                           . " backup $num; files were: "
-                           . join(", ", @fileListTrim));
+            $bpc->ServerMesg(eval("qq{$Lang->{log_User__User_downloaded_zip_archive_for__host}}"));
             return;
         }
         #
@@ -1289,11 +961,10 @@ EOF
         # Do restore directly onto host
         #
 	if ( !defined($Hosts->{$In{hostDest}}) ) {
-	    ErrorExit("Host ${EscapeHTML($In{hostDest})} doesn't exist");
+	    ErrorExit(eval("qq{$Lang->{Host__doesn_t_exist}}"));
 	}
 	if ( !CheckPermission($In{hostDest}) ) {
-	    ErrorExit("You don't have permission to restore onto host"
-		    . " ${EscapeHTML($In{hostDest})}");
+	    ErrorExit(eval("qq{$Lang->{You_don_t_have_permission_to_restore_onto_host}}"));
 	}
         $fileListStr = "";
         foreach my $f ( @fileList ) {
@@ -1305,40 +976,15 @@ EOF
 <tr><td>$host:/$strippedShare$f</td><td>$In{hostDest}:/$strippedShareDest$targetFile</td></tr>
 EOF
         }
-        Header("BackupPC: Restore Confirm on $host");
-        print <<EOF;
-${h1("Are you sure?")}
-<p>
-You are about to start a restore directly to the machine $In{hostDest}.
-The following files will be restored to share $In{shareDest}, from
-backup number $num:
-<p>
-<table border>
-<tr><td>Original file/dir</td><td>Will be restored to</td></tr>
-$fileListStr
-</table>
-
-<form action="$MyURL" method="post">
-<input type="hidden" name="host" value="${EscapeHTML($host)}">
-<input type="hidden" name="hostDest" value="${EscapeHTML($In{hostDest})}">
-<input type="hidden" name="shareDest" value="${EscapeHTML($In{shareDest})}">
-<input type="hidden" name="pathHdr" value="${EscapeHTML($In{pathHdr})}">
-<input type="hidden" name="num" value="$num">
-<input type="hidden" name="type" value="4">
-$hiddenStr
-Do you really want to do this?
-<input type="submit" value="$In{action}" name="action">
-<input type="submit" value="No" name="">
-</form>
-EOF
+        Header(eval("qq{$Lang->{Restore_Confirm_on__host}}"));
+	print(eval("qq{$Lang->{Are_you_sure}}"));
         Trailer();
     } elsif ( $In{type} == 4 ) {
 	if ( !defined($Hosts->{$In{hostDest}}) ) {
-	    ErrorExit("Host ${EscapeHTML($In{hostDest})} doesn't exist");
+	    ErrorExit(eval("qq{$Lang->{Host_doesn_t_exist}}"));
 	}
 	if ( !CheckPermission($In{hostDest}) ) {
-	    ErrorExit("You don't have permission to restore onto host"
-		    . " ${EscapeHTML($In{hostDest})}");
+	    ErrorExit(eval("qq{$Lang->{You_don_t_have_permission_to_restore_onto_host}}"));
 	}
 	my $hostDest = $1 if ( $In{hostDest} =~ /(.+)/ );
 	my $ipAddr = ConfirmIPAddress($hostDest);
@@ -1380,21 +1026,12 @@ EOF
             print(REQ $dump->Dump);
             close(REQ);
         } else {
-            ErrorExit("Can't open/create "
-                    . ${EscapeHTML("$TopDir/pc/$hostDest/$reqFileName")});
+            ErrorExit(eval("qq{$Lang->{Can_t_open_create}}"));
         }
-	$reply = $bpc->ServerMesg("restore $ipAddr"
-			. " $hostDest $User $reqFileName");
-	$str = "Restore requested to host $hostDest, backup #$num,"
-	     . " by $User from $ENV{REMOTE_ADDR}";
-        Header("BackupPC: Restore Requested on $hostDest");
-        print <<EOF;
-${h1($str)}
-<p>
-Reply from server was: $reply
-<p>
-Go back to <a href="$MyURL?host=$hostDest">$hostDest home page</a>.
-EOF
+	$reply = $bpc->ServerMesg(eval("qq{$Lang->{restore__ipAddr}}"));
+	$str = eval("qq{$Lang->{Restore_requested_to_host__hostDest__backup___num}}");
+        Header(eval("qq{$Lang->{Restore_Requested_on__hostDest}}"));
+	print (eval("qq{$Lang->{Reply_from_server_was___reply}}"));
         Trailer();
     }
 }
@@ -1497,13 +1134,12 @@ sub restoreFile
     };
 
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can restore backup files"
-                . " for host ${EscapeHTML($host)}." );
+        ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_restore_backup_files2}}"));
     }
     ServerConnect();
     my @Backups = $bpc->BackupInfoRead($host);
     if ( $host eq "" ) {
-        ErrorExit("Empty host name");
+        ErrorExit($Lang->{Empty_host_name});
     }
     $dir = "/" if ( $dir eq "" );
     for ( $i = 0 ; $i < @Backups ; $i++ ) {
@@ -1537,7 +1173,7 @@ sub restoreFile
 	}
     }
     if ( $fullPath =~ m{(^|/)\.\.(/|$)} || !-f $fullPath ) {
-        ErrorExit("Can't restore bad file ${EscapeHTML($fullPath)}");
+        ErrorExit(eval("qq{$Lang->{Can_t_restore_bad_file}}"));
     }
     my $dirUM = $mangle ? $bpc->fileNameUnmangle($dir) : $dir;
     my $attr = BackupPC::Attrib->new({compress => $compress});
@@ -1607,7 +1243,7 @@ sub Action_HostInfo
                 }
             }
             CheckPermission();
-            ErrorExit("Unknown host or user ${EscapeHTML($host)}")
+            ErrorExit(eval("qq{$Lang->{Unknown_host_or_user}}"))
                                 if ( !defined($Hosts->{$host}) );
         }
         $In{host} = $host;
@@ -1617,8 +1253,7 @@ sub Action_HostInfo
     %Conf = $bpc->Conf();
     my $Privileged = CheckPermission($host);
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can view information about"
-                . " host ${EscapeHTML($host)}." );
+        ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_view_information_about}}"));
     }
     ReadUserEmailInfo();
 
@@ -1648,12 +1283,15 @@ sub Action_HostInfo
         }
         my $age = sprintf("%.1f", (time - $Backups[$i]{startTime}) / (24*3600));
         my $browseURL = "$MyURL?action=browse&host=$host&num=$Backups[$i]{num}";
-        my $filled = $Backups[$i]{noFill} ? "no" : "yes";
+        my $filled = $Backups[$i]{noFill} ? $Lang->{No} : $Lang->{Yes};
         $filled .= " ($Backups[$i]{fillFromNum}) "
                             if ( $Backups[$i]{fillFromNum} ne "" );
+	my $ltype;
+	if ($Backups[$i]{type} eq "full") { $ltype = $Lang->{full}; }
+	else { $ltype = $Lang->{incremental}; }
         $str .= <<EOF;
 <tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
-    <td align="center"> $Backups[$i]{type} </td>
+    <td align="center"> $ltype </td>
     <td align="center"> $filled </td>
     <td align="right">  $startTime </td>
     <td align="right">  $duration </td>
@@ -1662,7 +1300,7 @@ sub Action_HostInfo
 EOF
         $sizeStr .= <<EOF;
 <tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
-    <td align="center"> $Backups[$i]{type} </td>
+    <td align="center"> $ltype </td>
     <td align="right">  $Backups[$i]{nFiles} </td>
     <td align="right">  $MB </td>
     <td align="right">  $MBperSec </td>
@@ -1673,13 +1311,17 @@ EOF
 </tr>
 EOF
         $Backups[$i]{compress} ||= "off";
+	my $is_compress = $Lang->{off};
+	if ($Backups[$i]{compress} ne "off") {$is_compress = $Lang->{on}; }
+	if (! $ExistComp) { $ExistComp = "&nbsp;"; }
+	if (! $MBExistComp) { $MBExistComp = "&nbsp;"; }
         $compStr .= <<EOF;
 <tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
-    <td align="center"> $Backups[$i]{type} </td>
-    <td align="center"> $Backups[$i]{compress} </td>
+    <td align="center"> $ltype </td>
+    <td align="center"> $is_compress </td> 
     <td align="right">  $MBExist </td>
-    <td align="right">  $MBExistComp </td>
-    <td align="right">  $ExistComp </td>
+    <td align="right">  $MBExistComp </td> 
+    <td align="right">  $ExistComp </td>   
     <td align="right">  $MBNew </td>
     <td align="right">  $MBNewComp </td>
     <td align="right">  $NewComp </td>
@@ -1687,7 +1329,7 @@ EOF
 EOF
         $errStr .= <<EOF;
 <tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
-    <td align="center"> $Backups[$i]{type} </td>
+    <td align="center"> $ltype </td>
     <td align="center"> <a href="$MyURL?action=view&type=XferLOG&num=$Backups[$i]{num}&host=$host">XferLOG</a>,
                       <a href="$MyURL?action=view&type=XferErr&num=$Backups[$i]{num}&host=$host">Errors</a> </td>
     <td align="right">  $Backups[$i]{xferErrs} </td>
@@ -1707,9 +1349,11 @@ EOF
         my $duration  = sprintf("%.1f", $dur / 60);
         my $MB        = sprintf("%.1f", $Restores[$i]{size} / (1024*1024));
         my $MBperSec  = sprintf("%.2f", $Restores[$i]{size} / (1024*1024*$dur));
+	my $Restores_Result = $Lang->{failed};
+	if ($Restores[$i]{result} ne "failed") { $Restores_Result = $Lang->{success}; }
 	$restoreStr  .= <<EOF;
 <tr><td align="center"><a href="$MyURL?action=restoreInfo&num=$Restores[$i]{num}&host=$host">$Restores[$i]{num}</a> </td>
-    <td align="center"> $Restores[$i]{result} </td>
+    <td align="center"> $Restores_Result </td>
     <td align="right"> $startTime </td>
     <td align="right"> $duration </td>
     <td align="right"> $Restores[$i]{nFiles} </td>
@@ -1719,65 +1363,48 @@ EOF
 </tr>
 EOF
     }
-    $restoreStr   = <<EOF if ( $restoreStr ne "" );
-${h2("Restore Summary")}
-<p>
-Click on the restore number for more details.
-<table border>
-<tr><td align="center"> Restore# </td>
-    <td align="center"> Result </td>
-    <td align="right"> Start Date</td>
-    <td align="right"> Dur/mins</td>
-    <td align="right"> #files </td>
-    <td align="right"> MB </td>
-    <td align="right"> #tar errs </td>
-    <td align="right"> #xferErrs </td>
-</tr>
-$restoreStr
-</table>
-<p>
-EOF
-
+    if ( $restoreStr ne "" ) {
+	$restoreStr = eval("qq{$Lang->{Restore_Summary}}");
+    }
     if ( @Backups == 0 ) {
-        $warnStr = "<h2> This PC has never been backed up!! </h2>\n";
+        $warnStr = $Lang->{This_PC_has_never_been_backed_up};
     }
     if ( defined($Hosts->{$host}) ) {
         my $user = $Hosts->{$host}{user};
+	my @moreUsers = sort(keys(%{$Hosts->{$host}{moreUsers}}));
+	my $moreUserStr;
+	foreach my $u ( sort(keys(%{$Hosts->{$host}{moreUsers}})) ) {
+	    $moreUserStr .= ", " if ( $moreUserStr ne "" );
+	    $moreUserStr .= "${UserLink($u)}";
+	}
+	if ( $moreUserStr ne "" ) {
+	    $moreUserStr = " ($Lang->{and} $moreUserStr).\n";
+	} else {
+	    $moreUserStr = ".\n";
+	}
         if ( $user ne "" ) {
-            $statusStr .= <<EOF;
-<li>This PC is used by ${UserLink($user)}.
-EOF
+            $statusStr .= eval("qq{$Lang->{This_PC_is_used_by}$moreUserStr}");
         }
         if ( defined($UserEmailInfo{$user})
                 && $UserEmailInfo{$user}{lastHost} eq $host ) {
             my $mailTime = timeStamp2($UserEmailInfo{$user}{lastTime});
             my $subj     = $UserEmailInfo{$user}{lastSubj};
-            $statusStr  .= <<EOF;
-<li>Last email sent to ${UserLink($user)} was at $mailTime, subject "$subj".
-EOF
+            $statusStr  .= eval("qq{$Lang->{Last_email_sent_to__was_at___subject}}");
         }
     }
     if ( defined($Jobs{$host}) ) {
         my $startTime = timeStamp2($Jobs{$host}{startTime});
         (my $cmd = $Jobs{$host}{cmd}) =~ s/$BinDir\///g;
-        $statusStr .= <<EOF;
-<li>The command $cmd is currently running for $host, started $startTime.
-EOF
+        $statusStr .= eval("qq{$Lang->{The_command_cmd_is_currently_running_for_started}}");
     }
     if ( $StatusHost{BgQueueOn} ) {
-        $statusStr .= <<EOF;
-<li>Host $host is queued on the background queue (will be backed up soon).
-EOF
+        $statusStr .= eval("qq{$Lang->{Host_host_is_queued_on_the_background_queue_will_be_backed_up_soon}}");
     }
     if ( $StatusHost{UserQueueOn} ) {
-        $statusStr .= <<EOF;
-<li>Host $host is queued on the user queue (will be backed up soon).
-EOF
+        $statusStr .= eval("qq{$Lang->{Host_host_is_queued_on_the_user_queue__will_be_backed_up_soon}}");
     }
     if ( $StatusHost{CmdQueueOn} ) {
-        $statusStr .= <<EOF;
-<li>A command for $host is on the command queue (will run soon).
-EOF
+        $statusStr .= eval("qq{$Lang->{A_command_for_host_is_on_the_command_queue_will_run_soon}}");
     }
     my $startTime = timeStamp2($StatusHost{endTime} == 0 ?
                 $StatusHost{startTime} : $StatusHost{endTime});
@@ -1785,27 +1412,19 @@ EOF
     if ( $StatusHost{reason} ne "" ) {
         $reason = " ($StatusHost{reason})";
     }
-    $statusStr .= <<EOF;
-<li>Last status is state "$StatusHost{state}"$reason
-    as of $startTime.
-EOF
+    $statusStr .= eval("qq{$Lang->{Last_status_is_state_StatusHost_state_reason_as_of_startTime}}");
+
     if ( $StatusHost{error} ne "" ) {
-        $statusStr .= <<EOF;
-<li>Last error is "${EscapeHTML($StatusHost{error})}"
-EOF
+        $statusStr .= eval("qq{$Lang->{Last_error_is____EscapeHTML_StatusHost_error}}");
     }
     my $priorStr = "Pings";
     if ( $StatusHost{deadCnt} > 0 ) {
-        $statusStr .= <<EOF;
-<li>Pings to $host have failed $StatusHost{deadCnt} consecutive times.
-EOF
-        $priorStr = "Prior to that, pings";
+        $statusStr .= eval("qq{$Lang->{Pings_to_host_have_failed_StatusHost_deadCnt__consecutive_times}}");
+        $priorStr = $Lang->{Prior_to_that__pings};
     }
     if ( $StatusHost{aliveCnt} > 0 ) {
-        $statusStr .= <<EOF;
-<li>$priorStr to $host have succeeded $StatusHost{aliveCnt}
-        consecutive times.
-EOF
+        $statusStr .= eval("qq{$Lang->{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times}}");
+
         if ( $StatusHost{aliveCnt} >= $Conf{BlackoutGoodCnt}
 		&& $Conf{BlackoutGoodCnt} >= 0 && $Conf{BlackoutHourBegin} >= 0
 		&& $Conf{BlackoutHourEnd} >= 0 ) {
@@ -1817,133 +1436,31 @@ EOF
             my($t1) = sprintf("%d:%02d", $Conf{BlackoutHourEnd},
                             60 * ($Conf{BlackoutHourEnd}
                                      - int($Conf{BlackoutHourEnd})));
-            $statusStr .= <<EOF;
-<li>Because $host has been on the network at least $Conf{BlackoutGoodCnt}
-consecutive times, it will not be backed up from $t0 to $t1 on $days.
-EOF
+            $statusStr .= eval("qq{$Lang->{Because__host_has_been_on_the_network_at_least__Conf_BlackoutGoodCnt_consecutive_times___}}");
         }
     }
     if ( $StatusHost{backoffTime} > time ) {
         my $hours = sprintf("%.1f", ($StatusHost{backoffTime} - time) / 3600);
-        $statusStr .= <<EOF;
-<li>Backups are deferred for $hours hours
-    (<a href="$MyURL?action=Stop/Dequeue%20Backup&host=$host">change this
-    number</a>).
-EOF
+        $statusStr .= eval("qq{$Lang->{Backups_are_deferred_for_hours_hours_change_this_number}}");
+
     }
     if ( @Backups ) {
         # only allow incremental if there are already some backups
         $startIncrStr = <<EOF;
-<input type="submit" value="Start Incr Backup" name="action">
+<input type="submit" value="\$Lang->{Start_Incr_Backup}" name="action">
 EOF
     }
 
-    Header("BackupPC: Host $host Backup Summary");
-    print <<EOF;
-${h1("Host $host Backup Summary")}
-<p>
-$warnStr
-<ul>
-$statusStr
-</ul>
+    $startIncrStr = eval ("qq{$startIncrStr}");
 
-${h2("User Actions")}
-<p>
-<form action="$MyURL" method="get">
-<input type="hidden" name="host" value="$host">
-$startIncrStr
-<input type="submit" value="Start Full Backup" name="action">
-<input type="submit" value="Stop/Dequeue Backup" name="action">
-</form>
-
-${h2("Backup Summary")}
-<p>
-Click on the backup number to browse and restore backup files.
-<table border>
-<tr><td align="center"> Backup# </td>
-    <td align="center"> Type </td>
-    <td align="center"> Filled </td>
-    <td align="center"> Start Date </td>
-    <td align="center"> Duration/mins </td>
-    <td align="center"> Age/days </td>
-    <td align="center"> Server Backup Path </td>
-</tr>
-$str
-</table>
-<p>
-
-$restoreStr
-
-${h2("Xfer Error Summary")}
-<p>
-<table border>
-<tr><td align="center"> Backup# </td>
-    <td align="center"> Type </td>
-    <td align="center"> View </td>
-    <td align="center"> #Xfer errs </td>
-    <td align="center"> #bad files </td>
-    <td align="center"> #bad share </td>
-    <td align="center"> #tar errs </td>
-</tr>
-$errStr
-</table>
-<p>
-
-${h2("File Size/Count Reuse Summary")}
-<p>
-Existing files are those already in the pool; new files are those added
-to the pool.
-Empty files and SMB errors aren't counted in the reuse and new counts.
-<table border>
-<tr><td colspan="2"></td>
-    <td align="center" colspan="3"> Totals </td>
-    <td align="center" colspan="2"> Existing Files </td>
-    <td align="center" colspan="2"> New Files </td>
-</tr>
-<tr>
-    <td align="center"> Backup# </td>
-    <td align="center"> Type </td>
-    <td align="center"> #Files </td>
-    <td align="center"> Size/MB </td>
-    <td align="center"> MB/sec </td>
-    <td align="center"> #Files </td>
-    <td align="center"> Size/MB </td>
-    <td align="center"> #Files </td>
-    <td align="center"> Size/MB </td>
-</tr>
-$sizeStr
-</table>
-<p>
-
-${h2("Compression Summary")}
-<p>
-Compression performance for files already in the pool and newly
-compressed files.
-<table border>
-<tr><td colspan="3"></td>
-    <td align="center" colspan="3"> Existing Files </td>
-    <td align="center" colspan="3"> New Files </td>
-</tr>
-<tr><td align="center"> Backup# </td>
-    <td align="center"> Type </td>
-    <td align="center"> Comp Level </td>
-    <td align="center"> Size/MB </td>
-    <td align="center"> Comp/MB </td>
-    <td align="center"> Comp </td>
-    <td align="center"> Size/MB </td>
-    <td align="center"> Comp/MB </td>
-    <td align="center"> Comp </td>
-</tr>
-$compStr
-</table>
-<p>
-EOF
+    Header(eval("qq{$Lang->{Host__host_Backup_Summary}}"));
+    print(eval("qq{$Lang->{Host__host_Backup_Summary2}}"));
     Trailer();
 }
 
 sub Action_GeneralInfo
 {
-    GetStatusInfo("info jobs hosts queueLen");
+    GetStatusInfo($Lang->{info_jobs_hosts_queueLen});
     my $Privileged = CheckPermission();
 
     my($jobStr, $statusStr, $tarPidHdr, $ rivLinks);
@@ -2023,59 +1540,15 @@ EOF
     } elsif ( $Info{cpoolFileCnt} > 0 ) {
         $poolInfo = $cpoolInfo;
     }
-    Header("BackupPC: Server Status");
-    print <<EOF;
 
-${h1("BackupPC Server Status")}
-<p>
+    Header($Lang->{H_BackupPC_Server_Status});
+	#Header("H_BackupPC_Server_Status");
+    print (eval ("qq{$Lang->{BackupPC_Server_Status}}"));
 
-${h2("General Server Information")}
+    #Header($Lang->{BackupPC_Server_Status});
 
-<ul>
-<li> The server's PID is $Info{pid} on host $Conf{ServerHost},
-     version $Info{Version}, started at $serverStartTime.
-<li> This status was generated at $now.
-<li> PCs will be next queued at $nextWakeupTime.
-<li> Other info:
-    <ul>
-        <li>$numBgQueue pending backup requests from last scheduled wakeup,
-        <li>$numUserQueue pending user backup requests,
-        <li>$numCmdQueue pending command requests,
-        $poolInfo
-        <li>Pool file system was recently at $Info{DUlastValue}%
-            ($DUlastTime), today's max is $Info{DUDailyMax}% ($DUmaxTime)
-            and yesterday's max was $Info{DUDailyMaxPrev}%.
-    </ul>
-</ul>
-
-${h2("Currently Running Jobs")}
-<p>
-<table border>
-<tr><td> Host </td>
-    <td> Type </td>
-    <td> User </td>
-    <td> Start Time </td>
-    <td> Command </td>
-    <td align="center"> PID </td>
-    <td> Xfer PID </td>
-    $tarPidHdr</tr>
-$jobStr
-</table>
-<p>
-
-${h2("Failures that need attention")}
-<p>
-<table border>
-<tr><td align="center"> Host </td>
-    <td align="center"> Type </td>
-    <td align="center"> User </td>
-    <td align="center"> Last Try </td>
-    <td align="center"> Details </td>
-    <td align="center"> Error Time </td>
-    <td> Last error (other than no ping) </td></tr>
-$statusStr
-</table>
-EOF
+    #my $trans_text = $Lang->{BackupPC_Server_Status};
+    #print eval ("qq{$trans_text}");
     Trailer();
 }
 
@@ -2087,7 +1560,7 @@ sub Action_RestoreInfo
     my $i;
 
     if ( !$Privileged ) {
-        ErrorExit("Only privileged users can view restore information." );
+        ErrorExit($Lang->{Only_privileged_users_can_view_restore_information});
     }
     #
     # Find the requested restore
@@ -2097,8 +1570,7 @@ sub Action_RestoreInfo
         last if ( $Restores[$i]{num} == $num );
     }
     if ( $i >= @Restores ) {
-        ErrorExit("Restore number $num for host ${EscapeHTML($host)} does"
-	        . " not exist.");
+        ErrorExit(eval("qq{$Lang->{Restore_number__num_for_host__does_not_exist}}"));
     }
 
     %RestoreReq = ();
@@ -2125,41 +1597,8 @@ sub Action_RestoreInfo
 EOF
     }
 
-    Header("BackupPC: Restore #$num details for $host");
-    print <<EOF;
-${h1("Restore #$num Details for $host")}
-<p>
-<table border>
-<tr><td> Number </td><td> $Restores[$i]{num} </td></tr>
-<tr><td> Requested by </td><td> $RestoreReq{user} </td></tr>
-<tr><td> Request time </td><td> $reqTime </td></tr>
-<tr><td> Result </td><td> $Restores[$i]{result} </td></tr>
-<tr><td> Error Message </td><td> $Restores[$i]{errorMsg} </td></tr>
-<tr><td> Source host </td><td> $RestoreReq{hostSrc} </td></tr>
-<tr><td> Source backup num </td><td> $RestoreReq{num} </td></tr>
-<tr><td> Source share </td><td> $RestoreReq{shareSrc} </td></tr>
-<tr><td> Destination host </td><td> $RestoreReq{hostDest} </td></tr>
-<tr><td> Destination share </td><td> $RestoreReq{shareDest} </td></tr>
-<tr><td> Start time </td><td> $startTime </td></tr>
-<tr><td> Duration </td><td> $duration min </td></tr>
-<tr><td> Number of files </td><td> $Restores[$i]{nFiles} </td></tr>
-<tr><td> Total size </td><td> ${MB} MB </td></tr>
-<tr><td> Transfer rate </td><td> $MBperSec MB/sec </td></tr>
-<tr><td> TarCreate errors </td><td> $Restores[$i]{tarCreateErrs} </td></tr>
-<tr><td> Xfer errors </td><td> $Restores[$i]{xferErrs} </td></tr>
-<tr><td> Xfer log file </td><td>
-<a href="$MyURL?action=view&type=RestoreLOG&num=$Restores[$i]{num}&host=$host">View</a>,
-<a href="$MyURL?action=view&type=RestoreErr&num=$Restores[$i]{num}&host=$host">Errors</a>
-</tr></tr>
-</table>
-<p>
-${h1("File/Directory list")}
-<p>
-<table border>
-<tr><td>Original file/dir</td><td>Restored to</td></tr>
-$fileListStr
-</table>
-EOF
+    Header(eval("qq{$Lang->{Restore___num_details_for__host}}"));
+    print(eval("qq{$Lang->{Restore___num_details_for__host2 }}"));
     Trailer();
 }
     
@@ -2217,7 +1656,7 @@ sub EscapeHTML
     $s =~ s/\"/&quot;/g;
     $s =~ s/>/&gt;/g;
     $s =~ s/</&lt;/g;
-    $s =~ s{([^[:print:]])}{sprintf("&#x%02X;", ord($1));}eg;
+    $s =~ s{([^[:print:]])}{sprintf("&\#x%02X", ord($1));}eg;
     return \$s;
 }
 
@@ -2240,12 +1679,18 @@ sub ErrorExit
 
     $bpc->ServerMesg("log User $User (host=$In{host}) got CGI error: $head")
                             if ( defined($bpc) );
-    Header("BackupPC: Error");
-    print <<EOF;
-${h1("Error: $head")}
+    if ( !defined($Lang->{Error}) ) {
+	Header("BackupPC: Error");
+	print <<EOF;
+${h1("Error: Language strings not defined!!")}
 <p>$mesg</p>
 EOF
-    Trailer();
+	Trailer();
+    } else {
+	Header(eval("qq{$Lang->{Error}}"));
+	print (eval("qq{$Lang->{Error____head}}"));
+	Trailer();
+    }
     exit(1);
 }
 
@@ -2257,14 +1702,7 @@ sub ServerConnect
     return if ( $bpc->ServerOK() );
     $bpc->ServerDisconnect();
     if ( my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
-        ErrorExit(
-            "Unable to connect to BackupPC server",
-            "This CGI script ($MyURL) is unable to connect to the BackupPC"
-          . " server on $Conf{ServerHost} port $Conf{ServerPort}.  The error"
-          . " was: $err.",
-            "Perhaps the BackupPC server is not running or there is a "
-          . " configuration error.  Please report this to your Sys Admin."
-        );
+        ErrorExit(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"));
     }
 }
 
@@ -2314,7 +1752,26 @@ sub CheckPermission
     }
     $PrivAdmin = $Privileged;
     $Privileged ||= $User eq $Hosts->{$host}{user};
+    $Privileged ||= defined($Hosts->{$host}{operators}{$User});
+
     return $Privileged;
+}
+
+#
+# Returns the list of hosts that should appear in the navigation bar
+# for this user.  If $Conf{CgiNavBarAdminAllHosts} is set, the admin
+# gets all the hosts.  Otherwise, regular users get hosts for which
+# they are the user or are listed in the moreUsers column in the
+# hosts file.
+#
+sub GetUserHosts
+{
+    if ( $Conf{CgiNavBarAdminAllHosts} && CheckPermission() ) {
+       return sort keys %$Hosts;
+    }
+
+    return sort grep { $Hosts->{$_}{user} eq $User ||
+                       defined($Hosts->{$_}{moreUsers}{$User}) } keys(%$Hosts);
 }
 
 #
@@ -2338,20 +1795,13 @@ sub ConfirmIPAddress
 	    GetStatusInfo("host($host)");
 	    if ( defined($StatusHost{dhcpHostIP})
 			&& $StatusHost{dhcpHostIP} ne $ipAddr ) {
-		$tryIP = " and $StatusHost{dhcpHostIP}";
+		$tryIP = eval("qq{$Lang->{tryIP}}");
 		($netBiosHost, $netBiosUser)
 			= $bpc->NetBiosInfoGet($StatusHost{dhcpHostIP});
 	    }
 	    if ( $netBiosHost ne $host ) {
-		ErrorExit("Can't find IP address for ${EscapeHTML($host)}",
-		          <<EOF);
-$host is a DHCP host, and I don't know its IP address.  I checked the
-netbios name of $ENV{REMOTE_ADDR}$tryIP, and found that that machine
-is not $host.
-<p>
-Until I see $host at a particular DHCP address, you can only
-start this request from the client machine itself.
-EOF
+		ErrorExit(eval("qq{$Lang->{Can_t_find_IP_address_for}}"),
+		          eval("qq{$Lang->{host_is_a_DHCP_host}}"));
 	    }
 	    $ipAddr = $StatusHost{dhcpHostIP};
 	}
@@ -2366,14 +1816,8 @@ sub genPoolInfo
     my $poolRmSize = sprintf("%.2f", $info->{"${name}KbRm"} / (1000 * 1024));
     my $poolTime   = timeStamp2($info->{"${name}Time"});
     $info->{"${name}FileCntRm"} = $info->{"${name}FileCntRm"} + 0;
-    return <<EOF;
-        <li>Pool is ${poolSize}GB comprising $info->{"${name}FileCnt"} files
-            and $info->{"${name}DirCnt"} directories (as of $poolTime),
-        <li>Pool hashing gives $info->{"${name}FileCntRep"} repeated
-            files with longest chain $info->{"${name}FileRepMax"},
-        <li>Nightly cleanup removed $info->{"${name}FileCntRm"} files of
-            size ${poolRmSize}GB (around $poolTime),
-EOF
+    return eval("qq{$Lang->{Pool_Stat}}");
+
 }
 
 ###########################################################################
@@ -2384,16 +1828,16 @@ sub Header
 {
     my($title) = @_;
     my @adminLinks = (
-        { link => "",                          name => "Status",
+        { link => "",                          name => $Lang->{Status},
                                                priv => 1},
-        { link => "?action=summary",           name => "PC Summary" },
-        { link => "?action=view&type=LOG",     name => "LOG file" },
-        { link => "?action=LOGlist",           name => "Old LOGs" },
-        { link => "?action=emailSummary",      name => "Email summary" },
-        { link => "?action=view&type=config",  name => "Config file" },
-        { link => "?action=view&type=hosts",   name => "Hosts file" },
-        { link => "?action=queue",             name => "Current queues" },
-        { link => "?action=view&type=docs",    name => "Documentation",
+        { link => "?action=summary",           name => $Lang->{PC_Summary} },
+        { link => "?action=view&type=LOG",     name => $Lang->{LOG_file} },
+        { link => "?action=LOGlist",           name => $Lang->{Old_LOGs} },
+        { link => "?action=emailSummary",      name => $Lang->{Email_summary} },
+        { link => "?action=view&type=config",  name => $Lang->{Config_file} },
+        { link => "?action=view&type=hosts",   name => $Lang->{Hosts_file} },
+        { link => "?action=queue",             name => $Lang->{Current_queues} },
+        { link => "?action=view&type=docs",    name => $Lang->{Documentation},
                                                priv => 1},
         { link => "http://backuppc.sourceforge.net", name => "SourceForge",
                                                      priv => 1},
@@ -2412,44 +1856,43 @@ EOF
     print "&nbsp;\n";
     if ( defined($In{host}) && defined($Hosts->{$In{host}}) ) {
         my $host = $In{host};
-        NavSectionTitle("Host $In{host}");
+        NavSectionTitle( eval("qq{$Lang->{Host_Inhost}}") );
         NavSectionStart();
-        NavLink("?host=$host", "Home");
-        NavLink("?action=view&type=LOG&host=$host", "LOG file");
-        NavLink("?action=LOGlist&host=$host", "Old LOGs");
+        NavLink("?host=$host", $Lang->{Home});
+        NavLink("?action=view&type=LOG&host=$host", $Lang->{LOG_file});
+        NavLink("?action=LOGlist&host=$host", $Lang->{Old_LOGs});
         if ( -f "$TopDir/pc/$host/SmbLOG.bad"
                     || -f "$TopDir/pc/$host/SmbLOG.bad.z"
                     || -f "$TopDir/pc/$host/XferLOG.bad"
                     || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
             NavLink("?action=view&type=XferLOGbad&host=$host",
-                                "Last bad XferLOG");
+                                $Lang->{Last_bad_XferLOG});
             NavLink("?action=view&type=XferErrbad&host=$host",
-                                "Last bad XferLOG (errors&nbsp;only)");
+                                $Lang->{Last_bad_XferLOG_errors_only});
         }
         if ( -f "$TopDir/pc/$host/config.pl" ) {
-            NavLink("?action=view&type=config&host=$host", "Config file");
+            NavLink("?action=view&type=config&host=$host", $Lang->{Config_file});
         }
         NavSectionEnd();
     }
-    NavSectionTitle("Hosts");
-    if ( %$Hosts > 0 ) {
-        NavSectionStart();
-        foreach my $host ( sort(keys(%$Hosts)) ) {
-            next if ( $Hosts->{$host}{user} ne $User );
+    NavSectionTitle($Lang->{Hosts});
+    if ( defined($Hosts) && %$Hosts > 0 ) {
+        NavSectionStart(0);
+        foreach my $host ( GetUserHosts() ) {
             NavLink("?host=$host", $host);
         }
         NavSectionEnd();
     }
     print <<EOF;
 <table cellpadding="2" cellspacing="0" border="0" width="100%">
-    <tr><td><small>Host or User name:</small></td>
+    <tr><td>$Lang->{Host_or_User_name}</td>
     <tr><td><form action="$MyURL" method="get"><small>
     <input type="text" name="host" size="10" maxlength="64">
-    <input type="hidden" name="action" value="hostInfo"><input type="submit" value="Go" name="ignore">
+    <input type="hidden" name="action" value="$Lang->{hostInfo}"><input type="submit" value="$Lang->{Go}" name="ignore">
     </small></form></td></tr>
 </table>
 EOF
-    NavSectionTitle("Server");
+    NavSectionTitle($Lang->{NavSectionTitle_});
     NavSectionStart();
     foreach my $l ( @adminLinks ) {
         if ( $PrivAdmin || $l->{priv} ) {
@@ -2471,6 +1914,50 @@ sub Trailer
 </td></table>
 </body></html>
 EOF
+}
+
+
+sub NavSectionTitle
+{
+    my($head) = @_;
+    print <<EOF;
+<table cellpadding="2" cellspacing="0" border="0" width="100%">
+<tr><td bgcolor="$Conf{CgiHeaderBgColor}"><font face="$Conf{CgiHeaderFontType}"
+size="$Conf{CgiHeaderFontSize}"><b>$head</b>
+</font></td></tr>
+</table>
+EOF
+}
+
+sub NavSectionStart
+{
+    my($padding) = @_;
+
+    $padding = 2 if ( !defined($padding) );
+    print <<EOF;
+<table cellpadding="$padding" cellspacing="0" border="0" width="100%">
+EOF
+}
+
+sub NavSectionEnd
+{
+    print "</table>\n";
+}
+
+sub NavLink
+{
+    my($link, $text) = @_;
+    print "<tr><td width=\"2%\" valign=\"top\"><b>&middot;</b></td>";
+    if ( defined($link) ) {
+        $link = "$MyURL$link" if ( $link eq "" || $link =~ /^\?/ );
+        print <<EOF;
+<td width="98%"><a href="$link"><small>$text</small></a></td></tr>
+EOF
+    } else {
+        print <<EOF;
+<td width="98%"><small>$text</small></td></tr>
+EOF
+    }
 }
 
 sub h1
@@ -2497,44 +1984,4 @@ sub h2
 </td></tr>
 </table>
 EOF
-}
-
-sub NavSectionTitle
-{
-    my($head) = @_;
-    print <<EOF;
-<table cellpadding="2" cellspacing="0" border="0" width="100%">
-<tr><td bgcolor="$Conf{CgiHeaderBgColor}"><font face="$Conf{CgiHeaderFontType}"
-size="$Conf{CgiHeaderFontSize}"><b>$head</b>
-</font></td></tr>
-</table>
-EOF
-}
-
-sub NavSectionStart
-{
-    print <<EOF;
-<table cellpadding="2" cellspacing="0" border="0" width="100%">
-EOF
-}
-
-sub NavSectionEnd
-{
-    print "</table>\n";
-}
-
-sub NavLink
-{
-    my($link, $text) = @_;
-    print "<tr><td width=\"2%\" valign=\"top\"><b>&middot;</b></td>";
-    if ( defined($link) ) {
-        $link = "$MyURL$link" if ( $link eq "" || $link =~ /^\?/ );
-        print <<EOF;
-<td width="98%"><a href="$link"><small>$text</small></a></td></tr>
-EOF
-    } else {
-        print <<EOF;
-<td width="98%"><small>$text</small></td></tr>
-EOF
-    }
 }

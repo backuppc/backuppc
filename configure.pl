@@ -33,7 +33,7 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version __VERSION__, released __RELEASEDATE__.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -409,7 +409,9 @@ unlink("$Conf{InstallDir}/bin/BackupPC_queueAll");
 printf("Installing library in $Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(BackupPC/Lib.pm BackupPC/FileZIO.pm BackupPC/Attrib.pm
         BackupPC/PoolWrite.pm BackupPC/Xfer/Tar.pm BackupPC/Xfer/Smb.pm
-	BackupPC/Zip/FileMember.pm) ) {
+	BackupPC/Zip/FileMember.pm
+	BackupPC/Lang/en.pm BackupPC/Lang/fr.pm
+    ) ) {
     InstallFile("lib/$lib", "$Conf{InstallDir}/lib/$lib", 0444);
 }
 

@@ -11,11 +11,28 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version __VERSION__, released __RELEASEDATE__.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
+
+#------------------------------------------------------------------------
+# Version __VERSION__, __RELEASEDATE__
+#------------------------------------------------------------------------
+
+* Added internationalization (i18n) code from Xavier Nicollet.
+  Voila!  BackupPC_Admin now supports English and French, and
+  adding more languages is now easy.
+
+* Added patch from Toby Johnson that allows additional users to be
+  specified in the hosts file; these users can also view/start/stop
+  and restore backups for that host.  Also added a new config
+  setting $Conf{CgiNavBarAdminAllHosts} that allows all hosts to
+  be listed in the left nav bar for admins.
+
+* Added "PerlTaintCheck On" to the mod_perl section in the docs,
+  suggested by Tim Demarest.
 
 #------------------------------------------------------------------------
 # Version 1.5.0, 2 Aug 2002

@@ -39,7 +39,7 @@ package BackupPC::Lib;
 
 use strict;
 
-use vars qw(%Conf);
+use vars qw(%Conf %Lang);
 use Fcntl qw/:flock/;
 use Carp;
 use DirHandle ();
@@ -54,8 +54,9 @@ sub new
     my $class = shift;
     my($topDir) = @_;
     my $self = bless {
-        TopDir  => $topDir || '__TOPDIR__',
-        BinDir  => '__INSTALLDIR__/bin',
+        TopDir  => $topDir || '/data/BackupPC',
+        BinDir  => '/usr/local/BackupPC/bin',
+        LibDir  => '/usr/local/BackupPC/lib',
         Version => '1.5.0',
         BackupFields => [qw(
                     num type startTime endTime
@@ -104,6 +105,12 @@ sub Conf
 {
     my($self) = @_;
     return %{$self->{Conf}};
+}
+
+sub Lang
+{
+    my($self) = @_;
+    return $self->{Lang};
 }
 
 sub adminJob
@@ -248,6 +255,14 @@ sub ConfigRead
         }
         %{$self->{Conf}} = ( %{$self->{Conf} || {}}, %Conf );
     }
+    my $langFile = "$self->{LibDir}/BackupPC/Lang/$self->{Conf}{Language}.pm";
+    if ( !defined($ret = do $langFile) && ($! || $@) ) {
+	$mesg = "Couldn't open language file $langFile: $!" if ( $! );
+	$mesg = "Couldn't execute language file $langFile: $@" if ( $@ );
+	$mesg =~ s/[\n\r]+//;
+	return $mesg;
+    }
+    $self->{Lang} = \%Lang;
     return;
 }
 
@@ -276,17 +291,19 @@ sub HostInfoRead
     if ( !open(HOST_INFO, "$self->{TopDir}/conf/hosts") ) {
         print(STDERR $self->timeStamp,
                      "Can't open $self->{TopDir}/conf/hosts\n");
-        return;
+        return {};
     }
     while ( <HOST_INFO> ) {
         s/[\n\r]+//;
         s/#.*//;
+        s/\s+$//;
         next if ( /^\s*$/ || !/^([\w\.-]+\s+.*)/ );
         @fld = split(/\s+/, $1);
         if ( @hdr ) {
             if ( defined($host) ) {
                 next if ( lc($fld[0]) ne $host );
                 @{$hosts{lc($fld[0])}}{@hdr} = @fld;
+		close(HOST_INFO);
                 return \%hosts;
             } else {
                 @{$hosts{lc($fld[0])}}{@hdr} = @fld;

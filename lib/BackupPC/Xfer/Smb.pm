@@ -78,7 +78,7 @@ sub start
     my($t) = @_;
     my $bpc = $t->{bpc};
     my $conf = $t->{conf};
-    my $I_option = $t->{hostIP} eq $t->{host} ? "" : " -I $t->{hostIP}";
+    my $I_option = $t->{hostIP} eq $t->{host} ? [] : ['-I', $t->{hostIP}];
     my(@fileList, $X_option, $smbClientCmd, $logMsg);
     my($timeStampFile);
     local(*SMB);

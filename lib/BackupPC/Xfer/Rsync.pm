@@ -119,7 +119,7 @@ sub start
     #
     # We add a slash to the share name we pass to rsync
     #
-    ($t->{shareNameSlash} = "$t->{shareName}/") =~ s{//+$}{};
+    ($t->{shareNameSlash} = "$t->{shareName}/") =~ s{//+$}{/};
 
     if ( $t->{type} eq "restore" ) {
         $rsyncClientCmd = $conf->{RsyncClientRestoreCmd};

@@ -314,7 +314,7 @@ sub HostInfoRead
         s/[\n\r]+//;
         s/#.*//;
         s/\s+$//;
-        next if ( /^\s*$/ || !/^([\w\.-\\]+\s+.*)/ );
+        next if ( /^\s*$/ || !/^([\w\.\\-]+\s+.*)/ );
         #
         # Split on white space, except if preceded by \
         # using zero-width negative look-behind assertion
@@ -985,6 +985,8 @@ sub cmdSystemOrEval
             close(STDERR);
 	    open(STDERR, ">&STDOUT");
 	    exec(@$cmd);
+            print("Exec of @$cmd failed\n");
+            exit(1);
 	}
 	#
 	# The parent gathers the output from the child

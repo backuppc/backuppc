@@ -910,5 +910,102 @@ $Lang{Reason_backup_failed} = "la sauvegarde a échouée";
 $Lang{Reason_no_ping} = "pas de ping";
 $Lang{Reason_backup_canceled_by_user} = "sauvegarde annulée par l'utilisateur";
 
+# ---------
+# Email messages
+
+# No backup ever
+$Lang{EMailNoBackupEverSubj} = "BackupPC: aucune sauvegarde de \$host n'a réussi";
+$Lang{EMailNoBackupEverMesg} = <<'EOF';
+To: $user$domain
+cc:
+Subject: $subj
+
+$userName,
+
+Notre logiciel de copies de sécurité n'a jamais réussi à
+prendre de sauvegarde de votre ordinateur ($host). Les sauvegardes
+devraient normallement survenir lorsque votre ordinateur est connecté
+au réseau. Vous devriez contacter le support informatique si:
+
+  - Votre ordinateur est régulièrement connecté au réseau, ce qui
+    signifie qu'il y aurait un problème de configuration
+    empêchant les sauvegardes de s'effectuer.
+
+  - Vous ne voulez pas qu'il y ait de copies de sécurité de
+    votre ordinateur ni ne voulez recevoir d'autres messages
+    comme celui-ci.
+
+Autrement, veuillez vous assurer que votre ordinateur est connecté
+au réseau lorsque ce sera possible.
+
+Merci de votre attention,
+BackupPC Genie
+http://backuppc.sourceforge.net
+EOF
+
+# No recent backup
+$Lang{EMailNoBackupRecentSubj} = "BackupPC: auncune sauvegarde récente de \$host";
+$Lang{EMailNoBackupRecentMesg} = <<'EOF';
+To: $user$domain
+cc:
+Subject: $subj
+
+$userName,
+
+Aucune sauvegarde de votre ordinateur n'a été effectuée depuis $days
+jours. $numBackups sauvegardes ont étés effectuées du $firstTime
+jusqu'il y à $days jours. Les sauvegardes devraient normallement
+survenir lorsque votre ordinateur est connecté au réseau.
+
+Si votre ordinateur a été connecté au réseau plus de quelques heures
+durant les derniers $days jours, vous devriez contacter votre support
+informatique pour savoir pourquoi les sauvegardes ne s'effectuent pas.
+
+Autrement, si vous êtes en dehors du bureau, il n'y a pas d'autres
+choses que vous pouvez faire, à part faire des copies de vos fichiers
+importants sur d'autres media. Vous devez réaliser que tout fichier crée
+ou modifié durant les $days derniers jours (incluant les courriels et
+les fichiers attachés) ne pourra être restauré si une problème survient
+avec votre ordinateur.
+
+Merci de votre attention,
+BackupPC Genie
+http://backuppc.sourceforge.net
+EOF
+
+# Old Outlook files
+$Lang{EMailOutlookBackupSubj} = "BackupPC: Les fichiers de Outlook sur \$host doivent êtes sauvegardés";
+$Lang{EMailOutlookBackupMesg} = <<'EOF';
+To: $user$domain
+cc:
+Subject: $subj
+
+$userName,
+
+Les fichiers Outlook sur votre ordinateur n'ont $howLong. Ces fichiers
+contiennent tous vos courriels, fichiers attachés, carnets d'adresses et
+calendriers. $numBackups sauvegardes ont étés effectuées du $firstTime
+au $lastTime.  Par contre, Outlook bloque ses fichiers lorsqu'il est
+ouvert, ce qui empêche de les sauvegarder.
+
+Il est recommendé d'effectuer une sauvegarde de vos fichiers Outlook
+quand vous serez connecté au réseau en quittant Outlook et tout autre
+application, et en visitant ce lien avec votre fureteur web:
+
+    $CgiURL?host=$host               
+
+Choisissez "Démarrer la sauvegarde incrémentale" deux fois afin
+d'effectuer une nouvelle sauvegarde. Vous pouvez ensuite choisir
+"Retourner à la page de $host" et appuyer sur "Recharger" dans votre
+fureteur avec de vérifier le bon fonctionnement de la sauvegarde. La
+sauvegarde devrait prendre quelques minutes à s'effectuer.
+
+Merci de votre attention,
+BackupPC Genie
+http://backuppc.sourceforge.net
+EOF
+
+$Lang{howLong_not_been_backed_up} = "jamais étés sauvegardés";
+$Lang{howLong_not_been_backed_up_for_days_days} = "pas été sauvegardés depuis \$days jours";
 
 #end of lang_fr.pm

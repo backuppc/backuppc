@@ -31,25 +31,27 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 use strict;
-use lib "/usr/local/BackupPC/lib";
+use lib "__INSTALLDIR__/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 
 use Data::Dumper;
 use Getopt::Std;
 use DirHandle ();
+use vars qw($Lang $TopDir $BinDir %Conf);
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
-my $TopDir = $bpc->TopDir();
-my $BinDir = $bpc->BinDir();
-my %Conf   = $bpc->Conf();
+$TopDir = $bpc->TopDir();
+$BinDir = $bpc->BinDir();
+%Conf   = $bpc->Conf();
+$Lang   = $bpc->Lang();
 
 $bpc->ChildInit();
 
@@ -170,8 +172,13 @@ foreach my $host ( sort(keys(%Status)) ) {
     my @Backups = $bpc->BackupInfoRead($host);
     my $numBackups = @Backups;
     if ( $numBackups == 0 ) {
-        my $subj = "BackupPC: no backups of $host have succeeded";
-        sendUserEmail($user, $host, $Conf{EMailNoBackupEverMesg}, $subj, {
+        my $subj = defined($Conf{EMailNoBackupEverSubj})
+			? $Conf{EMailNoBackupEverSubj}
+			: $Lang->{EMailNoBackupEverSubj};
+        my $mesg = defined($Conf{EMailNoBackupEverMesg})
+		        ? $Conf{EMailNoBackupEverMesg}
+			: $Lang->{EMailNoBackupEverMesg};
+        sendUserEmail($user, $host, $mesg, $subj, {
                             userName => user2name($user)
                         }) if ( !defined($Jobs{$host}) );
         next;
@@ -222,11 +229,16 @@ foreach my $host ( sort(keys(%Status)) ) {
         }
     }
     if ( time - $last > $Conf{EMailNotifyOldBackupDays} * 24*3600 ) {
-        my $subj = "BackupPC: no recent backups on $host";
+        my $subj = defined($Conf{EMailNoBackupRecentSubj})
+			? $Conf{EMailNoBackupRecentSubj}
+			: $Lang->{EMailNoBackupRecentSubj};
+        my $mesg = defined($Conf{EMailNoBackupRecentMesg})
+			? $Conf{EMailNoBackupRecentMesg}
+			: $Lang->{EMailNoBackupRecentMesg};
         my $firstTime = sprintf("%.1f",
                         (time - $Backups[0]{startTime}) / (24*3600));
         my $days = sprintf("%.1f", (time - $last) / (24 * 3600));
-        sendUserEmail($user, $host, $Conf{EMailNoBackupRecentMesg}, $subj, {
+        sendUserEmail($user, $host, $mesg, $subj, {
                             firstTime  => $firstTime,
                             days       => $days,
                             userName   => user2name($user),
@@ -239,22 +251,29 @@ foreach my $host ( sort(keys(%Status)) ) {
                                              * 24 * 3600 ) {
         my($days, $howLong);
         if ( $lastGoodOutlook == 0 ) {
-            $howLong = "not been backed up successfully";
+            $howLong = eval("qq{$Lang->{howLong_not_been_backed_up}}");
         } else {
             $days = sprintf("%.1f", (time - $lastGoodOutlook) / (24*3600));
-            $howLong = "not been backed up for $days days";
+            $howLong = eval("qq{$Lang->{howLong_not_been_backed_up_for_days_days}}");
         }
-        my $subj = "BackupPC: Outlook files on $host need to be backed up";
+        my $subj = defined($Conf{EMailOutlookBackupSubj})
+			? $Conf{EMailOutlookBackupSubj}
+			: $Lang->{EMailOutlookBackupSubj};
+        my $mesg = defined($Conf{EMailOutlookBackupMesg})
+			? $Conf{EMailOutlookBackupMesg}
+			: $Lang->{EMailOutlookBackupMesg};
         my $firstTime = sprintf("%.1f",
                         (time - $Backups[0]{startTime}) / (24*3600));
         my $lastTime = sprintf("%.1f",
                         (time - $Backups[$#Backups]{startTime}) / (24*3600));
-        sendUserEmail($user, $host, $Conf{EMailOutlookBackupMesg}, $subj, {
+        sendUserEmail($user, $host, $mesg, $subj, {
+                            days       => $days,
                             firstTime  => $firstTime,
                             lastTime   => $lastTime,
                             numBackups => $numBackups,
                             userName   => user2name($user),
                             howLong    => $howLong,
+                            serverHost => $Conf{ServerHost},
                         }) if ( !defined($Jobs{$host}) );
     }
 }
@@ -281,10 +300,13 @@ sub user2name
 sub sendUserEmail
 {
     my($user, $host, $mesg, $subj, $vars) = @_;
-    $vars->{user} = $user;
-    $vars->{host} = $host;
-    $vars->{subj} = $subj;
-    $mesg =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : \$$1/eg;
+    $vars->{user}   = $user;
+    $vars->{host}   = $host;
+    $vars->{domain} = $Conf{EMailUserDestDomain};
+    $vars->{CgiURL} = $Conf{CgiURL};
+    $subj =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
+    $vars->{subj}   = $subj;
+    $mesg =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
     if ( $opts{t} ) {
         print("#" x 75, "\n");
         print $mesg;

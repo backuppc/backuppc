@@ -962,38 +962,36 @@ $Conf{EMailFromUserName} = '';
 $Conf{EMailAdminUserName} = '';
 
 #
-# This message is sent to a user if their PC has never been backed up.
-# If your mailer needs a fully-qualified To name, then change "$user"
-# to "$user@mydomain.com" in the template, eg:
+# Destination domain name for email sent to users.  By default
+# this is empty, meaning email is sent to plain, unqualified
+# addresses.  Otherwise, set it to the destintation domain, eg:
 #
-#	To: $user@mydomain.com
+#    $Cong{EMailUserDestDomain} = '@mydomain.com';
 #
-$Conf{EMailNoBackupEverMesg} = <<'EOF';
-To: $user
-cc:
-Subject: $subj
+# With this setting user email will be set to 'user@mydomain.com'.
+#
+$Conf{EMailUserDestDomain} = '';
 
-Dear $userName,
-
-Your PC ($host) has never been successfully backed up by our
-PC backup software.  PC backups should occur automatically
-when your PC is connected to the network.  You should contact
-computer support if:
-
-  - Your PC has been regularly connected to the network, meaning
-    there is some configuration or setup problem preventing
-    backups from occurring.
-
-  - You don't want your PC backed up and you want these email
-    messages to stop.
-
-Otherwise, please make sure your PC is connected to the network
-next time you are in the office.
-
-Regards,
-BackupPC Genie
-http://backuppc.sourceforge.net
-EOF
+#
+# This subject and message is sent to a user if their PC has never been
+# backed up.
+#
+# These values are language-dependent.  The default versions can be
+# found in the language file (eg: lib/BackupPC/Lang/en.pm).  If you
+# need to change the message, copy it here and edit it, eg:
+#
+#   $Conf{EMailNoBackupEverMesg} = <<'EOF';
+#   To: $user$domain
+#   cc:
+#   Subject: $subj
+#   
+#   Dear $userName,
+#   
+#   This is a site-specific email message.
+#   EOF
+#
+$Conf{EMailNoBackupEverSubj} = undef;
+$Conf{EMailNoBackupEverMesg} = undef;
 
 #
 # How old the most recent backup has to be before notifying user.
@@ -1003,40 +1001,25 @@ EOF
 $Conf{EMailNotifyOldBackupDays} = 7.0;
 
 #
-# This message is sent to a user if their PC has not recently been
-# backed up (ie: more than $Conf{EMailNotifyOldBackupDays} days ago).
+# This subject and message is sent to a user if their PC has not recently
+# been backed up (ie: more than $Conf{EMailNotifyOldBackupDays} days ago).
 #
-# If your mailer needs a fully-qualified To name, then change "$user"
-# to "$user@mydomain.com" in the template, eg:
+# These values are language-dependent.  The default versions can be
+# found in the language file (eg: lib/BackupPC/Lang/en.pm).  If you
+# need to change the message, copy it here and edit it, eg:
 #
-#	To: $user@mydomain.com
+#   $Conf{EMailNoBackupRecentMesg} = <<'EOF';
+#   To: $user$domain
+#   cc:
+#   Subject: $subj
+#   
+#   Dear $userName,
+#   
+#   This is a site-specific email message.
+#   EOF
 #
-$Conf{EMailNoBackupRecentMesg} = <<'EOF';
-To: $user
-cc:
-Subject: $subj
-
-Dear $userName,
-
-Your PC ($host) has not been successfully backed up for $days days.
-Your PC has been correctly backed up $numBackups times from $firstTime to $days days
-ago.  PC backups should occur automatically when your PC is connected
-to the network.
-
-If your PC has been connected for more than a few hours to the
-network during the last $days days you should contact IS to find
-out why backups are not working.
-
-Otherwise, if you are out of the office, there's not much you can
-do, other than manually copying especially critical files to other
-media.  You should be aware that any files you have created or
-changed in the last $days days (including all new email and
-attachments) cannot be restored if your PC disk crashes.
-
-Regards,
-BackupPC Genie
-http://backuppc.sourceforge.net
-EOF
+$Conf{EMailNoBackupRecentSubj} = undef;
+$Conf{EMailNoBackupRecentMesg} = undef;
 
 #
 # How old the most recent backup of Outlook files has to be before
@@ -1045,43 +1028,26 @@ EOF
 $Conf{EMailNotifyOldOutlookDays} = 5.0;
 
 #
-# This message is sent to a user if their Outlook files have not
-# recently been backed up (ie: more than $Conf{EMailNotifyOldOutlookDays}
+# This subject and message is sent to a user if their Outlook files have
+# not recently been backed up (ie: more than $Conf{EMailNotifyOldOutlookDays}
 # days ago).
 #
-# If your mailer needs a fully-qualified To name, then change "$user"
-# to "$user@mydomain.com" in the template, eg:
+# These values are language-dependent.  The default versions can be
+# found in the language file (eg: lib/BackupPC/Lang/en.pm).  If you
+# need to change the message, copy it here and edit it, eg:
 #
-#	To: $user@mydomain.com
+#   $Conf{EMailOutlookBackupMesg} = <<'EOF';
+#   To: $user$domain
+#   cc:
+#   Subject: $subj
+#   
+#   Dear $userName,
+#   
+#   This is a site-specific email message.
+#   EOF
 #
-$Conf{EMailOutlookBackupMesg} = <<'EOF';
-To: $user
-cc:
-Subject: $subj
-
-Dear $userName,
-
-The Outlook files on your PC have $howLong.
-These files contain all your email, attachments, contact and calendar
-information.  Your PC has been correctly backed up $numBackups times from
-$firstTime to $lastTime days ago.  However, Outlook locks all its files when
-it is running, preventing these files from being backed up.
-
-It is recommended you backup the Outlook files when you are connected
-to the network by exiting Outlook and all other applications, and,
-using just your browser, go to this link:
-
-    http://myHost/cgi-bin/BackupPC_Admin?host=$host
-
-Select "Start Incr Backup" twice to start a new incremental backup.
-You can select "Return to $host page" and then hit "reload" to check
-the status of the backup.  It should take just a few minutes to
-complete.
-
-Regards,
-BackupPC Genie
-http://backuppc.sourceforge.net
-EOF
+$Conf{EMailOutlookBackupSubj} = undef;
+$Conf{EMailOutlookBackupMesg} = undef;
 
 ###########################################################################
 # CGI user interface configuration settings
@@ -1115,6 +1081,11 @@ EOF
 #
 $Conf{CgiAdminUserGroup} = '';
 $Conf{CgiAdminUsers}     = '';
+
+#
+# URL of the BackupPC_Admin CGI script.  Used for email messages.
+#
+$Conf{CgiURL} = undef;
 
 #   
 # Language to use.  See lib/BackupPC/Lang for the list of supported

@@ -902,4 +902,99 @@ $Lang{Reason_backup_failed} = "backup failed";
 $Lang{Reason_no_ping} = "no ping";
 $Lang{Reason_backup_canceled_by_user} = "backup canceled by user";
 
+# ---------
+# Email messages
+
+# No backup ever
+$Lang{EMailNoBackupEverSubj} = "BackupPC: no backups of \$host have succeeded";
+$Lang{EMailNoBackupEverMesg} = <<'EOF';
+To: $user$domain
+cc:
+Subject: $subj
+
+Dear $userName,
+
+Your PC ($host) has never been successfully backed up by our
+PC backup software.  PC backups should occur automatically
+when your PC is connected to the network.  You should contact
+computer support if:
+
+  - Your PC has been regularly connected to the network, meaning
+    there is some configuration or setup problem preventing
+    backups from occurring.
+
+  - You don't want your PC backed up and you want these email
+    messages to stop.
+
+Otherwise, please make sure your PC is connected to the network
+next time you are in the office.
+
+Regards,
+BackupPC Genie
+http://backuppc.sourceforge.net
+EOF
+
+# No recent backup
+$Lang{EMailNoBackupRecentSubj} = "BackupPC: no recent backups on \$host";
+$Lang{EMailNoBackupRecentMesg} = <<'EOF';
+To: $user$domain
+cc:
+Subject: $subj
+
+Dear $userName,
+
+Your PC ($host) has not been successfully backed up for $days days.
+Your PC has been correctly backed up $numBackups times from $firstTime to $days
+ago.  PC backups should occur automatically when your PC is connected
+to the network.
+
+If your PC has been connected for more than a few hours to the
+network during the last $days days you should contact IS to find
+out why backups are not working.
+
+Otherwise, if you are out of the office, there's not much you can
+do, other than manually copying especially critical files to other
+media.  You should be aware that any files you have created or
+changed in the last $days days (including all new email and
+attachments) cannot be restored if your PC disk crashes.
+
+Regards,
+BackupPC Genie
+http://backuppc.sourceforge.net
+EOF
+
+# Old Outlook files
+$Lang{EMailOutlookBackupSubj} = "BackupPC: Outlook files on \$host need to be backed up";
+$Lang{EMailOutlookBackupMesg} = <<'EOF';
+To: $user$domain
+cc:
+Subject: $subj
+
+Dear $userName,
+
+The Outlook files on your PC have $howLong.
+These files contain all your email, attachments, contact and calendar           
+information.  Your PC has been correctly backed up $numBackups times from
+$firstTime to $lastTime days ago.  However, Outlook locks all its files when
+it is running, preventing these files from being backed up.
+
+It is recommended you backup the Outlook files when you are connected
+to the network by exiting Outlook and all other applications, and,
+using just your browser, go to this link:
+
+    $CgiURL?host=$host               
+
+Select "Start Incr Backup" twice to start a new incremental backup.
+You can select "Return to $host page" and then hit "reload" to check
+the status of the backup.  It should take just a few minutes to
+complete.
+
+Regards,
+BackupPC Genie
+http://backuppc.sourceforge.net
+EOF
+
+$Lang{howLong_not_been_backed_up} = "not been backed up successfully";
+$Lang{howLong_not_been_backed_up_for_days_days} = "not been backed up for \$days days";
+
 #end of lang_en.pm

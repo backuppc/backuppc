@@ -599,6 +599,20 @@ will need to do:
 Enjoy!
 EOF
 
+if ( $ENV{LANG} =~ /utf/i && $^V ge v5.8.0 ) {
+    print <<EOF;
+
+WARNING: Your LANG environment variable is set to $ENV{LANG}, which
+doesn't behave well with this version of perl.  Please set the
+LANG environment variable to en_US before running BackupPC.
+
+On RH-8 this setting is in the file /etc/sysconfig/i18n, or you
+could set it in BackupPC's init.d script.
+EOF
+}
+
+exit(0);
+
 ###########################################################################
 # Subroutines
 ###########################################################################

@@ -263,7 +263,7 @@ $Conf{SmbShareName} = 'C$';
 $Conf{SmbShareUserName} = '';
 
 #
-# Smbclient share password.  This is passed to smbclient via the PASSWD
+# Smbclient share password.  This is passed to smbclient via its PASSWD
 # environment variable.  There are several ways you can tell BackupPC
 # the smb share password.  In each case you should be very careful about
 # security.  If you put the password here, make sure that this file is
@@ -314,6 +314,22 @@ $Conf{TarShareName} = '/';
 # Typically this is set slightly less than an integer number of days. The
 # time taken for the backup, plus the granularity of $Conf{WakeupSchedule}
 # will make the actual backup interval a bit longer.
+#
+# There are two special values for $Conf{FullPeriod}:
+#
+#   -1   Don't do any regular backups on this machine.  Manually
+#        requested backups (via the CGI interface) will still occur.
+#
+#   -2   Don't do any backups on this machine.  Manually requested
+#        backups (via the CGI interface) will be ignored.
+#
+# These special settings are useful for a client that is no longer
+# being backed up (eg: a retired machine), but you wish to keep the
+# last backups available for browsing or restoring to other machines.
+#
+# Also, you might create a virtual client (by setting $Conf{ClientNameAlias})
+# for restoring to a DVD or permanent media and you would set
+# $Conf{FullPeriod} to -2 so that it is never backed up.
 #
 $Conf{FullPeriod} = 6.97;
 
@@ -469,7 +485,7 @@ $Conf{BackupFilesOnly} = undef;
 #    $Conf{BackupFilesExclude} = {
 #       'c' => ['/temp', '/winnt/tmp'],         # these are for 'c' share
 #       'd' => ['/junk', '/dont_back_this_up'], # these are for 'd' share
-#    }
+#    };
 #
 $Conf{BackupFilesExclude} = undef;
 
@@ -704,7 +720,7 @@ $Conf{RsyncClientPath} = '/bin/rsync';
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
-$Conf{RsyncClientCmd} = '$sshPath -l root $host $rsyncPath $argList';
+$Conf{RsyncClientCmd} = '$sshPath -l root $host $rsyncPath $argList+';
 
 #
 # Full command to run rsync for restore on the client.  The following
@@ -721,7 +737,7 @@ $Conf{RsyncClientCmd} = '$sshPath -l root $host $rsyncPath $argList';
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
-$Conf{RsyncClientRestoreCmd} = '$sshPath -l root $host $rsyncPath $argList';
+$Conf{RsyncClientRestoreCmd} = '$sshPath -l root $host $rsyncPath $argList+';
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should
@@ -864,7 +880,7 @@ $Conf{NmbLookupCmd} = '$nmbLookupPath -A $host';
 
 #
 # NmbLookup command.  Given a netbios name, finds that host by doing
-# a NetBios multicast.  Several variables are substituted at run-time:
+# a NetBios lookup.  Several variables are substituted at run-time:
 #
 #   $nmbLookupPath      path to nmblookup ($Conf{NmbLookupPath})
 #   $host               NetBios name
@@ -875,6 +891,17 @@ $Conf{NmbLookupCmd} = '$nmbLookupPath -A $host';
 # address) using the -B option:
 #
 #    $Conf{NmbLookupFindHostCmd} = '$nmbLookupPath -B 192.168.1.255 $host';
+#
+# If you use a WINS server and your machines don't respond to
+# multicast NetBios requests you can use this (replace 1.2.3.4
+# with the IP address of your WINS server):
+#
+#    $Conf{NmbLookupFindHostCmd} = '$nmbLookupPath -R -U 1.2.3.4 $host';
+#
+# This is preferred over multicast since it minimizes network traffic.
+#
+# Experiment manually for your site to see what form of nmblookup command
+# works.
 #
 $Conf{NmbLookupFindHostCmd} = '$nmbLookupPath $host';
 
@@ -1256,8 +1283,8 @@ $Conf{CgiStatusHilightColor} = {
     Reason_backup_failed           => '#ffcccc',
     Reason_backup_done             => '#ccffcc',
     Reason_no_ping                 => '#ffff99',
-    Reason_backup_in_progress      => '#66cc99',
     Reason_backup_canceled_by_user => '#ff9900',
+    Status_backup_in_progress      => '#66cc99',
 };
 
 #

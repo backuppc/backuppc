@@ -724,13 +724,6 @@ $Lang{Backup_requested_on_DHCP__host} = "Copia de seguridad solicitada en DHCP \
 
 $Lang{Backup_requested_on__host_by__User} = "Copia de seguridad solicitada en \$host por \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Copia de seguridad detenida/desprogramada en \$host por \$User";
-$Lang{log_User__User_downloaded_tar_archive_for__host} = "El usuario del registro \$User ha descargado un archivo Tar para \$host,"
-                           . " copia de seguridad \$num; los archivos eran: "
-			   . " \${join(\", \", \@fileListTrim)}";
-
-$Lang{log_User__User_downloaded_zip_archive_for__host}= "El usuario del registro \$User ha descargado un archivo Zip para \$host,"
-                           . " copia de seguridad \$num; los archivos eran: "
-                           . "\${join(\", \", \@fileListTrim)}";
 
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restauración solicitada para el host \$hostDest, copia de seguridad #\$num,"
 	     . " por \$User desde \$ENV{REMOTE_ADDR}";
@@ -791,7 +784,7 @@ EOF
 
 # --------
 $Lang{Last_error_is____EscHTML_StatusHost_error} = <<EOF;
-<li>El último error fué \"\${EscHTML(\$StatusHost{error})}\"
+<li>El último error fué \"\${EscHTML(\$StatusHost{error})}\".
 EOF
 
 # ------
@@ -905,8 +898,10 @@ $Lang{Reason_backup_done} = "copia de seguridad realizada";
 $Lang{Reason_restore_done} = "restauración realizada";
 $Lang{Reason_nothing_to_do} = "nada por hacer";
 $Lang{Reason_backup_failed} = "copia de seguridad fallida";
+$Lang{Reason_restore_failed} = "restauración fallida";
 $Lang{Reason_no_ping} = "no hay ping";
 $Lang{Reason_backup_canceled_by_user} = "copia cancelada por el usuario";
+$Lang{Reason_restore_canceled_by_user} = "restauración cancelada por el usuario";
 
 # ---------
 # Email messages

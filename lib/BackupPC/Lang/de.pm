@@ -1,4 +1,4 @@
-#!/usr/bin/perl -T
+#!/bin/perl -T
 #
 # by Manfred Herrmann (V1.1) (some typo errors + 3 new strings)
 # CVS-> Revision ???
@@ -724,13 +724,6 @@ $Lang{Backup_requested_on_DHCP__host} = "Backup angefordert für DHCP Computer \$
 
 $Lang{Backup_requested_on__host_by__User} = "Backup angefordert für \$host durch \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Backup gestoppt/gelöscht für \$host durch \$User";
-$Lang{log_User__User_downloaded_tar_archive_for__host} = "LOG User \$User hat tar Archiv downgeloaded von \$host,"
-                           . " Backup \$num; folgende Dateien: "
-			   . " \${join(\", \", \@fileListTrim)}";
-
-$Lang{log_User__User_downloaded_zip_archive_for__host}= "LOG User \$User hat zip Archiv downgeloaded von \$host,"
-                           . " Backup \$num; folgende Dateien: "
-                           . "\${join(\", \", \@fileListTrim)}";
 
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restore beauftragt nach Computer \$hostDest, von Backup #\$num,"
 	     . " durch User \$User von Client \$ENV{REMOTE_ADDR}";
@@ -791,7 +784,7 @@ EOF
 
 # --------
 $Lang{Last_error_is____EscHTML_StatusHost_error} = <<EOF;
-<li>Letzter Fehler ist \"\${EscHTML(\$StatusHost{error})}\"
+<li>Letzter Fehler ist \"\${EscHTML(\$StatusHost{error})}\".
 EOF
 
 # ------
@@ -906,8 +899,10 @@ $Lang{Reason_backup_done} = "Backup durchgeführt";
 $Lang{Reason_restore_done} = "Restore durchgeführt";
 $Lang{Reason_nothing_to_do} = "kein Auftrag";
 $Lang{Reason_backup_failed} = "Backup Fehler";
+$Lang{Reason_restore_failed} = "Restore Fehler";
 $Lang{Reason_no_ping} = "nicht erreichbar";
 $Lang{Reason_backup_canceled_by_user} = "Abbruch durch User";
+$Lang{Reason_restore_canceled_by_user} = "Abbruch durch User";
 
 # ---------
 # Email messages

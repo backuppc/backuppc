@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta2, released 13 Apr 2003.
+# Version 2.0.0beta3, released 1 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -968,26 +968,29 @@ sub fileListEltSend
 	    || $type == BPC_FTYPE_BLOCKDEV
 	    || $type == BPC_FTYPE_SYMLINK ) {
 	my $fh = BackupPC::FileZIO->open($a->{fullPath}, 0, $a->{compress});
-	my $str;
+	my($str, $rdSize);
 	if ( defined($fh) ) {
-	    if ( $fh->read(\$str, $a->{size} + 1) == $a->{size} ) {
-		if ( $type == BPC_FTYPE_SYMLINK ) {
-		    #
-		    # Reconstruct symbolic link
-		    #
-		    $extraAttribs = { link => $str };
-		} elsif ( $str =~ /(\d*),(\d*)/ ) {
-		    #
-		    # Reconstruct char or block special major/minor device num
-		    #
-		    $extraAttribs = { rdev => $1 * 256 + $2 };
-		} else {
-		    $fio->log("$name: unexpected special file contents $str");
+	    $rdSize = $fh->read(\$str, $a->{size} + 1024);
+	    if ( $type == BPC_FTYPE_SYMLINK ) {
+		#
+		# Reconstruct symbolic link
+		#
+		$extraAttribs = { link => $str };
+		if ( $rdSize != $a->{size} ) {
+		    # ERROR
+		    $fio->log("$name: can't read exactly $a->{size} bytes");
 		    $fio->{stats}{errorCnt}++;
 		}
+	    } elsif ( $str =~ /(\d*),(\d*)/ ) {
+		#
+		# Reconstruct char or block special major/minor device num
+		#
+		# Note: char/block devices have $a->{size} = 0, so we
+		# can't do an error check on $rdSize.
+		#
+		$extraAttribs = { rdev => $1 * 256 + $2 };
 	    } else {
-		# ERROR
-		$fio->log("$name: can't read exactly $a->{size} bytes");
+		$fio->log("$name: unexpected special file contents $str");
 		$fio->{stats}{errorCnt}++;
 	    }
 	    $fh->close;

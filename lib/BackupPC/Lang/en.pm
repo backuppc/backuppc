@@ -722,13 +722,6 @@ $Lang{Backup_requested_on_DHCP__host} = "Backup requested on DHCP \$host (\$In{h
 
 $Lang{Backup_requested_on__host_by__User} = "Backup requested on \$host by \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Backup stopped/dequeued on \$host by \$User";
-$Lang{log_User__User_downloaded_tar_archive_for__host} = "log User \$User downloaded tar archive for \$host,"
-                           . " backup \$num; files were: "
-			   . " \${join(\", \", \@fileListTrim)}";
-
-$Lang{log_User__User_downloaded_zip_archive_for__host}= "log User \$User downloaded zip archive for \$host,"
-                           . " backup \$num; files were: "
-                           . "\${join(\", \", \@fileListTrim)}";
 
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restore requested to host \$hostDest, backup #\$num,"
 	     . " by \$User from \$ENV{REMOTE_ADDR}";
@@ -789,7 +782,7 @@ EOF
 
 # --------
 $Lang{Last_error_is____EscHTML_StatusHost_error} = <<EOF;
-<li>Last error is \"\${EscHTML(\$StatusHost{error})}\"
+<li>Last error is \"\${EscHTML(\$StatusHost{error})}\".
 EOF
 
 # ------
@@ -903,8 +896,10 @@ $Lang{Reason_backup_done} = "backup done";
 $Lang{Reason_restore_done} = "restore done";
 $Lang{Reason_nothing_to_do} = "nothing to do";
 $Lang{Reason_backup_failed} = "backup failed";
+$Lang{Reason_restore_failed} = "restore failed";
 $Lang{Reason_no_ping} = "no ping";
 $Lang{Reason_backup_canceled_by_user} = "backup canceled by user";
+$Lang{Reason_restore_canceled_by_user} = "restore canceled by user";
 
 # ---------
 # Email messages

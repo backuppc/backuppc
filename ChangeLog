@@ -21,6 +21,37 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Several improvements to restore: cancel now reports the correct
+  message and cleans up correctly.
+
+* Rsync with whitespace and wildcard excludes fixed by replacing
+  argList with argList+ in config.pl.
+
+* Fixed typo in bin/BackupPC_restore (XferLOG -> RestoreLOG).
+
+* (Re)-fixed "Bad command" in log file when restore via tar or zip
+  file download is done.
+
+* Added untaint to exec in Lib.pm to avoid tainted errors.
+
+* Applied additional tweak to hilight patch from Tim Demarest.
+
+* $Conf{CgiAdminUsers} = '*' now allows privileged even with REMOTE_USER
+  not set.
+
+* Don't display RsyncdPasswd when displaying config.pl files.
+
+* Replace pipe with socketpair in bin/BackupPC_dump and bin/BackupPC_restore,
+  which increases typical buffering from 4K to 16K-64K.  This improves the
+  performance.
+
+* Add check on $ENV{LANG} setting do configure.pl: if LANG includes utf
+  then a warning is printed.
+
+#------------------------------------------------------------------------
+# Version 2.0.0beta2, 11 May 2003
+#------------------------------------------------------------------------
+
 * Added German translation, provided by Manfred Herrmann.
 
 * Fixed large-file problem with rsync, reported by Manfred Herrmann.

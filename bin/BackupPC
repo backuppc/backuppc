@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta2, released 13 Apr 2003.
+# Version 2.0.0beta3, released 1 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -661,9 +661,16 @@ sub Main_Process_Signal
         $NextWakeup = 0;
     } elsif ( $SigName ) {
         print(LOG $bpc->timeStamp, "Got signal $SigName... cleaning up\n");
-        foreach my $host ( keys(%Jobs) ) {
-            kill(2, $Jobs{$host}{pid});
-        }
+	if ( keys(%Jobs) ) {
+	    foreach my $host ( keys(%Jobs) ) {
+		kill(2, $Jobs{$host}{pid});
+	    }
+	    sleep(1);
+	    foreach my $host ( keys(%Jobs) ) {
+		kill(9, $Jobs{$host}{pid});
+	    }
+	    %Jobs = ();
+	}
         StatusWrite();
         unlink("$TopDir/log/BackupPC.pid");
         exit(1);
@@ -845,9 +852,12 @@ sub Main_Check_Job_Messages
                 delete($Status{$host}{errorTime});
                 $Status{$host}{endTime}   = time;
             } elsif ( $mesg =~ /^nothing to do/ ) {
-                $Status{$host}{state}     = "Status_idle";
-                $Status{$host}{reason}    = "Reason_nothing_to_do";
-                $Status{$host}{startTime} = time;
+		if ( $Status{$host}{reason} ne "Reason_backup_failed"
+			&& $Status{$host}{reason} ne "Reason_restore_failed" ) {
+		    $Status{$host}{state}     = "Status_idle";
+		    $Status{$host}{reason}    = "Reason_nothing_to_do";
+		    $Status{$host}{startTime} = time;
+		}
                 $Status{$host}{dhcpCheckCnt}--
                                 if ( $Status{$host}{dhcpCheckCnt} > 0 );
             } elsif ( $mesg =~ /^no ping response/
@@ -871,7 +881,14 @@ sub Main_Check_Job_Messages
                 $Status{$host}{error}     = $1;
                 $Status{$host}{errorTime} = time;
                 $Status{$host}{endTime}   = time;
-                print(LOG $bpc->timeStamp, "backup failed on $host ($1)\n");
+                print(LOG $bpc->timeStamp, "Backup failed on $host ($1)\n");
+            } elsif ( $mesg =~ /^restore failed: (.*)/ ) {
+                $Status{$host}{state}     = "Status_idle";
+                $Status{$host}{reason}    = "Reason_restore_failed";
+                $Status{$host}{error}     = $1;
+                $Status{$host}{errorTime} = time;
+                $Status{$host}{endTime}   = time;
+                print(LOG $bpc->timeStamp, "Restore failed on $host ($1)\n");
             } elsif ( $mesg =~ /^log\s+(.*)/ ) {
                 print(LOG $bpc->timeStamp, "$1\n");
             } elsif ( $mesg =~ /^BackupPC_stats = (.*)/ ) {
@@ -1021,7 +1038,7 @@ sub Main_Check_Client_Messages
                 if ( $CmdJob ne $host && defined($Status{$host})
                                       && defined($Jobs{$host}) ) {
                     print(LOG $bpc->timeStamp,
-                               "Stopping current backup of $host,"
+                               "Stopping current $Jobs{$host}{type} of $host,"
                              . " request by $user (backoff=$backoff)\n");
                     kill(2, $Jobs{$host}{pid});
 		    #
@@ -1033,11 +1050,17 @@ sub Main_Check_Client_Messages
                     ##close($Jobs{$host}{fh});
                     ##delete($Jobs{$host});
 
-                    $Status{$host}{state}     = "Status_idle";
-                    $Status{$host}{reason}    = "Reason_backup_canceled_by_user";
+                    $Status{$host}{state}    = "Status_idle";
+		    if ( $Jobs{$host}{type} eq "restore" ) {
+			$Status{$host}{reason}
+				    = "Reason_restore_canceled_by_user";
+		    } else {
+			$Status{$host}{reason}
+				    = "Reason_backup_canceled_by_user";
+		    }
                     $Status{$host}{activeJob} = 0;
                     $Status{$host}{startTime} = time;
-                    $reply = "ok: backup of $host cancelled";
+                    $reply = "ok: $Jobs{$host}{type} of $host cancelled";
                 } elsif ( $BgQueueOn{$host} || $UserQueueOn{$host} ) {
                     print(LOG $bpc->timeStamp,
                                "Stopping pending backup of $host,"
@@ -1426,8 +1449,9 @@ sub catch_signal
         print(LOG "Fatal error: unhandled signal $SigName\n");
         unlink("$TopDir/log/BackupPC.pid");
         confess("Got new signal $SigName... quitting\n");
+    } else {
+	$SigName = shift;
     }
-    $SigName = shift;
 }
 
 #

@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta2, released 13 Apr 2003.
+# Version 2.0.0beta3, released 1 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -58,7 +58,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
-        Version => '2.0.0beta2',
+        Version => '2.0.0beta3',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew
@@ -1004,7 +1004,7 @@ sub cmdVarSubstitute
         $arg =~ s{\$(\w+)(\+?)}{
             exists($vars->{$1}) && ref($vars->{$1}) ne "ARRAY"
                 ? ($2 eq "+" ? $bpc->shellEscape($vars->{$1}) : $vars->{$1})
-                : "\$$1"
+                : "\$$1$2"
         }eg;
         #
         # Now replicate any array arguments; this just works for just one
@@ -1048,7 +1048,7 @@ sub cmdExecOrEval
 	print("cmdExecOrEval: about to exec ",
 	      $bpc->execCmd2ShellCmd(@$cmd), "\n")
 			if ( $bpc->{verbose} );
-        exec(@$cmd);
+        exec(map { m/(.*)/ } @$cmd);		# untaint
         print(STDERR "Exec failed for @$cmd\n");
         exit(1);
     }
@@ -1102,7 +1102,7 @@ sub cmdSystemOrEval
 	    #
             close(STDERR);
 	    open(STDERR, ">&STDOUT");
-	    exec(@$cmd);
+	    exec(map { m/(.*)/ } @$cmd);		# untaint
             print("Exec of @$cmd failed\n");
             exit(1);
 	}

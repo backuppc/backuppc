@@ -41,7 +41,7 @@ cancel backups and browse and restore files from backups.
 =item *
 
 The http/cgi user interface has internationalization (i18n) support,
-currently providing English, French and Spanish.
+currently providing English, French, German and Spanish.
 
 =item *
 
@@ -407,8 +407,8 @@ compression is on.
 =item *
 
 Perl version 5.6.0 or later. BackupPC has been tested with
-version 5.6.0 and 5.6.1. If you don't have perl, please see
-L<http://www.cpan.org>.
+version 5.6.0, 5.6.1 and 5.8.0. If you don't have perl, please
+see L<http://www.cpan.org>.
 
 =item *
 
@@ -441,7 +441,7 @@ If you are using tar to backup linux/unix machines you should have version
 1.13.7 at a minimum, with version 1.13.20 or higher recommended.  Use
 "tar --version" to check your version.  Various GNU mirrors have the newest
 versions of tar, see for example L<http://www.funet.fi/pub/gnu/alpha/gnu/tar>.
-As of February 2003 the latest version is 1.13.25.
+As of June 2003 the latest version is 1.13.25.
 
 =item *
 
@@ -451,7 +451,7 @@ Use "rsync --version" to check your version.
 
 For BackupPC to use Rsync you will also need to install the perl
 File::RsyncP module, which is available from
-L<http://perlrsync.sourceforge.net>.  Version 0.31 or later is required.
+L<http://perlrsync.sourceforge.net>.  Version 0.41 or later is required.
 
 =item *
 
@@ -531,7 +531,7 @@ You can run "perldoc Archive::Zip" to see if this module is installed.
 To use rsync and rsyncd with BackupPC you will need to install File::RsyncP.
 You can run "perldoc File::RsyncP" to see if this module is installed.
 File::RsyncP is available from L<http://perlrsync.sourceforge.net>.
-Version 0.31 or later is required.
+Version 0.41 or later is required.
 
 =back
 
@@ -1261,8 +1261,6 @@ to Apache's 1.x httpd.conf file:
 	</Location>
     </IfModule>
 
-For Apache 2.x and perl 5.8.x
-
 Apache 2.0.44 with Perl 5.8.0 on RedHat 7.1, Don Silvia reports that
 this works:
 
@@ -1323,9 +1321,14 @@ One alternative is to use LDAP.  In Apache's http.conf add these lines:
       require valid-user
     </Location>
 
-If you want to defeat the user authentication you can force a
-particular user name by getting Apache to set REMOTE_USER, eg,
-to hardcode the user to www you could add this to httpd.conf:
+If you want to disable the user authentication you can set
+$Conf{CgiAdminUsers} to '*', which allows any user to have
+full access to all hosts and backups.  In this case the REMOTE_USER
+environment variable does not have to be set by Apache.
+
+Alternatively, you can force a particular user name by getting Apache
+to set REMOTE_USER, eg, to hardcode the user to www you could add
+this to Apache's httpd.conf:
 
     <Location /cgi-bin/BackupPC/BackupPC_Admin>   # <--- change path as needed
         Setenv REMOTE_USER www
@@ -1339,6 +1342,8 @@ and $Conf{CgiAdminUsers}.  Also, the configure.pl script placed various
 images into $Conf{CgiImageDir} that BackupPC_Admin needs to serve
 up.  You should make sure that $Conf{CgiImageDirURL} is the correct
 URL for the image directory.
+
+See the section L<Debugging installation problems|debugging installation problems> for suggestions on debugging the Apache authentication setup.
 
 =head2 How BackupPC Finds Hosts
 
@@ -1424,6 +1429,46 @@ but does respond to a request directed to its IP address:
 =head2 Other installation topics
 
 =over 4
+
+=item Removing a client
+
+If there is a machine that no longer needs to be backed up (eg: a retired
+machine) you have two choices.  First, you can keep the backups accessible
+and browsable, but disable all new backups.  Alternatively, you can
+completely remove the client and all its backups.
+
+To disable backups for a client there are two special values for
+$Conf{FullPeriod} in that client's per-PC config.pl file:
+
+=over 4
+
+=item -1
+
+Don't do any regular backups on this machine.  Manually
+requested backups (via the CGI interface) will still occur.
+
+=item -2
+
+Don't do any backups on this machine.  Manually requested
+backups (via the CGI interface) will be ignored.
+
+=back
+
+This will still allow that client's old backups to be browsable
+and restorable.
+
+To completely remove a client and all its backups, you should remove its
+entry in the conf/hosts file, and then delete the __TOPDIR__/pc/$host
+directory.  Whenever you change the hosts file, you should send
+BackupPC a HUP (-1) signal so that it re-reads the hosts file.
+If you don't do this, BackupPC will automatically re-read the
+hosts file at the next regular wakeup.
+
+Note that when you remove a client's backups you won't initially recover
+a lot of disk space.  That's because the client's files are still in
+the pool.  Overnight, when BackupPC_nightly next runs, all the unused
+pool files will be deleted and this will recover the disk space used
+by the client's backups.
 
 =item Copying the pool
 
@@ -1630,11 +1675,69 @@ earlier section) so that user authentication works.  Make sure
 the config settings $Conf{CgiAdminUserGroup} and $Conf{CgiAdminUsers}
 correctly specify the privileged administrator users.
 
+=item You cannot access per-host information in the CGI interface
+
+If you get the error
+
+    Only privileged users can view information about host xyz
+
+it means that BackupPC_Admin is unable to match the user's login
+name (supplied by Apache via the REMOTE_USER environment variable)
+with either that host's user name (in the conf/hosts file) or
+with the administrators specified in the $Conf{CgiAdminUsers}
+or $Conf{CgiAdminUserGroup} settings.
+
+The most common problem is that REMOTE_USER is not set because the
+Apache authentication is not correctly configured.  In this case
+BackupPC_Admin will report this additional error:
+
+    Note: $ENV{REMOTE_USER} is not set, which could mean there is an
+    installation problem.  BackupPC_Admin expects Apache to authenticate
+    the user and pass their user name into this script as the REMOTE_USER
+    environment variable.  See the documentation.
+
+You should review the configuration instructions to setup Apache
+authentication correctly.  To test if REMOTE_USER is being set
+correctly, there is a simple script called printenv that is
+included with Apache.  This is a simple CGI script that prints
+out all the environment variables.  Place this script in the
+same directory as BackupPC_Admin and run it with a URL like:
+
+    http://myHost/cgi-bin/BackupPC/printenv
+
+Check the value of the REMOTE_USER environment variable.
+Here's a copy of the printenv script:
+
+    #!/usr/bin/perl
+    ##
+    ##  printenv -- demo CGI program which just prints its environment
+    ##
+
+    print "Content-type: text/plain\n\n";
+    foreach $var (sort(keys(%ENV))) {
+        $val = $ENV{$var};
+        $val =~ s|\n|\\n|g;
+        $val =~ s|"|\\"|g;
+        print "${var}=\"${val}\"\n";
+    }
+
 =item Can't ping or find host
 
 Please read the section L<How BackupPC Finds Hosts|how backuppc finds hosts>.
 
-You should also verify that nmblookup correctly returns the netbios name.
+The BackupPC_dump command now has a -v option, so the easiest way to
+debug backup problems on a specific host is to run BackupPC_dump
+manually as the BackupPC user:
+
+    su __BACKUPPCUSER__
+    __INSTALLDIR__/bin/BackupPC_dump -v -f hostName
+
+This will run a full dump on hostName (replace with your host name).
+It will show each command (eg: ping, nmblookup and the full dump
+commands) and the output from each command.  Reading the output
+carefully should show you what the problem is.
+
+You can also verify that nmblookup correctly returns the netbios name.
 This is essential for DHCP hosts, and depending upon the setting of
 $Conf{FixedIPNetBiosNameCheck} might also be required for fixed IP
 address hosts too.  Run this command:
@@ -1656,12 +1759,16 @@ The first name, converted to lower case, is used for the host name.
 
 =item Transport method doesn't work
 
-The BackupPC_dump command now has a -v option, so the easiest way to
+The BackupPC_dump command has a -v option, so the easiest way to
 debug backup problems on a specific host is to run BackupPC_dump
 manually as the BackupPC user:
 
     su __BACKUPPCUSER__
-    __INSTALLDIR__/bin/BackupPC_zcat
+    __INSTALLDIR__/bin/BackupPC_dump -v -f hostName
+
+This will run a full dump on hostName (replace with your host name)
+and will print all the output from each command, including the log
+output.
 
 The most likely problems will relate to connecting to the smb shares on
 each host.  On each failed backup, a file __TOPDIR__/pc/$host/XferLOG.bad.z

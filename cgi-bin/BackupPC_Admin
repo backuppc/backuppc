@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta2, released 11 May 2003.
+# Version 2.0.0beta3, released 1 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -204,7 +204,8 @@ sub Action_Summary
         $incrTot += $incrCnt;
         $fullSize = sprintf("%.2f", $fullSize / 1000);
 	$incrAge = "&nbsp;" if ( $incrAge eq "" );
-	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}};
+	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
+		      || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
 	$reasonHilite = " bgcolor=\"$reasonHilite\"" if ( $reasonHilite ne "" );
         if ( $Status{$host}{state} ne "Status_backup_in_progress"
 		&& $Status{$host}{state} ne "Status_restore_in_progress"
@@ -471,6 +472,7 @@ sub Action_View
                 # remove any passwords and user names
                 s/(SmbSharePasswd.*=.*['"]).*(['"])/$1$2/ig;
                 s/(SmbShareUserName.*=.*['"]).*(['"])/$1$2/ig;
+                s/(RsyncdPasswd.*=.*['"]).*(['"])/$1$2/ig;
                 s/(ServerMesgSecret.*=.*['"]).*(['"])/$1$2/ig;
                 print ${EscHTML($_)};
             }
@@ -883,7 +885,9 @@ EOF
 	if ( @fileListTrim > 10 ) {
 	    @fileListTrim = (@fileListTrim[0..9], '...');
 	}
-	$bpc->ServerMesg(eval("qq{$Lang->{log_User__User_downloaded_tar_archive_for__host}}"));
+	$bpc->ServerMesg("log User $User downloaded tar archive for $host,"
+		       . " backup $num; files were: "
+		       . join(", ", @fileListTrim));
 
         my @pathOpts;
         if ( $In{relative} ) {
@@ -917,7 +921,9 @@ EOF
 	if ( @fileListTrim > 10 ) {
 	    @fileListTrim = (@fileListTrim[0..9], '...');
 	}
-	$bpc->ServerMesg(eval("qq{$Lang->{log_User__User_downloaded_zip_archive_for__host}}"));
+	$bpc->ServerMesg("log User $User downloaded zip archive for $host,"
+		       . " backup $num; files were: "
+		       . join(", ", @fileListTrim));
 
         my @pathOpts;
         if ( $In{relative} ) {
@@ -1434,6 +1440,7 @@ EOF
     }
     foreach my $host ( sort(keys(%Status)) ) {
         next if ( $Status{$host}{reason} ne "Reason_backup_failed"
+		    && $Status{$host}{reason} ne "Reason_restore_failed"
 		    && (!$Status{$host}{userReq}
 			|| $Status{$host}{reason} ne "Reason_no_ping") );
         my $startTime = timeStamp2($Status{$host}{startTime});
@@ -1698,7 +1705,8 @@ sub CheckPermission
     my($host) = @_;
     my $Privileged = 0;
 
-    return 0 if ( $User eq "" || ($host ne "" && !defined($Hosts->{$host})) );
+    return 0 if ( $User eq "" && $Conf{CgiAdminUsers} ne "*"
+	       || $host ne "" && !defined($Hosts->{$host}) );
     if ( $Conf{CgiAdminUserGroup} ne "" ) {
         my($n,$p,$gid,$mem) = getgrnam($Conf{CgiAdminUserGroup});
         $Privileged ||= ($mem =~ /\b$User\b/);
@@ -1835,7 +1843,7 @@ EOF
     }
     NavSectionTitle($Lang->{Hosts});
     if ( defined($Hosts) && %$Hosts > 0 ) {
-        NavSectionStart(0);
+        NavSectionStart(1);
         foreach my $host ( GetUserHosts() ) {
             NavLink("?host=${EscURI($host)}", $host);
         }
@@ -1891,7 +1899,7 @@ sub NavSectionStart
 {
     my($padding) = @_;
 
-    $padding = 2 if ( !defined($padding) );
+    $padding = 1 if ( !defined($padding) );
     print <<EOF;
 <table cellpadding="$padding" cellspacing="0" border="0" width="100%">
 EOF

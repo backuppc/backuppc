@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta2, released 13 Apr 2003.
+# Version 2.0.0beta3, released 1 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -42,6 +42,7 @@ use BackupPC::FileZIO;
 use BackupPC::Xfer::Smb;
 use BackupPC::Xfer::Tar;
 use BackupPC::Xfer::Rsync;
+use Socket;
 
 use File::Path;
 use Getopt::Std;
@@ -88,6 +89,11 @@ my $tarPid  = -1;
 $SIG{INT}  = \&catch_signal;
 $SIG{ALRM} = \&catch_signal;
 $SIG{TERM} = \&catch_signal;
+$SIG{PIPE} = \&catch_signal;
+$SIG{STOP} = \&catch_signal;
+$SIG{TSTP} = \&catch_signal;
+$SIG{TTIN} = \&catch_signal;
+my $Pid = $$;
 
 mkpath($Dir, 0, 0777) if ( !-d $Dir );
 if ( !-f "$Dir/LOCK" ) {
@@ -224,13 +230,23 @@ my $useTar = $xfer->useTar;
 
 if ( $useTar ) {
     #
-    # Create a pipe to connect BackupPC_tarCreate to the transport program
-    # (smbclient, tar, etc).
+    # Create a socketpair to connect BackupPC_tarCreate to the transport
+    # program (smbclient, tar, etc).
     # WH is the write handle for writing, provided to BackupPC_tarCreate
     # and RH is the other end of the pipe for reading provided to the
     # transport program.
     #
-    pipe(RH, WH);
+    if ( socketpair(RH, WH, AF_UNIX, SOCK_STREAM, PF_UNSPEC) ) {
+	shutdown(RH, 1);    # no writing to this socket
+	shutdown(WH, 0);    # no reading from this socket
+	setsockopt(RH, SOL_SOCKET, SO_RCVBUF, 8 * 65536);
+	setsockopt(WH, SOL_SOCKET, SO_SNDBUF, 8 * 65536);
+    } else {
+	#
+	# Default to pipe() if socketpair() doesn't work.
+	#
+	pipe(RH, WH);
+    }
 }
 
 #
@@ -435,21 +451,28 @@ sub catch_signal
     my $signame = shift;
 
     #
+    # Children quit quietly on ALRM
+    #
+    exit(1) if ( $Pid != $$ && $signame eq "ALRM" );
+
+    #
+    # Ignore signals in children
+    #
+    return if ( $Pid != $$ );
+
+    #
     # Note: needs to be tested for each kind of XferMethod
     #
     print(LOG $bpc->timeStamp, "cleaning up after signal $signame\n");
-    if ( @xferPid ) {
-        kill(2, @xferPid);
-	sleep(1);
-	kill(9, @xferPid);
-    }
-    if ( $tarPid > 0 ) {
-        kill(2, $tarPid);
-	sleep(1);
-	kill(9, $tarPid);
-    }
+    $SIG{$signame} = 'IGNORE';
+    $RestoreLOG->write(\"exiting after signal $signame\n");
     $stat{xferOK} = 0;
-    $stat{hostError} = "aborted by signal $signame";
+    if ( $signame eq "INT" ) {
+	$stat{hostError} = "aborted by user (signal=$signame)";
+    } else {
+	$stat{hostError} = "aborted by signal=$signame";
+    }
+    exit(RestoreCleanup($client));
 }
 
 #
@@ -502,7 +525,6 @@ sub RestoreCleanup
     #
     UserCommandRun("RestorePostUserCmd") if ( $NeedPostCmd );
 
-    $RestoreLOG->close() if ( defined($RestoreLOG) );
     rename("$Dir/RestoreLOG$fileExt", "$Dir/RestoreLOG.$lastNum$fileExt");
     rename("$Dir/$reqFileName", "$Dir/RestoreInfo.$lastNum");
     my $endTime = time();
@@ -523,7 +545,11 @@ sub RestoreCleanup
 	if ( $stat{hostAbort} && $stat{hostError} eq "" ) {
 	    $stat{hostError} = "lost network connection during restore";
 	}
+	$RestoreLOG->write(\"Restore failed: $stat{hostError}\n")
+					    if ( defined($RestoreLOG) );
     }
+
+    $RestoreLOG->close() if ( defined($RestoreLOG) );
 
     #
     # Add the new restore information to the restore file
@@ -550,7 +576,7 @@ sub RestoreCleanup
     $bpc->RestoreInfoWrite($client, @Restores);
 
     if ( !$stat{xferOK} ) {
-	print(LOG $bpc->timeStamp, "Restore aborted ($stat{hostError})\n");
+	print(LOG $bpc->timeStamp, "Restore failed ($stat{hostError})\n");
 	print("restore failed: $stat{hostError}\n");
 	return 1;
     } else {
@@ -572,7 +598,7 @@ sub pidHandler
     my @pids = @xferPid;
     push(@pids, $tarPid) if ( $tarPid > 0 );
     my $str = join(",", @pids);
-    $XferLOG->write(\"Xfer PIDs are now $str\n") if ( defined($XferLOG) );
+    $RestoreLOG->write(\"Xfer PIDs are now $str\n") if ( defined($RestoreLOG) );
     print("xferPids $str\n");
 }
 

@@ -729,14 +729,6 @@ $Lang{Backup_requested_on_DHCP__host} = "Demande de sauvegarde sur l\'hôte \$hos
 $Lang{Backup_requested_on__host_by__User} = "Sauvegarde demandée sur \$host par \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Sauvegarde Arrêtée/déprogrammée pour \$host par \$User";
 
-$Lang{log_User__User_downloaded_tar_archive_for__host} = "log L\'utilisateur \$User a téléchargé "
-                           . "l\'archive tar pour \$host,"
-                           . " sauvegarde \$num; Les fichiers étaient: "
-			   . " \${join(\", \", \@fileListTrim)}";
-$Lang{log_User__User_downloaded_zip_archive_for__host}= "log L\'utilisateur \$User a téléchargé "
-                           . "l\'archive zip pour \$host,"
-                           . " Sauvegarde \$num; Les fichiers étaient: "
-                           . "\${join(\", \", \@fileListTrim)}";
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restauration demandée pour l\'hôte \$hostDest, "
              . "sauvegarde n° \$num,"
 	     . " par \$User depuis \$ENV{REMOTE_ADDR}";
@@ -797,7 +789,7 @@ EOF
 
 # --------
 $Lang{Last_error_is____EscHTML_StatusHost_error} = <<EOF;
-<li>La dernière erreur est \"\${EscHTML(\$StatusHost{error})}\"
+<li>La dernière erreur est \"\${EscHTML(\$StatusHost{error})}\".
 EOF
 
 # ------
@@ -911,8 +903,10 @@ $Lang{Reason_backup_done} = "sauvegarde terminée";
 $Lang{Reason_restore_done} = "restauration terminée";
 $Lang{Reason_nothing_to_do} = "rien à faire";
 $Lang{Reason_backup_failed} = "la sauvegarde a échouée";
+$Lang{Reason_restore_failed} = "la restauration a échouée";
 $Lang{Reason_no_ping} = "pas de ping";
 $Lang{Reason_backup_canceled_by_user} = "sauvegarde annulée par l'utilisateur";
+$Lang{Reason_restore_canceled_by_user} = "restauration annulée par l'utilisateur";
 
 # ---------
 # Email messages

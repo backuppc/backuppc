@@ -93,6 +93,7 @@ my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
 my $NeedPostCmd;
+my $Hosts;
 
 $bpc->ChildInit();
 
@@ -123,9 +124,11 @@ if ( $opts{d} ) {
 		    || $Conf{NmbLookupCmd} eq "" );
     ($client, $user) = $bpc->NetBiosInfoGet($hostIP);
     exit(1) if ( $host !~ /^([\w\.\s-]+)$/ );
-    my $hosts = $bpc->HostInfoRead($client);
-    exit(1) if ( !defined($hosts->{$client}) );
+    $Hosts = $bpc->HostInfoRead($client);
+    exit(1) if ( !defined($Hosts->{$client}) );
     $host = $client;
+} else {
+    $Hosts = $bpc->HostInfoRead($client);
 }
 
 my $Dir     = "$TopDir/pc/$client";
@@ -164,6 +167,14 @@ if ( !-f "$Dir/LOCK" ) {
 open(LOG, ">>", "$Dir/LOG");
 select(LOG); $| = 1; select(STDOUT);
 
+#
+# For the -e option we just expire backups and quit
+#
+if ( $opts{e} ) {
+    BackupExpire($client);
+    exit(0);
+}
+
 if ( !$opts{d} ) {
     #
     # In the non-DHCP case, make sure the host can be looked up
@@ -193,14 +204,6 @@ if ( !$opts{d} ) {
 ###########################################################################
 # Figure out what to do and do it
 ###########################################################################
-
-#
-# For the -e option we just expire backups and quit
-#
-if ( $opts{e} ) {
-    BackupExpire($client);
-    exit(0);
-}
 
 #
 # See if we should skip this host during a certain range
@@ -916,19 +919,21 @@ sub UserCommandRun
 
     return if ( !defined($Conf{$type}) );
     my $vars = {
-        xfer    => $xfer,
-        client  => $client,
-        host    => $host,
-        hostIP  => $hostIP,
-        share   => $ShareNames->[0],
-        shares  => $ShareNames,
+        xfer       => $xfer,
+        client     => $client,
+        host       => $host,
+        hostIP     => $hostIP,
+	user       => $Hosts->{$client}{user},
+	moreUsers  => $Hosts->{$client}{moreUsers},
+        share      => $ShareNames->[0],
+        shares     => $ShareNames,
         XferMethod => $Conf{XferMethod},
-        sshPath => $Conf{SshPath},
-        LOG     => *LOG,
-        XferLOG => $XferLOG,
-        stat    => \%stat,
-        xferOK  => $stat{xferOK},
-	type	=> $type,
+        sshPath    => $Conf{SshPath},
+        LOG        => *LOG,
+        XferLOG    => $XferLOG,
+        stat       => \%stat,
+        xferOK     => $stat{xferOK},
+	type	   => $type,
     };
     my $cmd = $bpc->cmdVarSubstitute($Conf{$type}, $vars);
     $XferLOG->write(\"Executing $type: @$cmd\n");

@@ -180,6 +180,8 @@ $Conf{TrashCleanSleepSec} = 300;
 #
 # List of DHCP address ranges we search looking for PCs to backup.
 # This is an array of hashes for each class C address range.
+# This is only needed if hosts in the conf/hosts file have the
+# dhcp flag set.
 #
 # Examples:
 #    # to specify 192.10.10.20 to 192.10.10.250 as the DHCP address pool
@@ -290,6 +292,14 @@ $Conf{SmbSharePasswd} = '';
 # a specific list of directories to backup.  It's more efficient to
 # use this option instead of $Conf{TarShareName} since a new tar is
 # run for each entry in $Conf{TarShareName}.
+#
+# On the other hand, if you add --one-file-system to $Conf{TarClientCmd}
+# you can backup each file system separately, which makes restoring one
+# bad file system easier.  In this case you would list all of the mount
+# points here, since you can't get the same result with
+# $Conf{BackupFilesOnly}:
+#
+#     $Conf{TarShareName} = ['/', '/var', '/data', '/boot'];
 #
 # This setting only matters if $Conf{XferMethod} = 'tar'.
 #
@@ -445,8 +455,10 @@ $Conf{BackupFilesOnly} = undef;
 # at the start of the string.  Since all the tar paths start with "./",
 # BackupPC prepends a "." if the exclude file starts with a "/".  Note
 # that GNU tar version >= 1.3.7 is required for the exclude option to
-# work correctly.  For linux or unix machines it is recommended to add
-# "/proc" to $Conf{BackupFilesExclude}.
+# work correctly.  For linux or unix machines you should add
+# "/proc" to $Conf{BackupFilesExclude} unless you have specified
+# --one-file-system in $Conf{TarClientCmd} or --one-file-system in
+# $Conf{RsyncArgs}.
 #
 # Examples:
 #    $Conf{BackupFilesExclude} = '/temp';
@@ -613,6 +625,9 @@ $Conf{TarClientCmd} = '$sshPath -q -n -l root $host'
 # Extra tar arguments for full backups.  Several variables are substituted at
 # run-time.  See $Conf{TarClientCmd} for the list of variable substitutions.
 #
+# If you are running tar locally (ie: without rsh or ssh) then remove the
+# "+" so that the argument is no longer shell escaped.
+#
 # This setting only matters if $Conf{XferMethod} = 'tar'.
 #
 $Conf{TarFullArgs} = '$fileList+';
@@ -638,6 +653,9 @@ $Conf{TarFullArgs} = '$fileList+';
 #          otherwise resetting the atime (access time) counts as an
 #          attribute change, meaning the file will always be included
 #          in each new incremental dump.
+#
+# If you are running tar locally (ie: without rsh or ssh) then remove the
+# "+" so that the argument is no longer shell escaped.
 #
 # This setting only matters if $Conf{XferMethod} = 'tar'.
 #
@@ -705,9 +723,18 @@ $Conf{RsyncClientRestoreCmd} = '$sshPath -l root $host $rsyncPath $argList';
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should
-# be a directory name, eg '/' or '/home'.  For $Conf{XferMethod} = "rsyncd"
-# this should be the name of the module to backup (ie: the name from
-# /etc/rsynd.conf).
+# be a file system path, eg '/' or '/home'.
+#
+# For $Conf{XferMethod} = "rsyncd" this should be the name of the module
+# to backup (ie: the name from /etc/rsynd.conf).
+#
+# This can also be a list of multiple file system paths or modules.
+# For example, by adding --one-file-system to $Conf{RsyncArgs} you
+# can backup each file system separately, which makes restoring one
+# bad file system easier.  In this case you would list all of the mount
+# points:
+#
+#     $Conf{RsyncShareName} = ['/', '/var', '/data', '/boot'];
 #
 $Conf{RsyncShareName} = '/';
 
@@ -826,7 +853,10 @@ $Conf{NmbLookupPath} = '/usr/bin/nmblookup';
 # IP address.  Several variables are substituted at run-time:
 #
 #   $nmbLookupPath      path to nmblookup ($Conf{NmbLookupPath})
-#   $host               host name
+#   $host               IP address
+#
+# This command is only used for DHCP hosts: given an IP address, this
+# command should try to find its NetBios name.
 #
 $Conf{NmbLookupCmd} = '$nmbLookupPath -A $host';
 
@@ -965,10 +995,18 @@ $Conf{RestorePostUserCmd} = undef;
 
 #
 # Override the client's host name.  This allows multiple clients
-# to all refer to the same physical hosts.  This should only be
-# set in the per-PC config file.
+# to all refer to the same physical hostj.  This should only be
+# set in the per-PC config file and is only used by BackupPC at
+# the last moment prior to generating the command used to backup
+# that machine (ie: the value of $Conf{ClientNameAlias} is invisible
+# everywhere else in BackupPC).  Eg:
 #
-# Note: this setting doesn't work for DHCP hosts.
+#         $Conf{ClientNameAlias} = 'realHostName';
+#
+# will cause the relevant smb/tar/rsync backup/restore commands to be
+# directed to realHostName, not the client name.
+#
+# Note: this setting doesn't work for hosts with DHCP set to 1.
 #
 $Conf{ClientNameAlias} = undef;
 

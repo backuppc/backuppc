@@ -16,8 +16,8 @@ start() {
     # If you put it here make sure this file has no read permissions
     # for normal users!  See the documentation for more information.
     #
-    #PASSWD=
-    #export PASSWD
+    #BPC_SMB_PASSWD=
+    #export BPC_SMB_PASSWD
     #
     su __BACKUPPCUSER__ -c "__INSTALLDIR__/bin/BackupPC -d"
 }

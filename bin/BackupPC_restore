@@ -76,7 +76,7 @@ $reqFileName = $1;
 
 my $startTime = time();
 
-my $Hosts = $bpc->HostInfoRead();
+my $Hosts = $bpc->HostInfoRead($client);
 
 my $Dir     = "$TopDir/pc/$client";
 my $xferPid = -1;
@@ -95,6 +95,7 @@ if ( !-f "$Dir/LOCK" ) {
 }
 open(LOG, ">>", "$Dir/LOG");
 select(LOG); $| = 1; select(STDOUT);
+
 
 #
 # Read the request file
@@ -568,6 +569,8 @@ sub UserCommandRun
         XferMethod   => $Conf{XferMethod},
         sshPath      => $Conf{SshPath},
         LOG          => *LOG,
+	user         => $Hosts->{$client}{user},
+	moreUsers    => $Hosts->{$client}{moreUsers},
         XferLOG      => $RestoreLOG,
         stat         => \%stat,
         xferOK       => $stat{xferOK},

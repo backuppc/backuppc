@@ -228,7 +228,7 @@ J. W. Schultz's dirvish (L<http://www.pegasys.ws/dirvish>),
 and John Bowman's rlbackup (L<http://www.math.ualberta.ca/imaging/rlbackup>).
 BackupPC provides many additional features, such as compressed storage,
 hardlinking any matching files (rather than just files with the same name),
-and storing special files without root priviliges.  But these other scripts
+and storing special files without root privileges.  But these other scripts
 provide simple and effective solutions and are worthy of consideration.
 
 =back
@@ -248,7 +248,7 @@ Adding hardlink support to rsync.
 
 Adding block and file checksum caching to rsync.  This will significantly
 increase performance since the server doesn't have to read each file
-twice to compute the block and file checksums.
+(twice) to compute the block and file checksums.
 
 =item *
 
@@ -281,6 +281,8 @@ corresponds to a physical host.  A physical host could have
 several backup clients.  This is useful for backing up
 different types of data, or backing up different portions
 of a machine with different frequencies or settings.
+
+(Note: this has already been implemented in 2.0.0.)
 
 =item *
 
@@ -405,14 +407,14 @@ L<http://www.cpan.org>.
 
 =item *
 
-Perl modules Compress::Zlib, Archive::Zip and Rsync.  Try "perldoc
+Perl modules Compress::Zlib, Archive::Zip and File::RsyncP.  Try "perldoc
 Compress::Zlib" and "perldoc Archive::Zip" to see if you have these
 modules.  If not, fetch them from L<http://www.cpan.org> and see the
 instructions below for how to build and install them.
 
-The Rsync module is available from L<http://backuppc.sourceforge.net>.
-You'll need to install the Rsync module if you want to use Rsync as
-a transport method.
+The File::RsyncP module is available from L<http://perlrsync.sourceforge.net>
+or CPAN.  You'll need to install the File::RsyncP module if you want to use
+Rsync as a transport method.
 
 =item *
 
@@ -434,7 +436,7 @@ If you are using tar to backup linux/unix machines you should have version
 1.13.7 at a minimum, with version 1.13.20 or higher recommended.  Use
 "tar --version" to check your version.  Various GNU mirrors have the newest
 versions of tar, see for example L<http://www.funet.fi/pub/gnu/alpha/gnu/tar>.
-As of July 2002 the latest versons is 1.13.25.
+As of February 2003 the latest version is 1.13.25.
 
 =item *
 
@@ -444,8 +446,7 @@ Use "rsync --version" to check your version.
 
 For BackupPC to use Rsync you will also need to install the perl
 File::RsyncP module, which is available from
-L<http://perlrsync.sourceforge.net>.
-Version 0.20 is required.
+L<http://perlrsync.sourceforge.net>.  Version 0.31 is required.
 
 =item *
 
@@ -613,7 +614,7 @@ share password:
 
 As an environment variable BPC_SMB_PASSWD set before BackupPC starts.
 If you start BackupPC manually the BPC_SMB_PASSWD variable must be set
-manually first.  For backward compatability for v1.5.0 and prior, the
+manually first.  For backward compatibility for v1.5.0 and prior, the
 environment variable PASSWD can be used if BPC_SMB_PASSWD is not set.
 Warning: on some systems it is possible to see environment variables of
 running processes.
@@ -680,24 +681,45 @@ by white space:
 
 =item Host name
 
-If this host is a static IP address this must the machine's IP host name
-(ie: something that can be looked up using nslookup or DNS). If this is
-a host with a dynamic IP address (ie: DHCP flag is 1) then the host
-name must be the netbios name of the machine.  The host name should
-be in lower case.
+This is typically the host name or NetBios name of the client machine
+and should be in lower case.  The host name can contain spaces (escape
+with a backslash), but it is not recommended.
+
+Please read the second L<How BackupPC Finds Hosts|how backuppc finds hosts>.
+
+In certain cases you might want several distinct clients to refer
+to the same physical machine.  For example, you might have a database
+you want to backup, and you want to bracket the backup of the database
+with shutdown/restart using $Conf{DumpPreUserCmd} and $Conf{DumpPostUserCmd}.
+But you also want to backup the rest of the machine while the database
+is still running.  In the case you can specify two different clients in
+the host file, using any mnemonic name (eg: myhost_mysql and myhost), and
+use $Conf{ClientNameAlias} in myhost_mysql's config.pl to specify the
+real host name of the machine.
 
 =item DHCP flag
 
-Set to 0 if this host has a static IP address (meaning it can be looked
-up by name in the DNS).  If the host's IP address is dynamic (eg, it is
-assigned by DHCP) then set this flag to 1.
+Starting with v2.0.0 the way hosts are discovered has changed and now
+in most cases you should specify 0 for the DHCP flag, even if the host
+has a dynamically assigned IP address.
+Please read the second L<How BackupPC Finds Hosts|how backuppc finds hosts>
+to understand whether you need to set the DHCP flag.
 
-The hosts with dhcp = 1 are backed up as follows.  If you have
-configured a DHCP address pool ($Conf{DHCPAddressRanges}) then
-BackupPC will check the NetBIOS name of each machine in the
-range.  Any hosts that have a valid NetBIOS name (ie: matching
-an entry in the hosts file) will be backed up.
+You only need to set DHCP to 1 if your client machine doesn't
+respond to the NetBios multicast request:
 
+    nmblookup myHost
+
+but does respond to a request directed to its IP address:
+
+    nmblookup -A W.X.Y.Z
+
+If you do set DHCP to 1 on any client you will need to specify the range of
+DHCP addresses to search is specified in $Conf{DHCPAddressRanges}.
+
+Note also that the $Conf{ClientNameAlias} feature does not work for
+clients with DHCP set to 1.
+    
 =item User name
 
 This should be the unix login/email name of the user who "owns" or uses
@@ -707,6 +729,13 @@ backups for this host.  Leave this blank if no specific person should
 receive email or be allowed to stop/start/browse/restore backups
 for this host.  Administrators will still have full permissions.
 
+=item More users
+
+Additional user names, separate by commas and with no white space,
+can be specified.  These users will also have full permission in
+the CGI interface to stop/start/browse/restore backups for this host.
+These users will not be sent email about this host.
+
 =back
 
 The first non-comment line of the hosts file is special: it contains
@@ -714,12 +743,9 @@ the names of the columns and should not be edited.
 
 Here's a simple example of a hosts file:
 
-    host        dhcp    user
-    farside     0       craig
-    larson      1       gary
-
-The range of DHCP addresses to search is specified in
-$Conf{DHCPAddressRanges}.
+    host        dhcp    user      moreUsers
+    farside     0       craig     jim,dave
+    larson      1       gary      andy
 
 =head2 Step 5: Client Setup
 
@@ -744,6 +770,9 @@ Here are some brief client setup notes:
 =item WinXX
 
 The preferred setup for WinXX clients is to set $Conf{XferMethod} to "smb".
+(Actually, for v2.0.0, rsyncd is the better method for WinXX if you are
+prepared to run rsync/cygwin on your WinXX client.  More information
+about this will be provided via the FAQ.)
 
 You need to create shares for the data you want to backup.
 Open "My Computer", right click on the drive (eg: C), and
@@ -779,25 +808,58 @@ for more information about settings for other languages.
 =item Linux/Unix
 
 The preferred setup for linux/unix clients is to set $Conf{XferMethod}
-to "tar".
+to "rsync", "rsyncd" or "tar".
 
-You can use either smb or tar for linux/unix machines. Smb requires that
-the Samba server (smbd) be run to provide the shares. Since the smb
+You can use either rsync, smb, or tar for linux/unix machines. Smb requires
+that the Samba server (smbd) be run to provide the shares. Since the smb
 protocol can't represent special files like symbolic links and fifos,
-tar is the recommended transport method for linux/unix machines.
+tar and rsync are the better transport methods for linux/unix machines.
 (In fact, by default samba makes symbolic links look like the file or
 directory that they point to, so you could get an infinite loop if a
 symbolic link points to the current or parent directory. If you really
 need to use Samba shares for linux/unix backups you should turn off the
 "follow symlinks" samba config setting. See the smb.conf manual page.)
 
-The rest of this section describes the tar setup.
+The requirements for each Xfer Method are:
+
+=over 4
+
+=item tar
 
 You must have GNU tar on the client machine.  Use "tar --version"
 or "gtar --version" to verify.  The version should be at least
-1.13.7, and 1.13.20 or greater is recommended.
+1.13.7, and 1.13.20 or greater is recommended.  Tar is run on
+the client machine via rsh or ssh.
 
-For linux/unix machines you should no backup "/proc".  This directory
+The relevant configuration settings are $Conf{TarClientPath},
+$Conf{TarShareName}, $Conf{TarClientCmd}, $Conf{TarFullArgs},
+$Conf{TarIncrArgs}, and $Conf{TarClientRestoreCmd}.
+
+=item rsync
+
+You should have at least rsync 2.5.5, and the latest version 2.5.6
+is recommended.  Rsync is run on the remote client via rsh or ssh.
+
+The relevant configuration settings are $Conf{RsyncClientPath},
+$Conf{RsyncClientCmd}, $Conf{RsyncClientRestoreCmd}, $Conf{RsyncShareName},
+$Conf{RsyncArgs}, $Conf{RsyncRestoreArgs} and $Conf{RsyncLogLevel}.
+
+=item rsyncd
+
+You should have at least rsync 2.5.5, and the latest version 2.5.6
+is recommended.  In this case the rsync daemon should be running on
+the client machine and BackupPC connects directly to it.
+
+The relevant configuration settings are $Conf{RsyncdClientPort},
+$Conf{RsyncdUserName}, $Conf{RsyncdPasswd}, $Conf{RsyncdAuthRequired},
+$Conf{RsyncShareName}, $Conf{RsyncArgs}, $Conf{RsyncRestoreArgs}
+and $Conf{RsyncLogLevel}.  In the case of rsyncd, $Conf{RsyncShareName}
+is the name of an rsync module (ie: the thing in square brackets in
+rsyncd's conf file -- see rsyncd.conf), not a file system path.
+
+=back
+
+For linux/unix machines you should not backup "/proc".  This directory
 contains a variety of files that look like regular files but they are
 special files that don't need to be backed up (eg: /proc/kcore is a
 regular file that contains physical memory).  See $Conf{BackupFilesExclude}.
@@ -805,6 +867,15 @@ It is safe to back up /dev since it contains mostly character-special
 and block-special files, which are correctly handed by BackupPC
 (eg: backing up /dev/hda5 just saves the block-special file information,
 not the contents of the disk).
+
+Alternatively, rather than backup all the file systems as a single
+share ("/"), it is easier to restore a single file system if you backup
+each file system separately.  To do this you should list each file system
+mount point in $Conf{TarShareName} or $Conf{RsyncShareName}, and add the
+--one-file-system option to $Conf{TarClientCmd} or add --one-file-system
+(note the different punctuation) to $Conf{RsyncArgs}.  In this case there
+is no need to exclude /proc explicitly since it looks like a different
+file system.
 
 Next you should decide whether to run tar over ssh, rsh or nfs. Ssh is
 the preferred method. Rsh is not secure and therefore not recommended.
@@ -1234,6 +1305,87 @@ particular, you should specify which users or groups have administrator
 images into $Conf{CgiImageDir} that BackupPC_Admin needs to serve
 up.  You should make sure that $Conf{CgiImageDirURL} is the correct
 URL for the image directory.
+
+=head2 How BackupPC Finds Hosts
+
+Starting with v2.0.0 the way hosts are discovered has changed.  In most
+cases you should specify 0 for the DHCP flag in the conf/hosts file,
+even if the host has a dynamically assigned IP address.
+
+BackupPC (starting with v2.0.0) looks up hosts with DHCP = 0 in this manner:
+
+=over 4
+
+=item *
+
+First DNS is used to lookup the IP address given the client's name
+using perl's gethostbyname() function.  This should succeed for machines
+that have fixed IP addresses that are known via DNS.  You can manually
+see whether a given host have a DNS entry according to perls'
+gethostbyname function with this command:
+
+    perl -e 'print(gethostbyname("myhost") ? "ok\n" : "not found\n");'
+
+=item *
+
+If gethostbyname() fails, BackupPC then attempts a NetBios multicast to
+find the host.  Provided your client machine is configured properly,
+it should respond to this NetBios multicast request.  Specifically,
+BackupPC runs a command of this form:
+
+    nmblookup myhost
+
+If this fails you will see output like:
+
+    querying myhost on 10.10.255.255
+    name_query failed to find name myhost
+
+If this success you will see output like:
+
+    querying myhost on 10.10.255.255
+    10.10.1.73 myhost<00>
+
+Depending on your netmask you might need to specify the -B option to
+nmblookup.  For example:
+
+    nmblookup -B 10.10.1.255 myhost
+    
+If necessary, experiment on the nmblookup command that will return the
+IP address of the client given its name.  Then update
+$Conf{NmbLookupFindHostCmd} with any necessary options to nmblookup.
+
+=back
+
+For hosts that have the DHCP flag set to 1, these machines are
+discovered as follows:
+
+=over 4
+
+=item *
+
+A DHCP address pool ($Conf{DHCPAddressRanges}) needs to be specified.
+BackupPC will check the NetBIOS name of each machine in the range using
+a command of the form:
+
+    nmblookup -A W.X.Y.Z
+
+where W.X.Y.Z is each candidate address from $Conf{DHCPAddressRanges}.
+Any host that has a valid NetBIOS name returned by this command (ie:
+matching an entry in the hosts file) will be backed up.  You can
+modify the specific nmblookup command if necessary via $Conf{NmbLookupCmd}.
+
+=item *
+
+You only need to use this DHCP feature if your client machine doesn't
+respond to the NetBios multicast request:
+
+    nmblookup myHost
+
+but does respond to a request directed to its IP address:
+
+    nmblookup -A W.X.Y.Z
+
+=back
 
 =head2 Other installation topics
 
@@ -2118,6 +2270,16 @@ Set if this backup has mangled file names and attributes.  Always
 true for backups in v1.4.0 and above.  False for all backups prior
 to v1.4.0.
 
+=item xferMethod
+
+Set to the value of $Conf{XferMethod} when this dump was done.
+
+=item level
+
+The level of this dump.  A full dump is level 0.  Currently incrementals
+are 1.  But when multi-level incrementals are supported this will reflect
+each dump's incremental level.
+
 =back
 
 =item restores
@@ -2297,6 +2459,15 @@ See the lib/BackupPC/Attrib.pm module for full details.
 Attribute files are pooled just like normal backup files.  This saves
 space if all the files in a directory have the same attributes across
 multiple backups, which is common.
+
+=head2 Optimizations
+
+BackupPC doesn't care about the access time of files in the pool
+since it saves attribute meta-data separate from the files.  Since
+BackupPC mostly does reads from disk, maintaining the access time of
+files generates a lot of unnecessary disk writes.  So, provided 
+BackupPC has a dedicated data disk, you should consider mounting
+BackupPC's data directory with the noatime attribute (see mount(1)).
 
 =head2 Limitations
 
@@ -2705,9 +2876,12 @@ See L<http://backuppc.sourceforge.net>.
 
 =head1 Copyright
 
-Copyright (C) 2001-2002 Craig Barratt
+Copyright (C) 2001-2003 Craig Barratt
 
 =head1 Credits
+
+Xavier Nicollet, with additions from Guillaume Filion, added the
+internationalization (i18n) support to the CGI interface for v2.0.0.
 
 Ryan Kucera contributed the directory navigation code and images
 for v1.5.0.  He also contributed the first skeleton of BackupPC_restore.
@@ -2715,8 +2889,8 @@ for v1.5.0.  He also contributed the first skeleton of BackupPC_restore.
 Guillaume Filion wrote BackupPC_zipCreate and added the CGI support
 for zip download, in addition to some CGI cleanup, for v1.5.0.
 
-Several people have reported bugs or made useful suggestions; see the
-ChangeLog.
+Many people have reported bugs, made useful suggestions and helped
+with testing; see the ChangeLog and the mail lists.
 
 Your name could appear here in the next version!
 

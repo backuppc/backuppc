@@ -1417,7 +1417,8 @@ EOF
         $jobStr .= "</tr>\n";
     }
     foreach my $host ( sort(keys(%Status)) ) {
-        next if ( $Status{$host}{reason} ne "Reason_backup_failed" );
+        next if ( $Status{$host}{reason} ne "Reason_backup_failed"
+	       || $Status{$host}{error} =~ /^Can't find host \Q$host/ );
         my $startTime = timeStamp2($Status{$host}{startTime});
         my($errorTime, $XferViewStr);
         if ( $Status{$host}{errorTime} > 0 ) {
@@ -1472,13 +1473,7 @@ EOF
     }
 
     Header($Lang->{H_BackupPC_Server_Status});
-	#Header("H_BackupPC_Server_Status");
     print (eval ("qq{$Lang->{BackupPC_Server_Status}}"));
-
-    #Header($Lang->{BackupPC_Server_Status});
-
-    #my $trans_text = $Lang->{BackupPC_Server_Status};
-    #print eval ("qq{$trans_text}");
     Trailer();
 }
 

@@ -365,14 +365,17 @@ sub run
     #
     my $stats = $rs->statsFinal;
     if ( !defined($error) && defined($stats) ) {
-	$t->{xferOK}  = 1;
+	$t->{xferOK} = 1;
     } else {
-	$t->{xferOK}  = 0;
+	$t->{xferOK} = 0;
     }
-    $t->{byteCnt} = $stats->{childStats}{TotalFileSize}
-		  + $stats->{parentStats}{TotalFileSize};
-    $t->{fileCnt} = $stats->{childStats}{TotalFileCnt}
-		  + $stats->{parentStats}{TotalFileCnt};
+    $t->{xferErrCnt} = $stats->{remoteErrCnt};
+    $t->{byteCnt}    = $stats->{childStats}{TotalFileSize}
+		     + $stats->{parentStats}{TotalFileSize};
+    $t->{fileCnt}    = $stats->{childStats}{TotalFileCnt}
+		     + $stats->{parentStats}{TotalFileCnt};
+    my $str = "Done: $t->{fileCnt} files, $t->{byteCnt} bytes\n";
+    $t->{XferLOG}->write(\$str);
     #
     # TODO: get error count, and call fio to get stats...
     #

@@ -29,7 +29,7 @@ start() {
     #
     # Replace the daemon line below with this:
     #   
-    #  daemon --user __BACKUPPCUSER__ /usr/bin/env PASSWD=xxxxx \
+    #  daemon --user __BACKUPPCUSER__ /usr/bin/env BPC_SMB_PASSWD=xxxxx \
     #				__INSTALLDIR__/bin/BackupPC -d
     #   
     echo -n "Starting BackupPC: "

@@ -25,7 +25,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 <br>
 \${h2("Server Control")}
 <form action="\$MyURL" method="get">
-<table>
+<table class="tableStnd">
   <!--<tr><td>Stop the server:<td><input type="submit" name="action" value="Stop">-->
   <tr><td>Reload the server configuration:<td><input type="submit" name="action" value="Reload">
 </table>

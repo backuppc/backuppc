@@ -25,7 +25,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 <br>
 \${h2("Controle van de server")}
 <form action="\$MyURL" method="get">
-<table>
+<table class="tableStnd">
   <!--<tr><td>Stop de server:<td><input type="submit" name="action" value="Stop">-->
   <tr><td>Herlaad de configuratie van de server:<td><input type="submit" name="action" value="Herlaad">
 </table>

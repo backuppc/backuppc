@@ -49,7 +49,7 @@ print OUT <<EOF;
 EOF
 
 foreach my $dir ( qw(bin lib cgi-bin) ) {
-    open(DIFF, "diff -ur $Base/$dir $TmpDir/$dir|")
+    open(DIFF, "diff -ur -I '^# Version .*, released ' $Base/$dir $TmpDir/$dir|")
 	    || die("can't run diff\n");
     while ( <DIFF> ) {
 	next if ( /^Only/ || /^diff / );

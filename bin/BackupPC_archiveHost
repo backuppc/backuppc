@@ -38,7 +38,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta2, released 23 May 2004.
+# Version 2.1.0, released 20 Jun 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -102,7 +102,7 @@ if ( -b $outLoc || -c $outLoc || -f $outLoc ) {
         print("Error: unable to create output directory $outLoc\n");
         exit(1);
     }
-    if ( $splitSize && -x $splitPath ) {
+    if ( $splitSize > 0 && -x $splitPath ) {
         $cmd  .= "| $splitPath -b $splitSize - $outLoc/$host.$bkupNum.tar$fileExt.";
         $mesg .= ", split to output files $outLoc/$host.$bkupNum.tar$fileExt.*";
     } else {
@@ -117,6 +117,7 @@ print("$mesg\n");
 #
 my $ret = system($cmd);
 if ( $ret ) {
+    print("Executing: $cmd\n");
     print("Error: $tarCreate, compress or split failed\n");
     exit(1);
 }
@@ -128,8 +129,10 @@ if ( $ret ) {
 if ( -d $outLoc && -x $parPath ) {
     if ( $parfile != 0 ) {
         print("Running $parPath to create parity files\n");
-        $ret = system("$parPath c -r$parfile $outLoc/$host.$bkupNum.tar$fileExt.par2 $outLoc/$host.$bkupNum.tar$fileExt.*");
+	my $parCmd = "$parPath c -r$parfile $outLoc/$host.$bkupNum.tar$fileExt.par2 $outLoc/$host.$bkupNum.tar$fileExt.*";
+        $ret = system($parCmd);
         if ( $ret ) {
+	    print("Executing: $parCmd\n");
             print("Error: $parPath failed\n");
             exit(1);
         }

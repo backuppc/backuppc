@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta2, released 23 May 2004.
+# Version 2.1.0, released 20 Jun 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,7 +59,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
-        Version => '2.1.0beta2pl1',
+        Version => '2.1.0',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew
@@ -220,11 +220,13 @@ sub BackupInfoWrite
     my($i);
 
     flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
-    unlink("$bpc->{TopDir}/pc/$host/backups.old")
-                if ( -f "$bpc->{TopDir}/pc/$host/backups.old" );
-    rename("$bpc->{TopDir}/pc/$host/backups",
-           "$bpc->{TopDir}/pc/$host/backups.old")
-                if ( -f "$bpc->{TopDir}/pc/$host/backups" );
+    if ( -s "$bpc->{TopDir}/pc/$host/backups" ) {
+	unlink("$bpc->{TopDir}/pc/$host/backups.old")
+		    if ( -f "$bpc->{TopDir}/pc/$host/backups.old" );
+	rename("$bpc->{TopDir}/pc/$host/backups",
+	       "$bpc->{TopDir}/pc/$host/backups.old")
+		    if ( -f "$bpc->{TopDir}/pc/$host/backups" );
+    }
     if ( open(BK_INFO, ">$bpc->{TopDir}/pc/$host/backups") ) {
 	binmode(BK_INFO);
         for ( $i = 0 ; $i < @Backups ; $i++ ) {
@@ -264,11 +266,13 @@ sub RestoreInfoWrite
     my($i);
 
     flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
-    unlink("$bpc->{TopDir}/pc/$host/restores.old")
-                if ( -f "$bpc->{TopDir}/pc/$host/restores.old" );
-    rename("$bpc->{TopDir}/pc/$host/restores",
-           "$bpc->{TopDir}/pc/$host/restores.old")
-                if ( -f "$bpc->{TopDir}/pc/$host/restores" );
+    if ( -s "$bpc->{TopDir}/pc/$host/restores" ) {
+	unlink("$bpc->{TopDir}/pc/$host/restores.old")
+		    if ( -f "$bpc->{TopDir}/pc/$host/restores.old" );
+	rename("$bpc->{TopDir}/pc/$host/restores",
+	       "$bpc->{TopDir}/pc/$host/restores.old")
+		    if ( -f "$bpc->{TopDir}/pc/$host/restores" );
+    }
     if ( open(RESTORE_INFO, ">$bpc->{TopDir}/pc/$host/restores") ) {
 	binmode(RESTORE_INFO);
         for ( $i = 0 ; $i < @Restores ; $i++ ) {
@@ -309,11 +313,13 @@ sub ArchiveInfoWrite
     my($i);
 
     flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
-    unlink("$bpc->{TopDir}/pc/$host/archives.old")
-                if ( -f "$bpc->{TopDir}/pc/$host/archives.old" );
-    rename("$bpc->{TopDir}/pc/$host/archives",
-           "$bpc->{TopDir}/pc/$host/archives.old")
-                if ( -f "$bpc->{TopDir}/pc/$host/archives" );
+    if ( -s "$bpc->{TopDir}/pc/$host/archives" ) {
+	unlink("$bpc->{TopDir}/pc/$host/archives.old")
+		    if ( -f "$bpc->{TopDir}/pc/$host/archives.old" );
+	rename("$bpc->{TopDir}/pc/$host/archives",
+	       "$bpc->{TopDir}/pc/$host/archives.old")
+		    if ( -f "$bpc->{TopDir}/pc/$host/archives" );
+    }
     if ( open(ARCHIVE_INFO, ">$bpc->{TopDir}/pc/$host/archives") ) {
         binmode(ARCHIVE_INFO);
         for ( $i = 0 ; $i < @Archives ; $i++ ) {
@@ -1139,7 +1145,7 @@ sub cmdExecOrEval
 #
 sub cmdSystemOrEvalLong
 {
-    my($bpc, $cmd, $stdoutCB, $ignoreStderr, @args) = @_;
+    my($bpc, $cmd, $stdoutCB, $ignoreStderr, $pidHandlerCB, @args) = @_;
     my($pid, $out, $allOut);
     local(*CHILD);
     
@@ -1187,6 +1193,12 @@ sub cmdSystemOrEvalLong
             print(STDERR "Exec of @$cmd failed\n");
             exit(1);
 	}
+
+	#
+	# Notify caller of child's pid
+	#
+	&$pidHandlerCB($pid) if ( ref($pidHandlerCB) eq "CODE" );
+
 	#
 	# The parent gathers the output from the child
 	#
@@ -1212,7 +1224,7 @@ sub cmdSystemOrEval
 {
     my($bpc, $cmd, $stdoutCB, @args) = @_;
 
-    return $bpc->cmdSystemOrEvalLong($cmd, $stdoutCB, 0, @args);
+    return $bpc->cmdSystemOrEvalLong($cmd, $stdoutCB, 0, undef, @args);
 }
 
 

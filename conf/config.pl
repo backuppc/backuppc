@@ -775,7 +775,7 @@ $Conf{XferLogLevel} = 1;
 $Conf{SmbClientPath} = '/usr/bin/smbclient';
 
 #
-# Commands to run smbclient for a full dump, incremental dump or a restore.
+# Command to run smbclient for a full dump.
 # This setting only matters if $Conf{XferMethod} = 'smb'.
 #
 # The following variables are substituted at run-time:
@@ -790,18 +790,30 @@ $Conf{SmbClientPath} = '/usr/bin/smbclient';
 #    $X_option        exclude option (if $fileList is an exclude list)
 #    $timeStampFile   start time for incremental dump
 #
-# If your smb share is read-only then direct restores will fail.
-# You should set $Conf{SmbClientRestoreCmd} to undef and the
-# corresponding CGI restore option will be removed.
-#
 $Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
 	    . ' $I_option -U $userName -E -N -d 1'
             . ' -c tarmode\\ full -Tc$X_option - $fileList';
 
+#
+# Command to run smbclient for an incremental dump.
+# This setting only matters if $Conf{XferMethod} = 'smb'.
+#
+# Same variable substitutions are applied as $Conf{SmbClientFullCmd}.
+#
 $Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
 	    . ' $I_option -U $userName -E -N -d 1'
 	    . ' -c tarmode\\ full -TcN$X_option $timeStampFile - $fileList';
 
+#
+# Command to run smbclient for a restore.
+# This setting only matters if $Conf{XferMethod} = 'smb'.
+#
+# Same variable substitutions are applied as $Conf{SmbClientFullCmd}.
+#
+# If your smb share is read-only then direct restores will fail.
+# You should set $Conf{SmbClientRestoreCmd} to undef and the
+# corresponding CGI restore option will be removed.
+#
 $Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
             . ' $I_option -U $userName -E -N -d 1'
             . ' -c tarmode\\ full -Tx -';
@@ -1139,7 +1151,7 @@ $Conf{ArchivePar} = 0;
 # If the value is 0, or if $Conf{ArchiveDest} is an existing file or
 # device (e.g. a streaming tape drive), this feature is disabled.
 #
-$Conf{ArchiveSplit} = 650;
+$Conf{ArchiveSplit} = 0;
 
 #
 # Archive Command
@@ -1364,6 +1376,7 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #        $shares       list of all the share names
 #        $XferMethod   value of $Conf{XferMethod} (eg: tar, rsync, smb)
 #        $sshPath      value of $Conf{SshPath},
+#        $cmdType      set to DumpPreUserCmd or DumpPostUserCmd
 #
 # The following variable substitutions are made at run time for
 # $Conf{RestorePreUserCmd} and $Conf{RestorePostUserCmd}:
@@ -1385,6 +1398,7 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #        $pathHdrSrc   common starting path of restore source
 #        $pathHdrDest  common starting path of destination
 #        $fileList     list of files being restored
+#        $cmdType      set to RestorePreUserCmd or RestorePostUserCmd
 #
 # The following variable substitutions are made at run time for
 # $Conf{ArchivePreUserCmd} and $Conf{ArchivePostUserCmd}:
@@ -1404,6 +1418,7 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #        $splitsize    size of the files that the archive creates
 #        $sshPath      value of $Conf{SshPath},
 #        $type         set to "archive"
+#        $cmdType      set to ArchivePreUserCmd or ArchivePostUserCmd
 #
 $Conf{DumpPreUserCmd}     = undef;
 $Conf{DumpPostUserCmd}    = undef;

@@ -42,8 +42,8 @@ use Getopt::Std;
 
 umask(0022);
 
-my $Version     = "2.1.0beta2pl1";
-my $ReleaseDate = "30 May 2004";
+my $Version     = "2.1.0";
+my $ReleaseDate = "20 Jun 2004";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -247,12 +247,13 @@ sub InstallFile
 		s/<(A NAME="item_(%|_)24Conf(%|_)7B(.*?)(%|_)7D).*?">/\L<A NAME="item_%24Conf%7b$4%7d">/ig;
 		s/^<DD>/<DD><P>/;
 		#
-		# fixup for perl 5.8.x
+		# Fixup for perl 5.8.x first one no longer needed after
+		# fix in CSS)
 		#
-		if ( /^<\/dt>/ ) {
-		    $_ .= <FILE>;
-		    s/^(<\/dt>\n<dd>)/$1<p>/s;
-		}
+#		if ( /^<\/dt>/ ) {
+#		    $_ .= <FILE>;
+#		    s/^(<\/dt>\n<dd>)/$1<p>/s;
+#		}
 		s/^<li><\/li>/<li>/;
 	    }
 	    if ( /__CONFIGPOD__/ ) {

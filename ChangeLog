@@ -33,6 +33,28 @@
 * Cosmetic changes to PC Summary and Log file language strings from
   Pete Wenzel.
 
+* BackupPC::Lib tries to be more careful when renaming the backups
+  file to backups.old.  There have been reports of backups being
+  empty, perhaps when the BackupPC data file system fills up.
+  Now backups is not renamed to backups.old if backups is empty.
+
+* BackupPC now closes stderr and stdout before renaming and
+  re-opening the log file.
+
+* Pre/post backup/restore/archive commands now correctly set
+  "type" to either incr/full/restore/archive, and now cmdType
+  is the type of Pre/post backup/restore/archive command.
+
+* BackupPC_archive correctly terminates archive processes on
+  alarm or cancel.
+
+* Updates to BackupPC_stnd.css with absolute font sizes instead
+  of relative.
+
+* BackupPC_dump now makes sure that the $Conf{FullAgeMax} check
+  also ensures the full backup is older than the maximum age
+  expected from $Conf{FullPeriod}.
+
 #------------------------------------------------------------------------
 # Version 2.1.0beta2pl1, 30 May 2004
 #------------------------------------------------------------------------
@@ -74,10 +96,10 @@
 
 * At each wakeup, clients are now queued based on how old the most
   recent backup is.  Clients with errors are queued first, with
-  the oldest error times going first.  Clients with good backups
-  are queued next, with the oldest backup going first.  Previously
-  the clients were simply queued in alphabetic order.  Suggested
-  by Tony Nelson.
+  the oldest error times going first.  The rest of the clients are
+  queued next, with the clients with the oldest backup going first.
+  Previously the clients were simply queued in alphabetic order.
+  Suggested by Mike Trisko and Tony Nelson.
 
 * Added config parameter $Conf{PartialAgeMax} that controls whether
   partials are saved at all, and if so, whether the partial will be
@@ -223,6 +245,10 @@
   that are relative to the last (so -1 is the last), suggested by
   William McKee and Carl Soderstrom.
 
+* The "Wrong user" message in BackupPC::Lib now goes to stderr, so that
+  the user is more likely to see the error with BackupPC_tarCreate.
+  Reported by Paul Fox.
+
 * Add creation of per-PC directory in BackupPC/CGI/Restore.pm in
   case it doesn't already exist.
 
@@ -243,6 +269,10 @@
 
 * Changed exec() syntax to allow executing commands whose path
   contains spaces.
+
+* BackupPC_dump no longer removes backups if $Conf{FullKeepCnt}
+  is zero or undefined.  The protects the existing backups in the
+  case of a bad config.pl file.  Suggested by Christian Warden.
 
 * Swapped the Server and Hosts sections on the Nav bar.  Moved the
   host search text box to the top of the hosts section.  This was

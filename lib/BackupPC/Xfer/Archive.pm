@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta2, released 23 May 2004.
+# Version 2.1.0, released 20 Jun 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -115,11 +115,11 @@ sub run
                                                     $cmdargs);
         $t->{XferLOG}->write(\"Executing: @$archiveClientCmd2\n");
 
-        $bpc->cmdSystemOrEval($archiveClientCmd2,
+        $bpc->cmdSystemOrEvalLong($archiveClientCmd2,
             sub {
                 $errStr = $_[0];
                 $t->{XferLOG}->write(\$_[0]);
-            });
+            }, 0, $t->{pidHandler});
         if ( $? ) {
             ($t->{_errStr} = $errStr) =~ s/[\n\r]+//;
             return;

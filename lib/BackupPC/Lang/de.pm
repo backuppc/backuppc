@@ -32,7 +32,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 <br>
 \${h2("Server Steuerung")}
 <form action="\$MyURL" method="get">
-<table>
+<table class="tableStnd">
   <!--<tr><td>Server stoppen:<td><input type="submit" name="action" value="Stop">-->
   <tr><td>Server Konfiguration neu laden:<td><input type="submit" name="action" value="Reload">
 </table>

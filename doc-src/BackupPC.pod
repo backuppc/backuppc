@@ -6,12 +6,12 @@ released on __RELEASEDATE__.
 =head2 Overview
 
 BackupPC is a high-performance, enterprise-grade system for backing up
-Linux and WinXX PCs, desktops and laptops to a server's disk.  BackupPC
-is highly configurable and easy to install and maintain.
+Unix, Linux and WinXX PCs, desktops and laptops to a server's disk.
+BackupPC is highly configurable and easy to install and maintain.
 
 Given the ever decreasing cost of disks and raid systems, it is now
-practical and cost effective to backup a large number of machines onto a
-server's local disk or network storage.  For some sites this might be
+practical and cost effective to backup a large number of machines onto
+a server's local disk or network storage.  For some sites this might be
 the complete backup solution.  For other sites additional permanent
 archives could be created by periodically backing up the server to tape.
 
@@ -41,7 +41,8 @@ cancel backups and browse and restore files from backups.
 =item *
 
 The http/cgi user interface has internationalization (i18n) support,
-currently providing English, French, German, Spanish and Italian.
+currently providing English, French, German, Spanish, Italian
+and Dutch.
 
 =item *
 
@@ -106,19 +107,21 @@ number of older fulls that are 2, 4, 8, or 16 weeks apart).
 
 =item Incremental Backup
 
-An incremental backup is a backup of files that have changed (based on their
-modification time) since the last successful full backup.  For SMB and
-tar, BackupPC backups all files that have changed since one hour prior to the
-start of the last successful full backup.  Rsync is more clever: any files
-who attributes have changed (ie: uid, gid, mtime, modes, size) since the
-last full are backed up.  Deleted and new files are also detected by
-Rsync incrementals (SMB and tar are not able to detect deleted files or
-new files whose modification time is prior to the last full dump.
+An incremental backup is a backup of files that have changed (based on
+their modification time) since the last successful full backup.  For
+SMB and tar, BackupPC backups all files that have changed since one
+hour prior to the start of the last successful full backup.  Rsync is
+more clever: any files whose attributes have changed (ie: uid, gid,
+mtime, modes, size) since the last full are backed up.  Deleted, new
+files and renamed files are detected by Rsync incrementals.
+In constrast, SMB and tar incrementals are not able to detect deleted
+files, renamed files or new files whose modification time is prior to
+the last full dump.
 
 BackupPC can also be configured to keep a certain number of incremental
 backups, and to keep a smaller number of very old incremental backups.
 (BackupPC does not support multi-level incremental backups, although it
-would be easy to do so.)
+will in a future version.)
 
 BackupPC's CGI interface "fills-in" incremental backups based on the 
 last full backup, giving every backup a "full" appearance.  This makes
@@ -169,10 +172,18 @@ client disk fails or loses files, the BackupPC server can be used to
 restore files. If the server disk fails, BackupPC can be restarted on a
 fresh file system, and create new backups from the clients. The chance
 of the server disk failing can be made very small by spending more money
-on increasingly better RAID systems.
+on increasingly better RAID systems.  However, there is still the risk
+of catastrophic events like fires or earthquakes that can destroy
+both the BackupPC server and the clients it is backing up if they
+are physically nearby.
 
-At other sites a secondary tape backup or cd/dvd will be required. This
-backup can be done perhaps weekly using the archive function of BackupPC.
+Some sites might choose to do periodic backups to tape or cd/dvd.
+This backup can be done perhaps weekly using the archive function of
+BackupPC.
+
+Other users have reported success with removable disks to rotate the
+BackupPC data drives, or using rsync to mirror the BackupPC data pool
+offsite.
 
 =back
 
@@ -197,6 +208,10 @@ The SourceForge project page is at:
     http://sourceforge.net/projects/backuppc
 
 This page has links to the current releases of BackupPC.
+
+=item BackupPC FAQ
+
+BackupPC has a FAQ at L<http://backuppc.sourceforge.net/faq>.
 
 =item Mail lists
 
@@ -253,8 +268,9 @@ These packages can be used as back ends to BackupPC to backup the
 BackupPC server data to tape.
 
 Various programs and scripts use rsync to provide hardlinked backups.
-See, for example, Mike Rubel's site (L<http://www.mikerubel.org>),
-J. W. Schultz's dirvish (L<http://www.pegasys.ws/dirvish>),
+See, for example, Mike Rubel's site (L<http://www.mikerubel.org/computers/rsync_snapshots>),
+JW Schultz's dirvish (L<http://www.pegasys.ws/dirvish> (although as of
+June 2004 this link doesn't work)),
 Ben Escoto's rdiff-backup (L<http://rdiff-backup.stanford.edu>),
 and John Bowman's rlbackup (L<http://www.math.ualberta.ca/imaging/rlbackup>).
 
@@ -267,160 +283,8 @@ provide simple and effective solutions and are worthy of consideration.
 
 =head2 Road map
 
-Here are some ideas for new features that might appear in future
-releases of BackupPC:
-
-=over 4
-
-=item *
-
-Adding hardlink support to rsync.  Currently the tar XferMethod
-correctly saves/restores hardlinks, but rsync does not.  Rsync
-2.6.2 has greatly improved the efficiency of saving hardlink
-information, so File::RsyncP and BackupPC::Xfer::RsyncFileIO need
-the corresponding changes.  Hardlink support is necessary for
-doing a bare-metal restore of a *nix system.
-
-=item *
-
-Adding more complete utf8 support.  BackupPC should use utf8 as the
-native charset for storing file names, and the CGI script should emit
-utf8 so that the file names can be rendered correctly.  Additional
-configuration parameters should allow you to specify the client Xfer
-charset (ie: the filcharset delivered by the XferMethod).  BackupPC
-should encode/decode between this charset and utf8 when doing a
-backup/restore. That way BackupPC can store all files in utf8 no
-matter what charset is used by the XferMethod to deliver the file
-names.  Secondly, the CGI charset should be configurable (default
-utf8) and the CGI script BackupPC_Admin should encode the utf8 file
-names in the desired output charset.  Finally, the charset used to
-deliver file names when restoring individual file names should also
-be configurable, and again BackupPC_Admin should encode the file
-names in this charset (again, utf8 default).  That should allow the
-"Save As" IE dialog to default to the correct file name.
-
-=item *
-
-Adding a trip wire feature for notification when files below certain
-directories change.  For example, if you are backing up a DMZ machine,
-you could request that you get sent email if any files below /bin,
-/sbin or /usr change.
-
-=item *
-
-Allow editing of config parameters via the CGI interface. Users should
-have permission to edit a subset of the parameters for their clients.
-Additionally, allow an optional self-service capability so that users
-can sign up and setup their own clients with no need for IT support.
-
-=item *
-
-Add backend SQL support for various BackupPC metadata, including
-configuration parameters, client lists, and backup and restore
-information.  At installation time the backend data engine will
-be specified (eg: MySQL, ascii text etc).
-
-=item *
-
-Because of file name mangling (adding "f" to start of each file
-name) and with pending utf8 changes, BackupPC is not able to
-store files whose file name length is 255 bytes or greater. The
-format of the attrib file should be extended so that very long
-file names (ie: >= 255) are abbreviated on the file system, but
-the full name is stored in the attrib file.  This could also be
-used to eliminate the leading "f", since that is there to avoid
-collisions with the attrib file.
-
-=item *
-
-Adding support for FTP (via Net::FTP) and/or wget (for HTTP and FTP)
-as additional XferMethods.  One question with ftp is whether you can
-support incrementals.  It should be possible. For example, you could
-use Net::FTP->ls to list each directory, and get the file sizes and
-mtimes.  That would allow incrementals to be supported: only backup
-the files that have different sizes or mtimes for an incremental.
-You also need the ls() function to recurse directories.  The code
-would need to be robust to the different formats returned by ls() on
-different clients.
-
-For wget there would be a new module called BackupPC::Xfer::Wget that
-uses wget.  Wget can do both http and ftp.  Certainly backing up a web
-site via ftp is better than http, especially when there is active
-content and not just static pages.  But the benefit of supporting http
-is that you could use it to backup config pages of network hardware
-(eg: routers etc).  So if a router fails you have a copy of the config
-screens and settings. (And the future tripwire feature on the todo
-list could tell you if someone messed with the router settings.)
-Probably the only choice with wget is to fetch all the files
-(either via ftp or http) into a temporary directory, then run
-tar on that directory and pipe it into BackupPC_tarExtract.
-
-The advantage of using wget is you get both http and ftp.
-The disadvantage is that you can't support incrementals
-with wget, but you can with Net::FTP.  Also people will
-find wget harder to configure and run.
-
-=item *
-
-Replacing smbclient with the perl module FileSys::SmbClient.  This
-gives much more direct control of the smb transfer, allowing
-incrementals to depend on any attribute change (eg: exist, mtime,
-file size, uid, gid), and better support for include and exclude.
-Currently smbclient incrementals only depend upon mtime, so
-deleted files or renamed files are not detected.  FileSys::SmbClient
-would also allow resuming of incomplete full backups in the
-same manner as rsync will.
-
-=item *
-
-Support --listed-incremental or --incremental for tar,
-so that incrementals will depend upon any attribute change (eg: exist,
-mtime, file size, uid, gid), rather than just mtime.  This will allow
-tar to be to as capable as FileSys::SmbClient and rsync.  This is
-low priority since rsync is really the preferred method.
-
-=item *
-
-In addition to allowing a specific backup (incremental or full) to
-be started from the CGI interface, also allow a "regular" backup
-to be started.  This would behave just like a regular background
-backup and determine whether a full, incremental or nothing
-should be done.
-
-=item *
-
-For rysnc (and smb when FileSys::SmbClient is supported, and tar when
---listed-incremental is supported) support multi-level incrementals.
-In fact, since incrementals will now be more "accurate", you could
-choose to never do full backups (except the first time), or at a
-minimum do them infrequently: each incremental would depend upon
-the last, giving a continuous chain of differential backups.
-
-=item *
-
-Allow diffs between two different backed up files to be displayed.
-The history feature in 2.1.0 does show files that are the same
-between backups.  Most often we would like to just take the diff of
-the same host, path and file between different backups, but it would
-be nice to generalize it to any pair of files (ie: different hosts,
-backups, paths etc).  But I'm not sure how the user interface would
-look.
-
-=item *
-
-More speculative: Storing binary file deltas (in fact, reverse deltas)
-for files that have the same name as a previous backup, but that aren't
-already in the pool. This will save storage for things like mailbox
-files or documents that change slightly between backups.  Running some
-benchmarks on a large pool suggests that the potential savings are
-around 15-20%, which isn't spectacular, and likely not worth the
-implementation effort. The program xdelta (v1) on SourceForge (see
-L<http://sourceforge.net/projects/xdelta>) uses an rsync algorithm for
-doing efficient binary file deltas.  Rather than using an external
-program, File::RsyncP would eventually get the necessary delta
-generation code from rsync.
-
-=back
+The new features planned for future releases of BackupPC
+are at L<http://backuppc.sourceforge.net/faq/roadMap.html>.
 
 Comments and suggestions are welcome.
 
@@ -432,19 +296,19 @@ to contribute to the open source community.
 BackupPC already has more than enough features for my own needs.  The
 main compensation for continuing to work on BackupPC is knowing that
 more and more people find it useful.  So feedback is certainly
-appreciated.  Even negative feedback is helpful, for example "We
-evaluated BackupPC but didn't use it because it doesn't ...".
+appreciated, both positive and negative.
 
 Beyond being a satisfied user and telling other people about it, everyone
-is encouraged to add links to L<http://backuppc.sourceforge.net> (I'll
-see then via Google) or otherwise publicize BackupPC.  Unlike the
-commercial products in this space, I have a zero budget (in both
+is encouraged to add links to L<http://backuppc.sourceforge.net>
+(I'll see then via Google) or otherwise publicize BackupPC.  Unlike
+the commercial products in this space, I have a zero budget (in both
 time and money) for marketing, PR and advertising, so it's up to
-all of you!
+all of you!  Feel free to vote for BackupPC at
+L<http://freshmeat.net/projects/backuppc>.
 
 Also, everyone is encouraged to contribute patches, bug reports, feature
-and design suggestions, new code, and documentation corrections or
-improvements.
+and design suggestions, new code, FAQs, and documentation corrections or
+improvements.  Answering questions on the mail list is a big help too.
 
 =head1 Installing BackupPC
 
@@ -461,6 +325,12 @@ disk space (see the next section for what that means). The CPU and disk
 performance on this server will determine how many simultaneous backups
 you can run. You should be able to run 4-8 simultaneous backups on a
 moderately configured server.
+
+Several users have reported significantly better performance using
+reiser compared to ext3 for the BackupPC data file system.  It is
+also recommended you consider either an LVM or raid setup (either
+in HW or SW; eg: 3Ware RAID5) so that you can expand the
+file system as necessary.
 
 When BackupPC starts with an empty pool, all the backup data will be
 written to the pool on disk. After more backups are done, a higher
@@ -479,8 +349,8 @@ compression is on.
 =item *
 
 Perl version 5.6.0 or later. BackupPC has been tested with
-version 5.6.0, 5.6.1, 5.8.0, 5.8.1 and 5.8.2. If you don't
-have perl, please see L<http://www.cpan.org>.
+version 5.6.x, and 5.8.x. If you don't have perl, please
+see L<http://www.cpan.org>.
 
 =item *
 
@@ -498,10 +368,8 @@ Rsync as a transport method.
 If you are using smb to backup WinXX machines you need smbclient and
 nmblookup from the samba package.  You will also need nmblookup if
 you are backing up linux/unix DHCP machines.  See L<http://www.samba.org>.
-Version 2.2.0 or later of Samba is required (smbclient's tar feature in
-2.0.8 and prior has bugs for file path lengths around 100 characters
-and generates bad output when file lengths change during the backup).
-Samba versions 3.x are stable and recommended instead of 2.x.
+Version 2.2.0 or later of Samba is required.
+Samba versions 3.x are stable and now recommended instead of 2.x.
 
 See L<http://www.samba.org> for source and binaries.  It's pretty easy to
 fetch and compile samba, and just grab smbclient and nmblookup, without
@@ -525,7 +393,7 @@ L<http://rsync.samba.org>. Use "rsync --version" to check your version.
 For BackupPC to use Rsync you will also need to install the perl
 File::RsyncP module, which is available from
 L<http://perlrsync.sourceforge.net>.
-Version 0.51 or later is required.
+Version 0.52 or later is required.
 
 =item *
 
@@ -549,7 +417,7 @@ Keeping three weekly full backups, and six incrementals is around
 1200GB of raw data.  Because of pooling and compression, only 150GB
 is needed.
 
-Here's a rule of thumb. Add up the C drive usage of all the machines you
+Here's a rule of thumb. Add up the disk usage of all the machines you
 want to backup (210GB in the first example above). This is a rough
 minimum space estimate that should allow a couple of full backups and at
 least half a dozen incremental backups per machine. If compression is on
@@ -588,7 +456,24 @@ inode usage.
 
 =head2 Step 1: Getting BackupPC
 
-Download the latest version from L<http://backuppc.sourceforge.net>.
+Some linux distributions now include BackupPC.  The Debian
+distribution, supprted by Ludovic Drolez, can be found at
+L<http://packages.debian.org/backuppc>; it should be included
+in the next stable Debian release.  On Debian, BackupPC can
+be installed with the command:
+
+    apt-get install backuppc
+
+In the future there might be packages for Gentoo and other
+linux flavors.  If the packaged version is older than the
+released version then you will probably want to install the
+lastest version as described below.
+
+Otherwise, manually fetching and installing BackupPC is easy.
+Start by downloading the latest version from
+L<http://backuppc.sourceforge.net>.  Hit the "Code" button,
+then select the "backuppc" or "backuppc-beta" package and
+download the latest version.
 
 =head2 Step 2: Installing the distribution
 
@@ -614,7 +499,7 @@ You can run "perldoc Archive::Zip" to see if this module is installed.
 To use rsync and rsyncd with BackupPC you will need to install File::RsyncP.
 You can run "perldoc File::RsyncP" to see if this module is installed.
 File::RsyncP is available from L<http://perlrsync.sourceforge.net>.
-Version 0.51 or later is required.
+Version 0.52 or later is required.
 
 =back
 
@@ -637,8 +522,30 @@ BackupPC-__VERSION__.tar.gz, run these commands as root:
     cd BackupPC-__VERSION__
     perl configure.pl
 
-The configure.pl also accepts command-line options if you wish
-to run it in a non-interactive manner.  It has self-contained
+In the future this release might also have patches available on the
+SourceForge site.  These patch files are text files, with a name of
+the form
+
+    BackupPC-__VERSION__plN.diff
+
+where N is the patch level, eg: pl5 is patch-level 5.  These
+patch files are cumulative: you only need apply the last patch
+file, not all the earlier patch files.  If a patch file is
+available, eg: BackupPC-__VERSION__pl5.diff, you should apply
+the patch after extracting the tar file:
+
+     # fetch BackupPC-__VERSION__.tar.gz
+     # fetch BackupPC-__VERSION__pl5.diff
+     tar zxf BackupPC-__VERSION__.tar.gz
+     cd BackupPC-__VERSION__
+     patch -p0 < ../BackupPC-__VERSION__pl5.diff
+     perl configure.pl
+
+A patch file includes comments that describe that bug fixes
+and changes.  Feel free to review it before you apply the patch.
+
+The configure.pl script also accepts command-line options if you
+wish to run it in a non-interactive manner.  It has self-contained
 documentation for all the command-line options, which you can
 read with perldoc:
 
@@ -695,53 +602,9 @@ directory.
 After running configure.pl, browse through the config file,
 __INSTALLDIR__/conf/config.pl, and make sure all the default settings
 are correct. In particular, you will need to decide whether to use
-smb or tar transport (or whether to set it on a per-PC basis),
-set the smb share password (if using smb), set the backup policies
-and modify the email message headers and bodies.
-
-BackupPC needs to know the smb share user name and password for each PC
-that uses smb (ie: all the WinXX clients).  The user name is specified
-in $Conf{SmbShareUserName}. There are four ways to tell BackupPC the smb
-share password:
-
-=over 4
-
-=item *
-
-As an environment variable BPC_SMB_PASSWD set before BackupPC starts.
-If you start BackupPC manually the BPC_SMB_PASSWD variable must be set
-manually first.  For backward compatibility for v1.5.0 and prior, the
-environment variable PASSWD can be used if BPC_SMB_PASSWD is not set.
-Warning: on some systems it is possible to see environment variables of
-running processes.
-
-=item *
-
-Alternatively the BPC_SMB_PASSWD setting can be included in
-/etc/init.d/backuppc, in which case you must make sure this file
-is not world (other) readable.
-
-=item *
-
-As a configuration variable $Conf{SmbSharePasswd} in
-__TOPDIR__/conf/config.pl.  If you put the password
-here you must make sure this file is not world (other) readable.
-
-=item *
-
-As a configuration variable $Conf{SmbSharePasswd} in the per-PC
-configuration file, __TOPDIR__/pc/$host/config.pl. You will have to
-use this option if the smb share password is different for each host.
-If you put the password here you must make sure this file is not
-world (other) readable.
-
-=back
-
-Placement and protection of the smb share password is a possible
-security risk, so please double-check the file and directory
-permissions.  In a future version there might be support for
-encryption of this password, but a private key will still have to
-be stored in a protected place.  Suggestions are welcome.
+smb, tar or rsync transport (or whether to set it on a per-PC basis)
+and set the relevant parameters for that transport method.
+See the section L<Client Setup|step 5: client setup> for more details.
 
 =head2 Step 4: Setting up the hosts file
 
@@ -846,8 +709,8 @@ Here's a simple example of a hosts file:
 =head2 Step 5: Client Setup
 
 Two methods for getting backup data from a client are supported: smb and
-tar. Smb is the preferred method for WinXX clients and tar is preferred
-method for linux/unix clients.
+tar. Smb or rsync are the preferred methods for WinXX clients and rsync or
+tar are the preferred methods for linux/unix clients.
 
 The transfer method is set using the $Conf{XferMethod} configuration
 setting. If you have a mixed environment (ie: you will use smb for some
@@ -896,6 +759,55 @@ NetBios name is set.  Go to Control Panel|System|Network Identification
 Also, you should go to Control Panel|Network Connections|Local Area
 Connection|Properties|Internet Protocol (TCP/IP)|Properties|Advanced|WINS
 and verify that NetBios is not disabled.
+
+The relevant configuration settings are $Conf{SmbShareName},
+$Conf{SmbShareUserName}, $Conf{SmbSharePasswd}, $Conf{SmbClientPath},
+$Conf{SmbClientFullCmd}, $Conf{SmbClientIncrCmd} and
+$Conf{SmbClientRestoreCmd}.
+
+BackupPC needs to know the smb share user name and password for a
+client machine that uses smb.  The user name is specified in
+$Conf{SmbShareUserName}. There are four ways to tell BackupPC the
+smb share password:
+
+=over 4
+
+=item *
+
+As an environment variable BPC_SMB_PASSWD set before BackupPC starts.
+If you start BackupPC manually the BPC_SMB_PASSWD variable must be set
+manually first.  For backward compatibility for v1.5.0 and prior, the
+environment variable PASSWD can be used if BPC_SMB_PASSWD is not set.
+Warning: on some systems it is possible to see environment variables of
+running processes.
+
+=item *
+
+Alternatively the BPC_SMB_PASSWD setting can be included in
+/etc/init.d/backuppc, in which case you must make sure this file
+is not world (other) readable.
+
+=item *
+
+As a configuration variable $Conf{SmbSharePasswd} in
+__TOPDIR__/conf/config.pl.  If you put the password
+here you must make sure this file is not world (other) readable.
+
+=item *
+
+As a configuration variable $Conf{SmbSharePasswd} in the per-PC
+configuration file, __TOPDIR__/pc/$host/config.pl. You will have to
+use this option if the smb share password is different for each host.
+If you put the password here you must make sure this file is not
+world (other) readable.
+
+=back
+
+Placement and protection of the smb share password is a possible
+security risk, so please double-check the file and directory
+permissions.  In a future version there might be support for
+encryption of this password, but a private key will still have to
+be stored in a protected place.  Suggestions are welcome.
 
 As an alternative to setting $Conf{XferMethod} to "smb" (using
 smbclient) for WinXX clients, you can use an smb network filesystem (eg:
@@ -962,7 +874,7 @@ $Conf{RsyncArgs}, and $Conf{RsyncRestoreArgs}.
 
 =item rsyncd
 
-You should have at least rsync 2.5.5, and the latest version 2.5.6
+You should have at least rsync 2.5.5, and the latest version 2.6.2
 is recommended.  In this case the rsync daemon should be running on
 the client machine and BackupPC connects directly to it.
 
@@ -1014,200 +926,45 @@ of SSH you have by typing "ssh" or "man ssh".)
 =item Mac OS X
 
 In general this should be similar to Linux/Unix machines.
-
-=over 4
-
-=item OpenSSH Instructions
-
-Depending upon your OpenSSH installation, many of these steps can be
-replaced by running the scripts ssh-user-config and ssh-host-config
-included with OpenSSH.  You still need to manually exchange the keys.
-
-=over 4
-
-=item Key generation
-
-As root on the client machine, use ssh-keygen to generate a
-public/private key pair, without a pass-phrase:
-
-    ssh-keygen -t rsa -N ''
-
-This will save the public key in ~/.ssh/id_rsa.pub and the private
-key in ~/.ssh/id_rsa.
-
-=item BackupPC setup
-
-Repeat the above steps for the BackupPC user (__BACKUPPCUSER__) on the server.
-Make a copy of the public key to make it recognizable, eg:
-
-    ssh-keygen -t rsa -N ''
-    cp ~/.ssh/id_rsa.pub ~/.ssh/BackupPC_id_rsa.pub
-
-See the ssh and sshd manual pages for extra configuration information.
-
-=item Key exchange
-
-To allow BackupPC to ssh to the client as root, you need to place
-BackupPC's public key into root's authorized list on the client.
-Append BackupPC's public key (BackupPC_id_rsa.pub) to root's
-~/.ssh/authorized_keys2 file on the client:
-
-    touch ~/.ssh/authorized_keys2
-    cat BackupPC_id_rsa.pub >> ~/.ssh/authorized_keys2
-
-You should edit ~/.ssh/authorized_keys2 and add further specifiers,
-eg: from, to limit which hosts can login using this key.  For example,
-if your BackupPC host is called backuppc.my.com, there should be
-one line in ~/.ssh/authorized_keys2 that looks like:
-
-    from="backuppc.my.com" ssh-rsa [base64 key, eg: ABwBCEAIIALyoqa8....]
-
-=item Fix permissions
-
-You will probably need to make sure that all the files
-in ~/.ssh have no group or other read/write permission:
-
-    chmod -R go-rwx ~/.ssh
-
-You should do the same thing for the BackupPC user on the server.
-
-=item Testing
-
-As the BackupPC user on the server, verify that this command:
-
-    ssh -l root clientHostName whoami
-
-prints
-
-    root
-
-You might be prompted the first time to accept the client's host key and
-you might be prompted for root's password on the client.  Make sure that
-this command runs cleanly with no prompts after the first time.  You
-might need to check /etc/hosts.equiv on the client.  Look at the
-man pages for more information.  The "-v" option to ssh is a good way
-to get detailed information about what fails.
-
-=back
-
-=item SSH2 Instructions
-
-=over 4
-
-=item Key generation
-
-As root on the client machine, use ssh-keygen2 to generate a
-public/private key pair, without a pass-phrase:
-
-    ssh-keygen2 -t rsa -P
-
-or:
-
-    ssh-keygen -t rsa -N ''
-
-(This command might just be called ssh-keygen on your machine.)
-
-This will save the public key in /.ssh2/id_rsa_1024_a.pub and the private
-key in /.ssh2/id_rsa_1024_a.
-
-=item Identification
-
-Create the identification file /.ssh2/identification:
-
-    echo "IdKey id_rsa_1024_a" > /.ssh2/identification
-
-=item BackupPC setup
-
-Repeat the above steps for the BackupPC user (__BACKUPPCUSER__) on the server.
-Rename the key files to recognizable names, eg:
-
-    ssh-keygen2 -t rsa -P
-    mv ~/.ssh2/id_rsa_1024_a.pub ~/.ssh2/BackupPC_id_rsa_1024_a.pub
-    mv ~/.ssh2/id_rsa_1024_a     ~/.ssh2/BackupPC_id_rsa_1024_a
-    echo "IdKey BackupPC_id_rsa_1024_a" > ~/.ssh2/identification
-
-Based on your ssh2 configuration, you might also need to turn off
-StrictHostKeyChecking and PasswordAuthentication:
-
-    touch ~/.ssh2/ssh2_config
-    echo "StrictHostKeyChecking ask" >> ~/.ssh2/ssh2_config
-    echo "PasswordAuthentication no" >> ~/.ssh2/ssh2_config
-
-=item Key exchange
-
-To allow BackupPC to ssh to the client as root, you need to place
-BackupPC's public key into root's authorized list on the client.
-Copy BackupPC's public key (BackupPC_id_rsa_1024_a.pub) to the
-/.ssh2 directory on the client.  Add the following line to the
-/.ssh2/authorization file on the client (as root):
-
-    touch /.ssh2/authorization
-    echo "Key BackupPC_id_rsa_1024_a.pub" >> /.ssh2/authorization
-
-=item Fix permissions
-
-You will probably need to make sure that all the files
-in ~/.ssh2 have no group or other read/write permission:
-
-    chmod -R go-rwx ~/.ssh2
-
-You should do the same thing for the BackupPC user on the server.
-
-=item Testing
-
-As the BackupPC user on the server, verify that this command:
-
-    ssh2 -l root clientHostName whoami
-
-prints
-
-    root
-
-You might be prompted the first time to accept the client's host key and
-you might be prompted for root's password on the client.  Make sure that
-this command runs cleanly with no prompts after the first time.  You
-might need to check /etc/hosts.equiv on the client.  Look at the
-man pages for more information.  The "-v" option to ssh2 is a good way
-to get detailed information about what fails.
-
-=back
-
-=item SSH version 1 Instructions
-
-The concept is identical and the steps are similar, but the specific
-commands and file names are slightly different.
-
-First, run ssh-keygen on the client (as root) and server (as the BackupPC
-user) and simply hit enter when prompted for the pass-phrase:
-
-    ssh-keygen
-
-This will save the public key in /.ssh/identity.pub and the private
-key in /.ssh/identity.
-
-Next, append BackupPC's ~/.ssh/identity.pub (from the server) to root's
-/.ssh/authorized_keys file on the client.  It's a single long line that
-you can cut-and-paste with an editor (make sure it remains a single line).
-
-Next, force protocol version 1 by adding:
-
-    Protocol 1
-
-to BackupPC's ~/.ssh/config on the server.
-
-Next, run "chmod -R go-rwx ~/.ssh" on the server and "chmod -R go-rwx ~/.ssh"
-on the client.
-
-Finally, test using:
-
-    ssh -l root clientHostName whoami
-
-=back
-
-Finally, if this machine uses DHCP you will need to run nmbd (the
-NetBios name server) from the Samba distribution so that the machine
-responds to a NetBios name request. See the manual page and Samba
-documentation for more information.
+Mark Stosberg reports that you can also use hfstar.
+See L<http://fink.sourceforge.net/pdb/package.php/hfstar>.
+
+=item SSH Setup
+
+SSH is a secure way to run tar or rsync on a backup client to extract
+the data.  SSH provides strong authentication and encryption of
+the network data.
+
+Note that if you run rsyncd (rsync daemon), ssh is not used.
+In this case, rsyncd provides its own authentication, but there
+is no encryption of network data.  If you want encryption of
+network data you can use ssh to create a tunnel, or use a
+program like stunnel.  If someone submits instructions I
+
+Setup instructions for ssh are at
+L<http://backuppc.sourceforge.net/faq/ssh.html>.
+
+=item Clients that use DHCP
+
+If a client machine uses DHCP BackupPC needs some way to find the
+IP address given the host name.  One alternative is to set dhcp
+to 1 in the hosts file, and BackupPC will search a pool of IP
+addresses looking for hosts.  More efficiently, it is better to
+set dhcp = 0 and provide a mechanism for BackupPC to find the
+IP address given the host name.
+
+For WinXX machines BackupPC uses the NetBios name server to determine
+the IP address given the host name.
+For unix machines you can run nmbd (the NetBios name server) from
+the Samba distribution so that the machine responds to a NetBios
+name request. See the manual page and Samba documentation for more
+information.
+
+Alternatively, you can set $Conf{NmbLookupFindHostCmd} to any command
+that returns the IP address given the host name.
+
+Please read the section L<How BackupPC Finds Hosts|how backuppc finds hosts>
+for more details.
 
 =back
 
@@ -1332,12 +1089,13 @@ This is because setuid scripts are disabled by the kernel in most
 flavors of unix and linux.
 
 To see if your perl has setuid emulation, see if there is a program
-called sperl5.6.0 or sperl5.6.1 in the place where perl is installed.
-If you can't find this program, then you have two options: rebuild
-and reinstall perl with the setuid emulation turned on (answer "y" to
-the question "Do you want to do setuid/setgid emulation?" when you
-run perl's configure script), or switch to the mod_perl alternative
-for the CGI script (which doesn't need setuid to work).
+called sperl5.6.0 (or sperl5.8.2 etc, based on your perl version)
+in the place where perl is installed. If you can't find this program,
+then you have two options: rebuild and reinstall perl with the setuid
+emulation turned on (answer "y" to the question "Do you want to do
+setuid/setgid emulation?" when you run perl's configure script), or
+switch to the mod_perl alternative for the CGI script (which doesn't
+need setuid to work).
 
 =item Mod_perl Setup
 
@@ -1391,7 +1149,6 @@ this works (with tweaks from Michael Tuzi):
 	PerlResponseHandler ModPerl::Registry
 	PerlOptions +ParseHeaders
 	Options +ExecCGI
-
 	Order deny,allow
 	Deny from all
 	Allow from 192.168.0  
@@ -1462,7 +1219,7 @@ images into $Conf{CgiImageDir} that BackupPC_Admin needs to serve
 up.  You should make sure that $Conf{CgiImageDirURL} is the correct
 URL for the image directory.
 
-See the section L<Debugging installation problems|debugging installation problems> for suggestions on debugging the Apache authentication setup.
+See the section L<Fixing installation problems|fixing installation problems> for suggestions on debugging the Apache authentication setup.
 
 =head2 How BackupPC Finds Hosts
 
@@ -1507,7 +1264,7 @@ Depending on your netmask you might need to specify the -B option to
 nmblookup.  For example:
 
     nmblookup -B 10.10.1.255 myhost
-    
+
 If necessary, experiment on the nmblookup command that will return the
 IP address of the client given its name.  Then update
 $Conf{NmbLookupFindHostCmd} with any necessary options to nmblookup.
@@ -1719,206 +1476,10 @@ can now re-start BackupPC.
 
 =back
 
-=head2 Debugging installation problems
+=head2 Fixing installation problems
 
-This section will probably grow based on the types of questions on
-the BackupPC mail list.  Eventually the FAQ at
-L<http://backuppc.sourceforge.net/faq/> will include more details
-than this section.
-
-=over 4
-
-=item Check log files
-
-Assuming BackupPC can start correctly you should inspect __TOPDIR__/log/LOG
-for any errors.  Assuming backups for a particular host start, you
-should be able to look in __TOPDIR__/pc/$host/LOG for error messages
-specific to that host.  Always check both log files.
-
-=item CGI script doesn't run
-
-Perhaps the most common program with the installation is getting the
-CGI script to run.  Often the setuid isn't configured correctly, or
-doesn't work on your system.
-
-First, try running BackupPC_Admin manually as the BackupPC user, eg:
-
-    su __BACKUPPCUSER__
-    __CGIDIR__/BackupPC_Admin
-
-Now try running it as the httpd user (which ever user apache runs as);
-
-    su httpd
-    __CGIDIR__/BackupPC_Admin
-
-In both cases do you get normal html output?
-
-If the first case works but the second case fails with an error that
-the wrong user is running the script then you have a setuid problem.
-(This assumes you are running BackupPC_Admin without mod_perl, and
-you therefore need seduid to work.  If you are using mod_perl then
-apache should run as user __BACKUPPCUSER__.)
-
-First you should make sure the cgi-bin directory is on a file system
-that doesn't have the "nosuid" mount option.  
-
-Next, experiment by creating this script:
-
-    #!/bin/perl
-
-    printf("My userid is $> (%s)\n", (getpwuid($>))[0]);
-
-then chown it to backuppc and chmod u+s:
-
-    root# chown backuppc testsetuid
-    root# chmod u+s testsetuid
-    root# chmod a+x testsetuid
-    root# ls -l testsetuid
-    -rwsr-xr-x    1 backuppc  wheel          76 Aug 26 09:46 testsetuid*
-
-Now run this program as a normal user.  What uid does it print?
-Try changing the first line of the script to directly call sperl:
-
-    #!/usr/bin/sperl5.8.0
-
-(modify according to your version and path).  Does this work
-instead?
-
-Finally, you should invoke the CGI script from a browser, using
-a URL like:
-
-    http://myHost/cgi-bin/BackupPC/BackupPC_Admin
-
-You should make sure REMOTE_USER is being set by apache (see the
-earlier section) so that user authentication works.  Make sure
-the config settings $Conf{CgiAdminUserGroup} and $Conf{CgiAdminUsers}
-correctly specify the privileged administrator users.
-
-=item You cannot access per-host information in the CGI interface
-
-If you get the error
-
-    Only privileged users can view information about host xyz
-
-it means that BackupPC_Admin is unable to match the user's login
-name (supplied by Apache via the REMOTE_USER environment variable)
-with either that host's user name (in the conf/hosts file) or
-with the administrators specified in the $Conf{CgiAdminUsers}
-or $Conf{CgiAdminUserGroup} settings.
-
-The most common problem is that REMOTE_USER is not set because the
-Apache authentication is not correctly configured.  In this case
-BackupPC_Admin will report this additional error:
-
-    Note: $ENV{REMOTE_USER} is not set, which could mean there is an
-    installation problem.  BackupPC_Admin expects Apache to authenticate
-    the user and pass their user name into this script as the REMOTE_USER
-    environment variable.  See the documentation.
-
-You should review the configuration instructions to setup Apache
-authentication correctly.  To test if REMOTE_USER is being set
-correctly, there is a simple script called printenv that is
-included with Apache.  This is a simple CGI script that prints
-out all the environment variables.  Place this script in the
-same directory as BackupPC_Admin and run it with a URL like:
-
-    http://myHost/cgi-bin/BackupPC/printenv
-
-Check the value of the REMOTE_USER environment variable.
-Here's a copy of the printenv script:
-
-    #!/usr/bin/perl
-    ##
-    ##  printenv -- demo CGI program which just prints its environment
-    ##
-
-    print "Content-type: text/plain\n\n";
-    foreach $var (sort(keys(%ENV))) {
-        $val = $ENV{$var};
-        $val =~ s|\n|\\n|g;
-        $val =~ s|"|\\"|g;
-        print "${var}=\"${val}\"\n";
-    }
-
-=item Can't ping or find host
-
-Please read the section L<How BackupPC Finds Hosts|how backuppc finds hosts>.
-
-The BackupPC_dump command now has a -v option, so the easiest way to
-debug backup problems on a specific host is to run BackupPC_dump
-manually as the BackupPC user:
-
-    su __BACKUPPCUSER__
-    __INSTALLDIR__/bin/BackupPC_dump -v -f hostName
-
-This will run a full dump on hostName (replace with your host name).
-It will show each command (eg: ping, nmblookup and the full dump
-commands) and the output from each command.  Reading the output
-carefully should show you what the problem is.
-
-You can also verify that nmblookup correctly returns the netbios name.
-This is essential for DHCP hosts, and depending upon the setting of
-$Conf{FixedIPNetBiosNameCheck} might also be required for fixed IP
-address hosts too.  Run this command:
-
-    nmblookup -A hostName
-
-Verify that the host name is printed.  The output might look like:
-
-    received 7 names
-            DELLLS13        <00> -         P <ACTIVE> 
-            DOMAINNAME      <00> - <GROUP> P <ACTIVE> 
-            DELLLS13        <20> -         P <ACTIVE> 
-            DOMAINNAME      <1e> - <GROUP> P <ACTIVE> 
-            DELLLS13        <03> -         P <ACTIVE> 
-            DELLLS13$       <03> -         P <ACTIVE> 
-            CRAIG           <03> -         P <ACTIVE> 
-
-The first name, converted to lower case, is used for the host name.
-
-=item Transport method doesn't work
-
-The BackupPC_dump command has a -v option, so the easiest way to
-debug backup problems on a specific host is to run BackupPC_dump
-manually as the BackupPC user:
-
-    su __BACKUPPCUSER__
-    __INSTALLDIR__/bin/BackupPC_dump -v -f hostName
-
-This will run a full dump on hostName (replace with your host name)
-and will print all the output from each command, including the log
-output.
-
-The most likely problems will relate to connecting to the smb shares on
-each host.  On each failed backup, a file __TOPDIR__/pc/$host/XferLOG.bad.z
-will be created.  This is the stderr output from the transport program.
-You can view this file via the CGI interface, or manually uncompress it
-with;
-
-    __INSTALLDIR__/bin/BackupPC_zcat __TOPDIR__/pc/$host/XferLOG.bad.z | more
-
-The first line will show the full command that was run (eg: rsync, tar
-or smbclient).  Based on the error messages you should figure out what
-is wrong.  Possible errors on the server side are invalid host, invalid
-share name, bad username or password.  Possible errors on the client
-side are misconfiguration of the share, username or password.
-
-You should try running the command manually to see what happens.
-For example, for smbclient you should it manually and verify that
-you can connect to the host in interactive mode, eg:
-
-    smbclient '\\hostName\shareName' -U userName
-
-shareName should match the $Conf{SmbShareName} setting and userName
-should match the the $Conf{SmbShareUserName} setting.
-
-You will be prompted for the password. You should then see this prompt:
-
-    smb: \>
-
-Verify that "ls" works and then type "quit" to exit.
-
-=back
+Please see the FAQ at L<http://backuppc.sourceforge.net/faq> for
+debugging suggestions.
 
 =head1 Restore functions
 
@@ -1969,14 +1530,24 @@ with a summary of the exact source and target files and directories
 before you commit.  When you give the final go ahead the restore
 operation will be queued like a normal backup job, meaning that it
 will be deferred if there is a backup currently running for that host.
-When the restore job is run, smbclient or tar is used (depending upon
-$Conf{XferMethod}) to actually restore the files.  Sorry, there is
-currently no option to cancel a restore that has been started.
+When the restore job is run, smbclient, tar, rsync or rsyncd is used
+(depending upon $Conf{XferMethod}) to actually restore the files.
+Sorry, there is currently no option to cancel a restore that has been
+started.
 
 A record of the restore request, including the result and list of
 files and directories, is kept.  It can be browsed from the host's
 home page.  $Conf{RestoreInfoKeepCnt} specifies how many old restore
 status files to keep.
+
+Note that for direct restore to work, the $Conf{XferMethod} must
+be able to write to the client.  For example, that means an SMB
+share for smbclient needs to be writable, and the rsyncd module
+needs "read only" set to "yes".  This creates additional security
+risks.  If you only create read-only SMB shares (which is a good
+idea), then the direct restore will fail.  You can disable the
+direct restore option by setting $Conf{SmbClientRestoreCmd},
+$Conf{TarClientRestoreCmd} and $Conf{RsyncRestoreArgs} to undef.
 
 =item Option 2: Download Zip archive
 
@@ -2019,6 +1590,8 @@ full file name, eg:
 
 It's your responsibility to make sure the file is really compressed:
 BackupPC_zcat doesn't check which backup the requested file is from.
+BackupPC_zcat returns a non-zero status if it fails to uncompress
+a file.
 
 =item BackupPC_tarCreate
 
@@ -2030,7 +1603,7 @@ incremental or full backup.
 The usage is:
 
    BackupPC_tarCreate [-t] [-h host] [-n dumpNum] [-s shareName]
-		    [-r pathRemove] [-p pathAdd]
+		    [-r pathRemove] [-p pathAdd] [-b BLOCKS] [-w writeBufSz]
                     files/directories...
 
 The command-line files and directories are relative to the specified
@@ -2069,6 +1642,16 @@ path prefix that will be replaced with pathAdd
 =item -p pathAdd
 
 new path prefix
+
+=item -b BLOCKS
+
+the tar block size, default is 20, meaning tar writes data in 20 * 512
+bytes chunks.
+
+=item -w writeBufSz
+
+write buffer size, default 1048576 (1MB).  You can increase this if
+you are trying to stream to a fast tape device.
 
 =back
 
@@ -2177,8 +1760,11 @@ the config.pl file.  Parameters may be fixed or the user can be allowed
 to change them (eg: output device).
 
 The per-host archive command is $Conf{ArchiveClientCmd}.  By default
-this invokes __INSTALLDIR__/BackupPC_archiveHost, which you can
-copy and customize as necessary.
+this invokes
+
+     __INSTALLDIR__/BackupPC_archiveHost
+
+which you can copy and customize as necessary.
 
 =head2 Starting an Archive
 
@@ -2289,29 +1875,66 @@ background command queue.
 =item 2
 
 For each PC, BackupPC_dump is forked. Several of these may be run in
-parallel, based on the configuration. First a ping is done to see if the
-machine is alive. If this is a DHCP address, nmblookup is run to get
-the netbios name, which is used as the host name. The file
-__TOPDIR__/pc/$host/backups is read to decide whether a full or
-incremental backup needs to be run. If no backup is scheduled, or the ping
-to $host fails, then BackupPC_dump exits.
+parallel, based on the configuration. First a ping is done to see if
+the machine is alive. If this is a DHCP address, nmblookup is run to
+get the netbios name, which is used as the host name. If DNS lookup
+fails, $Conf{NmbLookupFindHostCmd} is run to find the IP address from
+the host name.  The file __TOPDIR__/pc/$host/backups is read to decide
+whether a full or incremental backup needs to be run. If no backup is
+scheduled, or the ping to $host fails, then BackupPC_dump exits.
 
-The backup is done using samba's smbclient or tar over ssh/rsh/nfs piped
-into BackupPC_tarExtract, extracting the backup into __TOPDIR__/pc/$host/new.
-The smbclient or tar output is put into __TOPDIR__/pc/$host/XferLOG.
+The backup is done using the specified XferMethod.  Either samba's smbclient
+or tar over ssh/rsh/nfs piped into BackupPC_tarExtract, or rsync over ssh/rsh
+is run, or rsyncd is connected to, with the incoming data
+extracted to __TOPDIR__/pc/$host/new.  The XferMethod output is put
+into __TOPDIR__/pc/$host/XferLOG.
 
-As BackupPC_tarExtract extracts the files from smbclient, it checks each
-file in the backup to see if it is identical to an existing file from
-any previous backup of any PC. It does this without needed to write the
-file to disk. If the file matches an existing file, a hardlink is
-created to the existing file in the pool. If the file does not match any
-existing files, the file is written to disk and the file name is saved
-in __TOPDIR__/pc/$host/NewFileList for later processing by
-BackupPC_link.  BackupPC_tarExtract can handle arbitrarily large
-files and multiple candidate matching files without needing to
-write the file to disk in the case of a match.  This significantly
-reduces disk writes (and also reads, since the pool file comparison
-is done disk to memory, rather than disk to disk).
+The letter in the XferLOG file shows the type of object, similar to the
+first letter of the modes displayed by ls -l:
+
+    d -> directory
+    l -> symbolic link
+    b -> block special file
+    c -> character special file
+    p -> pipe file (fifo)
+    nothing -> regular file
+
+The words mean:
+
+=over 4
+
+=item create
+
+new for this backup (ie: directory or file not in pool)
+
+=item pool
+
+found a match in the pool
+
+=item same
+
+file is identical to previous backup (contents were
+checksummed and verified during full dump).
+
+=item skip
+
+file skipped in incremental because attributes are the
+same (only displayed if $Conf{XferLogLevel} >= 2).
+
+=back
+
+As BackupPC_tarExtract extracts the files from smbclient or tar, or as
+rsync runs, it checks each file in the backup to see if it is identical
+to an existing file from any previous backup of any PC. It does this
+without needed to write the file to disk. If the file matches an
+existing file, a hardlink is created to the existing file in the pool.
+If the file does not match any existing files, the file is written to
+disk and the file name is saved in __TOPDIR__/pc/$host/NewFileList for
+later processing by BackupPC_link.  BackupPC_tarExtract and rsync can handle
+arbitrarily large files and multiple candidate matching files without
+needing to write the file to disk in the case of a match.  This
+significantly reduces disk writes (and also reads, since the pool file
+comparison is done disk to memory, rather than disk to disk).
 
 Based on the configuration settings, BackupPC_dump checks each
 old backup to see if any should be removed.  Any expired backups
@@ -2332,20 +1955,20 @@ is removed and replaced by a hard link to the existing file. If the file
 is new, a hard link to the file is made in the pool area, so that this
 file is available for checking against each new file and new backup.
 
-Then, assuming $Conf{IncrFill} is set, for each incremental backup,
-hard links are made in the new backup to all files that were not extracted
-during the incremental backups.  The means the incremental backup looks
-like a complete image of the PC (with the exception that files
-that were removed on the PC since the last full backup will still
-appear in the backup directory tree).
+Then, if $Conf{IncrFill} is set (note that the default setting is
+off), for each incremental backup, hard links are made in the new
+backup to all files that were not extracted during the incremental
+backups.  The means the incremental backup looks like a complete
+image of the PC (with the exception that files that were removed on
+the PC since the last full backup will still appear in the backup
+directory tree).
 
-As of v1.03, the CGI interface knows how to merge unfilled
-incremental backups will the most recent prior filled (full)
-backup, giving the incremental backups a filled appearance.  The
-default for $Conf{IncrFill} is off, since there is now no need to
-fill incremental backups.  This saves some level of disk activity,
-since lots of extra hardlinks are no longer needed (and don't have
-to be deleted when the backup expires).
+The CGI interface knows how to merge unfilled incremental backups will
+the most recent prior filled (full) backup, giving the incremental
+backups a filled appearance.  The default for $Conf{IncrFill} is off,
+since there is no need to fill incremental backups.  This saves
+some level of disk activity, since lots of extra hardlinks are no
+longer needed (and don't have to be deleted when the backup expires).
 
 =item 4
 
@@ -2358,7 +1981,10 @@ administrative tasks, such as cleaning the pool.  This involves removing
 any files in the pool that only have a single hard link (meaning no backups
 are using that file).  Again, to avoid race conditions, BackupPC_nightly
 is only run when there are no BackupPC_dump or BackupPC_link processes
-running.
+running.  Therefore, when it is time to run BackupPC_nightly, no new
+backups are started and BackupPC waits until all backups have finished.
+Then BackupPC_nightly is run, and until it finishes no new backups are
+started.  If BackupPC_nightly is slow, the settings
 
 =back
 
@@ -2527,7 +2153,7 @@ Last month's log file.  Log files are aged monthly and compressed
 
 =item XferERR or XferERR.z
 
-Output from the transport program (ie: smbclient or tar)
+Output from the transport program (ie: smbclient, tar or rsync)
 for the most recent failed backup.
 
 =item new
@@ -2537,7 +2163,7 @@ directory is renamed if the backup succeeds.
 
 =item XferLOG or XferLOG.z
 
-Output from the transport program (ie: smbclient or tar)
+Output from the transport program (ie: smbclient, tar or rsync)
 for the current backup.
 
 =item nnn (an integer)
@@ -2546,7 +2172,7 @@ Successful backups are in directories numbered sequentially starting at 0.
 
 =item XferLOG.nnn or XferLOG.nnn.z
 
-Output from the transport program (ie: smbclient or tar)
+Output from the transport program (ie: smbclient, tar or rsync)
 corresponding to backup number nnn.
 
 =item RestoreInfo.nnn
@@ -2557,8 +2183,19 @@ numbers are not related to the backup number.)
 
 =item RestoreLOG.nnn.z
 
-Output from smbclient or tar during restore #nnn.  (Note that the restore
+Output from smbclient, tar or rsync during restore #nnn.  (Note that the restore
 numbers are not related to the backup number.)
+
+=item ArchiveInfo.nnn
+
+Information about archive request #nnn including who, what, when, and
+why. This file is in Data::Dumper format.  (Note that the archive
+numbers are not related to the restore or backup number.)
+
+=item ArchiveLOG.nnn.z
+
+Output from archive #nnn.  (Note that the archive numbers are not related
+to the backup or restore number.)
 
 =item config.pl
 
@@ -2593,11 +2230,11 @@ Stop time of the backup in unix seconds.
 
 =item nFiles
 
-Number of files backed up (as reported by smbclient or tar).
+Number of files backed up (as reported by smbclient, tar or rsync).
 
 =item size
 
-Total file size backed up (as reported by smbclient or tar).
+Total file size backed up (as reported by smbclient, tar or rsync).
 
 =item nFilesExist
 
@@ -2621,15 +2258,15 @@ Total size of files that were not in the pool
 
 =item xferErrs
 
-Number of errors or warnings from smbclient (zero for tar).
+Number of errors or warnings from smbclient, tar or rsync.
 
 =item xferBadFile
 
-Number of errors from smbclient that were bad file errors (zero for tar).
+Number of errors from smbclient that were bad file errors (zero otherwise).
 
 =item xferBadShare
 
-Number of errors from smbclient that were bad share errors (zero for tar).
+Number of errors from smbclient that were bad share errors (zero otherwise).
 
 =item tarErrs
 
@@ -2720,7 +2357,37 @@ Number of errors from BackupPC_tarCreate during restore.
 
 =item xferErrs
 
-Number of errors from smbclient or tar during restore.
+Number of errors from smbclient, tar or rsync during restore.
+
+=back
+
+=item archives
+
+A tab-delimited ascii table listing information about each requested
+archive, one per row.  The columns are:
+
+=over 4
+
+=item num
+
+Archive number (matches the suffix of the ArchiveInfo.nnn and
+ArchiveLOG.nnn.z file), unrelated to the backup or restore number.
+
+=item startTime
+
+Start time of the restore in unix seconds.
+
+=item endTime
+
+End time of the restore in unix seconds.
+
+=item result
+
+Result (ok or failed).
+
+=item errorMsg
+
+Error message if archive failed.
 
 =back
 
@@ -2933,299 +2600,14 @@ BackupPC's data directory with the noatime attribute (see mount(1)).
 
 =head2 Limitations
 
-BackupPC isn't perfect (but it is getting better).  Here are some
-limitations of BackupPC:
-
-=over 4
-
-=item Non-unix file attributes not backed up
-
-smbclient doesn't extract the WinXX ACLs, so file attributes other than
-the equivalent (as provided by smbclient) unix attributes are not
-backed up.
-
-=item Locked files are not backed up
-
-Under WinXX a locked file cannot be read by smbclient.  Such files will
-not be backed up.  This includes the WinXX system registry files.
-
-This is especially troublesome for Outlook, which stores all its data
-in a single large file and keeps it locked whenever it is running.
-Since many users keep Outlook running all the time their machine
-is up their Outlook file will not be backed up.  Sadly, this file
-is the most important file to backup.  As one workaround, Microsoft has
-a user-level application that periodically asks the user if they want to
-make a copy of their outlook.pst file.  This copy can then be backed up
-by BackupPC.  See L<http://office.microsoft.com/downloads/2002/pfbackup.aspx>.
-
-Similarly, all of the data for WinXX services like SQL databases,
-Exchange etc won't be backed up.  If these applications support
-some kind of export or utility to save their data to disk then this
-can =used to create files that BackupPC can backup.
-
-So far, the best that BackupPC can do is send warning emails to
-the user saying that their outlook files haven't been backed up in
-X days.  (X is configurable.)  The message invites the user to
-exit Outlook and gives a URL to manually start a backup.
-
-I suspect there is a way of mirroring the outlook.pst file so
-that at least the mirror copy can be backed up.  Or perhaps a
-manual copy can be started at login.   Does some WinXX expert
-know how to do this?
-
-Comment: two users have noted that there are commercial OFM (open file
-manager) products that are designed to solve this problem, for example
-from St. Bernard or Columbia Data Products. Apparently Veritas and
-Legato bundle this product with their commercial products.  See for
-example L<http://www.stbernard.com/products/docs/ofm_whitepaperV8.pdf>.
-If anyone tries these programs with BackupPC please tell us whether or
-not they work.
-
-=item Don't expect to reconstruct a complete WinXX drive
-
-The conclusion from the last few items is that BackupPC is not intended
-to allow a complete WinXX disk to be re-imaged from the backup. Our
-approach to system restore in the event of catastrophic failure is to
-re-image a new disk from a generic master, and then use the BackupPC
-archive to restore user files.
-
-It is likely that linux/unix backups done using tar (rather than
-smb) can be used to reconstruct a complete file system, although
-I haven't tried it.
-
-=item Maximum Backup File Sizes
-
-BackupPC can backup and manage very large file sizes, probably as large
-as 2^51 bytes (when a double-precision number's mantissa can no longer
-represent an integer exactly).  In practice, several things outside
-BackupPC limit the maximum individual file size.  Any one of the
-following items will limit the maximum individual file size:
-
-=over 4
-
-=item Perl
-
-Perl needs to be compiled with uselargefiles defined. Check your
-installation with:
-
-    perl -V | egrep largefiles
-
-Without this, the maximum file size will be 2GB.
-
-=item File system
-
-The BackupPC pool and data directories must be on a file system that
-supports large files.
-
-Without this, the maximum file size will be 2GB.
-
-=item Transport
-
-The transport mechanism also limits the maximum individual file size.
-
-GNU tar maximum file size is limited by the tar header format. The tar
-header uses 11 octal digits to represent the file size, which is 33 bits
-or 8GB.  I vaguely recall (but I haven't recently checked) that GNU tar
-uses an extra octal digit (replacing a trailing delimiter) if necessary,
-allowing 64GB files.  So tar transport limits the maximum file size to
-8GB or perhaps 64GB.  It is possible that files >= 8GB don't work; this
-needs to be looked into.
-
-Smbclient is limited to 4GB file sizes.  Moreover, a bug in smbclient
-(mixing signed and unsigned 32 bit values) causes it to incorrectly
-do the tar octal conversion for file sizes from 2GB-4GB.  BackupPC_tarExtract
-knows about this bug and can recover the correct file size.  So smbclient
-transport works up to 4GB file sizes.
-
-Rsync running on Cygwin is limited to either 2GB or 4GB file sizes.
-More testing needs to be done to verify the file size limit for
-rsync on various platforms.
-
-=back
-
-=item Some tape backup systems aren't smart about hard links
-
-If you backup the BackupPC pool to tape you need to make sure that the
-tape backup system is smart about hard links. For example, if you
-simply try to tar the BackupPC pool to tape you will backup a lot more
-data than is necessary.
-
-Using the example at the start of the installation section, 65 hosts are
-backed up with each full backup averaging 3.2GB. Storing one full backup
-and two incremental backups per laptop is around 240GB of raw data. But
-because of the pooling of identical files, only 87GB is used (with
-compression the total is lower). If you run du or tar on the data
-directory, there will appear to be 240GB of data, plus the size of the
-pool (around 87GB), or 327GB total.
-
-If your tape backup system is not smart about hard links an alternative
-is to periodically backup just the last successful backup for each host
-to tape.  Another alternative is to do a low-level dump of the pool
-file system (ie: /dev/hda1 or similar) using dump(1).
-
-Supporting more efficient tape backup is an area for further
-development.
-
-=item Incremental backups might included deleted files
-
-To make browsing and restoring backups easier, incremental backups
-are "filled-in" from the last complete backup when the backup is
-browsed or restored.
-
-However, if a file was deleted by a user after the last full backup, that
-file will still appear in the "filled-in" incremental backup. This is not
-really a specific problem with BackupPC, rather it is a general issue
-with the full/incremental backup paradigm.  This minor problem could be
-solved by having smbclient list all files when it does the incremental
-backup.  Volunteers anyone?
-
-=back
-
-Comments or suggestions on these issues are welcome.
+BackupPC isn't perfect (but it is getting better). Please see
+L<http://backuppc.sourceforge.net/faq/limitations.html> for a
+discussion of some of BackupPC's limitations.
 
 =head2 Security issues
 
-Please read this section and consider each of the issues carefully.
-
-=over 4
-
-=item Smb share password
-
-An important security risk is the manner in which the smb share
-passwords are stored. They are in plain text. As described in
-L<Step 3: Setting up config.pl|step 3: setting up config.pl> there are four
-ways to tell BackupPC the smb share password (manually setting an environment
-variable, setting the environment variable in /etc/init.d/backuppc,
-putting the password in __TOPDIR__/conf/config.pl, or putting the
-password in __TOPDIR__/pc/$host/config.pl). In the latter 3 cases the
-smb share password appears in plain text in a file.
-
-If you use any of the latter three methods please make sure that the file's
-permission is appropriately restricted.  If you also use RCS or CVS, double
-check the file permissions of the config.pl,v file.
-
-In future versions there will probably be support for encryption of the
-smb share password, but a private key will still have to be stored in a
-protected place.  Comments and suggestions are welcome.
-
-=item BackupPC socket server
-
-In v1.5.0 the primary method for communication between the CGI program
-(BackupPC_Admin) and the server (BackupPC) is via a unix-domain socket.
-Since this socket has restricted permissions, no local user should be
-able to connect to this port.  No backup or restore data passes through
-this interface, but an attacker can start or stop backups and get status
-through this port.
-
-If the Apache server and BackupPC_Admin run on a different host to
-BackupPC then a TCP port must be enabled by setting $Conf{ServerPort}.
-Anyone can connect to this port.  To avoid possible attacks via the TCP
-socket interface, every client message is protected by an MD5 digest.
-The MD5 digest includes four items:
-
-=over 4
-
-=item *
-
-a seed that is sent to the client when the connection opens
-
-=item *
-
-a sequence number that increments for each message
-
-=item *
-
-a shared secret that is stored in $Conf{ServerMesgSecret}
-
-=item *
-
-the message itself.
-
-=back
-
-The message is sent in plain text preceded by the MD5 digest.  A
-snooper can see the plain-text seed sent by BackupPC and plain-text
-message from the client, but cannot construct a valid MD5 digest since
-the secret in $Conf{ServerMesgSecret} is unknown.  A replay attack is
-not possible since the seed changes on a per-connection and
-per-message basis.
-
-So if you do enable the TCP port, please set $Conf{ServerMesgSecret}
-to some hard-to-guess string.  A denial-of-service attack is possible
-with the TCP port enabled.  Someone could simply connect many times
-to this port, until BackupPC had exhausted all its file descriptors,
-and this would cause new backups and the CGI interface to fail.  The
-most secure solution is to run BackupPC and Apache on the same machine
-and disable the TCP port.
-
-By the way, if you have upgraded from a version of BackupPC prior to
-v1.5.0 you should set $Conf{ServerPort} to -1 to disable the TCP port.
-
-=item Installation permissions
-
-It is important to check that the BackupPC scripts in __INSTALLDIR__/bin
-and __INSTALLDIR__/lib cannot be edited by normal users. Check the
-directory permissions too.
-
-=item Pool permissions
-
-It is important to check that the data files in __TOPDIR__/pool,
-__TOPDIR__/pc and __TOPDIR__/trash cannot be read by normal users.
-Normal users should not be able to see anything below __TOPDIR__.
-
-=item Host shares
-
-Enabling shares on hosts carries security risks.  If you are on a private
-network and you generally trust your users then there should not be a
-problem. But if you have a laptop that is sometimes on public networks
-(eg: broadband or even dialup) you should be concerned.  A conservative
-approach is to use firewall software, and only enable the netbios and
-smb ports (137 and 139) on connections from the host running BackupPC.
-
-=item SSH key security
-
-Using ssh for linux/unix clients is quite secure, but the security is
-only as good as the protection of ssh's private keys. If an attacker can
-devise a way to run a shell as the BackupPC user then they will have
-access to BackupPC's private ssh keys. They can then, in turn, ssh to
-any client machine as root (or whichever user you have configured
-BackupPC to use). This represents a serious compromise of your entire
-network.  So in vulnerable networks, think carefully about how to protect
-the machine running BackupPC and how to prevent attackers from gaining
-shell access (as the BackupPC user) to the machine.
-
-=item CGI interface
-
-The CGI interface, __CGIDIR__/BackupPC_Admin, needs access to the pool
-files so it is installed setuid to __BACKUPPCUSER__. The permissions of
-this file need to checked carefully. It should be owned by
-__BACKUPPCUSER__ and have user and group (but not other) execute
-permission. To allow apache/httpd to execute it, the group ownership
-should be something that apache/httpd belongs to.
-
-The Apache configuration should be setup for AuthConfig style,
-using a .htaccess file so that the user's name is passed into
-the script as $ENV{REMOTE_USER}.
-
-If normal users could directly run BackupPC_Admin then there is a serious
-security hole: since it is setuid to __BACKUPPCUSER__ any user can
-browse and restore any backups. Be aware that anyone who is allowed to
-edit or create cgi scripts on your server can execute BackupPC_Admin as
-any user!  They simply write a cgi script that sets $ENV{REMOTE_USER} and
-then execs BackupPC_Admin.  The exec succeeds since httpd runs the first
-script as user httpd/apache, which in turn has group permission to
-execute BackupPC_Admin.
-
-While this setup should be safe, a more conservative approach is to
-run a dedicated Apache as user __BACKUPPCUSER__ on a different port.
-Then BackupPC_Admin no longer needs to be setuid, and the cgi
-directories can be locked down from normal users.  Moreover, this
-setup is exactly the one used to support mod_perl, so this provides
-both the highest performance and the lowest security risk.
-
-=back
-
-Comments and suggestions are welcome.
+Please see L<http://backuppc.sourceforge.net/faq/security.html> for a
+discussion of some of various security issues.
 
 =head1 Configuration File
 
@@ -3328,12 +2710,16 @@ __CONFIGPOD__
 
 =head1 Version Numbers
 
-Starting with v1.4.0 BackupPC switched to a X.Y.Z version numbering
-system, instead of X.0Y. The first digit is for major new releases, the
-middle digit is for significant feature releases and improvements (most
-of the releases have been in this category), and the last digit is for
+Starting with v1.4.0 BackupPC uses a X.Y.Z version numbering system,
+instead of X.0Y. The first digit is for major new releases, the middle
+digit is for significant feature releases and improvements (most of
+the releases have been in this category), and the last digit is for
 bug fixes. You should think of the old 1.00, 1.01, 1.02 and 1.03 as
-1.0.0, 1.1.0, 1.2.0 and 1.3.0.
+1..0, 1.1.0, 1.2.0 and 1.3.0.
+
+Additionally, patches might be made available.  A patched version
+number is of the form X.Y.ZplN (eg: 2.1.0pl2), where N is the
+patch level.
 
 =head1 Author
 
@@ -3347,31 +2733,34 @@ Copyright (C) 2001-2004 Craig Barratt
 
 =head1 Credits
 
+Ryan Kucera contributed the directory navigation code and images
+for v1.5.0.  He contributed the first skeleton of BackupPC_restore.
+He also added a significant revision to the CGI interface, including
+CSS tags, in v2.1.0, and designed the BackupPC logo.
+
 Xavier Nicollet, with additions from Guillaume Filion, added the
 internationalization (i18n) support to the CGI interface for v2.0.0.
 Xavier provided the French translation fr.pm, with additions from
 Guillaume.
 
-Ryan Kucera contributed the directory navigation code and images
-for v1.5.0.  He contributed the first skeleton of BackupPC_restore.
-He also added a significant revision to the CGI interface, including
-CSS tags, in v2.1.0.
-
 Guillaume Filion wrote BackupPC_zipCreate and added the CGI support
 for zip download, in addition to some CGI cleanup, for v1.5.0.
-Guillaume continues to support fr.pm updates for each
-new version.
+Guillaume continues to support fr.pm updates for each new version.
 
 Josh Marshall implemented the Archive feature in v2.1.0.
+
+Ludovic Drolez supports the BackupPC Debian package.
 
 Javier Gonzalez provided the Spanish translation, es.pm for v2.0.0.
 
 Manfred Herrmann provided the German translation, de.pm for v2.0.0.
-Manfred continues to support de.pm updates for each new version.
+Manfred continues to support de.pm updates for each new version,
+together with some help frmo Ralph Paﬂgang.
 
 Lorenzo Cappelletti provided the Italian translation, it.pm for v2.1.0.
 
-Lieven Bridts provided the Dutch translation, nl.pm, for v2.1.0.
+Lieven Bridts provided the Dutch translation, nl.pm, for v2.1.0,
+with some tweaks from Guus Houtzager.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.

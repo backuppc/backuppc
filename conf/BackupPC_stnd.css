@@ -1,7 +1,7 @@
 /*
  * BackupPC standard CSS definitions
  *
- * Version 2.1.0beta0, released 20 Mar 2004.
+ * Version 2.1.0, released 13 Jun 2004.
  *
  * See http://backuppc.sourceforge.net.
  *
@@ -14,7 +14,7 @@
 
 body {
     font-family:arial,sans-serif;
-    font-size:1em;
+    font-size:11pt;
     background-color:#ffffff;
     margin:2px 5px 0px 2px;
     height:100%
@@ -22,19 +22,14 @@ body {
 
 h1 {
     font-family:arial,sans-serif;
-    font-size:1.5em;
+    font-size:16pt;
     color:#000000
 }
 
 h2 {
     font-family:arial,sans-serif;
-    font-size:1em;
+    font-size:12pt;
     color:#000000
-}
-
-p {
-    font-family:arial,sans-serif;
-    font-size:.9em
 }
 
 a {
@@ -42,8 +37,8 @@ a {
     color:#3333ff
 }
 
-li {
-    font-size:.9em;
+dt {
+    color:#3333ff
 }
 
 a:hover {
@@ -62,7 +57,7 @@ a.navbar {
 
 .h1 {
     font-family:arial,sans-serif;
-    font-size:1.5em;
+    font-size:16pt;
     color:#000000;
     font-weight:bold;
     background-color:#99cc33;
@@ -73,7 +68,7 @@ a.navbar {
 
 .h2 {
     font-family:arial,sans-serif;
-    font-size:1em;
+    font-size:12pt;
     color:#000000;
     font-weight:bold;
     background-color:#ddeeee;
@@ -84,21 +79,22 @@ a.navbar {
 }
 
 .tableStnd {
+    font-size:11pt;
 }
 
 .tableheader {
-    font-size:.8em;
+    font-size:9pt;
     font-weight:bold;
     background-color:#cccccc;
 }
 
 .border {
-    font-size:.9em;
+    font-size:10pt;
 }
 
 .fviewheader {
     font-weight:bold;
-    font-size:.8em;
+    font-size:10pt;
     color:#ffffff;
     background-color:#999999;
 }
@@ -107,7 +103,7 @@ a.navbar {
     border-bottom:1px solid #000000;
     border-left:1px dotted #666666;
     background-color:#dddddd;
-    font-size:.9em;
+    font-size:11pt;
 }
 
 .fviewon {
@@ -119,14 +115,14 @@ a.navbar {
 }
 
 .fview {
-    font-size:.8em;
+    font-size:9pt;
     font-family:arial,sans-serif;
     text-decoration:none;
     line-height:15px;
 }
 
 .fviewbold {
-    font-size:.9em;
+    font-size:10pt;
     font-family:arial,sans-serif;
     text-decoration:none;
     line-height:15px;
@@ -137,7 +133,7 @@ a.navbar {
     border-bottom:1px solid #000000;
     border-left:2px solid #ffffff;
     background-color:#dddddd;
-    font-size:.9em;
+    font-size:10pt;
 }
 
 .histViewMis {
@@ -152,7 +148,7 @@ div.NavMenu {
 }
 
 div.NavMenu a {
-    font-size:.8em;
+    font-size:10pt;
     display:block;
     margin-left:8px;
     padding:2px;

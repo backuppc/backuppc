@@ -14,7 +14,6 @@ sub CheckConfigInfo
     my($attr, $val, $def, $ref);
     
     foreach $attr (sort keys %{ $self->{Conf} }) {
-        print AA "Checking $attr...";
         $val = $self->{Conf}->{$attr};
         $ref = ref $val;
         $def = $ConfigDef{$attr};
@@ -104,7 +103,8 @@ sub timeStamp
             . ($noPad ? "" : " ");
 }
 
-sub ConnectData {
+sub ConnectData
+{
     # fallback routine in case no database used
     return 1;
 

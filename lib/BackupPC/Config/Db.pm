@@ -5,7 +5,32 @@ use warnings;
 use strict;
 
 use DBI;
-our $SELF;
+
+sub GetDbConnInfo
+{
+    my($self, $dbi) = @_;
+    my($ret, $mesg, $dbConfig);
+
+    $dbConfig = "$self->{TopDir}/conf/db.pl";
+    
+    our %Db;
+    
+    if ( !defined($ret = do $dbConfig) && ($! || $@) ) {
+        $mesg = "Couldn't open $dbConfig: $!" if ( $! );
+        $mesg = "Couldn't execute $dbConfig: $@" if ( $@ );
+        $mesg =~ s/[\n\r]+//;
+        
+        $self->{errstr} = $mesg;
+        return undef;
+    }
+    
+    $Db{passwd} = $ENV{BPC_DBPASSWD} if !exists $Db{passwd};
+    
+    my %parm = %Db;
+    undef %Db;
+    
+    return %parm;
+}
 
 sub BackupInfoRead
 {
@@ -214,7 +239,6 @@ our %gConfigTypeField; # will be defined by database-specific Config module
 
 sub ConfigWrite {
     my($self, $client) = @_;
-    $SELF = $self;
     my $dbh = $self->{dbh};
     
     $dbh->{RaiseError} = 0;
@@ -251,7 +275,6 @@ sub ConfigWrite {
 
 sub _ConfigWriteScalar {
     my($dbh, $def, $client, $attr, $val) = @_;
-    $SELF->Debug("SCALAR $val") if $attr eq 'BackupFilesOnly';
     return if !defined $val;
     
     my $ref = ref $val;
@@ -265,7 +288,6 @@ sub _ConfigWriteScalar {
 
 sub _ConfigWriteArray {
     my($dbh, $def, $client, $attr, $val, $key) = @_;
-    $SELF->Debug("ARRAY $val, $key") if $attr eq 'BackupFilesOnly';
     return if !defined $val;
 
     $key = '' unless defined $key;
@@ -291,7 +313,6 @@ sub _ConfigWriteArray {
 
 sub _ConfigWriteHash {
     my($dbh, $def, $client, $attr, $val, $subscript) = @_;
-    $SELF->Debug("HASH $val") if $attr eq 'BackupFilesOnly';
     return if !defined $val;
 
     $subscript = -1 unless defined $subscript;
@@ -354,7 +375,6 @@ sub _ConfigWriteArrayOfHash {
 
 sub _ConfigWriteHashOfArray {
     my($dbh, $def, $client, $attr, $val) = @_;
-    $SELF->Debug("HASHOFARRAY $val") if $attr eq 'BackupFilesOnly';
     return if !defined $val;
 
     my $ref = ref $val;

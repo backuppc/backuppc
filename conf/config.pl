@@ -924,6 +924,14 @@ EOF
 $Conf{CgiAdminUserGroup} = '';
 $Conf{CgiAdminUsers}     = '';
 
+#   
+# Language to use.  See lib/BackupPC/Lang for the list of supported
+# languages, which includes English (en) and French (fr).  Currently
+# this applies mainly to the CGI interface, but over time it might
+# also include log files and other text output.
+#
+$Conf{Language} = 'en';
+
 #
 # User names that are rendered by the CGI interface can be turned
 # into links into their home page or other information about the
@@ -953,6 +961,14 @@ $Conf{CgiUserUrlCreate}     = 'mailto:%s';
 # and zero for international dates (DD/MM).
 #
 $Conf{CgiDateFormatMMDD} = 1;
+
+#
+# If set, the complete list of hosts appears in the left navigation
+# bar for administrators.  Otherwise, just the hosts for which the
+# user is listed in the host file (as either the user or in moreUsers)
+# are displayed.
+#
+$Conf{CgiNavBarAdminAllHosts} = 0;
 
 #
 # Header font and size for CGI interface

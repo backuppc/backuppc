@@ -1,0 +1,408 @@
+#========================================================================
+#
+# ChangeLog - change log for BackupPC.
+#
+# DESCRIPTION
+#   Revision history for BackupPC, detailing significant changes between
+#   versions, most recent first.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+#========================================================================
+#
+# Version 1.5.0, released 2 Aug 2002.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+#------------------------------------------------------------------------
+# Version 1.5.0, 2 Aug 2002
+#------------------------------------------------------------------------
+
+* Changed conf/config.pl so that $Conf{TarIncrArgs} uses the --newer
+  option instead of --newer-mtime.  Also removed --atime-preserve from
+  $Conf{TarClientCmd}.  This makes the default settings work better
+  with tripwire.
+
+* Fixed configure.pl so it correctly detects a running BackupPC <= v1.4.0
+  so it can correctly warn the user to stop it before upgrading.  Reported
+  by David Holland.
+
+* Added missing ";" to entity escape in EscapeHTML in BackupPC_Admin.
+  Reported by Guillaume Filion.
+
+* Added LDAP setup to documentation from David Holland.
+
+* Tar.pm now adds a "." to file paths that start with "/", so that all
+  tar paths are relative.  From Ludovic Drolez.
+
+#------------------------------------------------------------------------
+# Version 1.5.0beta0, 30 Jun 2002
+#------------------------------------------------------------------------
+
+* A full set of restore options is now supported, including direct
+  restore via smbclient or tar or downloading a zip or tar file.
+
+* Major additions to CGI script to support better directory navigation,
+  restore features and mod_perl.  Also, file downloads from the CGI
+  interface now correctly preserve the file name and provide the
+  correct Content-Type for the most common types of files.  Improved
+  directory navigation was contributed by Ryan Kucera.
+
+* New script BackupPC_zipCreate (contributed by Guillaume Filion) is the
+  zip analog of BackupPC_tarCreate.  BackupPC_zipCreate can be used to
+  create a zip archive of any portion of a backup.
+
+* Substantial additions to BackupPC_tarCreate to support restore,
+  including modifying path names, handling hardlinks, fixing
+  support of old backups without attributes (pre-v1.4.0).  Plus
+  BackupPC_tarCreate is now an offical part of the release.
+  (Lack of support for hardlinks was reported by John Stanley.)
+
+* BackupPC_tarExtract now supports hardlinks and fixed pooling of
+  attribute files.
+
+* A unix domain socket is now used for communication between the CGI
+  interface and BackupPC.  The original TCP socket is optional.  Sockets
+  are correctly re-initialized if config.pl is updated with new socket
+  settings.
+
+* For improved security messages over the unix or TCP socket are protected
+  via an MD5 digest based on a shared secret, a sequence number, a time
+  stamp and a unique per-connection number.
+
+* Additions to configure.pl to support install of directory navigation
+  images.
+
+* Fixed case where $Conf{BackupFilesOnly} or $Conf{BackupFilesExclude}
+  were set to a single string or list (in v1.4.0 only the case of
+  hash worked correctly).  Reported by Phillip Bertolus.
+
+* Fixed case of $Conf{BackoutGoodCnt} == 0.  This setting now makes the
+  client always subject to blackout, matching the comments in config.pl.
+  Also fixed handling of $Conf{BackoutGoodCnt} < 0 in the CGI script
+  reported by Pascal Schelcher.
+
+* Fixed byte and file totals for tar backups, reported by several users.
+
+* Fixed --newer-mtime date/timestamp format to make it ISO 8601 compliant,
+  suggested by Erminio Baranzini.
+
+* Fixed handling of $Conf{BackupFilesOnly} in BackupPC::Xfer::Tar.pm, as
+  well as shell escaping of tar arguments.
+
+* Fixed entity encoding of 8-bit characters in the CGI interface.
+
+* Added optional CGI headers in $Conf{CgiHeaders} that by default
+  is set to a no-cache pragma.  Suggested by Benno Zuure.
+
+#------------------------------------------------------------------------
+# Version 1.4.0, 16 Mar 2002
+#------------------------------------------------------------------------
+
+* BackupPC now supports tar (in addition to smb) for extracting host	
+  data.  This is the most convenient option for linux/unix hosts.
+  Tar can be configured to run over ssh, rsh or to backup a local
+  nfs mount from the host.
+
+* Support for special files, including symbolic links, fifo, character
+  and block device files has been added, so that all native linux/unix
+  file types can be correctly backed up when using tar transport.
+  Special files are all stored as regular files and the type attributes
+  are used to remember the original file type.
+
+* All unix file attributes are now saved (and pooled when possible).
+  This includes user and group ownership, permissions, and modification
+  time.  Smbclient also does a reasonable job of emulating unix 
+  permissions (such as mtime), and these attributes get saved too.
+
+* The new default is to not fill incremental dumps.  configure.pl
+  automatically sets $Conf{IncrFill} to 0.  The default was 1
+  (incrementals were filled with hardlinks).  Since the CGI
+  script does filling at browsing time, there is no need to
+  fill incremental dumps.
+
+* Backup file names are now stored in "mangled" form. Each node of a
+  path is preceded by "f", and special characters (\n, \r, % and /) are
+  URI-encoded as "%xx", where xx is the ascii character's hex value. So
+  c:/craig/example.txt is now stored as fc/fcraig/fexample.txt. This
+  was done mainly so meta-data could be stored alongside the backup
+  files without name collisions.  In particular, the attributes for the
+  files in a directory are stored in a file called "attrib", and
+  mangling avoids file name collisions (I discarded the idea of having
+  a duplicate directory tree for every backup just to store the
+  attributes). Other meta-data (eg: rsync checksums) could be stored in
+  file names preceded by, eg, "c".  There are two other benefits to
+  mangling: the share name might contain "/" (eg: "/home/craig" for tar
+  transport), and I wanted that represented as a single level in the
+  storage tree.  Secondly, as files are written to NewFileList for later
+  processing by BackupPC_link, embedded newlines in the file's path
+  will cause problems which are avoided by mangling.
+
+  The CGI script undoes the mangling, so it is invisibe to the user.
+  Of course, old (unmangled) backups are still supported by the CGI
+  interface.
+
+* Various changes to the CGI interface, BackupPC_Admin:
+
+  + Added button that allows users to manually start a full dump in
+    addition to the existing incremental dump.
+
+  + Added display of file attributes when browsing backups.
+
+  + Added an optional holdoff time specified by the user when canceling
+    a backup. BackupPC will not attempt any new backups for at least the
+    specified time. This holdoff time can be changed whether or not a
+    backup is running.
+
+  + Added supports for file mangling, and correct merging of unfilled
+    backups from mangled or unmangled (and compressed or uncompressed)
+    fulls when browsing or restoring.
+
+  + Only displays a "Start Incr Backup" button if there are already some
+    backups.
+
+  + For DHCP hosts, when a user tries to manually start a backup, add
+    a check for the netbios name of both the host the request came
+    from (REMOTE_ADDR) and the last known DHCP address for that host
+    to see if either address matches the host. If not, an error
+    message is display. The previous behavior was that only requests
+    from the client itself succeeded, and requests from other machines
+    quietly failed.
+
+* Changed the version numbering to X.Y.Z, instead of X.0Y. This release
+  is 1.4.0. The first digit is for major new releases, the middle digit
+  is for significant feature releases and improvements, and the last
+  digit is for bug fixes. You should think of the old 1.00, 1.01, 1.02
+  and 1.03 as 1.0.0, ..., 1.3.0.
+
+* BackupPC and the CGI script BackupPC_Admin now check that the effective
+  user id is correct to avoid accidentally launching BackupPC as the
+  wrong user or detecting CGI configuration problems.  This behavior
+  can be turned off using the $Conf{BackupPCUserVerify} option.
+
+* In numerous places changed "Smb" to "Xfer" (eg: log file names) to
+  support generic names for both smb and tar transport methods.  The
+  CGI script checks for old names for backward compatibility.
+
+* Major changed to Backup_dump to support new tar transport.  All transport
+  specific code moved into BackupPC::Xfer::Smb and BackupPC::Xfer::Tar
+  objects.
+
+* Added workaround for a bug in Samba's smbclient for files between 2GB
+  and 4GB.  The file size in the tar header is incorrect.  This allows
+  files up to 4GB to work with smbclient, rather than 2GB.  To support
+  files larger than 2GB you must make sure perl is compiled with the
+  uselargefiles option (use "perl -V | egrep largefiles" to check) and
+  the pool directory must be on a file system that supports large files.
+
+* Moved the pool writing code into a module BackupPC::PoolWrite.  This
+  allows the clever file pool checking (digest, uncompressing, comparing
+  etc with minimum disk IO) to be used easily in multiple places (eg: it
+  is now used for writing attribute files so they can be pooled).
+
+* Changed MD5 to Digest::MD5 to avoid use of the depreceated MD5 module.
+
+* Shortened default $Conf{MyPath} so that perl's taint mode is more likely
+  to be happy.  The old $Conf{MyPath} contained /usr/local/bin, which
+  on one user's machine was world writable and perl -T correctly
+  complained about it.
+
+* Fixed ping command options in Lib.pm so that it works on OpenBSD.
+  Thanks to Kyle Amon for sending the fix.  Decided to move the
+  ping options from Lib.pm into config.pl (as $Conf{PingArgs}) and
+  now configure.pl tries to come up with a sensible default based on
+  the OS.
+
+* Fixed argument checking in BackupPC_tarExtract to allow '$' in the
+  share name (eg: C$).  Thanks to Jules Agee for this fix.  Also
+  changed the default config.pl so that single quotes are used
+  everywhere so that people don't get tripped up putting '$' inside
+  double-quoted strings.
+
+#------------------------------------------------------------------------
+# Version 1.03, 9 Dec 2001
+#------------------------------------------------------------------------
+
+* BackupPC now has full support for compression.  There are now two
+  pool areas, the original pool for uncompressed files, and cpool for
+  compressed files. The compression is done by Compress::Zlib.
+  Compression reduces the pool disk usage by around 40%, although your
+  mileage may vary.  Compression is optional and can also be specified on
+  a per-PC basis (although this will cost more pool storage since many
+  backup files will have to be stored in both compressed and
+  uncompressed forms.
+
+* A new script, BackupPC_compressPool, can be run to compress the entire
+  pool.  This is used once to migrate all the pool data from uncompressed
+  to compressed on existing installations.  Read the documentation
+  (Installing BackupPC/Compressing an existing pool) before running
+  BackupPC_compressPool!
+
+  Alternatively, compression can simply be turned on and all new backups
+  will be compressed. Both old (uncompressed) and new (compressed)
+  backups can be browsed and viewed. Eventually, the old backups will
+  expire and all the pool data will be compressed.  However, until the
+  old backups expire, this approach could require 60% or more additional
+  pool storage space to store both uncompressed and compressed versions
+  of the backup files.
+
+* Significant improvements to the cgi interface, BackupPC_Admin:
+
+    - much better layout navigation
+    - handles compressed backup files and compressed log files
+    - handles unfilled incremental dumps
+    - better backup directory browsing navigation
+    - reports compression statistics
+    - $Conf{CgiDateFormatMMDD} allows you to set date format (MM/DD or DD/MM)
+    - Additional customization with $Conf{CgiHeaderFontType},
+      $Conf{CgiHeaderFontSize}, $Conf{CgiNavBarBgColor}, and
+      $Conf{CgiHeaderBgColor}.
+
+* Eliminated BackupPC_queueAll.  BackupPC directly reads the hosts
+  file and queues the PCs itself.  Like config.pl, BackupPC will
+  re-read the hosts file on each wakeup if its modification time
+  changes, or upon a SIGHUP.  This also makes for better behavior
+  when adding a host: if you add hosts, simply send a SIGHUP to
+  BackupPC or wait for the next wakeup.
+
+* BackupPC_dump now compresses the SmbLOG file if compression is enabled.
+
+* BackupPC_dump keeps track of compressed file sizes so that compression
+  statistics can be reported by the cgi interface.
+
+* Aging of old log files now handles compressed log files (.z extension).
+
+* Added configuration option $Conf{IncrFill} to specify whether
+  incremental dumps should be filled in.  Old behavior was that
+  filling was on.  Now it's optional.  See config.pl for more
+  details.
+
+* BackupPC_nightly now cleans and generates statistics for both
+  the uncompressed pool and compressed pool (cpool).
+
+* Added new utility script BackupPC_zcat that can be used to
+  uncompresses BackupPC files.
+
+* configure.pl offers various options related to compression,
+  depending upon whether this is a new install or upgrade,
+  and whether or not Compress::Zlib is installed.
+
+* configure.pl now makes a backup copy of config.pl before
+  config.pl is updated.
+
+* added three new fields to the backups file to handle optional
+  filling and compression stats.
+
+* Added -e option to BackupPC_dump.  BackupPC now invokes BackupPC_dump -e
+  on each dhcp host once each night to verify that very old backups are
+  expired.  This ensures that very old backups are expired even if
+  the dhcp host has not been on the network for a long time.
+
+* fixed bug in BackupPC::FileZIO.pm that required Compress::Zlib,
+  even if compression was off.  Thanks to Steve Holmes for reporting
+  this.
+
+* fixed bug that caused a BackupPC queue to get blocked when a backup
+  cancel attempt was made during the BackupPC_link phase.
+
+#------------------------------------------------------------------------
+# Version 1.02, 28 Oct 2001.
+#------------------------------------------------------------------------
+
+* Added new script BackupPC_tarExtract to extract the smbclient tar
+  archive. This reduces disk writes by perhaps 90-95% and disk reads by
+  50%. Previously, tar was used to extract and write everything to disk.
+  Then BackupPC_dump would read enough of each file to compute the MD5
+  digest, and then compare the full file with candidate pool files.  So
+  for each 1MB file that matches a single file in the pool, there would
+  be 1MB of disk writes and 2MB of disk reads (to compare two 1MB files).
+
+  BackupPC_tarExtract instead extracts the archive using a 1MB memory
+  buffer.  This allows the MD5 digest to be computed without touching the
+  disk.  Next, any potential pool file compares are done by comparing the
+  pool file against the incoming tar data in memory, which only requires
+  the pool file to be read.  So for each 1MB file that matches a single
+  file in the pool, there are now no disk writes, and only 1MB of reads.
+  BackupPC_tarExtract handles arbitrary size files and repeated
+  potential pool matches.  If the incoming file doesn't match the pool
+  then it is written to disk (once the pool is mature this happens maybe
+  5-10% of the time).
+
+* Substantial changes to BackupPC_dump:
+
+    + BackupPC_tarExtract is now used in place of tar.
+
+    + BackupPC_dump now reads the output from both smbclient and
+      BackupPC_tarExtract and merges them into SmbLOG.
+
+    + Named pipes are no longer used to connect smbclient to tar
+      (now BackupPC_tarExtract).  Regular pipes are used instead.
+      This avoids the need to system mknod or mkfifo.
+
+    + Locked files on the client that can't be read by smbclient
+      previously were filled with 0x0 bytes by smbclient, meaning
+      tar extracted a useless file filled with 0x0 bytes.  Now,
+      BackupPC_dump watches the output of smbclient and removes
+      any files that smbclient couldn't read.  This avoids storing
+      useless files.  It tries to replace such files with a hard link
+      to a previous dump.  These actions appear in the log file.
+
+* added new module lib/BackupPC/FileZIO.pm. This handles pool file
+  I/O and is used by BackupPC_tarExtract.  BackupPC::FileIO supports
+  reading and writing compressed and regular files and provides all the
+  hooks for compression support in BackupPC (should be supported in next
+  version). BackupPC::FileIO also does efficient writing of files that
+  contain leading 0x0 bytes (by seeking past the 0x0 bytes). This is
+  helpful when smbclient reads a locked file, and it fills the tar
+  output with a file of the correct size but all 0x0.  Such files will be
+  later removed by BackupPC_dump.  But in the meantime, BackupPC::FileIO
+  writes such files efficiently (as sparse files), meaning just a few
+  blocks of disk space will be needed even if the file is large.
+
+* alive/dead counting for blackout now works correctly for DHCP hosts.
+
+* BackupPC resets activeJob on startup, to fix bug when BackupPC was
+  killed and restarted with backups running.
+
+* added extra non blocking select() in BackupPC to make sure the socket
+  reads don't block.
+
+* BackupPC avoids queuing multiple BackupPC_queueAll's on the CmdQueue.
+
+* Updated BackupPC_sendEmail to correctly parse the locked file
+  error from 2.2.1a smbclient, so that missing Outlook file emails
+  can be correctly sent.
+
+* Changed HostInfoRead() in lib/BackupPC/Lib.pm to lowercase the
+  hostname read from the hosts file.
+
+* BackupPC_Admin provides general summary when the host name is empty.
+
+* configure.pl (and BackupPC) now requires perl 5.6.0 or later.
+
+* configure.pl complains if BackupPC is already running, reminding you
+  to stop it before upgrading.
+
+* updated documentation, and fixed auto-insertion of config.pl into
+  BackupPC.pod (previously the last config parameter was left out of
+  BackupPC.pod).
+
+#------------------------------------------------------------------------
+# Version 1.01, 30 Sep 2001
+#------------------------------------------------------------------------
+
+* Documentation cleanup in README, doc/BackupPC.pod, conf/config.pl.
+
+* BackupPC_sendMail now reads the optional per-PC config file, allowing
+  email configuration parameters to be set on a per-PC basis.
+
+* Removed the unused 4096-length MD5 digest code in lib/BackupPC/Lib.pm.
+
+#------------------------------------------------------------------------
+# Version 1.00, 21 Sep 2001
+#------------------------------------------------------------------------
+
+* Initial release of BackupPC on sourceforge.net.

@@ -1,0 +1,91 @@
+#!/bin/sh
+#
+# DESCRIPTION
+#
+#   Startup init script for BackupPC on Redhat linux.
+#
+# Distributed with BackupPC version 1.5.0, released 2 Aug 2002.
+#
+# chkconfig: - 91 35
+# description: Starts and stops the BackupPC server
+
+# Source function library.
+if [ -f /etc/init.d/functions ] ; then
+  . /etc/init.d/functions
+elif [ -f /etc/rc.d/init.d/functions ] ; then
+  . /etc/rc.d/init.d/functions
+else
+  exit 0
+fi
+
+RETVAL=0
+
+start() {
+    #
+    # You can set the SMB share password here is you wish.  Otherwise
+    # you should put it in the config.pl script.
+    # If you put it here make sure this file has no read permissions
+    # for normal users!  See the documentation for more information.
+    #
+    # Replace the daemon line below with this:
+    #   
+    #  daemon --user __BACKUPPCUSER__ /usr/bin/env PASSWD=xxxxx \
+    #				__INSTALLDIR__/bin/BackupPC -d
+    #   
+    echo -n "Starting BackupPC: "
+    daemon --user __BACKUPPCUSER__ __INSTALLDIR__/bin/BackupPC -d
+    RETVAL=$?
+    echo
+    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/backuppc || \
+       RETVAL=1
+    return $RETVAL
+}	
+
+stop() {
+    echo -n "Shutting down BackupPC: "
+    killproc __INSTALLDIR__/bin/BackupPC
+    RETVAL=$?
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/backupcpc
+    echo ""
+    return $RETVAL
+}	
+
+restart() {
+    stop
+    start
+}	
+
+reload() {
+    echo -n "Reloading config.pl file: "
+    killproc __INSTALLDIR__/bin/BackupPC -HUP
+    RETVAL=$?
+    echo
+    return $RETVAL
+}	
+
+rhstatus() {
+    status __INSTALLDIR__/bin/BackupPC
+}
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart)
+  	restart
+	;;
+  reload)
+  	reload
+	;;
+  status)
+  	rhstatus
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|reload|status}"
+	exit 1
+esac
+
+exit $?

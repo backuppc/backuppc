@@ -1,0 +1,79 @@
+#!/bin/perl -T
+#============================================================= -*-perl-*-
+#
+# BackupPC_serverMesg: Send one or more commands to the BackupPC server.
+#
+# DESCRIPTION
+#   As of v1.5.0 the BackupPC server communicates via a unix or internet
+#   domain socket.  Every message is protected with an MD5 digest, based
+#   on a shared secret, a sequence number, and a per-connection unique
+#   key.  This minimizes the risk of an attacked issuing fake commands
+#   to the BackupPC server.
+#
+#   Previously, telnet could be used to talk to the BackupPC server.
+#   As of v1.5.0 that is no longer possible.
+#
+#   This script replaces telnet as a mechanism for sending BackupPC
+#   messages.  Usage:
+#
+#       BackupPC_serverMesg mesg
+#
+#   Example:
+#       BackupPC_serverMesg status info
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 1.5.0, released 2 Aug 2002.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+use lib "__INSTALLDIR__/lib";
+use BackupPC::Lib;
+use BackupPC::FileZIO;
+
+use File::Find;
+use File::Path;
+use Data::Dumper;
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+
+$bpc->ChildInit();
+
+if ( !@ARGV ) {
+    print("usage: $0 mesg\n");
+    exit(1);
+}
+
+my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
+if ( $err ) {
+    print("Can't connect to server ($err)\n");
+    exit(1);
+}
+my $reply = $bpc->ServerMesg(join(" ", @ARGV));
+print("Got reply: $reply");

@@ -1,0 +1,235 @@
+#!/bin/perl
+#
+# Build a BackupPC distribution
+#
+
+use strict;
+use File::Path;
+use File::Copy;
+
+umask(0022);
+
+my $Version     = "1.5.0";
+my $ReleaseDate = "2 Aug 2002";
+my $DistDir     = "dist/BackupPC-$Version";
+
+my @PerlSrc = qw(
+    bin/BackupPC
+    bin/BackupPC_dump
+    bin/BackupPC_link
+    bin/BackupPC_nightly
+    bin/BackupPC_restore
+    bin/BackupPC_sendEmail
+    bin/BackupPC_serverMesg
+    bin/BackupPC_trashClean
+    bin/BackupPC_tarExtract
+    bin/BackupPC_tarCreate
+    bin/BackupPC_compressPool
+    bin/BackupPC_zipCreate
+    bin/BackupPC_zcat
+    lib/BackupPC/Attrib.pm
+    lib/BackupPC/FileZIO.pm
+    lib/BackupPC/Lib.pm
+    lib/BackupPC/PoolWrite.pm
+    lib/BackupPC/Xfer/Smb.pm
+    lib/BackupPC/Xfer/Tar.pm
+    lib/BackupPC/Zip/FileMember.pm
+    cgi-bin/BackupPC_Admin
+);
+
+#
+# Check config parameters
+#
+my $ConfVars = {};
+CheckConfigParams("conf/config.pl", $ConfVars, 0);
+$ConfVars->{BackupPCUser} = 2;
+$ConfVars->{CgiDir} = 2;
+$ConfVars->{InstallDir} = 2;
+$ConfVars->{CgiImageDir} = 2;
+foreach my $file ( @PerlSrc ) {
+    CheckConfigParams($file, $ConfVars, 1);
+}
+my $errCnt;
+foreach my $var ( sort(keys(%$ConfVars) ) ) {
+    next if ( $ConfVars->{$var} >= 2 || $var =~ /^\$/ );
+    printf("Unused config parameter $var\n");
+    $errCnt++;
+}
+exit(1) if ( $errCnt );
+
+rmtree($DistDir, 0, 0);
+mkpath($DistDir, 0, 0777);
+
+foreach my $dir ( qw(bin lib/BackupPC/Xfer lib/BackupPC/Zip doc conf
+		     images init.d/src cgi-bin) ) {
+    mkpath("$DistDir/$dir", 0, 0777);
+}
+
+my %ConfName;
+my $ConfPod = config2pod();
+rmtree("doc", 0, 0);
+mkpath("doc", 0, 0777);
+InstallFile("doc-src/BackupPC.pod", "doc/BackupPC.pod");
+
+use Pod::Html;
+pod2html("doc/BackupPC.pod",
+        "--backlink=Back to Top",
+        "--header",
+        "--title=BackupPC",
+        "--outfile=doc/BackupPC.html");
+
+foreach my $file ( (@PerlSrc,
+	    <images/*>,
+	    qw(
+		conf/config.pl
+		conf/hosts
+		init.d/README
+		init.d/src/linux-backuppc
+		init.d/src/solaris-backuppc
+		doc/BackupPC.pod
+		doc/BackupPC.html
+		README
+		LICENSE
+		ChangeLog
+		configure.pl
+        )) ) {
+    InstallFile("$file", "$DistDir/$file");
+}
+rmtree("doc", 0, 0);
+system("cd dist ; tar zcf BackupPC-$Version.tar.gz BackupPC-$Version");
+
+###########################################################################
+# Subroutines
+###########################################################################
+
+sub InstallFile
+{
+    my($file, $dest) = @_;
+
+    unlink($dest) if ( -d $dest );
+    if ( $file =~ /\.gif/ ) {
+        die("can't copy($file, $dest)\n") unless copy($file, $dest);
+    } else {
+	open(FILE, $file)   || die("can't open $file for reading\n");
+	open(OUT, ">$dest") || die("can't open $dest for writing\n");
+	while ( <FILE> ) {
+	    s/^# *Version \d+\.\d+[\.\w]*, released \d+ \w+ \d{4}\.?/# Version __VERSION__, released __RELEASEDATE__./;
+	    s/__VERSION__/$Version/g;
+	    s/__RELEASEDATE__/$ReleaseDate/g;
+	    if ( $file =~ /BackupPC\.html$/ && !/A NAME="item_%24Conf/ ) {
+		s/\$Conf{([^}]*)}/
+			defined($ConfName{$1})
+			    ? "<A HREF=\"#$ConfName{$1}\">\$Conf{$1}<\/A>"
+			    : "\$Conf{$1}"/eg;
+	    }
+	    if ( /__CONFIGPOD__/ ) {
+		print OUT $ConfPod;
+	    } elsif ( /^use lib ".*BackupPC\/lib";/
+		    || /^use lib "\/home\/pcbackup\/install\/lib";/ ) {
+		print OUT "use lib \"__INSTALLDIR__/lib\";\n";
+	    } elsif ( $file =~ /Lib.pm/ && /(.*TopDir *=> .*)'.*',/ ) {
+		print OUT "$1'__TOPDIR__',\n";
+	    } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'[\w\d\.]+',/ ) {
+		print OUT "$1'$Version',\n";
+	    } elsif ( $file =~ /Lib.pm/ && /(.*BinDir *=> .*)'.*',/ ) {
+		print OUT "$1'__INSTALLDIR__/bin',\n";
+	    } elsif ( $file =~ /Lib.pm/ && /(.*LibDir *=> .*)'.*',/ ) {
+		print OUT "$1'__INSTALLDIR__/lib',\n";
+	    } else {
+		print OUT;
+	    }
+	}
+	close(FILE);
+	close(OUT);
+    }
+    if ( -x $file ) {
+        chmod(0555, $dest);
+    } else {
+        chmod(0444, $dest);
+    }
+}
+
+sub config2pod
+{
+    open(C, "conf/config.pl") || die("can't open conf/config.pl");
+    my($str, $out, $getHdr, @conf);
+    my $first = 1;
+    while ( <C> ) {
+        chomp;
+        s/ +$//;
+        if ( /^#########################/ ) {
+            if ( $getHdr ) {
+                $str =~ s/\n.*//sg;
+                $out .= "=back\n\n" if ( !$first );
+                $out .= "=head2 $str\n\n=over 4\n\n";
+                $str = "";
+                $first = 0;
+            }
+            $getHdr = !$getHdr;
+            next;
+        }
+        if ( /^#/ ) {
+            s/# ?//;
+            next if ( $str eq "" && /^$/ );
+            $str .= $_ . "\n";
+            $str .= "\n" if ( $str =~ /examples?:\n$/i );
+        } elsif ( /^\$Conf{([^}]*)/ ) {
+            my $var = $1;
+            s/  +/ /g;
+            s/;\s*#.*/;/;
+            if ( !s/\[$/[ ... ];/ && !s/<<'EOF'/.../ ) {
+                s/([^;])\s*$/$1 .../;
+            }
+            push(@conf, $_);
+            my $text = $_;
+            $text =~ s/\s+/_/sg;
+            $text =~ s{(\W)}{sprintf("%%%02X", ord($1) )}gxe;
+            $text = substr($text, 0, 50);
+            $ConfName{$var} = "item_$text";
+        } elsif ( /^$/ ) {
+            if ( $str ne "" && @conf ) {
+                $out .= "=item " . join("\n\n=item ", @conf) . "\n\n";
+                $out .= $str;
+                $out .= "\n" if ( $str !~ /\n$/ );
+            }
+            $str = "";
+            @conf = ();
+        }
+    }
+    if ( $str ne "" && @conf ) {
+        $out .= "=item " . join("\n\n=item ", @conf) . "\n\n";
+        $out .= $str;
+        $out .= "\n" if ( $str !~ /\n$/ );
+    }
+    $out .= "=back\n\n" if ( !$first );
+    return $out;
+}
+
+sub CheckConfigParams
+{
+    my($file, $vars, $check) = @_;
+
+    open(F, $file) || die("can't open $file\n");
+    if ( $check ) {
+        while ( <F> ) {
+            s/\$self->{Conf}{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
+                    print("Unexpected Conf var $1 in $file\n");
+                    exit(1);
+                } else {
+                    $vars->{$1}++;
+                }/eg;
+            s/\$[Cc]onf(?:->)?{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
+                    print("Unexpected Conf var $1 in $file\n");
+                    exit(1);
+                } else {
+                    $vars->{$1}++;
+                }/eg;
+        }
+    } else {
+        while ( <F> ) {
+            s/^[^#]*\$self->{Conf}{([^}]*)/$vars->{$1} = 1;/eg;
+            s/^[^#]*\$Conf{([^}]*)/$vars->{$1} = 1;/eg;
+        }
+    }
+    close(F);
+}

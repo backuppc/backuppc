@@ -1,0 +1,615 @@
+#!/bin/perl -T
+#============================================================= -*-perl-*-
+#
+# BackupPC_tarCreate: create a tar archive of an existing dump
+# for restore on a client.
+#
+# DESCRIPTION
+#  
+#   Usage: BackupPC_tarCreate [-t] [-h host] [-n dumpNum] [-s shareName]
+#		    [-r pathRemove] [-p pathAdd] files/directories...
+#
+#   Flags:
+#     Required options:
+#
+#       -h host         host from which the tar archive is created
+#       -n dumpNum      dump number from which the tar archive is created
+#       -s shareName    share name from which the tar archive is created
+#
+#     Other options:
+#       -t              print summary totals
+#       -r pathRemove   path prefix that will be replaced with pathAdd
+#       -p pathAdd      new path prefix
+#
+#     The -h, -n and -s options specify which dump is used to generate
+#     the tar archive.  The -r and -p options can be used to relocate
+#     the paths in the tar archive so extracted files can be placed
+#     in a location different from their original location.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 1.5.0, released 2 Aug 2002.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+use lib "__INSTALLDIR__/lib";
+use File::Path;
+use Getopt::Std;
+use BackupPC::Lib;
+use BackupPC::Attrib qw(:all);
+use BackupPC::FileZIO;
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+
+my %opts;
+getopts("th:n:p:r:s:", \%opts);
+
+if ( @ARGV < 1 ) {
+    print(STDERR "usage: $0 [-t] [-h host] [-n dumpNum] [-s shareName]"
+               . " [-r pathRemove] [-p pathAdd]"
+               . " files/directories...\n");
+    exit(1);
+}
+
+if ( $opts{h} !~ /^([\w\.-]+)$/ ) {
+    print(STDERR "$0: bad host name '$opts{h}'\n");
+    exit(1);
+}
+my $Host = $opts{h};
+
+if ( $opts{n} !~ /^(\d+)$/ ) {
+    print(STDERR "$0: bad dump number '$opts{n}'\n");
+    exit(1);
+}
+my $Num = $opts{n};
+
+my @Backups = $bpc->BackupInfoRead($Host);
+my($Compress, $Mangle, $CompressF, $MangleF, $NumF, $i);
+my $FileCnt = 0;
+my $ByteCnt = 0;
+my $DirCnt = 0;
+my $SpecialCnt = 0;
+my $ErrorCnt = 0;
+
+for ( $i = 0 ; $i < @Backups ; $i++ ) {
+    if ( !$Backups[$i]{noFill} ) {
+        #
+        # Remember the most recent filled backup
+        #
+        $NumF      = $Backups[$i]{num};
+        $MangleF   = $Backups[$i]{mangle};
+        $CompressF = $Backups[$i]{compress};
+    }
+    next if ( $Backups[$i]{num} != $Num );
+    $Compress = $Backups[$i]{compress};
+    $Mangle   = $Backups[$i]{mangle};
+    if ( !$Backups[$i]{noFill} ) {
+        # no need to back-fill a filled backup
+        $NumF = $MangleF = $CompressF = undef;
+    }
+    last;
+}
+if ( $i >= @Backups ) {
+    print(STDERR "$0: bad backup number $Num for host $Host\n");
+    exit(1);
+}
+
+my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
+my $PathAdd    = $1 if ( $opts{p} =~ /(.+)/ );
+if ( $opts{s} !~ /^([\w\s\.\/\$-]+)$/ ) {
+    print(STDERR "$0: bad share name '$opts{s}'\n");
+    exit(1);
+}
+my $ShareNameOrig = $opts{s};
+my $ShareName  = $Mangle  ? $bpc->fileNameEltMangle($ShareNameOrig)
+                          : $ShareNameOrig;
+my $ShareNameF = $MangleF ? $bpc->fileNameEltMangle($ShareNameOrig)
+                          : $ShareNameOrig;
+
+#
+# This constant and the line of code below that uses it are borrowed
+# from Archive::Tar.  Thanks to Calle Dybedahl and Stephen Zander.
+# See www.cpan.org.
+#
+# Archive::Tar is Copyright 1997 Calle Dybedahl. All rights reserved.
+#                 Copyright 1998 Stephen Zander. All rights reserved.
+#
+my $tar_pack_header
+    = 'a100 a8 a8 a8 a12 a12 A8 a1 a100 a6 a2 a32 a32 a8 a8 a155 x12';
+my $tar_header_length = 512;
+
+my $BufSize    = 1048576;     # 1MB or 2^20
+my $WriteBuf   = "";
+my $WriteBufSz = 20 * $tar_header_length;
+
+my(%UidCache, %GidCache);
+my(%HardLinkExtraFiles, @HardLinks);
+
+#
+# Write out all the requested files/directories
+#
+my $fh = *STDOUT;
+foreach my $dir ( @ARGV ) {
+    archiveWrite($fh, $dir);
+}
+
+#
+# Write out any hardlinks (if any)
+#
+foreach my $hdr ( @HardLinks ) {
+    $hdr->{size} = 0;
+    if ( defined($PathRemove)
+	  && substr($hdr->{linkname}, 0, length($PathRemove)+1)
+		    eq ".$PathRemove" ) {
+        substr($hdr->{linkname}, 0, length($PathRemove)+1) = ".$PathAdd";
+    }
+    TarWriteFileInfo($fh, $hdr);
+}
+
+#
+# Finish with two null 512 byte headers, and then round out a full
+# block.
+# 
+my $data = "\0" x ($tar_header_length * 2);
+TarWrite($fh, \$data);
+TarWrite($fh, undef);
+
+#
+# print out totals if requested
+#
+if ( $opts{t} ) {
+    print STDERR "Done: $FileCnt files, $ByteCnt bytes, $DirCnt dirs,",
+		 " $SpecialCnt specials, $ErrorCnt errors\n";
+}
+exit(0);
+
+###########################################################################
+# Subroutines
+###########################################################################
+
+sub archiveWrite
+{
+    my($fh, $dir, $tarPathOverride) = @_;
+    if ( $dir =~ m{(^|/)\.\.(/|$)} || $dir !~ /^(.*)$/ ) {
+        print(STDERR "$0: bad directory '$dir'\n");
+	$ErrorCnt++;
+        next;
+    }
+    (my $DirOrig  = $1) =~ s{/+$}{};
+    $DirOrig      =~ s{^\.?/+}{};
+    my($Dir, $DirF, $FullPath, $FullPathF);
+    if ( $DirOrig eq "" ) {
+        $Dir = $DirF = "";
+        $FullPath  = "$TopDir/pc/$Host/$Num/$ShareName";
+        $FullPathF = "$TopDir/pc/$Host/$NumF/$ShareNameF"
+                                            if ( defined($NumF) );
+    } else {
+        $Dir       = $Mangle  ? $bpc->fileNameMangle($DirOrig) : $DirOrig;
+        $DirF      = $MangleF ? $bpc->fileNameMangle($DirOrig) : $DirOrig;
+        $FullPath  = "$TopDir/pc/$Host/$Num/$ShareName/$Dir";
+        $FullPathF = "$TopDir/pc/$Host/$NumF/$ShareNameF/$DirF"
+                                            if ( defined($NumF) );
+    }
+    if ( -f $FullPath ) {
+        TarWriteFile($fh, $FullPath, $Mangle, $Compress, $tarPathOverride);
+    } elsif ( -d $FullPath || (defined($NumF) && -d $FullPathF) ) {
+        MergeFind($fh, $FullPath, $FullPathF);
+    } elsif ( defined($NumF) && -f $FullPathF ) {
+        TarWriteFile($fh, $FullPathF, $MangleF, $CompressF, $tarPathOverride);
+    } else {
+        print(STDERR "$0: $Host, backup $Num, doesn't have a directory or file"
+                   . " $ShareNameOrig/$DirOrig\n");
+	$ErrorCnt++;
+    }
+}
+
+sub UidLookup
+{
+    my($uid) = @_;
+
+    $UidCache{$uid} = (getpwuid($uid))[0] if ( !exists($UidCache{$uid}) );
+    return $UidCache{$uid};
+}
+
+sub GidLookup
+{
+    my($gid) = @_;
+
+    $GidCache{$gid} = (getgrgid($gid))[0] if ( !exists($GidCache{$gid}) );
+    return $GidCache{$gid};
+}
+
+sub TarWrite
+{
+    my($fh, $dataRef) = @_;
+
+    if ( !defined($dataRef) ) {
+        #
+        # do flush by padding to a full $WriteBufSz
+        #
+        my $data = "\0" x ($WriteBufSz - length($WriteBuf));
+        $dataRef = \$data;
+    }
+    if ( length($WriteBuf) + length($$dataRef) < $WriteBufSz ) {
+        #
+        # just buffer and return
+        #
+        $WriteBuf .= $$dataRef;
+        return;
+    }
+    my $done = $WriteBufSz - length($WriteBuf);
+    if ( syswrite($fh, $WriteBuf . substr($$dataRef, 0, $done))
+                                != $WriteBufSz ) {
+        print(STDERR "Unable to write to output file\n");
+        exit(1);
+    }
+    while ( $done + $WriteBufSz <= length($$dataRef) ) {
+        if ( syswrite($fh, substr($$dataRef, $done, $WriteBufSz))
+                            != $WriteBufSz ) {
+            print(STDERR "Unable to write to output file\n");
+            exit(1);
+        }
+        $done += $WriteBufSz;
+    }
+    $WriteBuf = substr($$dataRef, $done);
+}
+
+sub TarWritePad
+{
+    my($fh, $size) = @_;
+
+    if ( $size % $tar_header_length ) {
+        my $data = "\0" x ($tar_header_length - ($size % $tar_header_length));
+        TarWrite($fh, \$data);
+    }
+}
+
+sub TarWriteHeader
+{
+    my($fh, $hdr) = @_;
+
+    $hdr->{uname} = UidLookup($hdr->{uid}) if ( !defined($hdr->{uname}) );
+    $hdr->{gname} = GidLookup($hdr->{gid}) if ( !defined($hdr->{gname}) );
+    my $devmajor = defined($hdr->{devmajor}) ? sprintf("%07o", $hdr->{devmajor})
+                                             : "";
+    my $devminor = defined($hdr->{devminor}) ? sprintf("%07o", $hdr->{devminor})
+                                             : "";
+    my $data = pack($tar_pack_header,
+                     substr($hdr->{name}, 0, 99),
+                     sprintf("%07o", $hdr->{mode}),
+                     sprintf("%07o", $hdr->{uid}),
+                     sprintf("%07o", $hdr->{gid}),
+                     sprintf("%011o", $hdr->{size}),
+                     sprintf("%011o", $hdr->{mtime}),
+                     "",        #checksum field - space padded by pack("A8")
+                     $hdr->{type},
+                     substr($hdr->{linkname}, 0, 99),
+                     $hdr->{magic} || 'ustar ',
+                     $hdr->{version} || ' ',
+                     $hdr->{uname},
+                     $hdr->{gname},
+                     $devmajor,
+                     $devminor,
+                     ""         # prefix is empty
+                 );
+    substr($data, 148, 7) = sprintf("%06o\0", unpack("%16C*",$data));
+    TarWrite($fh, \$data);
+}
+
+sub TarWriteFileInfo
+{
+    my($fh, $hdr) = @_;
+
+    #
+    # Handle long link names (symbolic links)
+    #
+    if ( length($hdr->{linkname}) > 99 ) {
+        my %h;
+        my $data = $hdr->{linkname} . "\0";
+        $h{name} = "././\@LongLink";
+        $h{type} = "K";
+        $h{size} = length($data);
+        TarWriteHeader($fh, \%h);
+        TarWrite($fh, \$data);
+        TarWritePad($fh, length($data));
+    }
+    #
+    # Handle long file names
+    #
+    if ( length($hdr->{name}) > 99 ) {
+        my %h;
+        my $data = $hdr->{name} . "\0";
+        $h{name} = "././\@LongLink";
+        $h{type} = "L";
+        $h{size} = length($data);
+        TarWriteHeader($fh, \%h);
+        TarWrite($fh, \$data);
+        TarWritePad($fh, length($data));
+    }
+    TarWriteHeader($fh, $hdr);
+}
+
+my $Attr;
+my $AttrDir;
+
+sub TarWriteFile
+{
+    my($fh, $fullName, $mangle, $compress, $tarPathOverride) = @_;
+    my($tarPath);
+
+    if ( $fullName =~ m{^\Q$TopDir/pc/$Host/$Num/$ShareName\E(.*)}
+        || (defined($NumF)
+            && $fullName =~ m{^\Q$TopDir/pc/$Host/$NumF/$ShareNameF\E(.*)}) ) {
+        $tarPath = $mangle ? $bpc->fileNameUnmangle($1) : $1;
+    } else {
+        print(STDERR "Unexpected file name from find: $fullName\n");
+        return;
+    }
+    $tarPath = $tarPathOverride if ( defined($tarPathOverride) );
+    (my $dir = $fullName) =~ s{/([^/]*)$}{};
+    my $fileName = $mangle ? $bpc->fileNameUnmangle($1) : $1;
+    if ( $mangle && $AttrDir ne $dir ) {
+        $AttrDir = $dir;
+	$Attr = BackupPC::Attrib->new({ compress => $compress });
+	if ( -f $Attr->fileName($dir) && !$Attr->read($dir) ) {
+            print(STDERR "Can't read attribute file in $dir\n");
+            $ErrorCnt++;
+	    $Attr = undef;
+	}
+    }
+    my $hdr = $Attr->get($fileName) if ( defined($Attr) );
+    if ( !defined($hdr) ) {
+        #
+        # No attributes.  Must be an old style backup.  Reconstruct
+        # what we can.  Painful part is computing the size if compression
+        # is on: only method is to uncompress the file.
+        #
+        my @s = stat($fullName);
+        $hdr = {
+            type  => -d _ ? BPC_FTYPE_DIR : BPC_FTYPE_FILE,
+            mode  => $s[2],
+            uid   => $s[4],
+            gid   => $s[5],
+            size  => -f _ ? $s[7] : 0,
+            mtime => $s[9],
+        };
+        if ( $compress && -f _ ) {
+            #
+            # Compute the correct size by reading the whole file
+            #
+            my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
+            if ( !defined($f) ) {
+                print(STDERR "Unable to open file $fullName\n");
+		$ErrorCnt++;
+                return;
+            }
+            my($data, $size);
+            while ( $f->read(\$data, $BufSize) > 0 ) {
+                $size += length($data);
+            }
+            $f->close;
+            $hdr->{size} = $size;
+        }
+    }
+    if ( defined($PathRemove)
+            && substr($tarPath, 0, length($PathRemove)) eq $PathRemove ) {
+        substr($tarPath, 0, length($PathRemove)) = $PathAdd;
+    }
+    $tarPath = "./" . $tarPath if ( $tarPath !~ /^\.\// );
+    $tarPath =~ s{//+}{/}g;
+    $hdr->{name} = $tarPath;
+
+    if ( $hdr->{type} == BPC_FTYPE_DIR ) {
+        #
+        # Directory: just write the header
+        #
+        $hdr->{name} .= "/" if ( $hdr->{name} !~ m{/$} );
+        TarWriteFileInfo($fh, $hdr);
+	$DirCnt++;
+    } elsif ( $hdr->{type} == BPC_FTYPE_FILE ) {
+        #
+        # Regular file: write the header and file
+        #
+        my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
+        if ( !defined($f) ) {
+            print(STDERR "Unable to open file $fullName\n");
+            $ErrorCnt++;
+	    return;
+        }
+        TarWriteFileInfo($fh, $hdr);
+        my($data, $size);
+        while ( $f->read(\$data, $BufSize) > 0 ) {
+            TarWrite($fh, \$data);
+            $size += length($data);
+        }
+        $f->close;
+        TarWritePad($fh, $size);
+	$FileCnt++;
+	$ByteCnt += $size;
+    } elsif ( $hdr->{type} == BPC_FTYPE_HARDLINK ) {
+        #
+        # Hardlink file: either write a hardlink or the complete file
+	# depending upon whether the linked-to file will be written
+	# to the archive.
+        #
+	# Start by reading the contents of the link.
+	#
+        my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
+        if ( !defined($f) ) {
+            print(STDERR "Unable to open file $fullName\n");
+            $ErrorCnt++;
+	    return;
+        }
+        my $data;
+        while ( $f->read(\$data, $BufSize) > 0 ) {
+            $hdr->{linkname} .= $data;
+        }
+	$f->close;
+	#
+	# Check @ARGV and the list of hardlinked files we have explicity
+	# dumped to see if we have dumped this file or not
+	#
+	my $done = 0;
+	my $name = $hdr->{linkname};
+	$name =~ s{^\./}{/};
+	if ( $HardLinkExtraFiles{$name} ) {
+	    $done = 1;
+	} else {
+	    foreach my $arg ( @ARGV ) {
+		$arg =~ s{^\./+}{/};
+		$arg =~ s{/+$}{};
+		$done = 1 if ( $name eq $arg || $name =~ /^\Q$arg\// );
+	    }
+	}
+	if ( $done ) {
+	    #
+	    # Target file will be or was written, so just remember
+	    # the hardlink so we can dump it later.
+	    #
+	    push(@HardLinks, $hdr);
+	    $SpecialCnt++;
+	} else {
+	    #
+	    # Have to dump the original file.  Just call the top-level
+	    # routine, so that we save the hassle of dealing with
+	    # mangling, merging and attributes.
+	    #
+	    $HardLinkExtraFiles{$hdr->{linkname}} = 1;
+	    archiveWrite($fh, $hdr->{linkname}, $hdr->{name});
+	}
+    } elsif ( $hdr->{type} == BPC_FTYPE_SYMLINK ) {
+        #
+        # Symbolic link: read the symbolic link contents into the header
+        # and write the header.
+        #
+        my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
+        if ( !defined($f) ) {
+            print(STDERR "Unable to open symlink file $fullName\n");
+            $ErrorCnt++;
+            return;
+        }
+        my $data;
+        while ( $f->read(\$data, $BufSize) > 0 ) {
+            $hdr->{linkname} .= $data;
+        }
+        $f->close;
+        $hdr->{size} = 0;
+        TarWriteFileInfo($fh, $hdr);
+	$SpecialCnt++;
+    } elsif ( $hdr->{type} == BPC_FTYPE_CHARDEV
+           || $hdr->{type} == BPC_FTYPE_BLOCKDEV
+           || $hdr->{type} == BPC_FTYPE_FIFO ) {
+        #
+        # Special files: for char and block special we read the
+        # major and minor numbers from a plain file.
+        #
+        if ( $hdr->{type} != BPC_FTYPE_FIFO ) {
+            my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
+            my $data;
+            if ( !defined($f) || $f->read(\$data, $BufSize) < 0 ) {
+                print(STDERR "Unable to open/read char/block special file"
+                           . " $fullName\n");
+		$f->close if ( defined($f) );
+		$ErrorCnt++;
+		return;
+            }
+            $f->close;
+            if ( $data =~ /(\d+),(\d+)/ ) {
+                $hdr->{devmajor} = $1;
+                $hdr->{devminor} = $2;
+            }
+        }
+        $hdr->{size} = 0;
+        TarWriteFileInfo($fh, $hdr);
+	$SpecialCnt++;
+    } else {
+        print(STDERR "Got unknown type $hdr->{type} for $hdr->{name}\n");
+	$ErrorCnt++;
+    }
+}
+
+#
+# Does a recursive find of $dir, filling in from the (filled dump)
+# directory $dirF.  Handles the cases where $dir and $dirF might
+# or might not be mangled etc.
+#
+sub MergeFind
+{
+    my($fh, $dir, $dirF) = @_;
+
+    my(@Dir, $fLast);
+    if ( -d $dir ) {
+        TarWriteFile($fh, $dir, $Mangle, $Compress);
+    } elsif ( -d $dirF ) {
+        TarWriteFile($fh, $dirF, $MangleF, $CompressF);
+    }
+    if ( opendir(DIR, $dir) ) {
+        @Dir = readdir(DIR);
+        closedir(DIR);
+    }
+    if ( defined($NumF) && opendir(DIR, $dirF) ) {
+        if ( $Mangle == $MangleF ) {
+            @Dir = (@Dir, readdir(DIR));
+        } else {
+            foreach my $f ( readdir(DIR) ) {
+                if ( $Mangle ) {
+                    push(@Dir, $bpc->fileNameMangle($f));
+                } else {
+                    push(@Dir, $bpc->fileNameUnmangle($f));
+                }
+            }
+        }
+    }
+    foreach my $f ( sort({$a cmp $b} @Dir) ) {
+        next if ( $f eq "." || $f eq ".."
+               || $f eq $fLast || ($Mangle && $f eq "attrib") );
+        $fLast = $f;
+        my($fF) = $f;
+        if ( $Mangle != $MangleF ) {
+            $fF = $Mangle ? $bpc->fileNameUnmangle($f)
+                          : $bpc->fileNameMangle($f);
+        }
+        if ( -e "$dir/$f" ) {
+            if ( -d "$dir/$f" ) {
+                MergeFind($fh, "$dir/$f", "$dirF/$fF");
+            } else {
+                TarWriteFile($fh, "$dir/$f", $Mangle, $Compress);
+            }
+        } elsif ( -e "$dirF/$fF" ) {
+            if ( -d "$dirF/$fF" ) {
+                MergeFind($fh, "$dir/$f", "$dirF/$fF");
+            } else {
+                TarWriteFile($fh, "$dirF/$fF", $MangleF, $CompressF);
+            }
+        } else {
+            print(STDERR "$0: Botch on $dir, $dirF, $f, $fF\n");
+            $ErrorCnt++;
+        }
+    }
+}

@@ -1,0 +1,393 @@
+#!/bin/perl -T
+#============================================================= -*-perl-*-
+#
+# BackupPC_tarExtract: extract data from a dump
+#
+# DESCRIPTION
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 1.5.0, released 2 Aug 2002.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+use lib "__INSTALLDIR__/lib";
+use BackupPC::Lib;
+use BackupPC::Attrib qw(:all);
+use BackupPC::FileZIO;
+use BackupPC::PoolWrite;
+use File::Path;
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+
+if ( @ARGV != 3 ) {
+    print("usage: $0 <host> <shareName> <compressLevel>\n");
+    exit(1);
+}
+if ( $ARGV[0] !~ /^([\w\.-]+)$/ ) {
+    print("$0: bad host name '$ARGV[0]'\n");
+    exit(1);
+}
+my $host = $1;
+if ( $ARGV[1] !~ /^([\w\s\.\/\$-]+)$/ ) {
+    print("$0: bad share name '$ARGV[1]'\n");
+    exit(1);
+}
+my $ShareNameUM = $1;
+my $ShareName = $bpc->fileNameEltMangle($ShareNameUM);
+if ( $ARGV[2] !~ /^(\d+)$/ ) {
+    print("$0: bad compress level '$ARGV[2]'\n");
+    exit(1);
+}
+my $Compress = $1;
+
+#
+# This constant and the line of code below that uses it is borrowed
+# from Archive::Tar.  Thanks to Calle Dybedahl and Stephen Zander.
+# See www.cpan.org.
+#
+# Archive::Tar is Copyright 1997 Calle Dybedahl. All rights reserved.
+#                 Copyright 1998 Stephen Zander. All rights reserved.
+#
+my $tar_unpack_header
+    = 'A100 A8 A8 A8 A12 A12 A8 A1 A100 A6 A2 A32 A32 A8 A8 A155 x12';
+my $tar_header_length = 512;
+
+my $BufSize  = 1048576;     # 1MB or 2^20
+my $MaxFiles = 20;
+my $Errors   = 0;
+my $OutDir   = "$TopDir/pc/$host/new";
+my %Attrib   = ();
+
+my $ExistFileCnt      = 0;
+my $ExistFileSize     = 0;
+my $ExistFileCompSize = 0;
+my $TotalFileCnt      = 0;
+my $TotalFileSize     = 0;
+
+sub TarRead
+{
+    my($fh, $totBytes) = @_;
+    my($numBytes, $newBytes, $data);
+
+    $data = "\0" x $totBytes;
+    while ( $numBytes < $totBytes ) {
+        $newBytes = sysread($fh,
+                        substr($data, $numBytes, $totBytes - $numBytes),
+                        $totBytes - $numBytes);
+        if ( $newBytes <= 0 ) {
+            print(STDERR "Unexpected end of tar archive (tot = $totBytes,"
+                   . " num = $numBytes, posn = " . sysseek($fh, 0, 1) . ")\n");
+            $Errors++;
+            return;
+        }
+        $numBytes += $newBytes;
+    }
+    return $data;
+}
+
+sub TarReadHeader
+{
+    my($fh) = @_;
+
+    return $1 if ( TarRead($fh, $tar_header_length) =~ /(.*)/s );
+    return;
+}
+
+sub TarFlush
+{
+    my($fh, $size) = @_;
+
+    if ( $size % $tar_header_length ) {
+        TarRead($fh, $tar_header_length - ($size % $tar_header_length));
+    }
+}
+
+sub TarReadFileInfo
+{
+    my($fh) = @_;
+    my($head, $longName, $longLink);
+    my($name, $mode, $uid, $gid, $size, $mtime, $chksum, $type,
+       $linkname, $magic, $version, $uname, $gname, $devmajor,
+       $devminor, $prefix);
+
+    while ( 1 ) {
+        $head = TarReadHeader($fh);
+        return if ( $head eq "" || $head eq "\0" x $tar_header_length );
+        ($name,		# string
+            $mode,	# octal number
+            $uid,	# octal number
+            $gid,	# octal number
+            $size,	# octal number
+            $mtime,	# octal number
+            $chksum,	# octal number
+            $type,	# character
+            $linkname,	# string
+            $magic,	# string
+            $version,	# two bytes
+            $uname,	# string
+            $gname,	# string
+            $devmajor,	# octal number
+            $devminor,	# octal number
+            $prefix) = unpack($tar_unpack_header, $head);
+
+        $mode     = oct $mode;
+        $uid      = oct $uid;
+        $gid      = oct $gid;
+        $size     =~ s/^6/2/;       # fix bug in smbclient for >=2GB files
+        $size     =~ s/^7/3/;       # fix bug in smbclient for >=2GB files
+        $size     = oct $size;
+        $mtime    = oct $mtime;
+        $chksum   = oct $chksum;
+        $devmajor = oct $devmajor;
+        $devminor = oct $devminor;
+        $name     = "$prefix/$name" if $prefix;
+        $prefix   = "";
+        substr ($head, 148, 8) = "        ";
+        if (unpack ("%16C*", $head) != $chksum) {
+           print(STDERR "$name: checksum error at "
+                        . sysseek($fh, 0, 1) , "\n");
+           $Errors++;
+        }
+        if ( $type eq "L" ) {
+            $longName = TarRead($fh, $size) || return;
+            # remove trailing NULL
+            $longName = substr($longName, 0, $size - 1);
+            TarFlush($fh, $size);
+            next;
+        } elsif ( $type eq "K" ) {
+            $longLink = TarRead($fh, $size) || return;
+            # remove trailing NULL
+            $longLink = substr($longLink, 0, $size - 1);
+            TarFlush($fh, $size);
+            next;
+        }
+        $name     = $longName if ( defined($longName) );
+        $linkname = $longLink if ( defined($longLink) );
+        $name     =~ s{^\./+}{};
+        $name     =~ s{/+$}{};
+        $name     =~ s{//+}{/}g;
+        return {
+            name       => $name,
+            mangleName => $bpc->fileNameMangle($name),
+            mode       => $mode,
+            uid        => $uid,
+            gid        => $gid,
+            size       => $size,
+            mtime      => $mtime,
+            type       => $type,
+            linkname   => $linkname,
+            devmajor   => $devmajor,
+            devminor   => $devminor,
+        };
+    }
+}
+
+sub TarReadFile
+{
+    my($fh) = @_;
+    my $f = TarReadFileInfo($fh) || return;
+    my($dir, $file);
+
+    if ( $f->{name} eq "" ) {
+        # top-level dir
+        $dir = "";
+        $file = $ShareNameUM;
+    } else {
+        ($file = $f->{name}) =~ s{.*?([^/]*)$}{$1};         # unmangled file
+        if ( ($dir = $f->{mangleName}) =~ m{(.*)/.*} ) {
+            $dir = "$ShareName/$1";
+        } else {
+            $dir = $ShareName;
+        }
+    }
+    if ( !defined($Attrib{$dir}) ) {
+	foreach my $d ( keys(%Attrib) ) {
+	    next if ( $dir =~ m{^\Q$d/} );
+	    attributeWrite($d);
+	}
+	$Attrib{$dir} = BackupPC::Attrib->new({ compress => $Compress });
+	if ( -f $Attrib{$dir}->fileName("$OutDir/$dir")
+                    && !$Attrib{$dir}->read("$OutDir/$dir") ) {
+            printf(STDERR "Unable to read attribute file %s\n",
+                                $Attrib{$dir}->fileName("$OutDir/$dir"));
+            $Errors++;
+	}
+    }
+    if ( $f->{type} == BPC_FTYPE_DIR ) {
+        #
+        # Directory
+        #
+        mkpath("$OutDir/$ShareName/$f->{mangleName}", 0, 0777)
+                            if ( !-d "$OutDir/$ShareName/$f->{mangleName}" );
+    } elsif ( $f->{type} == BPC_FTYPE_FILE ) {
+        #
+        # Regular file
+        #
+        my($nRead);
+        #print("Reading $f->{name}, $f->{size} bytes, type $f->{type}\n");
+        my $poolWrite = BackupPC::PoolWrite->new($bpc,
+                                         "$OutDir/$ShareName/$f->{mangleName}",
+                                         $f->{size}, $Compress);
+        while ( $nRead < $f->{size} ) {
+            my $thisRead = $f->{size} - $nRead < $BufSize
+                                ? $f->{size} - $nRead : $BufSize;
+            my $data = TarRead($fh, $thisRead);
+            if ( $data eq "" ) {
+                print(STDERR "Unexpected end of tar archive during read\n");
+                $Errors++;
+                return;
+            }
+            $poolWrite->write(\$data);
+            $nRead += $thisRead;
+        }
+        processClose($poolWrite, "$ShareName/$f->{mangleName}", $f->{size});
+        TarFlush($fh, $f->{size});
+    } elsif ( $f->{type} == BPC_FTYPE_HARDLINK ) {
+        #
+        # Hardlink to another file.  GNU tar is clever about files
+	# that are hardlinks to each other.  The first link will be
+	# sent as a regular file.  The additional links will be sent
+	# as this type.  We store the hardlink just like a symlink:
+	# the link name (path of the linked-to file) is stored in
+	# a plain file.
+        #
+        $f->{size} = length($f->{linkname});
+        my $poolWrite = BackupPC::PoolWrite->new($bpc,
+                                         "$OutDir/$ShareName/$f->{mangleName}",
+                                         $f->{size}, $Compress);
+        $poolWrite->write(\$f->{linkname});
+        processClose($poolWrite, "$ShareName/$f->{mangleName}", $f->{size});
+    } elsif ( $f->{type} == BPC_FTYPE_SYMLINK ) {
+        #
+        # Symbolic link: write the value of the link to a plain file,
+        # that we pool as usual (ie: we don't create a symlink).
+        # The attributes remember the original file type.
+        # We also change the size to reflect the size of the link
+        # contents.
+        #
+        $f->{size} = length($f->{linkname});
+        my $poolWrite = BackupPC::PoolWrite->new($bpc,
+                                         "$OutDir/$ShareName/$f->{mangleName}",
+                                         $f->{size}, $Compress);
+        $poolWrite->write(\$f->{linkname});
+        processClose($poolWrite, "$ShareName/$f->{mangleName}", $f->{size});
+    } elsif ( $f->{type} == BPC_FTYPE_CHARDEV
+           || $f->{type} == BPC_FTYPE_BLOCKDEV
+           || $f->{type} == BPC_FTYPE_FIFO ) {
+        #
+        # Special files: for char and block special we write the
+        # major and minor numbers to a plain file, that we pool
+        # as usual.  For a pipe file we create an empty file.
+        # The attributes remember the original file type.
+        #
+        my $data;
+        if ( $f->{type} == BPC_FTYPE_FIFO ) {
+            $data = "";
+        } else {
+            $data = "$f->{devmajor},$f->{devminor}";
+        }
+        my $poolWrite = BackupPC::PoolWrite->new($bpc,
+                                         "$OutDir/$ShareName/$f->{mangleName}",
+                                         length($data), $Compress);
+        $poolWrite->write(\$data);
+        $f->{size} = length($data);
+        processClose($poolWrite, "$ShareName/$f->{mangleName}", length($data));
+    } else {
+        print("Got unknown type $f->{type} for $f->{name}\n");
+	$Errors++;
+    }
+    $Attrib{$dir}->set($file, {
+			    type  => $f->{type},
+			    mode  => $f->{mode},
+			    uid   => $f->{uid},
+			    gid   => $f->{gid},
+			    size  => $f->{size},
+			    mtime => $f->{mtime},
+		       });
+    return 1;
+}
+
+sub attributeWrite
+{
+    my($d) = @_;
+    my($poolWrite);
+
+    return if ( !defined($Attrib{$d}) );
+    if ( $Attrib{$d}->fileCount ) {
+        my $data = $Attrib{$d}->writeData;
+        my $fileName = $Attrib{$d}->fileName("$OutDir/$d");
+        my $poolWrite = BackupPC::PoolWrite->new($bpc, $fileName,
+                                         length($data), $Compress);
+        $poolWrite->write(\$data);
+        processClose($poolWrite, $Attrib{$d}->fileName($d), length($data));
+    }
+    delete($Attrib{$d});
+}
+
+sub processClose
+{
+    my($poolWrite, $fileName, $origSize) = @_;
+    my($exists, $digest, $outSize, $errs) = $poolWrite->close;
+
+    if ( @$errs ) {
+        print(STDERR join("", @$errs));
+        $Errors += @$errs;
+    }
+    $TotalFileCnt++;
+    $TotalFileSize += $origSize;
+    if ( $exists ) {
+        $ExistFileCnt++;
+        $ExistFileSize     += $origSize;
+        $ExistFileCompSize += $outSize;
+    } elsif ( $outSize > 0 ) {
+        print(NEW_FILES "$digest $origSize $fileName\n");
+    }
+}
+
+mkpath("$OutDir/$ShareName", 0, 0777);
+open(NEW_FILES, ">>$TopDir/pc/$host/NewFileList")
+                 || die("can't open $TopDir/pc/$host/NewFileList");
+1 while ( TarReadFile(*STDIN) );
+1 while ( sysread(STDIN, my $discard, 1024) );
+
+#
+# Flush out remaining attributes.
+#
+foreach my $d ( keys(%Attrib) ) {
+    attributeWrite($d);
+}
+close(NEW_FILES);
+
+#
+# Report results to BackupPC_dump
+#
+print("Done: $Errors errors, $ExistFileCnt filesExist,"
+    . " $ExistFileSize sizeExist, $ExistFileCompSize sizeExistComp,"
+    . " $TotalFileCnt filesTotal, $TotalFileSize sizeTotal\n");

@@ -1,0 +1,2540 @@
+#!/bin/perl -T
+#============================================================= -*-perl-*-w
+#
+# BackupPC_Admin: Apache/CGI interface for BackupPC.
+#
+# DESCRIPTION
+#   BackupPC_Admin provides a flexible web interface for BackupPC.
+#   It is a CGI script that runs under Apache.
+#
+#   It requires that Apache pass in $ENV{SCRIPT_NAME} and
+#   $ENV{REMOTE_USER}. The latter requires .ht_access style
+#   authentication. Replace the code below if you are using some other
+#   type of authentication, and have a different way of getting the
+#   user name.
+#
+#   Also, this script needs to run as the BackupPC user.  To accomplish
+#   this the script is typically installed as setuid to the BackupPC user.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 1.5.0, released 2 Aug 2002.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+use CGI;
+use lib "__INSTALLDIR__/lib";
+use BackupPC::Lib;
+use BackupPC::FileZIO;
+use BackupPC::Attrib qw(:all);
+use Data::Dumper;
+
+use vars qw($Cgi %In $MyURL $User %Conf $TopDir $BinDir $bpc);
+use vars qw(%Status %Info %Jobs @BgQueue @UserQueue @CmdQueue
+            %QueueLen %StatusHost);
+use vars qw($Hosts $HostsMTime $ConfigMTime $PrivAdmin);
+use vars qw(%UserEmailInfo $UserEmailInfoMTime %RestoreReq);
+
+$Cgi = new CGI;
+%In = $Cgi->Vars;
+
+#
+# We require that Apache pass in $ENV{SCRIPT_NAME} and $ENV{REMOTE_USER}.
+# The latter requires .ht_access style authentication.  Replace this
+# code if you are using some other type of authentication, and have
+# a different way of getting the user name.
+#
+$MyURL  = $ENV{SCRIPT_NAME};
+$User   = $ENV{REMOTE_USER};
+
+if ( !defined($bpc) ) {
+    ErrorExit("BackupPC::Lib->new failed: check apache error_log\n")
+                                    if ( !($bpc = BackupPC::Lib->new) );
+    $TopDir = $bpc->TopDir();
+    $BinDir = $bpc->BinDir();
+    %Conf   = $bpc->Conf();
+    $ConfigMTime = $bpc->ConfigMTime();
+} elsif ( $bpc->ConfigMTime() != $ConfigMTime ) {
+    $bpc->ConfigRead();
+    %Conf   = $bpc->Conf();
+    $ConfigMTime = $bpc->ConfigMTime();
+}
+
+#
+# Clean up %ENV for taint checking
+#
+delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+$ENV{PATH} = $Conf{MyPath};
+
+#
+# Verify we are running as the correct user
+#
+if ( $Conf{BackupPCUserVerify}
+        && $> != (my $uid = (getpwnam($Conf{BackupPCUser}))[2]) ) {
+    ErrorExit("Wrong user: my userid is $>, instead of $uid"
+            . " ($Conf{BackupPCUser})\n");
+}
+
+if ( !defined($Hosts) || $bpc->HostsMTime() != $HostsMTime ) {
+    $HostsMTime = $bpc->HostsMTime();
+    $Hosts = $bpc->HostInfoRead();
+}
+
+my %ActionDispatch = (
+    "summary"             => \&Action_Summary,
+    "Start Incr Backup"   => \&Action_StartStopBackup,
+    "Start Full Backup"   => \&Action_StartStopBackup,
+    "Stop/Dequeue Backup" => \&Action_StartStopBackup,
+    "queue"               => \&Action_Queue,
+    "view"                => \&Action_View,
+    "LOGlist"             => \&Action_LOGlist,
+    "emailSummary"        => \&Action_EmailSummary,
+    "browse"              => \&Action_Browse,
+    "Restore"             => \&Action_Restore,
+    "RestoreFile"         => \&Action_RestoreFile,
+    "hostInfo"            => \&Action_HostInfo,
+    "generalInfo"         => \&Action_GeneralInfo,
+    "restoreInfo"         => \&Action_RestoreInfo,
+);
+
+#
+# Set default actions, then call sub handler
+#
+$In{action} ||= "hostInfo"    if ( defined($In{host}) );
+$In{action}   = "generalInfo" if ( !defined($ActionDispatch{$In{action}}) );
+$ActionDispatch{$In{action}}();
+exit(0);
+
+###########################################################################
+# Action handling subroutines
+###########################################################################
+
+sub Action_Summary
+{
+    my($fullTot, $fullSizeTot, $incrTot, $incrSizeTot, $str,
+       $strNone, $strGood, $hostCntGood, $hostCntNone);
+
+    $hostCntGood = $hostCntNone = 0;
+    GetStatusInfo("hosts");
+    my $Privileged = CheckPermission();
+
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can view PC summaries." );
+    }
+    foreach my $host ( sort(keys(%Status)) ) {
+        my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate);
+        my @Backups = $bpc->BackupInfoRead($host);
+        my $fullCnt = $incrCnt = 0;
+        my $fullAge = $incrAge = -1;
+        for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+            if ( $Backups[$i]{type} eq "full" ) {
+                $fullCnt++;
+                if ( $fullAge < 0 || $Backups[$i]{startTime} > $fullAge ) {
+                    $fullAge  = $Backups[$i]{startTime};
+                    $fullSize = $Backups[$i]{size} / (1024 * 1024);
+                    $fullDur  = $Backups[$i]{endTime} - $Backups[$i]{startTime};
+                }
+                $fullSizeTot += $Backups[$i]{size} / (1024 * 1024);
+            } else {
+                $incrCnt++;
+                if ( $incrAge < 0 || $Backups[$i]{startTime} > $incrAge ) {
+                    $incrAge = $Backups[$i]{startTime};
+                }
+                $incrSizeTot += $Backups[$i]{size} / (1024 * 1024);
+            }
+        }
+        if ( $fullAge < 0 ) {
+            $fullAge = "";
+            $fullRate = "";
+        } else {
+            $fullAge = sprintf("%.1f", (time - $fullAge) / (24 * 3600));
+            $fullRate = sprintf("%.2f",
+                                $fullSize / ($fullDur <= 0 ? 1 : $fullDur));
+        }
+        if ( $incrAge < 0 ) {
+            $incrAge = "";
+        } else {
+            $incrAge = sprintf("%.1f", (time - $incrAge) / (24 * 3600));
+        }
+        $fullTot += $fullCnt;
+        $incrTot += $incrCnt;
+        $fullSize = sprintf("%.2f", $fullSize / 1000);
+        $str = <<EOF;
+<tr><td> ${HostLink($host)} </td>
+    <td align="center"> ${UserLink($Hosts->{$host}{user})} </td>
+    <td align="center"> $fullCnt </td>
+    <td align="center"> $fullAge </td>
+    <td align="center"> $fullSize </td>
+    <td align="center"> $fullRate </td>
+    <td align="center"> $incrCnt </td>
+    <td align="center"> $incrAge </td>
+    <td align="center"> $Status{$host}{state} </td>
+    <td> $Status{$host}{reason} </td></tr>
+EOF
+        if ( @Backups == 0 ) {
+            $hostCntNone++;
+            $strNone .= $str;
+        } else {
+            $hostCntGood++;
+            $strGood .= $str;
+        }
+    }
+    $fullSizeTot = sprintf("%.2f", $fullSizeTot / 1000);
+    $incrSizeTot = sprintf("%.2f", $incrSizeTot / 1000);
+    my $now      = timeStamp2(time);
+
+    Header("BackupPC: Server Summary");
+
+    print <<EOF;
+
+${h1("BackupPC Summary")}
+<p>
+This status was generated at $now.
+<p>
+
+${h2("Hosts with good Backups")}
+<p>
+There are $hostCntGood hosts that have been backed up, for a total of:
+<ul>
+<li> $fullTot full backups of total size ${fullSizeTot}GB
+     (prior to pooling and compression),
+<li> $incrTot incr backups of total size ${incrSizeTot}GB
+     (prior to pooling and compression).
+</ul>
+<table border>
+<tr><td> Host </td>
+    <td align="center"> User </td>
+    <td align="center"> #Full </td>
+    <td align="center"> Full Age/days </td>
+    <td align="center"> Full Size/GB </td>
+    <td align="center"> Speed MB/sec </td>
+    <td align="center"> #Incr </td>
+    <td align="center"> Incr Age/days </td>
+    <td align="center"> State </td>
+    <td align="center"> Last attempt </td></tr>
+$strGood
+</table>
+<p>
+
+${h2("Hosts with no Backups")}
+<p>
+There are $hostCntNone hosts with no backups.
+<p>
+<table border>
+<tr><td> Host </td>
+    <td align="center"> User </td>
+    <td align="center"> #Full </td>
+    <td align="center"> Full Age/days </td>
+    <td align="center"> Full Size/GB </td>
+    <td align="center"> Speed MB/sec </td>
+    <td align="center"> #Incr </td>
+    <td align="center"> Incr Age/days </td>
+    <td align="center"> Current State </td>
+    <td align="center"> Last backup attempt </td></tr>
+$strNone
+</table>
+EOF
+    Trailer();
+}
+
+sub Action_StartStopBackup
+{
+    my($str, $reply);
+    my $start = 1 if ( $In{action} eq "Start Incr Backup"
+                       || $In{action} eq "Start Full Backup" );
+    my $doFull = $In{action} eq "Start Full Backup" ? 1 : 0;
+    my $type = $doFull ? "full" : "incremental";
+    my $host = $In{host};
+    my $Privileged = CheckPermission($host);
+
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can stop or start backups on"
+		. " ${EscapeHTML($host)}.");
+    }
+    ServerConnect();
+
+    if ( $In{doit} ) {
+        if ( $start ) {
+	    if ( $Hosts->{$host}{dhcp} ) {
+		$reply = $bpc->ServerMesg("backup $In{hostIP} $host"
+                                        . " $User $doFull");
+		$str = "Backup requested on DHCP $host ($In{hostIP}) by"
+		     . " $User from $ENV{REMOTE_ADDR}";
+	    } else {
+		$reply = $bpc->ServerMesg("backup $host $host $User $doFull");
+		$str = "Backup requested on $host by $User";
+	    }
+        } else {
+            $reply = $bpc->ServerMesg("stop $host $User $In{backoff}");
+            $str = "Backup stopped/dequeued on $host by $User";
+        }
+        Header("BackupPC: Backup Requested on $host");
+        print <<EOF;
+${h1($str)}
+<p>
+Reply from server was: $reply
+<p>
+Go back to <a href="$MyURL?host=$host">$host home page</a>.
+EOF
+        Trailer();
+    } else {
+        if ( $start ) {
+	    my $ipAddr = ConfirmIPAddress($host);
+
+            Header("BackupPC: Start Backup Confirm on $host");
+            print <<EOF;
+${h1("Are you sure?")}
+<p>
+You are about to start a $type backup on $host.
+
+<form action="$MyURL" method="get">
+<input type="hidden" name="host" value="$host">
+<input type="hidden" name="hostIP" value="$ipAddr">
+<input type="hidden" name="doit" value="1">
+Do you really want to do this?
+<input type="submit" value="$In{action}" name="action">
+<input type="submit" value="No" name="">
+</form>
+EOF
+        } else {
+            my $backoff = "";
+            GetStatusInfo("host($host)");
+            if ( $StatusHost{backoffTime} > time ) {
+                $backoff = sprintf("%.1f",
+                                  ($StatusHost{backoffTime} - time) / 3600);
+            }
+            Header("BackupPC: Stop Backup Confirm on $host");
+            print <<EOF;
+${h1("Are you sure?")}
+<p>
+You are about to stop/dequeue backups on $host;
+
+<form action="$MyURL" method="get">
+<input type="hidden" name="host" value="$host">
+<input type="hidden" name="doit" value="1">
+Also, please don't start another backup for
+<input type="text" name="backoff" size="10" value="$backoff"> hours.
+<p>
+Do you really want to do this?
+<input type="submit" value="$In{action}" name="action">
+<input type="submit" value="No" name="">
+</form>
+EOF
+        }
+        Trailer();
+    }
+}
+
+sub Action_Queue
+{
+    my($strBg, $strUser, $strCmd);
+
+    GetStatusInfo("queues");
+    my $Privileged = CheckPermission();
+
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can view queues." );
+    }
+
+    while ( @BgQueue ) {
+        my $req = pop(@BgQueue);
+        my($reqTime) = timeStamp2($req->{reqTime});
+        $strBg .= <<EOF;
+<tr><td> ${HostLink($req->{host})} </td>
+    <td align="center"> $reqTime </td>
+    <td align="center"> $req->{user} </td></tr>
+EOF
+    }
+    while ( @UserQueue ) {
+        my $req = pop(@UserQueue);
+        my $reqTime = timeStamp2($req->{reqTime});
+        $strUser .= <<EOF;
+<tr><td> ${HostLink($req->{host})} </td>
+    <td align="center"> $reqTime </td>
+    <td align="center"> $req->{user} </td></tr>
+EOF
+    }
+    while ( @CmdQueue ) {
+        my $req = pop(@CmdQueue);
+        my $reqTime = timeStamp2($req->{reqTime});
+        (my $cmd = $req->{cmd}) =~ s/$BinDir\///;
+        $strCmd .= <<EOF;
+<tr><td> ${HostLink($req->{host})} </td>
+    <td align="center"> $reqTime </td>
+    <td align="center"> $req->{user} </td>
+    <td> $cmd </td></tr>
+EOF
+    }
+    Header("BackupPC: Queue Summary");
+    print <<EOF;
+${h1("Backup Queue Summary")}
+<p>
+${h2("User Queue Summary")}
+<p>
+The following user requests are currently queued:
+<table border>
+<tr><td> Host </td>
+    <td> Req Time </td>
+    <td> User </td></tr>
+$strUser
+</table>
+<p>
+
+${h2("Background Queue Summary")}
+<p>
+The following background requests are currently queued:
+<table border>
+<tr><td> Host </td>
+    <td> Req Time </td>
+    <td> User </td></tr>
+$strBg
+</table>
+<p>
+
+${h2("Command Queue Summary")}
+<p>
+The following command requests are currently queued:
+<table border>
+<tr><td> Host </td>
+    <td> Req Time </td>
+    <td> User </td>
+    <td> Command </td></tr>
+$strCmd
+</table>
+EOF
+    Trailer();
+}
+
+sub Action_View
+{
+    my $Privileged = CheckPermission($In{host});
+    my $compress = 0;
+    my $fh;
+    my $host = $In{host};
+    my $num  = $In{num};
+    my $type = $In{type};
+    my $linkHosts = 0;
+    my($file, $comment);
+    my $ext = $num ne "" ? ".$num" : "";
+
+    ErrorExit("Invalid number $num") if ( $num ne "" && $num !~ /^\d+$/ );
+    if ( $type eq "XferLOG" ) {
+        $file = "$TopDir/pc/$host/SmbLOG$ext";
+        $file = "$TopDir/pc/$host/XferLOG$ext" if ( !-f $file && !-f "$file.z");
+    } elsif ( $type eq "XferLOGbad" ) {
+        $file = "$TopDir/pc/$host/SmbLOG.bad";
+        $file = "$TopDir/pc/$host/XferLOG.bad" if ( !-f $file && !-f "$file.z");
+    } elsif ( $type eq "XferErrbad" ) {
+        $file = "$TopDir/pc/$host/SmbLOG.bad";
+        $file = "$TopDir/pc/$host/XferLOG.bad" if ( !-f $file && !-f "$file.z");
+        $comment = "(Extracting only Errors)";
+    } elsif ( $type eq "XferErr" ) {
+        $file = "$TopDir/pc/$host/SmbLOG$ext";
+        $file = "$TopDir/pc/$host/XferLOG$ext" if ( !-f $file && !-f "$file.z");
+        $comment = "(Extracting only Errors)";
+    } elsif ( $type eq "RestoreLOG" ) {
+        $file = "$TopDir/pc/$host/RestoreLOG$ext";
+    } elsif ( $type eq "RestoreErr" ) {
+        $file = "$TopDir/pc/$host/RestoreLOG$ext";
+        $comment = "(Extracting only Errors)";
+    } elsif ( $host ne "" && $type eq "config" ) {
+        $file = "$TopDir/pc/$host/config.pl";
+    } elsif ( $type eq "docs" ) {
+        $file = "$BinDir/../doc/BackupPC.html";
+        if ( open(LOG, $file) ) {
+            Header("BackupPC: Documentation");
+            print while ( <LOG> );
+            close(LOG);
+            Trailer();
+        } else {
+            ErrorExit("Unable to open $file: configuration problem?");
+        }
+        return;
+    } elsif ( $type eq "config" ) {
+        $file = "$TopDir/conf/config.pl";
+    } elsif ( $type eq "hosts" ) {
+        $file = "$TopDir/conf/hosts";
+    } elsif ( $host ne "" ) {
+        $file = "$TopDir/pc/$host/LOG$ext";
+    } else {
+        $file = "$TopDir/log/LOG$ext";
+        $linkHosts = 1;
+    }
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can view log or config files." );
+    }
+    if ( !-f $file && -f "$file.z" ) {
+        $file .= ".z";
+        $compress = 1;
+    }
+    Header("BackupPC: Log File $file");
+    print <<EOF;
+${h1("Log File $file $comment")}
+<p>
+EOF
+    if ( defined($fh = BackupPC::FileZIO->open($file, 0, $compress)) ) {
+        my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
+        print <<EOF;
+Contents of log file <tt>$file</tt>, modified $mtimeStr $comment
+EOF
+        print "<pre>";
+        if ( $type eq "XferErr" || $type eq "XferErrbad"
+				|| $type eq "RestoreErr" ) {
+	    my $skipped;
+            while ( 1 ) {
+                $_ = $fh->readLine();
+                if ( $_ eq "" ) {
+		    print("[ skipped $skipped lines ]\n") if ( $skipped );
+		    last;
+		}
+                if ( /smb: \\>/
+                        || /^\s*(\d+) \(\s*\d+\.\d kb\/s\) (.*)$/
+                        || /^tar: dumped \d+ files/
+                        || /^added interface/i
+                        || /^restore tar file /i
+                        || /^restore directory /i
+                        || /^tarmode is now/i
+                        || /^Total bytes written/i
+                        || /^Domain=/i
+                        || /^Getting files newer than/i
+                        || /^Output is \/dev\/null/
+                        || /^\([\d\.]* kb\/s\) \(average [\d\.]* kb\/s\)$/
+                        || /^\s+directory \\/
+                        || /^Timezone is/
+                        || /^\.\//
+			    ) {
+		    $skipped++;
+		    next;
+		}
+		print("[ skipped $skipped lines ]\n") if ( $skipped );
+		$skipped = 0;
+                print ${EscapeHTML($_)};
+            }
+        } elsif ( $linkHosts ) {
+            while ( 1 ) {
+                $_ = $fh->readLine();
+                last if ( $_ eq "" );
+                my $s = ${EscapeHTML($_)};
+                $s =~ s/\b([\w-]+)\b/defined($Hosts->{$1})
+                                        ? ${HostLink($1)} : $1/eg;
+                print $s;
+            }
+        } elsif ( $type eq "config" ) {
+            while ( 1 ) {
+                $_ = $fh->readLine();
+                last if ( $_ eq "" );
+                # remove any passwords and user names
+                s/(SmbSharePasswd.*=.*['"]).*(['"])/$1$2/ig;
+                s/(SmbShareUserName.*=.*['"]).*(['"])/$1$2/ig;
+                s/(ServerMesgSecret.*=.*['"]).*(['"])/$1$2/ig;
+                print ${EscapeHTML($_)};
+            }
+        } else {
+            while ( 1 ) {
+                $_ = $fh->readLine();
+                last if ( $_ eq "" );
+                print ${EscapeHTML($_)};
+            }
+        }
+        $fh->close();
+    } else {
+        printf("<pre>\nCan't open log file $file\n");
+    }
+    print <<EOF;
+</pre>
+EOF
+    Trailer();
+}
+
+sub Action_LOGlist
+{
+    my $Privileged = CheckPermission($In{host});
+
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can view log files.");
+    }
+    my $host = $In{host};
+    my($url0, $hdr, $root, $str);
+    if ( $host ne "" ) {
+        $root = "$TopDir/pc/$host/LOG";
+        $url0 = "&host=$host";
+        $hdr = "for host $host";
+    } else {
+        $root = "$TopDir/log/LOG";
+        $url0 = "";
+        $hdr = "";
+    }
+    for ( my $i = -1 ; ; $i++ ) {
+        my $url1 = "";
+        my $file = $root;
+        if ( $i >= 0 ) {
+            $file .= ".$i";
+            $url1 = "&num=$i";
+        }
+        $file .= ".z" if ( !-f $file && -f "$file.z" );
+        last if ( !-f $file );
+        my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
+        my $size     = (stat($file))[7];
+        $str .= <<EOF;
+<tr><td> <a href="$MyURL?action=view&type=LOG$url0$url1"><tt>$file</tt></a> </td>
+    <td align="right"> $size </td>
+    <td> $mtimeStr </td></tr>
+EOF
+    }
+    Header("BackupPC: Log File History");
+    print <<EOF;
+
+${h1("Log File History $hdr")}
+<p>
+<table border>
+<tr><td align="center"> File </td>
+    <td align="center"> Size </td>
+    <td align="center"> Modification time </td></tr>
+$str
+</table>
+EOF
+    Trailer();
+}
+
+sub Action_EmailSummary
+{
+    my $Privileged = CheckPermission();
+
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can view email summaries." );
+    }
+    GetStatusInfo("hosts");
+    ReadUserEmailInfo();
+    my(%EmailStr, $str);
+    foreach my $u ( keys(%UserEmailInfo) ) {
+        next if ( !defined($UserEmailInfo{$u}{lastTime}) );
+        my $emailTimeStr = timeStamp2($UserEmailInfo{$u}{lastTime});
+        $EmailStr{$UserEmailInfo{$u}{lastTime}} .= <<EOF;
+<tr><td>${UserLink($u)} </td>
+    <td>${HostLink($UserEmailInfo{$u}{lastHost})} </td>
+    <td>$emailTimeStr </td>
+    <td>$UserEmailInfo{$u}{lastSubj} </td></tr>
+EOF
+    }
+    foreach my $t ( sort({$b <=> $a} keys(%EmailStr)) ) {
+        $str .= $EmailStr{$t};
+    }
+    Header("BackupPC: Email Summary");
+    print <<EOF;
+${h1("Recent Email Summary (Reverse time order)")}
+<p>
+<table border>
+<tr><td align="center"> Recipient </td>
+    <td align="center"> Host </td>
+    <td align="center"> Time </td>
+    <td align="center"> Subject </td></tr>
+$str
+</table>
+EOF
+    Trailer();
+}
+
+sub Action_Browse
+{
+    my $Privileged = CheckPermission($In{host});
+    my($i, $dirStr, $fileStr, $mangle);
+    my($numF, $compressF, $mangleF, $fullDirF);
+    my $checkBoxCnt = 0;      # checkbox counter
+
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can browse backup files"
+                . " for host ${EscapeHTML($In{host})}." );
+    }
+    my $host = $In{host};
+    my $num  = $In{num};
+    my $dir  = $In{dir};
+    if ( $host eq "" ) {
+        ErrorExit("Empty host name.");
+    }
+    #
+    # Find the requested backup and the previous filled backup
+    #
+    my @Backups = $bpc->BackupInfoRead($host);
+    for ( $i = 0 ; $i < @Backups ; $i++ ) {
+        if ( !$Backups[$i]{noFill} ) {
+            $numF      = $Backups[$i]{num};
+            $mangleF   = $Backups[$i]{mangle};
+            $compressF = $Backups[$i]{compress};
+        }
+        last if ( $Backups[$i]{num} == $num );
+    }
+    if ( $i >= @Backups ) {
+        ErrorExit("Backup number $num for host ${EscapeHTML($host)} does"
+	        . " not exist.");
+    }
+    if ( !$Backups[$i]{noFill} ) {
+        # no need to back-fill a filled backup
+        $numF = $mangleF = $compressF = undef;
+    }
+    my $backupTime = timeStamp2($Backups[$i]{startTime});
+    my $backupAge = sprintf("%.1f", (time - $Backups[$i]{startTime})
+                                    / (24 * 3600));
+    $mangle = $Backups[$i]{mangle};
+    if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
+        if ( !opendir(DIR, "$TopDir/pc/$host/$num") ) {
+            ErrorExit("Can't browse bad directory name"
+	            . " ${EscapeHTML(\"$TopDir/pc/$host/$num\")}");
+        }
+        #
+        # Read this directory and find the first directory
+        #
+	foreach my $f ( readdir(DIR) ) {
+	    next if ( $f eq "." || $f eq ".." );
+	    if ( -d "$TopDir/pc/$host/$num/$f" ) {
+		$dir = "/$f";
+		last;
+	    }
+	}
+        closedir(DIR);
+	if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
+            ErrorExit("Directory ${EscapeHTML(\"$TopDir/pc/$host/$num\")}"
+		    . " is empty");
+	}
+    }
+    my $relDir   = $dir;
+    my $fullDir  = "$TopDir/pc/$host/$num/$relDir";
+    if ( defined($numF) ) {
+	# get full path to filled backup
+	if ( $mangle && !$mangleF ) {
+	    $fullDirF = "$TopDir/pc/$host/$numF/"
+	    			. $bpc->fileNameUnmangle($relDir);
+	} else {
+	    $fullDirF = "$TopDir/pc/$host/$numF/$relDir";
+	}
+    }
+    my $currDir    = undef;
+    #
+    # Read attributes for the directory and optionally for the filled backup
+    #
+    my $attr  = BackupPC::Attrib->new({ compress => $Backups[$i]{compress}});
+    my $attrF = BackupPC::Attrib->new({ compress => $compressF})
+                                                    if ( defined($numF) );
+    $attr->read($fullDir) if ( -f $attr->fileName($fullDir) );
+    if ( defined($numF) && -f $attrF->fileName($fullDirF)
+                        && $attrF->read($fullDirF) ) {
+        $attr->merge($attrF);
+    }
+    #
+    # Loop up the directory tree until we hit the top.
+    #
+    my(@DirStrPrev);
+    while ( 1 ) {
+        my($fLast, $fum, $fLastum, @DirStr);
+
+        if ( $fullDir =~ m{(^|/)\.\.(/|$)} || !opendir(DIR, $fullDir) ) {
+            ErrorExit("Can't browse bad directory name"
+	            . " ${EscapeHTML($fullDir)}");
+        }
+        #
+        # Read this directory and optionally the corresponding filled directory
+        #
+        my @Dir = readdir(DIR);
+        closedir(DIR);
+        if ( defined($numF) && opendir(DIR, $fullDirF) ) {
+            if ( $mangle == $mangleF ) {
+                @Dir = (@Dir, readdir(DIR));
+            } else {
+                foreach my $f ( readdir(DIR) ) {
+		    next if ( $f eq "." || $f eq ".." );
+		    push(@Dir, $bpc->fileNameMangle($f));
+                }
+            }
+            closedir(DIR);
+        }
+        my $fileCnt = 0;          # file counter
+        $fLast = $dirStr = "";
+        #
+        # Loop over each of the files in this directory
+        #
+	my(@DirUniq);
+        foreach my $f ( sort({uc($a) cmp uc($b)} @Dir) ) {
+            next if ( $f eq "." || $f eq ".."
+                   || $f eq $fLast || ($mangle && $f eq "attrib") );
+            $fLast = $f;
+	    push(@DirUniq, $f);
+	}
+	while ( defined(my $f = shift(@DirUniq)) ) {
+            my $path = "$relDir/$f";
+            my($dirOpen, $gotDir, $imgStr, $img);
+            $fum = $mangle ? $bpc->fileNameUnmangle($f) : $f;  # unmangled $f
+            my $fumURI = $fum;                                 # URI escaped $f
+            $path =~ s{^/+}{/};
+            $path =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+            $fumURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+            $dirOpen = 1 if ( defined($currDir) && $f eq $currDir );
+            if ( -d "$fullDir/$f" ) {
+                #
+                # Display directory if it exists in current backup.
+                # First find out if there are subdirs
+                #
+                my @s = (defined($numF) && -d "$fullDirF/$f")
+                            ? stat("$fullDirF/$f")
+                            : stat("$fullDir/$f");
+		my($bold, $unbold, $BGcolor);
+		$img |= 1 << 6;
+		$img |= 1 << 5 if ( $s[3] > 2 );
+		if ( $dirOpen ) {
+		    $bold = "<b>";
+		    $unbold = "</b>";
+		    $img |= 1 << 2;
+		    $img |= 1 << 3 if ( $s[3] > 2 );
+		}
+		my $imgFileName = sprintf("%07b.gif", $img);
+		$imgStr = "<img src=\"$Conf{CgiImageDirURL}/$imgFileName\" align=\"absmiddle\" width=\"9\" height=\"19\" border=\"0\">";
+		if ( "$relDir/$f" eq $dir ) {
+		    $BGcolor = " bgcolor=\"$Conf{CgiHeaderBgColor}\"";
+		} else {
+		    $BGcolor = "";
+		}
+		my $dirName = $fum;
+		$dirName =~ s/ /&nbsp;/g;
+		push(@DirStr, {needTick => 1,
+			       tdArgs   => $BGcolor,
+			       link     => <<EOF});
+<a href="$MyURL?action=browse&host=$host&num=$num&dir=$path">$imgStr</a><a href="$MyURL?action=browse&host=$host&num=$num&dir=$path" style="font-size:13px;font-family:arial;text-decoration:none;line-height:15px">&nbsp;$bold$dirName$unbold</a></td></tr>
+EOF
+                $fileCnt++;
+                $gotDir = 1;
+		if ( $dirOpen ) {
+		    my($lastTick, $doneLastTick);
+		    foreach my $d ( @DirStrPrev ) {
+			$lastTick = $d if ( $d->{needTick} );
+		    }
+		    $doneLastTick = 1 if ( !defined($lastTick) );
+		    foreach my $d ( @DirStrPrev ) {
+			$img = 0;
+			if  ( $d->{needTick} ) {
+			    $img |= 1 << 0;
+			}
+			if ( $d == $lastTick ) {
+			    $img |= 1 << 4;
+			    $doneLastTick = 1;
+			} elsif ( !$doneLastTick ) {
+			    $img |= 1 << 3 | 1 << 4;
+			}
+			my $imgFileName = sprintf("%07b.gif", $img);
+			$imgStr = "<img src=\"$Conf{CgiImageDirURL}/$imgFileName\" align=\"absmiddle\" width=\"9\" height=\"19\" border=\"0\">";
+			push(@DirStr, {needTick => 0,
+				       tdArgs   => $d->{tdArgs},
+				       link     => $imgStr . $d->{link}
+			});
+		    }
+		}
+            }
+            if ( $relDir eq $dir ) {
+                #
+                # This is the selected directory, so display all the files
+                #
+                my $attrStr;
+                if ( defined($a = $attr->get($fum)) ) {
+                    my $mtimeStr = $bpc->timeStamp($a->{mtime});
+                    my $typeStr  = $attr->fileType2Text($a->{type});
+                    my $modeStr  = sprintf("0%o", $a->{mode} & 07777);
+                    $attrStr .= <<EOF;
+    <td align="center">$typeStr</td>
+    <td align="right">$modeStr</td>
+    <td align="right">$a->{size}</td>
+    <td align="right">$mtimeStr</td>
+</tr>
+EOF
+                } else {
+                    $attrStr .= "<td colspan=\"4\" align=\"center\"> </td>\n";
+                }
+                if ( $gotDir ) {
+                    $fileStr .= <<EOF;
+<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=browse&host=$host&num=$num&dir=$path">${EscapeHTML($fum)}</a></td>
+$attrStr
+</tr>
+EOF
+                } else {
+                    $fileStr .= <<EOF;
+<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=RestoreFile&host=$host&num=$num&dir=$path">${EscapeHTML($fum)}</a></td>
+$attrStr
+</tr>
+EOF
+                }
+                $checkBoxCnt++;
+            }
+        }
+	@DirStrPrev = @DirStr;
+        last if ( $relDir eq "" );
+        # 
+        # Prune the last directory off $relDir
+        #
+        $relDir =~ s/(.*)\/(.*)/$1/;
+        $currDir = $2;
+        $fullDir = "$TopDir/pc/$host/$num/$relDir";
+        $fullDirF = "$TopDir/pc/$host/$numF/$relDir" if ( defined($numF) );
+    }
+    my $dirDisplay = $mangle ? $bpc->fileNameUnmangle($dir) : $dir;
+    $dirDisplay =~ s{//}{/}g;
+    my $filledBackup;
+    if ( defined($numF) ) {
+        $filledBackup = <<EOF;
+<li> This display is merged with backup #$numF, the most recent prior
+     filled (full) dump.
+EOF
+    }
+    Header("BackupPC: Browse backup $num for $host");
+
+    foreach my $d ( @DirStrPrev ) {
+	$dirStr .= "<tr><td$d->{tdArgs}>$d->{link}\n";
+    }
+
+    ### hide checkall button if there are no files
+    my ($topCheckAll, $checkAll, $fileHeader);
+    if ( $fileStr ) {
+    	$fileHeader = <<EOF;
+	    <tr bgcolor="$Conf{CgiHeaderBgColor}"><td align=center> Name</td>
+                <td align="center"> Type</td>
+                <td align="center"> Mode</td>
+                <td align="center"> Size</td>
+                <td align="center"> Mod time</td>
+            </tr>
+EOF
+	$checkAll = <<EOF;
+<tr bgcolor="#ffffcc"><td>
+<input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Select all
+</td><td colspan="4" align="center">
+<input type="submit" name="Submit" value="Restore selected files">
+</td></tr>
+EOF
+    	# and put a checkall box on top if there are at least 20 files
+	if ( $checkBoxCnt >= 20 ) {
+	    $topCheckAll = $checkAll;
+	    $topCheckAll =~ s{allFiles}{allFilestop}g;
+	}
+    } else {
+	$fileStr = <<EOF;
+<tr><td bgcolor="#ffffff">The directory ${EscapeHTML($dirDisplay)} is empty
+</td></tr>
+EOF
+    }
+ 
+    print <<EOF;
+${h1("Backup browse for $host")}
+
+<script language="javascript" type="text/javascript">
+<!--
+
+    function checkAll(location)
+    {
+      for (var i=0;i<document.form1.elements.length;i++)
+      {
+        var e = document.form1.elements[i];
+        if ((e.checked || !e.checked) && e.name != 'all') {
+            if (eval("document.form1."+location+".checked")) {
+            	e.checked = true;
+            } else {
+            	e.checked = false;
+            }
+        }
+      }
+    }
+    
+    function toggleThis(checkbox)
+    {
+       var cb = eval("document.form1."+checkbox);
+       cb.checked = !cb.checked;	
+    }
+
+//-->
+</script>
+
+<ul>
+<li> You are browsing backup #$num, which started around $backupTime
+        ($backupAge days ago),
+$filledBackup
+<li> Click on a directory below to navigate into that directory,
+<li> Click on a file below to restore that file.
+</ul>
+
+${h2("Contents of ${EscapeHTML($dirDisplay)}")}
+<form name="form1" method="post" action="$MyURL">
+<input type="hidden" name="num" value="$num">
+<input type="hidden" name="host" value="$host">
+<input type="hidden" name="fcbMax" value="$checkBoxCnt">
+<input type="hidden" name="action" value="Restore">
+<br>
+<table>
+<tr><td valign="top">
+    <!--Navigate here:-->
+    <br><table align="center" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+    $dirStr
+    </table>
+</td><td width="3%">
+</td><td valign="top">
+    <!--Restore files here:-->
+    <br>
+    <table cellpadding="0" cellspacing="0" bgcolor="#333333"><tr><td>
+        <table border="0" width="100%" align="left" cellpadding="2" cellspacing="1">
+        $fileHeader
+        $topCheckAll
+        $fileStr
+        $checkAll
+        </table>
+    </td></tr></table>
+<br>
+<!--
+This is now in the checkAll row
+<input type="submit" name="Submit" value="Restore selected files">
+-->
+</td></tr></table>
+</form>
+EOF
+    Trailer();
+}
+
+sub Action_Restore
+{
+    my($str, $reply, $i);
+    my $Privileged = CheckPermission($In{host});
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can restore backup files"
+                . " for host ${EscapeHTML($In{host})}." );
+    }
+    my $host = $In{host};
+    my $num  = $In{num};
+    my(@fileList, $fileListStr, $hiddenStr, $share, $pathHdr, $badFileCnt);
+    my @Backups = $bpc->BackupInfoRead($host);
+    for ( $i = 0 ; $i < @Backups ; $i++ ) {
+        last if ( $Backups[$i]{num} == $num );
+    }
+    my $mangle = $Backups[$i]{mangle};
+    ServerConnect();
+
+    if ( !defined($Hosts->{$host}) ) {
+        ErrorExit("Bad host name ${EscapeHTML($host)}");
+    }
+    for ( my $i = 0 ; $i < $In{fcbMax} ; $i++ ) {
+        next if ( !defined($In{"fcb$i"}) );
+        (my $name = $In{"fcb$i"}) =~ s/%([0-9A-F]{2})/chr(hex($1))/eg;
+        $badFileCnt++ if ( $name =~ m{(^|/)\.\.(/|$)} );
+        if ( $name =~ m{^/+(.*?)(/.*)} ) {
+            $share = $1;
+            $name  = $mangle ? $bpc->fileNameUnmangle($2) : $2;
+            if ( @fileList == 0 ) {
+                $pathHdr = $name;
+            } else {
+                while ( substr($name, 0, length($pathHdr)) ne $pathHdr ) {
+                    $pathHdr = substr($pathHdr, 0, rindex($pathHdr, "/"));
+                }
+            }
+        }
+        push(@fileList, $name);
+        $share = $mangle ? $bpc->fileNameUnmangle($share) : $share;
+        $hiddenStr .= <<EOF;
+<input type="hidden" name="fcb$i" value="$In{'fcb' . $i}">
+EOF
+        $fileListStr .= <<EOF;
+<li> ${EscapeHTML($name)}
+EOF
+    }
+    $hiddenStr .= "<input type=\"hidden\" name=\"fcbMax\" value=\"$In{fcbMax}\">\n";
+    $badFileCnt++ if ( $In{pathHdr} =~ m{(^|/)\.\.(/|$)} );
+    $badFileCnt++ if ( $In{num} =~ m{(^|/)\.\.(/|$)} );
+    if ( @fileList == 0 ) {
+        ErrorExit("You haven't selected any files; please go Back to"
+                . " select some files.");
+    }
+    if ( $badFileCnt ) {
+        ErrorExit("Nice try, but you can't put '..' in any of the file names");
+    }
+    if ( @fileList == 1 ) {
+	$pathHdr =~ s/(.*)\/.*/$1/;
+    }
+    $pathHdr = "/" if ( $pathHdr eq "" );
+    if ( $In{type} != 0 && @fileList == $In{fcbMax} ) {
+	#
+	# All the files in the list were selected, so just restore the
+	# entire parent directory
+	#
+	@fileList = ( $pathHdr );
+    }
+    if ( $In{type} == 0 ) {
+        #
+        # Tell the user what options they have
+        #
+        Header("BackupPC: Restore Options for $host");
+        print <<EOF;
+${h1("Restore Options for $host")}
+<p>
+You have selected the following files/directories from
+share $share, backup number #$num:
+<ul>
+$fileListStr
+</ul>
+<p>
+You have three choices for restoring these files/directories.
+Please select one of the following options.
+<p>
+${h2("Option 1: Direct Restore")}
+<p>
+You can start a restore that will restore these files directly onto
+$host.
+<p>
+<b>Warning:</b> any existing files that match the ones you have
+selected will be overwritten!
+
+<form action="$MyURL" method="post">
+<input type="hidden" name="host" value="${EscapeHTML($host)}">
+<input type="hidden" name="num" value="$num">
+<input type="hidden" name="type" value="3">
+$hiddenStr
+<input type="hidden" value="$In{action}" name="action">
+<table border="0">
+<tr>
+    <td>Restore the files to host</td>
+    <td><input type="text" size="40" value="${EscapeHTML($host)}"
+	 name="hostDest"></td>
+</tr><tr>
+    <td>Restore the files to share</td>
+    <td><input type="text" size="40" value="${EscapeHTML($share)}"
+	 name="shareDest"></td>
+</tr><tr>
+    <td>Restore the files below dir<br>(relative to share)</td>
+    <td valign="top"><input type="text" size="40" maxlength="256"
+	value="${EscapeHTML($pathHdr)}" name="pathHdr"></td>
+</tr><tr>
+    <td><input type="submit" value="Start Restore" name=""></td>
+</table>
+</form>
+EOF
+
+	#
+	# Verify that Archive::Zip is available before showing the
+	# zip restore option
+	#
+	if ( eval { require Archive::Zip } ) {
+	    print <<EOF;
+
+${h2("Option 2: Download Zip archive")}
+<p>
+You can download a Zip archive containing all the files/directories you have
+selected.  You can then use a local application, such as WinZip,
+to view or extract any of the files.
+<p>
+<b>Warning:</b> depending upon which files/directories you have selected,
+this archive might be very very large.  It might take many minutes to
+create and transfer the archive, and you will need enough local disk
+space to store it.
+<p>
+<form action="$MyURL" method="post">
+<input type="hidden" name="host" value="${EscapeHTML($host)}">
+<input type="hidden" name="num" value="$num">
+<input type="hidden" name="type" value="2">
+$hiddenStr
+<input type="hidden" value="$In{action}" name="action">
+<input type="checkbox" value="1" name="relative" checked> Make archive relative
+to ${EscapeHTML($pathHdr eq "" ? "/" : $pathHdr)}
+(otherwise archive will contain full paths).
+<br>
+Compression (0=off, 1=fast,...,9=best)
+<input type="text" size="6" value="5" name="compressLevel">
+<br>
+<input type="submit" value="Download Zip File" name="">
+</form>
+EOF
+	} else {
+	    print <<EOF;
+
+${h2("Option 2: Download Zip archive")}
+<p>
+You could download a zip archive, but Archive::Zip is not installed.
+Please ask your system adminstrator to install Archive::Zip from
+<a href="http://www.cpan.org">www.cpan.org</a>.
+<p>
+EOF
+	}
+	print <<EOF;
+${h2("Option 3: Download Tar archive")}
+<p>
+You can download a Tar archive containing all the files/directories you
+have selected.  You can then use a local application, such as tar or
+WinZip to view or extract any of the files.
+<p>
+<b>Warning:</b> depending upon which files/directories you have selected,
+this archive might be very very large.  It might take many minutes to
+create and transfer the archive, and you will need enough local disk
+space to store it.
+<p>
+<form action="$MyURL" method="post">
+<input type="hidden" name="host" value="${EscapeHTML($host)}">
+<input type="hidden" name="num" value="$num">
+<input type="hidden" name="type" value="1">
+$hiddenStr
+<input type="hidden" value="$In{action}" name="action">
+<input type="checkbox" value="1" name="relative" checked> Make archive relative
+to ${EscapeHTML($pathHdr eq "" ? "/" : $pathHdr)}
+(otherwise archive will contain full paths).
+<br>
+<input type="submit" value="Download Tar File" name="">
+</form>
+EOF
+        Trailer();
+    } elsif ( $In{type} == 1 ) {
+        #
+        # Provide the selected files via a tar archive.
+        #
+        $SIG{CHLD} = 'IGNORE';
+        my $pid = fork();
+        if ( !defined($pid) ) {
+            $bpc->ServerMesg("log Can't fork for tar restore request by $User");
+            ErrorExit("Can't fork for tar restore");
+        }
+        if ( $pid ) {
+            #
+            # This is the parent.
+            #
+            my @fileListTrim = @fileList;
+            if ( @fileListTrim > 10 ) {
+                @fileListTrim = (@fileListTrim[0..9], '...');
+            }
+            $bpc->ServerMesg("log User $User downloaded tar archive for $host,"
+                           . " backup $num; files were: "
+			   . join(", ", @fileListTrim));
+            return;
+        }
+        #
+        # This is the child.  Print the headers and run BackupPC_tarCreate.
+        #
+        my @pathOpts;
+        if ( $In{relative} ) {
+            @pathOpts = ("-r", $pathHdr, "-p", "");
+        }
+        $bpc->ServerDisconnect();
+        print "Content-Type: application/x-gtar\n";
+        print "Content-Transfer-Encoding: binary\n";
+        print "Content-Disposition: attachment; filename=\"restore.tar\"\n\n";
+        exec("$BinDir/BackupPC_tarCreate",
+             "-h", $host,
+             "-n", $num,
+             "-s", $share,
+             @pathOpts,
+             @fileList
+        );
+    } elsif ( $In{type} == 2 ) {
+        #
+        # Provide the selected files via a zip archive.
+        #
+        $SIG{CHLD} = 'IGNORE';
+        my $pid = fork();
+        if ( !defined($pid) ) {
+            $bpc->ServerMesg("log Can't fork for zip restore request by $User");
+            ErrorExit("Can't fork for zip restore");
+        }
+        if ( $pid ) {
+            #
+            # This is the parent.
+            #
+            my @fileListTrim = @fileList;
+            if ( @fileListTrim > 10 ) {
+                @fileListTrim = (@fileListTrim[0..9], '...');
+            }
+            $bpc->ServerMesg("log User $User downloaded zip archive for $host,"
+                           . " backup $num; files were: "
+                           . join(", ", @fileListTrim));
+            return;
+        }
+        #
+        # This is the child.  Print the headers and run BackupPC_tarCreate.
+        #
+        my @pathOpts;
+        if ( $In{relative} ) {
+            @pathOpts = ("-r", $pathHdr, "-p", "");
+        }
+        $bpc->ServerDisconnect();
+        print "Content-Type: application/zip\n";
+        print "Content-Transfer-Encoding: binary\n";
+        print "Content-Disposition: attachment; filename=\"restore.zip\"\n\n";
+	$In{compressLevel} = 5 if ( $In{compressLevel} !~ /^\d+$/ );
+        exec("$BinDir/BackupPC_zipCreate",
+             "-h", $host,
+             "-n", $num,
+             "-c", $In{compressLevel},
+             "-s", $share,
+             @pathOpts,
+             @fileList
+        );
+    } elsif ( $In{type} == 3 ) {
+        #
+        # Do restore directly onto host
+        #
+	if ( !defined($Hosts->{$In{hostDest}}) ) {
+	    ErrorExit("Host ${EscapeHTML($In{hostDest})} doesn't exist");
+	}
+	if ( !CheckPermission($In{hostDest}) ) {
+	    ErrorExit("You don't have permission to restore onto host"
+		    . " ${EscapeHTML($In{hostDest})}");
+	}
+        $fileListStr = "";
+        foreach my $f ( @fileList ) {
+            my $targetFile = $f;
+	    (my $strippedShare = $share) =~ s/^\///;
+	    (my $strippedShareDest = $In{shareDest}) =~ s/^\///;
+            substr($targetFile, 0, length($pathHdr)) = $In{pathHdr};
+            $fileListStr .= <<EOF;
+<tr><td>$host:/$strippedShare$f</td><td>$In{hostDest}:/$strippedShareDest$targetFile</td></tr>
+EOF
+        }
+        Header("BackupPC: Restore Confirm on $host");
+        print <<EOF;
+${h1("Are you sure?")}
+<p>
+You are about to start a restore directly to the machine $In{hostDest}.
+The following files will be restored to share $In{shareDest}, from
+backup number $num:
+<p>
+<table border>
+<tr><td>Original file/dir</td><td>Will be restored to</td></tr>
+$fileListStr
+</table>
+
+<form action="$MyURL" method="post">
+<input type="hidden" name="host" value="${EscapeHTML($host)}">
+<input type="hidden" name="hostDest" value="${EscapeHTML($In{hostDest})}">
+<input type="hidden" name="shareDest" value="${EscapeHTML($In{shareDest})}">
+<input type="hidden" name="pathHdr" value="${EscapeHTML($In{pathHdr})}">
+<input type="hidden" name="num" value="$num">
+<input type="hidden" name="type" value="4">
+$hiddenStr
+Do you really want to do this?
+<input type="submit" value="$In{action}" name="action">
+<input type="submit" value="No" name="">
+</form>
+EOF
+        Trailer();
+    } elsif ( $In{type} == 4 ) {
+	if ( !defined($Hosts->{$In{hostDest}}) ) {
+	    ErrorExit("Host ${EscapeHTML($In{hostDest})} doesn't exist");
+	}
+	if ( !CheckPermission($In{hostDest}) ) {
+	    ErrorExit("You don't have permission to restore onto host"
+		    . " ${EscapeHTML($In{hostDest})}");
+	}
+	my $hostDest = $1 if ( $In{hostDest} =~ /(.+)/ );
+	my $ipAddr = ConfirmIPAddress($hostDest);
+        #
+        # Prepare and send the restore request.  We write the request
+        # information using Data::Dumper to a unique file,
+        # $TopDir/pc/$hostDest/restoreReq.$$.n.  We use a file
+        # in case the list of files to restore is very long.
+        #
+        my $reqFileName;
+        for ( my $i = 0 ; ; $i++ ) {
+            $reqFileName = "restoreReq.$$.$i";
+            last if ( !-f "$TopDir/pc/$hostDest/$reqFileName" );
+        }
+        my %restoreReq = (
+	    # source of restore is hostSrc, #num, path shareSrc/pathHdrSrc
+            num         => $In{num},
+            hostSrc     => $host,
+            shareSrc    => $share,
+            pathHdrSrc  => $pathHdr,
+
+	    # destination of restore is hostDest:shareDest/pathHdrDest
+            hostDest    => $hostDest,
+            shareDest   => $In{shareDest},
+            pathHdrDest => $In{pathHdr},
+
+	    # list of files to restore
+            fileList    => \@fileList,
+
+	    # other info
+            user        => $User,
+            reqTime     => time,
+        );
+        my($dump) = Data::Dumper->new(
+                         [  \%restoreReq],
+                         [qw(*RestoreReq)]);
+        $dump->Indent(1);
+        if ( open(REQ, ">$TopDir/pc/$hostDest/$reqFileName") ) {
+            print(REQ $dump->Dump);
+            close(REQ);
+        } else {
+            ErrorExit("Can't open/create "
+                    . ${EscapeHTML("$TopDir/pc/$hostDest/$reqFileName")});
+        }
+	$reply = $bpc->ServerMesg("restore $ipAddr"
+			. " $hostDest $User $reqFileName");
+	$str = "Restore requested to host $hostDest, backup #$num,"
+	     . " by $User from $ENV{REMOTE_ADDR}";
+        Header("BackupPC: Restore Requested on $hostDest");
+        print <<EOF;
+${h1($str)}
+<p>
+Reply from server was: $reply
+<p>
+Go back to <a href="$MyURL?host=$hostDest">$hostDest home page</a>.
+EOF
+        Trailer();
+    }
+}
+
+sub Action_RestoreFile
+{
+    restoreFile($In{host}, $In{num}, $In{dir});
+}
+
+sub restoreFile
+{
+    my($host, $num, $dir, $skipHardLink, $origName) = @_;
+    my($Privileged) = CheckPermission($host);
+    my($i, $numF, $mangleF, $compressF, $mangle, $compress, $dirUM);
+    #
+    # Some common content (media) types from www.iana.org (via MIME::Types).
+    #
+    my $Ext2ContentType = {
+	'asc'  => 'text/plain',
+	'avi'  => 'video/x-msvideo',
+	'bmp'  => 'image/bmp',
+	'book' => 'application/x-maker',
+	'cc'   => 'text/plain',
+	'cpp'  => 'text/plain',
+	'csh'  => 'application/x-csh',
+	'csv'  => 'text/comma-separated-values',
+	'c'    => 'text/plain',
+	'deb'  => 'application/x-debian-package',
+	'doc'  => 'application/msword',
+	'dot'  => 'application/msword',
+	'dtd'  => 'text/xml',
+	'dvi'  => 'application/x-dvi',
+	'eps'  => 'application/postscript',
+	'fb'   => 'application/x-maker',
+	'fbdoc'=> 'application/x-maker',
+	'fm'   => 'application/x-maker',
+	'frame'=> 'application/x-maker',
+	'frm'  => 'application/x-maker',
+	'gif'  => 'image/gif',
+	'gtar' => 'application/x-gtar',
+	'gz'   => 'application/x-gzip',
+	'hh'   => 'text/plain',
+	'hpp'  => 'text/plain',
+	'h'    => 'text/plain',
+	'html' => 'text/html',
+	'htmlx'=> 'text/html',
+	'htm'  => 'text/html',
+	'iges' => 'model/iges',
+	'igs'  => 'model/iges',
+	'jpeg' => 'image/jpeg',
+	'jpe'  => 'image/jpeg',
+	'jpg'  => 'image/jpeg',
+	'js'   => 'application/x-javascript',
+	'latex'=> 'application/x-latex',
+	'maker'=> 'application/x-maker',
+	'mid'  => 'audio/midi',
+	'midi' => 'audio/midi',
+	'movie'=> 'video/x-sgi-movie',
+	'mov'  => 'video/quicktime',
+	'mp2'  => 'audio/mpeg',
+	'mp3'  => 'audio/mpeg',
+	'mpeg' => 'video/mpeg',
+	'mpg'  => 'video/mpeg',
+	'mpp'  => 'application/vnd.ms-project',
+	'pdf'  => 'application/pdf',
+	'pgp'  => 'application/pgp-signature',
+	'php'  => 'application/x-httpd-php',
+	'pht'  => 'application/x-httpd-php',
+	'phtml'=> 'application/x-httpd-php',
+	'png'  => 'image/png',
+	'ppm'  => 'image/x-portable-pixmap',
+	'ppt'  => 'application/powerpoint',
+	'ppt'  => 'application/vnd.ms-powerpoint',
+	'ps'   => 'application/postscript',
+	'qt'   => 'video/quicktime',
+	'rgb'  => 'image/x-rgb',
+	'rtf'  => 'application/rtf',
+	'rtf'  => 'text/rtf',
+	'shar' => 'application/x-shar',
+	'shtml'=> 'text/html',
+	'swf'  => 'application/x-shockwave-flash',
+	'tex'  => 'application/x-tex',
+	'texi' => 'application/x-texinfo',
+	'texinfo'=> 'application/x-texinfo',
+	'tgz'  => 'application/x-gtar',
+	'tiff' => 'image/tiff',
+	'tif'  => 'image/tiff',
+	'txt'  => 'text/plain',
+	'vcf'  => 'text/x-vCard',
+	'vrml' => 'model/vrml',
+	'wav'  => 'audio/x-wav',
+	'wmls' => 'text/vnd.wap.wmlscript',
+	'wml'  => 'text/vnd.wap.wml',
+	'wrl'  => 'model/vrml',
+	'xls'  => 'application/vnd.ms-excel',
+	'xml'  => 'text/xml',
+	'xwd'  => 'image/x-xwindowdump',
+	'z'    => 'application/x-compress',
+	'zip'  => 'application/zip',
+    };
+
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can restore backup files"
+                . " for host ${EscapeHTML($host)}." );
+    }
+    ServerConnect();
+    my @Backups = $bpc->BackupInfoRead($host);
+    if ( $host eq "" ) {
+        ErrorExit("Empty host name");
+    }
+    $dir = "/" if ( $dir eq "" );
+    for ( $i = 0 ; $i < @Backups ; $i++ ) {
+        if ( !$Backups[$i]{noFill} ) {
+            $numF      = $Backups[$i]{num};
+            $mangleF   = $Backups[$i]{mangle};
+            $compressF = $Backups[$i]{compress};
+        }
+        last if ( $Backups[$i]{num} == $num );
+    }
+    $mangle = $Backups[$i]{mangle};
+    $compress = $Backups[$i]{compress};
+    if ( !$Backups[$i]{noFill} ) {
+        # no need to back-fill a filled backup
+        $numF = $mangleF = $compressF = undef;
+    }
+    my $fullPath = "$TopDir/pc/$host/$num/$dir";
+    $fullPath =~ s{/+}{/}g;
+    if ( !-f $fullPath && defined($numF) ) {
+	my $dirF = $dir;
+	my $fullPathF;
+	if ( $mangle && !$mangleF ) {
+	    $fullPathF = "$TopDir/pc/$host/$numF/"
+				. $bpc->fileNameUnmangle($dir);
+	} else {
+	    $fullPathF = "$TopDir/pc/$host/$numF/$dir";
+	}
+	if ( -f $fullPathF ) {
+	    $fullPath = $fullPathF;
+	    $compress = $compressF;
+	}
+    }
+    if ( $fullPath =~ m{(^|/)\.\.(/|$)} || !-f $fullPath ) {
+        ErrorExit("Can't restore bad file ${EscapeHTML($fullPath)}");
+    }
+    my $dirUM = $mangle ? $bpc->fileNameUnmangle($dir) : $dir;
+    my $attr = BackupPC::Attrib->new({compress => $compress});
+    my $fullDir = $fullPath;
+    $fullDir =~ s{(.*)/.*}{$1};
+    my $fileName = $1 if ( $dirUM =~ /.*\/(.*)/ );
+    $attr->read($fullDir) if ( -f $attr->fileName($fullDir) );
+    my $a = $attr->get($fileName);
+
+    my $f = BackupPC::FileZIO->open($fullPath, 0, $compress);
+    my $data;
+    if ( !$skipHardLink && $a->{type} == BPC_FTYPE_HARDLINK ) {
+	#
+	# hardlinks should look like the file they point to
+	#
+	my $linkName;
+        while ( $f->read(\$data, 65536) > 0 ) {
+            $linkName .= $data;
+        }
+	$f->close;
+	$linkName =~ s/^\.\///;
+	my $share = $1 if ( $dir =~ /^\/?(.*?)\// );
+	restoreFile($host, $num,
+		"$share/" . ($mangle ? $bpc->fileNameMangle($linkName)
+				     : $linkName), 1, $dir);
+	return;
+    }
+    $dirUM =~ s{//}{/}g;
+    $fullPath =~ s{//}{/}g;
+    $bpc->ServerMesg("log User $User recovered file $dirUM ($fullPath)");
+    $dir = $origName if ( defined($origName) );
+    $dirUM = $mangle ? $bpc->fileNameUnmangle($dir) : $dir;
+    my $ext = $1 if ( $dirUM =~ /\.([^\/\.]+)$/ );
+    my $contentType = $Ext2ContentType->{lc($ext)}
+				    || "application/octet-stream";
+    $fileName = $1 if ( $dirUM =~ /.*\/(.*)/ );
+    $fileName =~ s/"/\\"/g;
+    print "Content-Type: $contentType\n";
+    print "Content-Transfer-Encoding: binary\n";
+    print "Content-Disposition: attachment; filename=\"$fileName\"\n\n";
+    while ( $f->read(\$data, 1024 * 1024) > 0 ) {
+        print STDOUT $data;
+    }
+    $f->close;
+}
+
+sub Action_HostInfo
+{
+    my $host = $1 if ( $In{host} =~ /(.*)/ );
+    my($statusStr, $startIncrStr);
+
+    $host =~ s/^\s+//;
+    $host =~ s/\s+$//;
+    return Action_GeneralInfo() if ( $host eq "" );
+    $host = lc($host)
+                if ( !-d "$TopDir/pc/$host" && -d "$TopDir/pc/" . lc($host) );
+    if ( $host =~ /\.\./ || !-d "$TopDir/pc/$host" ) {
+        #
+        # try to lookup by user name
+        #
+        if ( !defined($Hosts->{$host}) ) {
+            foreach my $h ( keys(%$Hosts) ) {
+                if ( $Hosts->{$h}{user} eq $host
+                        || lc($Hosts->{$h}{user}) eq lc($host) ) {
+                    $host = $h;
+                    last;
+                }
+            }
+            CheckPermission();
+            ErrorExit("Unknown host or user ${EscapeHTML($host)}")
+                                if ( !defined($Hosts->{$host}) );
+        }
+        $In{host} = $host;
+    }
+    GetStatusInfo("host($host)");
+    $bpc->ConfigRead($host);
+    %Conf = $bpc->Conf();
+    my $Privileged = CheckPermission($host);
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can view information about"
+                . " host ${EscapeHTML($host)}." );
+    }
+    ReadUserEmailInfo();
+
+    my @Backups = $bpc->BackupInfoRead($host);
+    my($str, $sizeStr, $compStr, $errStr, $warnStr);
+    for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+        my $startTime = timeStamp2($Backups[$i]{startTime});
+        my $dur       = $Backups[$i]{endTime} - $Backups[$i]{startTime};
+        $dur          = 1 if ( $dur <= 0 );
+        my $duration  = sprintf("%.1f", $dur / 60);
+        my $MB        = sprintf("%.1f", $Backups[$i]{size} / (1024*1024));
+        my $MBperSec  = sprintf("%.2f", $Backups[$i]{size} / (1024*1024*$dur));
+        my $MBExist   = sprintf("%.1f", $Backups[$i]{sizeExist} / (1024*1024));
+        my $MBNew     = sprintf("%.1f", $Backups[$i]{sizeNew} / (1024*1024));
+        my($MBExistComp, $ExistComp, $MBNewComp, $NewComp);
+        if ( $Backups[$i]{sizeExist} && $Backups[$i]{sizeExistComp} ) {
+            $MBExistComp = sprintf("%.1f", $Backups[$i]{sizeExistComp}
+                                                / (1024 * 1024));
+            $ExistComp = sprintf("%.1f%%", 100 *
+                  (1 - $Backups[$i]{sizeExistComp} / $Backups[$i]{sizeExist}));
+        }
+        if ( $Backups[$i]{sizeNew} && $Backups[$i]{sizeNewComp} ) {
+            $MBNewComp = sprintf("%.1f", $Backups[$i]{sizeNewComp}
+                                                / (1024 * 1024));
+            $NewComp = sprintf("%.1f%%", 100 *
+                  (1 - $Backups[$i]{sizeNewComp} / $Backups[$i]{sizeNew}));
+        }
+        my $age = sprintf("%.1f", (time - $Backups[$i]{startTime}) / (24*3600));
+        my $browseURL = "$MyURL?action=browse&host=$host&num=$Backups[$i]{num}";
+        my $filled = $Backups[$i]{noFill} ? "no" : "yes";
+        $filled .= " ($Backups[$i]{fillFromNum}) "
+                            if ( $Backups[$i]{fillFromNum} ne "" );
+        $str .= <<EOF;
+<tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
+    <td align="center"> $Backups[$i]{type} </td>
+    <td align="center"> $filled </td>
+    <td align="right">  $startTime </td>
+    <td align="right">  $duration </td>
+    <td align="right">  $age </td>
+    <td align="left">   <tt>$TopDir/pc/$host/$Backups[$i]{num}</tt> </td></tr>
+EOF
+        $sizeStr .= <<EOF;
+<tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
+    <td align="center"> $Backups[$i]{type} </td>
+    <td align="right">  $Backups[$i]{nFiles} </td>
+    <td align="right">  $MB </td>
+    <td align="right">  $MBperSec </td>
+    <td align="right">  $Backups[$i]{nFilesExist} </td>
+    <td align="right">  $MBExist </td>
+    <td align="right">  $Backups[$i]{nFilesNew} </td>
+    <td align="right">  $MBNew </td>
+</tr>
+EOF
+        $Backups[$i]{compress} ||= "off";
+        $compStr .= <<EOF;
+<tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
+    <td align="center"> $Backups[$i]{type} </td>
+    <td align="center"> $Backups[$i]{compress} </td>
+    <td align="right">  $MBExist </td>
+    <td align="right">  $MBExistComp </td>
+    <td align="right">  $ExistComp </td>
+    <td align="right">  $MBNew </td>
+    <td align="right">  $MBNewComp </td>
+    <td align="right">  $NewComp </td>
+</tr>
+EOF
+        $errStr .= <<EOF;
+<tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
+    <td align="center"> $Backups[$i]{type} </td>
+    <td align="center"> <a href="$MyURL?action=view&type=XferLOG&num=$Backups[$i]{num}&host=$host">XferLOG</a>,
+                      <a href="$MyURL?action=view&type=XferErr&num=$Backups[$i]{num}&host=$host">Errors</a> </td>
+    <td align="right">  $Backups[$i]{xferErrs} </td>
+    <td align="right">  $Backups[$i]{xferBadFile} </td>
+    <td align="right">  $Backups[$i]{xferBadShare} </td>
+    <td align="right">  $Backups[$i]{tarErrs} </td></tr>
+EOF
+    }
+
+    my @Restores = $bpc->RestoreInfoRead($host);
+    my $restoreStr;
+
+    for ( my $i = 0 ; $i < @Restores ; $i++ ) {
+        my $startTime = timeStamp2($Restores[$i]{startTime});
+        my $dur       = $Restores[$i]{endTime} - $Restores[$i]{startTime};
+        $dur          = 1 if ( $dur <= 0 );
+        my $duration  = sprintf("%.1f", $dur / 60);
+        my $MB        = sprintf("%.1f", $Restores[$i]{size} / (1024*1024));
+        my $MBperSec  = sprintf("%.2f", $Restores[$i]{size} / (1024*1024*$dur));
+	$restoreStr  .= <<EOF;
+<tr><td align="center"><a href="$MyURL?action=restoreInfo&num=$Restores[$i]{num}&host=$host">$Restores[$i]{num}</a> </td>
+    <td align="center"> $Restores[$i]{result} </td>
+    <td align="right"> $startTime </td>
+    <td align="right"> $duration </td>
+    <td align="right"> $Restores[$i]{nFiles} </td>
+    <td align="right"> $MB </td>
+    <td align="right"> $Restores[$i]{tarCreateErrs} </td>
+    <td align="right"> $Restores[$i]{xferErrs} </td>
+</tr>
+EOF
+    }
+    $restoreStr   = <<EOF if ( $restoreStr ne "" );
+${h2("Restore Summary")}
+<p>
+Click on the restore number for more details.
+<table border>
+<tr><td align="center"> Restore# </td>
+    <td align="center"> Result </td>
+    <td align="right"> Start Date</td>
+    <td align="right"> Dur/mins</td>
+    <td align="right"> #files </td>
+    <td align="right"> MB </td>
+    <td align="right"> #tar errs </td>
+    <td align="right"> #xferErrs </td>
+</tr>
+$restoreStr
+</table>
+<p>
+EOF
+
+    if ( @Backups == 0 ) {
+        $warnStr = "<h2> This PC has never been backed up!! </h2>\n";
+    }
+    if ( defined($Hosts->{$host}) ) {
+        my $user = $Hosts->{$host}{user};
+        if ( $user ne "" ) {
+            $statusStr .= <<EOF;
+<li>This PC is used by ${UserLink($user)}.
+EOF
+        }
+        if ( defined($UserEmailInfo{$user})
+                && $UserEmailInfo{$user}{lastHost} eq $host ) {
+            my $mailTime = timeStamp2($UserEmailInfo{$user}{lastTime});
+            my $subj     = $UserEmailInfo{$user}{lastSubj};
+            $statusStr  .= <<EOF;
+<li>Last email sent to ${UserLink($user)} was at $mailTime, subject "$subj".
+EOF
+        }
+    }
+    if ( defined($Jobs{$host}) ) {
+        my $startTime = timeStamp2($Jobs{$host}{startTime});
+        (my $cmd = $Jobs{$host}{cmd}) =~ s/$BinDir\///g;
+        $statusStr .= <<EOF;
+<li>The command $cmd is currently running for $host, started $startTime.
+EOF
+    }
+    if ( $StatusHost{BgQueueOn} ) {
+        $statusStr .= <<EOF;
+<li>Host $host is queued on the background queue (will be backed up soon).
+EOF
+    }
+    if ( $StatusHost{UserQueueOn} ) {
+        $statusStr .= <<EOF;
+<li>Host $host is queued on the user queue (will be backed up soon).
+EOF
+    }
+    if ( $StatusHost{CmdQueueOn} ) {
+        $statusStr .= <<EOF;
+<li>A command for $host is on the command queue (will run soon).
+EOF
+    }
+    my $startTime = timeStamp2($StatusHost{endTime} == 0 ?
+                $StatusHost{startTime} : $StatusHost{endTime});
+    my $reason = "";
+    if ( $StatusHost{reason} ne "" ) {
+        $reason = " ($StatusHost{reason})";
+    }
+    $statusStr .= <<EOF;
+<li>Last status is state "$StatusHost{state}"$reason
+    as of $startTime.
+EOF
+    if ( $StatusHost{error} ne "" ) {
+        $statusStr .= <<EOF;
+<li>Last error is "${EscapeHTML($StatusHost{error})}"
+EOF
+    }
+    my $priorStr = "Pings";
+    if ( $StatusHost{deadCnt} > 0 ) {
+        $statusStr .= <<EOF;
+<li>Pings to $host have failed $StatusHost{deadCnt} consecutive times.
+EOF
+        $priorStr = "Prior to that, pings";
+    }
+    if ( $StatusHost{aliveCnt} > 0 ) {
+        $statusStr .= <<EOF;
+<li>$priorStr to $host have succeeded $StatusHost{aliveCnt}
+        consecutive times.
+EOF
+        if ( $StatusHost{aliveCnt} >= $Conf{BlackoutGoodCnt}
+		&& $Conf{BlackoutGoodCnt} >= 0 && $Conf{BlackoutHourBegin} >= 0
+		&& $Conf{BlackoutHourEnd} >= 0 ) {
+            my(@days) = qw(Sun Mon Tue Wed Thu Fri Sat);
+            my($days) = join(", ", @days[@{$Conf{BlackoutWeekDays}}]);
+            my($t0) = sprintf("%d:%02d", $Conf{BlackoutHourBegin},
+                            60 * ($Conf{BlackoutHourBegin}
+                                     - int($Conf{BlackoutHourBegin})));
+            my($t1) = sprintf("%d:%02d", $Conf{BlackoutHourEnd},
+                            60 * ($Conf{BlackoutHourEnd}
+                                     - int($Conf{BlackoutHourEnd})));
+            $statusStr .= <<EOF;
+<li>Because $host has been on the network at least $Conf{BlackoutGoodCnt}
+consecutive times, it will not be backed up from $t0 to $t1 on $days.
+EOF
+        }
+    }
+    if ( $StatusHost{backoffTime} > time ) {
+        my $hours = sprintf("%.1f", ($StatusHost{backoffTime} - time) / 3600);
+        $statusStr .= <<EOF;
+<li>Backups are deferred for $hours hours
+    (<a href="$MyURL?action=Stop/Dequeue%20Backup&host=$host">change this
+    number</a>).
+EOF
+    }
+    if ( @Backups ) {
+        # only allow incremental if there are already some backups
+        $startIncrStr = <<EOF;
+<input type="submit" value="Start Incr Backup" name="action">
+EOF
+    }
+
+    Header("BackupPC: Host $host Backup Summary");
+    print <<EOF;
+${h1("Host $host Backup Summary")}
+<p>
+$warnStr
+<ul>
+$statusStr
+</ul>
+
+${h2("User Actions")}
+<p>
+<form action="$MyURL" method="get">
+<input type="hidden" name="host" value="$host">
+$startIncrStr
+<input type="submit" value="Start Full Backup" name="action">
+<input type="submit" value="Stop/Dequeue Backup" name="action">
+</form>
+
+${h2("Backup Summary")}
+<p>
+Click on the backup number to browse and restore backup files.
+<table border>
+<tr><td align="center"> Backup# </td>
+    <td align="center"> Type </td>
+    <td align="center"> Filled </td>
+    <td align="center"> Start Date </td>
+    <td align="center"> Duration/mins </td>
+    <td align="center"> Age/days </td>
+    <td align="center"> Server Backup Path </td>
+</tr>
+$str
+</table>
+<p>
+
+$restoreStr
+
+${h2("Xfer Error Summary")}
+<p>
+<table border>
+<tr><td align="center"> Backup# </td>
+    <td align="center"> Type </td>
+    <td align="center"> View </td>
+    <td align="center"> #Xfer errs </td>
+    <td align="center"> #bad files </td>
+    <td align="center"> #bad share </td>
+    <td align="center"> #tar errs </td>
+</tr>
+$errStr
+</table>
+<p>
+
+${h2("File Size/Count Reuse Summary")}
+<p>
+Existing files are those already in the pool; new files are those added
+to the pool.
+Empty files and SMB errors aren't counted in the reuse and new counts.
+<table border>
+<tr><td colspan="2"></td>
+    <td align="center" colspan="3"> Totals </td>
+    <td align="center" colspan="2"> Existing Files </td>
+    <td align="center" colspan="2"> New Files </td>
+</tr>
+<tr>
+    <td align="center"> Backup# </td>
+    <td align="center"> Type </td>
+    <td align="center"> #Files </td>
+    <td align="center"> Size/MB </td>
+    <td align="center"> MB/sec </td>
+    <td align="center"> #Files </td>
+    <td align="center"> Size/MB </td>
+    <td align="center"> #Files </td>
+    <td align="center"> Size/MB </td>
+</tr>
+$sizeStr
+</table>
+<p>
+
+${h2("Compression Summary")}
+<p>
+Compression performance for files already in the pool and newly
+compressed files.
+<table border>
+<tr><td colspan="3"></td>
+    <td align="center" colspan="3"> Existing Files </td>
+    <td align="center" colspan="3"> New Files </td>
+</tr>
+<tr><td align="center"> Backup# </td>
+    <td align="center"> Type </td>
+    <td align="center"> Comp Level </td>
+    <td align="center"> Size/MB </td>
+    <td align="center"> Comp/MB </td>
+    <td align="center"> Comp </td>
+    <td align="center"> Size/MB </td>
+    <td align="center"> Comp/MB </td>
+    <td align="center"> Comp </td>
+</tr>
+$compStr
+</table>
+<p>
+EOF
+    Trailer();
+}
+
+sub Action_GeneralInfo
+{
+    GetStatusInfo("info jobs hosts queueLen");
+    my $Privileged = CheckPermission();
+
+    my($jobStr, $statusStr, $tarPidHdr, $ rivLinks);
+    foreach my $host ( sort(keys(%Jobs)) ) {
+        my $startTime = timeStamp2($Jobs{$host}{startTime});
+        next if ( $host eq $bpc->trashJob
+                    && $Jobs{$host}{processState} ne "running" );
+        $Jobs{$host}{type} = $Status{$host}{type}
+                    if ( $Jobs{$host}{type} eq "" && defined($Status{$host}));
+        (my $cmd = $Jobs{$host}{cmd}) =~ s/$BinDir\///g;
+        $jobStr .= <<EOF;
+<tr><td> ${HostLink($host)} </td>
+    <td align="center"> $Jobs{$host}{type} </td>
+    <td align="center"> ${UserLink($Hosts->{$host}{user})} </td>
+    <td> $startTime </td>
+    <td> $cmd </td>
+    <td align="center"> $Jobs{$host}{pid} </td>
+    <td align="center"> $Jobs{$host}{xferPid} </td>
+EOF
+        if ( $Jobs{$host}{tarPid} > 0 ) {
+            $jobStr .= "    <td align=\"center\"> $Jobs{$host}{tarPid} </td>\n";
+            $tarPidHdr ||= "<td align=\"center\"> tar PID </td>\n";
+        }
+        $jobStr .= "</tr>\n";
+    }
+    foreach my $host ( sort(keys(%Status)) ) {
+        next if ( $Status{$host}{reason} ne "backup failed" );
+        my $startTime = timeStamp2($Status{$host}{startTime});
+        my($errorTime, $XferViewStr);
+        if ( $Status{$host}{errorTime} > 0 ) {
+            $errorTime = timeStamp2($Status{$host}{errorTime});
+        }
+        if ( -f "$TopDir/pc/$host/SmbLOG.bad"
+                || -f "$TopDir/pc/$host/SmbLOG.bad.z"
+                || -f "$TopDir/pc/$host/XferLOG.bad"
+                || -f "$TopDir/pc/$host/XferLOG.bad.z"
+                ) {
+            $XferViewStr = <<EOF;
+<a href="$MyURL?action=view&type=XferLOGbad&host=$host">XferLOG</a>,
+<a href="$MyURL?action=view&type=XferErrbad&host=$host">XferErr</a>
+EOF
+        } else {
+            $XferViewStr = "";
+        }
+        (my $shortErr = $Status{$host}{error}) =~ s/(.{48}).*/$1.../;   
+        $statusStr .= <<EOF;
+<tr><td> ${HostLink($host)} </td>
+    <td align="center"> $Status{$host}{type} </td>
+    <td align="center"> ${UserLink($Hosts->{$host}{user})} </td>
+    <td align="right"> $startTime </td>
+    <td> $XferViewStr </td>
+    <td align="right"> $errorTime </td>
+    <td> ${EscapeHTML($shortErr)} </td></tr>
+EOF
+    }
+    my $now          = timeStamp2(time);
+    my $nextWakeupTime = timeStamp2($Info{nextWakeup});
+    my $DUlastTime   = timeStamp2($Info{DUlastValueTime});
+    my $DUmaxTime    = timeStamp2($Info{DUDailyMaxTime});
+    my $numBgQueue   = $QueueLen{BgQueue};
+    my $numUserQueue = $QueueLen{UserQueue};
+    my $numCmdQueue  = $QueueLen{CmdQueue};
+    my $serverStartTime = timeStamp2($Info{startTime});
+    my $poolInfo     = genPoolInfo("pool", \%Info);
+    my $cpoolInfo    = genPoolInfo("cpool", \%Info);
+    if ( $Info{poolFileCnt} > 0 && $Info{cpoolFileCnt} > 0 ) {
+        $poolInfo = <<EOF;
+<li>Uncompressed pool:
+<ul>
+$poolInfo
+</ul>
+<li>Compressed pool:
+<ul>
+$cpoolInfo
+</ul>
+EOF
+    } elsif ( $Info{cpoolFileCnt} > 0 ) {
+        $poolInfo = $cpoolInfo;
+    }
+    Header("BackupPC: Server Status");
+    print <<EOF;
+
+${h1("BackupPC Server Status")}
+<p>
+
+${h2("General Server Information")}
+
+<ul>
+<li> The server's PID is $Info{pid} on host $Conf{ServerHost},
+     version $Info{Version}, started at $serverStartTime.
+<li> This status was generated at $now.
+<li> PCs will be next queued at $nextWakeupTime.
+<li> Other info:
+    <ul>
+        <li>$numBgQueue pending backup requests from last scheduled wakeup,
+        <li>$numUserQueue pending user backup requests,
+        <li>$numCmdQueue pending command requests,
+        $poolInfo
+        <li>Pool file system was recently at $Info{DUlastValue}%
+            ($DUlastTime), today's max is $Info{DUDailyMax}% ($DUmaxTime)
+            and yesterday's max was $Info{DUDailyMaxPrev}%.
+    </ul>
+</ul>
+
+${h2("Currently Running Jobs")}
+<p>
+<table border>
+<tr><td> Host </td>
+    <td> Type </td>
+    <td> User </td>
+    <td> Start Time </td>
+    <td> Command </td>
+    <td align="center"> PID </td>
+    <td> Xfer PID </td>
+    $tarPidHdr</tr>
+$jobStr
+</table>
+<p>
+
+${h2("Failures that need attention")}
+<p>
+<table border>
+<tr><td align="center"> Host </td>
+    <td align="center"> Type </td>
+    <td align="center"> User </td>
+    <td align="center"> Last Try </td>
+    <td align="center"> Details </td>
+    <td align="center"> Error Time </td>
+    <td> Last error (other than no ping) </td></tr>
+$statusStr
+</table>
+EOF
+    Trailer();
+}
+
+sub Action_RestoreInfo
+{
+    my $Privileged = CheckPermission($In{host});
+    my $host = $1 if ( $In{host} =~ /(.*)/ );
+    my $num  = $In{num};
+    my $i;
+
+    if ( !$Privileged ) {
+        ErrorExit("Only privileged users can view restore information." );
+    }
+    #
+    # Find the requested restore
+    #
+    my @Restores = $bpc->RestoreInfoRead($host);
+    for ( $i = 0 ; $i < @Restores ; $i++ ) {
+        last if ( $Restores[$i]{num} == $num );
+    }
+    if ( $i >= @Restores ) {
+        ErrorExit("Restore number $num for host ${EscapeHTML($host)} does"
+	        . " not exist.");
+    }
+
+    %RestoreReq = ();
+    do "$TopDir/pc/$host/RestoreInfo.$Restores[$i]{num}"
+	    if ( -f "$TopDir/pc/$host/RestoreInfo.$Restores[$i]{num}" );
+
+    my $startTime = timeStamp2($Restores[$i]{startTime});
+    my $reqTime   = timeStamp2($RestoreReq{reqTime});
+    my $dur       = $Restores[$i]{endTime} - $Restores[$i]{startTime};
+    $dur          = 1 if ( $dur <= 0 );
+    my $duration  = sprintf("%.1f", $dur / 60);
+    my $MB        = sprintf("%.1f", $Restores[$i]{size} / (1024*1024));
+    my $MBperSec  = sprintf("%.2f", $Restores[$i]{size} / (1024*1024*$dur));
+
+    my $fileListStr = "";
+    foreach my $f ( @{$RestoreReq{fileList}} ) {
+	my $targetFile = $f;
+	(my $strippedShareSrc  = $RestoreReq{shareSrc}) =~ s/^\///;
+	(my $strippedShareDest = $RestoreReq{shareDest}) =~ s/^\///;
+	substr($targetFile, 0, length($RestoreReq{pathHdrSrc}))
+					= $RestoreReq{pathHdrDest};
+	$fileListStr .= <<EOF;
+<tr><td>$RestoreReq{hostSrc}:/$strippedShareSrc$f</td><td>$RestoreReq{hostDest}:/$strippedShareDest$targetFile</td></tr>
+EOF
+    }
+
+    Header("BackupPC: Restore #$num details for $host");
+    print <<EOF;
+${h1("Restore #$num Details for $host")}
+<p>
+<table border>
+<tr><td> Number </td><td> $Restores[$i]{num} </td></tr>
+<tr><td> Requested by </td><td> $RestoreReq{user} </td></tr>
+<tr><td> Request time </td><td> $reqTime </td></tr>
+<tr><td> Result </td><td> $Restores[$i]{result} </td></tr>
+<tr><td> Error Message </td><td> $Restores[$i]{errorMsg} </td></tr>
+<tr><td> Source host </td><td> $RestoreReq{hostSrc} </td></tr>
+<tr><td> Source backup num </td><td> $RestoreReq{num} </td></tr>
+<tr><td> Source share </td><td> $RestoreReq{shareSrc} </td></tr>
+<tr><td> Destination host </td><td> $RestoreReq{hostDest} </td></tr>
+<tr><td> Destination share </td><td> $RestoreReq{shareDest} </td></tr>
+<tr><td> Start time </td><td> $startTime </td></tr>
+<tr><td> Duration </td><td> $duration min </td></tr>
+<tr><td> Number of files </td><td> $Restores[$i]{nFiles} </td></tr>
+<tr><td> Total size </td><td> ${MB} MB </td></tr>
+<tr><td> Transfer rate </td><td> $MBperSec MB/sec </td></tr>
+<tr><td> TarCreate errors </td><td> $Restores[$i]{tarCreateErrs} </td></tr>
+<tr><td> Xfer errors </td><td> $Restores[$i]{xferErrs} </td></tr>
+<tr><td> Xfer log file </td><td>
+<a href="$MyURL?action=view&type=RestoreLOG&num=$Restores[$i]{num}&host=$host">View</a>,
+<a href="$MyURL?action=view&type=RestoreErr&num=$Restores[$i]{num}&host=$host">Errors</a>
+</tr></tr>
+</table>
+<p>
+${h1("File/Directory list")}
+<p>
+<table border>
+<tr><td>Original file/dir</td><td>Restored to</td></tr>
+$fileListStr
+</table>
+EOF
+    Trailer();
+}
+    
+###########################################################################
+# Miscellaneous subroutines
+###########################################################################
+
+sub timeStamp2
+{
+    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)
+              = localtime($_[0] == 0 ? time : $_[0] );
+    $year += 1900;
+    $mon++;
+    if ( $Conf{CgiDateFormatMMDD} ) {
+        return sprintf("$mon/$mday %02d:%02d", $hour, $min);
+    } else {
+        return sprintf("$mday/$mon %02d:%02d", $hour, $min);
+    }
+}
+
+sub HostLink
+{
+    my($host) = @_;
+    my($s);
+    if ( defined($Hosts->{$host}) || defined($Status{$host}) ) {
+        $s = "<a href=\"$MyURL?host=$host\">$host</a>";
+    } else {
+        $s = $host;
+    }
+    return \$s;
+}
+
+sub UserLink
+{
+    my($user) = @_;
+    my($s);
+
+    return \$user if ( $user eq ""
+                    || $Conf{CgiUserUrlCreate} eq "" );
+    if ( $Conf{CgiUserHomePageCheck} eq ""
+            || -f sprintf($Conf{CgiUserHomePageCheck}, $user, $user, $user) ) {
+        $s = "<a href=\""
+             . sprintf($Conf{CgiUserUrlCreate}, $user, $user, $user)
+             . "\">$user</a>";
+    } else {
+        $s = $user;
+    }
+    return \$s;
+}
+
+sub EscapeHTML
+{
+    my($s) = @_;
+    $s =~ s/&/&amp;/g;
+    $s =~ s/\"/&quot;/g;
+    $s =~ s/>/&gt;/g;
+    $s =~ s/</&lt;/g;
+    $s =~ s{([^[:print:]])}{sprintf("&#x%02X;", ord($1));}eg;
+    return \$s;
+}
+
+##sub URIEncode
+##{
+##    my($s) = @_;
+##    $s =~ s{(['"&%[:^print:]])}{sprintf("%%%02X", ord($1));}eg;
+##    return \$s;
+##}
+
+sub ErrorExit
+{
+    my(@mesg) = @_;
+    my($head) = shift(@mesg);
+    my($mesg) = join("</p>\n<p>", @mesg);
+    $Conf{CgiHeaderFontType} ||= "arial"; 
+    $Conf{CgiHeaderFontSize} ||= "3";  
+    $Conf{CgiNavBarBgColor}  ||= "#ddeeee";
+    $Conf{CgiHeaderBgColor}  ||= "#99cc33";
+
+    $bpc->ServerMesg("log User $User (host=$In{host}) got CGI error: $head")
+                            if ( defined($bpc) );
+    Header("BackupPC: Error");
+    print <<EOF;
+${h1("Error: $head")}
+<p>$mesg</p>
+EOF
+    Trailer();
+    exit(1);
+}
+
+sub ServerConnect
+{
+    #
+    # Verify that the server connection is ok
+    #
+    return if ( $bpc->ServerOK() );
+    $bpc->ServerDisconnect();
+    if ( my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
+        ErrorExit(
+            "Unable to connect to BackupPC server",
+            "This CGI script ($MyURL) is unable to connect to the BackupPC"
+          . " server on $Conf{ServerHost} port $Conf{ServerPort}.  The error"
+          . " was: $err.",
+            "Perhaps the BackupPC server is not running or there is a "
+          . " configuration error.  Please report this to your Sys Admin."
+        );
+    }
+}
+
+sub GetStatusInfo
+{
+    my($status) = @_;
+    ServerConnect();
+    my $reply = $bpc->ServerMesg("status $status");
+    $reply = $1 if ( $reply =~ /(.*)/s );
+    eval($reply);
+    # ignore status related to admin and trashClean jobs
+    if ( $status =~ /\bhosts\b/ ) {
+        delete($Status{$bpc->adminJob});
+        delete($Status{$bpc->trashJob});
+    }
+}
+
+sub ReadUserEmailInfo
+{
+    if ( (stat("$TopDir/log/UserEmailInfo.pl"))[9] != $UserEmailInfoMTime ) {
+        do "$TopDir/log/UserEmailInfo.pl";
+        $UserEmailInfoMTime = (stat("$TopDir/log/UserEmailInfo.pl"))[9];
+    }
+}
+
+#
+# Check if the user is privileged.  A privileged user can access
+# any information (backup files, logs, status pages etc).
+#
+# A user is privileged if they belong to the group
+# $Conf{CgiAdminUserGroup}, or they are in $Conf{CgiAdminUsers}
+# or they are the user assigned to a host in the host file.
+#
+sub CheckPermission
+{
+    my($host) = @_;
+    my $Privileged = 0;
+
+    return 0 if ( $User eq "" || ($host ne "" && !defined($Hosts->{$host})) );
+    if ( $Conf{CgiAdminUserGroup} ne "" ) {
+        my($n,$p,$gid,$mem) = getgrnam($Conf{CgiAdminUserGroup});
+        $Privileged ||= ($mem =~ /\b$User\b/);
+    }
+    if ( $Conf{CgiAdminUsers} ne "" ) {
+        $Privileged ||= ($Conf{CgiAdminUsers} =~ /\b$User\b/);
+        $Privileged ||= $Conf{CgiAdminUsers} eq "*";
+    }
+    $PrivAdmin = $Privileged;
+    $Privileged ||= $User eq $Hosts->{$host}{user};
+    return $Privileged;
+}
+
+#
+# Given a host name tries to find the IP address.  For non-dhcp hosts
+# we just return the host name.  For dhcp hosts we check the address
+# the user is using ($ENV{REMOTE_ADDR}) and also the last-known IP
+# address for $host.  (Later we should replace this with a broadcast
+# nmblookup.)
+#
+sub ConfirmIPAddress
+{
+    my($host) = @_;
+    my $ipAddr = $host;
+
+    if ( $Hosts->{$host}{dhcp}
+	       && $ENV{REMOTE_ADDR} =~ /^(\d+[\.\d]*)$/ ) {
+	$ipAddr = $1;
+	my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($ipAddr);
+	if ( $netBiosHost ne $host ) {
+	    my($tryIP);
+	    GetStatusInfo("host($host)");
+	    if ( defined($StatusHost{dhcpHostIP})
+			&& $StatusHost{dhcpHostIP} ne $ipAddr ) {
+		$tryIP = " and $StatusHost{dhcpHostIP}";
+		($netBiosHost, $netBiosUser)
+			= $bpc->NetBiosInfoGet($StatusHost{dhcpHostIP});
+	    }
+	    if ( $netBiosHost ne $host ) {
+		ErrorExit("Can't find IP address for ${EscapeHTML($host)}",
+		          <<EOF);
+$host is a DHCP host, and I don't know its IP address.  I checked the
+netbios name of $ENV{REMOTE_ADDR}$tryIP, and found that that machine
+is not $host.
+<p>
+Until I see $host at a particular DHCP address, you can only
+start this request from the client machine itself.
+EOF
+	    }
+	    $ipAddr = $StatusHost{dhcpHostIP};
+	}
+    }
+    return $ipAddr;
+}
+
+sub genPoolInfo
+{
+    my($name, $info) = @_;
+    my $poolSize   = sprintf("%.2f", $info->{"${name}Kb"} / (1000 * 1024));
+    my $poolRmSize = sprintf("%.2f", $info->{"${name}KbRm"} / (1000 * 1024));
+    my $poolTime   = timeStamp2($info->{"${name}Time"});
+    $info->{"${name}FileCntRm"} = $info->{"${name}FileCntRm"} + 0;
+    return <<EOF;
+        <li>Pool is ${poolSize}GB comprising $info->{"${name}FileCnt"} files
+            and $info->{"${name}DirCnt"} directories (as of $poolTime),
+        <li>Pool hashing gives $info->{"${name}FileCntRep"} repeated
+            files with longest chain $info->{"${name}FileRepMax"},
+        <li>Nightly cleanup removed $info->{"${name}FileCntRm"} files of
+            size ${poolRmSize}GB (around $poolTime),
+EOF
+}
+
+###########################################################################
+# HTML layout subroutines
+###########################################################################
+
+sub Header
+{
+    my($title) = @_;
+    my @adminLinks = (
+        { link => "",                          name => "Status",
+                                               priv => 1},
+        { link => "?action=summary",           name => "PC Summary" },
+        { link => "?action=view&type=LOG",     name => "LOG file" },
+        { link => "?action=LOGlist",           name => "Old LOGs" },
+        { link => "?action=emailSummary",      name => "Email summary" },
+        { link => "?action=view&type=config",  name => "Config file" },
+        { link => "?action=view&type=hosts",   name => "Hosts file" },
+        { link => "?action=queue",             name => "Current queues" },
+        { link => "?action=view&type=docs",    name => "Documentation",
+                                               priv => 1},
+        { link => "http://backuppc.sourceforge.net", name => "SourceForge",
+                                                     priv => 1},
+    );
+    print $Cgi->header();
+    print <<EOF;
+<!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+<title>$title</title>
+$Conf{CgiHeaders}
+</head><body>
+<table cellpadding="0" cellspacing="0" border="0">
+<tr valign="top"><td valign="top" bgcolor="$Conf{CgiNavBarBgColor}" width="10%">
+EOF
+    NavSectionTitle("BackupPC");
+    print "&nbsp;\n";
+    if ( defined($In{host}) && defined($Hosts->{$In{host}}) ) {
+        my $host = $In{host};
+        NavSectionTitle("Host $In{host}");
+        NavSectionStart();
+        NavLink("?host=$host", "Home");
+        NavLink("?action=view&type=LOG&host=$host", "LOG file");
+        NavLink("?action=LOGlist&host=$host", "Old LOGs");
+        if ( -f "$TopDir/pc/$host/SmbLOG.bad"
+                    || -f "$TopDir/pc/$host/SmbLOG.bad.z"
+                    || -f "$TopDir/pc/$host/XferLOG.bad"
+                    || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
+            NavLink("?action=view&type=XferLOGbad&host=$host",
+                                "Last bad XferLOG");
+            NavLink("?action=view&type=XferErrbad&host=$host",
+                                "Last bad XferLOG (errors&nbsp;only)");
+        }
+        if ( -f "$TopDir/pc/$host/config.pl" ) {
+            NavLink("?action=view&type=config&host=$host", "Config file");
+        }
+        NavSectionEnd();
+    }
+    NavSectionTitle("Hosts");
+    if ( %$Hosts > 0 ) {
+        NavSectionStart();
+        foreach my $host ( sort(keys(%$Hosts)) ) {
+            next if ( $Hosts->{$host}{user} ne $User );
+            NavLink("?host=$host", $host);
+        }
+        NavSectionEnd();
+    }
+    print <<EOF;
+<table cellpadding="2" cellspacing="0" border="0" width="100%">
+    <tr><td><small>Host or User name:</small></td>
+    <tr><td><form action="$MyURL" method="get"><small>
+    <input type="text" name="host" size="10" maxlength="64">
+    <input type="hidden" name="action" value="hostInfo"><input type="submit" value="Go" name="ignore">
+    </small></form></td></tr>
+</table>
+EOF
+    NavSectionTitle("Server");
+    NavSectionStart();
+    foreach my $l ( @adminLinks ) {
+        if ( $PrivAdmin || $l->{priv} ) {
+            NavLink($l->{link}, $l->{name});
+        } else {
+            NavLink(undef, $l->{name});
+        }
+    }
+    NavSectionEnd();
+    print <<EOF;
+</td><td valign="top" width="5">&nbsp;&nbsp;</td>
+<td valign="top" width="90%">
+EOF
+}
+
+sub Trailer
+{
+    print <<EOF;
+</td></table>
+</body></html>
+EOF
+}
+
+sub h1
+{
+    my($str) = @_;
+    return \<<EOF;
+<table cellpadding="2" cellspacing="0" border="0" width="100%">
+<tr>
+<td bgcolor="$Conf{CgiHeaderBgColor}">&nbsp;<font face="$Conf{CgiHeaderFontType}"
+    size="$Conf{CgiHeaderFontSize}"><b>$str</b></font>
+</td></tr>
+</table>
+EOF
+}
+
+sub h2
+{
+    my($str) = @_;
+    return \<<EOF;
+<table cellpadding="2" cellspacing="0" border="0" width="100%">
+<tr>
+<td bgcolor="$Conf{CgiHeaderBgColor}">&nbsp;<font face="$Conf{CgiHeaderFontType}"
+    size="$Conf{CgiHeaderFontSize}"><b>$str</b></font>
+</td></tr>
+</table>
+EOF
+}
+
+sub NavSectionTitle
+{
+    my($head) = @_;
+    print <<EOF;
+<table cellpadding="2" cellspacing="0" border="0" width="100%">
+<tr><td bgcolor="$Conf{CgiHeaderBgColor}"><font face="$Conf{CgiHeaderFontType}"
+size="$Conf{CgiHeaderFontSize}"><b>$head</b>
+</font></td></tr>
+</table>
+EOF
+}
+
+sub NavSectionStart
+{
+    print <<EOF;
+<table cellpadding="2" cellspacing="0" border="0" width="100%">
+EOF
+}
+
+sub NavSectionEnd
+{
+    print "</table>\n";
+}
+
+sub NavLink
+{
+    my($link, $text) = @_;
+    print "<tr><td width=\"2%\" valign=\"top\"><b>&middot;</b></td>";
+    if ( defined($link) ) {
+        $link = "$MyURL$link" if ( $link eq "" || $link =~ /^\?/ );
+        print <<EOF;
+<td width="98%"><a href="$link"><small>$text</small></a></td></tr>
+EOF
+    } else {
+        print <<EOF;
+<td width="98%"><small>$text</small></td></tr>
+EOF
+    }
+}

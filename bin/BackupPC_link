@@ -1,0 +1,235 @@
+#!/bin/perl -T
+#============================================================= -*-perl-*-
+#
+# BackupPC_link: link new backup into pool
+#
+# DESCRIPTION
+#
+#   BackupPC_link inspects every file in a new backup and
+#   checks if an existing file from any previous backup is
+#   identical.  If so, the file is removed and replaced by
+#   a hardlink to the existing file.  If the file is new,
+#   a hardlink to the file is made in the pool area, so that
+#   this file is available for checking against future backups.
+#
+#   Then, for incremental backups, hardlinks are made in the
+#   backup directories to all files that were not extracted during
+#   the incremental backups.  The means the incremental dump looks
+#   like a complete image of the PC.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 1.5.0, released 2 Aug 2002.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+use lib "__INSTALLDIR__/lib";
+use BackupPC::Lib;
+use BackupPC::Attrib;
+use BackupPC::PoolWrite;
+
+use File::Find;
+use File::Path;
+use Digest::MD5;
+
+###########################################################################
+# Initialize
+###########################################################################
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+
+$bpc->ChildInit();
+
+if ( @ARGV != 1 ) {
+    print("usage: $0 <host>\n");
+    exit(1);
+}
+if ( $ARGV[0] !~ /^([\w\.-]+)$/ ) {
+    print("$0: bad host name '$ARGV[0]'\n");
+    exit(1);
+}
+my $host = $1;
+my $Dir  = "$TopDir/pc/$host";
+my($CurrDumpDir, $Compress);
+
+#
+# Re-read config file, so we can include the PC-specific config
+#
+$bpc->ConfigRead($host);  
+%Conf = $bpc->Conf();
+
+###########################################################################
+# Process any backups that haven't been linked
+###########################################################################
+my $md5 = Digest::MD5->new;
+my($nFilesNew, $sizeNew, $sizeNewComp);
+my($nFilesExist, $sizeExist, $sizeExistComp);
+while ( 1 ) {
+    my @Backups = $bpc->BackupInfoRead($host);
+    $nFilesNew = $sizeNew = $sizeNewComp = 0;
+    $nFilesExist = $sizeExist = $sizeExistComp = 0;
+    my($num);
+    for ( $num = 0 ; $num < @Backups ; $num++ ) {
+        last if ( $Backups[$num]{nFilesNew} eq ""
+                    || -f "$Dir/NewFileList.$Backups[$num]{num}" );
+    }
+    last if ( $num >= @Backups );
+    #
+    # Process list of new files left by BackupPC_dump
+    #
+    $CurrDumpDir = "$Dir/$Backups[$num]{num}";
+    $Compress = $Backups[$num]{compress};
+    if ( open(NEW, "$Dir/NewFileList.$Backups[$num]{num}") ) {
+        while ( <NEW> ) {
+            chomp;
+            next if ( !/(\w+) (\d+) (.*)/ );
+            LinkNewFile($1, $2, "$CurrDumpDir/$3");
+        }
+        close(NEW);
+    }
+    unlink("$Dir/NewFileList.$Backups[$num]{num}")
+                if ( -f "$Dir/NewFileList.$Backups[$num]{num}" );
+
+    #
+    # See if we should fill in this dump.  We only need to fill
+    # in incremental dumps.  We can only fill in the incremental
+    # dump if there is an existing filled in dump with the same
+    # type of compression (on or off).  Eg, we can't fill in
+    # a compressed incremental if the most recent filled in dump
+    # is not compressed.
+    #
+    my $noFill = 1;
+    my $fillFromNum;
+    if ( $Backups[$num]{type} eq "full" ) {
+        $noFill = 0
+    } elsif ( $Conf{IncrFill} ) {
+        my $i;
+        for ( $i = $num - 1 ; $i >= 0 ; $i-- ) {
+            last if ( !$Backups[$i]{noFill}
+                          && ($Backups[$i]{compress} ? 1 : 0)
+                                       == ($Compress ? 1 : 0) );
+        }
+        my $prevDump = "$Dir/$Backups[$i]{num}";
+        if ( $i >= 0 && -d $prevDump ) {
+            find({wanted => \&FillIncr, no_chdir => 1}, $prevDump);
+            $noFill = 0;
+            $fillFromNum = $Backups[$i]{num};
+        }
+    }
+    #
+    # Update the backup info file in $TopDir/pc/$host/backups
+    #
+    @Backups = $bpc->BackupInfoRead($host);
+    $Backups[$num]{nFilesExist}   += $nFilesExist;
+    $Backups[$num]{sizeExist}     += $sizeExist;
+    $Backups[$num]{sizeExistComp} += $sizeExistComp;
+    $Backups[$num]{nFilesNew}     += $nFilesNew;
+    $Backups[$num]{sizeNew}       += $sizeNew;
+    $Backups[$num]{sizeNewComp}   += $sizeNewComp;
+    $Backups[$num]{noFill}         = $noFill;
+    $Backups[$num]{fillFromNum}    = $fillFromNum;
+    $bpc->BackupInfoWrite($host, @Backups);
+}
+
+###########################################################################
+# Subroutines
+###########################################################################
+
+#
+# Fill in an incremental dump by making hardlinks to the previous
+# dump.
+#
+sub FillIncr
+{
+    my($name) = $File::Find::name;
+    my($newName);
+
+    $name = $1 if ( $name =~ /(.*)/ );
+    return if ( $name !~ m{\Q$Dir\E/(\d+)/(.*)} );
+    $newName = "$CurrDumpDir/$2";
+    if ( -d $name && -d $newName ) {
+        #
+        # Merge the file attributes.
+        #
+        my $newAttr = BackupPC::Attrib->new({ compress => $Compress });
+        my $attr = BackupPC::Attrib->new({ compress => $Compress });
+        $newAttr->read($newName) if ( -f $newAttr->fileName($newName) );
+        $attr->read($name)       if ( -f $attr->fileName($name) );
+        $newAttr->merge($attr);
+        #
+        # Now write it out, adding a link to the pool if necessary
+        #
+        my $data = $newAttr->writeData;
+        my $origSize = length($data);
+        my $fileName = $newAttr->fileName($newName);
+        my $poolWrite = BackupPC::PoolWrite->new($bpc, $fileName,
+                                         length($data), $Compress);
+        $poolWrite->write(\$data);
+        my($exists, $digest, $outSize, $errs) = $poolWrite->close;
+        if ( @$errs ) {
+            print("log ", join("", @$errs));
+        }
+        if ( $exists ) {
+            $nFilesExist++;
+            $sizeExist += $origSize;
+            $sizeExistComp += $outSize;
+        } elsif ( $outSize > 0 ) {
+            $nFilesNew++;
+            $sizeNew += $origSize;
+            $sizeNewComp += -s $outSize;
+            LinkNewFile($digest, $origSize, $fileName);
+        }
+    } elsif ( -f $name && !-f $newName ) {
+        #
+        # Exists in the older filled backup, and not in the new, so link it
+        #
+        link($name, $newName);
+    }
+}
+
+#
+# Add a link in the pool to a new file
+#
+sub LinkNewFile
+{
+    my($d, $size, $fileName) = @_;
+    my $res = $bpc->MakeFileLink($fileName, $d, 1, $Compress);
+    if ( $res == 1 ) {
+        $nFilesExist++;
+        $sizeExist += $size;
+        $sizeExistComp += -s $fileName;
+    } elsif ( $res == 2 ) {
+        $nFilesNew++;
+        $sizeNew += $size;
+        $sizeNewComp += -s $fileName;
+    } elsif ( $res != 0 && $res != -1 ) {
+        print("log BackupPC_link got error $res when calling"
+             . " MakeFileLink($fileName, $d, 1)\n");
+    }
+}

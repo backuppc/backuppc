@@ -1,0 +1,45 @@
+This directory contains some scripts for auto-starting BackupPC
+on boot.
+
+The subdirectory src contains source versions of these scripts (before
+various absolute paths have been filled in).
+
+Here are instrcutions for different OSs.  Please submit additions
+or improvements to this list!
+
+RedHat Linux:
+============
+
+When configure.pl is run, the script linux-backuppc is created. It
+should be copied to /etc/init.d/backuppc:
+
+    cp linux-backuppc /etc/init.d/backuppc
+
+After copying it, you can test it by running these commands as root:
+
+    /etc/init.d/backuppc start
+    /etc/init.d/backuppc status
+    /etc/init.d/backuppc stop
+
+You should then run the following commands as root:
+
+    chkconfig --add backuppc
+    chkconfig --level 345 backuppc on
+    chkconfig --list backuppc
+
+This will auto-start backuppc at run levels 3, 4 and 5.
+
+Solaris:
+=======
+
+When configure.pl is run the shell script solaris-backuppc is created.
+This should be copied to /etc/init.d and links made in /etc/rc3.d
+and /etc/rc0.d.
+
+    cp solaris-backuppc /etc/init.d/backuppc
+    ln -s /etc/init.d/backuppc /etc/rc3.d/S85backuppc
+    ln -s /etc/init.d/backuppc /etc/rc0.d/K85backuppc
+
+This will auto-start backuppc at run level 3 and stop it at run level 0.
+
+*** NOTE: the solaris startup script and instructions have not been tested ***

@@ -1,0 +1,762 @@
+#!/bin/perl -T
+#============================================================= -*-perl-*-
+#
+# BackupPC_dump: Dump a single PC.
+#
+# DESCRIPTION
+#
+#   Usage: BackupPC_dump [-i] [-f] [-d] [-e] <host>
+#
+#   Flags:
+#
+#     -i   Do an incremental dump, overriding any scheduling (but a full
+#          dump will be done if no dumps have yet succeeded)
+#
+#     -f   Do a full dump, overriding any scheduling.
+#
+#     -d   Host is a DHCP pool address, so initially we have no
+#          idea which machine this actually is.  BackupPC_dump
+#          determines the actual PC host name by using the NetBios
+#          name.
+#
+#     -e   Just do an dump expiry check for the host.  Don't do anything else.  #          This is used periodically by BackupPC to make sure that dhcp hosts
+#          have correctly expired old backups.  Without this, dhcp hosts that
+#          are no longer on the network will not expire old backups.
+#
+#   BackupPC_dump is run periodically by BackupPC to backup $host.
+#   The file $TopDir/pc/$host/backups is read to decide whether a
+#   full or incremental backup needs to be run.  If no backup is
+#   scheduled, or a ping to $host fails, then BackupPC_dump quits.
+#
+#   The backup is done using smbclient, extracting the dump into
+#   $TopDir/pc/$host/new.  The smbclient output is put into
+#   $TopDir/pc/$host/XferLOG.
+#
+#   If the dump succeeds (based on parsing the output of smbclient):
+#     - $TopDir/pc/$host/new is renamed to $TopDir/pc/$host/nnn, where
+#           nnn is the next sequential dump number.
+#     - $TopDir/pc/$host/XferLOG is renamed to $TopDir/pc/$host/XferLOG.nnn.
+#     - $TopDir/pc/$host/backups is updated.
+#
+#   If the dump fails:
+#     - $TopDir/pc/$host/new is moved to $TopDir/trash for later removal.
+#     - $TopDir/pc/$host/XferLOG is renamed to $TopDir/pc/$host/XferLOG.bad
+#           for later viewing.
+#
+#   BackupPC_dump communicates to BackupPC via printing to STDOUT.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 1.5.0, released 2 Aug 2002.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+use lib "__INSTALLDIR__/lib";
+use BackupPC::Lib;
+use BackupPC::FileZIO;
+use BackupPC::Xfer::Smb;
+use BackupPC::Xfer::Tar;
+
+use File::Path;
+use Getopt::Std;
+
+###########################################################################
+# Initialize
+###########################################################################
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+
+$bpc->ChildInit();
+
+my %opts;
+getopts("defi", \%opts);
+if ( @ARGV != 1 ) {
+    print("usage: $0 [-d] [-e] [-f] [-i] <host>\n");
+    exit(1);
+}
+if ( $ARGV[0] !~ /^([\w\.-]+)$/ ) {
+    print("$0: bad host name '$ARGV[0]'\n");
+    exit(1);
+}
+my $hostIP = $1;
+my($host, $user);
+
+if ( $opts{d} ) {
+    #
+    # The host name $hostIP is simply a DHCP address.  We need to check
+    # if there is any machine at this address, and if so, get the actual
+    # host name via NetBios using nmblookup.
+    #
+    exit(1) if ( $bpc->CheckHostAlive($hostIP) < 0 );
+    ($host, $user) = $bpc->NetBiosInfoGet($hostIP);
+    exit(1) if ( $host !~ /^([\w\.-]+)$/ );
+    my $hosts = $bpc->HostInfoRead($host);
+    exit(1) if ( !defined($hosts->{$host}) );
+} else {
+    $host = $hostIP;
+}
+
+my $Dir     = "$TopDir/pc/$host";
+my $xferPid = -1;
+my $tarPid  = -1;
+
+#
+# Re-read config file, so we can include the PC-specific config
+#
+$bpc->ConfigRead($host);
+%Conf = $bpc->Conf();
+
+#
+# Catch various signals
+#
+$SIG{INT}  = \&catch_signal;
+$SIG{ALRM} = \&catch_signal;
+$SIG{TERM} = \&catch_signal;
+
+#
+# Make sure we eventually timeout if there is no activity from
+# the data transport program.
+#
+alarm($Conf{SmbClientTimeout});
+
+mkpath($Dir, 0, 0777) if ( !-d $Dir );
+if ( !-f "$Dir/LOCK" ) {
+    open(LOCK, ">$Dir/LOCK") && close(LOCK);
+}
+open(LOG, ">>$Dir/LOG");
+select(LOG); $| = 1; select(STDOUT);
+
+###########################################################################
+# Figure out what to do and do it
+###########################################################################
+
+#
+# For the -e option we just expire backups and quit
+#
+if ( $opts{e} ) {
+    BackupExpire($host);
+    exit(0);
+}
+
+#
+# See if we should skip this host during a certain range
+# of times.
+#
+my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
+if ( $err ne "" ) {
+    print("Can't connect to server ($err)\n");
+    print(LOG $bpc->timeStamp, "Can't connect to server ($err)\n");
+    exit(1);
+}
+my $reply = $bpc->ServerMesg("status host($host)");
+$reply = $1 if ( $reply =~ /(.*)/s );
+my(%StatusHost);
+eval($reply);
+$bpc->ServerDisconnect();
+
+#
+# For DHCP tell BackupPC which host this is
+#
+if ( $opts{d} ) {
+    if ( $StatusHost{activeJob} ) {
+        # oops, something is already running for this host
+        exit(0);
+    }
+    print("DHCP $hostIP $host\n");
+}
+
+my($needLink, @Backups, $type);
+my $lastFull = 0;
+my $lastIncr = 0;
+
+if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
+             && $StatusHost{aliveCnt} >= $Conf{BlackoutGoodCnt} ) {
+    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    my($currHours) = $hour + $min / 60 + $sec / 3600;
+    if ( $Conf{BlackoutHourBegin} <= $currHours
+              && $currHours <= $Conf{BlackoutHourEnd}
+              && grep($_ == $wday, @{$Conf{BlackoutWeekDays}}) ) {
+        print(LOG $bpc->timeStamp, "skipping because of blackout"
+                    . " (alive $StatusHost{aliveCnt} times)\n");
+        print("nothing to do\n");
+        print("link $host\n") if ( $needLink );
+        exit(1);
+    }
+}
+
+if ( !$opts{i} && !$opts{f} && $StatusHost{backoffTime} > time ) {
+    printf(LOG "%sskipping because of user requested delay (%.1f hours left)",
+                $bpc->timeStamp, ($StatusHost{backoffTime} - time) / 3600);
+    print("nothing to do\n");
+    print("link $host\n") if ( $needLink );
+    exit(1);
+}
+
+#
+# Now see if there are any old backups we should delete
+#
+BackupExpire($host);
+
+#
+# Read Backup information, and find times of the most recent full and
+# incremental backups
+#
+@Backups = $bpc->BackupInfoRead($host);
+for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+    $needLink = 1 if ( $Backups[$i]{nFilesNew} eq ""
+                        || -f "$Dir/NewFileList.$Backups[$i]{num}" );
+    if ( $Backups[$i]{type} eq "full" ) {
+        $lastFull = $Backups[$i]{startTime}
+                if ( $lastFull < $Backups[$i]{startTime} );
+    } else {
+        $lastIncr = $Backups[$i]{startTime}
+                if ( $lastIncr < $Backups[$i]{startTime} );
+    }
+}
+
+#
+# Decide whether we do nothing, or a full or incremental backup.
+#
+if ( @Backups == 0
+        || $opts{f}
+        || (!$opts{i} && (time - $lastFull > $Conf{FullPeriod} * 24*3600
+            && time - $lastIncr > $Conf{IncrPeriod} * 24*3600)) ) {
+    $type = "full";
+} elsif ( $opts{i} || (time - $lastIncr > $Conf{IncrPeriod} * 24*3600
+        && time - $lastFull > $Conf{IncrPeriod} * 24*3600) ) {
+    $type = "incr";
+} else {
+    print("nothing to do\n");
+    print("link $host\n") if ( $needLink );
+    exit(0);
+}
+
+#
+# Check if $host is alive
+#
+my $delay = $bpc->CheckHostAlive($hostIP);
+if ( $delay < 0 ) {
+    print(LOG $bpc->timeStamp, "no ping response\n");
+    print("no ping response\n");
+    print("link $host\n") if ( $needLink );
+    exit(1);
+} elsif ( $delay > $Conf{PingMaxMsec} ) {
+    printf(LOG "%sping too slow: %.4gmsec\n", $bpc->timeStamp, $delay);
+    printf("ping too slow: %.4gmsec (threshold is %gmsec)\n",
+                    $delay, $Conf{PingMaxMsec});
+    print("link $host\n") if ( $needLink );
+    exit(1);
+}
+
+#
+# Make sure it is really the machine we expect (only for fixed addresses,
+# since we got the DHCP address above).
+#
+if ( !$opts{d} && (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
+    print(LOG $bpc->timeStamp, "dump failed: $errMsg\n");
+    print("dump failed: $errMsg\n");
+    exit(1);
+} elsif ( $opts{d} ) {
+    print(LOG $bpc->timeStamp, "$host is dhcp $hostIP, user is $user\n");
+}
+
+#
+# Get a clean directory $Dir/new
+#
+$bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
+
+#
+# Setup file extension for compression and open XferLOG output file
+#
+$Conf{CompressLevel} = 0 if ( !BackupPC::FileZIO->compOk );
+my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
+my $XferLOG = BackupPC::FileZIO->open("$Dir/XferLOG$fileExt", 1,
+                                     $Conf{CompressLevel});
+if ( !defined($XferLOG) ) {
+    print(LOG $bpc->timeStamp, "dump failed: unable to open/create"
+			     . " $Dir/XferLOG$fileExt\n");
+    print("dump failed: unable to open/create $Dir/XferLOG$fileExt\n");
+    exit(1);
+}
+unlink("$Dir/NewFileList");
+my $startTime = time();
+
+my $tarErrs       = 0;
+my $nFilesExist   = 0;
+my $sizeExist     = 0;
+my $sizeExistComp = 0;
+my $nFilesTotal   = 0;
+my $sizeTotal     = 0;
+my($logMsg, %stat, $xfer, $ShareNames);
+
+if ( $Conf{XferMethod} eq "tar" ) {
+    $ShareNames = $Conf{TarShareName};
+} else {
+    $ShareNames = $Conf{SmbShareName};
+}
+
+$ShareNames = [ $ShareNames ] unless ref($ShareNames) eq "ARRAY";
+
+#
+# Now backup each of the shares
+#
+for my $shareName ( @$ShareNames ) {
+    local(*RH, *WH);
+
+    $stat{xferOK} = $stat{hostAbort} = undef;
+    $stat{hostError} = $stat{lastOutputLine} = undef;
+    if ( -d "$Dir/new/$shareName" ) {
+        print(LOG $bpc->timeStamp,
+                  "unexpected repeated share name $shareName skipped\n");
+        next;
+    }
+
+    #
+    # Create a pipe to connect smbclient to BackupPC_tarExtract
+    # WH is the write handle for writing, provided to the transport
+    # program, and RH is the other end of the pipe for reading,
+    # provided to BackupPC_tarExtract.
+    #
+    pipe(RH, WH);
+
+    #
+    # fork a child for BackupPC_tarExtract.  TAR is a file handle
+    # on which we (the parent) read the stdout & stderr from
+    # BackupPC_tarExtract.
+    #
+    if ( !defined($tarPid = open(TAR, "-|")) ) {
+        print(LOG $bpc->timeStamp, "can't fork to run tar\n");
+        print("can't fork to run tar\n");
+        close(RH);
+        close(WH);
+        last;
+    }
+    if ( !$tarPid ) {
+        #
+        # This is the tar child.  Close the write end of the pipe,
+        # clone STDERR to STDOUT, clone STDIN from RH, and then
+        # exec BackupPC_tarExtract.
+        #
+        setpgrp 0,0;
+        close(WH);
+        close(STDERR);
+        open(STDERR, ">&STDOUT");
+        close(STDIN);
+        open(STDIN, "<&RH");
+        exec("$BinDir/BackupPC_tarExtract '$host' '$shareName'"
+             . " $Conf{CompressLevel}");
+        print(LOG $bpc->timeStamp, "can't exec $BinDir/BackupPC_tarExtract\n");
+        exit(0);
+    }
+
+    #
+    # Run the transport program
+    #
+    my $xferArgs = {
+        host      => $host,
+        hostIP    => $hostIP,
+        shareName => $shareName,
+        pipeRH    => *RH,
+        pipeWH    => *WH,
+        XferLOG   => $XferLOG,
+        outDir    => $Dir,
+        type      => $type,
+        lastFull  => $lastFull,
+    };
+    if ( $Conf{XferMethod} eq "tar" ) {
+        #
+        # Use tar (eg: tar/ssh) as the transport program.
+        #
+        $xfer = BackupPC::Xfer::Tar->new($bpc, $xferArgs);
+    } else {
+        #
+        # Default is to use smbclient (smb) as the transport program.
+        #
+        $xfer = BackupPC::Xfer::Smb->new($bpc, $xferArgs);
+    }
+    if ( !defined($logMsg = $xfer->start()) ) {
+        print(LOG $bpc->timeStamp, $xfer->errStr, "\n");
+        print($xfer->errStr, "\n");
+        print("link $host\n") if ( $needLink );
+        #
+        # kill off the tar process, first nicely then forcefully
+        #
+        kill(2, $tarPid);
+        sleep(1);
+        kill(9, $tarPid);
+        exit(1);
+    }
+    #
+    # The parent must close both handles on the pipe since the children
+    # are using these handles now.
+    #
+    close(RH);
+    close(WH);
+    $xferPid = $xfer->xferPid;
+    print(LOG $bpc->timeStamp, $logMsg,
+                               " (xferPid=$xferPid, tarPid=$tarPid)\n");
+    print("started $type dump, pid=$xferPid, tarPid=$tarPid\n");
+
+    #
+    # Parse the output of the transfer program and BackupPC_tarExtract
+    # while they run.  Since we are reading from two or more children
+    # we use a select.
+    #
+    my($FDread, $tarOut, $mesg);
+    vec($FDread, fileno(TAR), 1) = 1;
+    $xfer->setSelectMask(\$FDread);
+
+    SCAN: while ( 1 ) {
+        my $ein = $FDread;
+        last if ( $FDread =~ /^\0*$/ );
+        select(my $rout = $FDread, undef, $ein, undef);
+        if ( vec($rout, fileno(TAR), 1) ) {
+            if ( sysread(TAR, $mesg, 8192) <= 0 ) {
+                vec($FDread, fileno(TAR), 1) = 0;
+                close(TAR);
+            } else {
+                $tarOut .= $mesg;
+            }
+        }
+        while ( $tarOut =~ /(.*?)[\n\r]+(.*)/s ) {
+            $_ = $1;
+            $tarOut = $2;
+            $XferLOG->write(\"tarExtract: $_\n");
+            if ( /^Done: (\d+) errors, (\d+) filesExist, (\d+) sizeExist, (\d+) sizeExistComp, (\d+) filesTotal, (\d+) sizeTotal/ ) {
+                $tarErrs       = $1;
+                $nFilesExist   = $2;
+                $sizeExist     = $3;
+                $sizeExistComp = $4;
+		$nFilesTotal   = $5;
+		$sizeTotal     = $6;
+            }
+        }
+        last if ( !$xfer->readOutput(\$FDread, $rout) );
+        while ( my $str = $xfer->logMsgGet ) {
+            print(LOG $bpc->timeStamp, "xfer: $str\n");
+        }
+        if ( $xfer->getStats->{fileCnt} == 1 ) {
+            #
+            # Make sure it is still the machine we expect.  We do this while
+            # the transfer is running to avoid a potential race condition if
+            # the ip address was reassigned by dhcp just before we started
+            # the transfer.
+            #
+            if ( my $errMsg = CorrectHostCheck($hostIP, $host) ) {
+                $stat{hostError} = $errMsg;
+                last SCAN;
+            }
+        }
+    }
+    #
+    # Merge the xfer status (need to accumulate counts)
+    #
+    my $newStat = $xfer->getStats;
+    foreach my $k ( (keys(%stat), keys(%$newStat)) ) {
+        next if ( !defined($newStat->{$k}) );
+        if ( $k =~ /Cnt$/ ) {
+            $stat{$k} += $newStat->{$k};
+            delete($newStat->{$k});
+            next;
+        }
+        if ( !defined($stat{$k}) ) {
+            $stat{$k} = $newStat->{$k};
+            delete($newStat->{$k});
+            next;
+        }
+    }
+    $stat{xferOK} = 0 if ( $stat{hostError} || $stat{hostAbort} );
+    if ( !$stat{xferOK} ) {
+        #
+        # kill off the tranfer program, first nicely then forcefully
+        #
+        kill(2, $xferPid);
+        sleep(1);
+        kill(9, $xferPid);
+        #
+        # kill off the tar process, first nicely then forcefully
+        #
+        kill(2, $tarPid);
+        sleep(1);
+        kill(9, $tarPid);
+        #
+        # don't do any more shares on this host
+        #
+        last;
+    }
+}
+$XferLOG->close();
+
+my $lastNum  = -1;
+
+#
+# Do one last check to make sure it is still the machine we expect.
+#
+if ( $stat{xferOK} && (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
+    $stat{hostError} = $errMsg;
+    $stat{xferOK} = 0;
+}
+if ( $stat{xferOK} ) {
+    @Backups = $bpc->BackupInfoRead($host);
+    for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+        $lastNum = $Backups[$i]{num} if ( $lastNum < $Backups[$i]{num} );
+    }
+    $lastNum++;
+    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/$lastNum")
+                                if ( -d "$Dir/$lastNum" );
+    if ( !rename("$Dir/new", "$Dir/$lastNum") ) {
+        print(LOG $bpc->timeStamp,
+                  "Rename $Dir/new -> $Dir/$lastNum failed\n");
+        $stat{xferOK} = 0;
+    }
+    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.$lastNum$fileExt");
+    rename("$Dir/NewFileList", "$Dir/NewFileList.$lastNum");
+}
+my $endTime = time();
+
+#
+# If the dump failed, clean up
+#
+if ( !$stat{xferOK} ) {
+    #
+    # wait a short while and see if the system is still alive
+    #
+    $stat{hostError} = $stat{lastOutputLine} if ( $stat{hostError} eq "" );
+    if ( $stat{hostError} ) {
+        print(LOG $bpc->timeStamp,
+                  "Got fatal error during xfer ($stat{hostError})\n");
+    }
+    sleep(10);
+    if ( $bpc->CheckHostAlive($hostIP) < 0 ) {
+        $stat{hostAbort} = 1;
+    }
+    if ( $stat{hostAbort} ) {
+        $stat{hostError} = "lost network connection during backup";
+    }
+    print(LOG $bpc->timeStamp, "Dump aborted ($stat{hostError})\n");
+    unlink("$Dir/timeStamp.level0");
+    unlink("$Dir/SmbLOG.bad");
+    unlink("$Dir/SmbLOG.bad$fileExt");
+    unlink("$Dir/XferLOG.bad");
+    unlink("$Dir/XferLOG.bad$fileExt");
+    unlink("$Dir/NewFileList");
+    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.bad$fileExt");
+    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
+    print("dump failed: $stat{hostError}\n");
+    print("link $host\n") if ( $needLink );
+    exit(1);
+}
+
+#
+# Add the new backup information to the backup file
+#
+@Backups = $bpc->BackupInfoRead($host);
+my $i = @Backups;
+$Backups[$i]{num}           = $lastNum;
+$Backups[$i]{type}          = $type;
+$Backups[$i]{startTime}     = $startTime;
+$Backups[$i]{endTime}       = $endTime;
+$Backups[$i]{size}          = $sizeTotal;
+$Backups[$i]{nFiles}        = $nFilesTotal;
+$Backups[$i]{xferErrs}      = $stat{xferErrCnt} || 0;
+$Backups[$i]{xferBadFile}   = $stat{xferBadFileCnt} || 0;
+$Backups[$i]{xferBadShare}  = $stat{xferBadShareCnt} || 0;
+$Backups[$i]{nFilesExist}   = $nFilesExist;
+$Backups[$i]{sizeExist}     = $sizeExist;
+$Backups[$i]{sizeExistComp} = $sizeExistComp;
+$Backups[$i]{tarErrs}       = $tarErrs;
+$Backups[$i]{compress}      = $Conf{CompressLevel};
+$Backups[$i]{noFill}        = $type eq "full" ? 0 : 1;
+$Backups[$i]{mangle}        = 1;        # name mangling always on for v1.04+
+$bpc->BackupInfoWrite($host, @Backups);
+
+unlink("$Dir/timeStamp.level0");
+
+#
+# Now remove the bad files, replacing them if possible with links to
+# earlier backups.
+#
+foreach my $file ( $xfer->getBadFiles ) {
+    my $j;
+    unlink("$Dir/$lastNum/$file");
+    for ( $j = $i - 1 ; $j >= 0 ; $j-- ) {
+        next if ( !-f "$Dir/$Backups[$j]{num}/$file" );
+        if ( !link("$Dir/$Backups[$j]{num}/$file", "$Dir/$lastNum/$file") ) {
+            print(LOG $bpc->timeStamp,
+                      "Unable to link $lastNum/$file to"
+                    . " $Backups[$j]{num}/$file\n");
+        } else {
+            print(LOG $bpc->timeStamp,
+                      "Bad file $lastNum/$file replaced by link to"
+                    . " $Backups[$j]{num}/$file\n");
+        }
+        last;
+    }
+    if ( $j < 0 ) {
+        print(LOG $bpc->timeStamp,
+                  "Removed bad file $lastNum/$file (no older"
+                . " copy to link to)\n");
+    }
+}
+
+my $otherCount = $stat{xferErrCnt} - $stat{xferBadFileCnt}
+                                   - $stat{xferBadShareCnt};
+print(LOG $bpc->timeStamp,
+          "$type backup $lastNum complete, $stat{fileCnt} files,"
+        . " $stat{byteCnt} bytes,"
+        . " $stat{xferErrCnt} xferErrs ($stat{xferBadFileCnt} bad files,"
+        . " $stat{xferBadShareCnt} bad shares, $otherCount other)\n");
+
+BackupExpire($host);
+
+print("$type backup complete\n");
+
+###########################################################################
+# Subroutines
+###########################################################################
+
+sub catch_signal
+{
+    my $signame = shift;
+
+    print(LOG $bpc->timeStamp, "cleaning up after signal $signame\n");
+    if ( $xferPid > 0 ) {
+        if ( kill(2, $xferPid) <= 0 ) {
+            sleep(1);
+            kill(9, $xferPid);
+        }
+    }
+    if ( $tarPid > 0 ) {
+        if ( kill(2, $tarPid) <= 0 ) {
+            sleep(1);
+            kill(9, $tarPid);
+        }
+    }
+    unlink("$Dir/timeStamp.level0");
+    unlink("$Dir/NewFileList");
+    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
+    print("exiting after signal $signame\n");
+    print("link $host\n") if ( $needLink );
+    exit(1);
+}
+
+#
+# Decide which old backups should be expired by moving them
+# to $TopDir/trash.
+#
+sub BackupExpire
+{
+    my($host) = @_;
+    my($Dir) = "$TopDir/pc/$host";
+    my(@Backups) = $bpc->BackupInfoRead($host);
+    my($cntFull, $cntIncr, $firstFull, $firstIncr, $oldestIncr, $oldestFull);
+
+    while ( 1 ) {
+	$cntFull = $cntIncr = 0;
+	$oldestIncr = $oldestFull = 0;
+	for ( $i = 0 ; $i < @Backups ; $i++ ) {
+	    if ( $Backups[$i]{type} eq "full" ) {
+		$firstFull = $i if ( $cntFull == 0 );
+		$cntFull++;
+	    } else {
+		$firstIncr = $i if ( $cntIncr == 0 );
+		$cntIncr++;
+	    }
+	}
+	$oldestIncr = (time - $Backups[$firstIncr]{startTime}) / (24 * 3600)
+                        if ( $cntIncr > 0 );
+	$oldestFull = (time - $Backups[$firstFull]{startTime}) / (24 * 3600)
+                        if ( $cntFull > 0 );
+	if ( $cntIncr > $Conf{IncrKeepCnt}
+		|| ($cntIncr > $Conf{IncrKeepCntMin}
+		    && $oldestIncr > $Conf{IncrAgeMax})
+               && (@Backups <= $firstIncr + 1
+                        || $Backups[$firstIncr]{noFill}
+                        || !$Backups[$firstIncr + 1]{noFill}) ) {
+            #
+            # Only delete an incr backup if the Conf settings are satisfied.
+            # We also must make sure that either this backup is the most
+            # recent one, or it is not filled, or the next backup is filled.
+            # (We can't deleted a filled incr if the next backup is not
+            # filled.)
+            # 
+	    print(LOG $bpc->timeStamp,
+                      "removing incr backup $Backups[$firstIncr]{num}\n");
+	    $bpc->RmTreeDefer("$TopDir/trash",
+                              "$Dir/$Backups[$firstIncr]{num}");
+	    unlink("$Dir/SmbLOG.$Backups[$firstIncr]{num}")
+                        if ( -f "$Dir/SmbLOG.$Backups[$firstIncr]{num}" );
+	    unlink("$Dir/SmbLOG.$Backups[$firstIncr]{num}.z")
+                        if ( -f "$Dir/SmbLOG.$Backups[$firstIncr]{num}.z" );
+	    unlink("$Dir/XferLOG.$Backups[$firstIncr]{num}")
+                        if ( -f "$Dir/XferLOG.$Backups[$firstIncr]{num}" );
+	    unlink("$Dir/XferLOG.$Backups[$firstIncr]{num}.z")
+                        if ( -f "$Dir/XferLOG.$Backups[$firstIncr]{num}.z" );
+	    splice(@Backups, $firstIncr, 1);
+	} elsif ( ($cntFull > $Conf{FullKeepCnt}
+                    || ($cntFull > $Conf{FullKeepCntMin}
+                        && $oldestFull > $Conf{FullAgeMax}))
+               && (@Backups <= $firstFull + 1
+                        || !$Backups[$firstFull + 1]{noFill}) ) {
+            #
+            # Only delete a full backup if the Conf settings are satisfied.
+            # We also must make sure that either this backup is the most
+            # recent one, or the next backup is filled.
+            # (We can't deleted a full backup if the next backup is not
+            # filled.)
+            # 
+	    print(LOG $bpc->timeStamp,
+                   "removing full backup $Backups[$firstFull]{num}\n");
+	    $bpc->RmTreeDefer("$TopDir/trash",
+                              "$Dir/$Backups[$firstFull]{num}");
+	    unlink("$Dir/SmbLOG.$Backups[$firstFull]{num}")
+                        if ( -f "$Dir/SmbLOG.$Backups[$firstFull]{num}" );
+	    unlink("$Dir/SmbLOG.$Backups[$firstFull]{num}.z")
+                        if ( -f "$Dir/SmbLOG.$Backups[$firstFull]{num}.z" );
+	    unlink("$Dir/XferLOG.$Backups[$firstFull]{num}")
+                        if ( -f "$Dir/XferLOG.$Backups[$firstFull]{num}" );
+	    unlink("$Dir/XferLOG.$Backups[$firstFull]{num}.z")
+                        if ( -f "$Dir/XferLOG.$Backups[$firstFull]{num}.z" );
+	    splice(@Backups, $firstFull, 1);
+	} else {
+	    last;
+	}
+    }
+    $bpc->BackupInfoWrite($host, @Backups);
+}
+
+sub CorrectHostCheck
+{
+    my($hostIP, $host) = @_;
+    return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck} );
+    my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($hostIP);
+    return "host $host has mismatching netbios name $netBiosHost"
+            if ( $netBiosHost ne $host );
+    return;
+}

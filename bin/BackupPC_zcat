@@ -1,0 +1,74 @@
+#!/bin/perl -T
+#============================================================= -*-perl-*-
+#
+# BackupPC_zcat: uncompress files to stdout
+#
+# DESCRIPTION
+#
+#   Usage: BackupPC_zcat [files...]
+#
+#   BackupPC_zcat is a command-line utility for uncompressing BackupPC
+#   compressed files.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 1.5.0, released 2 Aug 2002.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+
+use lib "__INSTALLDIR__/lib";
+use Compress::Zlib;
+use BackupPC::FileZIO;
+
+sub zcat
+{
+    my($fh, $fileName) = @_;
+    my($data, $r);
+
+    while ( ($r = $fh->read(\$data, 65536)) > 0 ) { 
+        print($data);
+    }
+    if ( $r < 0 ) {
+        print(STDERR "$0: can't uncompress $fileName\n");
+    }
+    $fh->close();
+}
+
+if ( @ARGV ) {
+    while ( @ARGV ) {
+        if ( defined(my $fh = BackupPC::FileZIO->open($ARGV[0], 0, 1)) ) {
+            zcat($fh, $ARGV[0]);
+        } else {
+            print(STDERR "$0: can't open $ARGV[0]\n");
+            exit(1);
+        }
+        shift @ARGV;
+    }
+} else {
+    my $fh = BackupPC::FileZIO->open(*STDIN, 0, 1);
+    zcat($fh, "stdin");
+}

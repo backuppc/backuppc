@@ -1,0 +1,42 @@
+#============================================================= -*-perl-*-
+#
+# Host file list for BackupPC.
+#
+# DESCRIPTION
+#
+#   This file lists all the hosts that should be backed up by
+#   BackupPC.
+#
+#   Each line in the hosts file contains three fields, separated
+#   by white space:
+#
+#     - The host name.  If this host is a static IP address this
+#       must the machine's IP host name (ie: something that can
+#       be looked up using nslookup or DSN).  If this is a DHCP
+#       host then the host name must be the netbios name of the
+#       machine.
+#
+#     - DHCP flag.  Set to 0 if this is a static IP address host.
+#       Otherwise, set to 1 for DHCP hosts.
+#
+#     - User name (unix login/email name) of the user who "owns"
+#       or uses this machine.  This is the user who will be sent
+#       email about this machine, and this user will have permission
+#       to stop/start/browse/restore backups for this host.
+#
+# AUTHOR
+#   Craig Barratt  <craig@arraycomm.com>
+#
+# COPYRIGHT
+#   Copyright (C) 2001  Craig Barratt
+#
+#   See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+#
+# The first non-comment line gives the field names and should not be edited!!
+#
+host        dhcp    user     # <--- do not edit this line
+#farside    0       craig    # <--- example static IP host entry
+#larson     1       bill     # <--- example DHCP host entry

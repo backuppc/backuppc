@@ -1605,8 +1605,12 @@ sub ErrorExit
                             if ( defined($bpc) );
     if ( !defined($Lang->{Error}) ) {
 	Header("BackupPC: Error");
+        $mesg = <<EOF if ( !defined($mesg) );
+There is some problem with the BackupPC installation.
+Please check the permissions on BackupPC_Admin.
+EOF
 	print <<EOF;
-${h1("Error: Language strings not defined!!")}
+${h1("Error: Unable to read config.pl or language strings!!")}
 <p>$mesg</p>
 EOF
 	Trailer();

@@ -239,7 +239,8 @@ Adding hardlink support to rsync.
 =item *
 
 Adding block and file checksum caching to rsync.  This will significantly
-increase performance.
+increase performance since the server doesn't have to read each file
+twice to compute the block and file checksums.
 
 =item *
 
@@ -247,6 +248,31 @@ Adding a trip wire feature for notification when files below certain
 directories change.  For example, if you are backing up a DMZ machine,
 you could request that you get sent email if any files below /bin,
 /sbin or /usr change.
+
+=item *
+
+Allow editing of config parameters via the CGI interface. Users should
+have permission to edit a subset of the parameters for their clients.
+Additionally, allow an optional self-service capability so that users
+can sign up and setup their own clients with no need for IT support.
+
+=item *
+
+Add backend SQL support for various BackupPC metadata, including
+configuration parameters, client lists, and backup and restore
+information.  At installation time the backend data engine will
+be specified (eg: MySQL, ascii text etc).
+
+=item *
+
+Disconnect the notion of a physical host and a backup client.
+Currently there is a one-to-one match between physical hosts
+and backup clients.  Instead, the current notion of a host
+should be replaced by a backup client.  Each backup client
+corresponds to a physical host.  A physical host could have
+several backup clients.  This is useful for backing up
+different types of data, or backing up different portions
+of a machine with different frequencies or settings.
 
 =item *
 

@@ -140,7 +140,7 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
     <td align="center"> Complètes Taille/Go </td>
     <td align="center"> Vitesse Mo/sec </td>
     <td align="center"> Nb incrémentielles </td>
-    <td align="center"> Incrémentales Âge/Jours </td>
+    <td align="center"> Incrémentielles Âge/Jours </td>
     <td align="center"> État actuel </td>
     <td align="center"> Dernière tentative </td></tr>
 \$strGood

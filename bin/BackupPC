@@ -1532,13 +1532,25 @@ sub StatusWrite
 }
 
 #
+# Compare function for host sort.  Hosts with errors go first,
+# sorted with the oldest errors first.  The remaining hosts
+# are sorted so that those with the oldest backups go first.
+#
+sub HostSortCompare
+{
+    return -1 if ( $Status{$a}{error} ne "" && $Status{$b}{error} eq "" );
+    return  1 if ( $Status{$a}{error} eq "" && $Status{$b}{error} ne "" );
+    return $Status{$a}{endTime} <=> $Status{$b}{endTime};
+}
+
+#
 # Queue all the hosts for backup.  This means queuing all the fixed
 # ip hosts and all the dhcp address ranges.  We also additionally
 # queue the dhcp hosts with a -e flag to check for expired dumps.
 #
 sub QueueAllPCs
 {
-    foreach my $host ( sort(keys(%$Hosts)) ) {
+    foreach my $host ( sort(HostSortCompare keys(%$Hosts)) ) {
         delete($Status{$host}{backoffTime})
                 if ( defined($Status{$host}{backoffTime})
                   && $Status{$host}{backoffTime} < time );

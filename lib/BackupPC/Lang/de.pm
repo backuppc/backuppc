@@ -1,5 +1,6 @@
 #!/bin/perl
 #
+# by Ralph Passgang <ralph@debianbase.de> (06.05.2004 for V2.1.0beta2)
 # by Manfred Herrmann (11.03.2004 for V2.1.0beta0)
 # by Manfred Herrmann (V1.1) (some typo errors + 3 new strings)
 # CVS-> Revision ???
@@ -12,18 +13,18 @@
 
 $Lang{Start_Archive} = "Archivierung starten";
 $Lang{Stop_Dequeue_Archive} = "Archivierung stoppen";
-$Lang{Start_Full_Backup} = "Starte Backup vollständig";
-$Lang{Start_Incr_Backup} = "Starte Backup incrementell";
-$Lang{Stop_Dequeue_Backup} = "Stoppen/Aussetzen Backup";
-$Lang{Restore} = "Wiederherstellung";
+$Lang{Start_Full_Backup} = "Starte vollständiges Backup";
+$Lang{Start_Incr_Backup} = "Starte inkrementelles Backup";
+$Lang{Stop_Dequeue_Backup} = "Backup Stoppen/Aussetzen";
+$Lang{Restore} = "Wiederherstellen";
 
 $Lang{Type_full} = "voll";
 $Lang{Type_incr} = "inkrementell";
 
 # -----
 
-$Lang{Only_privileged_users_can_view_admin_options} = "Nur privilegierte Nutzer können Admin Optionen einsehen.";
-$Lang{H_Admin_Options} = "BackupPC Server: Admin Optionen";
+$Lang{Only_privileged_users_can_view_admin_options} = "Nur privilegierte Nutzer können die Administrator Optionen einsehen.";
+$Lang{H_Admin_Options} = "BackupPC Server: Administrations Optionen";
 $Lang{Admin_Options} = "Admin Optionen";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
@@ -43,16 +44,16 @@ $Lang{Admin_Options_Page} = <<EOF;
 </ul>
 -->
 EOF
-$Lang{Unable_to_connect_to_BackupPC_server} = "Kann keine Verbindung zu BackupPC server herstellen",
-            "Dieses CGI script (\$MyURL) kann keine Verbindung zu BackupPC"
-          . " server auf \$Conf{ServerHost} port \$Conf{ServerPort} herstellen.  Der Fehler"
+$Lang{Unable_to_connect_to_BackupPC_server} = "Kann keine Verbindung zu dem BackupPC Server herstellen!",
+            "Dieses CGI Script (\$MyURL) kann keine Verbindung zu dem BackupPC"
+          . " Server auf \$Conf{ServerHost} Port \$Conf{ServerPort} herstellen.  Der Fehler"
           . " war: \$err.",
-            "Möglicherweise ist der BackupPC server Prozess nicht gestartet oder es besteht ein"
+            "Möglicherweise ist der BackupPC Server Prozess nicht gestartet oder es besteht ein"
           . " Konfigurationsfehler.  Bitte teilen Sie diese Fehlermeldung dem Systemadministrator mit.";
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">
-Der BackupPC Server auf <tt>\$Conf{ServerHost}</tt> port <tt>\$Conf{ServerPort}</tt>
+Der BackupPC Server auf <tt>\$Conf{ServerHost}</tt> Port <tt>\$Conf{ServerPort}</tt>
 ist momentan nicht aktiv (möglicherweise wurde er gestoppt, oder noch nicht gestartet).<br>
 Möchten Sie den Server starten?
 <input type="hidden" name="action" value="startServer">
@@ -62,39 +63,45 @@ EOF
 
 # -----
 
-$Lang{H_BackupPC_Server_Status} = "BackupServer Server Status";
+$Lang{H_BackupPC_Server_Status} = "BackupPC Server Status";
 
-$Lang{BackupPC_Server_Status}= <<EOF;
-\${h1(qq{$Lang{H_BackupPC_Server_Status}})}
+$Lang{BackupPC_Server_Status_General_Info}= <<EOF;
 
-<p>
-\${h2(\"Allgemeine Server Information\")}
+\${h2(\"Allgemeine Server Informationen\")}
 
 <ul>
-<li> Die Server Prozess ID (PID) ist \$Info{pid},  auf Computer \$Conf{ServerHost},
+<li>Die Server Prozess ID (PID) ist \$Info{pid}, auf Computer \$Conf{ServerHost},
      Version \$Info{Version}, gestartet am \$serverStartTime.
 <li> Dieser Status wurde am \$now generiert.
-<li> Die Konfiguration wurde neu geladen am \$configLoadTime.
+<li> Die Konfiguration wurde am \$configLoadTime neu geladen.
 <li> Computer werden am \$nextWakeupTime auf neue Aufträge geprüft.
 <li> Weitere Informationen:
     <ul>
-        <li>\$numBgQueue wartende backup Aufträge der letzten Prüfung,
+        <li>\$numBgQueue wartende Backup Aufträge der letzten Prüfung,
         <li>\$numUserQueue wartende Aufträge von Benutzern,
         <li>\$numCmdQueue wartende Kommando Aufträge.
         \$poolInfo
         <li>Das Pool Filesystem (Backup-Speicherplatz) ist zu \$Info{DUlastValue}%
-            (\$DUlastTime) gefüllt, das Maximum-Heute ist \$Info{DUDailyMax}% (\$DUmaxTime)
-            und Maximum-Gestern war \$Info{DUDailyMaxPrev}%. (Hinweis: sollten ca. 70% überschritten werden, so
-	    ist evtl. bald eine Erweiterung des Backup-Speichers erforderlich. Planung erforderlich?)
+            (\$DUlastTime) voll, das Maximum heute ist \$Info{DUDailyMax}% (\$DUmaxTime)
+            und das Maximum gestern war \$Info{DUDailyMaxPrev}%. (Hinweis: Sollten ca. 70% überschritten werden, so
+	    ist evtl. bald eine Erweiterung des Backupspeichers erforderlich. Weitere Planung nötig?)
     </ul>
 </ul>
+EOF
+
+$Lang{BackupPC_Server_Status} = <<EOF;
+
+\${h1(qq{$Lang{H_BackupPC_Server_Status}})}
+
+<p>
+\$generalInfo
 
 \${h2("Aktuell laufende Aufträge")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Computer </td>
     <td> Typ </td>
-    <td> User </td>
+    <td> Benutzer </td>
     <td> Startzeit </td>
     <td> Kommando </td>
     <td align="center"> PID </td>
@@ -109,43 +116,43 @@ $Lang{BackupPC_Server_Status}= <<EOF;
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Computer </td>
     <td align="center"> Typ </td>
-    <td align="center"> User </td>
+    <td align="center"> Benutzer </td>
     <td align="center"> letzter Versuch </td>
     <td align="center"> Details </td>
     <td align="center"> Fehlerzeit </td>
-    <td> Letzter Fehler (außer "kein ping") </td></tr>
+    <td> Letzter Fehler (ausser "kein ping") </td></tr>
 \$statusStr
 </table>
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Server_Summary} = "BackupServer: Übersicht";
+$Lang{BackupPC__Server_Summary} = "BackupPC: Übersicht";
 $Lang{BackupPC__Archive} = "BackupPC: Archivierung";
 $Lang{BackupPC_Summary}=<<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
-Dieser Status wurde generiert am \$now.
+Dieser Status wurde am \$now generiert.
 </p>
 
 \${h2("Computer mit erfolgreichen Backups")}
 <p>
 Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
 <ul>
-<li> \$fullTot Voll Backups, Gesamtgröße \${fullSizeTot}GB
-     (vor pooling und Komprimierung),
-<li> \$incrTot Incrementelle Backups, Gesamtgröße \${incrSizeTot}GB
-     (vor pooling und Komprimierung).
+<li> \$fullTot Volle Backups, Gesamtgröße \${fullSizeTot}GB
+     (vor Pooling und Komprimierung),
+<li> \$incrTot Inkrementelle Backups, Gesamtgröße \${incrSizeTot}GB
+     (vor Pooling und Komprimierung).
 </ul>
 </p>
 <table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Computer </td>
-    <td align="center"> User </td>
+    <td align="center"> Benutzer </td>
     <td align="center"> #Voll </td>
-    <td align="center"> Alter/Tage </td>
+    <td align="center"> Alter/Tagen </td>
     <td align="center"> Größe/GB </td>
-    <td align="center"> MB/sec </td>
-    <td align="center"> #Incr </td>
+    <td align="center"> MB/Sek </td>
+    <td align="center"> #Inkr </td>
     <td align="center"> Alter/Tage </td>
     <td align="center"> Status </td>
     <td align="center"> Letzte Aktion </td></tr>
@@ -154,16 +161,16 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
 <br><br>
 \${h2("Computer ohne Backups")}
 <p>
-Es gibt \$hostCntNone Computer ohne Backups !!!.
+Es gibt \$hostCntNone Computer ohne Backups !!!
 <p>
 <table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Computer </td>
-    <td align="center"> User </td>
+    <td align="center"> Benutzer </td>
     <td align="center"> #Voll </td>
     <td align="center"> Alter/Tage </td>
     <td align="center"> Größe/GB </td>
     <td align="center"> MB/sec </td>
-    <td align="center"> #Incr </td>
+    <td align="center"> #Inkr </td>
     <td align="center"> Alter/Tage </td>
     <td align="center"> Status </td>
     <td align="center"> Letzter Versuch </td></tr>
@@ -267,7 +274,7 @@ EOF
 $Lang{BackupPC_Archive2_split} = <<EOF;
 <tr>
     <td>Aufteilen in</td>
-    <td><input type="numeric" value="\$ArchiveSplit" name="splitsize">Megabytes</td>
+    <td><input type="numeric" value="\$ArchiveSplit" name="splitsize"> Megabytes</td>
 </tr>
 EOF
 
@@ -330,23 +337,23 @@ Möchten Sie das wirklich tun?
 
 EOF
 # --------------------------------
-$Lang{Only_privileged_users_can_view_queues_} = "Nur berechtigte User können die Warteschlangen einsehen.";
+$Lang{Only_privileged_users_can_view_queues_} = "Nur berechtigte Benutzer können die Warteschlangen einsehen.";
 # --------------------------------
-$Lang{Only_privileged_users_can_archive} = "Nur berechtigte Personen könnnen archivieren.";
+$Lang{Only_privileged_users_can_archive} = "Nur berechtigte Benutzer könnnen archivieren.";
 # --------------------------------
 $Lang{BackupPC__Queue_Summary} = "BackupServer: Warteschlangen Übersicht";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Backup Warteschlangen Übersicht")}
 <br><br>
-\${h2("User Warteschlange Übersicht")}
+\${h2("Benutzer Warteschlange Übersicht")}
 <p>
-Die folgenden User Aufträge sind eingereiht:
+Die folgenden Benutzer Aufträge sind eingereiht:
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
     <td> Uhrzeit </td>
-    <td> User </td></tr>
+    <td> Benutzer </td></tr>
 \$strUser
 </table>
 <br><br>
@@ -358,7 +365,7 @@ Die folgenden Hintergrund Aufträge sind eingereiht:
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
     <td> Uhrzeit </td>
-    <td> User </td></tr>
+    <td> Benutzer </td></tr>
 \$strBg
 </table>
 <br><br>
@@ -369,7 +376,7 @@ Die folgenden Kommando Aufträge sind eingereiht:
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
     <td> Uhrzeit </td>
-    <td> User </td>
+    <td> Benutzer </td>
     <td> Kommando </td></tr>
 \$strCmd
 </table>
@@ -406,7 +413,7 @@ EOF
 
 # -------------------------------
 $Lang{Recent_Email_Summary} = <<EOF;
-\${h1("Letzte e-mail Übersicht (Sortierung nach Zeitpunkt)")}
+\${h1("Letzte eMail Übersicht (Sortierung nach Zeitpunkt)")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Empfänger </td>
@@ -426,7 +433,7 @@ $Lang{Restore_Options_for__host} = "BackupServer: Restore Optionen für \$host";
 $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("Restore Optionen für \$host")}
 <p>
-Sie haben die folgenden Dateien/Verzeichnisse von Freigabe \$share selektiert, von Backup Nummer #\$num:
+Sie haben die folgenden Dateien/Verzeichnisse von der Freigabe \$share aus der Backup Nummer #\$num selektiert:
 <ul>
 \$fileListStr
 </ul>
@@ -434,7 +441,7 @@ Sie haben die folgenden Dateien/Verzeichnisse von Freigabe \$share selektiert, v
 Sie haben drei verschiedene Möglichkeiten zur Wiederherstellung (Restore) der Dateien/Verzeichnisse.
 Bitte wählen Sie eine der folgenden Möglichkeiten:.
 </p>
-\${h2("Möglichkeit 1: Direct Restore")}
+\${h2("Möglichkeit 1: Direkte Wiederherstellung")}
 <p>
 EOF
 
@@ -443,9 +450,9 @@ Sie können diese Wiederherstellung starten um die Dateien/Verzeichnisse direkt a
 \$host wiederherzustellen. Alternativ können Sie einen anderen Computer und/oder Freigabe als Ziel angeben.
 </p><p>
 <b>Warnung:</b> alle aktuell existierenden Dateien/Verzeichnisse die bereits vorhanden sind
-werden überschrieben! (Tip: alternativ eine spezielle Freigabe erstellen mit schreibrecht für den
-Backup-User und die wiederhergestellten Dateien/Verzeichnisse durch Stichproben prüfen, ob die beabsichtigte
-Wiederherstellung korrekt ist) 
+werden überschrieben! (Tip: alternativ eine spezielle Freigabe erstellen mit Schreibrecht für den
+Backup-Benutzer und die wiederhergestellten Dateien/Verzeichnisse durch Stichproben prüfen, ob die beabsichtigte
+Wiederherstellung korrekt ist.) 
 </p>
 <form action="\$MyURL" method="post" name="direct">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
@@ -476,7 +483,7 @@ Wiederherstellung korrekt ist)
     <td valign="top"><input type="text" size="40" maxlength="256"
 	value="\${EscHTML(\$pathHdr)}" name="pathHdr"></td>
 </tr><tr>
-    <td><input type="submit" value="Start Restore" name=""></td>
+    <td><input type="submit" value="Wiederherstellung starten" name=""></td>
 </table>
 </form>
 EOF
@@ -489,9 +496,9 @@ EOF
 # ------------------------------
 $Lang{Option_2__Download_Zip_archive} = <<EOF;
 <p>
-\${h2("Möglichkeit 2: Download als Zip Archiv Datei")}
+\${h2("Möglichkeit 2: Download als Zip Archiv")}
 <p>
-Sie können eine ZIP Archiv Datei downloaden, die alle selektierten Dateien/Verzeichnisse
+Sie können eine ZIP Archivdatei downloaden, die alle selektierten Dateien/Verzeichnisse
 enthält. Mit einer lokalen Anwendung (z.B. WinZIP, WinXP-ZIP-Ordner...) können Sie dann
 beliebige Dateien entpacken. 
 </p><p>
@@ -513,7 +520,7 @@ evtl. die Dateien/Verzeichnisse erneut und lassen sehr große und unnötige Dateie
 Kompression (0=aus, 1=schnelle,...,9=höchste)
 <input type="text" size="6" value="5" name="compressLevel">
 <br>
-<input type="submit" value="Download Zip Datei" name="">
+<input type="submit" value="Zip Datei downloaden" name="">
 </form>
 EOF
 
@@ -521,20 +528,20 @@ EOF
 
 $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 <p>
-\${h2("Möglichkeit 2: Download als Zip Archiv Datei")}
+\${h2("Möglichkeit 2: Download als Zip Archiv")}
 <p>
 Archive::Zip ist nicht installiert. Der Download als Zip Archiv Datei ist daher nicht möglich.
 Bitte lassen Sie bei Bedarf von Ihrem Administrator die Perl-Erweiterung Archive::Zip von 
-<a href="http://www.cpan.org">www.cpan.org</a> installieren.
+<a href="http://www.cpan.org">www.cpan.org</a> installieren. Vielen Dank!
 </p>
 EOF
 
 
 # ------------------------------
 $Lang{Option_3__Download_Zip_archive} = <<EOF;
-\${h2("Möglichkeit 3: Download als Tar Archiv Datei")}
+\${h2("Möglichkeit 3: Download als Tar Archiv")}
 <p>
-Sie können eine Tar Archiv Datei downloaden, die alle selektierten Dateien/Verzeichnisse
+Sie können eine Tar Archivdatei downloaden, die alle selektierten Dateien/Verzeichnisse
 enthält. Mit einer lokalen Anwendung (z.B. tar, WinZIP...) können Sie dann
 beliebige Dateien entpacken.
 </p><p>
@@ -553,7 +560,7 @@ evtl. die Dateien/Verzeichnisse erneut und lassen sehr große und unnötige Dateie
  \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (andernfalls enthält die Archiv Datei vollständige Pfade).
 <br>
-<input type="submit" value="Download Tar Datei" name="">
+<input type="submit" value="Tar Datei downloaden" name="">
 </form>
 EOF
 
@@ -565,11 +572,11 @@ $Lang{Are_you_sure} = <<EOF;
 \${h1("Sind Sie sicher?")}
 <p>
 Sie starten eine direkte Wiederherstellung auf den Computer \$In{hostDest}.
-Die folgenden Dateien werden auf die Freigabe \$In{shareDest} wiederhergestellt, vom
-Backup Nummer \$num:
+Die folgenden Dateien werden auf die Freigabe \$In{shareDest} wiederhergestellt, von
+der Backup Nummer \$num:
 <p>
 <table border>
-<tr><td>Original Datei/Verzeichnis</td><td>Wird wiederhergestellt nach</td></tr>
+<tr><td>Original Datei/Verzeichnis:</td><td>Wird wiederhergestellt nach:</td></tr>
 \$fileListStr
 </table>
 
@@ -615,7 +622,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 \$statusStr
 </ul>
 </p>
-\${h2("User Aktionen")}
+\${h2("Benutzer Aktionen")}
 <p>
 <form action="\$MyURL" method="get">
 <input type="hidden" name="host" value="\$host">
@@ -626,14 +633,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </p>
 \${h2("Backup Übersicht")}
 <p>
-Klicken Sie auf die Backup-Nummer um Dateien zu browsen und bei Bedarf wiederherzustellen.
+Klicken Sie auf die Backup Nummer um durch Dateien zu browsen und bei Bedarf wiederherzustellen.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Filled </td>
     <td align="center"> Start Zeitpunkt </td>
-    <td align="center"> Dauer/mins </td>
+    <td align="center"> Dauer/min </td>
     <td align="center"> Alter/Tage </td>
     <td align="center"> Server Backup Pfad </td>
 </tr>
@@ -663,7 +670,7 @@ Klicken Sie auf die Backup-Nummer um Dateien zu browsen und bei Bedarf wiederher
 <p>
 "Bestehende Dateien" bedeutet bereits im Pool vorhanden.
 "Neue Dateien" bedeutet neu zum Pool hinzugefügt.
-Leere Dateien und Datei-Fehler sind nicht in den Summen enthalten.
+Leere Dateien und eventuelle Datei Fehler sind nicht in den Summen enthalten.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
@@ -686,7 +693,7 @@ Leere Dateien und Datei-Fehler sind nicht in den Summen enthalten.
 </table>
 <br><br>
 
-\${h2("Kompression Übersicht")}
+\${h2("Kompressions Übersicht")}
 <p>
 Kompressionsergebnisse für bereits im Backup-Pool vorhandene und für neu komprimierte Dateien.
 </p>
@@ -697,7 +704,7 @@ Kompressionsergebnisse für bereits im Backup-Pool vorhandene und für neu komprim
 </tr>
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
-    <td align="center"> Comp Level </td>
+    <td align="center"> Komp Level </td>
     <td align="center"> Größe/MB </td>
     <td align="center"> Comp/MB </td>
     <td align="center"> Comp </td>
@@ -719,7 +726,7 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 \$statusStr
 </ul>
 
-\${h2("User Aktionen")}
+\${h2("Benutzer Aktionen")}
 <p>
 <form action="\$MyURL" method="get">
 <input type="hidden" name="archivehost" value="\$host">
@@ -744,7 +751,7 @@ $Lang{NavSectionTitle_} = "Server";
 
 # -------------------------
 $Lang{Backup_browse_for__host} = <<EOF;
-\${h1("Backup browsen von Computer \$host")}
+\${h1("Backup durchsuchen für den Computer \$host")}
 
 <script language="javascript" type="text/javascript">
 <!--
@@ -779,12 +786,12 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="share" value="\${EscHTML(\$share)}">
 <input type="hidden" name="action" value="browse">
 <ul>
-<li> Sie browsen das Backup #\$num, erstellt am \$backupTime
+<li>Sie browsen das Backup #\$num, erstellt am \$backupTime
         (vor \$backupAge Tagen),
 \$filledBackup
 <li> Verzeichnis eingeben: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
 <li> Klicken Sie auf ein Verzeichnis um dieses zu durchsuchen,
-<li> Klicken Sie auf eine Datei um diese per download wiederherzustellen,
+<li> Klicken Sie auf eine Datei um diese per Download wiederherzustellen,
 <li> Einsehen der Backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">Historie</a> des aktuellen Verzeichnisses.
 </ul>
 </form>
@@ -815,7 +822,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <br>
 <!--
 This is now in the checkAll row
-<input type="submit" name="Submit" value="Restore der Selektion">
+<input type="submit" name="Submit" value="Selektion wiederherstellen">
 -->
 </form>
 EOF
@@ -898,7 +905,7 @@ $Lang{Archive___num_details_for__host} = "BackupPC: Archiv #\$num Details für \$
 $Lang{Archive___num_details_for__host2 } = <<EOF;
 \${h1("Archiv #\$num Details für \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="50%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> Nummer </td><td class="border"> \$Archives[\$i]{num} </td></tr>
 <tr><td class="tableheader"> beauftragt von </td><td class="border"> \$ArchiveReq{user} </td></tr>
 <tr><td class="tableheader"> Auftrag Zeitpunkt</td><td class="border"> \$reqTime </td></tr>
@@ -921,37 +928,37 @@ $Lang{Archive___num_details_for__host2 } = <<EOF;
 EOF
 
 # -----------------------------------
-$Lang{Email_Summary} = "BackupServer: e-mail Übersicht";
+$Lang{Email_Summary} = "BackupServer: eMail Übersicht";
 
 # -----------------------------------
 #  !! ERROR messages !!
 # -----------------------------------
-$Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: überprüfen Sie die apache error_log\n";
+$Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: Überprüfen Sie die Apache error_log\n";
 $Lang{Wrong_user__my_userid_is___} =  
-              "Falscher User: meine userid ist \$>, anstatt \$uid"
+              "Falscher Benutzer: Meine userid ist \$>, anstelle \$uid"
             . "(\$Conf{BackupPCUser})\n";
-# $Lang{Only_privileged_users_can_view_PC_summaries} = "Nur berechtigte User können die Computer Übersicht einsehen.";
+# $Lang{Only_privileged_users_can_view_PC_summaries} = "Nur berechtigte Benutzer können die Computer Übersicht einsehen.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
-                  "Nur berechtigte User können Backups starten und stoppen für"
+                  "Nur berechtigte Benutzer können Backups starten und stoppen für"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "ungültige Nummer \$num";
 $Lang{Unable_to_open__file__configuration_problem} = "kann Datei nicht öffnen \$file: Konfigurationsproblem?";
-$Lang{Only_privileged_users_can_view_log_or_config_files} = "Nur berechtigte User können LOG oder config Dateien einsehen.";
-$Lang{Only_privileged_users_can_view_log_files} = "Nur berechtigte User können LOG Dateien einsehen.";
-$Lang{Only_privileged_users_can_view_email_summaries} = "Nur berechtigte User können die Email Übersicht einsehen.";
-$Lang{Only_privileged_users_can_browse_backup_files} = "Nur berechtigte User können Backup Dateien browsen"
+$Lang{Only_privileged_users_can_view_log_or_config_files} = "Nur berechtigte Benutzer können Log oder Config Dateien einsehen.";
+$Lang{Only_privileged_users_can_view_log_files} = "Nur berechtigte Benutzer können LOG Dateien einsehen.";
+$Lang{Only_privileged_users_can_view_email_summaries} = "Nur berechtigte Benutzer können die Email Übersicht einsehen.";
+$Lang{Only_privileged_users_can_browse_backup_files} = "Nur berechtigte Benutzer können Backup Dateien browsen"
                 . " für computer \${EscHTML(\$In{host})}.";
-$Lang{Empty_host_name} = "Empty host name.";
+$Lang{Empty_host_name} = "Kein Hostname.";
 $Lang{Directory___EscHTML} = "Verzeichnis \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
 		    . " ist leer";
-$Lang{Can_t_browse_bad_directory_name2} = "Kann fehlerhaften Verzeichnisnamen nicht browsen"
+$Lang{Can_t_browse_bad_directory_name2} = "Kann fehlerhaften Verzeichnisnamen nicht durchsuchen"
 	            . " \${EscHTML(\$relDir)}";
-$Lang{Only_privileged_users_can_restore_backup_files} = "Nur berechtigte User können Dateien wiederherstellen"
+$Lang{Only_privileged_users_can_restore_backup_files} = "Nur berechtigte Benutzer können Dateien wiederherstellen"
                 . " für Computer \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Falscher Computer Name \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Sie haben keine Dateien selektiert; bitte gehen Sie zurück um"
                 . " Dateien zu selektieren.";
-$Lang{You_haven_t_selected_any_hosts} = "Sie haben keinen Computer gewählt, bitte zurückgehen um einen auszuwählen.";
+$Lang{You_haven_t_selected_any_hosts} = "Sie haben keinen Computer gewählt, bitte zurück gehen um einen auszuwählen.";
 $Lang{Nice_try__but_you_can_t_put} = "Sie dürfen \'..\' nicht in Dateinamen verwenden";
 $Lang{Host__doesn_t_exist} = "Computer \${EscHTML(\$In{hostDest})} existiert nicht";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "Sie haben keine Berechtigung zum Restore auf Computer"
@@ -961,11 +968,11 @@ $Lang{Can_t_open_create} = "Kann Datei nicht öffnen oder erstellen "
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Nur berechtigte Benutzer dürfen Backup und Restore von Dateien"
                 . " für Computer \${EscHTML(\$host)} durchführen.";
 $Lang{Empty_host_name} = "leerer Computer Name";
-$Lang{Unknown_host_or_user} = "Unbekannter Computer oder User \${EscHTML(\$host)}";
-$Lang{Only_privileged_users_can_view_information_about} = "Nur berechtigte User können Informationen sehen über"
+$Lang{Unknown_host_or_user} = "Unbekannter Computer oder Benutzer \${EscHTML(\$host)}";
+$Lang{Only_privileged_users_can_view_information_about} = "Nur berechtigte Benutzer können Informationen sehen über"
                 . " Computer \${EscHTML(\$host)}." ;
-$Lang{Only_privileged_users_can_view_archive_information} = "Nur berechtigte User können Archiv Informationen einsehen.";
-$Lang{Only_privileged_users_can_view_restore_information} = "Nur berechtigte User können Restore Informationen einsehen.";
+$Lang{Only_privileged_users_can_view_archive_information} = "Nur berechtigte Benutzer können Archiv Informationen einsehen.";
+$Lang{Only_privileged_users_can_view_restore_information} = "Nur berechtigte Benutzer können Restore Informationen einsehen.";
 $Lang{Restore_number__num_for_host__does_not_exist} = "Restore Nummer \$num für Computer \${EscHTML(\$host)} existiert"
 	        . " nicht.";
 $Lang{Archive_number__num_for_host__does_not_exist} = "Archiv Nummer \$num für Computer \${EscHTML(\$host)} existiert"
@@ -999,20 +1006,20 @@ $Lang{Status} = "Status";
 $Lang{PC_Summary} = "Computer Übersicht";
 $Lang{LOG_file} = "LOG Datei";
 $Lang{LOG_files} = "LOG Dateien";
-$Lang{Old_LOGs} = "Alte LOGs";
-$Lang{Email_summary} = "Email Übersicht";
+$Lang{Old_LOGs} = "Alte LOG Dateien";
+$Lang{Email_summary} = "eMail Übersicht";
 $Lang{Config_file} = "Config Datei";
 $Lang{Hosts_file} = "Hosts Datei";
 $Lang{Current_queues} = "Warteschlangen";
 $Lang{Documentation} = "Dokumentation";
 
-#$Lang{Host_or_User_name} = "<small>Computer oder User Name:</small>";
+#$Lang{Host_or_User_name} = "<small>Computer oder Benutzer Name:</small>";
 $Lang{Go} = "gehe zu";
 $Lang{Hosts} = "Computer";
 $Lang{Select_a_host} = "Computer auswählen...";
 
 $Lang{There_have_been_no_archives} = "<h2> Es existieren keine Archive </h2>\n";
-$Lang{This_PC_has_never_been_backed_up} = "<h2> Dieser Computer wurde nie gesichert!! </h2>\n";
+$Lang{This_PC_has_never_been_backed_up} = "<h2> Dieser Computer wurde nie gesichert! </h2>\n";
 $Lang{This_PC_is_used_by} = "<li>Dieser Computer wird betreut von \${UserLink(\$user)}";
 
 $Lang{Extracting_only_Errors} = "(nur Fehler anzeigen)";
@@ -1021,7 +1028,7 @@ $Lang{Errors}  = "Fehler";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
-<li>Letzte e-mail gesendet an \${UserLink(\$user)} am  \$mailTime, Titel "\$subj".
+<li>Letzte eMail gesendet an \${UserLink(\$user)} am  \$mailTime, Titel "\$subj".
 EOF
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
@@ -1035,7 +1042,7 @@ EOF
 
 # ----------
 $Lang{Host_host_is_queued_on_the_user_queue__will_be_backed_up_soon} = <<EOF;
-<li>Computer \$host ist in die User-Warteschlange eingereiht (Backup wird bald gestartet).
+<li>Computer \$host ist in die Benutzer-Warteschlange eingereiht (Backup wird bald gestartet).
 EOF
 
 # ---------
@@ -1088,7 +1095,7 @@ $Lang{checkAll} = <<EOF;
 <tr><td class="fviewborder">
 <input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;alles auswählen
 </td><td colspan="5" align="center" class="fviewborder">
-<input type="submit" name="Submit" value="Restore der Selektion">
+<input type="submit" name="Submit" value="Selektion wiederherstellen">
 </td></tr>
 EOF
 
@@ -1112,8 +1119,8 @@ EOF
 
 $Lang{Home} = "Home";
 $Lang{Browse} = "Datensicherungen anzeigen";
-$Lang{Last_bad_XferLOG} = "Letzte bad XferLOG";
-$Lang{Last_bad_XferLOG_errors_only} = "Letzte bad XferLOG (nur&nbsp;Fehler)";
+$Lang{Last_bad_XferLOG} = "Letztes fehlerhafte XferLOG";
+$Lang{Last_bad_XferLOG_errors_only} = "Letztes fehlerhafte XferLOG (nur&nbsp;Fehler)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
 <li> Diese Liste ist mit Backup #\$numF verbunden.
@@ -1131,7 +1138,7 @@ Klicken Sie auf die Restore Nummer (Restore#) für mehr Details.
 <tr class="tableheader"><td align="center"> Restore# </td>
     <td align="center"> Ergebnis </td>
     <td align="right"> Start Zeitpunkt</td>
-    <td align="right"> Dauer/mins</td>
+    <td align="right"> Dauer/min </td>
     <td align="right"> #Dateien </td>
     <td align="right"> Größe/MB </td>
     <td align="right"> #tar Fehler </td>
@@ -1172,7 +1179,7 @@ $Lang{off} = "aus";
 
 $Lang{backupType_full}    = "voll";
 $Lang{backupType_incr}    = "inkrementell";
-$Lang{backupType_partial} = "partiell";
+$Lang{backupType_partial} = "unvollständig";
 
 $Lang{failed} = "fehler";
 $Lang{success} = "erfolgreich";
@@ -1196,9 +1203,9 @@ $Lang{Reason_backup_failed} = "Backup Fehler";
 $Lang{Reason_restore_failed} = "Restore Fehler";
 $Lang{Reason_archive_failed} = "Archivierung Fehler";
 $Lang{Reason_no_ping} = "nicht erreichbar";
-$Lang{Reason_backup_canceled_by_user} = "Abbruch durch User";
-$Lang{Reason_restore_canceled_by_user} = "Abbruch durch User";
-$Lang{Reason_archive_canceled_by_user} = "Archivierung abgebrochen durch User";
+$Lang{Reason_backup_canceled_by_user} = "Abbruch durch Benutzer";
+$Lang{Reason_restore_canceled_by_user} = "Abbruch durch Benutzer";
+$Lang{Reason_archive_canceled_by_user} = "Archivierung abgebrochen durch Benutzer";
 
 # ---------
 # Email messages

@@ -49,6 +49,7 @@ sub action
         my $startTime = timeStamp2($Jobs{$host}{startTime});
         next if ( $host eq $bpc->trashJob
                     && $Jobs{$host}{processState} ne "running" );
+        next if ( !$Privileged && !CheckPermission($host) );
         $Jobs{$host}{type} = $Status{$host}{type}
                     if ( $Jobs{$host}{type} eq "" && defined($Status{$host}));
         (my $cmd = $Jobs{$host}{cmd}) =~ s/$BinDir\///g;
@@ -70,6 +71,7 @@ EOF
 		    && $Status{$host}{reason} ne "Reason_restore_failed"
 		    && (!$Status{$host}{userReq}
 			|| $Status{$host}{reason} ne "Reason_no_ping") );
+        next if ( !$Privileged && !CheckPermission($host) );
         my $startTime = timeStamp2($Status{$host}{startTime});
         my($errorTime, $XferViewStr);
         if ( $Status{$host}{errorTime} > 0 ) {
@@ -124,7 +126,9 @@ EOF
     } elsif ( $Info{cpoolFileCnt} > 0 ) {
         $poolInfo = $cpoolInfo;
     }
-    my $content = eval ("qq{$Lang->{BackupPC_Server_Status}}");
+    my $generalInfo = eval("qq{$Lang->{BackupPC_Server_Status_General_Info}}")
+                                if ( $Privileged );
+    my $content = eval("qq{$Lang->{BackupPC_Server_Status}}");
     Header($Lang->{H_BackupPC_Server_Status}, $content);
     Trailer();
 }

@@ -505,6 +505,21 @@ $Conf{IncrKeepCntMin} = 1;
 $Conf{IncrAgeMax}     = 30;
 
 #
+# A failed full backup is saved as a partial backup.  The rsync
+# XferMethod can take advantage of the partial full when the next
+# backup is run. This parameter sets the age of the partial full
+# in days: if the partial backup is older than this number of
+# days, then rsync will ignore (not use) the partial full when
+# the next backup is run.  If you set this to a negative value
+# then no partials will be saved.  If you set this to 0, partials
+# will be saved, but will not be used by the next backup.
+#
+# The default setting of 3 days means that a partial older than
+# 3 days is ignored when the next full backup is done.
+#
+$Conf{PartialAgeMax} = 3;
+
+#
 # Whether incremental backups are filled.  "Filling" means that the
 # most recent full (or filled) dump is merged into the new incremental
 # dump using hardlinks.  This makes an incremental dump look like a
@@ -981,6 +996,29 @@ $Conf{RsyncdPasswd} = '';
 $Conf{RsyncdAuthRequired} = 1;
 
 #
+# When rsync checksum caching is enabled (by adding the
+# --checksum-seed=32761 option to $Conf{RsyncArgs}), the cached
+# checksums can be occaisonally verified to make sure the file
+# contents matches the cached checksums.  This is to avoid the
+# risk that disk problems might cause the pool file contents to
+# get corrupted, but the cached checksums would make BackupPC
+# think that the file still matches the client.
+#
+# This setting is the probability (0 means never and 1 means always)
+# that a file will be rechecked.  Setting it to 0 means the checksums
+# will not be rechecked (unless there is a phase 0 failure).  Setting
+# it to 1 (ie: 100%) means all files will be checked, but that is
+# not a desirable setting since you are better off simply turning
+# caching off (ie: remove the --checksum-seed option).
+#   
+# The default of 0.01 means 1% (on average) of the files during a full
+# backup will have their cached checksum re-checked.
+#   
+# This setting has no effect unless checksum caching is turned on.
+#   
+$Conf{RsyncCsumCacheVerifyProb} = 0.01;
+
+#
 # Arguments to rsync for backup.  Do not edit the first set unless you
 # have a thorough understanding of how File::RsyncP works.
 #
@@ -1010,10 +1048,10 @@ $Conf{RsyncArgs} = [
 
 	    #
 	    # If you are using a patched client rsync that supports the
-	    # --fixed-csumseed option (see http://backuppc.sourceforge.net),
+	    # --checksum-seed option (see http://backuppc.sourceforge.net),
 	    # then uncomment this to enabled rsync checksum cachcing
 	    #
-	    #'--fixed-csumseed',
+	    #'--checksum-seed=32761',
 
 	    #
 	    # Add additional arguments here
@@ -1046,10 +1084,10 @@ $Conf{RsyncRestoreArgs} = [
 
 	    #
 	    # If you are using a patched client rsync that supports the
-	    # --fixed-csumseed option (see http://backuppc.sourceforge.net),
+	    # --checksum-seed option (see http://backuppc.sourceforge.net),
 	    # then uncomment this to enabled rsync checksum cachcing
 	    #
-	    #'--fixed-csumseed',
+	    #'--checksum-seed=32761',
 
 	    #
 	    # Add additional arguments here
@@ -1604,6 +1642,33 @@ $Conf{CgiDateFormatMMDD} = 1;
 # are displayed.
 #
 $Conf{CgiNavBarAdminAllHosts} = 1;
+
+#
+# Enable/disable the search box in the navigation bar.
+#
+$Conf{CgiSearchBoxEnable} = 1;
+
+#
+# Additional navigation bar links.  These appear for both regular users
+# and administrators.  This is a list of hashes giving the link (URL)
+# and the text (name) for the link.  Specifying lname instead of name
+# uses the language specific string (ie: $Lang->{lname}) instead of
+# just literally displaying name.
+#
+$Conf{CgiNavBarLinks} = [
+    {
+        link  => "?action=view&type=docs",
+        lname => "Documentation",    # actually displays $Lang->{Documentation}
+    },
+    {
+        link  => "http://backuppc.sourceforge.net/faq",
+        name  => "FAQ",              # displays literal "FAQ"
+    },
+    {
+        link  => "http://backuppc.sourceforge.net",
+        name  => "SourceForge",      # displays literal "SourceForge"
+    },
+];
 
 #
 # Hilight colors based on status that are used in the PC summary page.

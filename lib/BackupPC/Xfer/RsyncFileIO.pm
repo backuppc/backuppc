@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta1, released 9 Apr 2004.
+# Version 2.1.0beta2, released 9 May 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -24,7 +24,7 @@ use strict;
 use File::Path;
 use BackupPC::Attrib qw(:all);
 use BackupPC::View;
-use BackupPC::Xfer::RsyncDigest;
+use BackupPC::Xfer::RsyncDigest qw(:all);
 use BackupPC::PoolWrite;
 
 use constant S_IFMT       => 0170000;	# type of file
@@ -97,6 +97,7 @@ sub logHandlerSet
 {
     my($fio, $sub) = @_;
     $fio->{logHandler} = $sub;
+    BackupPC::Xfer::RsyncDigest->logHandlerSet($sub);
 }
 
 #
@@ -104,17 +105,55 @@ sub logHandlerSet
 #
 sub csumStart
 {
-    my($fio, $f, $needMD4, $defBlkSize) = @_;
+    my($fio, $f, $needMD4, $defBlkSize, $phase) = @_;
 
     $defBlkSize ||= $fio->{blockSize};
     my $attr = $fio->attribGet($f);
     $fio->{file} = $f;
     $fio->csumEnd if ( defined($fio->{csum}) );
     return -1 if ( $attr->{type} != BPC_FTYPE_FILE );
+    #
+    # Rsync uses short checksums on the first phase.  If the whole-file
+    # checksum fails, then the file is repeated with full checksums.
+    # So on phase 2 we verify the checksums if they are cached.
+    #
+    if ( ($phase > 0 || rand(1) < $fio->{cacheCheckProb})
+            && $attr->{compress}
+            && $fio->{checksumSeed} == RSYNC_CSUMSEED_CACHE ) {
+        my($err, $d, $blkSize) = BackupPC::Xfer::RsyncDigest->digestStart(
+                                     $attr->{fullPath}, $attr->{size}, 0,
+                                     $defBlkSize, $fio->{checksumSeed},
+                                     0, $attr->{compress}, 0);
+        my($isCached, $isInvalid) = $d->isCached;
+        if ( $fio->{logLevel} >= 5 ) {
+            $fio->log("$attr->{fullPath} verify; cached = $isCached,"
+                    . " invalid = $isInvalid, phase = $phase");
+        }
+        if ( $isCached || $isInvalid ) {
+            my $ret = BackupPC::Xfer::RsyncDigest->digestAdd(
+                            $attr->{fullPath}, $blkSize,
+                            $fio->{checksumSeed}, 1        # verify
+                        );
+            if ( $ret != 1 ) {
+                $fio->log("Bad cached digest for $attr->{fullPath} ($ret);"
+                        . " fixed");
+                $fio->{stats}{errorCnt}++;
+            } else {
+                $fio->log("$f->{name}: verified cached digest")
+                                    if ( $fio->{logLevel} >= 2 );
+            }
+        }
+        $d->digestEnd;
+    }
     (my $err, $fio->{csum}, my $blkSize)
          = BackupPC::Xfer::RsyncDigest->digestStart($attr->{fullPath},
 			 $attr->{size}, 0, $defBlkSize, $fio->{checksumSeed},
 			 $needMD4, $attr->{compress}, 1);
+    if ( $fio->{logLevel} >= 5 ) {
+        my($isCached, $invalid) = $fio->{csum}->isCached;
+        $fio->log("$attr->{fullPath} cache = $isCached,"
+                . " invalid = $invalid, phase = $phase");
+    }
     if ( $err ) {
         $fio->log("Can't get rsync digests from $attr->{fullPath}"
                 . " (err=$err, name=$f->{name})");
@@ -192,9 +231,9 @@ sub checksumSeed
 
     $fio->{checksumSeed} = $checksumSeed;
     $fio->log("Checksum caching enabled (checksumSeed = $checksumSeed)")
-		    if ( $fio->{logLevel} >= 1 && $checksumSeed == 32761 );
+        if ( $fio->{logLevel} >= 1 && $checksumSeed == RSYNC_CSUMSEED_CACHE );
     $fio->log("Checksum seed is $checksumSeed")
-		    if ( $fio->{logLevel} >= 2 && $checksumSeed != 32761 );
+        if ( $fio->{logLevel} >= 2 && $checksumSeed != RSYNC_CSUMSEED_CACHE );
 }
 
 sub dirs
@@ -876,7 +915,7 @@ sub fileDeltaRxNext
 #
 sub fileDeltaRxDone
 {
-    my($fio, $md4) = @_;
+    my($fio, $md4, $phase) = @_;
     my $name = $1 if ( $fio->{rxFile}{name} =~ /(.*)/ );
     my $ret;
 
@@ -903,12 +942,17 @@ sub fileDeltaRxDone
                          = BackupPC::Xfer::RsyncDigest->digestStart(
                                  $attr->{fullPath}, $attr->{size},
                                  0, 2048, $fio->{checksumSeed}, 1,
-                                 $attr->{compress});
+                                 $attr->{compress}, 1);
                 if ( $err ) {
                     $fio->log("Can't open $attr->{fullPath} for MD4"
                             . " check (err=$err, $name)");
                     $fio->{stats}{errorCnt}++;
                 } else {
+                    if ( $fio->{logLevel} >= 5 ) {
+                        my($isCached, $invalid) = $csum->isCached;
+                        $fio->log("MD4 $attr->{fullPath} cache = $isCached,"
+                                . " invalid = $invalid");
+                    }
                     $newDigest = $csum->digestEnd;
                 }
                 $fio->{rxSize} = $attr->{size};
@@ -930,7 +974,13 @@ sub fileDeltaRxDone
             $fio->log("$name got digests $md4Str vs $newStr")
         }
         if ( $md4 ne $newDigest ) {
-            $fio->log("$name: fatal error: md4 doesn't match");
+            if ( $phase > 0 ) {
+                $fio->log("$name: fatal error: md4 doesn't match on retry;"
+                        . " file removed");
+            } else {
+                $fio->log("$name: md4 doesn't match: will retry in phase 1;"
+                        . " file removed");
+            }
             $fio->{stats}{errorCnt}++;
             if ( defined($fio->{rxOutFd}) ) {
                 $fio->{rxOutFd}->close;

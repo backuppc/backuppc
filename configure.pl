@@ -33,7 +33,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 18 Jan 2003.
+# Version 2.1.0beta1, released 9 Apr 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -44,13 +44,27 @@ no  utf8;
 use vars qw(%Conf %OrigConf);
 use lib "./lib";
 
-my @Packages = qw(ExtUtils::MakeMaker File::Path File::Spec File::Copy
-                  DirHandle Digest::MD5 Data::Dumper Getopt::Std
-		  BackupPC::Lib BackupPC::FileZIO);
+my @Packages = qw(File::Path File::Spec File::Copy DirHandle Digest::MD5
+                  Data::Dumper Getopt::Std Getopt::Long Pod::Usage
+                  BackupPC::Lib BackupPC::FileZIO);
 
 foreach my $pkg ( @Packages ) {
     eval "use $pkg";
     next if ( !$@ );
+    if ( $pkg =~ /BackupPC/ ) {
+        die <<EOF;
+
+BackupPC cannot find the package $pkg, which is included in the
+BackupPC distribution.  This probably means you did not cd to the
+unpacked BackupPC distribution before running configure.pl, eg:
+
+    cd BackupPC-__VERSION__
+    ./configure.pl
+
+Please try again.
+
+EOF
+    }
     die <<EOF;
 
 BackupPC needs the package $pkg.  Please install $pkg
@@ -58,6 +72,30 @@ before installing BackupPC.
 
 EOF
 }
+
+my %opts;
+if ( !GetOptions(
+            \%opts,
+            "batch",
+            "bin-path=s%",
+            "config-path=s",
+            "cgi-dir=s",
+            "data-dir=s",
+            "dest-dir=s",
+            "help|?",
+            "hostname=s",
+            "html-dir=s",
+            "html-dir-url=s",
+            "install-dir=s",
+            "man",
+            "uid-ignore",
+        ) || @ARGV ) {
+    pod2usage(2);
+}
+pod2usage(1) if ( $opts{help} );
+pod2usage(-exitstatus => 0, -verbose => 2) if $opts{man};
+
+my $DestDir = $opts{"dest-dir"};
 
 if ( $< != 0 ) {
     print <<EOF;
@@ -68,7 +106,9 @@ install directories, then it should be ok to proceed.  Otherwise,
 please quit and restart as root.
 
 EOF
-    exit unless prompt("--> Do you want to continue?", "y") =~ /y/i;
+    exit(1) if ( prompt("--> Do you want to continue?",
+                       "y") !~ /y/i );
+    exit(1) if ( $opts{batch} && !$opts{"uid-ignore"} );
 }
 
 print <<EOF;
@@ -87,7 +127,8 @@ EOF
 my $ConfigPath = "";
 while ( 1 ) {
     $ConfigPath = prompt("--> Full path to existing conf/config.pl",
-                                    $ConfigPath);
+                         $ConfigPath,
+                         "config-path");
     last if ( $ConfigPath eq ""
             || ($ConfigPath =~ /^\// && -r $ConfigPath && -w $ConfigPath) );
     my $problem = "is not an absolute path";
@@ -95,6 +136,10 @@ while ( 1 ) {
     $problem = "is not readable" if ( !-r $ConfigPath );
     $problem = "doesn't exist"   if ( !-f $ConfigPath );
     print("The file '$ConfigPath' $problem.\n");
+    if ( $opts{batch} ) {
+        print("Need to specify a valid --config-path for upgrade\n");
+        exit(1);
+    }
 }
 my $bpc;
 if ( $ConfigPath ne "" && -r $ConfigPath ) {
@@ -141,10 +186,10 @@ my %Programs = (
 foreach my $prog ( sort(keys(%Programs)) ) {
     my $path;
     foreach my $subProg ( split(/\//, $prog) ) {
-        $path ||= FindProgram("$ENV{PATH}:/bin:/usr/bin:/sbin:/usr/sbin",
-                              $subProg);
+        $path = FindProgram("$ENV{PATH}:/bin:/usr/bin:/sbin:/usr/sbin",
+                            $subProg) if ( !length($path) );
     }
-    $Conf{$Programs{$prog}} ||= $path;
+    $Conf{$Programs{$prog}} = $path if ( !length($Conf{$Programs{$prog}}) );
 }
 
 while ( 1 ) {
@@ -185,7 +230,9 @@ Please tell me the hostname of the machine that BackupPC will run on.
 EOF
 chomp($Conf{ServerHost} = `$Conf{HostnamePath}`)
         if ( defined($Conf{HostnamePath}) && !defined($Conf{ServerHost}) );
-$Conf{ServerHost} = prompt("--> BackupPC will run on host", $Conf{ServerHost});
+$Conf{ServerHost} = prompt("--> BackupPC will run on host",
+                           $Conf{ServerHost},
+                           "hostname");
 
 print <<EOF;
 
@@ -203,7 +250,8 @@ EOF
 my($name, $passwd, $Uid, $Gid);
 while ( 1 ) {
     $Conf{BackupPCUser} = prompt("--> BackupPC should run as user",
-                                 $Conf{BackupPCUser} || "backuppc");
+                                 $Conf{BackupPCUser} || "backuppc",
+                                 "username");
     ($name, $passwd, $Uid, $Gid) = getpwnam($Conf{BackupPCUser});
     last if ( $name ne "" );
     print <<EOF;
@@ -212,6 +260,7 @@ getpwnam() says that user $Conf{BackupPCUser} doesn't exist.  Please check the
 name and verify that this user is in the passwd file.
 
 EOF
+    exit(1) if ( $opts{batch} );
 }
 
 print <<EOF;
@@ -223,8 +272,13 @@ EOF
 
 while ( 1 ) {
     $Conf{InstallDir} = prompt("--> Install directory (full path)",
-                               $Conf{InstallDir});
+                               $Conf{InstallDir},
+                               "install-dir");
     last if ( $Conf{InstallDir} =~ /^\// );
+    if ( $opts{batch} ) {
+        print("Need to specify --install-dir for new installation\n");
+        exit(1);
+    }
 }
 
 print <<EOF;
@@ -237,8 +291,14 @@ PCs you expect to backup (eg: at least 1-2GB per machine).
 EOF
 
 while ( 1 ) {
-    $Conf{TopDir} = prompt("--> Data directory (full path)", $Conf{TopDir});
+    $Conf{TopDir} = prompt("--> Data directory (full path)",
+                           $Conf{TopDir},
+                           "data-dir");
     last if ( $Conf{TopDir} =~ /^\// );
+    if ( $opts{batch} ) {
+        print("Need to specify --data-dir for new installation\n");
+        exit(1);
+    }
 }
 
 if ( !defined($Conf{CompressLevel}) ) {
@@ -318,8 +378,14 @@ Leave this path empty if you don't want to install the CGI interface.
 EOF
 
 while ( 1 ) {
-    $Conf{CgiDir} = prompt("--> CGI bin directory (full path)", $Conf{CgiDir});
+    $Conf{CgiDir} = prompt("--> CGI bin directory (full path)",
+                           $Conf{CgiDir},
+                           "cgi-dir");
     last if ( $Conf{CgiDir} =~ /^\// || $Conf{CgiDir} eq "" );
+    if ( $opts{batch} ) {
+        print("Need to specify --cgi-dir for new installation\n");
+        exit(1);
+    }
 }
 
 if ( $Conf{CgiDir} ne "" ) {
@@ -339,13 +405,23 @@ The URL for the image directory should start with a slash.
 EOF
     while ( 1 ) {
 	$Conf{CgiImageDir} = prompt("--> Apache image directory (full path)",
-					$Conf{CgiImageDir});
+                                    $Conf{CgiImageDir},
+                                    "html-dir");
 	last if ( $Conf{CgiImageDir} =~ /^\// );
+        if ( $opts{batch} ) {
+            print("Need to specify --html-dir for new installation\n");
+            exit(1);
+        }
     }
     while ( 1 ) {
 	$Conf{CgiImageDirURL} = prompt("--> URL for image directory (omit http://host; starts with '/')",
-					$Conf{CgiImageDirURL});
+					$Conf{CgiImageDirURL},
+                                        "html-dir-url");
 	last if ( $Conf{CgiImageDirURL} =~ /^\// );
+        if ( $opts{batch} ) {
+            print("Need to specify --html-dir-url for new installation\n");
+            exit(1);
+        }
     }
 }
 
@@ -371,13 +447,13 @@ foreach my $dir ( qw(bin doc
 		     lib/BackupPC/Xfer
 		     lib/BackupPC/Zip
 		 ) ) {
-    next if ( -d "$Conf{InstallDir}/$dir" );
-    mkpath("$Conf{InstallDir}/$dir", 0, 0775);
-    if ( !-d "$Conf{InstallDir}/$dir"
-            || !chown($Uid, $Gid, "$Conf{InstallDir}/$dir") ) {
-        die("Failed to create or chown $Conf{InstallDir}/$dir\n");
+    next if ( -d "$DestDir$Conf{InstallDir}/$dir" );
+    mkpath("$DestDir$Conf{InstallDir}/$dir", 0, 0775);
+    if ( !-d "$DestDir$Conf{InstallDir}/$dir"
+            || !chown($Uid, $Gid, "$DestDir$Conf{InstallDir}/$dir") ) {
+        die("Failed to create or chown $DestDir$Conf{InstallDir}/$dir\n");
     } else {
-        print("Created $Conf{InstallDir}/$dir\n");
+        print("Created $DestDir$Conf{InstallDir}/$dir\n");
     }
 }
 
@@ -386,11 +462,11 @@ foreach my $dir ( qw(bin doc
 #
 foreach my $dir ( ($Conf{CgiImageDir}) ) {
     next if ( $dir eq "" || -d $dir );
-    mkpath($dir, 0, 0775);
-    if ( !-d $dir || !chown($Uid, $Gid, $dir) ) {
-        die("Failed to create or chown $dir");
+    mkpath("$DestDir$dir", 0, 0775);
+    if ( !-d "$DestDir$dir" || !chown($Uid, $Gid, "$DestDir$dir") ) {
+        die("Failed to create or chown $DestDir$dir");
     } else {
-        print("Created $dir\n");
+        print("Created $DestDir$dir\n");
     }
 }
 
@@ -398,30 +474,25 @@ foreach my $dir ( ($Conf{CgiImageDir}) ) {
 # Create $TopDir's top-level directories
 #
 foreach my $dir ( qw(. conf pool cpool pc trash log) ) {
-    mkpath("$Conf{TopDir}/$dir", 0, 0750) if ( !-d "$Conf{TopDir}/$dir" );
-    if ( !-d "$Conf{TopDir}/$dir"
-            || !chown($Uid, $Gid, "$Conf{TopDir}/$dir") ) {
-        die("Failed to create or chown $Conf{TopDir}/$dir\n");
+    mkpath("$DestDir$Conf{TopDir}/$dir", 0, 0750) if ( !-d "$DestDir$Conf{TopDir}/$dir" );
+    if ( !-d "$DestDir$Conf{TopDir}/$dir"
+            || !chown($Uid, $Gid, "$DestDir$Conf{TopDir}/$dir") ) {
+        die("Failed to create or chown $DestDir$Conf{TopDir}/$dir\n");
     } else {
-        print("Created $Conf{TopDir}/$dir\n");
+        print("Created $DestDir$Conf{TopDir}/$dir\n");
     }
 }
 
-printf("Installing binaries in $Conf{InstallDir}/bin\n");
+printf("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
 foreach my $prog ( qw(BackupPC BackupPC_dump BackupPC_link BackupPC_nightly
         BackupPC_sendEmail BackupPC_tarCreate BackupPC_trashClean
         BackupPC_tarExtract BackupPC_compressPool BackupPC_zcat
         BackupPC_archive BackupPC_archiveHost
         BackupPC_restore BackupPC_serverMesg BackupPC_zipCreate ) ) {
-    InstallFile("bin/$prog", "$Conf{InstallDir}/bin/$prog", 0555);
+    InstallFile("bin/$prog", "$DestDir$Conf{InstallDir}/bin/$prog", 0555);
 }
 
-#
-# Remove unused binaries from older versions
-#
-unlink("$Conf{InstallDir}/bin/BackupPC_queueAll");
-
-printf("Installing library in $Conf{InstallDir}/lib\n");
+printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(
 	BackupPC/Lib.pm
 	BackupPC/FileZIO.pm
@@ -461,25 +532,25 @@ foreach my $lib ( qw(
 	BackupPC/CGI/Summary.pm
 	BackupPC/CGI/View.pm
     ) ) {
-    InstallFile("lib/$lib", "$Conf{InstallDir}/lib/$lib", 0444);
+    InstallFile("lib/$lib", "$DestDir$Conf{InstallDir}/lib/$lib", 0444);
 }
 
 if ( $Conf{CgiImageDir} ne "" ) {
-    printf("Installing images in $Conf{CgiImageDir}\n");
+    printf("Installing images in $DestDir$Conf{CgiImageDir}\n");
     foreach my $img ( <images/*> ) {
 	(my $destImg = $img) =~ s{^images/}{};
-	InstallFile($img, "$Conf{CgiImageDir}/$destImg", 0444, 1);
+	InstallFile($img, "$DestDir$Conf{CgiImageDir}/$destImg", 0444, 1);
     }
 
     #
     # Install new CSS file, making a backup copy if necessary
     #
-    my $cssBackup = "$Conf{CgiImageDir}/BackupPC_stnd.css.pre-__VERSION__";
-    if ( -f "$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
-	rename("$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
+    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-__VERSION__";
+    if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
+	rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
     }
     InstallFile("conf/BackupPC_stnd.css",
-	        "$Conf{CgiImageDir}/BackupPC_stnd.css", 0444, 0);
+	        "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", 0444, 0);
 }
 
 printf("Making init.d scripts\n");
@@ -488,21 +559,21 @@ foreach my $init ( qw(gentoo-backuppc gentoo-backuppc.conf linux-backuppc
     InstallFile("init.d/src/$init", "init.d/$init", 0444);
 }
 
-printf("Installing docs in $Conf{InstallDir}/doc\n");
+printf("Installing docs in $DestDir$Conf{InstallDir}/doc\n");
 foreach my $doc ( qw(BackupPC.pod BackupPC.html) ) {
-    InstallFile("doc/$doc", "$Conf{InstallDir}/doc/$doc", 0444);
+    InstallFile("doc/$doc", "$DestDir$Conf{InstallDir}/doc/$doc", 0444);
 }
 
-printf("Installing config.pl and hosts in $Conf{TopDir}/conf\n");
-InstallFile("conf/hosts", "$Conf{TopDir}/conf/hosts", 0644)
-                    if ( !-f "$Conf{TopDir}/conf/hosts" );
+printf("Installing config.pl and hosts in $DestDir$Conf{TopDir}/conf\n");
+InstallFile("conf/hosts", "$DestDir$Conf{TopDir}/conf/hosts", 0644)
+                    if ( !-f "$DestDir$Conf{TopDir}/conf/hosts" );
 
 #
 # Now do the config file.  If there is an existing config file we
 # merge in the new config file, adding any new configuration
 # parameters and deleting ones that are no longer needed.
 #
-my $dest = "$Conf{TopDir}/conf/config.pl";
+my $dest = "$DestDir$Conf{TopDir}/conf/config.pl";
 my ($newConf, $newVars) = ConfigParse("conf/config.pl");
 my ($oldConf, $oldVars);
 if ( -f $dest ) {
@@ -656,9 +727,9 @@ if ( !defined($oldConf) ) {
 }
 
 if ( $Conf{CgiDir} ne "" ) {
-    printf("Installing cgi script BackupPC_Admin in $Conf{CgiDir}\n");
-    mkpath("$Conf{CgiDir}", 0, 0755);
-    InstallFile("cgi-bin/BackupPC_Admin", "$Conf{CgiDir}/BackupPC_Admin",
+    printf("Installing cgi script BackupPC_Admin in $DestDir$Conf{CgiDir}\n");
+    mkpath("$DestDir$Conf{CgiDir}", 0, 0755);
+    InstallFile("cgi-bin/BackupPC_Admin", "$DestDir$Conf{CgiDir}/BackupPC_Admin",
                 04554);
 }
 
@@ -705,9 +776,9 @@ EOF
 }
 
 eval "use File::RsyncP;";
-if ( !$@ && $File::RsyncP::VERSION < 0.50 ) {
+if ( !$@ && $File::RsyncP::VERSION < 0.51 ) {
     print("\nWarning: you need to upgrade File::RsyncP;"
-        . " I found $File::RsyncP::VERSION and BackupPC needs 0.50\n");
+        . " I found $File::RsyncP::VERSION and BackupPC needs 0.51\n");
 }
 
 exit(0);
@@ -764,10 +835,15 @@ sub InstallFile
 sub FindProgram
 {
     my($path, $prog) = @_;
+
+    if ( defined($opts{"bin-path"}{$prog}) ) {
+        return $opts{"bin-path"}{$prog};
+    }
     foreach my $dir ( split(/:/, $path) ) {
         my $file = File::Spec->catfile($dir, $prog);
         return $file if ( -x $file );
     }
+    return;
 }
 
 sub ConfigParse
@@ -864,3 +940,189 @@ sub ConfigMerge
     }
     return $res;
 }
+
+sub prompt
+{
+    my($question, $default, $option) = @_;
+
+    $default = $opts{$option} if ( defined($opts{$option}) );
+    if ( $opts{batch} ) {
+        print("$question [$default]\n");
+        return $default;
+    }
+    print("$question [$default]? ");
+    my $reply = <STDIN>;
+    $reply =~ s/[\n\r]*//g;
+    return $reply if ( $reply !~ /^$/ );
+    return $default;
+}
+
+__END__
+
+=head1 SYNOPSIS
+
+configure.pl [options]
+
+=head1 DESCRIPTION
+
+configure.pl is a script that is used to install or upgrade a BackupPC
+installation.  It is usually run interactively without arguments.  It
+also supports a batch mode where all the options can be specified
+via the command-line.
+
+For upgrading BackupPC you need to make sure that BackupPC is not
+running prior to running BackupPC.
+
+Typically configure.pl needs to run as the super user (root).
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<--batch>
+
+Run configure.pl in batch mode.  configure.pl will run without
+prompting the user.  The other command-line options are used
+to specify the settings that the user is usually prompted for.
+
+=item B<--bin-path PROG=PATH>
+
+Specify the path for various external programs that BackupPC
+uses.  Several --bin-path options may be specified.  configure.pl
+usually finds sensible defaults based on searching the PATH.
+The format is:
+
+    --bin-path PROG=PATH
+
+where PROG is one of perl, tar, smbclient, nmblookup, rsync, ping,
+df, ssh, sendmail, hostname, split, par2, cat, gzip, bzip2 and
+PATH is that full path to that program.
+
+Examples
+
+    --bin-path cat=/bin/cat --bin-path bzip2=/home/user/bzip2
+
+=item B<--config-path CONFIG_PATH>
+
+Path to the existing config.pl configuration file for BackupPC.
+This option should be specified for batch upgrades to an
+existing installation.  The option should be omitted when
+doing a batch new install.
+
+=item B<--cgi-dir CGI_DIR>
+
+Path to Apache's cgi-bin directory where the BackupPC_Admin
+script will be installed.  This option only needs to be
+specified for a batch new install.
+
+=item B<--data-dir DATA_DIR>
+
+Path to the BackupPC data directory.  This is where all the backup
+data is stored, and it should be on a large file system. This option
+only needs to be specified for a batch new install.
+
+Example:
+
+    --data-dir /data/BackupPC
+
+=item B<--dest-dir DEST_DIR>
+
+An optional prefix to apply to all installation directories.
+Usually this is not needed, but certain auto-installers like
+to stage an install in a temporary directory, and then copy
+the files to their real destination.  This option can be used
+to specify the temporary directory prefix.  Note that if you
+specify this option, BackupPC won't run correctly if you try
+to run it from below the --dest-dir directory, since all the
+paths are set assuming BackupPC is installed in the intended
+final locations.
+
+=item B<--help|?>
+
+Print a brief help message and exits.
+
+=item B<--hostname HOSTNAME>
+
+Host name (this machine's name) on which BackupPC is being installed.
+This option only needs to be specified for a batch new install.
+
+=item B<--html-dir HTML_DIR>
+
+Path to an Apache html directory where various BackupPC image files
+and the CSS files will be installed.  This is typically a directory
+below Apache's DocumentRoot directory.  This option only needs to be
+specified for a batch new install.
+
+Example:
+
+    --html-dir /usr/local/apache/htdocs/BackupPC
+
+=item B<--html-dir-url URL>
+
+The URL (without http://hostname) required to access the BackupPC html
+directory specified with the --html-dir option.  This option only needs
+to be specified for a batch new install.
+
+Example:
+
+    --html-dir-url /BackupPC
+
+=item B<--install-dir INSTALL_DIR>
+
+Installation directory for BackupPC scripts, libraries, and
+documentation.  This option only needs to be specified for a
+batch new install.
+
+Example:
+
+    --install-dir /usr/local/BackupPC
+
+=item B<--man>
+
+Prints the manual page and exits.
+
+=item B<--uid-ignore>
+
+configure.pl verifies that the script is being run as the super user
+(root).  Without the --uid-ignore option, in batch mode the script will
+exit with an error if not run as the super user, and in interactive mode
+the user will be prompted.  Specifying this option will cause the script
+to continue even if the user id is not root.
+
+=head1 EXAMPLES
+
+For a standard interactive install, run without arguments:
+
+    configure.pl
+
+For a batch new install you need to specify answers to all the
+questions that are normally prompted:
+
+    configure.pl                                   \
+        --batch                                    \
+        --cgi-dir /var/www/cgi-bin/BackupPC        \
+        --data-dir /data/BackupPC                  \
+        --hostname myHost                          \
+        --html-dir /var/www/html/BackupPC          \
+        --html-dir-url /BackupPC                   \
+        --install-dir /usr/local/BackupPC
+
+For a batch upgrade, you only need to specify the path to the
+configuration file:
+        
+    configure.pl --batch --config-path /data/BackupPC/conf/config.pl
+
+=head1 AUTHOR
+
+Craig Barratt <cbarratt@users.sourceforge.net>
+
+=head1 COPYRIGHT
+
+Copyright (C) 2001-2004  Craig Barratt.
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+=cut

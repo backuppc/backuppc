@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta1, released 9 Apr 2004.
+# Version 2.1.0beta2, released 9 May 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,9 +38,32 @@
 package BackupPC::Xfer::RsyncDigest;
 
 use strict;
+use BackupPC::FileZIO;
 
 use vars qw( $RsyncLibOK );
 use Carp;
+require Exporter;
+use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
+
+my $Log = \&logHandler;
+
+#
+# Magic value for checksum seed.  We only cache block and file digests
+# when the checksum seed matches this value.
+#
+use constant RSYNC_CSUMSEED_CACHE     => 32761;
+
+@ISA = qw(Exporter);
+
+@EXPORT    = qw( );
+
+@EXPORT_OK = qw(
+                  RSYNC_CSUMSEED_CACHE
+             );
+
+%EXPORT_TAGS = (
+    'all'    => [ @EXPORT_OK ],
+);
 
 BEGIN {
     eval "use File::RsyncP;";
@@ -72,25 +95,53 @@ sub blockSize
     return $blkSize;
 }
 
+sub fileDigestIsCached
+{
+    my($class, $file) = @_;
+    my $data;
+
+    open(my $fh, "<", $file) || return -1;
+    binmode($fh);
+    return -2 if ( sysread($fh, $data, 1) != 1 );
+    close($fh);
+    return $data eq chr(0xd6) ? 1 : 0;
+}
+
 #
 # Compute and add rsync block and file digests to the given file.
 #
+# Empty files don't get cached checksums.
+#
+# If verify is set then existing cached checksums are checked.
+# 
+# Returns 0 on success.  Returns 1 on good verify and 2 on bad verify.
+# Returns a variety of negative values on error.
+#
 sub digestAdd
 {
-    my($class, $file, $blockSize, $checksumSeed) = @_;
+    my($class, $file, $blockSize, $checksumSeed, $verify) = @_;
+    my $retValue = 0;
+
+    #
+    # Don't cache checksums if the checksumSeed is not RSYNC_CSUMSEED_CACHE
+    # or if the file is empty.
+    #
+    return -100 if ( $checksumSeed != RSYNC_CSUMSEED_CACHE || !-s $file );
+
     if ( $blockSize == 0 ) {
-	print("bogus digestAdd($file, $blockSize, $checksumSeed)\n");
+	&$Log("digestAdd: bad blockSize ($file, $blockSize, $checksumSeed)");
 	$blockSize = 2048;
     }
     my $nBlks = int(65536 * 16 / $blockSize) + 1;
     my($data, $blockDigest, $fileDigest);
 
-    return if ( !$RsyncLibOK );
+    return -101 if ( !$RsyncLibOK );
 
     my $digest = File::RsyncP::Digest->new;
     $digest->add(pack("V", $checksumSeed)) if ( $checksumSeed );
 
-    return -1 if ( !defined(my $fh = BackupPC::FileZIO->open($file, 0, 1)) );
+    return -102 if ( !defined(my $fh = BackupPC::FileZIO->open($file, 0, 1)) );
+
     while ( 1 ) {
         $fh->read(\$data, $nBlks * $blockSize);
         last if ( $data eq "" );
@@ -113,24 +164,73 @@ sub digestAdd
 #                                            length($metaData),
 #                                            $file,
 #                                            $eofPosn);
-    open(my $fh2, "+<", $file) || return -2;
+    open(my $fh2, "+<", $file) || return -103;
     binmode($fh2);
-    return -3 if ( sysread($fh2, $data, 1) != 1 );
+    return -104 if ( sysread($fh2, $data, 1) != 1 );
     if ( $data ne chr(0x78) && $data ne chr(0xd6) ) {
-        printf("Unexpected first char 0x%x\n", ord($data));
-        return -4;
+        &$Log(sprintf("digestAdd: $file has unexpected first char 0x%x",
+                             ord($data)));
+        return -105;
     }
-    return -5 if ( sysseek($fh2, $eofPosn, 0) != $eofPosn );
-    return -6 if ( syswrite($fh2, $data2) != length($data2) );
-    return -7 if ( !defined(sysseek($fh2, 0, 0)) );
-    return -8 if ( syswrite($fh2, chr(0xd6)) != 1 );
+    return -106 if ( sysseek($fh2, $eofPosn, 0) != $eofPosn );
+    if ( $verify ) {
+        my $data3;
+
+        #
+        # Verify the cached checksums
+        #
+        return -107 if ( $data ne chr(0xd6) );
+        return -108 if ( sysread($fh2, $data3, length($data2) + 1) < 0 );
+        if ( $data2 eq $data3 ) {
+            return 1;
+        }
+        #
+        # Checksums don't agree - fall through so we rewrite the data
+        #
+        &$Log("digestAdd: $file verify failed; redoing checksums");
+        return -109 if ( sysseek($fh2, $eofPosn, 0) != $eofPosn );
+        $retValue = 2;
+    }
+    return -110 if ( syswrite($fh2, $data2) != length($data2) );
+    if ( $verify ) {
+        #
+        # Make sure there is no extraneous data on the end of
+        # the file.  Seek to the end and truncate if it doesn't
+        # match our expected length.
+        #
+        return -111 if ( !defined(sysseek($fh2, 0, 2)) );
+        if ( tell($fh2) != $eofPosn + length($data2) ) {
+            if ( !truncate($fh2, $eofPosn + length($data2)) ) {
+                &$Log(sprintf("digestAdd: $file truncate from %d to %d failed",
+                                tell($fh2), $eofPosn + length($data2)));
+                return -112;
+            } else {
+                &$Log(sprintf("digestAdd: $file truncated from %d to %d",
+                                tell($fh2), $eofPosn + length($data2)));
+            }
+        }
+    }
+    return -113 if ( !defined(sysseek($fh2, 0, 0)) );
+    return -114 if ( syswrite($fh2, chr(0xd6)) != 1 );
     close($fh2);
+    return $retValue;
 }
 
 #
 # Return rsync checksums for the given file.  We read the cached checksums
 # if they exist and the block size and checksum seed match.  Otherwise
 # we compute the checksums from the file contents.
+#
+# The doCache flag can take three ranges:
+#
+#  - doCache <  0: don't generate/use cached checksums
+#  - doCache == 0: don't generate, but do use cached checksums if available
+#  - doCache >  0: generate (if necessary) and use cached checksums
+#
+# Note: caching is only enabled when compression is on and the
+# checksum seed is RSYNC_CSUMSEED_CACHE (32761).
+#
+# Returns 0 on success.  Returns a variety of negative values on error.
 #
 sub digestStart
 {
@@ -141,20 +241,23 @@ sub digestStart
 
     my $data;
 
-    my $fio = bless {
+    my $dg = bless {
         name     => $fileName,
         needMD4  => $needMD4,
         digest   => File::RsyncP::Digest->new,
     }, $class;
 
-    if ( $fileSize > 0 && $compress ) {
+    if ( $fileSize > 0 && $compress && $doCache >= 0 ) {
         open(my $fh, "<", $fileName) || return -2;
         binmode($fh);
         return -3 if ( read($fh, $data, 1) != 1 );
-        if ( $data eq chr(0x78) && $doCache && $checksumSeed == 32761 ) {
+        my $ret;
+
+        if ( $data eq chr(0x78) && $doCache > 0
+                     && $checksumSeed == RSYNC_CSUMSEED_CACHE ) {
             #
-            # 32761 is the magic number that rsync uses for checksumSeed
-            # with the --fixed-csum option.
+            # RSYNC_CSUMSEED_CACHE (32761) is the magic number that
+            # rsync uses for checksumSeed with the --fixed-csum option.
             #
             # We now add the cached checksum data to the file.  There
             # is a possible race condition here since two BackupPC_dump
@@ -164,48 +267,57 @@ sub digestStart
             # in which they write it doesn't matter.
             #
             close($fh);
-            $fio->digestAdd($fileName,
-                    $blockSize
-			|| BackupPC::Xfer::RsyncDigest->blockSize($fileSize,
-							    $defBlkSize),
-                    $checksumSeed);
+            $ret = $dg->digestAdd($fileName,
+                            $blockSize
+                                || BackupPC::Xfer::RsyncDigest->blockSize(
+                                                    $fileSize, $defBlkSize),
+                                $checksumSeed);
+            if ( $ret < 0 ) {
+                &$Log("digestAdd($fileName) failed ($ret)");
+            }
             #
             # now re-open the file and re-read the first byte
             #
-            open($fh, "<", $fileName) || return -2;
+            open($fh, "<", $fileName) || return -4;
             binmode($fh);
-            return -3 if ( read($fh, $data, 1) != 1 );
+            return -5 if ( read($fh, $data, 1) != 1 );
         }
-        if ( $data eq chr(0xd6) ) {
+        if ( $ret >= 0 && $data eq chr(0xd6) ) {
             #
             # Looks like this file has cached checksums
             # Read the last 48 bytes: that's 2 file MD4s (32 bytes)
             # plus 4 words of meta data
             #
-            return -4 if ( !defined(seek($fh, -48, 2)) ); 
-            return -5 if ( read($fh, $data, 48) != 48 );
-            ($fio->{md4DigestOld},
-             $fio->{md4Digest},
-             $fio->{blockSize},
-             $fio->{checksumSeed},
-             $fio->{nBlocks},
-             $fio->{magic}) = unpack("a16 a16 V V V V", $data);
-            if ( $fio->{magic} == 0x5fe3c289
-                    && $fio->{checksumSeed} == $checksumSeed
-                    && ($blockSize == 0 || $fio->{blockSize} == $blockSize) ) {
-                $fio->{fh}     = $fh;
-                $fio->{cached} = 1;
+            return -6 if ( !defined(seek($fh, -48, 2)) ); 
+            return -7 if ( read($fh, $data, 48) != 48 );
+            ($dg->{md4DigestOld},
+             $dg->{md4Digest},
+             $dg->{blockSize},
+             $dg->{checksumSeed},
+             $dg->{nBlocks},
+             $dg->{magic}) = unpack("a16 a16 V V V V", $data);
+            if ( $dg->{magic} == 0x5fe3c289
+                    && $dg->{checksumSeed} == $checksumSeed
+                    && ($blockSize == 0 || $dg->{blockSize} == $blockSize) ) {
+                $dg->{fh}     = $fh;
+                $dg->{cached} = 1;
+                #
+                # position the file at the start of the rsync block checksums
+                # (4 (adler) + 16 (md4) bytes each)
+                #
+                return -8
+                    if ( !defined(seek($fh, -$dg->{nBlocks}*20 - 48, 2)) );
             } else {
+                #
+                # cached checksums are not valid, so we close the
+                # file and treat it as uncached.
+                #
+                $dg->{cachedInvalid} = 1;
                 close($fh);
             }
-            #
-            # position the file at the start of the rsync block checksums
-            # (4 (adler) + 16 (md4) bytes each)
-            #
-            return -6 if ( !defined(seek($fh, -$fio->{nBlocks}*20 - 48, 2)) );
         }
     }
-    if ( !$fio->{cached} ) {
+    if ( !$dg->{cached} ) {
         #
         # This file doesn't have cached checksums, or the checksumSeed
         # or blocksize doesn't match.  Open the file and prepare to
@@ -214,70 +326,104 @@ sub digestStart
         $blockSize
 	    = BackupPC::Xfer::RsyncDigest->blockSize($fileSize, $defBlkSize)
 				    if ( $blockSize == 0 );
-        $fio->{checksumSeed} = $checksumSeed;
-        $fio->{blockSize}    = $blockSize;
-        $fio->{fh} = BackupPC::FileZIO->open($fileName, 0, $compress);
-        return -7 if ( !defined($fio->{fh}) );
+        $dg->{checksumSeed} = $checksumSeed;
+        $dg->{blockSize}    = $blockSize;
+        $dg->{fh} = BackupPC::FileZIO->open($fileName, 0, $compress);
+        return -9 if ( !defined($dg->{fh}) );
         if ( $needMD4) {
-            $fio->{csumDigest} = File::RsyncP::Digest->new;
-            $fio->{csumDigest}->add(pack("V", $fio->{checksumSeed}));
+            $dg->{csumDigest} = File::RsyncP::Digest->new;
+            $dg->{csumDigest}->add(pack("V", $dg->{checksumSeed}));
         }
     }
-    return (undef, $fio, $fio->{blockSize});
+    return (undef, $dg, $dg->{blockSize});
 }
 
 sub digestGet
 {
-    my($fio, $num, $csumLen) = @_;
+    my($dg, $num, $csumLen, $noPad) = @_;
     my($fileData);
-    my $blockSize = $fio->{blockSize};
+    my $blockSize = $dg->{blockSize};
 
-    if ( $fio->{cached} ) {
+    if ( $dg->{cached} ) {
         my $thisNum = $num;
-        $thisNum = $fio->{nBlocks} if ( $thisNum > $fio->{nBlocks} );
-        read($fio->{fh}, $fileData, 20 * $thisNum);
-        $fio->{nBlocks} -= $thisNum;
-        if ( $thisNum < $num ) {
+        $thisNum = $dg->{nBlocks} if ( $thisNum > $dg->{nBlocks} );
+        read($dg->{fh}, $fileData, 20 * $thisNum);
+        $dg->{nBlocks} -= $thisNum;
+        if ( $thisNum < $num && !$noPad) {
             #
             # unexpected shortfall of data; pad with zero digest
             #
             $fileData .= pack("c", 0) x (20 * ($num - $thisNum));
         }
-        return $fio->{digest}->blockDigestExtract($fileData, $csumLen);
+        return $dg->{digest}->blockDigestExtract($fileData, $csumLen);
     } else {
-        if ( $fio->{fh}->read(\$fileData, $blockSize * $num) <= 0 ) {
+        if ( $dg->{fh}->read(\$fileData, $blockSize * $num) <= 0 ) {
             #
             # unexpected shortfall of data; pad with zeros
             #
-            $fileData = pack("c", 0) x ($blockSize * $num);
+            $fileData = pack("c", 0) x ($blockSize * $num) if ( !$noPad );
         }
-        $fio->{csumDigest}->add($fileData) if ( $fio->{needMD4} );
-        return $fio->{digest}->blockDigest($fileData, $blockSize,
-                                           $csumLen, $fio->{checksumSeed});
+        $dg->{csumDigest}->add($fileData) if ( $dg->{needMD4} );
+        return $dg->{digest}->blockDigest($fileData, $blockSize,
+                                           $csumLen, $dg->{checksumSeed});
     }
 }
 
 sub digestEnd
 {
-    my($fio) = @_;
+    my($dg, $skipMD4) = @_;
     my($fileData);
 
-    if ( $fio->{cached} ) {
-        close($fio->{fh});
-        return $fio->{md4DigestOld} if ( $fio->{needMD4} );
+    if ( $dg->{cached} ) {
+        close($dg->{fh});
+        return $dg->{md4DigestOld} if ( $dg->{needMD4} );
     } else {
         #
         # make sure we read the entire file for the file MD4 digest
         #
-        if ( $fio->{needMD4} ) {
+        if ( $dg->{needMD4} && !$skipMD4 ) {
             my $fileData;
-            while ( $fio->{fh}->read(\$fileData, 65536) > 0 ) {
-                $fio->{csumDigest}->add($fileData);
+            while ( $dg->{fh}->read(\$fileData, 65536) > 0 ) {
+                $dg->{csumDigest}->add($fileData);
             }
         }
-        $fio->{fh}->close();
-        return $fio->{csumDigest}->digest if ( $fio->{needMD4} );
+        $dg->{fh}->close();
+        return $dg->{csumDigest}->digest if ( $dg->{needMD4} );
     }
+}
+
+sub isCached
+{
+    my($dg) = @_;
+ 
+    return wantarray ? ($dg->{cached}, $dg->{cachedInvalid}) : $dg->{cached};
+}
+
+sub blockSizeCurr
+{
+    my($dg) = @_;
+ 
+    return $dg->{blockSize};
+}
+
+#
+# Default log handler
+#
+sub logHandler
+{
+    my($str) = @_;
+
+    print(STDERR $str, "\n");
+}
+
+#
+# Set log handler to a new subroutine.
+#
+sub logHandlerSet
+{
+    my($sub) = @_;
+
+    $Log = $sub;
 }
 
 1;

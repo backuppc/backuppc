@@ -42,8 +42,8 @@ use Getopt::Std;
 
 umask(0022);
 
-my $Version     = "2.1.0beta1";
-my $ReleaseDate = "9 Apr 2004";
+my $Version     = "2.1.0beta2";
+my $ReleaseDate = "20 May 2004";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -235,13 +235,13 @@ sub InstallFile
 		#
 		# fixup for perl 5.6.x
 		#
-		if ( !/A NAME="item_%24Conf/i ) {
+		if ( !/A NAME="item_(%|_)24Conf/i ) {
 		    s/\$Conf{([^}]*)}/
 			defined($ConfName{$1})
 			    ? "\L<A HREF=\"#$ConfName{$1}\">\E\$Conf{$1}<\/A>"
 			    : "\$Conf{$1}"/eg;
 		}
-		s/<(A NAME="item_%24Conf%7B.*?%7D).*?">/\L<$1">/ig;
+		s/<(A NAME="item_(%|_)24Conf(%|_)7B(.*?)(%|_)7D).*?">/\L<A NAME="item_%24Conf%7b$4%7d">/ig;
 		s/^<DD>/<DD><P>/;
 		#
 		# fixup for perl 5.8.x
@@ -407,6 +407,7 @@ sub CheckLangUsage
             s/\$Lang{([^}]*)}/
 		    my $var = $1;
 		    next if ( $var =~ m{^(Reason_|Status_|backupType_)} );
+		    next if ( $var eq "Documentation" );
                     if ( !defined($vars->{$var}) ) {
                         print("Unexpected Lang var $var in $f\n");
                         $errors++;

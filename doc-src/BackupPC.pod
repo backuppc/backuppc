@@ -204,6 +204,13 @@ Three BackupPC mailing lists exist for announcements (backuppc-announce),
 developers (backuppc-devel), and a general user list for support, asking
 questions or any other topic relevant to BackupPC (backuppc-users).
 
+The lists are archived on SourceForge and Gmane.  The SourceForge lists
+are not always up to date and the searching is limited, so Gmane is
+a good alternative.  See:
+
+    http://news.gmane.org/index.php?prefix=gmane.comp.sysutils.backup.backuppc
+    http://sourceforge.net/mailarchive/forum.php?forum_id=503
+
 You can subscribe to these lists by visiting:
 
     http://lists.sourceforge.net/lists/listinfo/backuppc-announce
@@ -267,12 +274,30 @@ releases of BackupPC:
 
 =item *
 
-Develop a FAQ and move some significant parts of this document
-to the FAQ (eg: ssh setup, this roadmap etc).  Volunteers?
+Adding hardlink support to rsync.  Currently the tar XferMethod
+correctly saves/restores hardlinks, but rsync does not.  Rsync
+2.6.2 has greatly improved the efficiency of saving hardlink
+information, so File::RsyncP and BackupPC::Xfer::RsyncFileIO need
+the corresponding changes.  Hardlink support is necessary for
+doing a bare-metal restore of a *nix system.
 
 =item *
 
-Adding hardlink support to rsync.
+Adding more complete utf8 support.  BackupPC should use utf8 as the
+native charset for storing file names, and the CGI script should emit
+utf8 so that the file names can be rendered correctly.  Additional
+configuration parameters should allow you to specify the client Xfer
+charset (ie: the filcharset delivered by the XferMethod).  BackupPC
+should encode/decode between this charset and utf8 when doing a
+backup/restore. That way BackupPC can store all files in utf8 no
+matter what charset is used by the XferMethod to deliver the file
+names.  Secondly, the CGI charset should be configurable (default
+utf8) and the CGI script BackupPC_Admin should encode the utf8 file
+names in the desired output charset.  Finally, the charset used to
+deliver file names when restoring individual file names should also
+be configurable, and again BackupPC_Admin should encode the file
+names in this charset (again, utf8 default).  That should allow the
+"Save As" IE dialog to default to the correct file name.
 
 =item *
 
@@ -297,6 +322,17 @@ be specified (eg: MySQL, ascii text etc).
 
 =item *
 
+Because of file name mangling (adding "f" to start of each file
+name) and with pending utf8 changes, BackupPC is not able to
+store files whose file name length is 255 bytes or greater. The
+format of the attrib file should be extended so that very long
+file names (ie: >= 255) are abbreviated on the file system, but
+the full name is stored in the attrib file.  This could also be
+used to eliminate the leading "f", since that is there to avoid
+collisions with the attrib file.
+
+=item *
+
 Replacing smbclient with the perl module FileSys::SmbClient.  This
 gives much more direct control of the smb transfer, allowing
 incrementals to depend on any attribute change (eg: exist, mtime,
@@ -304,71 +340,42 @@ file size, uid, gid), and better support for include and exclude.
 Currently smbclient incrementals only depend upon mtime, so
 deleted files or renamed files are not detected.  FileSys::SmbClient
 would also allow resuming of incomplete full backups in the
-same manner as rsync will.  (I'm not sure if FileSys::SmbClient
-has been updated for samba 3.x.)
+same manner as rsync will.
 
 =item *
 
-Possibly support --listed-incremental or --incremental for tar, so that
-incrementals will depend upon any attribute change (eg: exist, mtime,
-file size, uid, gid), rather than just mtime.  This will allow tar to
-be to as capable as FileSys::SmbClient and rsync.
+Support --listed-incremental or --incremental for tar,
+so that incrementals will depend upon any attribute change (eg: exist,
+mtime, file size, uid, gid), rather than just mtime.  This will allow
+tar to be to as capable as FileSys::SmbClient and rsync.  This is
+low priority since rsync is really the preferred method.
+
+=item *
+
+In addition to allowing a specific backup (incremental or full) to
+be started from the CGI interface, also allow a "regular" backup
+to be started.  This would behave just like a regular background
+backup and determine whether a full, incremental or nothing
+should be done.
 
 =item *
 
 For rysnc (and smb when FileSys::SmbClient is supported, and tar when
 --listed-incremental is supported) support multi-level incrementals.
 In fact, since incrementals will now be more "accurate", you could
-choose to never to full dumps (except the first time), or at a
+choose to never do full backups (except the first time), or at a
 minimum do them infrequently: each incremental would depend upon
-the last, giving a continuous chain of differential dumps.
+the last, giving a continuous chain of differential backups.
 
 =item *
 
-Improve the warning messages about locked files on WinXX machines,
-so that more file types than just outlook pst files will produce
-warning emails (and configuration settings for specifying the
-file extensions that produce email warngings).
-
-=item *
-
-Long term, support bare metal restore.  For *nix machines there's
-not a lot to do (althought rsync needs hardlink support).  For
-WinXX machines the file locking problem has to get resolved.
-Plus ACL save/restore would need to be supported.  This is
-really long term.
-
-=item *
-
-Support client pull for restores.  For example, BackupPC could
-emulate an rsync server.  That way you could boot a knoppix cd,
-and you wouldn't need perl, BackupPC, ssh setup or anything on
-the client to restore.  You would just run an rsync command like:
-
-    rsync -aH BackupPCServer::moduleName /path/to/emtpy/disk
-
-ModuleName could contain the client name, share name and backup number.
-There would have to be some way of specifying the password; perhaps
-the CGI could be used to "turn on" rsynd for a specific client and
-a specific time period (eg: only listens for X minutes, only serves
-up a specific client backup, accepts connections from a specific IP).
-BackupPC listens for and serves the request; it's not a real rsyncd on
-the server.
-
-=item *
-
-Add support for wget as an XferMethod.  This would allow ftp and http
-files to be backed up.  This might be useful, for example, for backing
-up the configuration of a router (via http), so that you have a
-backup copy of all the router setup screens in case the router
-fails.
-
-=item *
-
-Possibly support client push for backups, in addition to the
-existing server pull.  This would be helpful for clients behind
-firewalls who can connect to the server, but the server cannot
-see the client.
+Allow diffs between two different backed up files to be displayed.
+The history feature in 2.1.0 does show files that are the same
+between backups.  Most often we would like to just take the diff of
+the same host, path and file between different backups, but it would
+be nice to generalize it to any pair of files (ie: different hosts,
+backups, paths etc).  But I'm not sure how the user interface would
+look.
 
 =item *
 
@@ -381,7 +388,7 @@ around 15-20%, which isn't spectacular, and likely not worth the
 implementation effort. The program xdelta (v1) on SourceForge (see
 L<http://sourceforge.net/projects/xdelta>) uses an rsync algorithm for
 doing efficient binary file deltas.  Rather than using an external
-program, File::RsyncP will eventually get the necessary delta
+program, File::RsyncP would eventually get the necessary delta
 generation code from rsync.
 
 =back
@@ -407,7 +414,7 @@ time and money) for marketing, PR and advertising, so it's up to
 all of you!
 
 Also, everyone is encouraged to contribute patches, bug reports, feature
-and design suggestions, code, and documentation corrections or
+and design suggestions, new code, and documentation corrections or
 improvements.
 
 =head1 Installing BackupPC
@@ -443,8 +450,8 @@ compression is on.
 =item *
 
 Perl version 5.6.0 or later. BackupPC has been tested with
-version 5.6.0, 5.6.1 and 5.8.0. If you don't have perl, please
-see L<http://www.cpan.org>.
+version 5.6.0, 5.6.1, 5.8.0, 5.8.1 and 5.8.2. If you don't
+have perl, please see L<http://www.cpan.org>.
 
 =item *
 
@@ -465,6 +472,7 @@ you are backing up linux/unix DHCP machines.  See L<http://www.samba.org>.
 Version 2.2.0 or later of Samba is required (smbclient's tar feature in
 2.0.8 and prior has bugs for file path lengths around 100 characters
 and generates bad output when file lengths change during the backup).
+Samba versions 3.x are stable and recommended instead of 2.x.
 
 See L<http://www.samba.org> for source and binaries.  It's pretty easy to
 fetch and compile samba, and just grab smbclient and nmblookup, without
@@ -488,7 +496,8 @@ version.
 
 For BackupPC to use Rsync you will also need to install the perl
 File::RsyncP module, which is available from
-L<http://perlrsync.sourceforge.net>.  Version 0.44 or later is required.
+L<http://perlrsync.sourceforge.net>.
+Version 0.51 or later is required.
 
 =item *
 
@@ -600,8 +609,16 @@ BackupPC-__VERSION__.tar.gz, run these commands as root:
     cd BackupPC-__VERSION__
     perl configure.pl
 
-You will be prompted for the full paths of various executables, and
-you will be prompted for the following information:
+The configure.pl also accepts command-line options if you wish
+to run it in a non-interactive manner.  It has self-contained
+documentation for all the command-line options, which you can
+read with perldoc:
+
+    perldoc configure.pl
+
+When you run configure.pl you will be prompted for the full paths
+of various executables, and you will be prompted for the following
+information:
 
 =over 4
 
@@ -2308,15 +2325,6 @@ any files in the pool that only have a single hard link (meaning no backups
 are using that file).  Again, to avoid race conditions, BackupPC_nightly
 is only run when there are no BackupPC_dump or BackupPC_link processes
 running.
-
-To improve the running time for BackupPC_nightly, several
-BackupPC_nightly processes can be run concurrently, based on
-the $Conf{MaxBackupPCNightlyJobs} setting.
-
-If BackupPC_nightly still takes too long to run,
-$Conf{BackupPCNightlyPeriod} can be used to split
-BackupPC_nightly's pool traversal across multiple nights,
-proportionally reducing its runtime each night.
 
 =back
 

@@ -6,37 +6,36 @@
 
 # --------------------------------
 
-$Lang{Start_Archive} = "ENG Start Archive";
-$Lang{Stop_Dequeue_Archive} = "ENG Stop/Dequeue Archive";
+$Lang{Start_Archive} = "Comenzar archivado";
+$Lang{Stop_Dequeue_Archive} = "Parar/anular archivado";
 $Lang{Start_Full_Backup} = "Comenzar copia de seguridad completa";
 $Lang{Start_Incr_Backup} = "Comenzar copia de seguridad incremental";
 $Lang{Stop_Dequeue_Backup} = "Parar/anular copia de seguridad";
 $Lang{Restore} = "Restaurar";
 
-$Lang{Type_full} = "ENG full";
-$Lang{Type_incr} = "ENG incremental";
+$Lang{Type_full} = "completo";
+$Lang{Type_incr} = "incremental";
 
 # -----
 
-$Lang{Only_privileged_users_can_view_admin_options} = "ENG Only privileged users can view admin options.";
-$Lang{H_Admin_Options} = "ENG BackupPC Server: Admin Options";
-$Lang{Admin_Options} = "ENG Admin Options";
+$Lang{Only_privileged_users_can_view_admin_options} = "Sólo los superusuarios pueden ver las opciones de administración.";
+$Lang{H_Admin_Options} = "Servidor BackupPC: Opciones de administración";
+$Lang{Admin_Options} = "Opciones de administración";
 $Lang{Admin_Options_Page} = <<EOF;
-ENG
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
-\${h2("Server Control")}
+\${h2("Control del Servidor")}
 <form action="\$MyURL" method="get">
 <table>
-<!--<tr><td>Stop the server:<td><input type="submit" name="action" value="Stop">-->
-  <tr><td>Reload the server configuration:<td><input type="submit" name="action" value="Reload">
+<!--<tr><td>Para el servidor:<td><input type="submit" name="action" value="Stop">-->
+  <tr><td>Actualizar configuración del servidor:<td><input type="submit" name="action" value="Reload">
 </table>
 </form>
 <!--
 \${h2("Server Configuration")}
 <ul> 
-  <li><i>Other options can go here... e.g.,</i>
-  <li>Edit server configuration
+  <li><i>Espacio para otras opciones... e.j.,</i>
+  <li>Editar configuración del servidor
 </ul>
 -->
 EOF
@@ -47,11 +46,11 @@ $Lang{Unable_to_connect_to_BackupPC_server} = "Imposible conectar al servidor Ba
             "Quizá el servidor BackupPC no está activo o hay un "
           . " error de configuración. Por favor informe a su administrador de sistemas.";
 $Lang{Admin_Start_Server} = <<EOF;
-ENG\${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
+\${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">
-The BackupPC server at <tt>\$Conf{ServerHost}</tt> port <tt>\$Conf{ServerPort}</tt>
-is not currently running (maybe you just stopped it, or haven't yet started it).<br>
-Do you want to start it?
+El servidor BackupPC en <tt>\$Conf{ServerHost}</tt> port <tt>\$Conf{ServerPort}</tt>
+no está en funcionamiento ahora (puede haberlo detenido o no haberlo arrancado aún).<br>
+¿Quiere inicializarlo?
 <input type="hidden" name="action" value="startServer">
 <input type="submit" value="Start Server" name="ignore">
 </form>
@@ -61,17 +60,14 @@ EOF
 
 $Lang{H_BackupPC_Server_Status} = "Estado del Servidor BackupPC";
 
-$Lang{BackupPC_Server_Status}= <<EOF;
-\${h1(qq{$Lang{H_BackupPC_Server_Status}})}
-
-<p>
+$Lang{BackupPC_Server_Status_General_Info}= <<EOF;
 \${h2(\"Información General del servidor\")}
 
 <ul>
 <li> El PID del servidor es \$Info{pid}, en el host \$Conf{ServerHost},
      version \$Info{Version}, iniciado el \$serverStartTime.
 <li> Esta información de estado se ha generado el \$now.
-<li> ENG The configuration was last loaded at \$configLoadTime
+<li> La última configuración ha sido cargada a las \$configLoadTime
 <li> La cola de PC´s se activará de nuevo el \$nextWakeupTime.
 <li> Información adicional:
     <ul>
@@ -84,6 +80,13 @@ $Lang{BackupPC_Server_Status}= <<EOF;
             y el máximo de ayer era \$Info{DUDailyMaxPrev}%.
     </ul>
 </ul>
+EOF
+
+$Lang{BackupPC_Server_Status} = <<EOF;
+\${h1(qq{$Lang{H_BackupPC_Server_Status}})}
+
+<p>
+\$generalInfo
 
 \${h2("Trabajos en Ejecución")}
 <p>
@@ -116,7 +119,7 @@ EOF
 
 # --------------------------------
 $Lang{BackupPC__Server_Summary} = "BackupPC: Resumen del Servidor";
-$Lang{BackupPC__Archive} = "ENG BackupPC: Archive";
+$Lang{BackupPC__Archive} = "BackupPC: Archivo";
 $Lang{BackupPC_Summary}=<<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
@@ -168,7 +171,7 @@ Hay \$hostCntNone hosts sin copias de seguridad.
 EOF
 
 $Lang{BackupPC_Archive} = <<EOF;
-ENG\${h1(qq{$Lang{BackupPC__Archive}})}
+\${h1(qq{$Lang{BackupPC__Archive}})}
 <script language="javascript" type="text/javascript">
 <!--
 
@@ -196,7 +199,7 @@ ENG\${h1(qq{$Lang{BackupPC__Archive}})}
 //-->
 </script>
 
-There are \$hostCntGood hosts that have been backed up for a total size of \${fullSizeTot}GB
+Hay \$hostCntGood hosts que tienen copia de seguridad con un tamaño total de \${fullSizeTot}GB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -216,8 +219,8 @@ There are \$hostCntGood hosts that have been backed up for a total size of \${fu
 EOF
 
 $Lang{BackupPC_Archive2} = <<EOF;
-ENG\${h1(qq{$Lang{BackupPC__Archive}})}
-About to archive the following hosts
+\${h1(qq{$Lang{BackupPC__Archive}})}
+Se va a hacer copia de seguridad de los siguientes hosts
 <ul>
 \$HostListStr
 </ul>
@@ -237,14 +240,14 @@ About to archive the following hosts
 EOF
 
 $Lang{BackupPC_Archive2_location} = <<EOF;
-ENG<tr>
-    <td>Archive Location/Device</td>
+<tr>
+    <td>Ubicación de archivo/Dispositivo</td>
     <td><input type="text" value="\$ArchiveDest" name="archive_device"></td>
 </tr>
 EOF
 
 $Lang{BackupPC_Archive2_compression} = <<EOF;
-ENG<tr>
+<tr>
     <td>Compression</td>
     <td>
     <input type="radio" value="0" name="compression" \$ArchiveCompNone>None<br>
@@ -255,15 +258,15 @@ ENG<tr>
 EOF
 
 $Lang{BackupPC_Archive2_parity} = <<EOF;
-ENG<tr>
-    <td>Number of Parity Files</td>
+<tr>
+    <td>Porcentaje de datos de paridad (0 = deshabilitado, 5 = normal)</td>
     <td><input type="numeric" value="\$ArchivePar" name="par"></td>
 </tr>
 EOF
 
 $Lang{BackupPC_Archive2_split} = <<EOF;
-ENG<tr>
-    <td>Split output into</td>
+<tr>
+    <td>Dividir resultado en</td>
     <td><input type="numeric" value="\$ArchiveSplit" name="splitsize">Megabytes</td>
 </tr>
 EOF
@@ -330,7 +333,7 @@ EOF
 # --------------------------------
 $Lang{Only_privileged_users_can_view_queues_} = "Sólo los administradores pueden ver las colas.";
 # --------------------------------
-$Lang{Only_privileged_users_can_archive} = "ENG Only privileged users can Archive.";
+$Lang{Only_privileged_users_can_archive} = "Sólo los administradores pueden archivar.";
 # --------------------------------
 $Lang{BackupPC__Queue_Summary} = "BackupPC: Resumen de la Cola";
 # --------------------------------
@@ -479,8 +482,8 @@ seleccionado será sobreescrito!
 EOF
 
 $Lang{Restore_Options_for__host_Option1_disabled} = <<EOF;
-ENG Direct restore has been disabled for host \${EscHTML(\$hostDest)}.
-Please select one of the other restore options.
+Se ha deshabilitado la restauración directa para el host \${EscHTML(\$hostDest)}.
+Por favor seleccione una de las otras opciones de restauración.
 EOF
 
 # ------------------------------
@@ -493,7 +496,7 @@ ha seleccionado.  Después puede hacer uso de una aplicación local, como WinZip,
 para ver o extraer cualquiera de los archivos.
 </p><p>
 <b>¡Atención!:</b> Dependiendo de que archivos/carpetas haya seleccionado,
-este archivo puede ser muy grande. Podría tardar muchos minutos
+este archivo puede ser muy grande. Podría tardar muchos minutos en
 crear y transferir el archivo. Además necesitará suficiente espacio el el disco
 local para almacenarlo.
 </p>
@@ -557,7 +560,7 @@ EOF
 
 
 # ------------------------------
-$Lang{Restore_Confirm_on__host} = "BackupPC: Restore Confirm on \$host";
+$Lang{Restore_Confirm_on__host} = "BackupPC: Confirme restauración en \$host";
 
 $Lang{Are_you_sure} = <<EOF;
 \${h1("¿Está seguro?")}
@@ -579,7 +582,7 @@ la copia de seguridad número \$num:
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="4">
 \$hiddenStr
-Do you really want to do this?
+¿Realmente quiere hacer esto?
 <input type="submit" value="\$In{action}" name="action">
 <input type="submit" value="No" name="">
 </form>
@@ -593,13 +596,13 @@ $Lang{Reply_from_server_was___reply} = <<EOF;
 <p>
 La respuesta del servidor fué: \$reply
 <p>
-ENG Go back to <a href="\$MyURL?host=\$hostDest">\$hostDest home page</a>.
+volver a <a href="\$MyURL?host=\$hostDest">\$hostDest home page</a>.
 EOF
 
 $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
-ENG\${h1(\$str)}
+\${h1(\$str)}
 <p>
-Reply from server was: \$reply
+La respuesta del servidor fué: \$reply
 EOF
 
 # -------------------------
@@ -712,14 +715,14 @@ EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
-ENG\${h1("Host \$host Archive Summary")}
+${h1("Resumen de archivo del Host \$host")}
 <p>
 \$warnStr
 <ul>
 \$statusStr
 </ul>
 
-\${h2("User Actions")}
+\${h2("Acciones de usuario")}
 <p>
 <form action="\$MyURL" method="get">
 <input type="hidden" name="archivehost" value="\$host">
@@ -782,10 +785,10 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Está revisando la copia de seguridad Nº\$num, que comenzó hacia las \$backupTime
         (hace \$backupAge dias),
 \$filledBackup
-<li> ENG Enter directory: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
+<li> Introduzca el directorio: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
 <li> Haga click en uno de los directorios de abajo para revisar sus contenidos,
 <li> Haga click en un archivo para restaurarlo,
-<li> ENG You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
+<li> Puede ver la copia de seguridad <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> del directorio actual.
 </ul>
 </form>
 
@@ -821,32 +824,32 @@ This is now in the checkAll row
 EOF
 
 # ------------------------------
-$Lang{DirHistory_backup_for__host} = "(ENGLISH) BackupPC: Directory backup history for \$host";
+$Lang{DirHistory_backup_for__host} = "BackupPC: Histórico de copia de seguridad del directorio en \$host";
 
 #
 # These two strings are used to build the links for directories and
 # file versions.  Files are appended with a version number.
 #
-$Lang{DirHistory_dirLink}  = "ENG dir";
-$Lang{DirHistory_fileLink} = "ENG v";
+$Lang{DirHistory_dirLink}  = "dir";
+$Lang{DirHistory_fileLink} = "v";
 
 $Lang{DirHistory_for__host} = <<EOF;
-ENG\${h1("Directory backup history for \$host")}
+${h1("Histórico de copia de seguridad del directorio en \$host")}
 <p>
-This display shows each unique version of files across all
-the backups:
+Esta pantalla muestra cada versión única de archivos de entre todas
+las copias de seguridad:
 <ul>
-<li> Click on a backup number to return to the backup browser,
-<li> Click on a directory link (\$Lang->{DirHistory_dirLink}) to navigate
-     into that directory,
-<li> Click on a file version link (\$Lang->{DirHistory_fileLink}0,
-     \$Lang->{DirHistory_fileLink}1, ...) to download that file,
-<li> Files with the same contents between different backups have the same
-     version number,
-<li> Files or directories not present in a particular backup have an
-     empty box.
-<li> Files shown with the same version might have different attributes.
-     Select the backup number to see the file attributes.
+<li> Haga click en un número de copia de seguridad para volver al explorador de copias de seguridad,
+<li> Haga click en un vínculo de directorio (\$Lang->{DirHistory_dirLink}) para navegar
+     en ese directorio,
+<li> Haga click en un vínculo de versión de archivo (\$Lang->{DirHistory_fileLink}0,
+     \$Lang->{DirHistory_fileLink}1, ...) para descargar ese archivo,
+<li> Los archivos con diferentes contenidos entre distintas copias de seguridad tienen el mismo
+     número de versión,
+<li> Los archivos o directorios que no existen en una copia concreta tienen una
+     celda vacía.
+<li> Los archivos mostrados con la misma versión pueden tener diferentes atributos.
+     Seleccione el número de copia de seguridad para ver los atributos del archivo.
 </ul>
 
 \${h2("History of \${EscHTML(\$dirDisplay)}")}
@@ -898,20 +901,20 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 EOF
 
 # ------------------------------
-$Lang{Archive___num_details_for__host} = "ENG BackupPC: Archive #\$num details for \$host";
+$Lang{Archive___num_details_for__host} = "BackupPC: Copia de seguridad #\$num .Detalles de \$host";
 
 $Lang{Archive___num_details_for__host2 } = <<EOF;
-ENG\${h1("Archive #\$num Details for \$host")}
+\${h1("Copia de seguridad #\$num Detalles de \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="50%">
-<tr><td class="tableheader"> Number </td><td class="border"> \$Archives[\$i]{num} </td></tr>
-<tr><td class="tableheader"> Requested by </td><td class="border"> \$ArchiveReq{user} </td></tr>
-<tr><td class="tableheader"> Request time </td><td class="border"> \$reqTime </td></tr>
-<tr><td class="tableheader"> Result </td><td class="border"> \$Archives[\$i]{result} </td></tr>
-<tr><td class="tableheader"> Error Message </td><td class="border"> \$Archives[\$i]{errorMsg} </td></tr>
-<tr><td class="tableheader"> Start time </td><td class="border"> \$startTime </td></tr>
-<tr><td class="tableheader"> Duration </td><td class="border"> \$duration min </td></tr>
-<tr><td class="tableheader"> Xfer log file </td><td class="border">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<tr><td class="tableheader"> Número </td><td class="border"> \$Archives[\$i]{num} </td></tr>
+<tr><td class="tableheader"> Solicitado por </td><td class="border"> \$ArchiveReq{user} </td></tr>
+<tr><td class="tableheader"> Hora petición </td><td class="border"> \$reqTime </td></tr>
+<tr><td class="tableheader"> Resultado </td><td class="border"> \$Archives[\$i]{result} </td></tr>
+<tr><td class="tableheader"> Mensaje de error </td><td class="border"> \$Archives[\$i]{errorMsg} </td></tr>
+<tr><td class="tableheader"> Hora comienzo </td><td class="border"> \$startTime </td></tr>
+<tr><td class="tableheader"> Duración </td><td class="border"> \$duration min </td></tr>
+<tr><td class="tableheader"> Archivo registro Xfer </td><td class="border">
 <a href="\$MyURL?action=view&type=ArchiveLOG&num=\$Archives[\$i]{num}&host=\$host">View</a>,
 <a href="\$MyURL?action=view&type=ArchiveErr&num=\$Archives[\$i]{num}&host=\$host">Errors</a>
 </tr></tr>
@@ -920,7 +923,7 @@ ENG\${h1("Archive #\$num Details for \$host")}
 \${h1("Host list")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td>Host</td><td>Backup Number</td></tr>
+<tr class="tableheader"><td>Host</td><td>Copia de seguridad número</td></tr>
 \$HostListStr
 </table>
 EOF
@@ -956,7 +959,7 @@ $Lang{Only_privileged_users_can_restore_backup_files} = "Sólo los usuarios autor
 $Lang{Bad_host_name} = "Nombre de host erróneo \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} = "No ha seleccionado nigún archivo; por favor, vuelva a"
                 . " seleccione algunos archivos.";
-$Lang{You_haven_t_selected_any_hosts} = "ENG You haven\'t selected any hosts; please go Back to"
+$Lang{You_haven_t_selected_any_hosts} = "No ha seleccionado ningún host; por favor vuelva a"
                 . " select some hosts.";
 $Lang{Nice_try__but_you_can_t_put} = "Buen intento, pero no puede usar \'..\' en los nombres de archivo";
 $Lang{Host__doesn_t_exist} = "El Host \${EscHTML(\$In{hostDest})} no existe";
@@ -970,12 +973,12 @@ $Lang{Empty_host_name} = "Nombre de host vacío";
 $Lang{Unknown_host_or_user} = "Unknown host or user \${EscHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} = "Sólo los usuarios autorizados pueden ver información del"
                 . " host \${EscHTML(\$host)}." ;
-$Lang{Only_privileged_users_can_view_archive_information} = "ENG Only privileged users can view archive information.";
+$Lang{Only_privileged_users_can_view_archive_information} = "Sólo los administradores pueden ver información de archivo.";
 $Lang{Only_privileged_users_can_view_restore_information} = "Sólo los usuarios autorizados pueden ver información de restauración.";
 $Lang{Restore_number__num_for_host__does_not_exist} = "El número de restauración \$num del host \${EscHTML(\$host)} "
 	        . " no existe.";
-$Lang{Archive_number__num_for_host__does_not_exist} = "ENG Archive number \$num for host \${EscHTML(\$host)} does"
-                . " not exist.";
+$Lang{Archive_number__num_for_host__does_not_exist} = "La copia de seguridad \$num del host \${EscHTML(\$host)} "
+                . " no existe.";
 $Lang{Can_t_find_IP_address_for} = "No puedo encontrar la dirección IP de \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host} = <<EOF;
 \$host es un host DHCP y yo no conozco su dirección IP. He comprobado el
@@ -996,7 +999,7 @@ $Lang{Backup_requested_on__host_by__User} = "Copia de seguridad solicitada en \$
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Copia de seguridad detenida/desprogramada en \$host por \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restauración solicitada para el host \$hostDest, copia de seguridad #\$num,"
 	     . " por \$User desde \$ENV{REMOTE_ADDR}";
-$Lang{Archive_requested} = "ENG Archive requested by \$User from \$ENV{REMOTE_ADDR}";
+$Lang{Archive_requested} = "Archivo solicitado por \$User desde \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------
 # ------- Stuff that was forgotten ----------------
@@ -1005,7 +1008,7 @@ $Lang{Archive_requested} = "ENG Archive requested by \$User from \$ENV{REMOTE_AD
 $Lang{Status} = "Estado";
 $Lang{PC_Summary} = "Resumen PC";
 $Lang{LOG_file} = "Archivo Registro";
-$Lang{LOG_files} = "ENG LOG files";
+$Lang{LOG_files} = "Archivos de registro";
 $Lang{Old_LOGs} = "Registros antiguos";
 $Lang{Email_summary} = "Resumen correo";
 $Lang{Config_file} = "Archivo configuración";
@@ -1016,9 +1019,9 @@ $Lang{Documentation} = "Documentación";
 #$Lang{Host_or_User_name} = "<small>Host o usuario:</small>";
 $Lang{Go} = "Aceptar";
 $Lang{Hosts} = "Hosts";
-$Lang{Select_a_host} = "ENGLISH Select a host...";
+$Lang{Select_a_host} = "Seleccione un host...";
 
-$Lang{There_have_been_no_archives} = "<h2> ENG There have been no archives </h2>\n";
+$Lang{There_have_been_no_archives} = "<h2> No ha habido archivos </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> !Nunca se ha hecho copia de seguridad de este PC! </h2>\n";
 $Lang{This_PC_is_used_by} = "<li>This PC es utilizado por \${UserLink(\$user)}";
 
@@ -1100,9 +1103,9 @@ EOF
 
 $Lang{checkAllHosts} = <<EOF;
 <tr><td class="fviewborder">
-<input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;ENG Select all
+<input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Seleccionar todo
 </td><td colspan="2" align="center" class="fviewborder">
-<input type="submit" name="Submit" value="ENG Archive selected hosts">
+<input type="submit" name="Submit" value="Archivar los hosts seleccionados">
 </td></tr>
 EOF
 
@@ -1117,7 +1120,7 @@ $Lang{fileHeader} = <<EOF;
 EOF
 
 $Lang{Home} = "Principal";
-$Lang{Browse} = "ENG Browse backups";
+$Lang{Browse} = "Explorar copias de seguridad";
 $Lang{Last_bad_XferLOG} = "Ultimo error en registro de transferencia";
 $Lang{Last_bad_XferLOG_errors_only} = "Ultimo error en registro de transferencia (errores&nbsp;sólo)";
 
@@ -1126,7 +1129,7 @@ $Lang{This_display_is_merged_with_backup} = <<EOF;
 EOF
 
 $Lang{Visit_this_directory_in_backup} = <<EOF;
-<li> ENG Select the backup you wish to view: <select onChange="window.location=this.value">\$otherDirs </select>
+<li> Seleccione la copia de seguridad que desea ver: <select onChange="window.location=this.value">\$otherDirs </select>
 EOF
 
 $Lang{Restore_Summary} = <<EOF;
@@ -1149,13 +1152,13 @@ Haga click en el número de restauración para ver sus detalles.
 EOF
 
 $Lang{Archive_Summary} = <<EOF;
-ENG\${h2("Archive Summary")}
+\${h2("Archive Summary")}
 <p>
 Click on the archive number for more details.
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Archive# </td>
-    <td align="center"> Result </td>
-    <td align="right"> Start Date</td>
+    <td align="center"> Resultado </td>
+    <td align="right"> Hora comienzo</td>
     <td align="right"> Dur/mins</td>
 </tr>
 \$ArchiveStr
@@ -1178,7 +1181,7 @@ $Lang{off} = "inactivo";
 
 $Lang{backupType_full}    = "completo";
 $Lang{backupType_incr}    = "incremental";
-$Lang{backupType_partial} = "ENG partial";
+$Lang{backupType_partial} = "parcial";
 
 $Lang{failed} = "fallido";
 $Lang{success} = "éxito";
@@ -1196,15 +1199,15 @@ $Lang{Status_link_running} = "conexión en curso";
 
 $Lang{Reason_backup_done} = "copia de seguridad realizada";
 $Lang{Reason_restore_done} = "restauración realizada";
-$Lang{Reason_archive_done}   = "ENG archive done";
+$Lang{Reason_archive_done}   = "archivado realizado";
 $Lang{Reason_nothing_to_do} = "nada por hacer";
 $Lang{Reason_backup_failed} = "copia de seguridad fallida";
 $Lang{Reason_restore_failed} = "restauración fallida";
-$Lang{Reason_archive_failed} = "ENG archive failed";
+$Lang{Reason_archive_failed} = "ha fallado el archivado";
 $Lang{Reason_no_ping} = "no hay ping";
 $Lang{Reason_backup_canceled_by_user} = "copia cancelada por el usuario";
 $Lang{Reason_restore_canceled_by_user} = "restauración cancelada por el usuario";
-$Lang{Reason_archive_canceled_by_user} = "ENG archive canceled by user";
+$Lang{Reason_archive_canceled_by_user} = "archivado cancelado por el usuario";
 
 # ---------
 # Email messages
@@ -1306,3 +1309,4 @@ $Lang{howLong_not_been_backed_up} = "no se le ha realizado una copia de segurida
 $Lang{howLong_not_been_backed_up_for_days_days} = "no se le ha realizado una copia de seguridad durante \$days días";
 
 #end of lang_en.pm
+

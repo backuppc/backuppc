@@ -276,6 +276,7 @@ my $lastFull = 0;
 my $lastIncr = 0;
 my $partialIdx = -1;
 my $partialNum;
+my $lastPartial = 0;
 
 if ( $Conf{FullPeriod} == -1 && !$opts{f} && !$opts{i}
         || $Conf{FullPeriod} == -2 ) {
@@ -375,8 +376,9 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
         $lastIncr = $Backups[$i]{startTime}
                 if ( $lastIncr < $Backups[$i]{startTime} );
     } elsif ( $Backups[$i]{type} eq "partial" ) {
-        $partialIdx = $i;
-        $partialNum = $Backups[$i]{num};
+        $partialIdx  = $i;
+        $lastPartial = $Backups[$i]{startTime};
+        $partialNum  = $Backups[$i]{num};
     }
 }
 
@@ -444,10 +446,10 @@ if ( !defined($XferLOG) ) {
 }
 
 #
-# Ignore the partial dump in the case of an incremental.
-# A partial is a partial full.
+# Ignore the partial dump in the case of an incremental
+# or when the partial is too old.  A partial is a partial full.
 #
-if ( $type ne "full" ) {
+if ( $type ne "full" || time - $lastPartial > $Conf{PartialAgeMax} * 24*3600 ) {
     $partialNum = undef;
     $partialIdx = -1;
 }
@@ -1007,6 +1009,11 @@ sub BackupFailCleanup
 	    $keepPartial = 1;
 	}
     }
+
+    #
+    # Don't keep partials if they are disabled
+    #
+    $keepPartial = 0 if ( $Conf{PartialAgeMax} < 0 );
 
     if ( !$keepPartial ) {
         #

@@ -115,6 +115,7 @@ my $ExistFileSize     = 0;
 my $ExistFileCompSize = 0;
 my $TotalFileCnt      = 0;
 my $TotalFileSize     = 0;
+my $TarReadHdrCnt     = 0;
 
 sub TarRead
 {
@@ -128,6 +129,7 @@ sub TarRead
                         substr($data, $numBytes, $totBytes - $numBytes),
                         $totBytes - $numBytes);
         if ( $newBytes <= 0 ) {
+	    return if ( $TarReadHdrCnt == 1 );	 # empty tar file ok
             print("Unexpected end of tar archive (tot = $totBytes,"
                    . " num = $numBytes, posn = " . sysseek($fh, 0, 1) . ")\n");
             $Abort = 1;
@@ -144,6 +146,7 @@ sub TarReadHeader
 {
     my($fh) = @_;
 
+    $TarReadHdrCnt++;
     return $1 if ( TarRead($fh, $tar_header_length) =~ /(.*)/s );
     return;
 }
@@ -423,26 +426,30 @@ sub attributeWrite
         my $poolWrite = BackupPC::PoolWrite->new($bpc, $fileName,
                                          length($data), $Compress);
         $poolWrite->write(\$data);
-        processClose($poolWrite, $Attrib{$d}->fileName($d), length($data));
+        processClose($poolWrite, $Attrib{$d}->fileName($d), length($data), 1);
     }
     delete($Attrib{$d});
 }
 
 sub processClose
 {
-    my($poolWrite, $fileName, $origSize) = @_;
+    my($poolWrite, $fileName, $origSize, $noStats) = @_;
     my($exists, $digest, $outSize, $errs) = $poolWrite->close;
 
     if ( @$errs ) {
         print(join("", @$errs));
         $Errors += @$errs;
     }
-    $TotalFileCnt++;
-    $TotalFileSize += $origSize;
+    if ( !$noStats ) {
+	$TotalFileCnt++;
+	$TotalFileSize += $origSize;
+    }
     if ( $exists ) {
-        $ExistFileCnt++;
-        $ExistFileSize     += $origSize;
-        $ExistFileCompSize += $outSize;
+	if ( !$noStats ) {
+	    $ExistFileCnt++;
+	    $ExistFileSize     += $origSize;
+	    $ExistFileCompSize += $outSize;
+	}
     } elsif ( $outSize > 0 ) {
         print(NEW_FILES "$digest $origSize $fileName\n");
     }

@@ -64,10 +64,7 @@ EOF
 
 $Lang{H_BackupPC_Server_Status} = "Stato server BackupPC";
 
-$Lang{BackupPC_Server_Status}= <<EOF;
-\${h1(qq{$Lang{H_BackupPC_Server_Status}})}
-
-<p>
+$Lang{BackupPC_Server_Status_General_Info}= <<EOF;
 \${h2("Informazioni generali server")}
 
 <ul>
@@ -89,6 +86,13 @@ $Lang{BackupPC_Server_Status}= <<EOF;
             di ieri era del \$Info{DUDailyMaxPrev}%.
     </ul>
 </ul>
+EOF
+
+$Lang{BackupPC_Server_Status} = <<EOF;
+\${h1(qq{$Lang{H_BackupPC_Server_Status}})}
+
+<p>
+\$generalInfo
 
 \${h2("Processi attualmente in esecuzione")}
 <p>
@@ -262,7 +266,7 @@ EOF
 
 $Lang{BackupPC_Archive2_parity} = <<EOF;
 <tr>
-    <td>ENG Percentage of Parity Data (0 = disable, 5 = typical)</td>
+    <td>Percentuale di dati di parità (0 = disabiltata, 5 = valori tipici)</td>
     <td><input type="numeric" value="\$ArchivePar" name="par"></td>
 </tr>
 EOF
@@ -910,7 +914,7 @@ $Lang{Archive___num_details_for__host} = "BackupPC: Dettagli archivio n. \$num p
 $Lang{Archive___num_details_for__host2 } = <<EOF;
 \${h1("Dettagli archivio n. \$num per \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="50%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> Number </td><td class="border"> \$Archives[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Requested by </td><td class="border"> \$ArchiveReq{user} </td></tr>
 <tr><td class="tableheader"> Request time </td><td class="border"> \$reqTime </td></tr>

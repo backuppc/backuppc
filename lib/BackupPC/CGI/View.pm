@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta1, released 9 Apr 2004.
+# Version 2.1.0beta2, released 9 May 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -97,7 +97,7 @@ sub action
         $file = "$TopDir/log/LOG$ext";
         $linkHosts = 1;
     }
-    if ( !$Privileged ) {
+    if ( $type ne "docs" && !$Privileged ) {
         ErrorExit($Lang->{Only_privileged_users_can_view_log_or_config_files});
     }
     if ( !-f $file && -f "$file.z" ) {
@@ -186,16 +186,16 @@ sub action
 		    last if ( $s eq "" );
 		    $s =~ s/[\n\r]+//g;
 		    # remove any passwords and user names
-		    $s =~ s/(SmbSharePasswd.*=.*['"]).*(['"])/$1$2/ig;
-		    $s =~ s/(SmbShareUserName.*=.*['"]).*(['"])/$1$2/ig;
-		    $s =~ s/(RsyncdPasswd.*=.*['"]).*(['"])/$1$2/ig;
-		    $s =~ s/(ServerMesgSecret.*=.*['"]).*(['"])/$1$2/ig;
+		    $s =~ s/(SmbSharePasswd.*=.*['"]).*(['"])/$1****$2/ig;
+		    $s =~ s/(SmbShareUserName.*=.*['"]).*(['"])/$1****$2/ig;
+		    $s =~ s/(RsyncdPasswd.*=.*['"]).*(['"])/$1****$2/ig;
+		    $s =~ s/(ServerMesgSecret.*=.*['"]).*(['"])/$1****$2/ig;
 		    $s = ${EscHTML($s)};
 		    $s =~ s[(\$Conf\{.*?\})][
 			my $c = $1;
 			my $s = lc($c);
 			$s =~ s{(\W)}{sprintf("%%%02x", ord($1) )}gxe;
-			"<a href=\"?action=view&type=docs#item_$s\">$c</a>"
+			"<a href=\"?action=view&type=docs#item_$s\"><tt>$c</tt></a>"
 		    ]eg;
 		    $c .= $s . "\n";
 		}

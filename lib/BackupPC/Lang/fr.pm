@@ -59,10 +59,7 @@ EOF
 
 $Lang{H_BackupPC_Server_Status} = "État du serveur BackupPC";
 
-$Lang{BackupPC_Server_Status}= <<EOF;
-\${h1(qq{$Lang{H_BackupPC_Server_Status}})}
-
-<p>
+$Lang{BackupPC_Server_Status_General_Info}= <<EOF;
 \${h2(\"Informations générales du serveur\")}
 
 <ul>
@@ -82,6 +79,13 @@ $Lang{BackupPC_Server_Status}= <<EOF;
             et hier le maximum était \$Info{DUDailyMaxPrev}%.
     </ul>
 </ul>
+EOF
+
+$Lang{BackupPC_Server_Status} = <<EOF;
+\${h1(qq{$Lang{H_BackupPC_Server_Status}})}
+
+<p>
+\$generalInfo
 
 \${h2("Travaux en cours d'exécution")}
 <p>
@@ -899,7 +903,7 @@ $Lang{Archive___num_details_for__host} = "BackupPC: Détails de l'archivage no. \
 $Lang{Archive___num_details_for__host2 } = <<EOF;
 \${h1("Archive #\$num Details for \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="50%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> Numéro </td><td class="border"> \$Archives[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Demandé par </td><td class="border"> \$ArchiveReq{user} </td></tr>
 <tr><td class="tableheader"> Heure de demande </td><td class="border"> \$reqTime </td></tr>

@@ -86,8 +86,6 @@ my %ActionDispatch = (
 # Set default actions, then call sub handler
 #
 $In{action} ||= "hostInfo"    if ( defined($In{host}) );
-## rk default non admin users to pc summary for their hosts
-$In{action}   = "summary" if ( !defined($ActionDispatch{$In{action}}) && !CheckPermission());
 $In{action}   = "generalInfo" if ( !defined($ActionDispatch{$In{action}}) );
 my $action    = $ActionDispatch{$In{action}};
 

@@ -304,6 +304,7 @@ sub readOutput
 		|| /^\s*restore directory \\/i
                 || /^\s*Output is \/dev\/null/i
                 || /^\s*Timezone is/i
+                || /^\s*tar_re_search set/i
                 || /^\s*creating lame (up|low)case table/i
 	    ) {
             # ignore these messages

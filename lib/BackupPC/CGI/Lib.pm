@@ -392,23 +392,23 @@ sub Header
 {
     my($title, $content, $noBrowse, $contentSub, $contentPost) = @_;
     my @adminLinks = (
-        { link => "",                         name => $Lang->{Status},
+        { link => "",                         name => $Lang->{Status}},
+        { link => "?action=adminOpts",        name => $Lang->{Admin_Options},
                                               priv => 1},
-        { link => "?action=adminOpts",        name => $Lang->{Admin_Options} },
-        { link => "?action=summary",          name => $Lang->{PC_Summary},
+        { link => "?action=summary",          name => $Lang->{PC_Summary}},
+        { link => "?action=view&type=LOG",    name => $Lang->{LOG_file},
                                               priv => 1},
-        { link => "?action=view&type=LOG",    name => $Lang->{LOG_file} },
-        { link => "?action=LOGlist",          name => $Lang->{Old_LOGs} },
-        { link => "?action=emailSummary",     name => $Lang->{Email_summary} },
-        { link => "?action=view&type=config", name => $Lang->{Config_file} },
-        { link => "?action=view&type=hosts",  name => $Lang->{Hosts_file} },
-        { link => "?action=queue",            name => $Lang->{Current_queues} },
-        { link => "?action=view&type=docs",   name => $Lang->{Documentation},
+        { link => "?action=LOGlist",          name => $Lang->{Old_LOGs},
                                               priv => 1},
-        { link => "http://backuppc.sourceforge.net/faq", name => "FAQ",
+        { link => "?action=emailSummary",     name => $Lang->{Email_summary},
                                               priv => 1},
-        { link => "http://backuppc.sourceforge.net", name => "SourceForge",
+        { link => "?action=view&type=config", name => $Lang->{Config_file},
                                               priv => 1},
+        { link => "?action=view&type=hosts",  name => $Lang->{Hosts_file},
+                                              priv => 1},
+        { link => "?action=queue",            name => $Lang->{Current_queues},
+                                              priv => 1},
+        @{$Conf{CgiNavBarLinks}},
     );
     my $host = $In{host};
 
@@ -420,12 +420,12 @@ sub Header
 <link rel=stylesheet type="text/css" href="$Conf{CgiImageDirURL}/$Conf{CgiCSSFile}" title="CSSFile">
 $Conf{CgiHeaders}
 </head><body onLoad="document.getElementById('NavMenu').style.height=document.body.scrollHeight">
-<img src="$Conf{CgiImageDirURL}/logo.gif" hspace="5" vspace="7"><br>
+<a href="http://backuppc.sourceforge.net"><img src="$Conf{CgiImageDirURL}/logo.gif" hspace="5" vspace="7" border="0"></a><br>
 EOF
 
     if ( defined($Hosts) && defined($host) && defined($Hosts->{$host}) ) {
 	print "<div class=\"NavMenu\">";
-	NavSectionTitle("${EscURI($host)}");
+	NavSectionTitle("${EscHTML($host)}");
 	print <<EOF;
 </div>
 <div class="NavMenu">
@@ -487,20 +487,23 @@ $hostSelectbox
 <br><br>
 EOF
     }
-    print <<EOF;
+    if ( $Conf{CgiSearchBoxEnable} ) {
+        print <<EOF;
 <form action="$MyURL" method="get">
     <input type="text" name="host" size="14" maxlength="64">
     <input type="hidden" name="action" value="hostInfo"><input type="submit" value="$Lang->{Go}" name="ignore">
     </form>
 EOF
+    }
     NavSectionTitle($Lang->{NavSectionTitle_});
     foreach my $l ( @adminLinks ) {
-        if ( $PrivAdmin || $l->{priv} ) {
-            NavLink($l->{link}, $l->{name});
+        if ( $PrivAdmin || !$l->{priv} ) {
+            my $txt = defined($l->{lname}) ? $Lang->{$l->{lname}} : $l->{name};
+            NavLink($l->{link}, $txt);
+        }
     }
-}
 
-print <<EOF;
+    print <<EOF;
 <br><br><br>
 </div>
 EOF

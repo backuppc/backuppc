@@ -58,9 +58,8 @@ sub action
         $bpc->ConfigRead($host);
         %Conf = $bpc->Conf();
 
-        if ( $Conf{XferMethod} eq "archive" ) {
-            next;
-        }
+        next if ( $Conf{XferMethod} eq "archive" );
+        next if ( !$Privileged && !CheckPermission($host) );
 
         for ( my $i = 0 ; $i < @Backups ; $i++ ) {
             if ( $Backups[$i]{type} eq "full" ) {

@@ -46,14 +46,16 @@ sub action
 
     $host =~ s/^\s+//;
     $host =~ s/\s+$//;
-    return Action_GeneralInfo() if ( $host eq "" );
+    if ( $host eq "" ) {
+	ErrorExit(eval("qq{$Lang->{Unknown_host_or_user}}"));
+    }
     $host = lc($host)
-                if ( !-d "$TopDir/pc/$host" && -d "$TopDir/pc/" . lc($host) );
+               if ( !-d "$TopDir/pc/$host" && -d "$TopDir/pc/" . lc($host) );
     if ( $host =~ /\.\./ || !-d "$TopDir/pc/$host" ) {
         #
         # try to lookup by user name
         #
-        if ( !defined($Hosts->{$host}) ) {
+        if ( $host eq "" || !defined($Hosts->{$host}) ) {
             foreach my $h ( keys(%$Hosts) ) {
                 if ( $Hosts->{$h}{user} eq $host
                         || lc($Hosts->{$h}{user}) eq lc($host) ) {
@@ -63,7 +65,7 @@ sub action
             }
             CheckPermission();
             ErrorExit(eval("qq{$Lang->{Unknown_host_or_user}}"))
-                                if ( !defined($Hosts->{$host}) );
+                               if ( !defined($Hosts->{$host}) );
         }
         $In{host} = $host;
     }
@@ -286,7 +288,8 @@ EOF
     if ( $StatusHost{aliveCnt} > 0 ) {
         $statusStr .= eval("qq{$Lang->{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times}}");
 
-        if ( $StatusHost{aliveCnt} >= $Conf{BlackoutGoodCnt}
+        if ( (@{$Conf{BlackoutPeriods}} || defined($Conf{BlackoutHourBegin}))
+		&& $StatusHost{aliveCnt} >= $Conf{BlackoutGoodCnt}
                 && $Conf{BlackoutGoodCnt} >= 0 ) {
             #
             # Handle backward compatibility with original separate scalar

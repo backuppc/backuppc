@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta1, released 9 Apr 2004.
+# Version 2.1.0beta2, released 9 May 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -55,7 +55,7 @@ BEGIN {
 	#
 	# Note: also update configure.pl when this version number is changed!
 	#
-        if ( $File::RsyncP::VERSION < 0.50 ) {
+        if ( $File::RsyncP::VERSION < 0.51 ) {
             $RsyncLibOK = 0;
             $RsyncLibErr = "File::RsyncP module version too old: need 0.50";
         } else {
@@ -324,6 +324,7 @@ sub start
 					      $str .= "\n";
 					      $t->{XferLOG}->write(\$str);
 					  },
+			    cacheCheckProb => $conf->{RsyncCsumCacheVerifyProb},
 			    %$fioArgs,
 		      }),
     });

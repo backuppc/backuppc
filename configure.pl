@@ -511,6 +511,7 @@ foreach my $lib ( qw(
 	BackupPC/Lang/es.pm
         BackupPC/Lang/de.pm
         BackupPC/Lang/it.pm
+        BackupPC/Lang/nl.pm
         BackupPC/CGI/AdminOptions.pm
 	BackupPC/CGI/Archive.pm
 	BackupPC/CGI/ArchiveInfo.pm

@@ -124,7 +124,7 @@ $Lang{BackupPC_Summary}=<<EOF;
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
 Dit overzicht dateert van \$now.
-<p>
+</p>
 
 \${h2("Machine(s) met geslaagde backups")}
 <p>
@@ -338,7 +338,7 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: overzicht wachtrij";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Overzicht Wachtrij backup")}
-<p>
+<br><br>
 \${h2("Overzicht Wachtrij: Gebruikers")}
 <p>
 Deze aanvragen van gebruikers staan momenteel in de wachtrij:
@@ -505,7 +505,7 @@ harde schijfruimte beschikken om het bestand te kunnen bevatten.
 <input type="hidden" name="type" value="2">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<input type="checkbox" value="1" name="relatief" checked> Maak het zip-archief relatief
+<input type="checkbox" value="1" name="relative" checked> Maak het zip-archief relatief
 aan \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (in het andere geval zal het archiefbestand volledige padnamen bevatten).
 <br>
@@ -549,7 +549,7 @@ schijfruimte te beschikken om het bestand op te slaan.
 <input type="hidden" name="type" value="1">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<input type="checkbox" value="1" name="relatief" checked> Maak het tar-archief relatief
+<input type="checkbox" value="1" name="relative" checked> Maak het tar-archief relatief
 aan \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (anders zal het tar-archief volledige padnamen bevatten).
 <br>
@@ -672,7 +672,7 @@ Lege bestanden en SMB-fouten worden niet geteld in de aantallen \'hergebruik\' e
     <td align="center" colspan="2"> Bestaande bestanden </td>
     <td align="center" colspan="2"> Nieuwe bestanden </td>
 </tr>
-<tr>
+<tr class="tableheader">
     <td align="center"> backup nr. </td>
     <td align="center"> Type </td>
     <td align="center"> Aantal best.</td>
@@ -1085,7 +1085,7 @@ $Lang{__time0_to__time1_on__days} = "\$t0 tot \$t1 op \$days.";
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
 <li>backups zijn \$hours uren uitgesteld
-(<a href=\"\$MyURL?action=Stop/Dequeue%20Backup&host=\$host\">Wijzig dit aantal</a>).
+(<a href=\"\$MyURL?action=\${EscURI(\$Lang->{Stop_Dequeue_Archive})}&host=\$host\">Wijzig dit aantal</a>).
 EOF
 
 $Lang{tryIP} = " en \$StatusHost{dhcpHostIP}";
@@ -1178,8 +1178,8 @@ EOF
 #$Lang{on} = "aan";
 $Lang{off} = "uit";
 
-$Lang{backupType_full} = "volledig";
-$Lang{backupType_incremental} = "incrementeel";
+$Lang{backupType_full}    = "volledig";
+$Lang{backupType_incr}    = "incrementeel";
 $Lang{backupType_partial} = "gedeeltelijk";
 
 $Lang{failed} = "mislukt";

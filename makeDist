@@ -42,8 +42,8 @@ use Getopt::Std;
 
 umask(0022);
 
-my $Version     = "2.1.0beta2";
-my $ReleaseDate = "23 May 2004";
+my $Version     = "2.1.0beta2pl1";
+my $ReleaseDate = "30 May 2004";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -92,6 +92,7 @@ my @PerlSrc = qw(
     lib/BackupPC/Lang/es.pm
     lib/BackupPC/Lang/fr.pm
     lib/BackupPC/Lang/it.pm
+    lib/BackupPC/Lang/nl.pm
     lib/BackupPC/Xfer/Archive.pm
     lib/BackupPC/Xfer/Smb.pm
     lib/BackupPC/Xfer/Tar.pm
@@ -441,7 +442,7 @@ sub CheckLangTags
     my($en, $enVars) = LangParse("lib/BackupPC/Lang/en.pm");
     my($errors);
 
-    foreach my $lang ( qw(fr.pm de.pm es.pm it.pm) ) {
+    foreach my $lang ( qw(fr.pm de.pm es.pm it.pm nl.pm) ) {
 	my($d, $dVars) = LangParse("lib/BackupPC/Lang/$lang");
 	foreach my $v1 ( @$en ) {
 	    my $v2 = shift(@$d);

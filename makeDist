@@ -297,12 +297,13 @@ sub CheckLangUsage
     my $errors;
     my $vars = {};
 
-    open(F, "cgi-bin/BackupPC_Admin")
-                || die("can't open cgi-bin/BackupPC_Admin\n");
-    while ( <F> ) {
-        s/\$Lang->{([^}]*)}/$vars->{$1} = 1;/eg;
+    foreach my $file ( qw(cgi-bin/BackupPC_Admin bin/BackupPC_sendEmail) ) {
+	open(F, $file) || die("can't open $file");
+	while ( <F> ) {
+	    s/\$Lang->{([^}]*)}/$vars->{$1} = 1;/eg;
+	}
+	close(F);
     }
-    close(F);
     foreach my $f ( <lib/BackupPC/Lang/*.pm> ) {
         my $done = {};
         open(F, $f) || die("can't open $f\n");

@@ -462,6 +462,17 @@ $Conf{EMailAdminUserName} ||= $Conf{BackupPCUser};
 #
 
 #
+# Guess $Conf{CgiURL}
+#
+if ( !defined($Conf{CgiURL}) ) {
+    if ( $Conf{CgiDir} =~ m{cgi-bin(/.*)} ) {
+	$Conf{CgiURL} = "'http://$Conf{ServerHost}/cgi-bin$1/BackupPC_Admin'";
+    } else {
+	$Conf{CgiURL} = "'http://$Conf{ServerHost}/cgi-bin/BackupPC_Admin'";
+    }
+}
+
+#
 # IncrFill should now be off
 #
 $Conf{IncrFill} = 0;

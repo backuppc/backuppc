@@ -49,6 +49,10 @@
   setting $Conf{CgiNavBarAdminAllHosts} that allows all hosts to
   be listed in the left nav bar for admins.
 
+* Fixed new 2.0.0 CGI navigation bug that causes the top-level directory
+  to have a URL "&share=//boot&dir=" instead of "&share=/boot&dir=/".
+  Reported by Pascal Schelcher.
+
 * Added "PerlTaintCheck On" to the mod_perl section in the docs,
   suggested by Tim Demarest.
 

@@ -29,7 +29,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001  Craig Barratt
+#   Copyright (C) 2001-2003  Craig Barratt
 #
 #   See http://backuppc.sourceforge.net.
 #
@@ -151,6 +151,14 @@ $Conf{MaxOldLogFiles} = 14;
 # should not allowed to write to this file or directory.
 #
 $Conf{DfPath} = '/bin/df';
+
+#
+# Command to run df.  Several variables are substituted at run-time:
+#
+#   $dfPath      path to df ($Conf{DfPath})
+#   $topDir      top-level BackupPC data directory
+#
+$Conf{DfCmd} = '$dfPath $topDir';
 
 #
 # Maximum threshold for disk utilization on the __TOPDIR__ filesystem.
@@ -492,10 +500,18 @@ $Conf{BlackoutWeekDays}     = [1, 2, 3, 4, 5];
 #
 # The valid values are:
 #
-#   - 'smb': use smbclient and the SMB protocol.  Only choice for WinXX.
+#   - 'smb':    backup and restore via smbclient and the SMB protocol.
+#               Best choice for WinXX.
 #
-#   - 'tar': use tar, tar over ssh, rsh or nfs.  Best choice for
-#            linux/unix.
+#   - 'rsync':  backup and restore via rsync (via rsh or ssh).
+#               Best choice for linux/unix.  Can also work on WinXX.
+#
+#   - 'rsyncd': backup and restre via rsync daemon on the client.
+#               Best choice for linux/unix if you have rsyncd running on
+#               the client.  Can also work on WinXX.
+#
+#   - 'tar':    backup and restore via tar, tar over ssh, rsh or nfs.
+#               Good choice for linux/unix.
 #
 # A future version should support 'rsync' as a transport method for
 # more efficient backup of linux/unix machines (and perhaps WinXX??).
@@ -628,14 +644,38 @@ $Conf{TarClientPath} = '/bin/tar';
 $Conf{RsyncClientPath} = '/bin/rsync';
 
 #
-# Full command to run rsync on the client machine
+# Full command to run rsync on the client machine.  The following variables
+# are substituted at run-time:
 #
-$Conf{RsyncClientCmd} = '$sshPath -q -l root $host $rsyncPath $argList';
+#        $host           host name being backed up
+#        $hostIP         host's IP address
+#        $shareName      share name to backup (ie: top-level directory path)
+#        $rsyncPath      same as $Conf{RsyncClientPath}
+#        $sshPath        same as $Conf{SshPath}
+#        $argList        argument list, built from $Conf{RsyncArgs},
+#                        $shareName, $Conf{BackupFilesExclude} and
+#                        $Conf{BackupFilesOnly}
+#
+# This setting only matters if $Conf{XferMethod} = 'rsync'.
+#
+$Conf{RsyncClientCmd} = '$sshPath -l root $host $rsyncPath $argList';
 
 #
-# Full command to run rsync for restore on the client.
+# Full command to run rsync for restore on the client.  The following
+# variables are substituted at run-time:
 #
-## $Conf{RsyncClientRestoreCmd} = '';
+#        $host           host name being backed up
+#        $hostIP         host's IP address
+#        $shareName      share name to backup (ie: top-level directory path)
+#        $rsyncPath      same as $Conf{RsyncClientPath}
+#        $sshPath        same as $Conf{SshPath}
+#        $argList        argument list, built from $Conf{RsyncArgs},
+#                        $shareName, $Conf{BackupFilesExclude} and
+#                        $Conf{BackupFilesOnly}
+#
+# This setting only matters if $Conf{XferMethod} = 'rsync'.
+#
+$Conf{RsyncClientRestoreCmd} = '$sshPath -l root $host $rsyncPath $argList';
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should
@@ -651,9 +691,42 @@ $Conf{RsyncShareName} = '/';
 $Conf{RsyncdClientPort} = 873;
 
 #
-# Key arguments to rsync server.  Do not edit these unless you
-# have a very thorough understanding of how File::RsyncP works.
-# Really, do not edit these.  See $Conf{RsyncClientArgs} instead.
+# Rsync daemon user name on client, for $Conf{XferMethod} = "rsyncd".
+# The user name and password are stored on the client in whatever file
+# the "secrets file" parameter in rsyncd.conf points to
+# (eg: /etc/rsyncd.secrets).
+#
+$Conf{RsyncdUserName} = '';
+
+#
+# Rsync daemon user name on client, for $Conf{XferMethod} = "rsyncd".
+# The user name and password are stored on the client in whatever file
+# the "secrets file" parameter in rsyncd.conf points to
+# (eg: /etc/rsyncd.secrets).
+#
+$Conf{RsyncdPasswd} = '';
+
+#
+# Whether authentication is mandatory when connecting to the client's
+# rsyncd.  By default this is on, ensuring that BackupPC will refuse to
+# connect to an rsyncd on the client that is not password protected.
+# Turn off at your own risk.
+#
+$Conf{RsyncdAuthRequired} = 1;
+
+#
+# Arguments to rsync for backup.  Do not edit the first set unless you
+# have a thorough understanding of how File::RsyncP works.
+#
+# Examples of additional arguments that should work are --exclude/--include,
+# eg:
+#
+#     $Conf{RsyncArgs} = [
+#           # original arguments here
+#           '-v',
+#           '--exclude', '/proc',
+#           '--exclude', '*.tmp',
+#     ];
 #
 $Conf{RsyncArgs} = [
 	    #
@@ -665,32 +738,48 @@ $Conf{RsyncArgs} = [
             '--group',
             '--devices',
             '--links',
+            '--times',
             '--block-size=2048',
-            '--relative',
             '--recursive',
+	    #
+	    # Add additional arguments here
+	    #
 ];
 
 #
-# Additional Rsync arguments that are given to the remote (client)
-# rsync.  Unfortunately you need a pretty good understanding of
-# File::RsyncP to know which arguments will work; not all will.
-# Examples that should work are --exclude/--include, eg:
+# Arguments to rsync for restore.  Do not edit the first set unless you
+# have a thorough understanding of how File::RsyncP works.
 #
-#   $Conf{RsyncClientArgs} = [
-#           '--exclude', '*.tmp',
-#   ];
 #
-$Conf{RsyncClientArgs} = [
+$Conf{RsyncRestoreArgs} = [
+	    #
+	    # Do not edit these!
+	    #
+	    "--numeric-ids",
+	    "--perms",
+	    "--owner",
+	    "--group",
+	    "--devices",
+	    "--links",
+	    "--times",
+	    "--block-size=2048",
+	    "--relative",
+	    "--ignore-times",
+	    "--recursive",
+	    #
+	    # Add additional arguments here
+	    #
 ];
 
 #
 # Amount of verbosity in Rsync Xfer log files.  0 means be quiet,
-# 1 will give some general information, 2 will give one line per file,
-# 3 will include skipped files, higher values give more output.
-# 10 will include byte dumps of all data read/written, which will
-# make the log files huge.
+# 1 will give will give one line per file, 2 will also show skipped
+# files on incrementals, higher values give more output.  10 will
+# include byte dumps of all data read/written, which will make the
+# log files huge.
 #
-$Conf{RsyncLogLevel} = 2;
+$Conf{RsyncLogLevel} = 1;
+
 #
 # Full path for ssh. Security caution: normal users should not
 # allowed to write to this file or directory.
@@ -705,6 +794,14 @@ $Conf{SshPath} = '/usr/bin/ssh';
 # netbios name, necessary for DHCP hosts.
 #
 $Conf{NmbLookupPath} = '/usr/bin/nmblookup';
+
+#
+# NmbLookup command.  Several variables are substituted at run-time:
+#
+#   $nmbLookupPath      path to nmblookup ($Conf{NmbLookupPath})
+#   $host               host name
+#
+$Conf{NmbLookupCmd} = '$nmbLookupPath -A $host';
 
 #
 # For fixed IP address hosts, BackupPC_dump can also verify the netbios
@@ -728,9 +825,12 @@ $Conf{FixedIPNetBiosNameCheck} = 0;
 $Conf{PingPath} = '/bin/ping';
 
 #
-# Options for the ping command.
+# Ping command.  Several variables are substituted at run-time:
 #
-$Conf{PingArgs} = '-c 1 $host';
+#   $pingPath      path to ping ($Conf{PingPath})
+#   $host          host name
+#
+$Conf{PingCmd} = '$pingPath -c 1 $host';
 
 #
 # Compression level to use on files.  0 means no compression.  Compression
@@ -788,7 +888,7 @@ $Conf{PingMaxMsec} = 20;
 # Despite the name, this parameter sets the timeout for all transport
 # methods (tar, smb etc).
 #
-$Conf{SmbClientTimeout} = 7200;
+$Conf{ClientTimeout} = 7200;
 
 #
 # Maximum number of log files we keep around in each PC's directory
@@ -802,6 +902,29 @@ $Conf{SmbClientTimeout} = 7200;
 # while you will have to manually remove the older log files.
 #
 $Conf{MaxOldPerPCLogFiles} = 12;
+
+#
+# Optional commands to run before and after dumps and restores.
+# Stdout from these commands will be written to the Xfer (or Restore)
+# log file.  One example of using these commands would be to
+# shut down and restart a database server, or to dump a database
+# to files for backup.  Example:
+#
+#    $Conf{DumpPreUserCmd} = '$sshPath -l root $host /usr/bin/dumpMysql';
+#
+# Various variable substitutions are available; see BackupPC_dump
+# or BackupPC_restore for the details.
+#
+$Conf{DumpPreUserCmd}     = undef;
+$Conf{DumpPostUserCmd}    = undef;
+$Conf{RestorePreUserCmd}  = undef;
+$Conf{RestorePostUserCmd} = undef;
+
+#
+# Advanced option for asking BackupPC to load additional perl modules.
+# Can be a list (array ref) of module names to load at startup.
+#
+$Conf{PerlModuleLoad}     = undef;
 
 ###########################################################################
 # Email reminders, status and messages

@@ -23,7 +23,8 @@ package BackupPC::Xfer::RsyncFileIO;
 use strict;
 use File::Path;
 use BackupPC::Attrib qw(:all);
-use BackupPC::FileZIO;
+use BackupPC::View;
+use BackupPC::PoolWrite;
 use BackupPC::PoolWrite;
 use Data::Dumper;
 
@@ -62,17 +63,24 @@ sub new
         digest       => File::RsyncP::Digest->new,
         checksumSeed => 0,
 	attrib	     => {},
+	logHandler   => \&logHandler,
+	stats        => {
+	    TotalFileCnt      => 0,
+	    TotalFileSize     => 0,
+	    ExistFileCnt      => 0,
+	    ExistFileSize     => 0,
+	    ExistFileCompSize => 0,
+	},
 	%$options,
     }, $class;
 
-    $fio->{shareM}   = $fio->{bpc}->fileNameEltMangle($fio->{xfer}{shareName});
+    $fio->{shareM}   = $fio->{bpc}->fileNameEltMangle($fio->{share});
     $fio->{outDir}   = "$fio->{xfer}{outDir}/new/";
     $fio->{outDirSh} = "$fio->{outDir}/$fio->{shareM}/";
     $fio->{view}     = BackupPC::View->new($fio->{bpc}, $fio->{host},
 					 $fio->{backups});
-    $fio->{full} = $fio->{xfer}{type} eq "full" ? 1 : 0;
+    $fio->{full}     = $fio->{xfer}{type} eq "full" ? 1 : 0;
     $fio->{newFilesFH} = $fio->{xfer}{newFilesFH};
-    $fio->{lastBkupNum} = $fio->{xfer}{lastBkupNum};
     return $fio;
 }
 
@@ -84,23 +92,36 @@ sub blockSize
     return $fio->{blockSize};
 }
 
+sub logHandlerSet
+{
+    my($fio, $sub) = @_;
+    $fio->{logHandler} = $sub;
+}
+
 #
 # Setup rsync checksum computation for the given file.
 #
 sub csumStart
 {
-    my($fio, $f) = @_;
-    my $attr = $fio->attribGet($f);
+    my($fio, $f, $needMD4) = @_;
 
+    my $attr = $fio->attribGet($f);
     $fio->{file} = $f;
     $fio->csumEnd if ( defined($fio->{fh}) );
     return if ( $attr->{type} != BPC_FTYPE_FILE );
     if ( !defined($fio->{fh} = BackupPC::FileZIO->open($attr->{fullPath},
 						       0,
 						       $attr->{compress})) ) {
-        $fio->log("Can't open $attr->{fullPath}");
+        $fio->log("Can't open $attr->{fullPath} (name=$f->{name})");
         return -1;
     }
+    if ( $needMD4) {
+        $fio->{csumDigest} = File::RsyncP::Digest->new;
+        $fio->{csumDigest}->add(pack("V", $fio->{checksumSeed}));
+    } else {
+        delete($fio->{csumDigest});
+    }
+    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
 sub csumGet
@@ -113,15 +134,15 @@ sub csumGet
 
     return if ( !defined($fio->{fh}) );
     if ( $fio->{fh}->read(\$fileData, $blockSize * $num) <= 0 ) {
-        return $fio->csumEnd;
+        return;
     }
-    #$fileData = substr($fileData, 0, $blockSize * $num - 2);
+    $fio->{csumDigest}->add($fileData) if ( defined($fio->{csumDigest}) );
     $fio->log(sprintf("%s: getting csum ($num,$csumLen,%d,0x%x)\n",
                             $fio->{file}{name},
                             length($fileData),
                             $fio->{checksumSeed}))
                 if ( $fio->{logLevel} >= 10 );
-    return $fio->{digest}->rsyncChecksum($fileData, $blockSize,
+    return $fio->{digest}->blockDigest($fileData, $blockSize,
                                          $csumLen, $fio->{checksumSeed});
 }
 
@@ -130,35 +151,49 @@ sub csumEnd
     my($fio) = @_;
 
     return if ( !defined($fio->{fh}) );
+    #
+    # make sure we read the entire file for the file MD4 digest
+    #
+    if ( defined($fio->{csumDigest}) ) {
+	my $fileData;
+	while ( $fio->{fh}->read(\$fileData, 65536) > 0 ) {
+            $fio->{csumDigest}->add($fileData);
+        }
+    }
     $fio->{fh}->close();
     delete($fio->{fh});
+    return $fio->{csumDigest}->digest if ( defined($fio->{csumDigest}) );
 }
 
 sub readStart
 {
     my($fio, $f) = @_;
-    my $attr = $fio->attribGet($f);
 
+    my $attr = $fio->attribGet($f);
     $fio->{file} = $f;
     $fio->readEnd if ( defined($fio->{fh}) );
-    if ( !defined(my $fh = BackupPC::FileZIO->open($attr->{fullPath},
+    if ( !defined($fio->{fh} = BackupPC::FileZIO->open($attr->{fullPath},
                                            0,
                                            $attr->{compress})) ) {
-        $fio->log("Can't open $attr->{fullPath}");
+        $fio->log("Can't open $attr->{fullPath} (name=$f->{name})");
         return;
     }
+    $fio->log("$f->{name}: opened for read") if ( $fio->{logLevel} >= 4 );
+    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
 sub read
 {
     my($fio, $num) = @_;
-    my($fileData);
+    my $fileData;
 
     $num ||= 32768;
     return if ( !defined($fio->{fh}) );
     if ( $fio->{fh}->read(\$fileData, $num) <= 0 ) {
         return $fio->readEnd;
     }
+    $fio->log(sprintf("read returns %d bytes", length($fileData)))
+				if ( $fio->{logLevel} >= 8 );
     return \$fileData;
 }
 
@@ -168,7 +203,9 @@ sub readEnd
 
     return if ( !defined($fio->{fh}) );
     $fio->{fh}->close;
+    $fio->log("closing $fio->{file}{name})") if ( $fio->{logLevel} >= 8 );
     delete($fio->{fh});
+    return;
 }
 
 sub checksumSeed
@@ -193,7 +230,7 @@ sub viewCacheDir
 
     #$fio->log("viewCacheDir($share, $dir)");
     if ( !defined($share) ) {
-	$share  = $fio->{xfer}{shareName};
+	$share  = $fio->{share};
 	$shareM = $fio->{shareM};
     } else {
 	$shareM = $fio->{bpc}->fileNameEltMangle($share);
@@ -211,7 +248,7 @@ sub viewCacheDir
     # fetch new directory attributes
     #
     $fio->{viewCache}{$shareM}
-		= $fio->{view}->dirAttrib($fio->{lastBkupNum}, $share, $dir);
+		= $fio->{view}->dirAttrib($fio->{viewNum}, $share, $dir);
 }
 
 sub attribGet
@@ -219,19 +256,22 @@ sub attribGet
     my($fio, $f) = @_;
     my($dir, $fname, $share, $shareM);
 
-    if ( $f->{name} =~ m{(.*)/(.*)} ) {
+    $fname = $f->{name};
+    $fname = "$fio->{xfer}{pathHdrSrc}/$fname"
+		       if ( defined($fio->{xfer}{pathHdrSrc}) );
+    $fname =~ s{//+}{/}g;
+    if ( $fname =~ m{(.*)/(.*)} ) {
 	$shareM = $fio->{shareM};
 	$dir = $1;
 	$fname = $2;
-    } elsif ( $f->{name} ne "." ) {
+    } elsif ( $fname ne "." ) {
 	$shareM = $fio->{shareM};
 	$dir = "";
-	$fname = $f->{name};
     } else {
 	$share = "";
 	$shareM = "";
 	$dir = "";
-	$fname = $fio->{xfer}{shareName};
+	$fname = $fio->{share};
     }
     $fio->viewCacheDir($share, $dir);
     $shareM .= "/$dir" if ( $dir ne "" );
@@ -274,7 +314,7 @@ sub attribSet
 	$dir  = "$fio->{shareM}/" . $1;
     } elsif ( $f->{name} eq "." ) {
 	$dir  = "";
-	$file = $fio->{xfer}{shareName};
+	$file = $fio->{share};
     } else {
 	$dir  = $fio->{shareM};
 	$file = $f->{name};
@@ -434,7 +474,7 @@ sub statsGet
 #
 # Make a given directory.  Returns non-zero on error.
 #
-sub mkpath
+sub makePath
 {
     my($fio, $f) = @_;
     my $name = $1 if ( $f->{name} =~ /(.*)/ );
@@ -446,7 +486,7 @@ sub mkpath
 	$path = $fio->{outDirSh} . $fio->{bpc}->fileNameMangle($name);
     }
     $fio->logFileAction("create", $f) if ( $fio->{logLevel} >= 1 );
-    $fio->log("mkpath($path, 0777)") if ( $fio->{logLevel} >= 5 );
+    $fio->log("makePath($path, 0777)") if ( $fio->{logLevel} >= 5 );
     $path = $1 if ( $path =~ /(.*)/ );
     File::Path::mkpath($path, 0, 0777) if ( !-d $path );
     return $fio->attribSet($f) if ( -d $path );
@@ -457,7 +497,7 @@ sub mkpath
 #
 # Make a special file.  Returns non-zero on error.
 #
-sub mkspecial
+sub makeSpecial
 {
     my($fio, $f) = @_;
     my $name = $1 if ( $f->{name} =~ /(.*)/ );
@@ -467,7 +507,7 @@ sub mkspecial
     my $str = "";
     my $type = $fio->mode2type($f->{mode});
 
-    $fio->log("mkspecial($path, $type, $f->{mode})")
+    $fio->log("makeSpecial($path, $type, $f->{mode})")
 		    if ( $fio->{logLevel} >= 5 );
     if ( $type == BPC_FTYPE_CHARDEV || $type == BPC_FTYPE_BLOCKDEV ) {
 	my($major, $minor, $fh, $fileData);
@@ -488,6 +528,7 @@ sub mkspecial
             || $attr->{type}  != $fio->mode2type($f->{mode})
             || $attr->{mtime} != $f->{mtime}
             || $attr->{size}  != $f->{size}
+            || $attr->{uid}   != $f->{uid}
             || $attr->{gid}   != $f->{gid}
             || $attr->{mode}  != $f->{mode}
             || !defined($fh = BackupPC::FileZIO->open($attr->{fullPath}, 0,
@@ -517,14 +558,26 @@ sub unlink
 }
 
 #
-# Appends to list of log messages
+# Default log handler
+#
+sub logHandler
+{
+    my($str) = @_;
+
+    print(STDERR $str, "\n");
+}
+
+#
+# Handle one or more log messages
 #
 sub log
 {
-    my($fio, @msg) = @_;
+    my($fio, @logStr) = @_;
 
-    $fio->{log} ||= [];
-    push(@{$fio->{log}}, @msg);
+    foreach my $str ( @logStr ) {
+        next if ( $str eq "" );
+        $fio->{logHandler}($str);
+    }
 }
 
 #
@@ -547,15 +600,13 @@ sub logFileAction
 }
 
 #
-# Returns a list of log messages
+# Later we'll use this function to complete a prior unfinished dump.
+# We'll do an incremental on the part we have already, and then a
+# full or incremental against the rest.
 #
-sub logMsg
+sub ignoreAttrOnFile
 {
-    my($fio) = @_;
-    my $log = $fio->{log} || [];
-
-    delete($fio->{log});
-    return @$log;
+    return undef;
 }
 
 #
@@ -583,6 +634,7 @@ sub fileDeltaRxStart
     delete($fio->{rxOutFd});
     delete($fio->{rxDigest});
     delete($fio->{rxInData});
+    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
 #
@@ -781,14 +833,14 @@ sub fileDeltaRxDone
 	    }
             $fh->close;
         } else {
-	    # error
+	    # ERROR
 	}
         $fio->log("$name got exact match")
                         if ( $fio->{logLevel} >= 5 );
     }
     close($fio->{rxInFd})  if ( defined($fio->{rxInFd}) );
     unlink("$fio->{outDirSh}RStmp") if  ( -f "$fio->{outDirSh}RStmp" );
-    my $newDigest = $fio->{rxDigest}->rsyncDigest;
+    my $newDigest = $fio->{rxDigest}->digest;
     if ( $fio->{logLevel} >= 3 ) {
         my $md4Str = unpack("H*", $md4);
         my $newStr = unpack("H*", $newDigest);
@@ -864,33 +916,93 @@ sub fileDeltaRxDone
     return;
 }
 
+#
+# Callback function for BackupPC::View->find.  Note the order of the
+# first two arguments.
+#
 sub fileListEltSend
 {
-    my($fio, $name, $fList, $outputFunc) = @_;
-    my @s = stat($name);
+    my($a, $fio, $fList, $outputFunc) = @_;
+    my $name = $a->{relPath};
+    my $n = $name;
+    my $type = $fio->mode2type($a->{mode});
+    my $extraAttribs = {};
 
-    (my $n = $name) =~ s/^\Q$fio->{localDir}/$fio->{remoteDir}/;
-    $fList->encode({
-            fname => $n,
-            dev   => $s[0],
-            inode => $s[1],
-            mode  => $s[2],
-            uid   => $s[4],
-            gid   => $s[5],
-            rdev  => $s[6],
-            mtime => $s[9],
-        });
+    $n =~ s/^\Q$fio->{xfer}{pathHdrSrc}//;
+    $fio->log("Sending $name (remote=$n)") if ( $fio->{logLevel} >= 4 );
+    if ( $type == BPC_FTYPE_CHARDEV
+	    || $type == BPC_FTYPE_BLOCKDEV
+	    || $type == BPC_FTYPE_SYMLINK ) {
+	my $fh = BackupPC::FileZIO->open($a->{fullPath}, 0, $a->{compress});
+	my $str;
+	if ( defined($fh) ) {
+	    if ( $fh->read(\$str, $a->{size} + 1) == $a->{size} ) {
+		if ( $type == BPC_FTYPE_SYMLINK ) {
+		    #
+		    # Reconstruct symbolic link
+		    #
+		    $extraAttribs = { link => $str };
+		} elsif ( $str =~ /(\d*),(\d*)/ ) {
+		    #
+		    # Reconstruct char or block special major/minor device num
+		    #
+		    $extraAttribs = { rdev => $1 * 256 + $2 };
+		} else {
+		    # ERROR
+		    $fio->log("$name: unexpected file contents $str");
+		}
+	    } else {
+		# ERROR
+		$fio->log("$name: can't read exactly $a->{size} bytes");
+	    }
+	    $fh->close;
+	} else {
+	    # ERROR
+	    $fio->log("$name: can't open");
+	}
+    }
+    my $f = {
+            name  => $n,
+            #dev   => 0,		# later, when we support hardlinks
+            #inode => 0,		# later, when we support hardlinks
+            mode  => $a->{mode},
+            uid   => $a->{uid},
+            gid   => $a->{gid},
+            mtime => $a->{mtime},
+            size  => $a->{size},
+	    %$extraAttribs,
+    };
+    $fList->encode($f);
+    $f->{name} = "$fio->{xfer}{pathHdrDest}/$f->{name}";
+    $f->{name} =~ s{//+}{/}g;
+    $fio->logFileAction("restore", $f) if ( $fio->{logLevel} >= 1 );
     &$outputFunc($fList->encodeData);
+    #
+    # Cumulate stats
+    #
+    if ( $type != BPC_FTYPE_DIR ) {
+	$fio->{stats}{TotalFileCnt}++;
+	$fio->{stats}{TotalFileSize} += $a->{size};
+    }
+    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
 sub fileListSend
 {
     my($fio, $flist, $outputFunc) = @_;
 
-    $fio->log("fileListSend not implemented!!");
-    $fio->{view}->find($fio->{lastBkupNum}, $fio->{xfer}{shareName},
-                       $fio->{restoreFiles}, 1, \&fileListEltSend,
-                       $flist, $outputFunc);
+    #
+    # Populate the file list with the files requested by the user.
+    # Since some might be directories so we call BackupPC::View::find.
+    #
+    $fio->log("fileListSend: sending file list: "
+	     . join(" ", @{$fio->{fileList}})) if ( $fio->{logLevel} >= 4 );
+    foreach my $name ( @{$fio->{fileList}} ) {
+	$fio->{view}->find($fio->{xfer}{bkupSrcNum},
+			   $fio->{xfer}{bkupSrcShare},
+			   $name, 1,
+			   \&fileListEltSend, $fio, $flist, $outputFunc);
+    }
 }
 
 sub finish
@@ -900,16 +1012,16 @@ sub finish
     #
     # Flush the attributes if this is the child
     #
-    $fio->attribWrite(undef)
+    $fio->attribWrite(undef);
+    alarm($fio->{timeout}) if ( defined($fio->{timeout}) );
 }
 
-
-sub is_tainted
-{
-    return ! eval {
-        join('',@_), kill 0;
-        1;
-    };
-}
+#sub is_tainted
+#{
+#    return ! eval {
+#        join('',@_), kill 0;
+#        1;
+#    };
+#}
 
 1;

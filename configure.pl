@@ -15,7 +15,7 @@
 #   Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001  Craig Barratt
+#   Copyright (C) 2001-2003  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -127,7 +127,7 @@ my %Programs = (
     rsync      => "RsyncClientPath",
     ping       => "PingPath",
     df         => "DfPath",
-    'ssh2/ssh' => "SshPath",
+    'ssh/ssh2' => "SshPath",
     sendmail   => "SendmailPath",
     hostname   => "HostnamePath",
 );
@@ -456,20 +456,48 @@ if ( -f $dest ) {
 }
 $Conf{EMailFromUserName}  ||= $Conf{BackupPCUser};
 $Conf{EMailAdminUserName} ||= $Conf{BackupPCUser};
+
+#
+# Update various config parameters
+#
+
 #
 # IncrFill should now be off
 #
 $Conf{IncrFill} = 0;
+
 #
 # Figure out sensible arguments for the ping command
 #
-if ( $^O eq "solaris" || $^O eq "sunos" ) {
-    $Conf{PingArgs} ||= '-s $host 56 1';
-} elsif ( ($^O eq "linux" || $^O eq "openbsd" || $^O eq "netbsd")
-        && !system("$Conf{PingClientPath} -c 1 -w 3 localhost") ) {
-    $Conf{PingArgs} ||= '-c 1 -w 3 $host';
-} else {
-    $Conf{PingArgs} ||= '-c 1 $host';
+if ( defined($Conf{PingArgs}) ) {
+    $Conf{PingCmd} = '$pingPath ' . $Conf{PingArgs};
+} elsif ( !defined($Conf{PingCmd}) ) {
+    if ( $^O eq "solaris" || $^O eq "sunos" ) {
+	$Conf{PingCmd} = '$pingPath -s $host 56 1';
+    } elsif ( ($^O eq "linux" || $^O eq "openbsd" || $^O eq "netbsd")
+	    && !system("$Conf{PingClientPath} -c 1 -w 3 localhost") ) {
+	$Conf{PingCmd} = '$pingPath -c 1 -w 3 $host';
+    } else {
+	$Conf{PingCmd} = '$pingPath -c 1 $host';
+    }
+    delete($Conf{PingArgs});
+}
+
+#
+# Figure out sensible arguments for the df command
+#
+if ( !defined($Conf{DfCmd}) ) {
+    if ( $^O eq "solaris" || $^O eq "sunos" ) {
+	$Conf{DfCmd} = '$dfPath -k $topDir';
+    }
+}
+
+#
+# $Conf{SmbClientTimeout} is now $Conf{ClientTimeout}
+#
+if ( defined($Conf{SmbClientTimeout}) ) {
+    $Conf{ClientTimeout} = $Conf{SmbClientTimeout};
+    delete($Conf{SmbClientTimeout});
 }
 
 my $confCopy = "$dest.pre-__VERSION__";
@@ -518,7 +546,7 @@ if ( $Conf{CgiDir} ne "" ) {
 
 print <<EOF;
 
-Ok, it looks we are finished.  There are several more things you
+Ok, it looks like we are finished.  There are several more things you
 will need to do:
 
   - Browse through the config file, $Conf{TopDir}/conf/config.pl,
@@ -635,7 +663,7 @@ sub ConfigParse
                 $allVars->{$var} = @conf if ( defined($var) );
                 push(@conf, {
                     text => $out,
-                var => $var,
+                    var => $var,
                 });
                 $out = $_;
             } else {

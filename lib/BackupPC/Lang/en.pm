@@ -828,7 +828,7 @@ $Lang{fileHeader} = <<EOF;
     <tr bgcolor="\$Conf{CgiHeaderBgColor}"><td align=center> Name</td>
        <td align="center"> Type</td>
        <td align="center"> Mode</td>
-       <td align="center"> Backup#</td>
+       <td align="center"> #</td>
        <td align="center"> Size</td>
        <td align="center"> Mod time</td>
     </tr>
@@ -875,7 +875,7 @@ $Lang{The_directory_is_empty} = <<EOF;
 </td></tr>
 EOF
 
-$Lang{on} = "on";
+#$Lang{on} = "on";
 $Lang{off} = "off";
 
 $Lang{full} = "full";

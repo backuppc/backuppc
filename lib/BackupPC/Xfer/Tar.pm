@@ -78,11 +78,15 @@ sub start
     my($t) = @_;
     my $bpc = $t->{bpc};
     my $conf = $t->{conf};
-    my(@fileList, @tarClientCmd, $logMsg, $incrDate);
+    my(@fileList, $tarClientCmd, $logMsg, $incrDate);
     local(*TAR);
 
     if ( $t->{type} eq "restore" ) {
-        push(@tarClientCmd, split(/ +/, $conf->{TarClientRestoreCmd}));
+	if ( ref($conf->{TarClientRestoreCmd}) eq "ARRAY" ) {
+	    $tarClientCmd = $conf->{TarClientRestoreCmd};
+	} else {
+	    $tarClientCmd = [split(/ +/, $conf->{TarClientRestoreCmd})];
+	}
         $logMsg = "restore started below directory $t->{shareName}";
 	#
 	# restores are considered to work unless we see they fail
@@ -125,52 +129,35 @@ sub start
         } else {
 	    push(@fileList, ".");
         }
+	if ( ref($conf->{TarClientCmd}) eq "ARRAY" ) {
+	    $tarClientCmd = $conf->{TarClientCmd};
+	} else {
+	    $tarClientCmd = [split(/ +/, $conf->{TarClientCmd})];
+	}
+	my $args;
         if ( $t->{type} eq "full" ) {
-	    push(@tarClientCmd,
-		    split(/ +/, $conf->{TarClientCmd}),
-		    split(/ +/, $conf->{TarFullArgs})
-	    );
+	    $args = $conf->{TarFullArgs};
             $logMsg = "full backup started for directory $t->{shareName}";
         } else {
             $incrDate = $bpc->timeStampISO($t->{lastFull} - 3600, 1);
-	    push(@tarClientCmd,
-		    split(/ +/, $conf->{TarClientCmd}),
-		    split(/ +/, $conf->{TarIncrArgs})
-	    );
+	    $args = $conf->{TarIncrArgs};
             $logMsg = "incr backup started back to $incrDate for directory"
                     . " $t->{shareName}";
         }
+	push(@$tarClientCmd, split(/ +/, $args));
     }
     #
     # Merge variables into @tarClientCmd
     #
-    my $vars = {
+    $tarClientCmd = $bpc->cmdVarSubstitute($tarClientCmd, {
         host      => $t->{host},
         hostIP    => $t->{hostIP},
         incrDate  => $incrDate,
         shareName => $t->{shareName},
+	fileList  => \@fileList,
         tarPath   => $conf->{TarClientPath},
         sshPath   => $conf->{SshPath},
-    };
-    my @cmd = @tarClientCmd;
-    @tarClientCmd = ();
-    foreach my $arg ( @cmd ) {
-	next if ( $arg =~ /^\s*$/ );
-	if ( $arg =~ /^\$fileList(\+?)/ ) {
-	    my $esc = $1 eq "+";
-	    foreach $arg ( @fileList ) {
-		$arg = $bpc->shellEscape($arg) if ( $esc );
-		push(@tarClientCmd, $arg);
-	    }
-	} else {
-	    $arg =~ s{\$(\w+)(\+?)}{
-		defined($vars->{$1})
-		    ? ($2 eq "+" ? $bpc->shellEscape($vars->{$1}) : $vars->{$1})
-		    : "\$$1"
-	    }eg;
-	    push(@tarClientCmd, $arg);
-	}
-    }
+    });
     if ( !defined($t->{xferPid} = open(TAR, "-|")) ) {
         $t->{_errStr} = "Can't fork to run tar";
         return;
@@ -204,13 +191,13 @@ sub start
         #
         # Run the tar command
         #
-        exec(@tarClientCmd);
+	$bpc->cmdExecOrEval($tarClientCmd);
         # should not be reached, but just in case...
-        $t->{_errStr} = "Can't exec @tarClientCmd";
+        $t->{_errStr} = "Can't exec @$tarClientCmd";
         return;
     }
-    $t->{XferLOG}->write(\"Running: @tarClientCmd\n");
-    alarm($conf->{SmbClientTimeout});
+    $t->{XferLOG}->write(\"Running: @$tarClientCmd\n");
+    alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
     return $logMsg;
 }
@@ -239,7 +226,7 @@ sub readOutput
         #
         # refresh our inactivity alarm
         #
-        alarm($conf->{SmbClientTimeout});
+        alarm($conf->{ClientTimeout});
         $t->{lastOutputLine} = $_ if ( !/^$/ );
         if ( /^Total bytes written: / ) {
             $t->{xferOK} = 1;

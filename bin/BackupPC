@@ -882,6 +882,7 @@ sub Main_Check_Job_Messages
                 $Info{"$f[0]FileCntRep"}    = $f[7];
                 $Info{"$f[0]FileRepMax"}    = $f[8];
                 $Info{"$f[0]FileCntRename"} = $f[9];
+                $Info{"$f[0]FileLinkMax"}   = $f[10];
                 $Info{"$f[0]Time"}          = time;
                 printf(LOG "%s%s nightly clean removed %d files of"
                            . " size %.2fGB\n",
@@ -889,11 +890,12 @@ sub Main_Check_Job_Messages
                              $Info{"$f[0]FileCntRm"},
                              $Info{"$f[0]KbRm"} / (1000 * 1024));
                 printf(LOG "%s%s is %.2fGB, %d files (%d repeated, "
-			   . "%d max chain), %d directories\n",
+			   . "%d max chain, %d max links), %d directories\n",
                              $bpc->timeStamp, ucfirst($f[0]),
                              $Info{"$f[0]Kb"} / (1000 * 1024),
                              $Info{"$f[0]FileCnt"}, $Info{"$f[0]FileCntRep"},
-			     $Info{"$f[0]FileRepMax"}, $Info{"$f[0]DirCnt"});
+			     $Info{"$f[0]FileRepMax"},
+			     $Info{"$f[0]FileLinkMax"}, $Info{"$f[0]DirCnt"});
             } elsif ( $mesg =~ /^BackupPC_nightly lock_off/ ) {
 		$RunNightlyWhenIdle = 0;
             } elsif ( $mesg =~ /^processState\s+(.+)/ ) {

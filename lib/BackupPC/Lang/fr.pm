@@ -835,7 +835,7 @@ $Lang{fileHeader} = <<EOF;
     <tr bgcolor="\$Conf{CgiHeaderBgColor}"><td align=center> Nom</td>
        <td align="center"> Type</td>
        <td align="center"> Mode</td>
-       <td align="center"> Sauvegarde n°</td>
+       <td align="center"> n°</td>
        <td align="center"> Taille</td>
        <td align="center"> Date de modification</td>
     </tr>
@@ -883,7 +883,7 @@ $Lang{The_directory_is_empty} = <<EOF;
 </td></tr>
 EOF
 
-$Lang{on} = "actif";
+#$Lang{on} = "actif";
 $Lang{off} = "inactif";
 
 $Lang{full} = "complet";

@@ -234,15 +234,12 @@ releases of BackupPC:
 
 =item *
 
-Adding support for rsync as a transport method, in addition to
-smb and tar.  This will give big savings in network traffic for
-linux/unix clients.  I haven't decided whether to save the pool file
-rsync checksums (that would double the number of files in the pool, but
-eliminate most server disk reads), or recompute them every time.  I expect
-to use native rsync on the client side.  On the server, rsync would
-need to understand the compressed file format, the file name mangling
-and the attribute files, so I will either have to add features to rsync
-or emulate rsync on the server side in perl.
+Adding hardlink support to rsync.
+
+=item *
+
+Adding block and file checksum caching to rsync.  This will significantly
+increase performance.
 
 =item *
 
@@ -253,10 +250,48 @@ you could request that you get sent email if any files below /bin,
 
 =item *
 
-Resuming incomplete completed full backups.  Useful if a machine
+Resuming incomplete full backups.  Useful if a machine
 (eg: laptop) is disconnected from the network during a backup,
-or if the user manually stops a backup.  This would work by
-excluding directories that were already complete.
+or if the user manually stops a backup.  This would be supported
+initially for rsync.  The partial dump would be kept, and be
+browsable.  When the next dump starts, an incremental against
+the partial dump would be done to make sure it was up to date,
+and then the rest of the full dump would be done.
+
+=item *
+
+Replacing smbclient with the perl module FileSys::SmbClient.  This
+gives much more direct control of the smb transfer, allowing
+incrementals to depend on any attribute change (eg: exist, mtime,
+file size, uid, gid), and better support for include and exclude.
+Currently smbclient incrementals only depend upon mtime, so
+deleted files or renamed files are not detected.  FileSys::SmbClient
+would also allow resuming of incomplete full backups in the
+same manner as rsync will.
+
+=item *
+
+Support --listed-incremental or --incremental for tar,
+so that incrementals will depend upon any attribute change (eg: exist,
+mtime, file size, uid, gid), rather than just mtime.  This will allow
+tar to be to as capable as FileSys::SmbClient and rsync.
+
+=item *
+
+For rysnc (and smb when FileSys::SmbClient is supported, and tar when
+--listed-incremental is supported) support multi-level incrementals.
+In fact, since incrementals will now be more "accurate", you could
+choose to never to full dumps (except the first time), or at a
+minimum do them infrequently: each incremental would depend upon
+the last, giving a continuous chain of differential dumps.
+
+=item *
+
+Add a backup browsing feature that shows backup history by file.
+So rather than a single directory view, it would be a table showing
+the files (down) and the backups (across).  The internal hardlinks
+encode which files are identical across backups.  You could immediately
+see which files changed on which backups.
 
 =item *
 
@@ -268,7 +303,9 @@ benchmarks on a large pool suggests that the potential savings are
 around 15-20%, which isn't spectacular, and likely not worth the
 implementation effort. The program xdelta (v1) on SourceForge (see
 L<http://sourceforge.net/projects/xdelta>) uses an rsync algorithm for
-doing efficient binary file deltas.
+doing efficient binary file deltas.  Rather than using an external
+program, File::RsyncP will eventually get the necessary delta
+generataion code from rsync.
 
 =back
 
@@ -371,8 +408,10 @@ If you are using rsync to backup linux/unix machines you should have
 version 2.5.5 on each client machine.  See L<http://rsync.samba.org>.
 Use "rsync --version" to check your version.
 
-For BackupPC to use Rsync you will also need to install the perl Rsync
-module, which is available from L<http://backuppc.sourceforge.net>.
+For BackupPC to use Rsync you will also need to install the perl
+File::RsyncP module, which is available from
+L<http://perlrsync.sourceforge.net>.
+Version 0.20 is required.
 
 =item *
 
@@ -430,13 +469,34 @@ Download the latest version from L<http://backuppc.sourceforge.net>.
 
 =head2 Step 2: Installing the distribution
 
-First off, to enable compression, you will need to install Compress::Zlib
-from L<http://www.cpan.org>.  It is optional, but strongly recommended.
+First off, there are three perl modules you should install.
+These are all optional, but highly recommended:
+
+=over 4
+
+=item Compress::Zlib
+
+To enable compression, you will need to install Compress::Zlib
+from L<http://www.cpan.org>.
+You can run "perldoc Compress::Zlib" to see if this module is installed.
+
+=item Archive::Zip
+
 To support restore via Zip archives you will need to install
-Archive::Zip, also from L<http://www.cpan.org>.  You can run
-"perldoc Compress::Zlib" to see if this module is installed.
-Finally, you will need the Rsync module.  To build and install these
-packages you should run these commands:
+Archive::Zip, also from L<http://www.cpan.org>.
+You can run "perldoc Archive::Zip" to see if this module is installed.
+
+=item File::RsyncP
+
+To use rsync and rsyncd with BackupPC you will need to install File::RsyncP.
+You can run "perldoc File::RsyncP" to see if this module is installed.
+File::RsyncP is available from L<http://perlrsync.sourceforge.net>.
+Version 0.20 is required.
+
+=back
+
+To build and install these packages, fetch the tar.gz file and
+then run these commands:
 
     tar zxvf Archive-Zip-1.01.tar.gz
     cd Archive-Zip-1.01
@@ -444,6 +504,8 @@ packages you should run these commands:
     make
     make test
     make install
+
+The same sequence of commands can be used for each module.
 
 Now let's move onto BackupPC itself.  After fetching
 BackupPC-__VERSION__.tar.gz, run these commands as root:
@@ -721,16 +783,96 @@ root), since it needs sufficient permissions to read all the backup
 files. Ssh is setup so that BackupPC on the server (an otherwise low
 privileged user) can ssh as root on the client, without being prompted
 for a password. There are two common versions of ssh: v1 and v2. Here
-are some instructions for one way to setup ssh v2:
+are some instructions for one way to setup ssh.  (Check which version
+of SSH you have by typing "ssh" or "man ssh".)
+
+=over 4
+
+=item OpenSSH Instructions
 
 =over 4
 
 =item Key generation
 
-As root on the client machine, use ssh2-keygen to generate a
+As root on the client machine, use ssh-keygen to generate a
+public/private key pair, without a pass-phrase:
+
+    ssh-keygen -t rsa -N ''
+
+This will save the public key in ~/.ssh/id_rsa.pub and the private
+key in ~/.ssh/id_rsa.
+
+=item BackupPC setup
+
+Repeat the above steps for the BackupPC user (__BACKUPPCUSER__) on the server.
+Make a copy of the public key to make it recognizable, eg:
+
+    ssh-keygen -t rsa -N ''
+    cp ~/.ssh/id_rsa.pub ~/.ssh/BackupPC_id_rsa.pub
+
+See the ssh and sshd manual pages for extra configuration information.
+
+=item Key exchange
+
+To allow BackupPC to ssh to the client as root, you need to place
+BackupPC's public key into root's authorized list on the client.
+Append BackupPC's public key (BackupPC_id_rsa.pub) to root's
+~/.ssh/authorized_keys2 file on the client:
+
+    touch ~/.ssh/authorized_keys2
+    cat BackupPC_id_rsa.pub >> ~/.ssh/authorized_keys2
+
+You should edit ~/.ssh/authorized_keys2 and add further specifiers,
+eg: from, to limit which hosts can login using this key.  For example,
+if your BackupPC host is called backuppc.my.com, there should be
+one line in ~/.ssh/authorized_keys2 that looks like:
+
+    from="backuppc.my.com" ssh-rsa [base64 key, eg: ABwBCEAIIALyoqa8....]
+
+=item Fix permissions
+
+You will probably need to make sure that all the files
+in ~/.ssh have no group or other read/write permission:
+
+    chmod -R go-rwx ~/.ssh
+
+You should do the same thing for the BackupPC user on the server.
+
+=item Testing
+
+As the BackupPC user on the server, verify that this command:
+
+    ssh -l root clientHostName whoami
+
+prints
+
+    root
+
+You might be prompted the first time to accept the client's host key and
+you might be prompted for root's password on the client.  Make sure that
+this command runs cleanly with no prompts after the first time.  You
+might need to check /etc/hosts.equiv on the client.  Look at the
+man pages for more information.  The "-v" option to ssh is a good way
+to get detailed information about what fails.
+
+=back
+
+=item SSH2 Instructions
+
+=over 4
+
+=item Key generation
+
+As root on the client machine, use ssh-keygen2 to generate a
 public/private key pair, without a pass-phrase:
 
     ssh-keygen2 -t rsa -P
+
+or:
+
+    ssh-keygen -t rsa -N ''
+
+(This command might just be called ssh-keygen on your machine.)
 
 This will save the public key in /.ssh2/id_rsa_1024_a.pub and the private
 key in /.ssh2/id_rsa_1024_a.
@@ -795,7 +937,9 @@ might need to check /etc/hosts.equiv on the client.  Look at the
 man pages for more information.  The "-v" option to ssh2 is a good way
 to get detailed information about what fails.
 
-=item ssh version 1 instructions
+=back
+
+=item SSH version 1 Instructions
 
 The concept is identical and the steps are similar, but the specific
 commands and file names are slightly different.

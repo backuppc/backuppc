@@ -202,7 +202,7 @@ sub start
         return;
     }
     $t->{XferLOG}->write(\"Running: $smbClientCmd\n");
-    alarm($conf->{SmbClientTimeout});
+    alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
     return $logMsg;
 }
@@ -228,7 +228,7 @@ sub readOutput
         #
         # refresh our inactivity alarm
         #
-        alarm($conf->{SmbClientTimeout});
+        alarm($conf->{ClientTimeout});
         $t->{lastOutputLine} = $_ if ( !/^$/ );
         #
         # This section is highly dependent on the version of smbclient.

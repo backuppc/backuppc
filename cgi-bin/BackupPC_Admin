@@ -360,6 +360,9 @@ sub Action_View
         $comment = "(Extracting only Errors)";
     } elsif ( $host ne "" && $type eq "config" ) {
         $file = "$TopDir/pc/$host/config.pl";
+        $file = "$TopDir/conf/$host.pl"
+                    if ( $host ne "config" && -f "$TopDir/conf/$host.pl"
+                                           && !-f $file );
     } elsif ( $type eq "docs" ) {
         $file = "$BinDir/../doc/BackupPC.html";
         if ( open(LOG, $file) ) {
@@ -402,7 +405,8 @@ sub Action_View
             while ( 1 ) {
                 $_ = $fh->readLine();
                 if ( $_ eq "" ) {
-		    print(eval ("qq{$Lang->{skipped__skipped_lines}}"));
+		    print(eval ("qq{$Lang->{skipped__skipped_lines}}"))
+						    if ( $skipped );
 		    last;
 		}
                 if ( /smb: \\>/
@@ -425,7 +429,8 @@ sub Action_View
 		    $skipped++;
 		    next;
 		}
-		print(eval("qq{$Lang->{skipped__skipped_lines}}")) if ( $skipped );
+		print(eval("qq{$Lang->{skipped__skipped_lines}}"))
+						     if ( $skipped );
 		$skipped = 0;
                 print ${EscapeHTML($_)};
             }
@@ -750,17 +755,16 @@ EOF
     }
     my @otherDirs;
     foreach my $i ( $view->backupList($share, $dir) ) {
-        next if ( $i == $num );
         my $path = $dir;
         my $shareURI = $share;
         $path =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
         $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-        push(@otherDirs, <<EOF);
-<a href="$MyURL?action=browse&host=$host&num=$i&share=$shareURI&dir=$path">$i</a>
-EOF
+        push(@otherDirs, "<a href=\"$MyURL?action=browse&host=$host&num=$i"
+                       . "&share=$shareURI&dir=$path\">$i</a>");
+
     }
     if ( @otherDirs ) {
-	my $otherDirs  = join(", ", @otherDirs);
+	my $otherDirs  = join(",\n", @otherDirs);
         $filledBackup .= eval("qq{$Lang->{Visit_this_directory_in_backup}}");
     }
  
@@ -944,7 +948,7 @@ EOF
         Trailer();
     } elsif ( $In{type} == 4 ) {
 	if ( !defined($Hosts->{$In{hostDest}}) ) {
-	    ErrorExit(eval("qq{$Lang->{Host_doesn_t_exist}}"));
+	    ErrorExit(eval("qq{$Lang->{Host__doesn_t_exist}}"));
 	}
 	if ( !CheckPermission($In{hostDest}) ) {
 	    ErrorExit(eval("qq{$Lang->{You_don_t_have_permission_to_restore_onto_host}}"));
@@ -1232,9 +1236,7 @@ EOF
     <td align="right">  $MBNew </td>
 </tr>
 EOF
-        $Backups[$i]{compress} ||= "off";
-	my $is_compress = $Lang->{off};
-	if ($Backups[$i]{compress} ne "off") {$is_compress = $Lang->{on}; }
+	my $is_compress = $Backups[$i]{compress} || $Lang->{off};
 	if (! $ExistComp) { $ExistComp = "&nbsp;"; }
 	if (! $MBExistComp) { $MBExistComp = "&nbsp;"; }
         $compStr .= <<EOF;
@@ -1739,7 +1741,6 @@ sub genPoolInfo
     my $poolTime   = timeStamp2($info->{"${name}Time"});
     $info->{"${name}FileCntRm"} = $info->{"${name}FileCntRm"} + 0;
     return eval("qq{$Lang->{Pool_Stat}}");
-
 }
 
 ###########################################################################
@@ -1761,8 +1762,10 @@ sub Header
         { link => "?action=queue",             name => $Lang->{Current_queues} },
         { link => "?action=view&type=docs",    name => $Lang->{Documentation},
                                                priv => 1},
+        { link => "http://backuppc.sourceforge.net/faq", name => "FAQ",
+                                               priv => 1},
         { link => "http://backuppc.sourceforge.net", name => "SourceForge",
-                                                     priv => 1},
+                                               priv => 1},
     );
     print $Cgi->header();
     print <<EOF;

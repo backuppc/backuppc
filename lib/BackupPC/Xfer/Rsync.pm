@@ -41,7 +41,7 @@ use strict;
 use BackupPC::View;
 use BackupPC::Xfer::RsyncFileIO;
 
-use vars qw( $RsyncLibOK );
+use vars qw( $RsyncLibOK $RsyncLibErr );
 
 BEGIN {
     eval "use File::RsyncP;";
@@ -50,8 +50,14 @@ BEGIN {
         # Rsync module doesn't exist.
         #
         $RsyncLibOK = 0;
+        $RsyncLibErr = "File::RsyncP module doesn't exist";
     } else {
-        $RsyncLibOK = 1;
+        if ( $File::RsyncP::VERSION < 0.20 ) {
+            $RsyncLibOK = 0;
+            $RsyncLibErr = "File::RsyncP module version too old: need 0.20";
+        } else {
+            $RsyncLibOK = 1;
+        }
     }
 };
 
@@ -68,6 +74,20 @@ sub new
         hostIP    => "",
         shareName => "",
         badFiles  => [],
+
+	#
+	# Various stats
+	#
+        byteCnt         => 0,
+	fileCnt         => 0,
+	xferErrCnt      => 0,
+	xferBadShareCnt => 0,
+	xferBadFileCnt  => 0,
+	xferOK          => 0,
+
+	#
+	# User's args
+	#
         %$args,
     }, $class;
 
@@ -93,21 +113,32 @@ sub start
     my($t) = @_;
     my $bpc = $t->{bpc};
     my $conf = $t->{conf};
-    my(@fileList, @rsyncClientCmd, $logMsg, $incrDate);
+    my(@fileList, $rsyncClientCmd, $rsyncArgs, $logMsg,
+       $incrDate, $argList, $fioArgs);
+
+    #
+    # We add a slash to the share name we pass to rsync
+    #
+    ($t->{shareNameSlash} = "$t->{shareName}/") =~ s{//+$}{};
 
     if ( $t->{type} eq "restore" ) {
-	# TODO
-        #push(@rsyncClientCmd, split(/ +/, $c o n f->{RsyncClientRestoreCmd}));
-        $logMsg = "restore not supported for $t->{shareName}";
-	#
-	# restores are considered to work unless we see they fail
-	# (opposite to backups...)
-	#
-	$t->{xferOK} = 1;
+        $rsyncClientCmd = $conf->{RsyncClientRestoreCmd};
+	$rsyncArgs = $conf->{RsyncRestoreArgs};
+	my $remoteDir = "$t->{shareName}/$t->{pathHdrDest}";
+	$remoteDir    =~ s{//+}{/}g;
+        $argList = ['--server', @$rsyncArgs, '.', $remoteDir];
+	$fioArgs = {
+	    host     => $t->{bkupSrcHost},
+	    share    => $t->{bkupSrcShare},
+	    viewNum  => $t->{bkupSrcNum},
+	    fileList => $t->{fileList},
+	};
+        $logMsg = "restore started below directory $t->{shareName}"
+		. " to host $t->{host}";
     } else {
 	#
 	# Turn $conf->{BackupFilesOnly} and $conf->{BackupFilesExclude}
-	# into a hash of arrays of files.  NOT IMPLEMENTED YET.
+	# into a hash of arrays of files.
 	#
 	$conf->{RsyncShareName} = [ $conf->{RsyncShareName} ]
 			unless ref($conf->{RsyncShareName}) eq "ARRAY";
@@ -125,20 +156,62 @@ sub start
 		};
 	    }
 	}
-        if ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
-            foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
-            {
+        if ( defined($conf->{BackupFilesOnly}{$t->{shareName}}) ) {
+            my(@inc, @exc, %incDone, %excDone);
+            foreach my $file ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
+                #
+                # If the user wants to just include /home/craig, then
+                # we need to do create include/exclude pairs at
+                # each level:
+                #     --include /home --exclude /*
+                #     --include /home/craig --exclude /home/*
+                #
+                # It's more complex if the user wants to include multiple
+                # deep paths.  For example, if they want /home/craig and
+                # /var/log, then we need this mouthfull:
+                #     --include /home --include /var --exclude /*
+                #     --include /home/craig --exclude /home/*
+                #     --include /var/log --exclude /var/*
+                #
+                # To make this easier we do all the includes first and all
+                # of the excludes at the end (hopefully they commute).
+                #
+                $file = "/$file";
+                $file =~ s{//+}{/}g;
+                my $f = "";
+                while ( $file =~ m{^/([^/]*)(.*)} ) {
+                    my $elt = $1;
+                    $file = $2;
+                    if ( $file eq "/" ) {
+                        #
+                        # preserve a tailing slash
+                        #
+                        $file = "";
+                        $elt = "$elt/";
+                    }
+                    push(@exc, "$f/*") if ( !$excDone{"$f/*"} );
+                    $excDone{"$f/*"} = 1;
+                    $f = "$f/$elt";
+                    push(@inc, $f) if ( !$incDone{$f} );
+                    $incDone{$f} = 1;
+                }
+            }
+            foreach my $file ( @inc ) {
+                push(@fileList, "--include=$file");
+            }
+            foreach my $file ( @exc ) {
                 push(@fileList, "--exclude=$file");
             }
         }
-        if ( defined($conf->{BackupFilesOnly}{$t->{shareName}}) ) {
-            foreach my $file ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
-                push(@fileList, $file);
+        if ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
+            foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
+            {
+                #
+                # just append additional exclude lists onto the end
+                #
+                push(@fileList, "--exclude=$file");
             }
-        } else {
-	    push(@fileList, ".");
         }
-	push(@rsyncClientCmd, split(/ +/, $conf->{RsyncClientCmd}));
         if ( $t->{type} eq "full" ) {
             $logMsg = "full backup started for directory $t->{shareName}";
         } else {
@@ -146,80 +219,75 @@ sub start
             $logMsg = "incr backup started back to $incrDate for directory"
                     . " $t->{shareName}";
         }
-	$t->{xferOK} = 0;
-    }
-    #
-    # Merge variables into @rsyncClientCmd
-    #
-    my $vars = {
-        host      => $t->{host},
-        hostIP    => $t->{hostIP},
-        shareName => $t->{shareName},
-        rsyncPath => $conf->{RsyncClientPath},
-        sshPath   => $conf->{SshPath},
-    };
-    my @cmd = @rsyncClientCmd;
-    @rsyncClientCmd = ();
-    foreach my $arg ( @cmd ) {
-	next if ( $arg =~ /^\s*$/ );
-	if ( $arg =~ /^\$fileList(\+?)/ ) {
-	    my $esc = $1 eq "+";
-	    foreach $arg ( @fileList ) {
-		$arg = $bpc->shellEscape($arg) if ( $esc );
-		push(@rsyncClientCmd, $arg);
-	    }
-	} elsif ( $arg =~ /^\$argList(\+?)/ ) {
-	    my $esc = $1 eq "+";
-	    foreach $arg ( (@{$conf->{RsyncArgs}},
-			    @{$conf->{RsyncClientArgs}}) ) {
-		$arg = $bpc->shellEscape($arg) if ( $esc );
-		push(@rsyncClientCmd, $arg);
-	    }
-	} else {
-	    $arg =~ s{\$(\w+)(\+?)}{
-		defined($vars->{$1})
-		    ? ($2 eq "+" ? $bpc->shellEscape($vars->{$1}) : $vars->{$1})
-		    : "\$$1"
-	    }eg;
-	    push(@rsyncClientCmd, $arg);
-	}
+        
+        #
+        # A full dump is implemented with --ignore-times: this causes all
+        # files to be checksummed, even if the attributes are the same.
+        # That way all the file contents are checked, but you get all
+        # the efficiencies of rsync: only files deltas need to be
+        # transferred, even though it is a full dump.
+        #
+	$rsyncArgs = $conf->{RsyncArgs};
+        $rsyncArgs = [@$rsyncArgs, "--ignore-times"]
+                                    if ( $t->{type} eq "full" );
+	$rsyncClientCmd = $conf->{RsyncClientCmd};
+        $argList = ['--server', '--sender', @$rsyncArgs,
+                              '.', $t->{shareNameSlash}];
+	$fioArgs = {
+	    host    => $t->{host},
+	    share   => $t->{shareName},
+	    viewNum => $t->{lastFullBkupNum},
+	};
     }
 
     #
-    # A full dump is implemented with --ignore-times: this causes all
-    # files to be checksummed, even if the attributes are the same.
-    # That way all the file contents are checked, but you get all
-    # the efficiencies of rsync: only files deltas need to be
-    # transferred, even though it is a full dump.
+    # Merge variables into $rsyncClientCmd
     #
-    my $rsyncArgs = $conf->{RsyncArgs};
-    $rsyncArgs = [@$rsyncArgs, "--ignore-times"] if ( $t->{type} eq "full" );
+    $rsyncClientCmd = $bpc->cmdVarSubstitute($rsyncClientCmd,
+            {
+                host      => $t->{host},
+                hostIP    => $t->{hostIP},
+                shareName => $t->{shareName},
+                shareNameSlash => $t->{shareNameSlash},
+                rsyncPath => $conf->{RsyncClientPath},
+                sshPath   => $conf->{SshPath},
+                argList   => $argList,
+            });
 
     #
     # Create the Rsync object, and tell it to use our own File::RsyncP::FileIO
     # module, which handles all the special BackupPC file storage
     # (compression, mangling, hardlinks, special files, attributes etc).
     #
+    $t->{rsyncClientCmd} = $rsyncClientCmd;
     $t->{rs} = File::RsyncP->new({
-	logLevel   => $conf->{RsyncLogLevel},
-	rsyncCmd   => \@rsyncClientCmd,
-	rsyncArgs  => $rsyncArgs,
-	logHandler => sub {
+	logLevel     => $conf->{RsyncLogLevel},
+	rsyncCmd     => sub {
+			    $bpc->cmdExecOrEval($rsyncClientCmd);
+			},
+	rsyncCmdType => "full",
+	rsyncArgs    => $rsyncArgs,
+	logHandler   => sub {
 			  my($str) = @_;
 			  $str .= "\n";
 			  $t->{XferLOG}->write(\$str);
-		      },
-	fio        => BackupPC::Xfer::RsyncFileIO->new({
+		        },
+	fio          => BackupPC::Xfer::RsyncFileIO->new({
 			    xfer       => $t,
 			    bpc        => $t->{bpc},
 			    conf       => $t->{conf},
-			    host       => $t->{host},
 			    backups    => $t->{backups},
 			    logLevel   => $conf->{RsyncLogLevel},
+			    timeout    => $conf->{ClientTimeout},
+			    logHandler => sub {
+					      my($str) = @_;
+					      $str .= "\n";
+					      $t->{XferLOG}->write(\$str);
+					  },
+			    %$fioArgs,
 		      }),
     });
 
-    # TODO: alarm($conf->{SmbClientTimeout});
     delete($t->{_errStr});
 
     return $logMsg;
@@ -230,12 +298,27 @@ sub run
     my($t) = @_;
     my $rs = $t->{rs};
     my $conf = $t->{conf};
+    my($remoteSend, $remoteDir, $remoteDirDaemon);
 
+    alarm($conf->{ClientTimeout});
+    if ( $t->{type} eq "restore" ) {
+	$remoteSend       = 0;
+	($remoteDir       = "$t->{shareName}/$t->{pathHdrDest}") =~ s{//+}{/}g;
+	($remoteDirDaemon = "$t->{shareName}/$t->{pathHdrDest}") =~ s{//+}{/}g;
+	$remoteDirDaemon  = $t->{shareNameSlash}
+				if ( $t->{pathHdrDest} eq ""
+			 		      || $t->{pathHdrDest} eq "/" );
+    } else {
+	$remoteSend      = 1;
+	$remoteDir       = $t->{shareNameSlash};
+	$remoteDirDaemon = ".";
+    }
     if ( $t->{XferMethod} eq "rsync" ) {
 	#
 	# Run rsync command
 	#
-	$rs->remoteStart(1, $t->{shareName});
+	$t->{XferLOG}->write(\"Running: @{$t->{rsyncClientCmd}}\n");
+	$rs->remoteStart($remoteSend, $remoteDir);
     } else {
 	#
 	# Connect to the rsync server
@@ -245,14 +328,22 @@ sub run
 	    $t->{hostError} = $err;
 	    return;
 	}
-	if ( defined(my $err = $rs->serverService($t->{shareName},
-						 "craig", "xyz123", 0)) ) {
+	#
+	# Pass module name, and follow it with a slash if it already
+	# contains a slash; otherwise just keep the plain module name.
+	#
+	my $module = $t->{shareName};
+	$module = $t->{shareNameSlash} if ( $module =~ /\// );
+	if ( defined(my $err = $rs->serverService($module,
+                                             $conf->{RsyncdUserName},
+                                             $conf->{RsyncdPasswd},
+                                             $conf->{RsyncdAuthRequired})) ) {
 	    $t->{hostError} = $err;
 	    return;
 	}
-	$rs->serverStart(1, ".");
+	$rs->serverStart($remoteSend, $remoteDirDaemon);
     }
-    my $error = $rs->go($t->{shareName});
+    my $error = $rs->go($t->{shareNameSlash});
     $rs->serverClose();
 
     #
@@ -260,9 +351,6 @@ sub run
     # 
     # $rs->{stats}{totalWritten}
     # $rs->{stats}{totalSize}
-    #
-    # qw(byteCnt fileCnt xferErrCnt xferBadShareCnt xferBadFileCnt
-    #           xferOK hostAbort hostError lastOutputLine)
     #
     my $stats = $rs->statsFinal;
     if ( !defined($error) && defined($stats) ) {
@@ -279,22 +367,29 @@ sub run
     #
     $t->{hostError} = $error if ( defined($error) );
 
-    return (
-	0,
-	$stats->{childStats}{ExistFileCnt}
-	    + $stats->{parentStats}{ExistFileCnt},
-	$stats->{childStats}{ExistFileSize}
-	    + $stats->{parentStats}{ExistFileSize},
-	$stats->{childStats}{ExistFileCompSize}
-	    + $stats->{parentStats}{ExistFileCompSize},
-	$stats->{childStats}{TotalFileCnt}
-	    + $stats->{parentStats}{TotalFileCnt},
-	$stats->{childStats}{TotalFileSize}
-	    + $stats->{parentStats}{TotalFileSize},
-    );
+    if ( $t->{type} eq "restore" ) {
+	return (
+	    $t->{fileCnt},
+	    $t->{byteCnt},
+	    0,
+	    0
+	);
+    } else {
+	return (
+	    0,
+	    $stats->{childStats}{ExistFileCnt}
+		+ $stats->{parentStats}{ExistFileCnt},
+	    $stats->{childStats}{ExistFileSize}
+		+ $stats->{parentStats}{ExistFileSize},
+	    $stats->{childStats}{ExistFileCompSize}
+		+ $stats->{parentStats}{ExistFileCompSize},
+	    $stats->{childStats}{TotalFileCnt}
+		+ $stats->{parentStats}{TotalFileCnt},
+	    $stats->{childStats}{TotalFileSize}
+		+ $stats->{parentStats}{TotalFileSize},
+	);
+    }
 }
-
-#        alarm($conf->{SmbClientTimeout});
 
 sub setSelectMask
 {
@@ -305,6 +400,7 @@ sub errStr
 {
     my($t) = @_;
 
+    return $RsyncLibErr if ( !defined($t) || ref($t) ne "HASH" );
     return $t->{_errStr};
 }
 

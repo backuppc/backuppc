@@ -1,6 +1,38 @@
 #!/bin/perl
 #
-# Build a BackupPC distribution
+# makeDist: Build a BackupPC distribution
+#
+# DESCRIPTION
+#
+#   This script should be run with no arguments to build a
+#   distribution.  The $Version and $ReleaseDate should be
+#   edited below to specify the version name and the release
+#   date.  The distribution is createede in the sub-directory
+#   dist.  The dsitribution is in the file name:
+#
+#           dist/BackupPC-$Version.tar.gz.
+#
+# AUTHOR
+#   Craig Barratt <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001-2003  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
 #
 
 use strict;
@@ -9,8 +41,8 @@ use File::Copy;
 
 umask(0022);
 
-my $Version     = "1.6.0_CVS";
-my $ReleaseDate = "10 Dec 2002";
+my $Version     = "2.0.0_CVS";
+my $ReleaseDate = "18 Jan 2003";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -56,6 +88,7 @@ $ConfVars->{CgiImageDir} = 2;
 foreach my $file ( @PerlSrc ) {
     $errCnt += CheckConfigParams($file, $ConfVars, 1);
 }
+$errCnt += CheckLangUsage();
 exit(1) if ( $errCnt );
 
 foreach my $var ( sort(keys(%$ConfVars) ) ) {
@@ -107,6 +140,8 @@ foreach my $file ( (@PerlSrc,
 rmtree("doc", 0, 0);
 system("cd dist ; tar zcf BackupPC-$Version.tar.gz BackupPC-$Version");
 print("Distribution written to dist/BackupPC-$Version.tar.gz\n");
+unlink("pod2htmd.x~~");
+unlink("pod2htmi.x~~");
 
 ###########################################################################
 # Subroutines
@@ -223,13 +258,19 @@ sub CheckConfigParams
     open(F, $file) || die("can't open $file\n");
     if ( $check ) {
         while ( <F> ) {
-            s/\$self->{Conf}{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
+            s/\$(self|bpc)->{Conf}{([^}\$]+)}/if ( !defined($vars->{$2}) ) {
+                    print("Unexpected Conf var $2 in $file\n");
+                    $errors++;
+                } else {
+                    $vars->{$2}++;
+                }/eg;
+            s/\$[Cc]onf(?:->)?{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
                     print("Unexpected Conf var $1 in $file\n");
                     $errors++;
                 } else {
                     $vars->{$1}++;
                 }/eg;
-            s/\$[Cc]onf(?:->)?{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
+            s/UserCommandRun\("([^"]*)"\)/if ( !defined($vars->{$1}) ) {
                     print("Unexpected Conf var $1 in $file\n");
                     $errors++;
                 } else {
@@ -243,5 +284,51 @@ sub CheckConfigParams
         }
     }
     close(F);
+    return $errors;
+}
+
+#
+# Make sure that every lang variable in cgi-bin/BackupPC_Admin matches
+# the strings in each lib/BackupPC/Lang/*.pm file.  This makes sure
+# we didn't miss any translations in any of the languages.
+#
+sub CheckLangUsage
+{
+    my $errors;
+    my $vars = {};
+
+    open(F, "cgi-bin/BackupPC_Admin")
+                || die("can't open cgi-bin/BackupPC_Admin\n");
+    while ( <F> ) {
+        s/\$Lang->{([^}]*)}/$vars->{$1} = 1;/eg;
+    }
+    close(F);
+    foreach my $f ( <lib/BackupPC/Lang/*.pm> ) {
+        my $done = {};
+        open(F, $f) || die("can't open $f\n");
+        while ( <F> ) {
+            s/#.*//g;
+            s/\$Lang{([^}]*)}/
+		    my $var = $1;
+		    next if ( $var =~ m{^(Reason_|Status_)} );
+                    if ( !defined($vars->{$var}) ) {
+                        print("Unexpected Lang var $var in $f\n");
+                        $errors++;
+                    } else {
+                        $done->{$var} = 1;
+                    }/eg;
+        }
+        close(F);
+        foreach my $v ( keys(%$vars) ) {
+	    #
+	    # skip "variables" with "$", since they are like expressions
+	    #
+	    next if ( $v =~ /\$/ );
+            if ( !defined($done->{$v}) ) {
+                print("Lang var $v missing from $f\n");
+                $errors++;
+            }
+        }
+    }
     return $errors;
 }

@@ -21,17 +21,27 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Support for rsync and rsyncd.  Changes to BackupPC_dump and new
-  modules BackupPC::Xfer::Rsync and BackupPC::Xfer::RsyncFileIO.
+* Support for rsync and rsyncd backup and restore.  Changes to
+  BackupPC_dump, BackupPC_restore, and new modules BackupPC::Xfer::Rsync
+  and BackupPC::Xfer::RsyncFileIO.
+
+* Added internationalization (i18n) code from Xavier Nicollet,
+  with additions from Guillaume Filion.  Voila!  BackupPC_Admin
+  now supports English and French, and adding more languages is
+  now easy.
+
+* Added optional user-defined pre/post dump/restore commands, allowing
+  things like database shutdown/startup for dumps.
+
+* Replaced $Conf{PingArgs} with $Conf{PingCmd}, added $Conf{DfCmd},
+  $Conf{NmbLookupCmd} allowing all these commands to be fully
+  configured.  Also, all commands (except smbclient) can also
+  now be fragments of perl code.
 
 * Added new BackupPC::View module that creates views of backups
   (handling merging etc).  Updated BackupPC_Admin, BackupPC_zipCreate
   and BackupPC_tarCreate to use BackupPC::View.  This removes lots
   of merging and mangling code from the higher-level code.
-
-* Added internationalization (i18n) code from Xavier Nicollet.
-  Voila!  BackupPC_Admin now supports English and French, and
-  adding more languages is now easy.
 
 * Added patch from Toby Johnson that allows additional users to be
   specified in the hosts file; these users can also view/start/stop

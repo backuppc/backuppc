@@ -302,24 +302,39 @@ sub find
 {
     my($m, $backupNum, $share, $path, $depth, $callback, @callbackArgs) = @_;
 
+    #
+    # First call the callback on the given $path
+    #
+    my $attr = $m->fileAttrib($backupNum, $share, $path);
+    return -1 if ( !defined($attr) );
+    &$callback($attr, @callbackArgs);
+    return if ( $attr->{type} != BPC_FTYPE_DIR );
+
+    #
+    # Now recurse into subdirectories
+    #
+    $m->findRecurse($backupNum, $share, $path, $depth,
+		    $callback, @callbackArgs);
+}
+
+#
+# Same as find(), except the callback is not called on the current
+# $path, only on the contents of $path.  So if $path is a file then
+# no callback or recursion occurs.
+#
+sub findRecurse
+{
+    my($m, $backupNum, $share, $path, $depth, $callback, @callbackArgs) = @_;
+
     my $attr = $m->dirAttrib($backupNum, $share, $path);
-    if ( !defined($attr) ) {
-        #
-        # maybe this is a file, not a directory; if so call the callback
-        # just on this file.
-        #
-        my $attr = $m->fileAttrib($backupNum, $share, $path);
-        return -1 if ( !defined($attr) );
-        &$callback($attr, @callbackArgs);
-        return;
-    }
+    return if ( !defined($attr) );
     foreach my $file ( keys(%$attr) ) {
         &$callback($attr->{$file}, @callbackArgs);
         next if ( !$depth || $attr->{$file}{type} != BPC_FTYPE_DIR );
         #
         # For depth-first, recurse as we hit each directory
         #
-        $m->find($backupNum, $share, "$path/$file", $depth,
+        $m->findRecurse($backupNum, $share, "$path/$file", $depth,
 			     $callback, @callbackArgs);
     }
     if ( !$depth ) {
@@ -328,7 +343,7 @@ sub find
         #
         foreach my $file ( keys(%{$attr}) ) {
             next if ( $attr->{$file}{type} != BPC_FTYPE_DIR );
-            $m->find($backupNum, $share, "$path/$file", $depth,
+            $m->findRecurse($backupNum, $share, "$path/$file", $depth,
 			    $callback, @callbackArgs);
         }
     }

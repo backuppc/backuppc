@@ -21,6 +21,24 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fixed handling of >= 8GB files in BackupPC_tarExtract and >= 4GB
+  files in BackupPC_tarCreate.
+
+* Removed smbclient size repair in BackupPC_tarExtract for files
+  between 2GB and 4GB.  This means that BackupPC_tarExtract 2.0.1
+  doesn't behave the same as 2.0.0 for file sizes between 2GB and 4GB
+  extacted using smbclient 2.2.x.  If you have problems backing up
+  files whose size is between 2GB and 4GB using smbclient 2.2.x
+  you should upgrade smbclient to 3.0, since it now generates
+  correct file sizes.
+
+* Fixed additional print to stdout for BackupPC_dump -v in
+  BackupPC::FileZIO.  Now prints to stderr.
+
+#------------------------------------------------------------------------
+# Version 2.0.1beta1, 13 Sep 2003
+#------------------------------------------------------------------------
+
 * Fixed handling of $Conf{HardLinkMax} in BackupPC/Lib.pm.  Reported
   by Ross Skaliotis.
 

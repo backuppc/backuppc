@@ -41,8 +41,8 @@ use File::Copy;
 
 umask(0022);
 
-my $Version     = "2.0.1beta1";
-my $ReleaseDate = "13 Sep 2003";
+my $Version     = "2.0.1";
+my $ReleaseDate = "5 Oct 2003";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -176,7 +176,7 @@ sub InstallFile
 	    }
 	    if ( /__CONFIGPOD__/ ) {
 		print OUT $ConfPod;
-	    } elsif ( /^use lib ".*BackupPC\/lib";/
+	    } elsif ( /^use lib ".*BackupPC[^\/]*\/lib";/
 		    || /^use lib "\/home\/pcbackup\/install\/lib";/ ) {
 		print OUT "use lib \"__INSTALLDIR__/lib\";\n";
 	    } elsif ( $file =~ /Lib.pm/ && /(.*TopDir *=> .*)'.*',/ ) {

@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #
 # by Manfred Herrmann (V1.1) (some typo errors + 3 new strings)
 # CVS-> Revision ???

@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 
 #my %lang;
 

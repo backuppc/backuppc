@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0, released 14 Jun 2003.
+# Version 2.0.1, released 5 Oct 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -230,7 +230,7 @@ sub readOutput
 	# ignore the log file time stamps from smbclient introduced
 	# in version 3.0.0 - don't even write them to the log file.
 	#
-	next if ( m{^\[\d+/\d+/\d+ +\d+:\d+:\d+.*\] +client/cli.*\(\d+\)} );
+	next if ( m{^\[\d+/\d+/\d+ +\d+:\d+:\d+.*\] +(client/cli|lib/util_unistr).*\(\d+\)} );
         $t->{XferLOG}->write(\"$_\n");
         #
         # refresh our inactivity alarm
@@ -292,7 +292,9 @@ sub readOutput
                 || /^\s*directory \\/i
                 || /^\s*restore directory \\/i
                 || /^\s*Output is \/dev\/null/i
-                || /^\s*Timezone is/i ) {
+                || /^\s*Timezone is/i
+                || /^\s*creating lame (up|low)case table/i
+	    ) {
             # ignore these messages
         } else {
             $t->{xferErrCnt}++;

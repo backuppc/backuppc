@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_compressPool: Compress existing pool
@@ -49,7 +49,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0, released 14 Jun 2003.
+# Version 2.0.1, released 5 Oct 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -62,7 +62,7 @@ use File::Find;
 use File::Path;
 use Compress::Zlib;
 use Getopt::Std;
-use lib "/usr/local/BackupPC/lib";
+use lib "/usr/local/BackupPC2.0.1/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 

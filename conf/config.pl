@@ -1326,10 +1326,7 @@ $Conf{CgiStatusHilightColor} = {
 };
 
 #
-# Additional CGI header text.  For example, if you wanted each CGI page
-# to auto refresh every 900 seconds, you could add this text:
-#
-#       <meta http-equiv="refresh" content="900">
+# Additional CGI header text.
 #
 $Conf{CgiHeaders} = '<meta http-equiv="pragma" content="no-cache">';
 

@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-w
 #
 # BackupPC_Admin: Apache/CGI interface for BackupPC.
@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0, released 14 Jun 2003.
+# Version 2.0.1, released 5 Oct 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -48,7 +48,7 @@
 use strict;
 no  utf8;
 use CGI;
-use lib "/usr/local/BackupPC/lib";
+use lib "/usr/local/BackupPC2.0.1/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 use BackupPC::Attrib qw(:all);
@@ -437,17 +437,18 @@ sub Action_View
                 if ( /smb: \\>/
                         || /^\s*(\d+) \(\s*\d+\.\d kb\/s\) (.*)$/
                         || /^tar: dumped \d+ files/
-                        || /^added interface/i
-                        || /^restore tar file /i
-                        || /^restore directory /i
-                        || /^tarmode is now/i
-                        || /^Total bytes written/i
-                        || /^Domain=/i
-                        || /^Getting files newer than/i
-                        || /^Output is \/dev\/null/
+                        || /^\s*added interface/i
+                        || /^\s*restore tar file /i
+                        || /^\s*restore directory /i
+                        || /^\s*tarmode is now/i
+                        || /^\s*Total bytes written/i
+                        || /^\s*Domain=/i
+                        || /^\s*Getting files newer than/i
+                        || /^\s*Output is \/dev\/null/
                         || /^\([\d\.]* kb\/s\) \(average [\d\.]* kb\/s\)$/
                         || /^\s+directory \\/
-                        || /^Timezone is/
+                        || /^\s*Timezone is/
+			|| /^\s*creating lame (up|low)case table/i
                         || /^\.\//
                         || /^   /
 			    ) {

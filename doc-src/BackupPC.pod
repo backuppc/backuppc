@@ -426,26 +426,23 @@ Rsync as a transport method.
 If you are using smb to backup WinXX machines you need smbclient and
 nmblookup from the samba package.  You will also need nmblookup if
 you are backing up linux/unix DHCP machines.  See L<http://www.samba.org>.
-Version 2.2.0 or later of Samba is required (smbclient's tar feature in
-2.0.8 and prior has bugs for file path lengths around 100 characters
-and generates bad output when file lengths change during the backup).
+Version 2.2.0 or later of Samba is required.
 
 See L<http://www.samba.org> for source and binaries.  It's pretty easy to
 fetch and compile samba, and just grab smbclient and nmblookup, without
 doing the installation. Alternatively, L<http://www.samba.org> has binary
 distributions for most platforms.
 
-Note: samba version 3.0.0rc2 (the latest version as of 9/1/03) still
-has several smbclient bugs.  If you want to use samba 3.0.0, be sure
-to use the latest release.  If that's still rc2, please apply the
-following patches:
+Note: samba version 3.0.0 (the first official 3.0 release as of 9/24/03)
+still has two known smbclient bugs.  If you want to use samba 3.0.0, be sure
+to use the latest release.  For 3.0.0 please apply the following two patches:
 
-    https://bugzilla.samba.org/show_bug.cgi?id=308
-    https://bugzilla.samba.org/show_bug.cgi?id=388
     https://bugzilla.samba.org/show_bug.cgi?id=389
+    https://bugzilla.samba.org/show_bug.cgi?id=563
 
-Hopefully any release after 3.0.0rc2 will have all these patches
-applied.
+Hopefully any release after 3.0.0 will have these patches applied.
+Smbclient does not work correctly in earlier versions of 3.0.0
+(eg: 3.0.0rc1); you must use the official 3.0.0.
 
 =item *
 
@@ -2811,21 +2808,35 @@ The transport mechanism also limits the maximum individual file size.
 
 GNU tar maximum file size is limited by the tar header format. The tar
 header uses 11 octal digits to represent the file size, which is 33 bits
-or 8GB.  I vaguely recall (but I haven't recently checked) that GNU tar
-uses an extra octal digit (replacing a trailing delimiter) if necessary,
-allowing 64GB files.  So tar transport limits the maximum file size to
-8GB or perhaps 64GB.  It is possible that files >= 8GB don't work; this
-needs to be looked into.
+or 8GB.  But GNU tar has a binary file size convention for files bigger
+than 8GB, which is supported in BackupPC as of 2.0.1.  So GNU tar can
+support very large files.
 
-Smbclient is limited to 4GB file sizes.  Moreover, a bug in smbclient
-(mixing signed and unsigned 32 bit values) causes it to incorrectly
-do the tar octal conversion for file sizes from 2GB-4GB.  BackupPC_tarExtract
-knows about this bug and can recover the correct file size.  So smbclient
-transport works up to 4GB file sizes.
+Smbclient 2.2.x is limited to 4GB file sizes.  Moreover, a bug in
+smbclient (mixing signed and unsigned 32 bit values) causes it to
+incorrectly do the tar octal conversion for file sizes from 2GB-4GB.
+Up to 2.0.0, BackupPC_tarExtract knows about this bug and can recover
+the correct file size.  So smbclient 2.2.x transport works up to 4GB
+file sizes with BackupPC 2.0.0.
 
-Rsync running on Cygwin is limited to either 2GB or 4GB file sizes.
-More testing needs to be done to verify the file size limit for
-rsync on various platforms.
+But as of BackupPC 2.0.1 this repair was removed.  The reason is
+that smbclient 3.0.x now supports large files, so it can validly
+generate file sizes that would have been incorrectly "repaired" by
+BackupPC_tarExtract.  So with smbclient 3.0.x and BackupPC 2.0.1
+or later, files bigger than 4GB are supported.  Files larger than
+8GB have been tested, provided the patch in this smbclient bug
+is applied to samba 3.0.0:
+
+    https://bugzilla.samba.org/show_bug.cgi?id=563
+
+However, due to some bug in smbclient, restores only work up to 2GB file
+sizes.  This is mentioned in this bug report.
+
+Rsync running on linux supports large files, bigger than 4GB.
+Cygwin 1.3.x is limited to either 2GB or 4GB file sizes. Cygwin
+1.5.x allows large file support but I haven't tested it yet with
+rsync.  More testing needs to be done to verify the file size
+limit for rsync on various platforms.
 
 =back
 

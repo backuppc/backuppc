@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_tarCreate: create a tar archive of an existing dump
@@ -48,7 +48,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0, released 14 Jun 2003.
+# Version 2.0.1, released 5 Oct 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -56,7 +56,7 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "/usr/local/BackupPC2.0.1/lib";
 use File::Path;
 use Getopt::Std;
 use BackupPC::Lib;
@@ -262,12 +262,29 @@ sub TarWriteHeader
                                              : "";
     my $devminor = defined($hdr->{devminor}) ? sprintf("%07o", $hdr->{devminor})
                                              : "";
+    my $sizeStr;
+    if ( $hdr->{size} >= 2 * 65536 * 65536 ) {
+	#
+	# GNU extension for files >= 8GB: send size in big-endian binary
+	#
+	$sizeStr = pack("c4 N N", 0x80, 0, 0, 0,
+				  $hdr->{size} / (65536 * 65536),
+				  $hdr->{size} % (65536 * 65536));
+    } elsif ( $hdr->{size} >= 1 * 65536 * 65536 ) {
+	#
+	# sprintf octal only handles up to 2^32 - 1
+	#
+	my $sizeStr = sprintf("%03o", $hdr->{size} / (1 << 24))
+		    . sprintf("%08o", $hdr->{size} % (1 << 24));
+    } else {
+	$sizeStr = sprintf("%011o", $hdr->{size});
+    }
     my $data = pack($tar_pack_header,
                      substr($hdr->{name}, 0, 99),
                      sprintf("%07o", $hdr->{mode}),
                      sprintf("%07o", $hdr->{uid}),
                      sprintf("%07o", $hdr->{gid}),
-                     sprintf("%011o", $hdr->{size}),
+                     $sizeStr,
                      sprintf("%011o", $hdr->{mtime}),
                      "",        #checksum field - space padded by pack("A8")
                      $hdr->{type},

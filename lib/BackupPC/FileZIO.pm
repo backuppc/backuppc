@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0, released 14 Jun 2003.
+# Version 2.0.1, released 5 Oct 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -247,7 +247,7 @@ sub write
     my $n = length($$dataRef);
 
     return if ( !$self->{write} );
-    print($$dataRef) if ( $self->{writeTeeStdout} );
+    print(STDERR $$dataRef) if ( $self->{writeTeeStdout} );
     return 0 if ( $n == 0 );
     if ( !$self->{compress} ) {
         #

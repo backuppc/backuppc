@@ -986,7 +986,7 @@ $Lang{Hosts_file} = "Fichiers des hôtes";
 $Lang{Current_queues} = "Files actuelles";
 $Lang{Documentation} = "Documentation";
 
-$Lang{Host_or_User_name} = "<small>Hôte ou Nom d\'utilisateur:</small>";
+#$Lang{Host_or_User_name} = "<small>Hôte ou Nom d\'utilisateur:</small>";
 $Lang{Go} = "Chercher";
 $Lang{Hosts} = "Hôtes";
 

@@ -790,7 +790,7 @@ $Lang{Hosts_file} = "Hosts Datei";
 $Lang{Current_queues} = "Warteschlangen";
 $Lang{Documentation} = "Dokumentation";
 
-$Lang{Host_or_User_name} = "<small>Computer oder User Name:</small>";
+#$Lang{Host_or_User_name} = "<small>Computer oder User Name:</small>";
 $Lang{Go} = "gehe zu";
 $Lang{Hosts} = "Computer";
 

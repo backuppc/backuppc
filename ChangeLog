@@ -21,6 +21,8 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Replace PingClientPath with PingPath in configure.pl.
+
 * GFK updated fr.pm from en.pm.
 
 * Various tweaks to recent changes, including additional patches

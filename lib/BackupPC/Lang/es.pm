@@ -790,7 +790,7 @@ $Lang{Hosts_file} = "Archivo Hosts";
 $Lang{Current_queues} = "Colas actuales";
 $Lang{Documentation} = "Documentación";
 
-$Lang{Host_or_User_name} = "<small>Host o usuario:</small>";
+#$Lang{Host_or_User_name} = "<small>Host o usuario:</small>";
 $Lang{Go} = "Aceptar";
 $Lang{Hosts} = "Hosts";
 

@@ -987,7 +987,7 @@ $Lang{Hosts_file} = "Hosts file";
 $Lang{Current_queues} = "Current queues";
 $Lang{Documentation} = "Documentation";
 
-$Lang{Host_or_User_name} = "<small>Host or User name:</small>";
+#$Lang{Host_or_User_name} = "<small>Host or User name:</small>";
 $Lang{Go} = "Go";
 $Lang{Hosts} = "Hosts";
 

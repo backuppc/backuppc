@@ -505,7 +505,7 @@ if ( defined($Conf{PingArgs}) ) {
     if ( $^O eq "solaris" || $^O eq "sunos" ) {
 	$Conf{PingCmd} = '$pingPath -s $host 56 1';
     } elsif ( ($^O eq "linux" || $^O eq "openbsd" || $^O eq "netbsd")
-	    && !system("$Conf{PingClientPath} -c 1 -w 3 localhost") ) {
+	    && !system("$Conf{PingPath} -c 1 -w 3 localhost") ) {
 	$Conf{PingCmd} = '$pingPath -c 1 -w 3 $host';
     } else {
 	$Conf{PingCmd} = '$pingPath -c 1 $host';
@@ -648,18 +648,10 @@ sub InstallFile
 	    s/__BACKUPPCUSER__/$Conf{BackupPCUser}/g;
 	    s/__CGIDIR__/$Conf{CgiDir}/g;
 	    if ( $first && /^#.*bin\/perl/ ) {
-		if ( $Perl56 ) {
-		    #
-		    # perl56 and later is taint ok
-		    #
-		    print OUT "#!$Conf{PerlPath} -T\n";
-		} else {
-		    #
-		    # prior to perl56, File::Find fails taint checks,
-		    # so we run without -T.  It's still safe.
-		    #
-		    print OUT "#!$Conf{PerlPath}\n";
-		}
+		#
+		# Fill in correct path to perl (no taint for >= 2.0.1).
+		#
+		print OUT "#!$Conf{PerlPath}\n";
 	    } else {
 		print OUT;
 	    }

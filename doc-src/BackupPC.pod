@@ -435,6 +435,18 @@ fetch and compile samba, and just grab smbclient and nmblookup, without
 doing the installation. Alternatively, L<http://www.samba.org> has binary
 distributions for most platforms.
 
+Note: samba version 3.0.0rc2 (the latest version as of 9/1/03) still
+has several smbclient bugs.  If you want to use samba 3.0.0, be sure
+to use the latest release.  If that's still rc2, please apply the
+following patches:
+
+    https://bugzilla.samba.org/show_bug.cgi?id=308
+    https://bugzilla.samba.org/show_bug.cgi?id=388
+    https://bugzilla.samba.org/show_bug.cgi?id=389
+
+Hopefully any release after 3.0.0rc2 will have all these patches
+applied.
+
 =item *
 
 If you are using tar to backup linux/unix machines you should have version

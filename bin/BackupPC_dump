@@ -126,20 +126,19 @@ if ( $opts{d} ) {
     #
     $hostIP = $client;
     if ( $bpc->CheckHostAlive($hostIP) < 0 ) {
-	print("Exiting because CheckHostAlive($hostIP) failed\n")
+	print(STDERR "Exiting because CheckHostAlive($hostIP) failed\n")
 			    if ( $opts{v} );
 	exit(1);
     }
     if ( $Conf{NmbLookupCmd} eq "" ) {
-	print("Exiting because \$Conf{NmbLookupCmd} is empty\n")
+	print(STDERR "Exiting because \$Conf{NmbLookupCmd} is empty\n")
 			    if ( $opts{v} );
 	exit(1);
     }
     ($client, $user) = $bpc->NetBiosInfoGet($hostIP);
     if ( $client !~ /^([\w\.\s-]+)$/ ) {
-	print("Exiting because NetBiosInfoGet($hostIP) returned '$client',"
-	    . " an invalid host name\n")
-			    if ( $opts{v} );
+	print(STDERR "Exiting because NetBiosInfoGet($hostIP) returned"
+	    . " '$client', an invalid host name\n") if ( $opts{v} );
 	exit(1)
     }
     $Hosts = $bpc->HostInfoRead($client);
@@ -148,8 +147,8 @@ if ( $opts{d} ) {
     $Hosts = $bpc->HostInfoRead($client);
 }
 if ( !defined($Hosts->{$client}) ) {
-    print("Exiting because host $client does not exist in the hosts file\n")
-			    if ( $opts{v} );
+    print(STDERR "Exiting because host $client does not exist in the"
+	       . " hosts file\n") if ( $opts{v} );
     exit(1)
 }
 
@@ -215,7 +214,7 @@ if ( !$opts{d} ) {
         # Ok, NS doesn't know about it.  Maybe it is a NetBios name
         # instead.
         #
-	print("Name server doesn't know about $host; trying NetBios\n")
+	print(STDERR "Name server doesn't know about $host; trying NetBios\n")
 			if ( $opts{v} );
         if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
 	    print(LOG $bpc->timeStamp, "Can't find host $host via netbios\n");
@@ -253,7 +252,7 @@ $bpc->ServerDisconnect();
 if ( $opts{d} ) {
     if ( $StatusHost{activeJob} ) {
         # oops, something is already running for this host
-	print("Exiting because backup is already running for $client\n")
+	print(STDERR "Exiting because backup is already running for $client\n")
 			if ( $opts{v} );
         exit(0);
     }
@@ -680,9 +679,9 @@ for my $shareName ( @$ShareNames ) {
 my $lastNum  = -1;
 
 #
-# If any share had zero files then consider the dump bad
+# If this is a full, and any share had zero files then consider the dump bad
 #
-if ( $stat{hostError} eq ""
+if ( $type eq "full" && $stat{hostError} eq ""
 	&& length($noFilesErr) && $Conf{BackupZeroFilesIsFatal} ) {
     $stat{hostError} = $noFilesErr;
     $stat{xferOK} = 0;

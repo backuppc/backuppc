@@ -21,6 +21,23 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fixed handling of $Conf{HardLinkMax} in BackupPC/Lib.pm.  Reported
+  by Ross Skaliotis.
+
+* Updated BackupPC/Xfer/Smb.pm to handle new messages from
+  smbclient 3.0.0rc2.
+
+* Fixed $Conf{BackupZeroFilesIsFatal} so that it only applies to full
+  dumps, not incrementals.
+
+* Replaced typo $Conf{PingClientPath} with $Conf{PingPath} in configure.pl.
+
+* Removed -T (taint mode) on binaries installed in configure.pl.
+
+#------------------------------------------------------------------------
+# Version 2.0.1beta0, July 26th, 2003
+#------------------------------------------------------------------------
+
 * In BackupPC_Admin, default REMOTE_USER to $Conf{BackupPCUser}
   if it is not defined.  This allows the CGI interface to work
   when AdminUsers = '*'.  Reported by Quentin Arce.

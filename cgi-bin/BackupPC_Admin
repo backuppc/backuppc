@@ -66,16 +66,6 @@ use vars qw ($Lang);
 $Cgi = new CGI;
 %In = $Cgi->Vars;
 
-#
-# We require that Apache pass in $ENV{SCRIPT_NAME} and $ENV{REMOTE_USER}.
-# The latter requires .ht_access style authentication.  Replace this
-# code if you are using some other type of authentication, and have
-# a different way of getting the user name.
-#
-$ENV{REMOTE_USER} = $Conf{BackupPCUser} if ( !defined($ENV{REMOTE_USER}) );
-$MyURL  = $ENV{SCRIPT_NAME};
-$User   = $ENV{REMOTE_USER};
-
 if ( !defined($bpc) ) {
     ErrorExit($Lang->{BackupPC__Lib__new_failed__check_apache_error_log})
 	if ( !($bpc = BackupPC::Lib->new(undef, undef, 1)) );
@@ -90,6 +80,16 @@ if ( !defined($bpc) ) {
     $ConfigMTime = $bpc->ConfigMTime();
     $Lang   = $bpc->Lang();
 }
+
+#
+# We require that Apache pass in $ENV{SCRIPT_NAME} and $ENV{REMOTE_USER}.
+# The latter requires .ht_access style authentication.  Replace this
+# code if you are using some other type of authentication, and have
+# a different way of getting the user name.
+#
+$ENV{REMOTE_USER} = $Conf{BackupPCUser} if ( $ENV{REMOTE_USER} eq "" );
+$MyURL  = $ENV{SCRIPT_NAME};
+$User   = $ENV{REMOTE_USER};
 
 #
 # Clean up %ENV for taint checking
@@ -449,7 +449,7 @@ sub Action_View
                         || /^\s+directory \\/
                         || /^Timezone is/
                         || /^\.\//
-                        || /^  /
+                        || /^   /
 			    ) {
 		    $skipped++;
 		    next;

@@ -41,8 +41,8 @@ use File::Copy;
 
 umask(0022);
 
-my $Version     = "2.0.1beta0";
-my $ReleaseDate = "26 Jul 2003";
+my $Version     = "2.0.1beta1";
+my $ReleaseDate = "13 Sep 2003";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(

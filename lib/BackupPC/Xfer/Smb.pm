@@ -226,6 +226,11 @@ sub readOutput
     while ( $t->{smbOut} =~ /(.*?)[\n\r]+(.*)/s ) {
         $_ = $1;
         $t->{smbOut} = $2;
+	#
+	# ignore the log file time stamps from smbclient introduced
+	# in version 3.0.0 - don't even write them to the log file.
+	#
+	next if ( m{^\[\d+/\d+/\d+ +\d+:\d+:\d+.*\] +client/cli.*\(\d+\)} );
         $t->{XferLOG}->write(\"$_\n");
         #
         # refresh our inactivity alarm
@@ -247,27 +252,27 @@ sub readOutput
         } elsif ( /restore tar file (.*) of size (\d+) bytes/ ) {
             $t->{byteCnt} += $2;
             $t->{fileCnt}++;
-        } elsif ( /tar: dumped \d+ files/ ) {
+        } elsif ( /^\s*tar: dumped \d+ files/ ) {
             $t->{xferOK} = 1;
-        } elsif ( /^tar: restored \d+ files/ ) {
+        } elsif ( /^\s*tar: restored \d+ files/ ) {
             $t->{xferOK} = 1;
-        } elsif ( /^read_socket_with_timeout: timeout read. /i ) {
+        } elsif ( /^\s*read_socket_with_timeout: timeout read. /i ) {
             $t->{hostAbort} = 1;
         } elsif ( /^code 0 listing /
-                    || /^code 0 opening /
-                    || /^abandoning restore/i
-                    || /^Error: Looping in FIND_NEXT/i
-                    || /^SUCCESS - 0/i
-                    || /^Call timed out: server did not respond/i
-		    || /^tree connect failed: ERRDOS - ERRnoaccess \(Access denied\.\)/
-		    || /^tree connect failed: NT_STATUS_BAD_NETWORK_NAME/
+                    || /^\s*code 0 opening /
+                    || /^\s*abandoning restore/i
+                    || /^\s*Error: Looping in FIND_NEXT/i
+                    || /^\s*SUCCESS - 0/i
+                    || /^\s*Call timed out: server did not respond/i
+		    || /^\s*tree connect failed: ERRDOS - ERRnoaccess \(Access denied\.\)/
+		    || /^\s*tree connect failed: NT_STATUS_BAD_NETWORK_NAME/
                  ) {
 	    if ( $t->{hostError} eq "" ) {
 		$t->{XferLOG}->write(\"This backup will fail because: $_\n");
 		$t->{hostError} = $_;
 	    }
-        } elsif ( /^NT_STATUS_ACCESS_DENIED listing (.*)/
-	       || /^ERRDOS - ERRnoaccess \(Access denied\.\) listing (.*)/ ) {
+        } elsif ( /^\s*NT_STATUS_ACCESS_DENIED listing (.*)/
+	       || /^\s*ERRDOS - ERRnoaccess \(Access denied\.\) listing (.*)/ ) {
 	    my $badDir = $1;
 	    $badDir =~ s{\\}{/}g;
 	    $badDir =~ s{/+}{/}g;
@@ -278,15 +283,16 @@ sub readOutput
 		$t->{hostError} ||= $_;
 	    }
         } elsif ( /smb: \\>/
-                || /^added interface/i
-                || /^tarmode is now/i
-                || /^Total bytes written/i
-                || /^Domain=/i
+                || /^\s*added interface/i
+                || /^\s*tarmode is now/i
+                || /^\s*Total bytes written/i
+                || /^\s*Domain=/i
                 || /^\([\d\.]* kb\/s\) \(average [\d\.]* kb\/s\)$/i
-                || /^Getting files newer than/i
-                || /^\s+directory \\/i
-                || /^Output is \/dev\/null/i
-                || /^Timezone is/i ) {
+                || /^\s*Getting files newer than/i
+                || /^\s*directory \\/i
+                || /^\s*restore directory \\/i
+                || /^\s*Output is \/dev\/null/i
+                || /^\s*Timezone is/i ) {
             # ignore these messages
         } else {
             $t->{xferErrCnt}++;

@@ -626,6 +626,7 @@ sub UserCommandRun
         XferLOG      => $RestoreLOG,
         stat         => \%stat,
         xferOK       => $stat{xferOK} || 0,
+	hostError    => $stat{hostError},
 	type	     => $type,
 	bkupSrcHost  => $RestoreReq{hostSrc},
 	bkupSrcShare => $RestoreReq{shareSrc},

@@ -385,7 +385,7 @@ my $sizeExist     = 0;
 my $sizeExistComp = 0;
 my $nFilesTotal   = 0;
 my $sizeTotal     = 0;
-my($logMsg, %stat, $xfer, $ShareNames);
+my($logMsg, %stat, $xfer, $ShareNames, $noFilesErr);
 my $newFilesFH;
 
 if ( $Conf{XferMethod} eq "tar" ) {
@@ -637,6 +637,9 @@ for my $shareName ( @$ShareNames ) {
     # Merge the xfer status (need to accumulate counts)
     #
     my $newStat = $xfer->getStats;
+    if ( $newStat->{fileCnt} == 0 ) {
+	$noFilesErr ||= "No files dumped for share $shareName";
+    }
     foreach my $k ( (keys(%stat), keys(%$newStat)) ) {
         next if ( !defined($newStat->{$k}) );
         if ( $k =~ /Cnt$/ ) {
@@ -675,6 +678,15 @@ for my $shareName ( @$ShareNames ) {
     }
 }
 my $lastNum  = -1;
+
+#
+# If any share had zero files then consider the dump bad
+#
+if ( $stat{hostError} eq ""
+	&& length($noFilesErr) && $Conf{BackupZeroFilesIsFatal} ) {
+    $stat{hostError} = $noFilesErr;
+    $stat{xferOK} = 0;
+}
 
 #
 # Do one last check to make sure it is still the machine we expect.
@@ -768,25 +780,34 @@ unlink("$Dir/timeStamp.level0");
 # Now remove the bad files, replacing them if possible with links to
 # earlier backups.
 #
-foreach my $file ( $xfer->getBadFiles ) {
+foreach my $f ( $xfer->getBadFiles ) {
     my $j;
-    unlink("$Dir/$lastNum/$file");
+    my $shareM = $bpc->fileNameEltMangle($f->{share});
+    my $fileM  = $bpc->fileNameMangle($f->{file});
+    unlink("$Dir/$lastNum/$shareM/$fileM");
     for ( $j = $i - 1 ; $j >= 0 ; $j-- ) {
+	my $file;
+	if ( $Backups[$j]{mangle} ) {
+	    $file = "$shareM/$fileM";
+	} else {
+	    $file = "$f->{share}/$f->{file}";
+	}
         next if ( !-f "$Dir/$Backups[$j]{num}/$file" );
-        if ( !link("$Dir/$Backups[$j]{num}/$file", "$Dir/$lastNum/$file") ) {
+        if ( !link("$Dir/$Backups[$j]{num}/$file",
+			    "$Dir/$lastNum/$shareM/$fileM") ) {
             print(LOG $bpc->timeStamp,
-                      "Unable to link $lastNum/$file to"
+                      "Unable to link $lastNum/$shareM/$fileM to"
                     . " $Backups[$j]{num}/$file\n");
         } else {
             print(LOG $bpc->timeStamp,
-                      "Bad file $lastNum/$file replaced by link to"
+                      "Bad file $lastNum/$shareM/$fileM replaced by link to"
                     . " $Backups[$j]{num}/$file\n");
         }
         last;
     }
     if ( $j < 0 ) {
         print(LOG $bpc->timeStamp,
-                  "Removed bad file $lastNum/$file (no older"
+                  "Removed bad file $lastNum/$shareM/$fileM (no older"
                 . " copy to link to)\n");
     }
 }
@@ -997,6 +1018,7 @@ sub UserCommandRun
         XferLOG    => $XferLOG,
         stat       => \%stat,
         xferOK     => $stat{xferOK} || 0,
+        hostError  => $stat{hostError},
 	type	   => $type,
     };
     my $cmd = $bpc->cmdVarSubstitute($Conf{$type}, $vars);

@@ -72,6 +72,7 @@ $Cgi = new CGI;
 # code if you are using some other type of authentication, and have
 # a different way of getting the user name.
 #
+$ENV{REMOTE_USER} = $Conf{BackupPCUser} if ( !defined($ENV{REMOTE_USER}) );
 $MyURL  = $ENV{SCRIPT_NAME};
 $User   = $ENV{REMOTE_USER};
 
@@ -606,6 +607,9 @@ sub Action_Browse
     $dir = "/$dir" if ( $dir !~ /^\// );
     my $relDir  = $dir;
     my $currDir = undef;
+    if ( $dir =~ m{(^|/)\.\.(/|$)} ) {
+        ErrorExit($Lang->{Nice_try__but_you_can_t_put});
+    }
 
     #
     # Loop up the directory tree until we hit the top.

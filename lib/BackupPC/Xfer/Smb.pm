@@ -121,9 +121,11 @@ sub start
 		};
 	    }
 	}
+	$t->{fileIncludeHash} = {};
         if ( defined($conf->{BackupFilesOnly}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
 		push(@fileList, $file);
+		$t->{fileIncludeHash}{$file} = 1;
             }
         } elsif ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
@@ -257,8 +259,24 @@ sub readOutput
                     || /^Error: Looping in FIND_NEXT/i
                     || /^SUCCESS - 0/i
                     || /^Call timed out: server did not respond/i
+		    || /^tree connect failed: ERRDOS - ERRnoaccess \(Access denied\.\)/
+		    || /^tree connect failed: NT_STATUS_BAD_NETWORK_NAME/
                  ) {
-            $t->{hostError} ||= $_;
+	    if ( $t->{hostError} eq "" ) {
+		$t->{XferLOG}->write(\"This backup will fail because: $_\n");
+		$t->{hostError} = $_;
+	    }
+        } elsif ( /^NT_STATUS_ACCESS_DENIED listing (.*)/
+	       || /^ERRDOS - ERRnoaccess \(Access denied\.\) listing (.*)/ ) {
+	    my $badDir = $1;
+	    $badDir =~ s{\\}{/}g;
+	    $badDir =~ s{/+}{/}g;
+	    $badDir =~ s{/\*$}{};
+	    if ( $t->{hostError} eq ""
+		    && ($badDir eq "" || $t->{fileIncludeHash}{$badDir}) ) {
+		$t->{XferLOG}->write(\"This backup will fail because: $_\n");
+		$t->{hostError} ||= $_;
+	    }
         } elsif ( /smb: \\>/
                 || /^added interface/i
                 || /^tarmode is now/i
@@ -297,7 +315,10 @@ sub readOutput
                 my $badFile = $1;
                 $badFile =~ s{\\}{/}g;
                 $badFile =~ s{^/}{};
-                push(@{$t->{badFiles}}, "$t->{shareName}/$badFile");
+                push(@{$t->{badFiles}}, {
+			share => $t->{shareName},
+			file  => $badFile
+		    });
             }
         }
     }

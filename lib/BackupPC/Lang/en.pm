@@ -440,7 +440,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <form action="\$MyURL" method="get">
 <input type="hidden" name="host" value="\$host">
 \$startIncrStr
-<input type="submit" value="$Lang{Start_Full_Backup}" name="action" alt="demarage plein">
+<input type="submit" value="$Lang{Start_Full_Backup}" name="action">
 <input type="submit" value="$Lang{Stop_Dequeue_Backup}" name="action">
 </form>
 

@@ -55,7 +55,7 @@ EOF
 
 # -----
 
-$Lang{H_BackupPC_Server_Status} = "Status du serveur BackupPC";
+$Lang{H_BackupPC_Server_Status} = "État du serveur BackupPC";
 
 $Lang{BackupPC_Server_Status}= <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
@@ -234,7 +234,7 @@ EOF
 
 $Lang{BackupPC_Archive2_location} = <<EOF;
 <tr>
-    <td>ENG Archive Location/Device</td>
+    <td>Dispositif/Localisation de l'archive</td>
     <td><input type="text" value="\$ArchiveDest" name="archive_device"></td>
 </tr>
 EOF
@@ -459,7 +459,7 @@ tous les fichiers correspondant à ceux que vous avez sélectionnés vont être effa
 		window.open(URL,'','width=500,height=400');
 	}
 	 </script>
-	 <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Chercher les partitions disponibles (ENGLISH: NOT IMPLEMENTED)</a></td>
+	 <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Chercher les partitions disponibles (NON IMPLANTE)</a></td>
 </tr><tr>
     <td>Restaurer les fichiers vers le partage</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"
@@ -475,8 +475,8 @@ tous les fichiers correspondant à ceux que vous avez sélectionnés vont être effa
 EOF
 
 $Lang{Restore_Options_for__host_Option1_disabled} = <<EOF;
-ENG Direct restore has been disabled for host \${EscHTML(\$hostDest)}.
-Please select one of the other restore options.
+La restauration directe a été désactivée pour l'hôte \${EscHTML(\$hostDest)}.
+Veuillez choisir une autre option.
 EOF
 
 # ------------------------------
@@ -996,7 +996,7 @@ $Lang{Archive_requested} = "Archivage demandé par \$User de \$ENV{REMOTE_ADDR}";
 # ------- Stuff that was forgotten ----------------
 # -------------------------------------------------
 
-$Lang{Status} = "Status";
+$Lang{Status} = "État";
 $Lang{PC_Summary} = "Bilan des PC";
 $Lang{LOG_file} = "Fichier journal";
 $Lang{LOG_files} = "Fichiers journaux";
@@ -1117,7 +1117,7 @@ $Lang{This_display_is_merged_with_backup} = <<EOF;
 EOF
 
 $Lang{Visit_this_directory_in_backup} = <<EOF;
-<li> ENG Select the backup you wish to view: <select onChange="window.location=this.value">\$otherDirs </select>
+<li> Choisissez la sauvegarde que vous désirez voir: <select onChange="window.location=this.value">\$otherDirs </select>
 EOF
 
 $Lang{Restore_Summary} = <<EOF;
@@ -1140,14 +1140,14 @@ Cliquer sur le numéro de restauration pour plus de détails.
 EOF
 
 $Lang{Archive_Summary} = <<EOF;
-\${h2("Archive Summary")} (ENGLISH)
+\${h2("Résumé de l'archive")}
 <p>
-Click on the archive number for more details.
+Cliquez sur le numéro de l'archive pour plus de détails.
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td align="center"> Archive# </td>
-    <td align="center"> Result </td>
-    <td align="right"> Start Date</td>
-    <td align="right"> Dur/mins</td>
+<tr class="tableheader"><td align="center"> No. Archive </td>
+    <td align="center">Résultat</td>
+    <td align="right">Date début</td>
+    <td align="right">Durée (min)</td>
 </tr>
 \$ArchiveStr
 </table>
@@ -1187,15 +1187,15 @@ $Lang{Status_link_running} = "édition de liens en cours";
 
 $Lang{Reason_backup_done}    = "sauvegarde terminée";
 $Lang{Reason_restore_done}   = "restauration terminée";
-$Lang{Reason_archive_done}   = "ENG archive done";
+$Lang{Reason_archive_done}   = "archivage terminé";
 $Lang{Reason_nothing_to_do}  = "rien à faire";
 $Lang{Reason_backup_failed}  = "la sauvegarde a échouée";
 $Lang{Reason_restore_failed} = "la restauration a échouée";
-$Lang{Reason_archive_failed} = "ENG archive failed";
+$Lang{Reason_archive_failed} = "l'archivage a échoué";
 $Lang{Reason_no_ping}        = "pas de ping";
 $Lang{Reason_backup_canceled_by_user}  = "sauvegarde annulée par l'utilisateur";
 $Lang{Reason_restore_canceled_by_user} = "restauration annulée par l'utilisateur";
-$Lang{Reason_archive_canceled_by_user} = "ENG archive canceled by user";
+$Lang{Reason_archive_canceled_by_user} = "archivage annulé par l'utilisateur";
 
 # ---------
 # Email messages

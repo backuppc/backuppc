@@ -332,18 +332,6 @@ sub ConnectData
     CgiNavBarAdminAllHosts       => {struct => 'SCALAR',
                                      type   => 'BOOLEAN', },
 
-    CgiHeaderFontType            => {struct => 'SCALAR',
-                                     type   => 'STRING', },
-
-    CgiHeaderFontSize            => {struct => 'SCALAR',
-                                     type   => 'INT', },
-
-    CgiNavBarBgColor             => {struct => 'SCALAR',
-                                     type   => 'STRING', },
-
-    CgiHeaderBgColor             => {struct => 'SCALAR',
-                                     type   => 'STRING', },
-
     CgiHeaders                   => {struct => 'SCALAR',
                                      type   => 'STRING', },
 

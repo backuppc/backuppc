@@ -141,9 +141,7 @@ full support for special file types and unix attributes in v1.4.0
 likely means an exact image of a linux/unix file system can be made.
 
 BackupPC saves backups onto disk. Because of pooling you can relatively
-economically keep several weeks of old backups. But BackupPC does not
-provide permanent storage to tape. Other Open Source applications can do
-this by backing up BackupPC's pool directories to tape.
+economically keep several weeks of old backups.
 
 At some sites the disk-based backup will be adequate, without a
 secondary tape backup. This system is robust to any single failure: if a
@@ -153,8 +151,8 @@ fresh file system, and create new backups from the clients. The chance
 of the server disk failing can be made very small by spending more money
 on increasingly better RAID systems.
 
-At other sites a secondary tape backup will be required. This tape
-backup can be done perhaps weekly from the BackupPC pool file system.
+At other sites a secondary tape backup or cd/dvd will be required. This
+backup can be done perhaps weekly using the archive function of BackupPC.
 
 =back
 
@@ -2031,6 +2029,47 @@ in a location different from their original location.
 =back
 
 Each of these programs reside in __INSTALLDIR__/bin.
+
+=head1 Archive functions
+
+BackupPC supports archiving to removable media. For users that require
+offsite backups, BackupPC can create archives that stream to tape
+devices, or create files of specified sizes to fit onto cd or dvd media.
+
+Each archive type is specified by a BackupPC host with its XferMethod
+set to 'archive'. This allows for multiple configurations at sites where
+there might be a combination of tape and cd/dvd backups being made.
+
+=head2 Configuring an Archive Host
+
+To create an Archive Host, add it to the hosts file just as any other host
+and call it a name that best describes the type of archive, e.g. ArchiveDLT
+
+To tell BackupPC that the Host is for Archives, create a config.pl file in 
+the Archive Hosts's pc directory, adding the following line:
+
+$Conf{XferMethod} = 'archive';
+
+To further customise the archive's parameters you can adding the changed
+parameters in the host's config.pl file. The parameters are explained in the config.pl
+file.
+
+The example archive programs included with BackupPC are for a CD and 
+Tape archive. The programs are called BackupPC_archivecd and 
+BackupPC_archivetape. These are specified by the ArchiveClientCmd configuration
+parameter.
+
+=head2 Starting an Archive
+
+In the web interface, click on the Archive Host you wish to use. You will see a
+list of previous archives and a summary on each. By clicking the "Start Archive"
+button you are presented with the list of hosts and the approximate backup size
+(note this is raw size, not projected compressed size) Select the hosts you wish
+to archive and press the "Archive Selected Hosts" button.
+
+The next screen allows you to adjust the parameters for this archive run.
+Press the "Start the Archive" to start archiving the selected hosts with the
+parameters displayed.
 
 =head1 BackupPC Design
 

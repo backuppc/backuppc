@@ -61,6 +61,7 @@ my %ActionDispatch = (
     $Lang->{Start_Incr_Backup}   => "StartStopBackup",
     $Lang->{Start_Full_Backup}   => "StartStopBackup",
     $Lang->{Stop_Dequeue_Backup} => "StartStopBackup",
+    $Lang->{Stop_Dequeue_Archive} => "StartStopBackup",
     "queue"               	 => "Queue",
     "view"                	 => "View",
     "LOGlist"             	 => "LOGlist",
@@ -72,12 +73,21 @@ my %ActionDispatch = (
     "hostInfo"		       	 => "HostInfo",
     "generalInfo"         	 => "GeneralInfo",
     "restoreInfo"         	 => "RestoreInfo",
+    "archiveInfo"         	 => "ArchiveInfo",
+    $Lang->{Start_Archive}       => "Archive",
+    "Archive"                    => "Archive",
+    "Reload"                     => "ReloadServer",
+    "startServer"                => "StartServer",
+    "Stop"                       => "StopServer",
+    "adminOpts"                  => "AdminOptions",
 );
 
 #
 # Set default actions, then call sub handler
 #
 $In{action} ||= "hostInfo"    if ( defined($In{host}) );
+## rk default non admin users to pc summary for their hosts
+$In{action}   = "summary" if ( !defined($ActionDispatch{$In{action}}) && !CheckPermission());
 $In{action}   = "generalInfo" if ( !defined($ActionDispatch{$In{action}}) );
 my $action    = $ActionDispatch{$In{action}};
 require "BackupPC/CGI/$action.pm"

@@ -70,17 +70,15 @@ sub action
             $reply = $bpc->ServerMesg("stop ${EscURI($host)} $User $In{backoff}");
             $str = eval("qq{$Lang->{Backup_stopped_dequeued_on__host_by__User}}");
         }
-
-        Header(eval ("qq{$Lang->{BackupPC__Backup_Requested_on__host}}") );
-        print (eval ("qq{$Lang->{REPLY_FROM_SERVER}}"));
+    my $content = eval ("qq{$Lang->{REPLY_FROM_SERVER}}");
+        Header(eval ("qq{$Lang->{BackupPC__Backup_Requested_on__host}}"),$content);
 
         Trailer();
     } else {
         if ( $start ) {
 	    my $ipAddr = ConfirmIPAddress($host);
-
-            Header(eval("qq{$Lang->{BackupPC__Start_Backup_Confirm_on__host}}"));
-            print (eval("qq{$Lang->{Are_you_sure_start}}"));
+	    my $content = eval("qq{$Lang->{Are_you_sure_start}}");
+            Header(eval("qq{$Lang->{BackupPC__Start_Backup_Confirm_on__host}}"),$content);
         } else {
             my $backoff = "";
             GetStatusInfo("host(${EscURI($host)})");
@@ -88,8 +86,8 @@ sub action
                 $backoff = sprintf("%.1f",
                                   ($StatusHost{backoffTime} - time) / 3600);
             }
-            Header($Lang->{BackupPC__Stop_Backup_Confirm_on__host});
-            print (eval ("qq{$Lang->{Are_you_sure_stop}}"));
+            my $content = eval ("qq{$Lang->{Are_you_sure_stop}}");
+            Header($Lang->{BackupPC__Stop_Backup_Confirm_on__host},$content);
         }
         Trailer();
     }

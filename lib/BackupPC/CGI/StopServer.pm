@@ -1,10 +1,10 @@
 #============================================================= -*-perl-*-
 #
-# BackupPC::CGI::EmailSummary package
+# BackupPC::CGI::StopServer package
 #
 # DESCRIPTION
 #
-#   This module implements the EmailSummary action for the CGI interface.
+#   This module implements the StopServer action for the CGI interface.
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
@@ -34,37 +34,23 @@
 #
 #========================================================================
 
-package BackupPC::CGI::EmailSummary;
+package BackupPC::CGI::StopServer;
 
 use strict;
 use BackupPC::CGI::Lib qw(:all);
 
 sub action
 {
-    my $Privileged = CheckPermission();
-
-    if ( !$Privileged ) {
-        ErrorExit($Lang->{Only_privileged_users_can_view_email_summaries});
+    if ( defined($bpc) && $bpc->ServerOK() ) {
+        $bpc->ServerMesg("log User $User requested server shutdown");
+        $bpc->ServerMesg("server shutdown");
+        for ( my $i = 0; $i < 10; $i++ ) {
+            last unless $bpc->ServerOK();
+            sleep(1);
+        }
+        sleep(2);
     }
-    GetStatusInfo("hosts");
-    ReadUserEmailInfo();
-    my(%EmailStr, $str);
-    foreach my $u ( keys(%UserEmailInfo) ) {
-        next if ( !defined($UserEmailInfo{$u}{lastTime}) );
-        my $emailTimeStr = timeStamp2($UserEmailInfo{$u}{lastTime});
-        $EmailStr{$UserEmailInfo{$u}{lastTime}} .= <<EOF;
-<tr><td>${UserLink($u)} </td>
-    <td>${HostLink($UserEmailInfo{$u}{lastHost})} </td>
-    <td>$emailTimeStr </td>
-    <td>$UserEmailInfo{$u}{lastSubj} </td></tr>
-EOF
-    }
-    foreach my $t ( sort({$b <=> $a} keys(%EmailStr)) ) {
-        $str .= $EmailStr{$t};
-    }
-    my $content = eval("qq{$Lang->{Recent_Email_Summary}}");
-    Header($Lang->{Email_Summary}, $content);
-    Trailer();
+    print $Cgi->redirect($MyURL);
 }
 
 1;

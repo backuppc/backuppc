@@ -1,10 +1,10 @@
 #============================================================= -*-perl-*-
 #
-# BackupPC::CGI::EmailSummary package
+# BackupPC::CGI::AdminOptions package
 #
 # DESCRIPTION
 #
-#   This module implements the EmailSummary action for the CGI interface.
+#   This module implements the AdminOptions action for the CGI interface.
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
@@ -34,36 +34,18 @@
 #
 #========================================================================
 
-package BackupPC::CGI::EmailSummary;
+package BackupPC::CGI::AdminOptions;
 
 use strict;
 use BackupPC::CGI::Lib qw(:all);
 
 sub action
 {
-    my $Privileged = CheckPermission();
-
-    if ( !$Privileged ) {
-        ErrorExit($Lang->{Only_privileged_users_can_view_email_summaries});
+    unless ( CheckPermission() ) {
+        ErrorExit($Lang->{Only_privileged_users_can_view_admin_options});
     }
-    GetStatusInfo("hosts");
-    ReadUserEmailInfo();
-    my(%EmailStr, $str);
-    foreach my $u ( keys(%UserEmailInfo) ) {
-        next if ( !defined($UserEmailInfo{$u}{lastTime}) );
-        my $emailTimeStr = timeStamp2($UserEmailInfo{$u}{lastTime});
-        $EmailStr{$UserEmailInfo{$u}{lastTime}} .= <<EOF;
-<tr><td>${UserLink($u)} </td>
-    <td>${HostLink($UserEmailInfo{$u}{lastHost})} </td>
-    <td>$emailTimeStr </td>
-    <td>$UserEmailInfo{$u}{lastSubj} </td></tr>
-EOF
-    }
-    foreach my $t ( sort({$b <=> $a} keys(%EmailStr)) ) {
-        $str .= $EmailStr{$t};
-    }
-    my $content = eval("qq{$Lang->{Recent_Email_Summary}}");
-    Header($Lang->{Email_Summary}, $content);
+    my $content = eval("qq{$Lang->{Admin_Options_Page}}");
+    Header(eval("qq{$Lang->{H_Admin_Options}}"), $content);
     Trailer();
 }
 

@@ -84,8 +84,9 @@ sub action
 	my %inode2name;
 	my $nameCnt = 0;
 	(my $fDisp  = "${EscHTML($f)}") =~ s/ /&nbsp;/g;
-	$fileStr   .= "<tr><td align=left>$fDisp</td>";
-	my($colSpan, $url, $inode, $type, $tdColor);
+	$fileStr   .= "<tr><td align=\"left\"  class=\"histView\">$fDisp</td>";
+	my($colSpan, $url, $inode, $type);
+	my $tdClass = ' class="histView"';
 	for ( $i = 0 ; $i < @Backups ; $i++ ) {
 	    my($path);
 	    if ( $colSpan > 0 ) {
@@ -109,16 +110,16 @@ sub action
 		    $colSpan++;
 		    next;
 		}
-		$fileStr .= "<td align=center colspan=$colSpan$tdColor>"
+		$fileStr .= "<td align=center colspan=$colSpan$tdClass>"
 			  . "$url</td>";
 		$colSpan = 0;
-		$tdColor = "";
+		$tdClass = ' class="histView"';
 	    }
 	    if ( !defined($hist->{$f}[$i]) ) {
 		$colSpan = 1;
 		$url     = "&nbsp;";
 		$inode   = -3;			# special value for missing
-		$tdColor = ' bgcolor="#ffffaa"';
+		$tdClass = ' class="histViewMis"';
 		next;
 	    }
             if ( $dir eq "" ) {
@@ -154,7 +155,7 @@ EOF
 	    $colSpan = 1;
 	}
 	if ( $colSpan > 0 ) {
-	    $fileStr .= "<td align=center colspan=$colSpan$tdColor>$url</td>";
+	    $fileStr .= "<td align=center colspan=$colSpan$tdClass>$url</td>";
 	    $colSpan = 0;
 	}
 	$fileStr .= "</tr>\n";
@@ -164,11 +165,8 @@ EOF
     $dirDisplay =~ s{//+}{/}g;
     $dirDisplay =~ s{/+$}{}g;
     $dirDisplay = "/" if ( $dirDisplay eq "" );
-
-    Header(eval("qq{$Lang->{DirHistory_backup_for__host}}"));
-
-    print (eval("qq{$Lang->{DirHistory_for__host}}"));
-
+    my $content = eval("qq{$Lang->{DirHistory_for__host}}");
+    Header(eval("qq{$Lang->{DirHistory_backup_for__host}}"), $content);
     Trailer();
 }
 

@@ -42,7 +42,7 @@ use Data::Dumper;
 
 sub action
 {
-    my($str, $reply);
+    my($str, $reply, $content);
     my $Privileged = CheckPermission($In{host});
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_restore_backup_files}}"));
@@ -101,19 +101,19 @@ EOF
         #
         # Tell the user what options they have
         #
-        Header(eval("qq{$Lang->{Restore_Options_for__host}}"));
-	print(eval("qq{$Lang->{Restore_Options_for__host2}}"));
+	$content .= eval("qq{$Lang->{Restore_Options_for__host2}}");
 
 	#
 	# Verify that Archive::Zip is available before showing the
 	# zip restore option
 	#
 	if ( eval { require Archive::Zip } ) {
-	    print (eval("qq{$Lang->{Option_2__Download_Zip_archive}}"));
+	    $content .= eval("qq{$Lang->{Option_2__Download_Zip_archive}}");
 	} else {
-	    print (eval("qq{$Lang->{Option_2__Download_Zip_archive2}}"));
+	    $content .= eval("qq{$Lang->{Option_2__Download_Zip_archive2}}");
 	}
-	print (eval("qq{$Lang->{Option_3__Download_Zip_archive}}"));
+	$content .= eval("qq{$Lang->{Option_3__Download_Zip_archive}}");
+	Header(eval("qq{$Lang->{Restore_Options_for__host}}"), $content);
         Trailer();
     } elsif ( $In{type} == 1 ) {
         #
@@ -209,8 +209,8 @@ EOF
 <tr><td>$host:/$strippedShare$f</td><td>$In{hostDest}:/$strippedShareDest$targetFile</td></tr>
 EOF
         }
-        Header(eval("qq{$Lang->{Restore_Confirm_on__host}}"));
-	print(eval("qq{$Lang->{Are_you_sure}}"));
+        my $content = eval("qq{$Lang->{Are_you_sure}}");
+        Header(eval("qq{$Lang->{Restore_Confirm_on__host}}"), $content);
         Trailer();
     } elsif ( $In{type} == 4 ) {
 	if ( !defined($Hosts->{$In{hostDest}}) ) {
@@ -265,8 +265,8 @@ EOF
 	$reply = $bpc->ServerMesg("restore ${EscURI($ipAddr)}"
 			. " ${EscURI($hostDest)} $User $reqFileName");
 	$str = eval("qq{$Lang->{Restore_requested_to_host__hostDest__backup___num}}");
-        Header(eval("qq{$Lang->{Restore_Requested_on__hostDest}}"));
-	print (eval("qq{$Lang->{Reply_from_server_was___reply}}"));
+	my $content = eval("qq{$Lang->{Reply_from_server_was___reply}}");
+        Header(eval("qq{$Lang->{Restore_Requested_on__hostDest}}"), $content);
         Trailer();
     }
 }

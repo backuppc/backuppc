@@ -300,6 +300,7 @@ sub Main_Initialize
     $Info{ConfigModTime} = $bpc->ConfigMTime();
     $Info{pid} = $$;
     $Info{startTime} = time;
+    $Info{ConfigLTime} = time;
     $Info{Version} = $bpc->{Version};
 
     #
@@ -477,7 +478,7 @@ sub Main_TryToRun_Bg_or_User_Queue
                 next;
             }
             push(@args, $req->{doFull} ? "-f" : "-i")
-                            if ( !$req->{restore} );
+                            if (( !$req->{restore} ) && ( !$req->{archive} ));
             $UserQueueOn{$req->{host}} = 0;
         } elsif ( $nJobs < $Conf{MaxBackups}
                         && (@CmdQueue + $nJobs)
@@ -538,6 +539,10 @@ sub Main_TryToRun_Bg_or_User_Queue
             $progName = "BackupPC_restore";
             $type     = "restore";
             push(@args, $req->{hostIP}, $req->{host}, $req->{reqFileName});
+	} elsif ( $req->{archive} ) {
+            $progName = "BackupPC_archive";
+            $type     = "archive";
+            push(@args, $req->{user}, $req->{host}, $req->{reqFileName});
         } else {
             $progName = "BackupPC_dump";
             $type     = "backup";
@@ -597,13 +602,7 @@ sub Main_Select
 						= localtime(time);
         my($currHours) = $hour + $min / 60 + $sec / 3600;
         if ( $bpc->ConfigMTime() != $Info{ConfigModTime} ) {
-            my($mesg) = $bpc->ConfigRead()
-                        || "Re-read config file because mtime changed";
-            print(LOG $bpc->timeStamp, "$mesg\n");
-            %Conf = $bpc->Conf();
-            $Info{ConfigModTime} = $bpc->ConfigMTime();
-            umask($Conf{UmaskMode});
-            ServerSocketInit();
+            ServerReload("Re-read config file because mtime changed");
         }
         my $delta = -1;
         foreach my $t ( @{$Conf{WakeupSchedule} || [0..23]} ) {
@@ -651,30 +650,9 @@ sub Main_Process_Signal
     # Process signals
     #
     if ( $SigName eq "HUP" ) {
-        my($mesg) = $bpc->ConfigRead()
-                    || "Re-read config file because of a SIG_HUP";
-        print(LOG $bpc->timeStamp, "$mesg\n");
-        $Info{ConfigModTime} = $bpc->ConfigMTime();
-        %Conf = $bpc->Conf();
-        umask($Conf{UmaskMode});
-        ServerSocketInit();
-        HostsUpdate(0);
-        $NextWakeup = 0;
+        ServerReload("Re-read config file because of a SIG_HUP");
     } elsif ( $SigName ) {
-        print(LOG $bpc->timeStamp, "Got signal $SigName... cleaning up\n");
-	if ( keys(%Jobs) ) {
-	    foreach my $host ( keys(%Jobs) ) {
-		kill(2, $Jobs{$host}{pid});
-	    }
-	    sleep(1);
-	    foreach my $host ( keys(%Jobs) ) {
-		kill(9, $Jobs{$host}{pid});
-	    }
-	    %Jobs = ();
-	}
-        StatusWrite();
-        unlink("$TopDir/log/BackupPC.pid");
-        exit(1);
+        ServerShutdown("Got signal $SigName... cleaning up");
     }
     $SigName = "";
 }
@@ -1055,6 +1033,9 @@ sub Main_Check_Client_Messages
 		    if ( $Jobs{$host}{type} eq "restore" ) {
 			$Status{$host}{reason}
 				    = "Reason_restore_canceled_by_user";
+		    } elsif ( $Jobs{$host}{type} eq "archive" ) {
+			$Status{$host}{reason}
+				    = "Reason_archive_canceled_by_user";
 		    } else {
 			$Status{$host}{reason}
 				    = "Reason_backup_canceled_by_user";
@@ -1125,6 +1106,36 @@ sub Main_Check_Client_Messages
                         });
                     $UserQueueOn{$hostIP} = 1;
                     $reply = "ok: requested backup of $host";
+                }
+            } elsif ( $cmd =~ /^archive (\S+)\s+(\S+)\s+(\S+)/ ) {
+                my $user         = $1;
+                my $archivehost  = $2;
+                my $reqFileName  = $3;
+		$host      = $bpc->uriUnesc($archivehost);
+                if ( !defined($Status{$host}) ) {
+                    print(LOG $bpc->timeStamp,
+                               "User $user requested archive of unknown archive host"
+                             . " $host");
+                    $reply = "archive error: unknown archive host $host";
+                } else {
+                    print(LOG $bpc->timeStamp,
+                               "User $user requested archive on $host"
+                             . " ($host)\n");
+                    if ( defined($Jobs{$host}) ) {
+                        $reply = "Archive currently running on $host, please try later";
+                    } else {
+                        unshift(@UserQueue, {
+                                host    => $host,
+                                hostIP  => $user,
+                                reqFileName => $reqFileName,
+                                reqTime => time,
+                                dhcp    => 0,
+                                archive => 1,
+				userReq => 1,
+                        });
+                        $UserQueueOn{$host} = 1;
+                        $reply = "ok: requested archive on $host";
+                    }
                 }
             } elsif ( $cmd =~ /^restore (\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ) {
                 my $hostIP = $1;
@@ -1211,6 +1222,15 @@ sub Main_Check_Client_Messages
                 QueueLink($host);
             } elsif ( $cmd =~ /^log\s+(.*)/ ) {
                 print(LOG $bpc->timeStamp, "$1\n");
+            } elsif ( $cmd =~ /^server\s+(\w+)/ ) {
+                my($type) = $1;
+                if ( $type eq 'reload' ) {
+                    ServerReload("Reloading server configuration...");
+                } elsif ( $type eq 'shutdown' ) {
+                    $reply = "Shutting down...\n";
+                    syswrite($Clients{$client}{fh}, $reply, length($reply));
+                    ServerShutdown("Server shutting down...");
+                }
             } elsif ( $cmd =~ /^quit/ || $cmd =~ /^exit/ ) {
                 $nbytes = 0;
                 last;
@@ -1530,3 +1550,46 @@ sub ServerSocketInit
         $ServerInetPort = $Conf{ServerPort};
     }
 }
+
+#
+# Reload the server.  Used by Main_Process_Signal when $SigName eq "HUP"
+# or when the command "server reload" is received.
+#
+sub ServerReload
+{
+    my($mesg) = @_;
+    $mesg = $bpc->ConfigRead() || $mesg;
+    print(LOG $bpc->timeStamp, "$mesg\n");
+    $Info{ConfigModTime} = $bpc->ConfigMTime();
+    %Conf = $bpc->Conf();
+    umask($Conf{UmaskMode});
+    ServerSocketInit();
+    HostsUpdate(0);
+    $NextWakeup = 0;
+    $Info{ConfigLTime} = time;
+}
+
+#
+# Gracefully shutdown the server.  Used by Main_Process_Signal when
+# $SigName ne "" && $SigName ne "HUP" or when the command
+# "server shutdown" is received.
+#
+sub ServerShutdown
+{
+    my($mesg) = @_;
+    print(LOG $bpc->timeStamp, "$mesg\n");
+    if ( keys(%Jobs) ) {
+        foreach my $host ( keys(%Jobs) ) {
+            kill(2, $Jobs{$host}{pid});
+        }
+        sleep(1);
+        foreach my $host ( keys(%Jobs) ) {
+            kill(9, $Jobs{$host}{pid});
+        }
+        %Jobs = ();
+    }
+    StatusWrite();
+    unlink("$TopDir/log/BackupPC.pid");
+    exit(1);
+}
+

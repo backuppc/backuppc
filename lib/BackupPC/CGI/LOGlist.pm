@@ -74,8 +74,8 @@ sub action
     <td> $mtimeStr </td></tr>
 EOF
     }
-    Header($Lang->{BackupPC__Log_File_History});
-    print (eval("qq{$Lang->{Log_File_History__hdr}}"));
+    my $content = eval("qq{$Lang->{Log_File_History__hdr}}");
+    Header($Lang->{BackupPC__Log_File_History}, $content);
     Trailer();
 }
 

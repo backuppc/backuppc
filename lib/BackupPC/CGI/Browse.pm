@@ -60,6 +60,15 @@ sub action
     # Find the requested backup and the previous filled backup
     #
     my @Backups = $bpc->BackupInfoRead($host);
+
+    #
+    # default to the newest backup
+    #
+    if ( !defined($In{num}) && defined(@Backups) ) {
+        $i = @Backups - 1;
+        $num = $Backups[$i]{num};
+    }
+
     for ( $i = 0 ; $i < @Backups ; $i++ ) {
         last if ( $Backups[$i]{num} == $num );
     }
@@ -129,28 +138,28 @@ sub action
                 # Display directory if it exists in current backup.
                 # First find out if there are subdirs
                 #
-		my($bold, $unbold, $BGcolor);
+                my $tdStyle;
+                my $linkStyle = "fview";
 		$img |= 1 << 6;
 		$img |= 1 << 5 if ( $attr->{$f}{nlink} > 2 );
 		if ( $dirOpen ) {
-		    $bold = "<b>";
-		    $unbold = "</b>";
+                    $linkStyle = "fviewbold";
 		    $img |= 1 << 2;
 		    $img |= 1 << 3 if ( $attr->{$f}{nlink} > 2 );
 		}
 		my $imgFileName = sprintf("%07b.gif", $img);
 		$imgStr = "<img src=\"$Conf{CgiImageDirURL}/$imgFileName\" align=\"absmiddle\" width=\"9\" height=\"19\" border=\"0\">";
 		if ( "$relDir/$f" eq $dir ) {
-		    $BGcolor = " bgcolor=\"$Conf{CgiHeaderBgColor}\"";
+                    $tdStyle = "fviewon";
 		} else {
-		    $BGcolor = "";
+                    $tdStyle = "fviewoff";
 		}
 		my $dirName = $f;
 		$dirName =~ s/ /&nbsp;/g;
 		push(@DirStr, {needTick => 1,
-			       tdArgs   => $BGcolor,
+                               tdArgs   => " class=\"$tdStyle\"",
 			       link     => <<EOF});
-<a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$imgStr</a><a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path" style="font-size:13px;font-family:arial;text-decoration:none;line-height:15px">&nbsp;$bold$dirName$unbold</a></td></tr>
+<a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$imgStr</a><a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path" class="$linkStyle">&nbsp;$dirName</a></td></tr>
 EOF
                 $fileCnt++;
                 $gotDir = 1;
@@ -184,34 +193,49 @@ EOF
                 #
                 # This is the selected directory, so display all the files
                 #
-                my $attrStr;
+                my ($attrStr, $iconStr);
                 if ( defined($a = $attr->{$f}) ) {
                     my $mtimeStr = $bpc->timeStamp($a->{mtime});
 		    # UGH -> fix this
                     my $typeStr  = BackupPC::Attrib::fileType2Text(undef,
 								   $a->{type});
                     my $modeStr  = sprintf("0%o", $a->{mode} & 07777);
+                    $iconStr = <<EOF;
+<img src="$Conf{CgiImageDirURL}/icon-$typeStr.gif" align="center">
+EOF
                     $attrStr .= <<EOF;
-    <td align="center">$typeStr</td>
-    <td align="center">$modeStr</td>
-    <td align="center">$a->{backupNum}</td>
-    <td align="right">$a->{size}</td>
-    <td align="right">$mtimeStr</td>
+    <td align="center" class="fviewborder">$typeStr</td>
+    <td align="center" class="fviewborder">$modeStr</td>
+    <td align="center" class="fviewborder">$a->{backupNum}</td>
+    <td align="right" class="fviewborder">$a->{size}</td>
+    <td align="right" class="fviewborder">$mtimeStr</td>
 </tr>
 EOF
                 } else {
-                    $attrStr .= "<td colspan=\"5\" align=\"center\"> </td>\n";
+                    $attrStr .= "<td colspan=\"5\" align=\"center\" class=\"fviewborder\"> </td>\n";
                 }
 		(my $fDisp = "${EscHTML($f)}") =~ s/ /&nbsp;/g;
                 if ( $gotDir ) {
                     $fileStr .= <<EOF;
-<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a></td>
+<tr><td class="fviewborder">
+    <table cellpadding="0" cellspacing="0" border="0"><tr><td>
+    <input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;$iconStr
+    </td><td>
+        &nbsp;<a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a>
+    </td></tr></table>
+</td>
 $attrStr
 </tr>
 EOF
                 } else {
                     $fileStr .= <<EOF;
-<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=RestoreFile&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a></td>
+<tr><td class="fviewborder">
+    <table cellpadding="0" cellspacing="0" border="0"><tr><td>
+    <input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;$iconStr
+    </td><td>
+        &nbsp;<a href="$MyURL?action=RestoreFile&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a>
+    </td></tr></table>
+</td>
 $attrStr
 </tr>
 EOF
@@ -246,7 +270,6 @@ EOF
 	my $numF = join(", #", @mergeNums);
         $filledBackup = eval("qq{$Lang->{This_display_is_merged_with_backup}}");
     }
-    Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"));
 
     foreach my $d ( @DirStrPrev ) {
 	$dirStr .= "<tr><td$d->{tdArgs}>$d->{link}\n";
@@ -273,14 +296,22 @@ EOF
     $pathURI  =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
     $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
     foreach my $i ( $view->backupList($share, $dir) ) {
-        push(@otherDirs, "<a href=\"$MyURL?action=browse&host=${EscURI($host)}"
-                       . "&num=$i&share=$shareURI&dir=$pathURI\">$i</a>");
+        push(@otherDirs, $i);
     }
     if ( @otherDirs ) {
 	my $otherDirs  = join(",\n", @otherDirs);
+        my $inc = 0;
+        foreach my $value (@otherDirs) {
+            my $selected = undef;
+            my $showDate = timeStamp2($Backups[$inc]{startTime});
+            $selected = " selected" if ($value == $num);
+            $otherDirs .= "<option value=\"$MyURL?action=browse&host=${EscURI($host)}&num=$value\"$selected>#$value - ($showDate)</option>\n";
+            $inc++;
+        }
         $filledBackup .= eval("qq{$Lang->{Visit_this_directory_in_backup}}");
     }
-    print (eval("qq{$Lang->{Backup_browse_for__host}}"));
+    my $content = eval("qq{$Lang->{Backup_browse_for__host}}");
+    Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"), $content);
     Trailer();
 }
 

@@ -79,10 +79,8 @@ EOF
     <td> $cmd $req->{cmd}[0] </td></tr>
 EOF
     }
-    Header($Lang->{BackupPC__Queue_Summary});
-
-    print ( eval ( "qq{$Lang->{Backup_Queue_Summary}}") );
-
+    my $content = eval ( "qq{$Lang->{Backup_Queue_Summary}}");
+    Header($Lang->{BackupPC__Queue_Summary}, $content);
     Trailer();
 }
 

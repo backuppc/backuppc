@@ -83,9 +83,8 @@ sub action
 <tr><td>$RestoreReq{hostSrc}:/$strippedShareSrc$f</td><td>$RestoreReq{hostDest}:/$strippedShareDest$targetFile</td></tr>
 EOF
     }
-
-    Header(eval("qq{$Lang->{Restore___num_details_for__host}}"));
-    print(eval("qq{$Lang->{Restore___num_details_for__host2 }}"));
+    my $content = eval("qq{$Lang->{Restore___num_details_for__host2 }}");
+    Header(eval("qq{$Lang->{Restore___num_details_for__host}}"),$content);
     Trailer();
 }
 

@@ -48,7 +48,7 @@ use vars qw($Cgi %In $MyURL $User %Conf $TopDir $BinDir $bpc);
 use vars qw(%Status %Info %Jobs @BgQueue @UserQueue @CmdQueue
             %QueueLen %StatusHost);
 use vars qw($Hosts $HostsMTime $ConfigMTime $PrivAdmin);
-use vars qw(%UserEmailInfo $UserEmailInfoMTime %RestoreReq);
+use vars qw(%UserEmailInfo $UserEmailInfoMTime %RestoreReq %ArchiveReq);
 use vars qw($Lang);
 
 @ISA = qw(Exporter);
@@ -80,7 +80,7 @@ use vars qw($Lang);
 		    %Status %Info %Jobs @BgQueue @UserQueue @CmdQueue
 		    %QueueLen %StatusHost
 		    $Hosts $HostsMTime $ConfigMTime $PrivAdmin
-		    %UserEmailInfo $UserEmailInfoMTime %RestoreReq
+		    %UserEmailInfo $UserEmailInfoMTime %RestoreReq %ArchiveReq
 		    $Lang
              );
 
@@ -117,10 +117,8 @@ sub NewRequest
 	$Lang   = $bpc->Lang();
 	$ConfigMTime = $bpc->ConfigMTime();
     } elsif ( $bpc->ConfigMTime() != $ConfigMTime ) {
-	$bpc->ConfigRead();
-	%Conf   = $bpc->Conf();
-	$ConfigMTime = $bpc->ConfigMTime();
-	$Lang   = $bpc->Lang();
+        $bpc->ServerMesg("log Re-read config file because mtime changed");
+        $bpc->ServerMesg("server reload");
     }
 
     #
@@ -223,10 +221,6 @@ sub ErrorExit
     my(@mesg) = @_;
     my($head) = shift(@mesg);
     my($mesg) = join("</p>\n<p>", @mesg);
-    $Conf{CgiHeaderFontType} ||= "arial"; 
-    $Conf{CgiHeaderFontSize} ||= "3";  
-    $Conf{CgiNavBarBgColor}  ||= "#ddeeee";
-    $Conf{CgiHeaderBgColor}  ||= "#99cc33";
 
     if ( !defined($ENV{REMOTE_USER}) ) {
 	$mesg .= <<EOF;
@@ -241,19 +235,19 @@ EOF
     $bpc->ServerMesg("log User $User (host=$In{host}) got CGI error: $head")
                             if ( defined($bpc) );
     if ( !defined($Lang->{Error}) ) {
-	Header("BackupPC: Error");
         $mesg = <<EOF if ( !defined($mesg) );
 There is some problem with the BackupPC installation.
 Please check the permissions on BackupPC_Admin.
 EOF
-	print <<EOF;
+        my $content = <<EOF;
 ${h1("Error: Unable to read config.pl or language strings!!")}
 <p>$mesg</p>
 EOF
+        Header("BackupPC: Error", $content);
 	Trailer();
     } else {
-	Header(eval("qq{$Lang->{Error}}"));
-	print (eval("qq{$Lang->{Error____head}}"));
+        my $content = eval("qq{$Lang->{Error____head}}");
+        Header(eval("qq{$Lang->{Error}}"), $content);
 	Trailer();
     }
     exit(1);
@@ -267,7 +261,16 @@ sub ServerConnect
     return if ( $bpc->ServerOK() );
     $bpc->ServerDisconnect();
     if ( my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
-        ErrorExit(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"));
+        if ( CheckPermission() 
+          && -f $Conf{ServerInitdPath}
+          && $Conf{ServerInitdStartCmd} ne "" ) {
+            Header(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"));
+            print (eval("qq{$Lang->{Admin_Start_Server}}"));
+            Trailer();
+            exit(1);
+        } else {
+            ErrorExit(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"));
+        }
     }
 }
 
@@ -332,12 +335,20 @@ sub CheckPermission
 #
 sub GetUserHosts
 {
-    if ( $Conf{CgiNavBarAdminAllHosts} && CheckPermission() ) {
-       return sort keys %$Hosts;
-    }
+    my($host) = @_;
+    my @hosts;
 
-    return sort grep { $Hosts->{$_}{user} eq $User ||
+    if ( $Conf{CgiNavBarAdminAllHosts} && CheckPermission() ) {
+        @hosts = sort keys %$Hosts;
+    } else {
+        @hosts = sort grep { $Hosts->{$_}{user} eq $User ||
                        defined($Hosts->{$_}{moreUsers}{$User}) } keys(%$Hosts);
+    }
+    #
+    # return the selected host first (if present)
+    #
+    return @hosts if ( !defined($host) || !grep(/^$host$/, @hosts) );
+    return ($host, grep(!/^$host$/, @hosts));
 }
 
 #
@@ -381,94 +392,127 @@ sub ConfirmIPAddress
 
 sub Header
 {
-    my($title) = @_;
+    my($title, $content) = @_;
     my @adminLinks = (
-        { link => "",                          name => $Lang->{Status},
-                                               priv => 1},
-        { link => "?action=summary",           name => $Lang->{PC_Summary} },
-        { link => "?action=view&type=LOG",     name => $Lang->{LOG_file} },
-        { link => "?action=LOGlist",           name => $Lang->{Old_LOGs} },
-        { link => "?action=emailSummary",      name => $Lang->{Email_summary} },
-        { link => "?action=view&type=config",  name => $Lang->{Config_file} },
-        { link => "?action=view&type=hosts",   name => $Lang->{Hosts_file} },
-        { link => "?action=queue",             name => $Lang->{Current_queues} },
-        { link => "?action=view&type=docs",    name => $Lang->{Documentation},
-                                               priv => 1},
+        { link => "",                         name => $Lang->{Status},
+                                              priv => 1},
+        { link => "?action=adminOpts",        name => $Lang->{Admin_Options} },
+        { link => "?action=summary",          name => $Lang->{PC_Summary} },
+        { link => "?action=view&type=LOG",    name => $Lang->{LOG_file} },
+        { link => "?action=LOGlist",          name => $Lang->{Old_LOGs} },
+        { link => "?action=emailSummary",     name => $Lang->{Email_summary} },
+        { link => "?action=view&type=config", name => $Lang->{Config_file} },
+        { link => "?action=view&type=hosts",  name => $Lang->{Hosts_file} },
+        { link => "?action=queue",            name => $Lang->{Current_queues} },
+        { link => "?action=view&type=docs",   name => $Lang->{Documentation},
+                                              priv => 1},
         { link => "http://backuppc.sourceforge.net/faq", name => "FAQ",
-                                               priv => 1},
+                                              priv => 1},
         { link => "http://backuppc.sourceforge.net", name => "SourceForge",
-                                               priv => 1},
+                                              priv => 1},
     );
     print $Cgi->header();
     print <<EOF;
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
 <title>$title</title>
+$Conf{CSSstylesheet}
 $Conf{CgiHeaders}
-</head><body bgcolor="$Conf{CgiBodyBgColor}">
-<table cellpadding="0" cellspacing="0" border="0">
-<tr valign="top"><td valign="top" bgcolor="$Conf{CgiNavBarBgColor}" width="10%">
+</head><body onLoad="document.getElementById('NavMenu').style.height=document.body.scrollHeight">
+<img src="$Conf{CgiImageDirURL}/logo.gif" hspace="5" vspace="7"><br>
 EOF
-    NavSectionTitle("BackupPC");
-    print "&nbsp;\n";
-    if ( defined($In{host}) && defined($Hosts->{$In{host}}) ) {
-        my $host = $In{host};
-        NavSectionTitle( eval("qq{$Lang->{Host_Inhost}}") );
-        NavSectionStart();
-        NavLink("?host=${EscURI($host)}", $Lang->{Home});
-        NavLink("?action=view&type=LOG&host=${EscURI($host)}", $Lang->{LOG_file});
-        NavLink("?action=LOGlist&host=${EscURI($host)}", $Lang->{Old_LOGs});
-        if ( -f "$TopDir/pc/$host/SmbLOG.bad"
-                    || -f "$TopDir/pc/$host/SmbLOG.bad.z"
-                    || -f "$TopDir/pc/$host/XferLOG.bad"
-                    || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
-            NavLink("?action=view&type=XferLOGbad&host=${EscURI($host)}",
-                                $Lang->{Last_bad_XferLOG});
-            NavLink("?action=view&type=XferErrbad&host=${EscURI($host)}",
-                                $Lang->{Last_bad_XferLOG_errors_only});
-        }
-        if ( -f "$TopDir/pc/$host/config.pl" ) {
-            NavLink("?action=view&type=config&host=${EscURI($host)}", $Lang->{Config_file});
-        }
-        NavSectionEnd();
+    if (!defined($In{host})) {
+        print <<EOF;
+<div id="Content">
+$content
+<br><br><br>
+</div>
+<div class="NavMenu" id="NavMenu" style="height:100%">
+EOF
+    } else {
+        print "<div class=\"NavMenu\">";
     }
+    NavSectionTitle($Lang->{Hosts});
+    my $hostSelectbox = "<option value=\"#\">Select a host...</option>";
+    my @hosts;
+    if ( defined($Hosts) && %$Hosts > 0 ) {
+        @hosts = GetUserHosts($In{host});
+        foreach my $host ( @hosts ) {
+            if ($In{host} eq $host) {
+                print <<EOF;
+</div>
+<div class="HostOn"> <a href="?host=${EscURI($host)}">$host</a> <br>
+<div class="HostOnContent">
+EOF
+                NavLink("?host=${EscURI($host)}",
+                        "$host $Lang->{Home}", " class=\"navbar\"");
+                NavLink("?action=browse&host=${EscURI($host)}",
+                        "Browse backups", " class=\"navbar\"");
+                NavLink("?action=view&type=LOG&host=${EscURI($host)}",
+                        $Lang->{LOG_file}, " class=\"navbar\"");
+                NavLink("?action=LOGlist&host=${EscURI($host)}",
+                        $Lang->{LOG_files}, " class=\"navbar\"");
+                if ( -f "$TopDir/pc/$host/SmbLOG.bad"
+                            || -f "$TopDir/pc/$host/SmbLOG.bad.z"
+                            || -f "$TopDir/pc/$host/XferLOG.bad"
+                            || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
+                   NavLink("?action=view&type=XferLOGbad&host=${EscURI($host)}",
+                            $Lang->{Last_bad_XferLOG}, " class=\"navbar\"");
+                   NavLink("?action=view&type=XferErrbad&host=${EscURI($host)}",
+                            $Lang->{Last_bad_XferLOG_errors_only},
+                            " class=\"navbar\"");
+                }
+                if ( -f "$TopDir/pc/$host/config.pl" ) {
+                    NavLink("?action=view&type=config&host=${EscURI($host)}",
+                            $Lang->{Config_file}, " class=\"navbar\"");
+                }
+                print <<EOF;
+</div></div>
+<div id="Content">
+$content
+<br><br><br>
+</div>
+<div class="NavMenu" style="height:100%" id="NavMenu">
+EOF
+            } else {
+                NavLink("?host=${EscURI($host)}", $host) if ( @hosts < 6 );
+                $hostSelectbox .= "<option value=\"?host=${EscURI($host)}\">"
+                                . "$host</option>";
+            }
+        }
+    }
+    if ( @hosts >= 6 ) {
+        print <<EOF;
+<br>
+<select onChange="document.location=this.value">
+$hostSelectbox
+</select>
+<br><br>
+EOF
+    }
+    NavSectionTitle($Lang->{Host_or_User_name});
+    print <<EOF;
+<form action="$MyURL" method="get">
+    <input type="text" name="host" size="10" maxlength="64">
+    <input type="hidden" name="action" value="hostInfo"><input type="submit" value="$Lang->{Go}" name="ignore">
+    </form>
+EOF
     NavSectionTitle($Lang->{NavSectionTitle_});
-    NavSectionStart();
     foreach my $l ( @adminLinks ) {
         if ( $PrivAdmin || $l->{priv} ) {
             NavLink($l->{link}, $l->{name});
-        } else {
-            NavLink(undef, $l->{name});
-        }
     }
-    NavSectionEnd();
-    NavSectionTitle($Lang->{Hosts});
-    print <<EOF;
-<table cellpadding="2" cellspacing="0" border="0" width="100%">
-    <tr><td>$Lang->{Host_or_User_name}</td>
-    <tr><td><form action="$MyURL" method="get"><small>
-    <input type="text" name="host" size="10" maxlength="64">
-    <input type="hidden" name="action" value="hostInfo"><input type="submit" value="$Lang->{Go}" name="ignore">
-    </small></form></td></tr>
-</table>
-EOF
-    if ( defined($Hosts) && %$Hosts > 0 ) {
-        NavSectionStart(1);
-        foreach my $host ( GetUserHosts() ) {
-            NavLink("?host=${EscURI($host)}", $host);
-        }
-        NavSectionEnd();
-    }
-    print <<EOF;
-</td><td valign="top" width="5">&nbsp;&nbsp;</td>
-<td valign="top" width="90%">
+}
+
+print <<EOF;
+<br><br><br>
+</div>
 EOF
 }
 
 sub Trailer
 {
     print <<EOF;
-</td></table>
 </body></html>
 EOF
 }
@@ -478,41 +522,35 @@ sub NavSectionTitle
 {
     my($head) = @_;
     print <<EOF;
-<table cellpadding="2" cellspacing="0" border="0" width="100%">
-<tr><td bgcolor="$Conf{CgiHeaderBgColor}"><font face="$Conf{CgiHeaderFontType}"
-size="$Conf{CgiHeaderFontSize}"><b>$head</b>
-</font></td></tr>
-</table>
+<div class="NavTitle">
+$head
+</div>
 EOF
 }
 
 sub NavSectionStart
 {
-    my($padding) = @_;
-
-    $padding = 1 if ( !defined($padding) );
-    print <<EOF;
-<table cellpadding="$padding" cellspacing="0" border="0" width="100%">
-EOF
 }
 
 sub NavSectionEnd
 {
-    print "</table>\n";
 }
 
 sub NavLink
 {
     my($link, $text) = @_;
-    print "<tr><td width=\"2%\" valign=\"top\"><b>&middot;</b></td>";
     if ( defined($link) ) {
+        my($class);
+        $class = " class=\"NavCurrent\""
+                if ( length($link) && $ENV{REQUEST_URI} =~ /\Q$link\E$/
+                    || $link eq "" && $ENV{REQUEST_URI} !~ /\?/ );
         $link = "$MyURL$link" if ( $link eq "" || $link =~ /^\?/ );
         print <<EOF;
-<td width="98%"><a href="$link"><small>$text</small></a></td></tr>
+<a href="$link"$class>$text</a>
 EOF
     } else {
         print <<EOF;
-<td width="98%"><small>$text</small></td></tr>
+$text<br>
 EOF
     }
 }
@@ -521,12 +559,7 @@ sub h1
 {
     my($str) = @_;
     return \<<EOF;
-<table cellpadding="2" cellspacing="0" border="0" width="100%">
-<tr>
-<td bgcolor="$Conf{CgiHeaderBgColor}">&nbsp;<font face="$Conf{CgiHeaderFontType}"
-    size="$Conf{CgiHeaderFontSize}"><b>$str</b></font>
-</td></tr>
-</table>
+<div class="h1">$str</div>
 EOF
 }
 
@@ -534,11 +567,6 @@ sub h2
 {
     my($str) = @_;
     return \<<EOF;
-<table cellpadding="2" cellspacing="0" border="0" width="100%">
-<tr>
-<td bgcolor="$Conf{CgiHeaderBgColor}">&nbsp;<font face="$Conf{CgiHeaderFontType}"
-    size="$Conf{CgiHeaderFontSize}"><b>$str</b></font>
-</td></tr>
-</table>
+<div class="h2">$str</div>
 EOF
 }

@@ -161,6 +161,16 @@ $Conf{DfPath} = '/bin/df';
 $Conf{DfCmd} = '$dfPath $topDir';
 
 #
+# Full path to various commands for archiving
+#
+
+$Conf{SplitPath} = '/usr/bin/split';
+$Conf{ParPath}   = '/usr/bin/par';
+$Conf{CatPath}   = '/bin/cat';
+$Conf{GzipPath}  = '/bin/gzip';
+$Conf{Bzip2Path} = '/usr/bin/bzip2';
+
+#
 # Maximum threshold for disk utilization on the __TOPDIR__ filesystem.
 # If the output from $Conf{DfPath} reports a percentage larger than
 # this number then no new regularly scheduled backups will be run.
@@ -421,6 +431,13 @@ $Conf{IncrFill} = 0;
 # are written to the host) count as restores that are logged.
 #
 $Conf{RestoreInfoKeepCnt} = 10;
+
+#
+# Number of archive logs to keep.  BackupPC remembers information about
+# each archive request.  This number per archive client will be kept around before
+# the oldest ones are pruned.
+#
+$Conf{ArchiveInfoKeepCnt} = 10;
 
 #
 # List of directories or files to backup.  If this is defined, only these
@@ -856,6 +873,69 @@ $Conf{RsyncRestoreArgs} = [
 $Conf{RsyncLogLevel} = 1;
 
 #
+# Archive Destination
+#
+# The Destination of the archive
+# e.g. /tmp for file archive or /dev/nst0 for device archive
+#
+$Conf{ArchiveDest} = '/tmp';
+
+#
+# Archive Compression type
+#
+# The valid values are:
+#
+#   - 'none':  No Compression
+#
+#   - 'gzip':  Medium Compression. Recommended.
+#
+#   - 'bzip2': High Compression but takes longer.
+#
+$Conf{ArchiveComp} = 'gzip';
+
+#
+# Archive Parity Files
+#
+# The number of Parity Files to generate.
+# Uses the commandline par available from
+# http://parchive.sourceforge.net
+#
+# Only useful for file dumps.
+#
+# Set to 0 to disable this feature.
+#
+$Conf{ArchivePar} = 0;
+
+#
+# Archive Size Split
+#
+# Only for file archives. Splits the output into 
+# the specified size * 1,000,000.
+# e.g. to split into 650,000,000 bytes, specify 650 below.
+#
+$Conf{ArchiveSplit} = 650;
+
+#
+# Archive Command
+#
+# This is the command that is called to actually run the archive process
+#  The following variables are substituted at run-time:
+#
+#   $Installdir    The installation directory of BackupPC
+#   $tarCreatePath The path to BackupPC_tarCreate
+#   $splitpath     The path to the split program
+#   $parpath       The path to the par program
+#   $host          The host to archive
+#   $backupnumber  The backup number of the host to archive
+#   $compression   The path to the compression program
+#   $compext       The extension assigned to the compression type
+#   $splitsize     The number of bytes to split archives into
+#   $archiveloc    The location to put the archive
+#   $parfile       The number of par files to create
+#
+$Conf{ArchiveClientCmd} = '$Installdir/bin/BackupPC_archivecd $tarCreatePath $splitpath $parpath $host $backupnumber $compression $compext $splitsize $archiveloc $parfile /';
+
+#
 # Full path for ssh. Security caution: normal users should not
 # allowed to write to this file or directory.
 #
@@ -941,6 +1021,25 @@ $Conf{PingPath} = '/bin/ping';
 # gets the correct exit status but we don't get the round-trip time.
 #
 $Conf{PingCmd} = '$pingPath -c 1 $host';
+
+#
+# Path to init.d script and command to use that script to start the
+# server from the CGI interface.  The following variables are substituted
+# at run-time:
+#
+#   $sshPath           path to ssh ($Conf{SshPath})
+#   $serverHost        same as $Conf{ServerHost}
+#   $serverInitdPath   path to init.d script ($Conf{ServerInitdPath})
+#
+# Example:
+#
+# $Conf{ServerInitdPath}     = '/etc/init.d/backuppc';
+# $Conf{ServerInitdStartCmd} = '$sshPath -l root $serverHost'
+#                            . ' $serverInitdPath start'
+#                            . ' < /dev/null >& /dev/null';
+#
+$Conf{ServerInitdPath} = '';
+$Conf{ServerInitdStartCmd} = '';
 
 #
 # Compression level to use on files.  0 means no compression.  Compression
@@ -1059,10 +1158,31 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #        $pathHdrDest  common starting path of destination
 #        $fileList     list of files being restored
 #
+# The following variable substitutions are made at run time for
+# $Conf{ArchivePreUserCmd} and $Conf{ArchivePostUserCmd}:
+#
+#        $client       client name being backed up
+#        $xferOK       1 if the archive succeeded, 0 if it didn't
+#        $host         Name of the archive host
+#        $user         user name from the hosts file
+#        $share        the first share name
+#        $XferMethod   value of $Conf{XferMethod} (eg: tar, rsync, smb)
+#        $HostList     list of hosts being archived
+#        $BackupList   list of backup numbers for the hosts being archived
+#        $archiveloc   location where the archive is sent to
+#        $parfile      number of par files being generated
+#        $compression  compression program being used (eg: cat, gzip, bzip2)
+#        $compext      extension used for compression type (eg: raw, gz, bz2)
+#        $splitsize    size of the files that the archive creates
+#        $sshPath      value of $Conf{SshPath},
+#        $type         set to "archive"
+#
 $Conf{DumpPreUserCmd}     = undef;
 $Conf{DumpPostUserCmd}    = undef;
 $Conf{RestorePreUserCmd}  = undef;
 $Conf{RestorePostUserCmd} = undef;
+$Conf{ArchivePreUserCmd}  = undef;
+$Conf{ArchivePostUserCmd} = undef;
 
 #
 # Override the client's host name.  This allows multiple clients
@@ -1299,20 +1419,9 @@ $Conf{CgiDateFormatMMDD} = 1;
 $Conf{CgiNavBarAdminAllHosts} = 0;
 
 #
-# Header font and size for CGI interface
+# Color scheme for CGI interface.
 #
-$Conf{CgiHeaderFontType} = 'arial';
-$Conf{CgiHeaderFontSize} = '3';
-
-#
-# Color scheme for CGI interface.  Default values give a very light blue
-# for the background navigation color, green for the header background,
-# and white for the body background.  (You call tell I should stick to
-# programming and not graphical design.)
-#
-$Conf{CgiNavBarBgColor} = '#ddeeee';
 $Conf{CgiHeaderBgColor} = '#99cc33';
-$Conf{CgiBodyBgColor}   = '#ffffff';
 
 #
 # Hilight colors based on status that are used in the PC summary page.
@@ -1363,3 +1472,179 @@ $Conf{CgiExt2ContentType} = { };
 #     $Conf{CgiImageDirURL} = '/BackupPC';
 #
 $Conf{CgiImageDirURL} = '';
+
+#
+# CSS stylesheet for the CGI interface.
+#
+$Conf{CSSstylesheet} = <<'EOF';
+<style type="text/css">
+body {
+    font-family:arial,sans-serif;
+    font-size:1em;
+    background-color:#ffffff;
+    margin:2px 5px 0px 2px;
+    height:100%
+}
+
+h1 {
+    font-family:arial,sans-serif;
+    font-size:1.5em;
+    color:#000000
+}
+
+h2 {
+    font-family:arial,sans-serif;
+    font-size:1em;
+    color:#000000
+}
+        
+p {
+    font-family:arial,sans-serif;
+    font-size:.8em
+}
+        
+a {
+    font-family:arial,sans-serif;
+    font-size:1em;
+    color:#3333ff
+}
+        
+a:hover {
+    color:#cc0000;
+    text-decoration:none
+}
+        
+a.NavCurrent {
+    font-weight:bold;
+    padding-left:5px;
+    padding-right:5px;
+}
+        
+a.navbar {
+    padding-left:5px;
+    padding-right:5px;
+}
+
+.h1 {
+    font-family:arial,sans-serif;
+    font-size:1.5em;
+    color:#000000;
+    font-weight:bold;
+    background-color:#99cc33;
+    padding:3px;
+    padding-left:10px
+}
+        
+.h2 {
+    font-family:arial,sans-serif;
+    font-size:1em;
+    color:#000000;
+    font-weight:bold;
+    background-color:#ddeeee;
+    padding:3px;
+    padding-left:10px
+}
+    
+.border {
+    border-bottom:1px solid #000000;
+    border-left:1px dotted #666666
+}
+
+.tableheader {
+    font-weight:bold;
+    background-color:#cccccc
+}
+    
+.fviewheader {
+    font-weight:bold;
+    color:#ffffff;
+    background-color:#999999
+}
+    
+.fviewborder {
+    border-bottom:1px solid #000000;
+    border-left:1px dotted #666666;
+    background-color:#dddddd
+}
+    
+.fviewon {
+    background-color:#cccccc
+}
+
+.fviewoff {
+    background-color:#ffffff
+}
+
+.fview {
+    font-size:13px;
+    font-family:arial,sans-serif;
+    text-decoration:none;
+    line-height:15px
+}
+
+.fviewbold {
+    font-size:13px;
+    font-family:arial,sans-serif;
+    text-decoration:none;
+    line-height:15px;
+    font-weight:bold
+}
+
+.histView {
+    border-bottom:1px solid #000000;
+    border-left:2px solid #ffffff;
+    background-color:#dddddd
+}
+    
+.histViewMis {
+    border-bottom:1px solid #000000;
+    background-color:#ffdddd
+}
+    
+div.NavMenu {
+    width:18%;
+    margin:0px;
+    background-color:#ddeeee;
+}
+             
+div.NavMenu a {
+    font-size:.8em;
+    display:block;
+    margin-left:8px;
+    padding:3px;
+}
+             
+div.NavTitle {
+    padding-left:10px;
+    background-color:#99cc33;
+    font-family:arial,sans-serif;
+    color:#000000;
+    font-weight:bold
+}
+             
+div.HostOn {
+    width:18%;
+    background-color:#ddeeee;
+    padding:3px;
+    padding-left:10px;
+}
+
+div.HostOnContent {
+    background-color:#ddeeee;
+    padding:5px;
+}
+
+div.HostOnContent a {
+    font-size:.8em;
+    display:block;
+}
+
+#Content {
+    float:right;
+    width:80%;
+    left:20%;
+    top:10px;
+    position:absolute;
+}
+</style>
+EOF

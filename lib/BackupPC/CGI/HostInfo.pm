@@ -76,6 +76,50 @@ sub action
     }
     ReadUserEmailInfo();
 
+    if ($Conf{XferMethod} eq "archive" ) {
+        my @Archives = $bpc->ArchiveInfoRead($host);
+        my ($ArchiveStr,$warnStr);
+
+        for ( my $i = 0 ; $i < @Archives ; $i++ ) {
+            my $startTime = timeStamp2($Archives[$i]{startTime});
+            my $dur       = $Archives[$i]{endTime} - $Archives[$i]{startTime};
+            $dur          = 1 if ( $dur <= 0 );
+            my $duration  = sprintf("%.1f", $dur / 60);
+            my $Archives_Result = $Lang->{failed};
+            if ($Archives[$i]{result} ne "failed") { $Archives_Result = $Lang->{success}; }
+            $ArchiveStr  .= <<EOF;
+<tr><td align="center"><a href="$MyURL?action=archiveInfo&num=$Archives[$i]{num}&host=${EscURI($host)}">$Archives[$i]{num}</a> </td>
+    <td align="center"> $Archives_Result </td>
+    <td align="right"> $startTime </td>
+    <td align="right"> $duration </td>
+</tr>
+EOF
+        }
+        if ( $ArchiveStr ne "" ) {
+            $ArchiveStr = eval("qq{$Lang->{Archive_Summary}}");
+        }
+        if ( @Archives == 0 ) {
+            $warnStr = $Lang->{There_have_been_no_archives};
+        }
+        if ( $StatusHost{BgQueueOn} ) {
+            $statusStr .= eval("qq{$Lang->{Host_host_is_queued_on_the_background_queue_will_be_backed_up_soon}}");
+        }
+        if ( $StatusHost{UserQueueOn} ) {
+            $statusStr .= eval("qq{$Lang->{Host_host_is_queued_on_the_user_queue__will_be_backed_up_soon}}");
+        }
+        if ( $StatusHost{CmdQueueOn} ) {
+            $statusStr .= eval("qq{$Lang->{A_command_for_host_is_on_the_command_queue_will_run_soon}}");
+        }
+
+        my $content = eval("qq{$Lang->{Host__host_Archive_Summary2}}");
+        Header(eval("qq{$Lang->{Host__host_Archive_Summary}}"), $content);
+        Trailer();
+        return;
+    }
+
+    #
+    # Normal, non-archive case
+    #
     my @Backups = $bpc->BackupInfoRead($host);
     my($str, $sizeStr, $compStr, $errStr, $warnStr);
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
@@ -105,52 +149,52 @@ sub action
         my $filled = $Backups[$i]{noFill} ? $Lang->{No} : $Lang->{Yes};
         $filled .= " ($Backups[$i]{fillFromNum}) "
                             if ( $Backups[$i]{fillFromNum} ne "" );
-	my $ltype = $Lang->{"backupType_$Backups[$i]{type}"};
+        my $ltype = $Lang->{"backupType_$Backups[$i]{type}"};
         $str .= <<EOF;
-<tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
-    <td align="center"> $ltype </td>
-    <td align="center"> $filled </td>
-    <td align="right">  $startTime </td>
-    <td align="right">  $duration </td>
-    <td align="right">  $age </td>
-    <td align="left">   <tt>$TopDir/pc/$host/$Backups[$i]{num}</tt> </td></tr>
+<tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
+    <td align="center" class="border"> $ltype </td>
+    <td align="center" class="border"> $filled </td>
+    <td align="right" class="border">  $startTime </td>
+    <td align="right" class="border">  $duration </td>
+    <td align="right" class="border">  $age </td>
+    <td align="left" class="border">   <tt>$TopDir/pc/$host/$Backups[$i]{num}</tt> </td></tr>
 EOF
         $sizeStr .= <<EOF;
-<tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
-    <td align="center"> $ltype </td>
-    <td align="right">  $Backups[$i]{nFiles} </td>
-    <td align="right">  $MB </td>
-    <td align="right">  $MBperSec </td>
-    <td align="right">  $Backups[$i]{nFilesExist} </td>
-    <td align="right">  $MBExist </td>
-    <td align="right">  $Backups[$i]{nFilesNew} </td>
-    <td align="right">  $MBNew </td>
+<tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
+    <td align="center" class="border"> $ltype </td>
+    <td align="right" class="border">  $Backups[$i]{nFiles} </td>
+    <td align="right" class="border">  $MB </td>
+    <td align="right" class="border">  $MBperSec </td>
+    <td align="right" class="border">  $Backups[$i]{nFilesExist} </td>
+    <td align="right" class="border">  $MBExist </td>
+    <td align="right" class="border">  $Backups[$i]{nFilesNew} </td>
+    <td align="right" class="border">  $MBNew </td>
 </tr>
 EOF
-	my $is_compress = $Backups[$i]{compress} || $Lang->{off};
-	if (! $ExistComp) { $ExistComp = "&nbsp;"; }
-	if (! $MBExistComp) { $MBExistComp = "&nbsp;"; }
+        my $is_compress = $Backups[$i]{compress} || $Lang->{off};
+        if (! $ExistComp) { $ExistComp = "&nbsp;"; }
+        if (! $MBExistComp) { $MBExistComp = "&nbsp;"; }
         $compStr .= <<EOF;
-<tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
-    <td align="center"> $ltype </td>
-    <td align="center"> $is_compress </td> 
-    <td align="right">  $MBExist </td>
-    <td align="right">  $MBExistComp </td> 
-    <td align="right">  $ExistComp </td>   
-    <td align="right">  $MBNew </td>
-    <td align="right">  $MBNewComp </td>
-    <td align="right">  $NewComp </td>
+<tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
+    <td align="center" class="border"> $ltype </td>
+    <td align="center" class="border"> $is_compress </td>
+    <td align="right" class="border">  $MBExist </td>
+    <td align="right" class="border">  $MBExistComp </td>
+    <td align="right" class="border">  $ExistComp </td>
+    <td align="right" class="border">  $MBNew </td>
+    <td align="right" class="border">  $MBNewComp </td>
+    <td align="right" class="border">  $NewComp </td>
 </tr>
 EOF
         $errStr .= <<EOF;
-<tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
-    <td align="center"> $ltype </td>
-    <td align="center"> <a href="$MyURL?action=view&type=XferLOG&num=$Backups[$i]{num}&host=${EscURI($host)}">$Lang->{XferLOG}</a>,
+<tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
+    <td align="center" class="border"> $ltype </td>
+    <td align="center" class="border"> <a href="$MyURL?action=view&type=XferLOG&num=$Backups[$i]{num}&host=${EscURI($host)}">$Lang->{XferLOG}</a>,
                       <a href="$MyURL?action=view&type=XferErr&num=$Backups[$i]{num}&host=${EscURI($host)}">$Lang->{Errors}</a> </td>
-    <td align="right">  $Backups[$i]{xferErrs} </td>
-    <td align="right">  $Backups[$i]{xferBadFile} </td>
-    <td align="right">  $Backups[$i]{xferBadShare} </td>
-    <td align="right">  $Backups[$i]{tarErrs} </td></tr>
+    <td align="right" class="border">  $Backups[$i]{xferErrs} </td>
+    <td align="right" class="border">  $Backups[$i]{xferBadFile} </td>
+    <td align="right" class="border">  $Backups[$i]{xferBadShare} </td>
+    <td align="right" class="border">  $Backups[$i]{tarErrs} </td></tr>
 EOF
     }
 
@@ -164,39 +208,39 @@ EOF
         my $duration  = sprintf("%.1f", $dur / 60);
         my $MB        = sprintf("%.1f", $Restores[$i]{size} / (1024*1024));
         my $MBperSec  = sprintf("%.2f", $Restores[$i]{size} / (1024*1024*$dur));
-	my $Restores_Result = $Lang->{failed};
-	if ($Restores[$i]{result} ne "failed") { $Restores_Result = $Lang->{success}; }
-	$restoreStr  .= <<EOF;
-<tr><td align="center"><a href="$MyURL?action=restoreInfo&num=$Restores[$i]{num}&host=${EscURI($host)}">$Restores[$i]{num}</a> </td>
-    <td align="center"> $Restores_Result </td>
-    <td align="right"> $startTime </td>
-    <td align="right"> $duration </td>
-    <td align="right"> $Restores[$i]{nFiles} </td>
-    <td align="right"> $MB </td>
-    <td align="right"> $Restores[$i]{tarCreateErrs} </td>
-    <td align="right"> $Restores[$i]{xferErrs} </td>
+        my $Restores_Result = $Lang->{failed};
+        if ($Restores[$i]{result} ne "failed") { $Restores_Result = $Lang->{success}; }
+        $restoreStr  .= <<EOF;
+<tr><td align="center" class="border"><a href="$MyURL?action=restoreInfo&num=$Restores[$i]{num}&host=${EscURI($host)}">$Restores[$i]{num}</a> </td>
+    <td align="center" class="border"> $Restores_Result </td>
+    <td align="right" class="border"> $startTime </td>
+    <td align="right" class="border"> $duration </td>
+    <td align="right" class="border"> $Restores[$i]{nFiles} </td>
+    <td align="right" class="border"> $MB </td>
+    <td align="right" class="border"> $Restores[$i]{tarCreateErrs} </td>
+    <td align="right" class="border"> $Restores[$i]{xferErrs} </td>
 </tr>
 EOF
     }
     if ( $restoreStr ne "" ) {
-	$restoreStr = eval("qq{$Lang->{Restore_Summary}}");
+        $restoreStr = eval("qq{$Lang->{Restore_Summary}}");
     }
     if ( @Backups == 0 ) {
         $warnStr = $Lang->{This_PC_has_never_been_backed_up};
     }
     if ( defined($Hosts->{$host}) ) {
         my $user = $Hosts->{$host}{user};
-	my @moreUsers = sort(keys(%{$Hosts->{$host}{moreUsers}}));
-	my $moreUserStr;
-	foreach my $u ( sort(keys(%{$Hosts->{$host}{moreUsers}})) ) {
-	    $moreUserStr .= ", " if ( $moreUserStr ne "" );
-	    $moreUserStr .= "${UserLink($u)}";
-	}
-	if ( $moreUserStr ne "" ) {
-	    $moreUserStr = " ($Lang->{and} $moreUserStr).\n";
-	} else {
-	    $moreUserStr = ".\n";
-	}
+        my @moreUsers = sort(keys(%{$Hosts->{$host}{moreUsers}}));
+        my $moreUserStr;
+        foreach my $u ( sort(keys(%{$Hosts->{$host}{moreUsers}})) ) {
+            $moreUserStr .= ", " if ( $moreUserStr ne "" );
+            $moreUserStr .= "${UserLink($u)}";
+        }
+        if ( $moreUserStr ne "" ) {
+            $moreUserStr = " ($Lang->{and} $moreUserStr).\n";
+        } else {
+            $moreUserStr = ".\n";
+        }
         if ( $user ne "" ) {
             $statusStr .= eval("qq{$Lang->{This_PC_is_used_by}$moreUserStr}");
         }
@@ -230,8 +274,8 @@ EOF
     $statusStr .= eval("qq{$Lang->{Last_status_is_state_StatusHost_state_reason_as_of_startTime}}");
 
     if ( $StatusHost{state} ne "Status_backup_in_progress"
-	    && $StatusHost{state} ne "Status_restore_in_progress"
-	    && $StatusHost{error} ne "" ) {
+            && $StatusHost{state} ne "Status_restore_in_progress"
+            && $StatusHost{error} ne "" ) {
         $statusStr .= eval("qq{$Lang->{Last_error_is____EscHTML_StatusHost_error}}");
     }
     my $priorStr = "Pings";
@@ -243,8 +287,8 @@ EOF
         $statusStr .= eval("qq{$Lang->{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times}}");
 
         if ( $StatusHost{aliveCnt} >= $Conf{BlackoutGoodCnt}
-		&& $Conf{BlackoutGoodCnt} >= 0 && $Conf{BlackoutHourBegin} >= 0
-		&& $Conf{BlackoutHourEnd} >= 0 ) {
+                && $Conf{BlackoutGoodCnt} >= 0 && $Conf{BlackoutHourBegin} >= 0
+                && $Conf{BlackoutHourEnd} >= 0 ) {
             my(@days) = qw(Sun Mon Tue Wed Thu Fri Sat);
             my($days) = join(", ", @days[@{$Conf{BlackoutWeekDays}}]);
             my($t0) = sprintf("%d:%02d", $Conf{BlackoutHourBegin},
@@ -269,9 +313,8 @@ EOF
     }
 
     $startIncrStr = eval ("qq{$startIncrStr}");
-
-    Header(eval("qq{$Lang->{Host__host_Backup_Summary}}"));
-    print(eval("qq{$Lang->{Host__host_Backup_Summary2}}"));
+    my $content = eval("qq{$Lang->{Host__host_Backup_Summary2}}");
+    Header(eval("qq{$Lang->{Host__host_Backup_Summary}}"), $content);
     Trailer();
 }
 

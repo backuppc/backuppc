@@ -1,0 +1,375 @@
+#!/bin/perl -T
+#============================================================= -*-perl-*-
+#
+# BackupPC_archive: Archive files for an archive client.
+#
+# DESCRIPTION
+#
+#   Usage: BackupPC_archive <user> <archiveclient> <reqFileName>
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001-2003  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 2.1.0_CVS, released 3 Jul 2003.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+no  utf8;
+use lib "/usr/local/BackupPC/lib";
+use BackupPC::Lib;
+use BackupPC::FileZIO;
+use BackupPC::Xfer::Archive;
+
+use vars qw( %ArchiveReq );
+
+###########################################################################
+# Initialize
+###########################################################################
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+my $NeedPostCmd;
+
+my($user, $host, $client, $reqFileName, %stat);
+
+$bpc->ChildInit();
+
+if ( @ARGV != 3 ) {
+    print("usage: $0 <user> <archiveclient> <reqFileName>\n");
+    exit(1);
+}
+$user = $1 if ( $ARGV[0] =~ /(.+)/ );
+$client = $1 if ( $ARGV[1] =~ /(.+)/ );
+if ( $ARGV[2] !~ /^([\w.]+)$/ ) {
+    print("$0: bad reqFileName (arg #3): $ARGV[2]\n");
+    exit(1);
+}
+$reqFileName = $1;
+
+my $startTime = time();
+
+#my $Hosts = $bpc->HostInfoRead($client);
+
+my $Dir     = "$TopDir/pc/$client";
+my @xferPid = ();
+
+#
+# Catch various signals
+#
+$SIG{INT}  = \&catch_signal;
+$SIG{ALRM} = \&catch_signal;
+$SIG{TERM} = \&catch_signal;
+$SIG{PIPE} = \&catch_signal;
+$SIG{STOP} = \&catch_signal;
+$SIG{TSTP} = \&catch_signal;
+$SIG{TTIN} = \&catch_signal;
+my $Pid = $$;
+
+mkpath($Dir, 0, 0777) if ( !-d $Dir );
+if ( !-f "$Dir/LOCK" ) {
+    open(LOCK, ">", "$Dir/LOCK") && close(LOCK);
+}
+open(LOG, ">>", "$Dir/LOG");
+select(LOG); $| = 1; select(STDOUT);
+
+
+#
+# Read the request file
+#
+
+if ( !(my $ret = do "$Dir/$reqFileName") ) {
+    my $err;
+    if ( $@ ) {
+        $err = "couldn't parse $Dir/$reqFileName: $@";
+    } elsif ( !defined($ret) ) {
+	$err = "couldn't do $Dir/$reqFileName: $!";
+    } else {
+	$err = "couldn't run $Dir/$reqFileName";
+    }
+    $stat{hostError} = $err;
+    exit(ArchiveCleanup($client));
+}
+#
+# Re-read config file, so we can include the PC-specific config
+#
+if ( defined(my $error = $bpc->ConfigRead($client)) ) {
+    $stat{hostError} = "Can't read PC's config file: $error";
+    exit(ArchiveCleanup($client));
+}
+%Conf = $bpc->Conf();
+
+#
+# Make sure we eventually timeout if there is no activity from
+# the data transport program.
+#
+alarm($Conf{ClientTimeout});
+
+#
+# See if the host name is aliased
+#
+if ( $Conf{ClientNameAlias} ne "" ) {
+    $host = $Conf{ClientNameAlias};
+} else {
+    $host = $client;
+}
+
+#
+# Setup file extension for compression and open ArchiveLOG output file
+#
+$Conf{CompressLevel} = 0 if ( !BackupPC::FileZIO->compOk );
+my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
+my $ArchiveLOG = BackupPC::FileZIO->open("$Dir/ArchiveLOG$fileExt", 1,
+                                     $Conf{CompressLevel});
+my($logMsg, $xfer);
+
+$stat{xferOK} = 1;
+$stat{hostAbort} = undef;
+$stat{hostError} = $stat{lastOutputLine} = undef;
+local(*RH, *WH);
+
+#
+# Run an optional pre-archive command
+#
+UserCommandRun("ArchivePreUserCmd");
+$NeedPostCmd = 1;
+
+$xfer = BackupPC::Xfer::Archive->new($bpc);
+
+#
+# Run the transport program
+#
+
+my $xferArgs = {
+    client       => $client,
+    host         => $host,
+    user         => $ArchiveReq{user},
+    type         => "archive",
+    XferLOG      => $ArchiveLOG,
+    XferMethod   => $Conf{XferMethod},
+    pathHdrSrc   => $ArchiveReq{pathHdrSrc},
+    pathHdrDest  => $ArchiveReq{pathHdrDest},
+    HostList     => \@{$ArchiveReq{HostList}},
+    BackupList   => \@{$ArchiveReq{BackupList}},
+    archiveloc   => $ArchiveReq{archiveloc},
+    parfile      => $ArchiveReq{parfile},
+    compression  => $ArchiveReq{compression},
+    compext      => $ArchiveReq{compext},
+    splitsize    => $ArchiveReq{splitsize},
+    pidHandler   => \&pidHandler,
+};
+
+$xfer->args($xferArgs);
+
+if ( !defined($logMsg = $xfer->start()) ) {
+    UserCommandRun("ArchivePostUserCmd") if ( $NeedPostCmd );
+    $stat{hostError} = "xfer start failed: ", $xfer->errStr;
+    exit(ArchiveCleanup($client));
+}
+
+print(LOG $bpc->timeStamp, "Starting archive\n");
+$xfer->run();
+alarm(0);
+
+exit(ArchiveCleanup($client));
+
+###########################################################################
+# Subroutines
+###########################################################################
+
+sub catch_signal
+{
+    my $signame = shift;
+
+    #
+    # Children quit quietly on ALRM
+    #
+    exit(1) if ( $Pid != $$ && $signame eq "ALRM" );
+
+    #
+    # Ignore signals in children
+    #
+    return if ( $Pid != $$ );
+
+    #
+    # Note: needs to be tested for each kind of XferMethod
+    #
+    print(LOG $bpc->timeStamp, "cleaning up after signal $signame\n");
+    $SIG{$signame} = 'IGNORE';
+    $ArchiveLOG->write(\"exiting after signal $signame\n");
+    $stat{xferOK} = 0;
+    if ( $signame eq "INT" ) {
+	$stat{hostError} = "aborted by user (signal=$signame)";
+    } else {
+	$stat{hostError} = "aborted by signal=$signame";
+    }
+    exit(ArchiveCleanup($client));
+}
+
+#
+# Cleanup and update the archive status
+#
+sub ArchiveCleanup
+{
+    my($client) = @_;
+
+    $stat{xferOK} = 0 if ( $stat{hostError} || $stat{hostAbort} );
+
+    if ( !$stat{xferOK} ) {
+	#
+	# kill off the tranfer program, first nicely then forcefully
+	#
+	if ( @xferPid ) {
+	    kill(2, @xferPid);
+	    sleep(1);
+	    kill(9, @xferPid);
+	}
+    }
+
+    my $lastNum  = -1;
+    my @Archives;
+
+    @Archives = $bpc->ArchiveInfoRead($client);
+    for ( my $i = 0 ; $i < @Archives ; $i++ ) {
+	$lastNum = $Archives[$i]{num} if ( $lastNum < $Archives[$i]{num} );
+    }
+    $lastNum++;
+
+    #
+    # Run an optional post-archive command
+    #
+    UserCommandRun("ArchivePostUserCmd") if ( $NeedPostCmd );
+
+    rename("$Dir/ArchiveLOG$fileExt", "$Dir/ArchiveLOG.$lastNum$fileExt");
+    rename("$Dir/$reqFileName", "$Dir/ArchiveInfo.$lastNum");
+    my $endTime = time();
+
+    #
+    # If the archive failed, clean up
+    #
+    if ( !$stat{xferOK} ) {
+	#
+	# wait a short while and see if the system is still alive
+	#
+	$stat{hostError} = $stat{lastOutputLine} if ( $stat{hostError} eq "" );
+	sleep(2);
+	$stat{hostAbort} = 1;
+	$ArchiveLOG->write(\"Archive failed: $stat{hostError}\n")
+					    if ( defined($ArchiveLOG) );
+    }
+
+    $ArchiveLOG->close() if ( defined($ArchiveLOG) );
+
+    #
+    # Add the new archive information to the archive file
+    #
+    @Archives = $bpc->ArchiveInfoRead($client);
+    my $i = @Archives;
+    $Archives[$i]{num}           = $lastNum;
+    $Archives[$i]{startTime}     = $startTime;
+    $Archives[$i]{endTime}       = $endTime;
+    $Archives[$i]{result}        = $stat{xferOK} ? "ok" : "failed";
+    $Archives[$i]{errorMsg}      = $stat{hostError};
+
+    while ( @Archives > $Conf{ArchiveInfoKeepCnt} ) {
+	my $num = $Archives[0]{num};
+	unlink("$Dir/ArchiveLOG.$num.z");
+	unlink("$Dir/ArchiveLOG.$num");
+	unlink("$Dir/ArchiveInfo.$num");
+	shift(@Archives);
+    }
+    $bpc->ArchiveInfoWrite($client, @Archives);
+
+    if ( !$stat{xferOK} ) {
+	print(LOG $bpc->timeStamp, "Archive failed ($stat{hostError})\n");
+	print("archive failed: $stat{hostError}\n");
+	return 1;
+    } else {
+        print(LOG $bpc->timeStamp, "Archive Complete\n");
+	print("Archive Complete\n");
+	return;
+    }
+}
+
+#
+# The Xfer method might tell us from time to time about processes
+# it forks.  We tell BackupPC about this (for status displays) and
+# keep track of the pids in case we cancel the backup
+#
+sub pidHandler
+{
+    @xferPid = @_;
+    @xferPid = grep(/./, @xferPid);
+    return if ( !@xferPid );
+    my @pids = @xferPid;
+    my $str = join(",", @pids);
+    $ArchiveLOG->write(\"Xfer PIDs are now $str\n") if ( defined($ArchiveLOG) );
+    print("xferPids $str\n");
+}
+
+#
+# Run an optional pre- or post-dump command
+#
+sub UserCommandRun
+{
+    my($type) = @_;
+
+    return if ( !defined($Conf{$type}) );
+    my $vars = {
+        xfer         => $xfer,
+        client       => $client,
+        host         => $host,
+        user         => $user,
+        share        => $ArchiveReq{shareDest},
+        XferMethod   => $Conf{XferMethod},
+        HostList     => \@{$ArchiveReq{HostList}},
+        BackupList   => \@{$ArchiveReq{BackupList}},
+        archiveloc   => $ArchiveReq{archiveloc},
+        parfile      => $ArchiveReq{parfile},
+        compression  => $ArchiveReq{compression},
+        compext      => $ArchiveReq{compext},
+        splitsize    => $ArchiveReq{splitsize},
+        sshPath      => $Conf{SshPath},
+        LOG          => *LOG,
+        XferLOG      => $ArchiveLOG,
+        stat         => \%stat,
+        xferOK       => $stat{xferOK} || 0,
+	type	     => $type,
+    };
+    my $cmd = $bpc->cmdVarSubstitute($Conf{$type}, $vars);
+    $ArchiveLOG->write(\"Executing $type: @$cmd\n");
+    #
+    # Run the user's command, dumping the stdout/stderr into the
+    # Xfer log file.  Also supply the optional $vars and %Conf in
+    # case the command is really perl code instead of a shell
+    # command.
+    #
+    $bpc->cmdSystemOrEval($cmd,
+	    sub {
+		$ArchiveLOG->write(\$_[0]);
+	    },
+	    $vars, \%Conf);
+}

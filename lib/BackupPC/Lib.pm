@@ -70,6 +70,9 @@ sub new
                     num startTime endTime result errorMsg nFiles size
                     tarCreateErrs xferErrs
                 )],
+        ArchiveFields => [qw(
+                    num startTime endTime result errorMsg
+                )],
     }, $class;
     $bpc->{BinDir} .= "/bin";
     $bpc->{LibDir} .= "/lib";
@@ -251,6 +254,51 @@ sub RestoreInfoWrite
                         join("\t", @b{@{$bpc->{RestoreFields}}}));
         }
         close(RESTORE_INFO);
+    }
+    close(LOCK);
+}
+
+sub ArchiveInfoRead
+{
+    my($bpc, $host) = @_;
+    local(*ARCHIVE_INFO, *LOCK);
+    my(@Archives);
+
+    flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
+    if ( open(ARCHIVE_INFO, "$bpc->{TopDir}/pc/$host/archives") ) {
+        binmode(ARCHIVE_INFO);
+        while ( <ARCHIVE_INFO> ) {
+            s/[\n\r]+//;
+            next if ( !/^(\d+.*)/ );
+            $_ = $1;
+            @{$Archives[@Archives]}{@{$bpc->{ArchiveFields}}} = split(/\t/);
+        }
+        close(ARCHIVE_INFO);
+    }
+    close(LOCK);
+    return @Archives;
+}
+
+sub ArchiveInfoWrite
+{
+    my($bpc, $host, @Archives) = @_;
+    local(*ARCHIVE_INFO, *LOCK);
+    my($i);
+
+    flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
+    unlink("$bpc->{TopDir}/pc/$host/archives.old")
+                if ( -f "$bpc->{TopDir}/pc/$host/archives.old" );
+    rename("$bpc->{TopDir}/pc/$host/archives",
+           "$bpc->{TopDir}/pc/$host/archives.old")
+                if ( -f "$bpc->{TopDir}/pc/$host/archives" );
+    if ( open(ARCHIVE_INFO, ">$bpc->{TopDir}/pc/$host/archives") ) {
+        binmode(ARCHIVE_INFO);
+        for ( $i = 0 ; $i < @Archives ; $i++ ) {
+            my %b = %{$Archives[$i]};
+            printf(ARCHIVE_INFO "%s\n",
+                        join("\t", @b{@{$bpc->{ArchiveFields}}}));
+        }
+        close(ARCHIVE_INFO);
     }
     close(LOCK);
 }

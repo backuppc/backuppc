@@ -45,7 +45,7 @@ stop() {
     echo -n "Shutting down BackupPC: "
     killproc __INSTALLDIR__/bin/BackupPC
     RETVAL=$?
-    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/backupcpc
+    [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/backuppc
     echo ""
     return $RETVAL
 }	

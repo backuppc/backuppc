@@ -48,15 +48,24 @@ sub action
     GetStatusInfo("hosts");
     my $Privileged = CheckPermission();
 
-    if ( !$Privileged ) {
-        ErrorExit($Lang->{Only_privileged_users_can_view_PC_summaries} );
-    }
-    foreach my $host ( sort(keys(%Status)) ) {
+    foreach my $host ( GetUserHosts() ) { ## give access to users hosts only
+    ## foreach my $host ( sort(keys(%Status)) ) {
         my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite);
 	my($shortErr);
         my @Backups = $bpc->BackupInfoRead($host);
         my $fullCnt = $incrCnt = 0;
         my $fullAge = $incrAge = -1;
+
+        if ( defined(my $error = $bpc->ConfigRead($host)) ) {
+            print("dump failed: Can't read PC's config file: $error\n");
+            exit(1);
+        }
+        %Conf = $bpc->Conf();
+
+        if ($Conf{XferMethod} eq "archive" ) {
+            next;
+        }
+
         for ( my $i = 0 ; $i < @Backups ; $i++ ) {
             if ( $Backups[$i]{type} eq "full" ) {
                 $fullCnt++;
@@ -102,17 +111,17 @@ sub action
 	}
 
         $str = <<EOF;
-<tr$reasonHilite><td> ${HostLink($host)} </td>
-    <td align="center"> ${UserLink(defined($Hosts->{$host})
+<tr$reasonHilite><td class="border"> ${HostLink($host)} </td>
+    <td align="center" class="border"> ${UserLink(defined($Hosts->{$host})
 				    ? $Hosts->{$host}{user} : "")} </td>
-    <td align="center"> $fullCnt </td>
-    <td align="center"> $fullAge </td>
-    <td align="center"> $fullSize </td>
-    <td align="center"> $fullRate </td>
-    <td align="center"> $incrCnt </td>
-    <td align="center"> $incrAge </td>
-    <td align="center"> $Lang->{$Status{$host}{state}} </td>
-    <td> $Lang->{$Status{$host}{reason}}$shortErr </td></tr>
+    <td align="center" class="border"> $fullCnt </td>
+    <td align="center" class="border"> $fullAge </td>
+    <td align="center" class="border"> $fullSize </td>
+    <td align="center" class="border"> $fullRate </td>
+    <td align="center" class="border"> $incrCnt </td>
+    <td align="center" class="border"> $incrAge </td>
+    <td align="center" class="border"> $Lang->{$Status{$host}{state}} </td>
+    <td class="border"> $Lang->{$Status{$host}{reason}}$shortErr </td></tr>
 EOF
         if ( @Backups == 0 ) {
             $hostCntNone++;
@@ -126,9 +135,8 @@ EOF
     $incrSizeTot = sprintf("%.2f", $incrSizeTot / 1000);
     my $now      = timeStamp2(time);
 
-    Header($Lang->{BackupPC__Server_Summary});
-    print eval ("qq{$Lang->{BackupPC_Summary}}");
-
+    my $content = eval ("qq{$Lang->{BackupPC_Summary}}");
+    Header($Lang->{BackupPC__Server_Summary}, $content);
     Trailer();
 }
 

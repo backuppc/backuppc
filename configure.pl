@@ -131,6 +131,11 @@ my %Programs = (
     'ssh/ssh2' => "SshPath",
     sendmail   => "SendmailPath",
     hostname   => "HostnamePath",
+    split      => "SplitPath",
+    par        => "ParPath",
+    cat        => "CatPath",
+    gzip       => "GzipPath",
+    bzip2      => "Bzip2Path",
 );
 
 foreach my $prog ( sort(keys(%Programs)) ) {
@@ -406,6 +411,7 @@ printf("Installing binaries in $Conf{InstallDir}/bin\n");
 foreach my $prog ( qw(BackupPC BackupPC_dump BackupPC_link BackupPC_nightly
         BackupPC_sendEmail BackupPC_tarCreate BackupPC_trashClean
         BackupPC_tarExtract BackupPC_compressPool BackupPC_zcat
+        BackupPC_archive BackupPC_archivecd BackupPC_archivetape 
         BackupPC_restore BackupPC_serverMesg BackupPC_zipCreate ) ) {
     InstallFile("bin/$prog", "$Conf{InstallDir}/bin/$prog", 0555);
 }
@@ -422,6 +428,7 @@ foreach my $lib ( qw(
 	BackupPC/Attrib.pm
         BackupPC/PoolWrite.pm
 	BackupPC/View.pm
+	BackupPC/Xfer/Archive.pm
 	BackupPC/Xfer/Tar.pm
         BackupPC/Xfer/Smb.pm
 	BackupPC/Xfer/Rsync.pm
@@ -431,6 +438,9 @@ foreach my $lib ( qw(
 	BackupPC/Lang/fr.pm
 	BackupPC/Lang/es.pm
         BackupPC/Lang/de.pm
+        BackupPC/CGI/AdminOptions.pm
+	BackupPC/CGI/Archive.pm
+	BackupPC/CGI/ArchiveInfo.pm
 	BackupPC/CGI/Browse.pm
 	BackupPC/CGI/DirHistory.pm
 	BackupPC/CGI/EmailSummary.pm
@@ -439,10 +449,13 @@ foreach my $lib ( qw(
 	BackupPC/CGI/Lib.pm
 	BackupPC/CGI/LOGlist.pm
 	BackupPC/CGI/Queue.pm
+        BackupPC/CGI/ReloadServer.pm
 	BackupPC/CGI/RestoreFile.pm
 	BackupPC/CGI/RestoreInfo.pm
 	BackupPC/CGI/Restore.pm
+        BackupPC/CGI/StartServer.pm
 	BackupPC/CGI/StartStopBackup.pm
+        BackupPC/CGI/StopServer.pm
 	BackupPC/CGI/Summary.pm
 	BackupPC/CGI/View.pm
     ) ) {
@@ -623,7 +636,9 @@ will need to do:
   - BackupPC should be ready to start.  Don't forget to run it
     as user $Conf{BackupPCUser}!  The installation also contains an
     init.d/backuppc script that can be copied to /etc/init.d
-    so that BackupPC can auto-start on boot.  See init.d/README.
+    so that BackupPC can auto-start on boot.  This will also enable
+    administrative users to start the server from the CGI interface.
+    See init.d/README.
 
 Enjoy!
 EOF
@@ -716,8 +731,9 @@ sub ConfigParse
     my($out, @conf, $var);
     my $comment = 1;
     my $allVars = {};
+    my $endLine = undef;
     while ( <C> ) {
-        if ( /^#/ ) {
+        if ( /^#/ && !defined($endLine) ) {
             if ( $comment ) {
                 $out .= $_;
             } else {
@@ -745,7 +761,10 @@ sub ConfigParse
                 $out .= $_;
             }
             $var = $1;
+	    $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<(.*);/ );
+	    $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<'(.*)';/ );
         } else {
+	    $endLine = undef if ( defined($endLine) && /^\Q$endLine[\n\r]*$/ );
             $out .= $_;
         }
     }

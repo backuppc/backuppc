@@ -72,6 +72,11 @@ sub action
     } elsif ( $type eq "RestoreErr" ) {
         $file = "$TopDir/pc/$host/RestoreLOG$ext";
         $comment = $Lang->{Extracting_only_Errors};
+    } elsif ( $type eq "ArchiveLOG" ) {
+        $file = "$TopDir/pc/$host/ArchiveLOG$ext";
+    } elsif ( $type eq "ArchiveErr" ) {
+        $file = "$TopDir/pc/$host/ArchiveLOG$ext";
+        $comment = $Lang->{Extracting_only_Errors};
     } elsif ( $host ne "" && $type eq "config" ) {
         $file = "$TopDir/pc/$host/config.pl";
         $file = "$TopDir/conf/$host.pl"
@@ -81,9 +86,10 @@ sub action
         $file = "$BinDir/../doc/BackupPC.html";
         if ( open(LOG, $file) ) {
 	    binmode(LOG);
-            Header($Lang->{BackupPC__Documentation});
-            print while ( <LOG> );
+            my $content;
+            $content .= $_ while ( <LOG> );
             close(LOG);
+            Header($Lang->{BackupPC__Documentation}, $content);
             Trailer();
         } else {
             ErrorExit(eval("qq{$Lang->{Unable_to_open__file__configuration_problem}}"));
@@ -106,21 +112,21 @@ sub action
         $file .= ".z";
         $compress = 1;
     }
-    Header(eval("qq{$Lang->{Backup_PC__Log_File__file}}")  );
-    print( eval ("qq{$Lang->{Log_File__file__comment}}"));
+    my $content;
+    $content .= eval ("qq{$Lang->{Log_File__file__comment}}");
     if ( defined($fh = BackupPC::FileZIO->open($file, 0, $compress)) ) {
         my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
 
-	print ( eval ("qq{$Lang->{Contents_of_log_file}}"));
+	$content .= ( eval ("qq{$Lang->{Contents_of_log_file}}"));
 
-        print "<pre>";
+        $content .= "<pre>";
         if ( $type eq "XferErr" || $type eq "XferErrbad"
 				|| $type eq "RestoreErr" ) {
 	    my $skipped;
             while ( 1 ) {
                 $_ = $fh->readLine();
                 if ( $_ eq "" ) {
-		    print(eval ("qq{$Lang->{skipped__skipped_lines}}"))
+		    $content .= (eval ("qq{$Lang->{skipped__skipped_lines}}"))
 						    if ( $skipped );
 		    last;
 		}
@@ -144,10 +150,10 @@ sub action
 		    $skipped++;
 		    next;
 		}
-		print(eval("qq{$Lang->{skipped__skipped_lines}}"))
+		$content .= (eval("qq{$Lang->{skipped__skipped_lines}}"))
 						     if ( $skipped );
 		$skipped = 0;
-                print ${EscHTML($_)};
+                $content .= ${EscHTML($_)};
             }
         } elsif ( $linkHosts ) {
             while ( 1 ) {
@@ -156,7 +162,7 @@ sub action
                 my $s = ${EscHTML($_)};
                 $s =~ s/\b([\w-]+)\b/defined($Hosts->{$1})
                                         ? ${HostLink($1)} : $1/eg;
-                print $s;
+                $content .= $s;
             }
         } elsif ( $type eq "config" ) {
             while ( 1 ) {
@@ -167,22 +173,23 @@ sub action
                 s/(SmbShareUserName.*=.*['"]).*(['"])/$1$2/ig;
                 s/(RsyncdPasswd.*=.*['"]).*(['"])/$1$2/ig;
                 s/(ServerMesgSecret.*=.*['"]).*(['"])/$1$2/ig;
-                print ${EscHTML($_)};
+                $content .= ${EscHTML($_)};
             }
         } else {
             while ( 1 ) {
                 $_ = $fh->readLine();
                 last if ( $_ eq "" );
-                print ${EscHTML($_)};
+                $content .= ${EscHTML($_)};
             }
         }
         $fh->close();
     } else {
-	printf( eval("qq{$Lang->{_pre___Can_t_open_log_file__file}}"));
+	$content .= ( eval("qq{$Lang->{_pre___Can_t_open_log_file__file}}"));
     }
-    print <<EOF;
+    $content .= <<EOF;
 </pre>
 EOF
+    Header(eval("qq{$Lang->{Backup_PC__Log_File__file}}"), $content);
     Trailer();
 }
 

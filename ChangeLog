@@ -21,6 +21,19 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Major changes from Ryan Kucera to add style sheets to the CGI
+  interface, allowing easy customization.  Added new icons and
+  BackupPC logo.  Numerous navigation improvements.
+
+* Major addition of Archive feature from Josh Marshall.  Special
+  clients can be configured to be archive targets (eg: tape drives,
+  CD-R).  Any subset of the backup clients can be selected and tar
+  archives are created, optionally compressed and split and written
+  to the output device.  Logs are maintained and are browsable.
+
+* Addition of administration options from Paul Lukins.  Initial
+  page allows server to be started/stopped/reloaded.
+
 * Split BackupPC_Admin into a set of modules, one for each major action.
   Each action is now a seperate module in lib/BackupPC/CGI.
 

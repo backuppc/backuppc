@@ -98,16 +98,23 @@ EOF
     } else {
         my(@HostList, @BackupList, $HostListStr, $hiddenStr, $pathHdr,
            $badFileCnt, $reply, $str);
+
+        #
+        # Pick up the archive host's config file
+        #
+        $bpc->ConfigRead($archHost);
+        %Conf = $bpc->Conf();
+
         my $args = {
-            SplitPath    => $bpc->{Conf}{SplitPath},
-            ParPath      => $bpc->{Conf}{ParPath},
-            CatPath      => $bpc->{Conf}{CatPath},
-            GzipPath     => $bpc->{Conf}{GzipPath},
-            Bzip2Path    => $bpc->{Conf}{Bzip2Path},
-            ArchiveDest  => $bpc->{Conf}{ArchiveDest},
-            ArchiveComp  => $bpc->{Conf}{ArchiveComp},
-            ArchivePar   => $bpc->{Conf}{ArchivePar},
-            ArchiveSplit => $bpc->{Conf}{ArchiveSplit},
+            SplitPath    => $Conf{SplitPath},
+            ParPath      => $Conf{ParPath},
+            CatPath      => $Conf{CatPath},
+            GzipPath     => $Conf{GzipPath},
+            Bzip2Path    => $Conf{Bzip2Path},
+            ArchiveDest  => $Conf{ArchiveDest},
+            ArchiveComp  => $Conf{ArchiveComp},
+            ArchivePar   => $Conf{ArchivePar},
+            ArchiveSplit => $Conf{ArchiveSplit},
             topDir       => $bpc->{TopDir},
         };
 
@@ -136,42 +143,42 @@ EOF
         }
         my ($ArchiveDest, $ArchiveCompNone, $ArchiveCompGzip,
             $ArchiveCompBzip2, $ArchivePar, $ArchiveSplit);
-        $ArchiveDest = $bpc->{Conf}{ArchiveDest};
-        if ( $bpc->{Conf}{ArchiveComp} eq "none" ) {
+        $ArchiveDest = $Conf{ArchiveDest};
+        if ( $Conf{ArchiveComp} eq "none" ) {
             $ArchiveCompNone   = "checked";
         } else {
             $ArchiveCompNone   = "";
         }
-        if ( $bpc->{Conf}{ArchiveComp} eq "gzip" ) {
+        if ( $Conf{ArchiveComp} eq "gzip" ) {
             $ArchiveCompGzip   = "checked";
         } else {
             $ArchiveCompGzip   = "";
         }
-        if ( $bpc->{Conf}{ArchiveComp} eq "bzip2" ) {
+        if ( $Conf{ArchiveComp} eq "bzip2" ) {
             $ArchiveCompBzip2  = "checked";
         } else {
             $ArchiveCompBzip2  = "";
         }
-        $ArchivePar   = $bpc->{Conf}{ArchivePar};
-        $ArchiveSplit = $bpc->{Conf}{ArchiveSplit};
+        $ArchivePar   = $Conf{ArchivePar};
+        $ArchiveSplit = $Conf{ArchiveSplit};
 
         if ( $In{type} == 1 ) {
             #
             # Tell the user what options they have
             #
             my $paramStr = "";
-            if ( $bpc->{Conf}{ArchiveClientCmd} =~ /\$archiveloc\b/ ) {
+            if ( $Conf{ArchiveClientCmd} =~ /\$archiveloc\b/ ) {
                 $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_location}}");
             }
-            if ( $bpc->{Conf}{ArchiveClientCmd} =~ /\$compression\b/ ) {
+            if ( $Conf{ArchiveClientCmd} =~ /\$compression\b/ ) {
                 $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_compression}}");
             }
-            if ( $bpc->{Conf}{ArchiveClientCmd} =~ /\$parfile\b/
-                    && -x $bpc->{Conf}{ParPath} ) {
+            if ( $Conf{ArchiveClientCmd} =~ /\$parfile\b/
+                    && -x $Conf{ParPath} ) {
                 $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_parity}}");
             }
-            if ( $bpc->{Conf}{ArchiveClientCmd} =~ /\$splitsize\b/
-                    && -x $bpc->{Conf}{SplitPath} ) {
+            if ( $Conf{ArchiveClientCmd} =~ /\$splitsize\b/
+                    && -x $Conf{SplitPath} ) {
                 $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_split}}");
             }
             my $content = eval("qq{$Lang->{BackupPC_Archive2}}");

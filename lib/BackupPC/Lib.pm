@@ -59,7 +59,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
-        Version => '2.1.0beta2',
+        Version => '2.1.0beta2pl1',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew
@@ -1137,9 +1137,9 @@ sub cmdExecOrEval
 #
 # Also, $? should be set when the CHILD pipe is closed.
 #
-sub cmdSystemOrEval
+sub cmdSystemOrEvalLong
 {
-    my($bpc, $cmd, $stdoutCB, @args) = @_;
+    my($bpc, $cmd, $stdoutCB, $ignoreStderr, @args) = @_;
     my($pid, $out, $allOut);
     local(*CHILD);
     
@@ -1173,7 +1173,11 @@ sub cmdSystemOrEval
 	    # This is the child
 	    #
             close(STDERR);
-	    open(STDERR, ">&STDOUT");
+	    if ( $ignoreStderr ) {
+		open(STDERR, ">", "/dev/null");
+	    } else {
+		open(STDERR, ">&STDOUT");
+	    }
 	    alarm(0);
 	    $cmd = [map { m/(.*)/ } @$cmd];		# untaint
 	    #
@@ -1199,6 +1203,18 @@ sub cmdSystemOrEval
 			if ( $bpc->{verbose} );
     return $out;
 }
+
+#
+# The shorter version that sets $ignoreStderr = 0, ie: merges stdout
+# and stderr together.
+#
+sub cmdSystemOrEval
+{
+    my($bpc, $cmd, $stdoutCB, @args) = @_;
+
+    return $bpc->cmdSystemOrEvalLong($cmd, $stdoutCB, 0, @args);
+}
+
 
 #
 # Promotes $conf->{BackupFilesOnly}, $conf->{BackupFilesExclude}

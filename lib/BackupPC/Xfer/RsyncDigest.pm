@@ -150,7 +150,7 @@ sub digestAdd
         $digest->add($data);
     }
     $fileDigest = $digest->digest2;
-    my $eofPosn = tell($fh->{fh});
+    my $eofPosn = sysseek($fh->{fh}, 0, 1);
     $fh->close;
     my $rsyncData = $blockDigest . $fileDigest;
     my $metaData  = pack("VVVV", $blockSize,
@@ -199,14 +199,14 @@ sub digestAdd
         # match our expected length.
         #
         return -111 if ( !defined(sysseek($fh2, 0, 2)) );
-        if ( tell($fh2) != $eofPosn + length($data2) ) {
+        if ( sysseek($fh2, 0, 1) != $eofPosn + length($data2) ) {
             if ( !truncate($fh2, $eofPosn + length($data2)) ) {
                 &$Log(sprintf("digestAdd: $file truncate from %d to %d failed",
-                                tell($fh2), $eofPosn + length($data2)));
+                                sysseek($fh2, 0, 1), $eofPosn + length($data2)));
                 return -112;
             } else {
                 &$Log(sprintf("digestAdd: $file truncated from %d to %d",
-                                tell($fh2), $eofPosn + length($data2)));
+                                sysseek($fh2, 0, 1), $eofPosn + length($data2)));
             }
         }
     }

@@ -48,28 +48,33 @@ use BackupPC::FileZIO;
 sub zcat
 {
     my($fh, $fileName) = @_;
-    my($data, $r);
+    my($data, $r, $ret);
 
     while ( ($r = $fh->read(\$data, 65536)) > 0 ) { 
         print($data);
     }
     if ( $r < 0 ) {
         print(STDERR "$0: can't uncompress $fileName\n");
+	$ret = 1;
     }
     $fh->close();
+    return $ret;
 }
 
+my $ret = 0;
 if ( @ARGV ) {
     while ( @ARGV ) {
         if ( defined(my $fh = BackupPC::FileZIO->open($ARGV[0], 0, 1)) ) {
-            zcat($fh, $ARGV[0]);
+            $ret ||= zcat($fh, $ARGV[0]);
         } else {
             print(STDERR "$0: can't open $ARGV[0]\n");
-            exit(1);
+            $ret = 1;
+	    last;
         }
         shift @ARGV;
     }
 } else {
     my $fh = BackupPC::FileZIO->open(*STDIN, 0, 1);
-    zcat($fh, "stdin");
+    $ret ||= zcat($fh, "stdin");
 }
+exit($ret);

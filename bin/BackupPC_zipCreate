@@ -271,8 +271,14 @@ sub ZipWriteFile
     }
     return if ( !$zipmember );
     
-    # Set the attributes and permissions
-    $zipmember->setLastModFileDateTimeFromUnix($hdr->{mtime});
+    #
+    # Set the attributes and permissions.  The standard zip file
+    # header cannot handle dates prior to 1/1/1980, or 315561600
+    # unix seconds, so we round up the mtime.
+    #
+    my $mtime = $hdr->{mtime};
+    $mtime = 315561600 if ( $mtime < 315561600 );
+    $zipmember->setLastModFileDateTimeFromUnix($mtime);
     $zipmember->unixFileAttributes($hdr->{mode});
     # Zip files don't accept uid and gid, so we put them in the comment field.
     $zipmember->fileComment("uid=".$hdr->{uid}." gid=".$hdr->{gid})

@@ -581,7 +581,7 @@ $Conf{ArchiveInfoKeepCnt} = 10;
 # to give a list of directories or files to backup for each share
 # (the share name is the key).  If this is set to just a string or
 # array, and $Conf{SmbShareName} contains multiple share names, then
-# the setting is assumed to apply to only the first share name.
+# the setting is assumed to apply all shares.
 #
 # Examples:
 #    $Conf{BackupFilesOnly} = '/myFiles';
@@ -606,7 +606,7 @@ $Conf{BackupFilesOnly} = undef;
 # to give a list of directories or files to exclude for each share
 # (the share name is the key).  If this is set to just a string or
 # array, and $Conf{SmbShareName} contains multiple share names, then
-# the setting is assumed to apply to only the first share name.
+# the setting is assumed to apply to all shares.
 #
 # The exact behavior is determined by the underlying transport program,
 # smbclient or tar.  For smbclient the exlclude file list is passed into
@@ -1135,6 +1135,9 @@ $Conf{ArchivePar} = 0;
 # Only for file archives. Splits the output into 
 # the specified size * 1,000,000.
 # e.g. to split into 650,000,000 bytes, specify 650 below.
+# 
+# If the value is 0, or if $Conf{ArchiveDest} is an existing file or
+# device (e.g. a streaming tape drive), this feature is disabled.
 #
 $Conf{ArchiveSplit} = 650;
 
@@ -1598,7 +1601,7 @@ $Conf{CgiURL} = undef;
 #   
 # Language to use.  See lib/BackupPC/Lang for the list of supported
 # languages, which include English (en), French (fr), Spanish (es),
-# German (de), and Italian (it).
+# German (de), Italian (it) and Dutch (nl).
 #
 # Currently the Language setting applies to the CGI interface and email
 # messages sent to users.  Log files and other text are still in English.

@@ -216,7 +216,7 @@ sub action
 		return $c;
             };
 	    #
-	    # Documentation a different header and no pre or post text,
+	    # Documentation has a different header and no pre or post text,
 	    # so just handle it here
 	    #
             Header($Lang->{BackupPC__Documentation}, "", 0, $contentSub);

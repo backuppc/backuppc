@@ -117,7 +117,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Server_Summary} = "BackupPC: Server Summary";
+$Lang{BackupPC__Server_Summary} = "BackupPC: Host Summary";
 $Lang{BackupPC__Archive} = "BackupPC: Archive";
 $Lang{BackupPC_Summary} = <<EOF;
 
@@ -376,14 +376,14 @@ The following command requests are currently queued:
 EOF
 
 # --------------------------------
-$Lang{Backup_PC__Log_File__file} = "BackupPC: Log File \$file";
+$Lang{Backup_PC__Log_File__file} = "BackupPC: File \$file";
 $Lang{Log_File__file__comment} = <<EOF;
-\${h1("Log File \$file \$comment")}
+\${h1("File \$file \$comment")}
 <p>
 EOF
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
-Contents of log file <tt>\$file</tt>, modified \$mtimeStr \$comment
+Contents of file <tt>\$file</tt>, modified \$mtimeStr \$comment
 EOF
 
 # --------------------------------
@@ -1005,7 +1005,7 @@ $Lang{Archive_requested} = "Archive requested by \$User from \$ENV{REMOTE_ADDR}"
 # -------------------------------------------------
 
 $Lang{Status} = "Status";
-$Lang{PC_Summary} = "PC Summary";
+$Lang{PC_Summary} = "Host Summary";
 $Lang{LOG_file} = "LOG file";
 $Lang{LOG_files} = "LOG files";
 $Lang{Old_LOGs} = "Old LOGs";

@@ -1,0 +1,97 @@
+#!/bin/perl
+#
+# Script that generates a patch file for BackupPC.
+#
+
+use strict;
+
+use File::Find;
+use File::Path;
+
+my $BaseVersion  = "2.1.0beta2";
+my $PatchLevel   = "pl1";
+my $PatchVersion = "$BaseVersion$PatchLevel";
+
+my $Base         = "/home/craig/admin/packages/BackupPC-$BaseVersion";
+my $TmpDir       = "patch.tmp";
+my $OutFile      = "BackupPC-$PatchVersion.diff";
+
+find({wanted => \&CopyFile, no_chdir => 1}, $Base);
+
+unlink($OutFile);
+
+open(OUT, ">", $OutFile) || die("can't open OutFile\n");
+
+my $now = localtime;
+
+print OUT <<EOF;
+#
+# $OutFile: BackupPC patch file generated
+# on $now.
+#
+# This patch file should be applied to a cleanly unpacked BackupPC
+# version $BaseVersion.  Do not apply any old patch files; each
+# patch file accumulates all previous changes.
+#
+# Example:
+#
+#     # fetch BackupPC-$BaseVersion.tar.gz
+#     # fetch $OutFile
+#     tar zxvf BackupPC-$BaseVersion.tar.gz
+#     cd BackupPC-$BaseVersion
+#     patch -p0 < ../$OutFile
+#     perl configure.pl
+#
+# ChangeLog:
+#
+#  ADD CHANGELOG HERE
+#
+EOF
+
+foreach my $dir ( qw(bin lib cgi-bin) ) {
+    open(DIFF, "diff -ur $Base/$dir $TmpDir/$dir|")
+	    || die("can't run diff\n");
+    while ( <DIFF> ) {
+	next if ( /^Only/ || /^diff / );
+	s/^--- \Q$Base\//--- /;
+	s/^\+\+\+ \Q$TmpDir\//+++ /;
+	print OUT;
+    }
+}
+rmtree($TmpDir, 0);
+
+sub CopyFile
+{
+    (my $file = $File::Find::name) =~ s{\Q$Base}{};
+    (my $dir = $file) =~ s{(.*)/.*}{$1};
+    $file =~ s{^/}{};
+
+    #print("Got dir = $TmpDir/$dir, file = $file\n");
+    return if ( !-f $file );
+    mkpath("$TmpDir/$dir", 0, 0755) if ( !-d "$TmpDir/$dir" );
+    open(IN, "<", $file)
+                    || die("Can't open $file for input\n");
+    open(OUT, ">", "$TmpDir/$file")
+                    || die("Can't open $TmpDir/$file for output\n");
+    while ( <IN> ) {
+        if ( /^use lib ".*BackupPC\/lib";/
+                || /^use lib "\/home\/pcbackup\/install\/lib";/ ) {
+            print OUT "use lib \"__INSTALLDIR__/lib\";\n";
+        } elsif ( $file =~ /Lib.pm/ && /(.*TopDir *=> .*)'.*',/ ) {
+            print OUT "$1'__TOPDIR__',\n";
+        } elsif ( $file =~ /Lib.pm/ && /(.*BinDir *=> .*)'.*',/ ) {
+            print OUT "$1'__INSTALLDIR__',\n";
+        } elsif ( $file =~ /Lib.pm/ && /(.*LibDir *=> .*)'.*',/ ) {
+            print OUT "$1'__INSTALLDIR__',\n";
+        } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'.*',/ ) {
+            print OUT "$1'$PatchVersion',\n";
+        } elsif ( $file =~ /BackupPC_Admin/ && /(my *\$installDir *= *)'.*'/
+) {
+            print OUT "$1'__INSTALLDIR__/lib';\n";
+        } else {
+            print(OUT);
+        }
+    }
+    close(IN);
+    close(OUT);
+}

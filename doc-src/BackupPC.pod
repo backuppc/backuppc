@@ -3371,6 +3371,8 @@ Manfred continues to support de.pm updates for each new version.
 
 Lorenzo Cappelletti provided the Italian translation, it.pm for v2.1.0.
 
+Lieven Bridts provided the Dutch translation, nl.pm, for v2.1.0.
+
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.
 

@@ -177,7 +177,7 @@ sub read
                 # the compressed file.  Also seek the file so
                 # it is positioned at the 0xb3.
                 #
-                seek($self->{fh}, -length($self->{dataIn}), 1);
+                sysseek($self->{fh}, -length($self->{dataIn}), 1);
                 $self->{eof} = 1;
                 $self->{dataIn} = "";
                 ##print("Got 0xb3 block: considering eof\n");

@@ -181,14 +181,15 @@ EOF
 	# This is necessary to ensure the output gets to the correct place
 	# under mod_perl.
 	#
-	$bpc->cmdSystemOrEval(["$BinDir/BackupPC_tarCreate",
+	$bpc->cmdSystemOrEvalLong(["$BinDir/BackupPC_tarCreate",
 		 "-h", $host,
 		 "-n", $num,
 		 "-s", $share,
 		 @pathOpts,
 		 @fileList
 	    ],
-	    sub { print(@_); }
+	    sub { print(@_); },
+	    1,			# ignore stderr
 	);
     } elsif ( $In{type} == 2 ) {
         #
@@ -218,7 +219,7 @@ EOF
 	# This is necessary to ensure the output gets to the correct place
 	# under mod_perl.
 	#
-	$bpc->cmdSystemOrEval(["$BinDir/BackupPC_zipCreate",
+	$bpc->cmdSystemOrEvalLong(["$BinDir/BackupPC_zipCreate",
 		 "-h", $host,
 		 "-n", $num,
 		 "-c", $In{compressLevel},
@@ -226,7 +227,8 @@ EOF
 		 @pathOpts,
 		 @fileList
 	    ],
-	    sub { print(@_); }
+	    sub { print(@_); },
+	    1,			# ignore stderr
 	);
     } elsif ( $In{type} == 3 ) {
         #

@@ -21,6 +21,37 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Added Dutch translation from Lieven Bridts, with tweaks from
+  Guus Houtzager.
+
+* Added PC-specific config file read in CGI/Archive.pm.  Patch
+  from Pete Wenzel.
+
+* Added non-zero exit code to BackupPC_zcat when uncompress fails.
+  Patch from Pete Wenzel.
+
+* Cosmetic changes to PC Summary and Log file language strings from
+  Pete Wenzel.
+
+#------------------------------------------------------------------------
+# Version 2.1.0beta2pl1, 30 May 2004
+#------------------------------------------------------------------------
+
+* Fixed bug in rsync checksum caching code in BackupPC::Xfer::RsyncDigest.
+
+* BackupPC_zipCreate now ensures the earliest mtime is 1/1/1980,
+  since zip file formats don't support earlier dates.  Reported
+  by Dan Niles.
+
+* CGI restore via zip and tar now makes sure stderr is ignored
+  when BackupPC_tarCreate and BackupPC_zipCreate are run.
+  Previously any stderr output would get mixed in the archive,
+  corrupting it.  Reported by Dan Niles.
+
+#------------------------------------------------------------------------
+# Version 2.1.0beta2, 23 May 2004
+#------------------------------------------------------------------------
+
 * $Conf{BackupFilesOnly} and $Conf{BackupFilesExclude} now apply
   to every share, rather than just the first, in the case where
   they are arrays and there are multiple shares.  Suggested

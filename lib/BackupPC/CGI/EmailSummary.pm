@@ -1,20 +1,16 @@
-#!/bin/perl -T
 #============================================================= -*-perl-*-
 #
-# BackupPC_zcat: uncompress files to stdout
+# BackupPC::CGI::EmailSummary package
 #
 # DESCRIPTION
 #
-#   Usage: BackupPC_zcat [files...]
-#
-#   BackupPC_zcat is a command-line utility for uncompressing BackupPC
-#   compressed files.
+#   This module implements the EmailSummary action for the CGI interface.
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2003  Craig Barratt
+#   Copyright (C) 2003  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -38,38 +34,37 @@
 #
 #========================================================================
 
+package BackupPC::CGI::EmailSummary;
+
 use strict;
-no  utf8;
+use BackupPC::CGI::Lib qw(:all);
 
-use lib "/usr/local/BackupPC/lib";
-use Compress::Zlib;
-use BackupPC::FileZIO;
-
-sub zcat
+sub action
 {
-    my($fh, $fileName) = @_;
-    my($data, $r);
+    my $Privileged = CheckPermission();
 
-    while ( ($r = $fh->read(\$data, 65536)) > 0 ) { 
-        print($data);
+    if ( !$Privileged ) {
+        ErrorExit($Lang->{Only_privileged_users_can_view_email_summaries});
     }
-    if ( $r < 0 ) {
-        print(STDERR "$0: can't uncompress $fileName\n");
+    GetStatusInfo("hosts");
+    ReadUserEmailInfo();
+    my(%EmailStr, $str);
+    foreach my $u ( keys(%UserEmailInfo) ) {
+        next if ( !defined($UserEmailInfo{$u}{lastTime}) );
+        my $emailTimeStr = timeStamp2($UserEmailInfo{$u}{lastTime});
+        $EmailStr{$UserEmailInfo{$u}{lastTime}} .= <<EOF;
+<tr><td>${UserLink($u)} </td>
+    <td>${HostLink($UserEmailInfo{$u}{lastHost})} </td>
+    <td>$emailTimeStr </td>
+    <td>$UserEmailInfo{$u}{lastSubj} </td></tr>
+EOF
     }
-    $fh->close();
+    foreach my $t ( sort({$b <=> $a} keys(%EmailStr)) ) {
+        $str .= $EmailStr{$t};
+    }
+    Header($Lang->{Email_Summary});
+    print (eval("qq{$Lang->{Recent_Email_Summary}}"));
+    Trailer();
 }
 
-if ( @ARGV ) {
-    while ( @ARGV ) {
-        if ( defined(my $fh = BackupPC::FileZIO->open($ARGV[0], 0, 1)) ) {
-            zcat($fh, $ARGV[0]);
-        } else {
-            print(STDERR "$0: can't open $ARGV[0]\n");
-            exit(1);
-        }
-        shift @ARGV;
-    }
-} else {
-    my $fh = BackupPC::FileZIO->open(*STDIN, 0, 1);
-    zcat($fh, "stdin");
-}
+1;

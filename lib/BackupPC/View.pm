@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002  Craig Barratt
+#   Copyright (C) 2002-2003  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0, released 14 Jun 2003.
+# Version 2.1.0_CVS, released 3 Jul 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -300,6 +300,142 @@ sub backupList
     }
     return @backupList;
 }
+
+#
+# Return the history of all backups for a particular directory
+#
+sub dirHistory
+{
+    my($m, $share, $dir) = @_;
+    my($i, $level);
+    my $files = {};
+
+    $dir = "/$dir" if ( $dir !~ m{^/} );
+    $dir =~ s{/+$}{};
+
+    #
+    # merge backups, starting at the first one, and working
+    # forward.
+    #
+    for ( $i = 0 ; $i < @{$m->{backups}} ; $i++ ) {
+	$level        = $m->{backups}[$i]{level};
+	my $backupNum = $m->{backups}[$i]{num};
+	my $mangle    = $m->{backups}[$i]{mangle};
+	my $compress  = $m->{backups}[$i]{compress};
+	my $path      = "$m->{topDir}/pc/$m->{host}/$backupNum/";
+        my $sharePathM;
+        if ( $mangle ) {
+            $sharePathM = $m->{bpc}->fileNameEltMangle($share)
+                        . $m->{bpc}->fileNameMangle($dir);
+        } else {
+            $sharePathM = $share . $dir;
+        }
+        $path .= $sharePathM;
+	#print(STDERR "Opening $path (share=$share)\n");
+	if ( !opendir(DIR, $path) ) {
+	    #
+	    # Oops, directory doesn't exist.
+	    #
+	    next;
+        }
+        my @dir = readdir(DIR);
+        closedir(DIR);
+        my $attr;
+	if ( $mangle ) {
+	    $attr = BackupPC::Attrib->new({ compress => $compress });
+	    if ( -f $attr->fileName($path) && !$attr->read($path) ) {
+                $m->{error} = "Can't read attribute file in $path";
+		$attr = undef;
+	    }
+	}
+        foreach my $file ( @dir ) {
+            $file = $1 if ( $file =~ /(.*)/ );
+            my $fileUM = $file;
+            $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
+            #print(STDERR "Doing $fileUM\n");
+	    #
+	    # skip special files
+	    #
+            next if (  $file eq ".."
+		    || $file eq "."
+		    || $mangle && $file eq "attrib"
+		    || defined($files->{$fileUM}[$i]) );
+	    my @s = stat("$path/$file");
+            if ( defined($attr) && defined(my $a = $attr->get($fileUM)) ) {
+                $files->{$fileUM}[$i] = $a;
+		$attr->set($fileUM, undef);
+            } else {
+                #
+                # Very expensive in the non-attribute case when compresseion
+                # is on.  We have to stat the file and read compressed files
+                # to determine their size.
+                #
+                $files->{$fileUM}[$i] = {
+                    type  => -d _ ? BPC_FTYPE_DIR : BPC_FTYPE_FILE,
+                    mode  => $s[2],
+                    uid   => $s[4],
+                    gid   => $s[5],
+                    size  => -f _ ? $s[7] : 0,
+                    mtime => $s[9],
+                };
+                if ( $compress && -f _ ) {
+                    #
+                    # Compute the correct size by reading the whole file
+                    #
+                    my $f = BackupPC::FileZIO->open("$path/$file",
+						    0, $compress);
+                    if ( !defined($f) ) {
+                        $m->{error} = "Can't open $path/$file";
+                    } else {
+                        my($data, $size);
+                        while ( $f->read(\$data, 65636 * 8) > 0 ) {
+                            $size += length($data);
+                        }
+                        $f->close;
+                        $files->{$fileUM}[$i]{size} = $size;
+                    }
+                }
+            }
+            $files->{$fileUM}[$i]{relPath}    = "$dir/$fileUM";
+            $files->{$fileUM}[$i]{sharePathM} = "$sharePathM/$file";
+            $files->{$fileUM}[$i]{fullPath}   = "$path/$file";
+            $files->{$fileUM}[$i]{backupNum}  = $backupNum;
+            $files->{$fileUM}[$i]{compress}   = $compress;
+	    $files->{$fileUM}[$i]{nlink}      = $s[3];
+	    $files->{$fileUM}[$i]{inode}      = $s[1];
+        }
+
+	#
+	# Merge old backups.  Don't merge directories from old
+	# backups because every backup has an accurate directory
+	# tree.
+	#
+	for ( my $k = $i - 1 ; $level > 0 && $k >= 0 ; $k-- ) {
+	    next if ( $m->{backups}[$k]{level} >= $level );
+	    $level = $m->{backups}[$k]{level};
+	    foreach my $fileUM ( keys(%$files) ) {
+		next if ( !defined($files->{$fileUM}[$k])
+			|| defined($files->{$fileUM}[$i])
+			|| $files->{$fileUM}[$k]{type} == BPC_FTYPE_DIR );
+		$files->{$fileUM}[$i] = $files->{$fileUM}[$k];
+	    }
+	}
+
+	#
+	# Finally, remove deleted files
+	#
+	if ( defined($attr) ) {
+	    my $a = $attr->get;
+	    foreach my $fileUM ( keys(%$a) ) {
+		next if ( $a->{$fileUM}{type} != BPC_FTYPE_DELETED );
+		$files->{$fileUM}[$i] = undef;
+	    }
+	}
+    }
+    #print STDERR "Returning:\n", Dumper($files);
+    return $files;
+}
+
 
 #
 # Do a recursive find starting at the given path (either a file

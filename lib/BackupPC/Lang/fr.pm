@@ -572,7 +572,8 @@ $Lang{Backup_browse_for__host} = <<EOF;
         (il y a \$backupAge jours),
 \$filledBackup
 <li> Cliquer dans un répertoire ci-dessous pour y naviguer,
-<li> Cliquer dans un fichier ci-dessous pour le restaurer.
+<li> Cliquer dans un fichier ci-dessous pour le restaurer,
+<li> (ENGLISH) You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
 </ul>
 
 \${h2("Contenu de \${EscHTML(\$dirDisplay)}")}
@@ -610,9 +611,32 @@ This is now in the checkAll row
 </form>
 EOF
 
+# ------------------------------
+$Lang{DirHistory_backup_for__host} = "(ENGLISH) BackupPC: Directory backup history for \$host";
+
+$Lang{DirHistory_for__host} = <<EOF;
+(ENGLISH)
+\${h1("Backup history for \$host")}
+
+This display shows each unique version of files across all
+the backups:
+<ul>
+<li> Click on a backup number to return to the backup browser,
+<li> Click on a directory link to navigate into that directory,
+<li> Click on a file version link to download that file.
+</ul>
+
+\${h2("History of \${EscHTML(\$dirDisplay)}")}
+
+<br>
+<table border>
+<tr><td>Backup number</td>\$backupNumStr</tr>
+<tr><td>Backup time</td>\$backupTimeStr</tr>
+\$fileStr
+</table>
+EOF
 
 # ------------------------------
-
 $Lang{Restore___num_details_for__host} = "BackupPC: Détails de la restauration n° \$num pour \$host"; 
 
 $Lang{Restore___num_details_for__host2 } = <<EOF;

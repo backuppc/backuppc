@@ -41,8 +41,8 @@ use File::Copy;
 
 umask(0022);
 
-my $Version     = "2.0.0";
-my $ReleaseDate = "14 Jun 2003";
+my $Version     = "2.1.0_CVS";
+my $ReleaseDate = "3 Jul 2003";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -62,12 +62,26 @@ my @PerlSrc = qw(
     lib/BackupPC/Attrib.pm
     lib/BackupPC/FileZIO.pm
     lib/BackupPC/Lib.pm
+    lib/BackupPC/PoolWrite.pm
+    lib/BackupPC/View.pm
+    lib/BackupPC/CGI/Browse.pm
+    lib/BackupPC/CGI/DirHistory.pm
+    lib/BackupPC/CGI/EmailSummary.pm
+    lib/BackupPC/CGI/GeneralInfo.pm
+    lib/BackupPC/CGI/HostInfo.pm
+    lib/BackupPC/CGI/Lib.pm
+    lib/BackupPC/CGI/LOGlist.pm
+    lib/BackupPC/CGI/Queue.pm
+    lib/BackupPC/CGI/RestoreFile.pm
+    lib/BackupPC/CGI/RestoreInfo.pm
+    lib/BackupPC/CGI/Restore.pm
+    lib/BackupPC/CGI/StartStopBackup.pm
+    lib/BackupPC/CGI/Summary.pm
+    lib/BackupPC/CGI/View.pm
     lib/BackupPC/Lang/de.pm
     lib/BackupPC/Lang/en.pm
     lib/BackupPC/Lang/es.pm
     lib/BackupPC/Lang/fr.pm
-    lib/BackupPC/PoolWrite.pm
-    lib/BackupPC/View.pm
     lib/BackupPC/Xfer/Smb.pm
     lib/BackupPC/Xfer/Tar.pm
     lib/BackupPC/Xfer/Rsync.pm
@@ -103,8 +117,12 @@ exit(1) if ( $errCnt );
 rmtree($DistDir, 0, 0);
 mkpath($DistDir, 0, 0777);
 
-foreach my $dir ( qw(bin lib/BackupPC/Xfer lib/BackupPC/Zip lib/BackupPC/Lang
-		     doc conf images init.d/src cgi-bin) ) {
+foreach my $dir ( qw(bin doc conf images init.d/src cgi-bin
+		     lib/BackupPC/CGI
+		     lib/BackupPC/Lang
+		     lib/BackupPC/Xfer
+		     lib/BackupPC/Zip
+		) ) {
     mkpath("$DistDir/$dir", 0, 0777);
 }
 
@@ -306,7 +324,10 @@ sub CheckLangUsage
     my $errors;
     my $vars = {};
 
-    foreach my $file ( qw(cgi-bin/BackupPC_Admin bin/BackupPC_sendEmail) ) {
+    foreach my $file ( (
+		qw(cgi-bin/BackupPC_Admin bin/BackupPC_sendEmail),
+		<lib/BackupPC/CGI/*pm>
+	    ) ) {
 	open(F, $file) || die("can't open $file");
 	binmode(F);
 	while ( <F> ) {

@@ -104,7 +104,7 @@ if ( $ConfigPath ne "" && -r $ConfigPath ) {
     %Conf = $bpc->Conf();
     %OrigConf = %Conf;
     $Conf{TopDir} = $topDir;
-    my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}, 1); 
+    my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}, 1);
     if ( $err eq "" ) {
         print <<EOF;
 
@@ -360,8 +360,12 @@ exit unless prompt("--> Do you want to continue?", "y") =~ /y/i;
 #
 # Create install directories
 #
-foreach my $dir ( qw(bin lib/BackupPC/Xfer lib/BackupPC/Zip
-		     lib/BackupPC/Lang doc) ) {
+foreach my $dir ( qw(bin doc
+		     lib/BackupPC/CGI
+		     lib/BackupPC/Lang
+		     lib/BackupPC/Xfer
+		     lib/BackupPC/Zip
+		 ) ) {
     next if ( -d "$Conf{InstallDir}/$dir" );
     mkpath("$Conf{InstallDir}/$dir", 0, 0775);
     if ( !-d "$Conf{InstallDir}/$dir"
@@ -412,12 +416,35 @@ foreach my $prog ( qw(BackupPC BackupPC_dump BackupPC_link BackupPC_nightly
 unlink("$Conf{InstallDir}/bin/BackupPC_queueAll");
 
 printf("Installing library in $Conf{InstallDir}/lib\n");
-foreach my $lib ( qw(BackupPC/Lib.pm BackupPC/FileZIO.pm BackupPC/Attrib.pm
-        BackupPC/PoolWrite.pm BackupPC/View.pm BackupPC/Xfer/Tar.pm
-        BackupPC/Xfer/Smb.pm BackupPC/Xfer/Rsync.pm
-        BackupPC/Xfer/RsyncFileIO.pm BackupPC/Zip/FileMember.pm
-        BackupPC/Lang/en.pm BackupPC/Lang/fr.pm BackupPC/Lang/es.pm
+foreach my $lib ( qw(
+	BackupPC/Lib.pm
+	BackupPC/FileZIO.pm
+	BackupPC/Attrib.pm
+        BackupPC/PoolWrite.pm
+	BackupPC/View.pm
+	BackupPC/Xfer/Tar.pm
+        BackupPC/Xfer/Smb.pm
+	BackupPC/Xfer/Rsync.pm
+        BackupPC/Xfer/RsyncFileIO.pm
+	BackupPC/Zip/FileMember.pm
+        BackupPC/Lang/en.pm
+	BackupPC/Lang/fr.pm
+	BackupPC/Lang/es.pm
         BackupPC/Lang/de.pm
+	BackupPC/CGI/Browse.pm
+	BackupPC/CGI/DirHistory.pm
+	BackupPC/CGI/EmailSummary.pm
+	BackupPC/CGI/GeneralInfo.pm
+	BackupPC/CGI/HostInfo.pm
+	BackupPC/CGI/Lib.pm
+	BackupPC/CGI/LOGlist.pm
+	BackupPC/CGI/Queue.pm
+	BackupPC/CGI/RestoreFile.pm
+	BackupPC/CGI/RestoreInfo.pm
+	BackupPC/CGI/Restore.pm
+	BackupPC/CGI/StartStopBackup.pm
+	BackupPC/CGI/Summary.pm
+	BackupPC/CGI/View.pm
     ) ) {
     InstallFile("lib/$lib", "$Conf{InstallDir}/lib/$lib", 0444);
 }

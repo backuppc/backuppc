@@ -6,7 +6,7 @@
 # --------------------------------
 
 $Lang{Start_Full_Backup} = "Démarrer la sauvegarde complète";
-$Lang{Start_Incr_Backup} = "Départ de la sauvegarde incrémentale";
+$Lang{Start_Incr_Backup} = "Démarrer la sauvegarde incrémentale";
 $Lang{Stop_Dequeue_Backup} = "Arrêter/annuler la sauvegarde";
 $Lang{Restore} = "Restaurer";
 
@@ -17,14 +17,14 @@ $Lang{BackupPC_Server_Status}= <<EOF;
 
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 <p>
-\${h2(\"Informations Générales du serveur\")}
+\${h2(\"Informations générales du serveur\")}
 
 <ul>
 <li> Le PID du serveur est \$Info{pid}, sur l\'hôte \$Conf{ServerHost},
      version \$Info{Version}, démarré le \$serverStartTime.
 <li> Ce rapport à été généré le \$now.
 <li> La prochaine file d\'attente sera remplie le \$nextWakeupTime.
-<li> Autres info:
+<li> Autres infos:
     <ul>
         <li>\$numBgQueue demandes de sauvegardes en attente depuis le dernier réveil automatique,
         <li>\$numUserQueue requêtes de sauvegardes utilisateur en attente,
@@ -86,12 +86,12 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
 <table border>
 <tr><td> Hôte </td>
     <td align="center"> Utilisateur </td>
-    <td align="center"> nb complètes </td>
-    <td align="center"> complètes Âge/Jours </td>
-    <td align="center"> complètes Taille/Go </td>
+    <td align="center"> Nb complètes </td>
+    <td align="center"> Complètes Âge/Jours </td>
+    <td align="center"> Complètes Taille/Go </td>
     <td align="center"> Vitesse Mo/sec </td>
-    <td align="center"> nb incrémentales </td>
-    <td align="center"> Incr Age/Jours </td>
+    <td align="center"> Nb incrémentales </td>
+    <td align="center"> Incrémentales Âge/Jours </td>
     <td align="center"> État actuel </td>
     <td align="center"> Dernière tentative </td></tr>
 \$strGood
@@ -106,11 +106,11 @@ Il y a \$hostCntNone hôtes sans sauvegardes.
 <tr><td> Hôte </td>
     <td align="center"> Utilisateur </td>
     <td align="center"> Nb complètes </td>
-    <td align="center"> Complètes Age/jour </td>
+    <td align="center"> Complètes Âge/jour </td>
     <td align="center"> Complètes Taille/Go </td>
     <td align="center"> Vitesse Mo/sec </td>
     <td align="center"> Nb incrémentales </td>
-    <td align="center"> Incrémentales Age/jours </td>
+    <td align="center"> Incrémentales Âge/jours </td>
     <td align="center"> État actuel </td>
     <td align="center"> Dernière tentative </td></tr>
 \$strNone
@@ -119,8 +119,8 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>Le disque dispose de \${poolSize} Go avec \$info->{"\${name}FileCnt"} fichiers
-            et \$info->{"\${name}DirCnt"} repertoires (depuis le \$poolTime),
+        <li>La mise en commun est constituée de \$info->{"\${name}FileCnt"} fichiers
+            et \$info->{"\${name}DirCnt"} repertoires représentant \${poolSize} Go (depuis le \$poolTime),
         <li>Le hachage de mise en commun des fichiers donne \$info->{"\${name}FileCntRep"} fichiers répétés
             avec comme plus longue chaîne \$info->{"\${name}FileRepMax"},
         <li>Le nettoyage nocturne a effacé \$info->{"\${name}FileCntRm"} fichiers, soit
@@ -277,7 +277,7 @@ Veuillez sélectionner une des options suivantes.
 <p>
 \${h2("Option 1: Restauration directe")}
 <p>
-Vous pouvez démarrer une restauration qui va restaurer ces fichiers 
+Vous pouvez démarrer une restauration de ces fichiers 
 directement sur \$host.
 <p>
 <b>Attention:</b>
@@ -312,7 +312,7 @@ EOF
 # ------------------------------
 $Lang{Option_2__Download_Zip_archive} = <<EOF;
 
-\${h2("Option 2: Télécharger l\'archive Zip")}
+\${h2("Option 2: Télécharger une archive Zip")}
 <p>
 Vous pouvez télécharger une archive compressée (.zip) contenant tous les fichiers/répertoires que vous 
 avez sélectionnés. Vous pouvez utiliser une application locale, comme Winzip, pour voir ou extraire n\'importe quel fichier.
@@ -344,8 +344,8 @@ EOF
 $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 \${h2("Option 2: Télécharger une archive Zip")}
 <p>
-Vous pouvez télécharger une archive zippée, mais Archive::Zip n\'est pas
-installé. Vous pouvez demander à votre administrateur système d\'installer 
+Vous ne pouvez pas télécharger d'archive zip, car Archive::Zip n\'est pas
+installé. Veuillez demander à votre administrateur système d\'installer 
 Archive::Zip depuis <a href="http://www.cpan.org">www.cpan.org</a>.
 <p>
 EOF
@@ -357,13 +357,13 @@ $Lang{Option_3__Download_Zip_archive} = <<EOF;
 <p>
 
 Vous pouvez télécharger une archive Tar contenant tous les fichiers/répertoires 
-que vous avez sélectionnés. Vous pouvez alors utiliser une application locale, 
+que vous avez sélectionnés. Vous pourrez alors utiliser une application locale, 
 comme tar ou winzip pour voir ou extraire n\'importe quel fichier.
 <p>
 <b>Attention:</b> en fonction des fichiers/répertoires que vous avez sélectionnés,
-cette archive peut devenir très très large.  Cela peut prendre beaucoup de temps 
-(plusieurs minutes) pour créer et transférer l\'archive, et vous aurez besoin d'assez
-d\'espace disque local pour le stocker.
+cette archive peut devenir très très large.  Cela peut prendre plusieurs minutes
+pour créer et transférer l\'archive, et vous aurez besoin d'assez
+d\'espace disque local pour la stocker.
 <p>
 <form action="\$MyURL" method="post">
 <input type="hidden" name="host" value="\${EscapeHTML(\$host)}">
@@ -445,11 +445,11 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 <table border>
 <tr><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
-    <td align="center"> terminée </td> 
+    <td align="center"> Fusionnée </td> 
     <td align="center"> Date de démarrage </td>
     <td align="center"> Durée/mins </td>
-    <td align="center"> Age/jours </td>
-    <td align="center"> Chemin d\'accès sauvegarde sur serveur </td>
+    <td align="center"> Âge/jours </td>
+    <td align="center"> Chemin d\'accès de la sauvegarde sur le serveur </td>
 </tr>
 \$str
 </table>
@@ -491,7 +491,7 @@ Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés parmis les no
     <td align="center"> Taille/Mo </td>
     <td align="center"> Mo/sec </td>
     <td align="center"> Nb de Fichiers </td>
-    <td align="center"> Taille/MB </td>
+    <td align="center"> Taille/Mo </td>
     <td align="center"> Nb de Fichiers </td>
     <td align="center"> Taille/Mo </td>
 </tr>
@@ -515,7 +515,7 @@ récemment compressés.
     <td align="center"> Niveau de Compression </td>
     <td align="center"> Taille/Mo </td>
     <td align="center"> Comp/Mo </td>
-    <td align="center"> Comp </td>
+    <td align="center"> Compression </td>
     <td align="center"> Taille/Mo </td>
     <td align="center"> Comp/Mo </td>
     <td align="center"> Compression </td>
@@ -751,7 +751,7 @@ $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restauration demandé
 # -------------------------------------------------
 
 $Lang{Status} = "Status";
-$Lang{PC_Summary} = "Bilan du PC";
+$Lang{PC_Summary} = "Bilan des PC";
 $Lang{LOG_file} = "Fichier journal";
 $Lang{Old_LOGs} = "Vieux journaux";
 $Lang{Email_summary} = "Résumé des courriels";
@@ -842,7 +842,7 @@ $Lang{fileHeader} = <<EOF;
        <td align="center"> Mode</td>
        <td align="center"> Sauvegarde n°</td>
        <td align="center"> Taille</td>
-       <td align="center"> Date modification</td>
+       <td align="center"> Date de modification</td>
     </tr>
 EOF
 
@@ -854,9 +854,8 @@ $Lang{This_display_is_merged_with_backup} = <<EOF;
 <li> Cet affichage est fusionné avec la sauvegarde n°\$numF, la plus récente copie intégrale.
 EOF
 
-# Needs translation!
 $Lang{Visit_this_directory_in_backup} = <<EOF;
-<li> Visit this directory in backup #\$otherDirs.
+<li> Explorer ce répertoire dans la sauvegarde no \$otherDirs.
 EOF
 
 

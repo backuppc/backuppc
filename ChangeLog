@@ -21,6 +21,21 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Split BackupPC_Admin into a set of modules, one for each major action.
+  Each action is now a seperate module in lib/BackupPC/CGI.
+
+* Added directory history display to BackupPC_Admin, allowing the
+  user to quickly see which files changed between backups.
+
+* Swapped the Server and Hosts sections on the Nav bar.  Moved the
+  host search text box to the top of the hosts section.  This was
+  done to move the variable-length part of the Nav bar (when all
+  hosts are displayed) to the bottom.
+
+#------------------------------------------------------------------------
+# Version 2.0.0, 14 Jun 2003
+#------------------------------------------------------------------------
+
 * Minor tweaks to disable utf8 on utf8-capable machines (eg: RH8+).
   Added "no utf8" to all programs, and added binmode() to relevant
   file handles.

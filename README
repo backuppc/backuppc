@@ -5,7 +5,7 @@
 
                             __RELEASEDATE__
 
-         Copyright (C) 2001-2002 Craig Barratt.  All rights reserved.
+         Copyright (C) 2001-2003 Craig Barratt.  All rights reserved.
 
       This program is free software; you can redistribute it and/or
       modify it under the terms of the GNU General Public License.
@@ -47,9 +47,9 @@ sites, additional permanent archives could be created by periodically
 backing up the server to tape.  A variety of Open Source systems are
 available for doing backup to tape.
 
-BackupPC is written in Perl and extracts backup data either via
-SMB (using Samba) or tar over ssh/rsh/nfs.  It is robust, reliable,
-well documented and freely available as Open Source on SourceForge.
+BackupPC is written in Perl and extracts backup data via SMB (using Samba),
+rsync, or tar over ssh/rsh/nfs.  It is robust, reliable, well documented
+and freely available as Open Source on SourceForge.
 
 FEATURES:
 --------
@@ -65,9 +65,11 @@ FEATURES:
     only 150GB is needed.
 
   - No client-side software is needed.  The standard smb protocol is used
-    to extract backup data on WinXX clients.  On linux clients, tar
-    over ssh/rsh/nfs is used to backup the data (or alternatively
-    Samba can be installed on the linux client to provide smb shares).
+    to extract backup data on WinXX clients.  On *nix clients, either rsync
+    or tar over ssh/rsh/nfs is used to backup the data.  Various alternatives
+    are possible: rsync can also be used with WinXX by running rsyncd/cygwin.
+    Similarly, smb could be used to backup *nix file systems if they are
+    exported as smb shares.
 
   - A powerful http/cgi user interface allows administrators to view log
     files, configuration, current status and allows users to initiate and
@@ -77,8 +79,8 @@ FEATURES:
     any backup directly from the CGI interface.  Zip or Tar archives
     for selected files or directories from any backup can also be
     downloaded from the CGI interface.  Finally, direct restore to
-    the client machine (using SMB or tar) for selected files or
-    directories is also supported from the CGI interface.
+    the client machine (using SMB, rsync or tar) for selected files
+    or directories is also supported from the CGI interface.
 
   - Supports mobile environments where laptops are only intermittently
     connected to the network and have dynamic IP addresses (DHCP).
@@ -114,16 +116,21 @@ The SourceForge project resides at:
 
     http://sourceforge.net/projects/backuppc
 
-You are encouraged to subscribe to either the backuppc-announce
-or backuppc-users mail list on sourceforge.net at either:
+You are encouraged to subscribe to any of the mail lists available
+on sourceforge.net:
 
     http://lists.sourceforge.net/lists/listinfo/backuppc-announce
     http://lists.sourceforge.net/lists/listinfo/backuppc-users
+    http://lists.sourceforge.net/lists/listinfo/backuppc-devel
 
 The backuppc-announce list is moderated and is used only for
 important announcements (eg: new versions).  It is low traffic.
-You only need to subscribe to one list: backuppc-users also
-receives any messages on backuppc-announce.
+You only need to subscribe to one of users and announce: backuppc-users
+also receives any messages on backuppc-announce.
+
+The backuppc-devel list is only for developers who are working on BackupPC.
+Do not post questions or support requests there.  But detailed technical
+discussions should happen on this list.
 
 To post a message to the backuppc-users list, send an email to
 

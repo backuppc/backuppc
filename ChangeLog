@@ -28,30 +28,91 @@
 * Added internationalization (i18n) code from Xavier Nicollet,
   with additions from Guillaume Filion.  Voila!  BackupPC_Admin
   now supports English and French, and adding more languages is
-  now easy.
+  now easy.  New config paramater $Conf{Language} sets the language.
 
 * Added optional user-defined pre/post dump/restore commands, allowing
   things like database shutdown/startup for dumps.
 
+* Changed the way hosts are found.
+
+* Added $Conf{ClientNameAlias}, which allows the name of the physical
+  client machine to be set.  This allows several different backup
+  "hosts" to all refer to the same physical machine, which is
+  convenient if several different types of data need to be backed
+  up, or if different parameters are needed for different parts of
+  the host.
+
 * Replaced $Conf{PingArgs} with $Conf{PingCmd}, added $Conf{DfCmd},
   $Conf{NmbLookupCmd} allowing all these commands to be fully
-  configured.  Also, all commands (except smbclient) can also
-  now be fragments of perl code.
+  configured.  Also, all commands can also now be fragments of
+  perl code.
+
+* Moved all smbclient commands into the config.pl file so the specific
+  arguments can be customized.  New config parameters are
+  $Conf{SmbClientFullCmd}, $Conf{SmbClientIncrCmd} and
+  $Conf{SmbClientRestoreCmd}.
 
 * Added new BackupPC::View module that creates views of backups
   (handling merging etc).  Updated BackupPC_Admin, BackupPC_zipCreate
   and BackupPC_tarCreate to use BackupPC::View.  This removes lots
   of merging and mangling code from the higher-level code.
 
-* Added patch from Toby Johnson that allows additional users to be
+* Added code from Toby Johnson that allows additional users to be
   specified in the hosts file; these users can also view/start/stop
   and restore backups for that host.  Also added a new config
   setting $Conf{CgiNavBarAdminAllHosts} that allows all hosts to
   be listed in the left nav bar for admins.
 
+* Added $Conf{HardLinkMax} (default 31999) which sets the limit on
+  the maximum number of hardlinks per file in the pool.  If a file
+  ever gets to this number of links a new pool file is created to
+  handle additional links.
+
+* Added $Conf{PerlModuleLoad}, which allows optional additional perl
+  modules to be loaded.
+
+* Added $Conf{EMailUserDestDomain} and other EMail config settings to
+  allow language-specific default messages to be overridden.
+
+* Added BPC_FTYPE_DELETED to lib/BackupPC/Attrib.pm, allowing deleted
+  files to be represented in the attrib file correctly.
+
+* Added support for environment variable BPC_SMB_PASSWD, which is the
+  client's smb password.  This overrides the old environment variable
+  PASSWD.
+
+* Added taint cleanup for perl5.8 to lib/BackupPC/Lib.pm.
+
+* Changed $tar_unpack_header format in BackupPC_tarExtract to correctly
+  handle files with trailing spaces.
+
+* Added catching of SIG_PIPE to BackupPC_dump, and changed catch_signal
+  to ignore multiple signals of the same type.
+
+* Added reporting of the largest number of hardlinks in the pool to the
+  log file.
+
+* Adding reporting of syntax errors in the per-PC config.pl file.
+
+* Updated BackupPC_sendEmail to handle language-specific email messages.
+
+* Allow client (host) names to contain spaces.  Spaces in host names
+  need to be escaped via "\" in the hosts file.  The user of spaces in
+  host names is discouraged, but they should work.  One feature that
+  doesn't work with host names that contain spaces is the highlighting
+  of that name in the log file display in the CGI interface.  There are
+  no plans to fix this.
+
+* Renamed $Conf{SmbClientTimeout} to $Conf{ClientTimeout}.
+
+* Fixed all open() calls to use 3 argument form to fix handling of file
+  names with trailing whitespace.  Also fixed CGI interface so these
+  file names are displayed correctly.
+
 * Fixed new 2.0.0 CGI navigation bug that causes the top-level directory
   to have a URL "&share=//boot&dir=" instead of "&share=/boot&dir=/".
-  Reported by Pascal Schelcher.
+  Reported by Pascal Schelcher.  Fixed similar problem reported by
+  Doug Lytle.
 
 * Added "PerlTaintCheck On" to the mod_perl section in the docs,
   suggested by Tim Demarest.

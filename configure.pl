@@ -33,7 +33,7 @@
 #
 #========================================================================
 #
-# Version __VERSION__, released __RELEASEDATE__.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -470,6 +470,22 @@ if ( !defined($Conf{CgiURL}) ) {
     } else {
 	$Conf{CgiURL} = "'http://$Conf{ServerHost}/cgi-bin/BackupPC_Admin'";
     }
+}
+
+#
+# The smbclient commands have moved from hard-coded to the config file.
+# $Conf{SmbClientArgs} no longer exists, so merge it into the new
+# commands if it still exists.
+#
+if ( defined($Conf{SmbClientArgs}) ) {
+    if ( $Conf{SmbClientArgs} ne "" ) {
+        foreach my $param ( qw(SmbClientRestoreCmd SmbClientFullCmd
+                                SmbClientIncrCmd) ) {
+            $newConf->[$newVars->{$param}]{text}
+                            =~ s/(-E\s+-N)/$1 $Conf{SmbClientArgs}/;
+        }
+    }
+    delete($Conf{SmbClientArgs});
 }
 
 #

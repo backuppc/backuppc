@@ -40,6 +40,7 @@ package BackupPC::Lib;
 use strict;
 
 use vars qw(%Conf %Lang);
+use BackupPC::Storage;
 use Fcntl qw/:flock/;
 use Carp;
 use DirHandle ();
@@ -55,28 +56,21 @@ sub new
     my $class = shift;
     my($topDir, $installDir, $noUserCheck) = @_;
 
-    my $bpc = bless {
+    my $paths = {
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
+    };
+    $paths->{BinDir} .= "/bin";
+    $paths->{LibDir} .= "/lib";
+
+    $paths->{storage} = BackupPC::Storage->new($paths);
+
+    my $bpc = bless {
+	%$paths,
         Version => '2.1.0',
-        BackupFields => [qw(
-                    num type startTime endTime
-                    nFiles size nFilesExist sizeExist nFilesNew sizeNew
-                    xferErrs xferBadFile xferBadShare tarErrs
-                    compress sizeExistComp sizeNewComp
-                    noFill fillFromNum mangle xferMethod level
-                )],
-        RestoreFields => [qw(
-                    num startTime endTime result errorMsg nFiles size
-                    tarCreateErrs xferErrs
-                )],
-        ArchiveFields => [qw(
-                    num startTime endTime result errorMsg
-                )],
     }, $class;
-    $bpc->{BinDir} .= "/bin";
-    $bpc->{LibDir} .= "/lib";
+
     #
     # Clean up %ENV and setup other variables.
     #
@@ -87,6 +81,7 @@ sub new
         print(STDERR $error, "\n");
         return;
     }
+
     #
     # Verify we are running as the correct user
     #
@@ -195,165 +190,84 @@ sub timeStamp
 sub BackupInfoRead
 {
     my($bpc, $host) = @_;
-    local(*BK_INFO, *LOCK);
-    my(@Backups);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
-    if ( open(BK_INFO, "$bpc->{TopDir}/pc/$host/backups") ) {
-	binmode(BK_INFO);
-        while ( <BK_INFO> ) {
-            s/[\n\r]+//;
-            next if ( !/^(\d+\t(incr|full|partial)[\d\t]*$)/ );
-            $_ = $1;
-            @{$Backups[@Backups]}{@{$bpc->{BackupFields}}} = split(/\t/);
-        }
-        close(BK_INFO);
-    }
-    close(LOCK);
-    return @Backups;
+    return $bpc->{storage}->BackupInfoRead($host);
 }
 
 sub BackupInfoWrite
 {
     my($bpc, $host, @Backups) = @_;
-    local(*BK_INFO, *LOCK);
-    my($i);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
-    if ( -s "$bpc->{TopDir}/pc/$host/backups" ) {
-	unlink("$bpc->{TopDir}/pc/$host/backups.old")
-		    if ( -f "$bpc->{TopDir}/pc/$host/backups.old" );
-	rename("$bpc->{TopDir}/pc/$host/backups",
-	       "$bpc->{TopDir}/pc/$host/backups.old")
-		    if ( -f "$bpc->{TopDir}/pc/$host/backups" );
-    }
-    if ( open(BK_INFO, ">$bpc->{TopDir}/pc/$host/backups") ) {
-	binmode(BK_INFO);
-        for ( $i = 0 ; $i < @Backups ; $i++ ) {
-            my %b = %{$Backups[$i]};
-            printf(BK_INFO "%s\n", join("\t", @b{@{$bpc->{BackupFields}}}));
-        }
-        close(BK_INFO);
-    }
-    close(LOCK);
+    return $bpc->{storage}->BackupInfoWrite($host, @Backups);
 }
 
 sub RestoreInfoRead
 {
     my($bpc, $host) = @_;
-    local(*RESTORE_INFO, *LOCK);
-    my(@Restores);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
-    if ( open(RESTORE_INFO, "$bpc->{TopDir}/pc/$host/restores") ) {
-	binmode(RESTORE_INFO);
-        while ( <RESTORE_INFO> ) {
-            s/[\n\r]+//;
-            next if ( !/^(\d+.*)/ );
-            $_ = $1;
-            @{$Restores[@Restores]}{@{$bpc->{RestoreFields}}} = split(/\t/);
-        }
-        close(RESTORE_INFO);
-    }
-    close(LOCK);
-    return @Restores;
+    return $bpc->{storage}->RestoreInfoRead($host);
 }
 
 sub RestoreInfoWrite
 {
     my($bpc, $host, @Restores) = @_;
-    local(*RESTORE_INFO, *LOCK);
-    my($i);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
-    if ( -s "$bpc->{TopDir}/pc/$host/restores" ) {
-	unlink("$bpc->{TopDir}/pc/$host/restores.old")
-		    if ( -f "$bpc->{TopDir}/pc/$host/restores.old" );
-	rename("$bpc->{TopDir}/pc/$host/restores",
-	       "$bpc->{TopDir}/pc/$host/restores.old")
-		    if ( -f "$bpc->{TopDir}/pc/$host/restores" );
-    }
-    if ( open(RESTORE_INFO, ">$bpc->{TopDir}/pc/$host/restores") ) {
-	binmode(RESTORE_INFO);
-        for ( $i = 0 ; $i < @Restores ; $i++ ) {
-            my %b = %{$Restores[$i]};
-            printf(RESTORE_INFO "%s\n",
-                        join("\t", @b{@{$bpc->{RestoreFields}}}));
-        }
-        close(RESTORE_INFO);
-    }
-    close(LOCK);
+    return $bpc->{storage}->RestoreInfoWrite($host, @Restores);
 }
 
 sub ArchiveInfoRead
 {
     my($bpc, $host) = @_;
-    local(*ARCHIVE_INFO, *LOCK);
-    my(@Archives);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
-    if ( open(ARCHIVE_INFO, "$bpc->{TopDir}/pc/$host/archives") ) {
-        binmode(ARCHIVE_INFO);
-        while ( <ARCHIVE_INFO> ) {
-            s/[\n\r]+//;
-            next if ( !/^(\d+.*)/ );
-            $_ = $1;
-            @{$Archives[@Archives]}{@{$bpc->{ArchiveFields}}} = split(/\t/);
-        }
-        close(ARCHIVE_INFO);
-    }
-    close(LOCK);
-    return @Archives;
+    return $bpc->{storage}->ArchiveInfoRead($host);
 }
 
 sub ArchiveInfoWrite
 {
     my($bpc, $host, @Archives) = @_;
-    local(*ARCHIVE_INFO, *LOCK);
-    my($i);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
-    if ( -s "$bpc->{TopDir}/pc/$host/archives" ) {
-	unlink("$bpc->{TopDir}/pc/$host/archives.old")
-		    if ( -f "$bpc->{TopDir}/pc/$host/archives.old" );
-	rename("$bpc->{TopDir}/pc/$host/archives",
-	       "$bpc->{TopDir}/pc/$host/archives.old")
-		    if ( -f "$bpc->{TopDir}/pc/$host/archives" );
-    }
-    if ( open(ARCHIVE_INFO, ">$bpc->{TopDir}/pc/$host/archives") ) {
-        binmode(ARCHIVE_INFO);
-        for ( $i = 0 ; $i < @Archives ; $i++ ) {
-            my %b = %{$Archives[$i]};
-            printf(ARCHIVE_INFO "%s\n",
-                        join("\t", @b{@{$bpc->{ArchiveFields}}}));
-        }
-        close(ARCHIVE_INFO);
-    }
-    close(LOCK);
+    return $bpc->{storage}->ArchiveInfoWrite($host, @Archives);
+}
+
+sub ConfigDataRead
+{
+    my($bpc, $host) = @_;
+
+    return $bpc->{storage}->ConfigDataRead($host);
+}
+
+sub ConfigDataWrite
+{
+    my($bpc, $host, $conf) = @_;
+
+    return $bpc->{storage}->ConfigDataWrite($host, $conf);
 }
 
 sub ConfigRead
 {
     my($bpc, $host) = @_;
-    my($ret, $mesg, $config, @configs);
+    my($ret);
 
-    $bpc->{Conf} = ();
-    push(@configs, "$bpc->{TopDir}/conf/config.pl");
-    push(@configs, "$bpc->{TopDir}/conf/$host.pl")
-            if ( $host ne "config" && -f "$bpc->{TopDir}/conf/$host.pl" );
-    push(@configs, "$bpc->{TopDir}/pc/$host/config.pl")
-            if ( defined($host) && -f "$bpc->{TopDir}/pc/$host/config.pl" );
-    foreach $config ( @configs ) {
-        %Conf = ();
-        if ( !defined($ret = do $config) && ($! || $@) ) {
-            $mesg = "Couldn't open $config: $!" if ( $! );
-            $mesg = "Couldn't execute $config: $@" if ( $@ );
-            $mesg =~ s/[\n\r]+//;
-            return $mesg;
-        }
-        %{$bpc->{Conf}} = ( %{$bpc->{Conf} || {}}, %Conf );
+    #
+    # Read main config file
+    #
+    my($mesg, $config) = $bpc->{storage}->ConfigDataRead();
+    return $mesg if ( defined($mesg) );
+
+    $bpc->{Conf} = $config;
+
+    #
+    # Read host config file
+    #
+    if ( $host ne "" ) {
+	($mesg, $config) = $bpc->{storage}->ConfigDataRead($host);
+	return $mesg if ( defined($mesg) );
+	$bpc->{Conf} = { %{$bpc->{Conf}}, %$config };
     }
-    return if ( !defined($bpc->{Conf}{Language}) );
+
+    #
+    # Load optional perl modules
+    #
     if ( defined($bpc->{Conf}{PerlModuleLoad}) ) {
         #
         # Load any user-specified perl modules.  This is for
@@ -365,6 +279,11 @@ sub ConfigRead
             eval("use $module;");
         }
     }
+
+    #
+    # Load language file
+    #
+    return "No language setting" if ( !defined($bpc->{Conf}{Language}) );
     my $langFile = "$bpc->{LibDir}/BackupPC/Lang/$bpc->{Conf}{Language}.pm";
     if ( !defined($ret = do $langFile) && ($! || $@) ) {
 	$mesg = "Couldn't open language file $langFile: $!" if ( $! );
@@ -382,7 +301,8 @@ sub ConfigRead
 sub ConfigMTime
 {
     my($bpc) = @_;
-    return (stat("$bpc->{TopDir}/conf/config.pl"))[9];
+
+    return $bpc->{storage}->ConfigMTime();
 }
 
 #
@@ -395,47 +315,8 @@ sub ConfigMTime
 sub HostInfoRead
 {
     my($bpc, $host) = @_;
-    my(%hosts, @hdr, @fld);
-    local(*HOST_INFO);
 
-    if ( !open(HOST_INFO, "$bpc->{TopDir}/conf/hosts") ) {
-        print(STDERR $bpc->timeStamp,
-                     "Can't open $bpc->{TopDir}/conf/hosts\n");
-        return {};
-    }
-    binmode(HOST_INFO);
-    while ( <HOST_INFO> ) {
-        s/[\n\r]+//;
-        s/#.*//;
-        s/\s+$//;
-        next if ( /^\s*$/ || !/^([\w\.\\-]+\s+.*)/ );
-        #
-        # Split on white space, except if preceded by \
-        # using zero-width negative look-behind assertion
-	# (always wanted to use one of those).
-        #
-        @fld = split(/(?<!\\)\s+/, $1);
-        #
-        # Remove any \
-        #
-        foreach ( @fld ) {
-            s{\\(\s)}{$1}g;
-        }
-        if ( @hdr ) {
-            if ( defined($host) ) {
-                next if ( lc($fld[0]) ne $host );
-                @{$hosts{lc($fld[0])}}{@hdr} = @fld;
-		close(HOST_INFO);
-                return \%hosts;
-            } else {
-                @{$hosts{lc($fld[0])}}{@hdr} = @fld;
-            }
-        } else {
-            @hdr = @fld;
-        }
-    }
-    close(HOST_INFO);
-    return \%hosts;
+    return $bpc->{storage}->HostInfoRead($host);
 }
 
 #
@@ -444,7 +325,8 @@ sub HostInfoRead
 sub HostsMTime
 {
     my($bpc) = @_;
-    return (stat("$bpc->{TopDir}/conf/hosts"))[9];
+
+    return $bpc->{storage}->HostsMTime();
 }
 
 #

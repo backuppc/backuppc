@@ -150,7 +150,7 @@ sub restoreFile
     my $view = BackupPC::View->new($bpc, $host, \@Backups);
     my $a = $view->fileAttrib($num, $share, $dir);
     if ( $dir =~ m{(^|/)\.\.(/|$)} || !defined($a) ) {
-        ErrorExit("Can't restore bad file ${EscHTML($dir)}");
+        ErrorExit("Can't restore bad file ${EscHTML($dir)} ($num, $share, $dir)");
     }
     my $f = BackupPC::FileZIO->open($a->{fullPath}, 0, $a->{compress});
     my $data;
@@ -164,7 +164,6 @@ sub restoreFile
         }
 	$f->close;
 	$linkName =~ s/^\.\///;
-	my $share = $1 if ( $dir =~ /^\/?(.*?)\// );
 	restoreFile($host, $num, $share, $linkName, 1, $dir);
 	return;
     }

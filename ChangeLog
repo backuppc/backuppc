@@ -21,6 +21,73 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Add config file editing.
+
+* Added Portuguese Brazillian pt_br.pm from Reginaldo Ferreira.
+
+* Added Slackware init.d script from Tony Nelson.
+
+* Fixed error reporting when restore/archive fail to write the
+  request file to the client directory.
+
+* Applied patch from Marc Prewitt for DumpPreShareCmd and DumpPostShareCmd.
+
+* Apply patch from Pete Wenzel to add smbClientPath => $Conf{SmbClientPath}
+  to DumpPreUserCmd etc.
+
+* Applied Lorenzo Cappelletti's it.pm patch.
+
+* Applied patch to bin/BackupPC_sendEmail from Marc Prewitt that
+  ignores any file starting with "." in the pc directory when
+  it is generating warnings about old/unused files/directories.
+
+* Applied patch from Marc Prewitt to fix host queue order.
+ 
+* Add NT_STATUS_FILE_LOCK_CONFLICT to pst read error check in
+  BackupPC_sendEmail to fix bug reported by Dale Renton.
+
+* Fixed minor typo in documentation from Richard Ames
+
+#------------------------------------------------------------------------
+# Version 2.1.0pl1, 15 Aug 2004
+#------------------------------------------------------------------------
+
+* Added fix to nl.pm from Lieven Bridts.
+
+* Added patch from Tony Nelson to remove $Info{pid} before BackupPC
+  writes the status and shuts down.
+
+* Changed BackupPC_nightly so that it doesn't call find() if the
+  directory doesn't exist.  This avoids errors in certain versions
+  of perl.  Reported by Bernd Rilling.
+
+* Fixed BackupPC::CGI::Lib to correctly re-load config.pl for mod_perl.
+  Reported by Tony Nelson and Jimmy Liang.
+
+* Explicitly untaint $In{host} in BackupPC::CGI::Lib to fix problem
+  reported by Thomas Tempé.
+
+* Added newline to "...skipping because of user requested delay..."
+  log message in BackupPC_dump.  Reported by Wayne Scott.
+
+* Added read file size error checking to BackupPC_tarCreate.
+  Reported by Brandon Evans.
+
+* Added check in BackupPC::Xfer::RsyncFileIO to ensure that when
+  compression is toggled on/off, a compressed backup doesn't link
+  to an uncompressed pool file (and an uncompressed backup doesn't
+  link to a compressed pool file).  Reported by Brandon Evans.
+
+* Updated documentation with new dirvish URL and a typo from
+  Todd Curry.
+
+* Fix to BackupPC_sendEmail so that it correctly sends admin emails
+  for hosts that have failed backups.  Reported by Simon Kuhn.
+
+#------------------------------------------------------------------------
+# Version 2.1.0, 20 Jun 2004
+#------------------------------------------------------------------------
+
 * Added Dutch translation from Lieven Bridts, with tweaks from
   Guus Houtzager.
 

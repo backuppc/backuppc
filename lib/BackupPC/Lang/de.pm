@@ -964,8 +964,8 @@ $Lang{Nice_try__but_you_can_t_put} = "Sie dürfen \'..\' nicht in Dateinamen verw
 $Lang{Host__doesn_t_exist} = "Computer \${EscHTML(\$In{hostDest})} existiert nicht";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "Sie haben keine Berechtigung zum Restore auf Computer"
 		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create} = "Kann Datei nicht öffnen oder erstellen "
-                    . "\${EscHTML(\"\$TopDir/pc/\$hostDest/\$reqFileName\")}";
+$Lang{Can_t_open_create__openPath} = "Kann Datei nicht öffnen oder erstellen "
+		. "\${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Nur berechtigte Benutzer dürfen Backup und Restore von Dateien"
                 . " für Computer \${EscHTML(\$host)} durchführen.";
 $Lang{Empty_host_name} = "leerer Computer Name";

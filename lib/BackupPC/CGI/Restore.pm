@@ -321,12 +321,13 @@ EOF
         $dump->Indent(1);
         mkpath("$TopDir/pc/$hostDest", 0, 0777)
                                     if ( !-d "$TopDir/pc/$hostDest" );
-        if ( open(REQ, ">$TopDir/pc/$hostDest/$reqFileName") ) {
+	my $openPath = "$TopDir/pc/$hostDest/$reqFileName";
+        if ( open(REQ, ">", $openPath) ) {
 	    binmode(REQ);
             print(REQ $dump->Dump);
             close(REQ);
         } else {
-            ErrorExit(eval("qq{$Lang->{Can_t_open_create}}"));
+            ErrorExit(eval("qq{$Lang->{Can_t_open_create__openPath}}"));
         }
 	$reply = $bpc->ServerMesg("restore ${EscURI($ipAddr)}"
 			. " ${EscURI($hostDest)} $User $reqFileName");

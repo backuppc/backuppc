@@ -965,8 +965,8 @@ $Lang{Nice_try__but_you_can_t_put} = "Buen intento, pero no puede usar \'..\' en
 $Lang{Host__doesn_t_exist} = "El Host \${EscHTML(\$In{hostDest})} no existe";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "No tiene autorización para restaurar en el host"
 		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create} = "No puedo abrir/crear "
-                    . "\${EscHTML(\"\$TopDir/pc/\$hostDest/\$reqFileName\")}";
+$Lang{Can_t_open_create__openPath} = "No puedo abrir/crear "
+		. "\${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Sólo los usuarios autorizados pueden restaurar copias de seguridad"
                 . " del host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name} = "Nombre de host vacío";

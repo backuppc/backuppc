@@ -313,6 +313,7 @@ sub TarReadFile
         #
         my($nRead);
         #print("Reading $f->{name}, $f->{size} bytes, type $f->{type}\n");
+        pathCreate($dir, "$OutDir/$ShareName/$f->{mangleName}", $f);
         my $poolWrite = BackupPC::PoolWrite->new($bpc,
                                          "$OutDir/$ShareName/$f->{mangleName}",
                                          $f->{size}, $Compress);
@@ -350,6 +351,7 @@ sub TarReadFile
 	# a plain file.
         #
         $f->{size} = length($f->{linkname});
+        pathCreate($dir, "$OutDir/$ShareName/$f->{mangleName}", $f);
         my $poolWrite = BackupPC::PoolWrite->new($bpc,
                                          "$OutDir/$ShareName/$f->{mangleName}",
                                          $f->{size}, $Compress);
@@ -367,6 +369,7 @@ sub TarReadFile
         # contents.
         #
         $f->{size} = length($f->{linkname});
+        pathCreate($dir, "$OutDir/$ShareName/$f->{mangleName}", $f);
         my $poolWrite = BackupPC::PoolWrite->new($bpc,
                                          "$OutDir/$ShareName/$f->{mangleName}",
                                          $f->{size}, $Compress);
@@ -390,6 +393,7 @@ sub TarReadFile
         } else {
             $data = "$f->{devmajor},$f->{devminor}";
         }
+        pathCreate($dir, "$OutDir/$ShareName/$f->{mangleName}", $f);
         my $poolWrite = BackupPC::PoolWrite->new($bpc,
                                          "$OutDir/$ShareName/$f->{mangleName}",
                                          length($data), $Compress);
@@ -476,6 +480,30 @@ sub logFileAction
 				$owner,
 				$f->{size},
 				$name);
+}
+
+#
+# Create the parent directory of $file if necessary
+#
+sub pathCreate
+{
+    my($dir, $file, $f) = @_;
+
+    #
+    # Get parent directory of each of $dir and $file
+    #
+    $dir  =~ s{/[^/]*$}{};
+    $file =~ s{/[^/]*$}{};
+    return if ( -d $file );
+    mkpath($file, 0, 0777);
+    $Attrib{$dir}->set($file, {
+                            type  => BPC_FTYPE_DIR,
+                            mode  => 0755,
+                            uid   => $f->{uid},
+                            gid   => $f->{gid},
+                            size  => 0,
+                            mtime => 0,
+                       });
 }
 
 sub catch_signal

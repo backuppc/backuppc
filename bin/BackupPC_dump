@@ -348,7 +348,7 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
 }
 
 if ( !$opts{i} && !$opts{f} && $StatusHost{backoffTime} > time ) {
-    printf(LOG "%sskipping because of user requested delay (%.1f hours left)",
+    printf(LOG "%sskipping because of user requested delay (%.1f hours left)\n",
                 $bpc->timeStamp, ($StatusHost{backoffTime} - time) / 3600);
     NothingToDo($needLink);
 }
@@ -518,6 +518,8 @@ for my $shareName ( @$ShareNames ) {
         next;
     }
 
+    UserCommandRun("DumpPreShareCmd", $shareName);
+
     if ( $Conf{XferMethod} eq "tar" ) {
         #
         # Use tar (eg: tar/ssh) as the transport program.
@@ -531,6 +533,7 @@ for my $shareName ( @$ShareNames ) {
             my $errStr = BackupPC::Xfer::Rsync::errStr;
             print(LOG $bpc->timeStamp, "dump failed: $errStr\n");
             print("dump failed: $errStr\n");
+	    UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
             UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
             exit(1);
         }
@@ -650,6 +653,7 @@ for my $shareName ( @$ShareNames ) {
 	    sleep(1);
 	    kill($bpc->sigName2num("KILL"), @xferPid);
 	}
+	UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
 	UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
         exit(1);
     }
@@ -763,6 +767,9 @@ for my $shareName ( @$ShareNames ) {
             next;
         }
     }
+
+    UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
+
     $stat{xferOK} = 0 if ( $stat{hostError} || $stat{hostAbort} );
     if ( !$stat{xferOK} ) {
         #
@@ -1384,7 +1391,7 @@ sub pidHandler
 #
 sub UserCommandRun
 {
-    my($cmdType) = @_;
+    my($cmdType, $sharename) = @_;
 
     return if ( !defined($Conf{$cmdType}) );
     my $vars = {
@@ -1406,6 +1413,11 @@ sub UserCommandRun
 	type	   => $type,
 	cmdType	   => $cmdType,
     };
+
+    if ($cmdType eq 'DumpPreShareCmd' || $cmdType eq 'DumpPostShareCmd') {
+	$vars->{share} = $sharename;
+    }
+
     my $cmd = $bpc->cmdVarSubstitute($Conf{$cmdType}, $vars);
     $XferLOG->write(\"Executing $cmdType: @$cmd\n");
     #

@@ -9,6 +9,10 @@
 #
 #        perl configure.pl
 #
+#   To read about the command-line options for this configure script:
+#
+#        perldoc configure.pl
+#
 #   The installation steps are described as the script runs.
 #
 # AUTHOR
@@ -443,7 +447,9 @@ exit unless prompt("--> Do you want to continue?", "y") =~ /y/i;
 #
 foreach my $dir ( qw(bin doc
 		     lib/BackupPC/CGI
+		     lib/BackupPC/Config
 		     lib/BackupPC/Lang
+		     lib/BackupPC/Storage
 		     lib/BackupPC/Xfer
 		     lib/BackupPC/Zip
 		 ) ) {
@@ -495,23 +501,12 @@ foreach my $prog ( qw(BackupPC BackupPC_dump BackupPC_link BackupPC_nightly
 printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(
 	BackupPC/Lib.pm
-	BackupPC/FileZIO.pm
 	BackupPC/Attrib.pm
+	BackupPC/FileZIO.pm
+        BackupPC/Config.pm
         BackupPC/PoolWrite.pm
+        BackupPC/Storage.pm
 	BackupPC/View.pm
-	BackupPC/Xfer/Archive.pm
-	BackupPC/Xfer/Tar.pm
-        BackupPC/Xfer/Smb.pm
-	BackupPC/Xfer/Rsync.pm
-	BackupPC/Xfer/RsyncDigest.pm
-        BackupPC/Xfer/RsyncFileIO.pm
-	BackupPC/Zip/FileMember.pm
-        BackupPC/Lang/en.pm
-	BackupPC/Lang/fr.pm
-	BackupPC/Lang/es.pm
-        BackupPC/Lang/de.pm
-        BackupPC/Lang/it.pm
-        BackupPC/Lang/nl.pm
         BackupPC/CGI/AdminOptions.pm
 	BackupPC/CGI/Archive.pm
 	BackupPC/CGI/ArchiveInfo.pm
@@ -532,6 +527,22 @@ foreach my $lib ( qw(
         BackupPC/CGI/StopServer.pm
 	BackupPC/CGI/Summary.pm
 	BackupPC/CGI/View.pm
+	BackupPC/Config/Meta.pm
+        BackupPC/Lang/en.pm
+	BackupPC/Lang/fr.pm
+	BackupPC/Lang/es.pm
+        BackupPC/Lang/de.pm
+        BackupPC/Lang/it.pm
+        BackupPC/Lang/nl.pm
+	BackupPC/Lang/pt_br.pm
+	BackupPC/Storage/Text.pm
+	BackupPC/Xfer/Archive.pm
+	BackupPC/Xfer/Tar.pm
+        BackupPC/Xfer/Smb.pm
+	BackupPC/Xfer/Rsync.pm
+	BackupPC/Xfer/RsyncDigest.pm
+        BackupPC/Xfer/RsyncFileIO.pm
+	BackupPC/Zip/FileMember.pm
     ) ) {
     InstallFile("lib/$lib", "$DestDir$Conf{InstallDir}/lib/$lib", 0444);
 }
@@ -556,7 +567,8 @@ if ( $Conf{CgiImageDir} ne "" ) {
 
 printf("Making init.d scripts\n");
 foreach my $init ( qw(gentoo-backuppc gentoo-backuppc.conf linux-backuppc
-		      solaris-backuppc debian-backuppc suse-backuppc) ) {
+		      solaris-backuppc debian-backuppc suse-backuppc
+		      slackware-backuppc ) ) {
     InstallFile("init.d/src/$init", "init.d/$init", 0444);
 }
 

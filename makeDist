@@ -42,8 +42,8 @@ use Getopt::Std;
 
 umask(0022);
 
-my $Version     = "2.1.0";
-my $ReleaseDate = "20 Jun 2004";
+my $Version     = "2.2.0alpha";
+my $ReleaseDate = "15 Aug 2004";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -63,15 +63,18 @@ my @PerlSrc = qw(
     bin/BackupPC_zipCreate
     bin/BackupPC_zcat
     lib/BackupPC/Attrib.pm
+    lib/BackupPC/Config.pm
     lib/BackupPC/FileZIO.pm
     lib/BackupPC/Lib.pm
     lib/BackupPC/PoolWrite.pm
+    lib/BackupPC/Storage.pm
     lib/BackupPC/View.pm
     lib/BackupPC/CGI/AdminOptions.pm
     lib/BackupPC/CGI/Archive.pm
     lib/BackupPC/CGI/ArchiveInfo.pm
     lib/BackupPC/CGI/Browse.pm
     lib/BackupPC/CGI/DirHistory.pm
+    lib/BackupPC/CGI/EditConfig.pm
     lib/BackupPC/CGI/EmailSummary.pm
     lib/BackupPC/CGI/GeneralInfo.pm
     lib/BackupPC/CGI/HostInfo.pm
@@ -87,12 +90,15 @@ my @PerlSrc = qw(
     lib/BackupPC/CGI/StopServer.pm
     lib/BackupPC/CGI/Summary.pm
     lib/BackupPC/CGI/View.pm
+    lib/BackupPC/Config/Meta.pm
     lib/BackupPC/Lang/de.pm
     lib/BackupPC/Lang/en.pm
     lib/BackupPC/Lang/es.pm
     lib/BackupPC/Lang/fr.pm
     lib/BackupPC/Lang/it.pm
     lib/BackupPC/Lang/nl.pm
+    lib/BackupPC/Lang/pt_br.pm
+    lib/BackupPC/Storage/Text.pm
     lib/BackupPC/Xfer/Archive.pm
     lib/BackupPC/Xfer/Smb.pm
     lib/BackupPC/Xfer/Tar.pm
@@ -164,7 +170,9 @@ mkpath($DistDir, 0, 0777);
 
 foreach my $dir ( qw(bin doc conf images init.d/src cgi-bin
 		     lib/BackupPC/CGI
+		     lib/BackupPC/Config
 		     lib/BackupPC/Lang
+		     lib/BackupPC/Storage
 		     lib/BackupPC/Xfer
 		     lib/BackupPC/Zip
 		) ) {
@@ -195,6 +203,7 @@ foreach my $file ( (@PerlSrc,
 		init.d/src/gentoo-backuppc
 		init.d/src/gentoo-backuppc.conf
 		init.d/src/linux-backuppc
+		init.d/src/slackware-backuppc
 		init.d/src/solaris-backuppc
 		init.d/src/suse-backuppc
 		doc/BackupPC.pod
@@ -363,7 +372,7 @@ sub CheckConfigParams
                 } else {
                     $vars->{$1}++;
                 }/eg;
-            s/UserCommandRun\("([^"]*)"\)/if ( !defined($vars->{$1}) ) {
+            s/UserCommandRun\("([^"]*)"/if ( !defined($vars->{$1}) ) {
                     print("Unexpected Conf var $1 in $file\n");
                     $errors++;
                 } else {
@@ -397,6 +406,7 @@ sub CheckLangUsage
 	open(F, $file) || die("can't open $file");
 	binmode(F);
 	while ( <F> ) {
+	    next if ( /^\s*#/ );
 	    s/\$Lang->{([^}]*)}/$vars->{$1} = 1;/eg;
 	}
 	close(F);

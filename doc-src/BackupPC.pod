@@ -269,8 +269,7 @@ BackupPC server data to tape.
 
 Various programs and scripts use rsync to provide hardlinked backups.
 See, for example, Mike Rubel's site (L<http://www.mikerubel.org/computers/rsync_snapshots>),
-JW Schultz's dirvish (L<http://www.pegasys.ws/dirvish> (although as of
-June 2004 this link doesn't work)),
+JW Schultz's dirvish (L<http://www.dirvish.org/>),
 Ben Escoto's rdiff-backup (L<http://rdiff-backup.stanford.edu>),
 and John Bowman's rlbackup (L<http://www.math.ualberta.ca/imaging/rlbackup>).
 
@@ -600,7 +599,7 @@ directory.
 =head2 Step 3: Setting up config.pl
 
 After running configure.pl, browse through the config file,
-__INSTALLDIR__/conf/config.pl, and make sure all the default settings
+__TOPDIR__/conf/config.pl, and make sure all the default settings
 are correct. In particular, you will need to decide whether to use
 smb, tar or rsync transport (or whether to set it on a per-PC basis)
 and set the relevant parameters for that transport method.
@@ -1543,7 +1542,7 @@ status files to keep.
 Note that for direct restore to work, the $Conf{XferMethod} must
 be able to write to the client.  For example, that means an SMB
 share for smbclient needs to be writable, and the rsyncd module
-needs "read only" set to "yes".  This creates additional security
+needs "read only" set to "false".  This creates additional security
 risks.  If you only create read-only SMB shares (which is a good
 idea), then the direct restore will fail.  You can disable the
 direct restore option by setting $Conf{SmbClientRestoreCmd},
@@ -2761,6 +2760,9 @@ Lorenzo Cappelletti provided the Italian translation, it.pm for v2.1.0.
 
 Lieven Bridts provided the Dutch translation, nl.pm, for v2.1.0,
 with some tweaks from Guus Houtzager.
+
+Reginaldo Ferreira provided the Portuguese Brazillian translation
+pt_br.pm for v2.2.0.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.

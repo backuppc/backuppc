@@ -962,8 +962,8 @@ $Lang{Nice_try__but_you_can_t_put} = "Bien tenté, mais vous ne pouvez pas mettre
 $Lang{Host__doesn_t_exist} = "L'hôte \${EscHTML(\$In{hostDest})} n\'existe pas.";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "Vous n\'avez pas la permission de restaurer sur l\'hôte"
 		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create} = "Ne peut pas ouvrir/créer "
-            . "\${EscHTML(\"\$TopDir/pc/\$hostDest/\$reqFileName\")}";
+$Lang{Can_t_open_create__openPath} = "Ne peut pas ouvrir/créer "
+		. "\${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Seuls les utilisateurs privilégiés peuvent restaurer"
                 . " des fichiers de sauvegarde pour l\'hôte \${EscHTML(\$host)}.";
 $Lang{Empty_host_name} = "Nom d\'hôte vide";

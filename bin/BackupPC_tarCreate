@@ -230,6 +230,11 @@ sub archiveWriteHardLinks
     my $fh = @_;
     foreach my $hdr ( @HardLinks ) {
         $hdr->{size} = 0;
+	my $name = $hdr->{linkname};
+	$name =~ s{^\./}{/};
+	if ( defined($HardLinkExtraFiles{$name}) ) {
+            $hdr->{linkname} = $HardLinkExtraFiles{$name};
+        }
         if ( defined($PathRemove)
               && substr($hdr->{linkname}, 0, length($PathRemove)+1)
                         eq ".$PathRemove" ) {
@@ -423,10 +428,28 @@ sub TarWriteFile
         TarWriteFileInfo($fh, $hdr);
         my($data, $size);
         while ( $f->read(\$data, $BufSize) > 0 ) {
+            if ( $size + length($data) > $hdr->{size} ) {
+                print(STDERR "Error: truncating $hdr->{fullPath} to"
+                           . " $hdr->{size} bytes\n");
+                $data = substr($data, 0, $hdr->{size} - $size);
+                $ErrorCnt++;
+            }
             TarWrite($fh, \$data);
             $size += length($data);
         }
         $f->close;
+        if ( $size != $hdr->{size} ) {
+            print(STDERR "Error: padding $hdr->{fullPath} to $hdr->{size}"
+                       . " bytes from $size bytes\n");
+            $ErrorCnt++;
+            while ( $size < $hdr->{size} ) {
+                my $len = $hdr->{size} - $size;
+                $len = $BufSize if ( $len > $BufSize );
+                $data = "\0" x $len;
+                TarWrite($fh, \$data);
+                $size += $len;
+            }
+        }
         TarWritePad($fh, $size);
 	$FileCnt++;
 	$ByteCnt += $size;
@@ -456,7 +479,7 @@ sub TarWriteFile
 	my $done = 0;
 	my $name = $hdr->{linkname};
 	$name =~ s{^\./}{/};
-	if ( $HardLinkExtraFiles{$name} ) {
+	if ( defined($HardLinkExtraFiles{$name}) ) {
 	    $done = 1;
 	} else {
 	    foreach my $arg ( @ARGV ) {
@@ -478,7 +501,9 @@ sub TarWriteFile
 	    # routine, so that we save the hassle of dealing with
 	    # mangling, merging and attributes.
 	    #
-	    $HardLinkExtraFiles{$hdr->{linkname}} = 1;
+            my $name = $hdr->{linkname};
+            $name =~ s{^\./}{/};
+	    $HardLinkExtraFiles{$name} = $hdr->{name};
 	    archiveWrite($fh, $hdr->{linkname}, $hdr->{name});
 	}
     } elsif ( $hdr->{type} == BPC_FTYPE_SYMLINK ) {

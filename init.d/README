@@ -67,6 +67,18 @@ start automatically at boot (at the default run level):
 
     rc-update add backuppc default
 
+Slackware:
+=========
+
+When configure.pl is run, the script slackware-backuppc is created.
+
+Install it by running these commands as root:
+
+    cp slackware-backuppc /etc/rc.d/rc.backuppc
+    chmod 755 /etc/rc.d/rc.backuppc
+
+then use an editor to add /etc/rc.d/rc.backuppc to /etc/rc.d/rc.local
+
 Solaris:
 =======
 

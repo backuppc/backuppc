@@ -27,14 +27,15 @@ use BackupPC::View;
 use BackupPC::Xfer::RsyncDigest qw(:all);
 use BackupPC::PoolWrite;
 
-use constant S_IFMT       => 0170000;	# type of file
-use constant S_IFDIR      => 0040000; 	# directory
-use constant S_IFCHR      => 0020000; 	# character special
-use constant S_IFBLK      => 0060000; 	# block special
-use constant S_IFREG      => 0100000; 	# regular
-use constant S_IFLNK      => 0120000; 	# symbolic link
-use constant S_IFSOCK     => 0140000; 	# socket
-use constant S_IFIFO      => 0010000; 	# fifo
+use constant S_HLINK_TARGET => 0400000;    # this file is hardlink target
+use constant S_IFMT         => 0170000;	   # type of file
+use constant S_IFDIR        => 0040000;    # directory
+use constant S_IFCHR        => 0020000;    # character special
+use constant S_IFBLK        => 0060000;    # block special
+use constant S_IFREG        => 0100000;    # regular
+use constant S_IFLNK        => 0120000;    # symbolic link
+use constant S_IFSOCK       => 0140000;    # socket
+use constant S_IFIFO        => 0010000;    # fifo
 
 use vars qw( $RsyncLibOK );
 
@@ -59,7 +60,7 @@ sub new
     my $fio = bless {
         blockSize    => 700,
         logLevel     => 0,
-        digest       => File::RsyncP::Digest->new,
+        digest       => File::RsyncP::Digest->new($options->{protocol_version}),
         checksumSeed => 0,
 	attrib	     => {},
 	logHandler   => \&logHandler,
@@ -85,12 +86,45 @@ sub new
     return $fio;
 }
 
+#
+# We publish our version to File::RsyncP.  This is so File::RsyncP
+# can provide backward compatibility to older FileIO code.
+#
+# Versions:
+#
+#   undef or 1:  protocol version 26, no hardlinks
+#   2:           protocol version 28, supports hardlinks
+#
+sub version
+{
+    return 2;
+}
+
 sub blockSize
 {
     my($fio, $value) = @_;
 
     $fio->{blockSize} = $value if ( defined($value) );
     return $fio->{blockSize};
+}
+
+sub protocol_version
+{
+    my($fio, $value) = @_;
+
+    if ( defined($value) ) {
+        $fio->{protocol_version} = $value;
+        $fio->{digest}->protocol($fio->{protocol_version});
+    }
+    return $fio->{protocol_version};
+}
+
+sub preserve_hard_links
+{
+    my($fio, $value) = @_;
+
+    $fio->{preserve_hard_links} = $value if ( defined($value) );
+    return $fio->{preserve_hard_links};
 }
 
 sub logHandlerSet
@@ -108,10 +142,11 @@ sub csumStart
     my($fio, $f, $needMD4, $defBlkSize, $phase) = @_;
 
     $defBlkSize ||= $fio->{blockSize};
-    my $attr = $fio->attribGet($f);
+    my $attr = $fio->attribGet($f, 1);
     $fio->{file} = $f;
     $fio->csumEnd if ( defined($fio->{csum}) );
     return -1 if ( $attr->{type} != BPC_FTYPE_FILE );
+
     #
     # Rsync uses short checksums on the first phase.  If the whole-file
     # checksum fails, then the file is repeated with full checksums.
@@ -186,7 +221,7 @@ sub readStart
 {
     my($fio, $f) = @_;
 
-    my $attr = $fio->attribGet($f);
+    my $attr = $fio->attribGet($f, 1);
     $fio->{file} = $f;
     $fio->readEnd if ( defined($fio->{fh}) );
     if ( !defined($fio->{fh} = BackupPC::FileZIO->open($attr->{fullPath},
@@ -317,18 +352,48 @@ sub attribGetWhere
 
 sub attribGet
 {
-    my($fio, $f) = @_;
+    my($fio, $f, $doHardLink) = @_;
 
     my($attr) = $fio->attribGetWhere($f);
+    if ( $doHardLink && $attr->{type} == BPC_FTYPE_HARDLINK ) {
+        $fio->log("$attr->{fullPath}: opening for hardlink read"
+                . " (name = $f->{name})") if ( $fio->{logLevel} >= 4 );
+        my $fh = BackupPC::FileZIO->open($attr->{fullPath}, 0,
+                                         $attr->{compress});
+        my $target;
+        if ( defined($fh) ) {
+            $fh->read(\$target,  65536);
+            $fh->close;
+            $target =~ s/^\.?\/+//;
+        } else {
+            $fio->log("$attr->{fullPath}: can't open for hardlink read");
+            $fio->{stats}{errorCnt}++;
+            $attr->{type} = BPC_FTYPE_FILE;
+            return $attr;
+        }
+        $target = "/$target" if ( $target !~ /^\// );
+        $fio->log("$attr->{fullPath}: redirecting to $target (will trim "
+                . "$fio->{xfer}{pathHdrSrc})") if ( $fio->{logLevel} >= 4 );
+        $target =~ s/^\Q$fio->{xfer}{pathHdrSrc}//;
+        $f->{name} = $target;
+        $attr = $fio->attribGet($f);
+        $fio->log(" ... now got $attr->{fullPath}")
+                            if ( $fio->{logLevel} >= 4 );
+    }
     return $attr;
 }
 
 sub mode2type
 {
-    my($fio, $mode) = @_;
+    my($fio, $f) = @_;
+    my $mode = $f->{mode};
 
     if ( ($mode & S_IFMT) == S_IFREG ) {
-	return BPC_FTYPE_FILE;
+        if ( defined($f->{hlink}) && !$f->{hlink_self} ) {
+            return BPC_FTYPE_HARDLINK;
+        } else {
+            return BPC_FTYPE_FILE;
+        }
     } elsif ( ($mode & S_IFMT) == S_IFDIR ) {
 	return BPC_FTYPE_DIR;
     } elsif ( ($mode & S_IFMT) == S_IFLNK ) {
@@ -389,9 +454,12 @@ sub attribSet
     }
     $fio->log("attribSet(dir=$dir, file=$file)") if ( $fio->{logLevel} >= 4 );
 
+    my $mode = $f->{mode};
+
+    $mode |= S_HLINK_TARGET if ( $f->{hlink_self} );
     $fio->{attrib}{$dir}->set($file, {
-                            type  => $fio->mode2type($f->{mode}),
-                            mode  => $f->{mode},
+                            type  => $fio->mode2type($f),
+                            mode  => $mode,
                             uid   => $f->{uid},
                             gid   => $f->{gid},
                             size  => $placeHolder ? -1 : $f->{size},
@@ -552,18 +620,33 @@ sub makeSpecial
     my $path = $fio->{outDirSh} . $fNameM;
     my $attr = $fio->attribGet($f);
     my $str = "";
-    my $type = $fio->mode2type($f->{mode});
+    my $type = $fio->mode2type($f);
 
     $fio->log("makeSpecial($path, $type, $f->{mode})")
 		    if ( $fio->{logLevel} >= 5 );
     if ( $type == BPC_FTYPE_CHARDEV || $type == BPC_FTYPE_BLOCKDEV ) {
 	my($major, $minor, $fh, $fileData);
 
-	$major = $f->{rdev} >> 8;
-	$minor = $f->{rdev} & 0xff;
+        if ( defined($f->{rdev_major}) ) {
+            $major = $f->{rdev_major};
+            $minor = $f->{rdev_minor};
+        } else {
+            $major = $f->{rdev} >> 8;
+            $minor = $f->{rdev} & 0xff;
+        }
         $str = "$major,$minor";
     } elsif ( ($f->{mode} & S_IFMT) == S_IFLNK ) {
         $str = $f->{link};
+    } elsif ( ($f->{mode} & S_IFMT) == S_IFREG ) {
+        #
+        # this is a hardlink
+        #
+        if ( !defined($f->{hlink}) ) {
+            $fio->log("Error: makeSpecial($path, $type, $f->{mode}) called"
+                    . " on a regular non-hardlink file");
+            return 1;
+        }
+        $str  = $f->{hlink};
     }
     #
     # Now see if the file is different, or this is a full, in which
@@ -572,7 +655,7 @@ sub makeSpecial
     my($fh, $fileData);
     if ( $fio->{full}
             || !defined($attr)
-            || $attr->{type}  != $fio->mode2type($f->{mode})
+            || $attr->{type}  != $type
             || $attr->{mtime} != $f->{mtime}
             || $attr->{size}  != $f->{size}
             || $attr->{uid}   != $f->{uid}
@@ -595,6 +678,22 @@ sub makeSpecial
 	$fio->logFileAction("skip", $f) if ( $fio->{logLevel} >= 2 );
     }
     $fh->close if ( defined($fh) );
+}
+
+#
+# Make a hardlink.  Returns non-zero on error.
+# This actually gets called twice for each hardlink.
+# Once as the file list is processed, and again at
+# the end.  BackupPC does them as it goes (since it is
+# just saving the hardlink info and not actually making
+# hardlinks).
+#
+sub makeHardLink
+{
+    my($fio, $f, $end) = @_;
+
+    return if ( $end );
+    return $fio->makeSpecial($f) if ( !$f->{hlink_self} );
 }
 
 sub unlink
@@ -636,14 +735,23 @@ sub logFileAction
     my $owner = "$f->{uid}/$f->{gid}";
     my $type  = (("", "p", "c", "", "d", "", "b", "", "", "", "l", "", "s"))
 		    [($f->{mode} & S_IFMT) >> 12];
+    my $link;
 
-    $fio->log(sprintf("  %-6s %1s%4o %9s %11.0f %s",
+    if ( ($f->{mode} & S_IFMT) == S_IFLNK ) {
+        $link = " -> $f->{link}";
+    } if ( ($f->{mode} & S_IFMT) == S_IFREG
+            && defined($f->{hlink}) && !$f->{hlink_self} ) {
+        $link = " -> $f->{hlink}";
+    }
+
+    $fio->log(sprintf("  %-6s %1s%4o %9s %11.0f %s%s",
 				$action,
 				$type,
 				$f->{mode} & 07777,
 				$owner,
 				$f->{size},
-				$f->{name}));
+				$f->{name},
+                                $link));
 }
 
 #
@@ -711,6 +819,17 @@ sub fileDeltaRxStart
                   . " ($fio->{rxFile}{size} vs $rxSize)")
                         if ( $fio->{logLevel} >= 5 );
     }
+    #
+    # If compression was off and now on, or on and now off, then
+    # don't do an exact match.
+    #
+    if ( defined($fio->{rxLocalAttr})
+	    && !$fio->{rxLocalAttr}{compress} != !$fio->{xfer}{compress} ) {
+        $fio->{rxMatchBlk} = undef;     # compression changed, so no file match
+        $fio->log("$fio->{rxFile}{name}: compression changed, so no match"
+              . " ($fio->{rxLocalAttr}{compress} vs $fio->{xfer}{compress})")
+                    if ( $fio->{logLevel} >= 4 );
+    }
     delete($fio->{rxInFd});
     delete($fio->{rxOutFd});
     delete($fio->{rxDigest});
@@ -763,7 +882,7 @@ sub fileDeltaRxNext
                         if ( $fio->{logLevel} >= 9 );
         $fio->{rxOutFile} = $rxOutFile;
         $fio->{rxOutFileRel} = $rxOutFileRel;
-        $fio->{rxDigest} = File::RsyncP::Digest->new;
+        $fio->{rxDigest} = File::RsyncP::Digest->new($fio->{protocol_version});
         $fio->{rxDigest}->add(pack("V", $fio->{checksumSeed}));
     }
     if ( defined($fio->{rxMatchBlk})
@@ -960,7 +1079,7 @@ sub fileDeltaRxDone
 		#
 		# Empty file; just create an empty file digest
 		#
-		$fio->{rxDigest} = File::RsyncP::Digest->new;
+		$fio->{rxDigest} = File::RsyncP::Digest->new($fio->{protocol_version});
 		$fio->{rxDigest}->add(pack("V", $fio->{checksumSeed}));
 		$newDigest = $fio->{rxDigest}->digest;
 	    }
@@ -1068,11 +1187,11 @@ sub fileListEltSend
     my($a, $fio, $fList, $outputFunc) = @_;
     my $name = $a->{relPath};
     my $n = $name;
-    my $type = $fio->mode2type($a->{mode});
+    my $type = $a->{type};
     my $extraAttribs = {};
 
     $n =~ s/^\Q$fio->{xfer}{pathHdrSrc}//;
-    $fio->log("Sending $name (remote=$n)") if ( $fio->{logLevel} >= 4 );
+    $fio->log("Sending $name (remote=$n) type = $type") if ( $fio->{logLevel} >= 1 );
     if ( $type == BPC_FTYPE_CHARDEV
 	    || $type == BPC_FTYPE_BLOCKDEV
 	    || $type == BPC_FTYPE_SYMLINK ) {
@@ -1097,7 +1216,11 @@ sub fileListEltSend
 		# Note: char/block devices have $a->{size} = 0, so we
 		# can't do an error check on $rdSize.
 		#
-		$extraAttribs = { rdev => $1 * 256 + $2 };
+		$extraAttribs = {
+                    rdev       => $1 * 256 + $2,
+                    rdev_major => $1,
+                    rdev_minor => $2,
+                };
 	    } else {
 		$fio->log("$name: unexpected special file contents $str");
 		$fio->{stats}{errorCnt}++;
@@ -1108,17 +1231,59 @@ sub fileListEltSend
 	    $fio->log("$name: can't open");
 	    $fio->{stats}{errorCnt}++;
 	}
+    } elsif ( $fio->{preserve_hard_links}
+            && ($type == BPC_FTYPE_HARDLINK || $type == BPC_FTYPE_FILE)
+            && ($type == BPC_FTYPE_HARDLINK
+                    || $fio->{protocol_version} < 27
+                    || $a->{mode} & S_HLINK_TARGET ) ) {
+        #
+        # Fill in fake inode information so that the remote rsync
+        # can correctly create hardlinks.
+        #
+        $name =~ s/^\.?\/+//;
+        my($target, $inode);
+
+        if ( $type == BPC_FTYPE_HARDLINK ) {
+            my $fh = BackupPC::FileZIO->open($a->{fullPath}, 0,
+                                             $a->{compress});
+            if ( defined($fh) ) {
+                $fh->read(\$target,  65536);
+                $fh->close;
+                $target =~ s/^\.?\/+//;
+                if ( defined($fio->{hlinkFile2Num}{$target}) ) {
+                    $inode = $fio->{hlinkFile2Num}{$target};
+                } else {
+                    $inode = $fio->{fileListCnt};
+                    $fio->{hlinkFile2Num}{$target} = $inode;
+                }
+            } else {
+                $fio->log("$a->{fullPath}: can't open for hardlink");
+                $fio->{stats}{errorCnt}++;
+            }
+        } elsif ( $a->{mode} & S_HLINK_TARGET ) {
+            if ( defined($fio->{hlinkFile2Num}{$name}) ) {
+                $inode = $fio->{hlinkFile2Num}{$name};
+            } else {
+                $inode = $fio->{fileListCnt};
+                $fio->{hlinkFile2Num}{$name} = $inode;
+            }
+        }
+        $inode = $fio->{fileListCnt} if ( !defined($inode) );
+        $fio->log("$name: setting inode to $inode");
+        $extraAttribs = {
+            %$extraAttribs,
+            dev   => 0,
+            inode => $inode,
+        };
     }
     my $f = {
-            name  => $n,
-            #dev   => 0,		# later, when we support hardlinks
-            #inode => 0,		# later, when we support hardlinks
-            mode  => $a->{mode},
-            uid   => $a->{uid},
-            gid   => $a->{gid},
-            mtime => $a->{mtime},
-            size  => $a->{size},
-	    %$extraAttribs,
+        name  => $n,
+        mode  => $a->{mode} & ~S_HLINK_TARGET,
+        uid   => $a->{uid},
+        gid   => $a->{gid},
+        mtime => $a->{mtime},
+        size  => $a->{size},
+        %$extraAttribs,
     };
     $fList->encode($f);
     $f->{name} = "$fio->{xfer}{pathHdrDest}/$f->{name}";
@@ -1128,6 +1293,7 @@ sub fileListEltSend
     #
     # Cumulate stats
     #
+    $fio->{fileListCnt}++;
     if ( $type != BPC_FTYPE_DIR ) {
 	$fio->{stats}{TotalFileCnt}++;
 	$fio->{stats}{TotalFileSize} += $a->{size};
@@ -1144,6 +1310,8 @@ sub fileListSend
     #
     $fio->log("fileListSend: sending file list: "
 	     . join(" ", @{$fio->{fileList}})) if ( $fio->{logLevel} >= 4 );
+    $fio->{fileListCnt} = 0;
+    $fio->{hlinkFile2Num} = {};
     foreach my $name ( @{$fio->{fileList}} ) {
 	$fio->{view}->find($fio->{xfer}{bkupSrcNum},
 			   $fio->{xfer}{bkupSrcShare},

@@ -2,7 +2,7 @@
 
 #my %lang;
 #use strict;
-#File:  nl.pm       version 1.3
+#File:  nl.pm       version 1.5
 # --------------------------------
 
 $Lang{Start_Archive} = "Start Archivering";
@@ -79,7 +79,7 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
             en het maximum van gisteren was \$Info{DUDailyMaxPrev}%.
     </ul>
 </ul>
-eof
+EOF
 
 $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
@@ -483,7 +483,7 @@ EOF
 $Lang{Restore_Options_for__host_Option1_disabled} = <<EOF;
 Rechtstreeks terugplaatsen is gedeactiveerd voor machine \${EscHTML(\$hostDest)}.
 Gelieve een van de andere herstelopties te kiezen.
-eof
+EOF
 
 # ------------------------------
 $Lang{Option_2__Download_Zip_archive} = <<EOF;
@@ -964,8 +964,8 @@ $Lang{Nice_try__but_you_can_t_put} = "Goed geprobeerd, maar u kan geen \'..\' in
 $Lang{Host__doesn_t_exist} = "Machine \${EscHTML(\$In{hostDest})} bestaat niet.";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "U beschikt niet over de juiste rechten om bestanden terug te plaatsen naar machine "
 		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create} = "Ik kan "
-                    . "\${EscHTML(\"\$TopDir/pc/\$hostDest/\$reqFileName\")} niet openen of aanmaken";
+$Lang{Can_t_open_create__openPath} = "Ik kan "
+		. "\${EscHTML(\"\$openPath\")} niet openen of aanmaken";
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Alleen gebruikers met bijzondere rechten kunnen bestanden terugplaatsen"
                 . " naar machine \${EscHTML(\$host)}.";
 $Lang{Empty_host_name} = "Lege machinenaam";

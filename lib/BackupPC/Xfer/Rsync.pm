@@ -55,9 +55,10 @@ BEGIN {
 	#
 	# Note: also update configure.pl when this version number is changed!
 	#
-        if ( $File::RsyncP::VERSION < 0.51 ) {
+        if ( $File::RsyncP::VERSION < 0.52 ) {
             $RsyncLibOK = 0;
-            $RsyncLibErr = "File::RsyncP module version too old: need 0.50";
+            $RsyncLibErr = "File::RsyncP module version"
+                         . " ($File::RsyncP::VERSION) too old: need 0.52";
         } else {
             $RsyncLibOK = 1;
         }
@@ -238,6 +239,7 @@ sub start
 	$rsyncClientCmd = $conf->{RsyncClientCmd};
         $argList = ['--server', '--sender', @$rsyncArgs,
                               '.', $t->{shareNameSlash}];
+	$argList = File::RsyncP->excludeStrip($argList);
 	$fioArgs = {
 	    client     => $t->{client},
 	    share      => $t->{shareName},

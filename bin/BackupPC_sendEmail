@@ -82,7 +82,8 @@ my $mesg = "";
 
 my @badHosts = ();
 foreach my $host ( sort(keys(%Status)) ) {
-    next if ( $Status{$host}{reason} ne "backup failed"
+    next if ( ($Status{$host}{reason} ne "Reason_backup_failed"
+               && $Status{$host}{reason} ne "Reason_restore_failed")
            || $Status{$host}{error} =~ /^lost network connection to host/ );
     push(@badHosts, "$host ($Status{$host}{error})");
 }
@@ -121,7 +122,7 @@ my @oldDirs = ();
 my @files = $d->read;
 $d->close;
 foreach my $host ( @files ) {
-    next if ( $host eq "." || $host eq ".." || defined($Status{$host}) );
+    next if ( $host =~ /^\./ || defined($Status{$host}) );
     push(@oldDirs, "$TopDir/pc/$host");
 }
 if ( @oldDirs ) {
@@ -216,7 +217,7 @@ foreach my $host ( sort(keys(%Status)) ) {
         while ( 1 ) {
             my $s = $fh->readLine();
             last if ( $s eq "" );
-            if ( $s =~ /^\s*Error reading file.*\.pst : ERRDOS - ERRlock/
+            if ( $s =~ /^\s*Error reading file.*\.pst : (ERRDOS - ERRlock|NT_STATUS_FILE_LOCK_CONFLICT)/
                   || $s =~ /^\s*Error reading file.*\.pst\. Got 0 bytes/ ) {
                 $badOutlook = 1;
                 last;

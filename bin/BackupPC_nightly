@@ -127,6 +127,7 @@ my $fileCntRep;    # total number of file names containing "_", ie: files
 my $fileRepMax;    # worse case number of files that have repeated checksums
                    # (ie: max(nnn+1) for all names xxxxxxxxxxxxxxxx_nnn)
 my $fileLinkMax;   # maximum number of hardlinks on a pool file
+my $fileLinkTotal; # total number of hardlinks on entire pool
 my $fileCntRename; # number of renamed files (to keep file numbering
                    # contiguous)
 my %FixList;       # list of paths that need to be renamed to avoid
@@ -148,7 +149,8 @@ for my $pool ( qw(pool cpool) ) {
         $fileLinkMax   = 0;
         $fileCntRename = 0;
         %FixList       = ();
-        find({wanted => \&GetPoolStats}, "$TopDir/$pool/$dir");
+        find({wanted => \&GetPoolStats}, "$TopDir/$pool/$dir")
+					    if ( -d "$TopDir/$pool/$dir" );
         my $kb   = $blkCnt / 2;
         my $kbRm = $blkCntRm / 2;
         my $kb2  = $blkCnt2 / 2;
@@ -193,7 +195,7 @@ for my $pool ( qw(pool cpool) ) {
         }
         print("BackupPC_stats $i = $pool,$fileCnt,$dirCnt,$kb,$kb2,$kbRm,"
                               . "$fileCntRm,$fileCntRep,$fileRepMax,"
-                              . "$fileCntRename,$fileLinkMax\n");
+                              . "$fileCntRename,$fileLinkMax,$fileLinkTotal\n");
     }
 }
 
@@ -282,5 +284,6 @@ sub GetPoolStats
         $blkCnt  += $nblocks;
         $blkCnt2 += $nblocks if ( $nlinks == 2 );
         $fileLinkMax = $nlinks if ( $fileLinkMax < $nlinks );
+        $fileLinkTotal += $nlinks - 1;
     }
 }

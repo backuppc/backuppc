@@ -546,14 +546,70 @@ sub Main_TryToRun_CmdQueue
 sub Main_TryToRun_Bg_or_User_Queue
 {
     my($req, $host);
+    my(@deferUserQueue, @deferBgQueue);
+    my $du;
+
+    if ( time - $Info{DUlastValueTime} >= 600 ) {
+        #
+        # Update our notion of disk usage no more than
+        # once every 10 minutes
+        #
+        $du = $bpc->CheckFileSystemUsage($TopDir);
+        $Info{DUlastValue}     = $du;
+        $Info{DUlastValueTime} = time;
+    } else {
+        #
+        # if we recently checked it then just use the old value
+        #
+        $du = $Info{DUlastValue};
+    }
+    if ( $Info{DUDailyMaxReset} ) {
+        $Info{DUDailyMaxStartTime} = time;
+        $Info{DUDailyMaxReset}     = 0;
+        $Info{DUDailyMax}          = 0;
+    }
+    if ( $du > $Info{DUDailyMax} ) {
+        $Info{DUDailyMax}     = $du;
+        $Info{DUDailyMaxTime} = time;
+    }
+    if ( $du > $Conf{DfMaxUsagePct} ) {
+        my @bgQueue = @BgQueue;
+        my $nSkip = 0;
+
+        #
+        # When the disk is too full, only run backups that will
+        # do expires, not regular backups
+        #
+        @BgQueue = ();
+        foreach $req ( @bgQueue ) {
+            if ( $req->{dumpExpire} ) {
+                unshift(@BgQueue, $req);
+            } else {
+                $BgQueueOn{$req->{host}} = 0;
+                $nSkip++;
+            }
+        }
+        if ( $nSkip ) {
+            print(LOG $bpc->timeStamp,
+                       "Disk too full ($du%); skipped $nSkip hosts\n");
+            $Info{DUDailySkipHostCnt} += $nSkip;
+        }
+    }
+
     while ( $RunNightlyWhenIdle == 0 ) {
         local(*FH);
-        my(@args, @deferUserQueue, @deferBgQueue, $progName, $type);
+        my(@args, $progName, $type);
         my $nJobs = keys(%Jobs);
         #
         # CmdJob and trashClean don't count towards MaxBackups / MaxUserBackups
         #
-        $nJobs -= $BackupPCNightlyJobs if ( $CmdJob ne "" );
+        if ( $CmdJob ne "" ) {
+            if ( $BackupPCNightlyJobs ) {
+                $nJobs -= $BackupPCNightlyJobs;
+            } else {
+                $nJobs--;
+            }
+        }
         $nJobs-- if ( defined($Jobs{$bpc->trashJob} ) );
         if ( $nJobs < $Conf{MaxBackups} + $Conf{MaxUserBackups}
                         && @UserQueue > 0 ) {
@@ -569,53 +625,21 @@ sub Main_TryToRun_Bg_or_User_Queue
                         && (@CmdQueue + $nJobs)
                                 <= $Conf{MaxBackups} + $Conf{MaxPendingCmds}
                         && @BgQueue > 0 ) {
-            my $du;
-            if ( time - $Info{DUlastValueTime} >= 60 ) {
-                #
-                # Update our notion of disk usage no more than
-                # once every minute
-                #
-                $du = $bpc->CheckFileSystemUsage($TopDir);
-                $Info{DUlastValue}     = $du;
-                $Info{DUlastValueTime} = time;
-            } else {
-                #
-                # if we recently checked it then just use the old value
-                #
-                $du = $Info{DUlastValue};
-            }
-	    if ( $Info{DUDailyMaxReset} ) {
-		$Info{DUDailyMaxStartTime} = time;
-		$Info{DUDailyMaxReset}     = 0;
-		$Info{DUDailyMax}          = 0;
-	    }
-	    if ( $du > $Info{DUDailyMax} ) {
-		$Info{DUDailyMax}     = $du;
-		$Info{DUDailyMaxTime} = time;
-	    }
-            if ( $du > $Conf{DfMaxUsagePct} ) {
-                my $nSkip = @BgQueue + @deferBgQueue;
-                print(LOG $bpc->timeStamp,
-                           "Disk too full ($du%); skipping $nSkip hosts\n");
-		$Info{DUDailySkipHostCnt} += $nSkip;
-                @BgQueue = ();
-                @deferBgQueue = ();
-                %BgQueueOn = ();
-                next;
-            }
             $req = pop(@BgQueue);
             if ( defined($Jobs{$req->{host}}) ) {
-                push(@deferBgQueue, $req);
+                #
+                # Job is currently running for this host; save it for later
+                #
+                unshift(@deferBgQueue, $req);
                 next;
             }
             $BgQueueOn{$req->{host}} = 0;
         } else {
-            while ( @deferBgQueue ) {
-                push(@BgQueue, pop(@deferBgQueue));
-            }
-            while ( @deferUserQueue ) {
-                push(@UserQueue, pop(@deferUserQueue));
-            }
+            #
+            # Restore the deferred jobs
+            #
+            @BgQueue   = (@BgQueue,   @deferBgQueue);
+            @UserQueue = (@UserQueue, @deferUserQueue);
             last;
         }
         $host = $req->{host};
@@ -922,6 +946,7 @@ sub Main_Check_Job_Messages
                 delete($Status{$host}{error});
                 delete($Status{$host}{errorTime});
                 $Status{$host}{endTime}   = time;
+                $Status{$host}{lastGoodBackupTime} = time;
             } elsif ( $mesg =~ /^backups disabled/ ) {
                 print(LOG $bpc->timeStamp,
 			    "Ignoring old backup error on $host\n");
@@ -1024,13 +1049,14 @@ sub Main_Check_Job_Messages
                 $Info{pool}{$f[0]}[$chunk]{FileCntRename} += $f[9];
                 $Info{pool}{$f[0]}[$chunk]{FileLinkMax}    = $f[10]
                         if ( $Info{pool}{$f[0]}[$chunk]{FileLinkMax} < $f[10] );
+                $Info{pool}{$f[0]}[$chunk]{FileLinkTotal} += $f[11];
                 $Info{pool}{$f[0]}[$chunk]{Time}           = time;
             } elsif ( $mesg =~ /^BackupPC_nightly lock_off/ ) {
 		$BackupPCNightlyLock--;
                 if ( $BackupPCNightlyLock == 0 ) {
                     #
                     # This means the last BackupPC_nightly is done with
-		    # the pool clean, so it's to start running regular
+		    # the pool clean, so it's ok to start running regular
 		    # backups again.
                     #
                     $RunNightlyWhenIdle = 0;
@@ -1284,12 +1310,6 @@ sub Main_Check_Client_Messages
                                "User $user requested backup of unknown host"
                              . " $host\n");
                     $reply = "error: unknown host $host";
-                } elsif ( defined($Jobs{$host})
-                                && $Jobs{$host}{type} ne "restore" ) {
-                    print(LOG $bpc->timeStamp,
-                               "User $user requested backup of $host,"
-                             . " but one is currently running\n");
-                    $reply = "error: backup of $host is already running";
                 } else {
                     print(LOG $bpc->timeStamp,
                                "User $user requested backup of $host"
@@ -1540,9 +1560,27 @@ sub StatusWrite
 #
 sub HostSortCompare
 {
+    #
+    # Hosts with errors go before hosts without errors
+    #
     return -1 if ( $Status{$a}{error} ne "" && $Status{$b}{error} eq "" );
+
+    #
+    # Hosts with no errors go after hosts with errors
+    #
+
     return  1 if ( $Status{$a}{error} eq "" && $Status{$b}{error} ne "" );
-    return $Status{$a}{endTime} <=> $Status{$b}{endTime};
+
+    #
+    # hosts with the older last good backups sort earlier
+    #
+    my $r = $Status{$a}{lastGoodBackupTime} <=> $Status{$b}{lastGoodBackupTime};
+    return $r if ( $r );
+
+    #
+    # Finally, just sort based on host name
+    #
+    return $a cmp $b;
 }
 
 #
@@ -1552,6 +1590,7 @@ sub HostSortCompare
 #
 sub QueueAllPCs
 {
+    my $nSkip = 0;
     foreach my $host ( sort(HostSortCompare keys(%$Hosts)) ) {
         delete($Status{$host}{backoffTime})
                 if ( defined($Status{$host}{backoffTime})
@@ -1580,11 +1619,34 @@ sub QueueAllPCs
             #
             # this is a fixed ip host: queue it
             #
-            unshift(@BgQueue,
-                {host => $host, user => "BackupPC", reqTime => time,
-                 dhcp => $Hosts->{$host}{dhcp}});
+            if ( $Info{DUlastValue} > $Conf{DfMaxUsagePct} ) {
+                #
+                # Since we are out of disk space, instead of queuing
+                # a regular job, queue an expire check instead.  That
+                # way if the admin reduces the number of backups to
+                # keep then we will actually delete them.  Otherwise
+                # BackupPC_dump will never run since we have exceeded
+                # the limit.
+                #
+                $nSkip++;
+                unshift(@BgQueue,
+                    {host => $host, user => "BackupPC", reqTime => time,
+                     dhcp => $Hosts->{$host}{dhcp}, dumpExpire => 1});
+            } else {
+                #
+                # Queue regular background backup
+                #
+                unshift(@BgQueue,
+                    {host => $host, user => "BackupPC", reqTime => time,
+                     dhcp => $Hosts->{$host}{dhcp}});
+            }
             $BgQueueOn{$host} = 1;
         }
+    }
+    if ( $nSkip ) {
+        print(LOG $bpc->timeStamp,
+               "Disk too full ($Info{DUlastValue}%); skipped $nSkip hosts\n");
+        $Info{DUDailySkipHostCnt} += $nSkip;
     }
     foreach my $dhcp ( @{$Conf{DHCPAddressRanges}} ) {
         for ( my $i = $dhcp->{first} ; $i <= $dhcp->{last} ; $i++ ) {
@@ -1806,6 +1868,7 @@ sub ServerShutdown
         }
         %Jobs = ();
     }
+    delete($Info{pid});
     StatusWrite();
     unlink("$TopDir/log/BackupPC.pid");
     exit(1);

@@ -102,8 +102,10 @@ sub NewRequest
 	$Lang   = $bpc->Lang();
 	$ConfigMTime = $bpc->ConfigMTime();
     } elsif ( $bpc->ConfigMTime() != $ConfigMTime ) {
-        $bpc->ServerMesg("log Re-read config file because mtime changed");
-        $bpc->ServerMesg("server reload");
+        $bpc->ConfigRead();
+        %Conf   = $bpc->Conf();
+        $Lang   = $bpc->Lang();
+        $ConfigMTime = $bpc->ConfigMTime();
     }
 
     #
@@ -153,6 +155,15 @@ EOF
 	   $Hosts->{$host}{moreUsers} =
 	       {map {$_, 1} split(",", $Hosts->{$host}{moreUsers}) }
 	}
+    }
+
+    #
+    # Untaint the host name
+    #
+    if ( $In{host} =~ /^([\w.\s-]+)$/ ) {
+	$In{host} = $1;
+    } else {
+	delete($In{host});
     }
 }
 
@@ -278,6 +289,8 @@ sub GetStatusInfo
 {
     my($status) = @_;
     ServerConnect();
+    %Status = ()     if ( $status =~ /\bhosts\b/ );
+    %StatusHost = () if ( $status =~ /\bhost\(/ );
     my $reply = $bpc->ServerMesg("status $status");
     $reply = $1 if ( $reply =~ /(.*)/s );
     eval($reply);
@@ -395,6 +408,10 @@ sub Header
         { link => "",                         name => $Lang->{Status}},
         { link => "?action=adminOpts",        name => $Lang->{Admin_Options},
                                               priv => 1},
+        { link => "?action=editConfig",       name => "Edit Config",
+                                              priv => 1},
+        { link => "?action=editHosts",        name => "Edit Hosts",
+                                              priv => 1},
         { link => "?action=summary",          name => $Lang->{PC_Summary}},
         { link => "?action=view&type=LOG",    name => $Lang->{LOG_file},
                                               priv => 1},
@@ -449,8 +466,8 @@ EOF
 		    " class=\"navbar\"");
 	}
 	if ( -f "$TopDir/pc/$host/config.pl" ) {
-	    NavLink("?action=view&type=config&host=${EscURI($host)}",
-		    $Lang->{Config_file}, " class=\"navbar\"");
+	    NavLink("?action=editConfig&host=${EscURI($host)}",
+		    "Edit Config", " class=\"navbar\"");
 	}
 	print "</div>\n";
     }
@@ -498,7 +515,7 @@ EOF
     NavSectionTitle($Lang->{NavSectionTitle_});
     foreach my $l ( @adminLinks ) {
         if ( $PrivAdmin || !$l->{priv} ) {
-            my $txt = defined($l->{lname}) ? $Lang->{$l->{lname}} : $l->{name};
+            my $txt = $l->{lname} ne "" ? $Lang->{$l->{lname}} : $l->{name};
             NavLink($l->{link}, $txt);
         }
     }

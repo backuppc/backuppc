@@ -225,12 +225,13 @@ EOF
                             [  \%ArchiveReq],
                             [qw(*ArchiveReq)]);
             $archive->Indent(1);
-            if ( open(REQ, ">$TopDir/pc/$archivehost/$reqFileName") ) {
+	    my $openPath = "$TopDir/pc/$archivehost/$reqFileName";
+	    if ( open(REQ, ">", $openPath) ) {
                 binmode(REQ);
                 print(REQ $archive->Dump);
                 close(REQ);
             } else {
-                ErrorExit($Lang->{Can_t_open_create} );
+                ErrorExit(eval("qq{$Lang->{Can_t_open_create__openPath}}"));
             }
             $reply = $bpc->ServerMesg("archive $User $archivehost $reqFileName");
             $str = eval("qq{$Lang->{Archive_requested}}");

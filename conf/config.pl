@@ -300,72 +300,36 @@ $Conf{BackupPCUserVerify} = 1;
 #
 $Conf{HardLinkMax} = 31999;
 
+#
+# Advanced option for asking BackupPC to load additional perl modules.
+# Can be a list (array ref) of module names to load at startup.
+#
+$Conf{PerlModuleLoad}     = undef;
+
+#
+# Path to init.d script and command to use that script to start the
+# server from the CGI interface.  The following variables are substituted
+# at run-time:
+#
+#   $sshPath           path to ssh ($Conf{SshPath})
+#   $serverHost        same as $Conf{ServerHost}
+#   $serverInitdPath   path to init.d script ($Conf{ServerInitdPath})
+#
+# Example:
+#
+# $Conf{ServerInitdPath}     = '/etc/init.d/backuppc';
+# $Conf{ServerInitdStartCmd} = '$sshPath -q -x -l root $serverHost'
+#                            . ' $serverInitdPath start'
+#                            . ' < /dev/null >& /dev/null';
+#
+$Conf{ServerInitdPath} = '';
+$Conf{ServerInitdStartCmd} = '';
+
+
 ###########################################################################
 # What to backup and when to do it
 # (can be overridden in the per-PC config.pl)
 ###########################################################################
-#
-# Name of the host share that is backed up when using SMB.  This can be a
-# string or an array of strings if there are multiple shares per host.
-# Examples:
-#
-#   $Conf{SmbShareName} = 'c';          # backup 'c' share
-#   $Conf{SmbShareName} = ['c', 'd'];   # backup 'c' and 'd' shares
-#
-# This setting only matters if $Conf{XferMethod} = 'smb'.
-#
-$Conf{SmbShareName} = 'C$';
-
-#
-# Smbclient share user name.  This is passed to smbclient's -U argument.
-#
-# This setting only matters if $Conf{XferMethod} = 'smb'.
-#
-$Conf{SmbShareUserName} = '';
-
-#
-# Smbclient share password.  This is passed to smbclient via its PASSWD
-# environment variable.  There are several ways you can tell BackupPC
-# the smb share password.  In each case you should be very careful about
-# security.  If you put the password here, make sure that this file is
-# not readable by regular users!  See the "Setting up config.pl" section
-# in the documentation for more information.
-#
-# This setting only matters if $Conf{XferMethod} = 'smb'.
-#
-$Conf{SmbSharePasswd} = '';
-
-#
-# Which host directories to backup when using tar transport.  This can be a
-# string or an array of strings if there are multiple directories to
-# backup per host.  Examples:
-#
-#   $Conf{TarShareName} = '/';			# backup everything
-#   $Conf{TarShareName} = '/home';		# only backup /home
-#   $Conf{TarShareName} = ['/home', '/src'];	# backup /home and /src
-#
-# The fact this parameter is called 'TarShareName' is for historical
-# consistency with the Smb transport options.  You can use any valid
-# directory on the client: there is no need for it to correspond to
-# any Smb share or device mount point.
-#
-# Note also that you can also use $Conf{BackupFilesOnly} to specify
-# a specific list of directories to backup.  It's more efficient to
-# use this option instead of $Conf{TarShareName} since a new tar is
-# run for each entry in $Conf{TarShareName}.
-#
-# On the other hand, if you add --one-file-system to $Conf{TarClientCmd}
-# you can backup each file system separately, which makes restoring one
-# bad file system easier.  In this case you would list all of the mount
-# points here, since you can't get the same result with
-# $Conf{BackupFilesOnly}:
-#
-#     $Conf{TarShareName} = ['/', '/var', '/data', '/boot'];
-#
-# This setting only matters if $Conf{XferMethod} = 'tar'.
-#
-$Conf{TarShareName} = '/';
-
 #
 # Minimum period in days between full backups. A full dump will only be
 # done if at least this much time has elapsed since the last full dump,
@@ -480,8 +444,8 @@ $Conf{FullKeepCnt} = 1;
 # we keep at least $Conf{FullKeepCntMin} full backups no matter how old
 # they are.
 #
-# Note that $Conf{FullAgeMax} will be increased to $Conf{FullAgeMax}
-# times $Conf{FullPeriod} if $Conf{FullAgeMax} specifies enough
+# Note that $Conf{FullAgeMax} will be increased to $Conf{FullKeepCnt}
+# times $Conf{FullPeriod} if $Conf{FullKeepCnt} specifies enough
 # full backups to exceed $Conf{FullAgeMax}.
 #
 $Conf{FullKeepCntMin} = 1;
@@ -725,7 +689,7 @@ $Conf{BlackoutPeriods} = [
 $Conf{BackupZeroFilesIsFatal} = 1;
 
 ###########################################################################
-# General per-PC configuration settings
+# How to backup a client
 # (can be overridden in the per-PC config.pl)
 ###########################################################################
 #
@@ -761,6 +725,37 @@ $Conf{XferMethod} = 'smb';
 # incrementals, higher values give more output.
 #
 $Conf{XferLogLevel} = 1;
+
+#
+# Name of the host share that is backed up when using SMB.  This can be a
+# string or an array of strings if there are multiple shares per host.
+# Examples:
+#
+#   $Conf{SmbShareName} = 'c';          # backup 'c' share
+#   $Conf{SmbShareName} = ['c', 'd'];   # backup 'c' and 'd' shares
+#
+# This setting only matters if $Conf{XferMethod} = 'smb'.
+#
+$Conf{SmbShareName} = 'C$';
+
+#
+# Smbclient share user name.  This is passed to smbclient's -U argument.
+#
+# This setting only matters if $Conf{XferMethod} = 'smb'.
+#
+$Conf{SmbShareUserName} = '';
+
+#
+# Smbclient share password.  This is passed to smbclient via its PASSWD
+# environment variable.  There are several ways you can tell BackupPC
+# the smb share password.  In each case you should be very careful about
+# security.  If you put the password here, make sure that this file is
+# not readable by regular users!  See the "Setting up config.pl" section
+# in the documentation for more information.
+#
+# This setting only matters if $Conf{XferMethod} = 'smb'.
+#
+$Conf{SmbSharePasswd} = '';
 
 #
 # Full path for smbclient. Security caution: normal users should not
@@ -817,6 +812,37 @@ $Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
 $Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
             . ' $I_option -U $userName -E -N -d 1'
             . ' -c tarmode\\ full -Tx -';
+
+#
+# Which host directories to backup when using tar transport.  This can be a
+# string or an array of strings if there are multiple directories to
+# backup per host.  Examples:
+#
+#   $Conf{TarShareName} = '/';			# backup everything
+#   $Conf{TarShareName} = '/home';		# only backup /home
+#   $Conf{TarShareName} = ['/home', '/src'];	# backup /home and /src
+#
+# The fact this parameter is called 'TarShareName' is for historical
+# consistency with the Smb transport options.  You can use any valid
+# directory on the client: there is no need for it to correspond to
+# any Smb share or device mount point.
+#
+# Note also that you can also use $Conf{BackupFilesOnly} to specify
+# a specific list of directories to backup.  It's more efficient to
+# use this option instead of $Conf{TarShareName} since a new tar is
+# run for each entry in $Conf{TarShareName}.
+#
+# On the other hand, if you add --one-file-system to $Conf{TarClientCmd}
+# you can backup each file system separately, which makes restoring one
+# bad file system easier.  In this case you would list all of the mount
+# points here, since you can't get the same result with
+# $Conf{BackupFilesOnly}:
+#
+#     $Conf{TarShareName} = ['/', '/var', '/data', '/boot'];
+#
+# This setting only matters if $Conf{XferMethod} = 'tar'.
+#
+$Conf{TarShareName} = '/';
 
 #
 # Full command to run tar on the client.  GNU tar is required.  You will
@@ -1263,23 +1289,15 @@ $Conf{PingPath} = '/bin/ping';
 $Conf{PingCmd} = '$pingPath -c 1 $host';
 
 #
-# Path to init.d script and command to use that script to start the
-# server from the CGI interface.  The following variables are substituted
-# at run-time:
+# Maximum round-trip ping time in milliseconds.  This threshold is set
+# to avoid backing up PCs that are remotely connected through WAN or
+# dialup connections.  The output from ping -s (assuming it is supported
+# on your system) is used to check the round-trip packet time.  On your
+# local LAN round-trip times should be much less than 20msec.  On most
+# WAN or dialup connections the round-trip time will be typically more
+# than 20msec.  Tune if necessary.
 #
-#   $sshPath           path to ssh ($Conf{SshPath})
-#   $serverHost        same as $Conf{ServerHost}
-#   $serverInitdPath   path to init.d script ($Conf{ServerInitdPath})
-#
-# Example:
-#
-# $Conf{ServerInitdPath}     = '/etc/init.d/backuppc';
-# $Conf{ServerInitdStartCmd} = '$sshPath -q -x -l root $serverHost'
-#                            . ' $serverInitdPath start'
-#                            . ' < /dev/null >& /dev/null';
-#
-$Conf{ServerInitdPath} = '';
-$Conf{ServerInitdStartCmd} = '';
+$Conf{PingMaxMsec} = 20;
 
 #
 # Compression level to use on files.  0 means no compression.  Compression
@@ -1313,17 +1331,6 @@ $Conf{ServerInitdStartCmd} = '';
 $Conf{CompressLevel} = 0;
 
 #
-# Maximum round-trip ping time in milliseconds.  This threshold is set
-# to avoid backing up PCs that are remotely connected through WAN or
-# dialup connections.  The output from ping -s (assuming it is supported
-# on your system) is used to check the round-trip packet time.  On your
-# local LAN round-trip times should be much less than 20msec.  On most
-# WAN or dialup connections the round-trip time will be typically more
-# than 20msec.  Tune if necessary.
-#
-$Conf{PingMaxMsec} = 20;
-
-#
 # Timeout in seconds when listening for the transport program's
 # (smbclient, tar etc) stdout. If no output is received during this
 # time, then it is assumed that something has wedged during a backup,
@@ -1353,16 +1360,20 @@ $Conf{ClientTimeout} = 7200;
 $Conf{MaxOldPerPCLogFiles} = 12;
 
 #
-# Optional commands to run before and after dumps and restores.
+# Optional commands to run before and after dumps and restores,
+# and also before and after each share of a dump.
+#
 # Stdout from these commands will be written to the Xfer (or Restore)
 # log file.  One example of using these commands would be to
-# shut down and restart a database server, or to dump a database
-# to files for backup.  Example:
+# shut down and restart a database server, dump a database
+# to files for backup, or doing a snapshot of a share prior
+# to a backup.  Example:
 #
 #    $Conf{DumpPreUserCmd} = '$sshPath -q -x -l root $host /usr/bin/dumpMysql';
 #
 # The following variable substitutions are made at run time for
-# $Conf{DumpPreUserCmd} and $Conf{DumpPostUserCmd}:
+# $Conf{DumpPreUserCmd}, $Conf{DumpPostUserCmd}, $Conf{DumpPreShareCmd}
+# and $Conf{DumpPostShareCmd}:
 #
 #        $type         type of dump (incr or full)
 #        $xferOK       1 if the dump succeeded, 0 if it didn't
@@ -1372,7 +1383,8 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #        $hostIP       IP address of host
 #        $user         user name from the hosts file
 #        $moreUsers    list of additional users from the hosts file
-#        $share        the first share name
+#        $share        the first share name (or current share for
+#                        $Conf{DumpPreShareCmd} and $Conf{DumpPostShareCmd})
 #        $shares       list of all the share names
 #        $XferMethod   value of $Conf{XferMethod} (eg: tar, rsync, smb)
 #        $sshPath      value of $Conf{SshPath},
@@ -1422,6 +1434,8 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #
 $Conf{DumpPreUserCmd}     = undef;
 $Conf{DumpPostUserCmd}    = undef;
+$Conf{DumpPreShareCmd}    = undef;
+$Conf{DumpPostShareCmd}   = undef;
 $Conf{RestorePreUserCmd}  = undef;
 $Conf{RestorePostUserCmd} = undef;
 $Conf{ArchivePreUserCmd}  = undef;
@@ -1445,12 +1459,6 @@ $Conf{ArchivePostUserCmd} = undef;
 # Note: this setting doesn't work for hosts with DHCP set to 1.
 #
 $Conf{ClientNameAlias} = undef;
-
-#
-# Advanced option for asking BackupPC to load additional perl modules.
-# Can be a list (array ref) of module names to load at startup.
-#
-$Conf{PerlModuleLoad}     = undef;
 
 ###########################################################################
 # Email reminders, status and messages
@@ -1616,7 +1624,8 @@ $Conf{CgiURL} = undef;
 #   
 # Language to use.  See lib/BackupPC/Lang for the list of supported
 # languages, which include English (en), French (fr), Spanish (es),
-# German (de), Italian (it) and Dutch (nl).
+# German (de), Italian (it), Dutch (nl) and Portuguese Brazillian
+# (pt_br).
 #
 # Currently the Language setting applies to the CGI interface and email
 # messages sent to users.  Log files and other text are still in English.
@@ -1741,3 +1750,65 @@ $Conf{CgiImageDirURL} = '';
 # $Conf{CgiImageDirURL} URL.
 #
 $Conf{CgiCSSFile} = 'BackupPC_stnd.css';
+
+#
+# Which per-host config variables a non-admin user is allowed
+# to edit.
+#
+$Conf{CgiUserConfigEdit} = {
+        FullPeriod                => 1,
+        IncrPeriod                => 1,
+        FullKeepCnt               => 1,
+        FullKeepCntMin            => 1,
+        FullAgeMax                => 1,
+        IncrKeepCnt               => 1,
+        IncrKeepCntMin            => 1,
+        IncrAgeMax                => 1,
+        PartialAgeMax             => 1,
+        IncrFill                  => 1,
+        RestoreInfoKeepCnt        => 1,
+        ArchiveInfoKeepCnt        => 1,
+        BackupFilesOnly           => 1,
+        BackupFilesExclude        => 1,
+        BlackoutBadPingLimit      => 1,
+        BlackoutGoodCnt           => 1,
+        BlackoutPeriods           => 1,
+        BackupZeroFilesIsFatal    => 1,
+        XferMethod                => 1,
+        XferLogLevel              => 1,
+        SmbShareName              => 1,
+        SmbShareUserName          => 1,
+        SmbSharePasswd            => 1,
+        TarShareName              => 1,
+        TarFullArgs               => 1,
+        TarIncrArgs               => 1,
+        RsyncShareName            => 1,
+        RsyncdClientPort          => 1,
+        RsyncdPasswd              => 1,
+        RsyncdAuthRequired        => 1,
+        RsyncCsumCacheVerifyProb  => 1,
+        RsyncArgs                 => 1,
+        RsyncRestoreArgs          => 1,
+        ArchiveDest               => 1,
+        ArchiveComp               => 1,
+        ArchivePar                => 1,
+        ArchiveSplit              => 1,
+        FixedIPNetBiosNameCheck   => 1,
+        PingMaxMsec               => 1,
+        ClientTimeout             => 1,
+        MaxOldPerPCLogFiles       => 1,
+        CompressLevel             => 1,
+        ClientNameAlias           => 1,
+        EMailNotifyMinDays        => 1,
+        EMailFromUserName         => 1,
+        EMailAdminUserName        => 1,
+        EMailUserDestDomain       => 1,
+        EMailNoBackupEverSubj     => 1,
+        EMailNoBackupEverMesg     => 1,
+        EMailNotifyOldBackupDays  => 1,
+        EMailNoBackupRecentSubj   => 1,
+        EMailNoBackupRecentMesg   => 1,
+        EMailNotifyOldOutlookDays => 1,
+        EMailOutlookBackupSubj    => 1,
+        EMailOutlookBackupMesg    => 1,
+};

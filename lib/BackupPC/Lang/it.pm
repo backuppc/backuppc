@@ -1,6 +1,6 @@
 #!/bin/perl
 #
-# $Id: it.pm,v 1.8 2004/06/12 18:18:42 cbarratt Exp $
+# $Id: it.pm,v 1.9 2004/06/20 02:21:02 cbarratt Exp $
 #
 # Italian i18n file
 #
@@ -973,8 +973,8 @@ $Lang{Nice_try__but_you_can_t_put} = "Bella mossa, man non &egrave; possibile me
 $Lang{Host__doesn_t_exist} = "L\'host \${EscHTML(\$In{hostDest})} non esiste";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "Non si possiedono i permessi per ripristinare sull\'host"
 		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create} = "Impossibile creare/aprire "
-                    . "\${EscHTML(\"\$TopDir/pc/\$hostDest/\$reqFileName\")}";
+$Lang{Can_t_open_create__openPath} = "Impossibile creare/aprire "
+		. "\${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Solo gli utenti privilegiati possono ripristinare i file"
                 . " per l\'host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name} = "Nome host vuoto";
@@ -1259,7 +1259,7 @@ Subject: $subj
 
 Ciao $userName,
 
-e` stato effettuato correttamente il backup del tuo PC ($host) per
+non e` stato effettuato correttamente il backup del tuo PC ($host) per
 $days giorni.  Dal $firstTime fino a $days fa sono stati eseguiti con
 successo $numBackups backup.  I backup dei PC dovrebbero avvenire
 automaticamente quando il tuo PC e` connesso alla rete.

@@ -49,13 +49,14 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta3, released 1 Jun 2003.
+# Version 2.0.0, released 14 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 use strict;
+no  utf8;
 
 use File::Find;
 use File::Path;
@@ -178,6 +179,7 @@ sub doCompress
         $Errors++;
         return;
     }
+    binmode(FH);
     while ( sysread(FH, $dataIn, $CompMaxWrite) > 0 ) {
         $flush = 0;
         $FileOrigSz += length($dataIn);
@@ -202,6 +204,7 @@ sub doCompress
                 close(FH);
                 return;
             }
+	    binmode(OUT);
             $copy = 1;
         }
         if ( $copy && $dataOut ne "" ) {
@@ -244,6 +247,7 @@ sub doCompress
             unlink("$file.__z");
             return;
         }
+	binmode(FH);
     }
     if ( $copy ) {
         if ( !sysseek(OUT, 0, 0) ) {
@@ -329,6 +333,7 @@ sub checkRead
         $f->close();
         return;
     }
+    binmode(FH);
     #print("comparing $file to $cfile\n");
     while ( 1 ) {
         $n = 1 + int(rand($CompMaxRead) + rand(100));
@@ -363,6 +368,7 @@ sub checkReadLine
         $f->close();
         return;
     }
+    binmode(FH);
     while ( 1 ) {
         $d0 = <FH>;
         $d  = $f->readLine();

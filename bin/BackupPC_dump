@@ -70,13 +70,14 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta3, released 1 Jun 2003.
+# Version 2.0.0, released 14 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 use strict;
+no  utf8;
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
@@ -476,6 +477,7 @@ for my $shareName ( @$ShareNames ) {
 	    close(WH);
 	    last;
 	}
+	binmode(TAR);
 	if ( !$tarPid ) {
 	    #
 	    # This is the tar child.  Close the write end of the pipe,
@@ -502,6 +504,7 @@ for my $shareName ( @$ShareNames ) {
 	open(NEW_FILES, ">", "$TopDir/pc/$client/NewFileList")
 		     || die("can't open $TopDir/pc/$client/NewFileList");
 	$newFilesFH = *NEW_FILES;
+	binmode(NEW_FILES);
     }
 
     #
@@ -993,7 +996,7 @@ sub UserCommandRun
         LOG        => *LOG,
         XferLOG    => $XferLOG,
         stat       => \%stat,
-        xferOK     => $stat{xferOK},
+        xferOK     => $stat{xferOK} || 0,
 	type	   => $type,
     };
     my $cmd = $bpc->cmdVarSubstitute($Conf{$type}, $vars);

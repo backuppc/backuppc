@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta3, released 1 Jun 2003.
+# Version 2.0.0, released 14 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -58,7 +58,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
-        Version => '2.0.0beta3',
+        Version => '2.0.0',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew
@@ -187,6 +187,7 @@ sub BackupInfoRead
 
     flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
     if ( open(BK_INFO, "$bpc->{TopDir}/pc/$host/backups") ) {
+	binmode(BK_INFO);
         while ( <BK_INFO> ) {
             s/[\n\r]+//;
             next if ( !/^(\d+\t(incr|full)[\d\t]*$)/ );
@@ -212,6 +213,7 @@ sub BackupInfoWrite
            "$bpc->{TopDir}/pc/$host/backups.old")
                 if ( -f "$bpc->{TopDir}/pc/$host/backups" );
     if ( open(BK_INFO, ">$bpc->{TopDir}/pc/$host/backups") ) {
+	binmode(BK_INFO);
         for ( $i = 0 ; $i < @Backups ; $i++ ) {
             my %b = %{$Backups[$i]};
             printf(BK_INFO "%s\n", join("\t", @b{@{$bpc->{BackupFields}}}));
@@ -229,6 +231,7 @@ sub RestoreInfoRead
 
     flock(LOCK, LOCK_EX) if open(LOCK, "$bpc->{TopDir}/pc/$host/LOCK");
     if ( open(RESTORE_INFO, "$bpc->{TopDir}/pc/$host/restores") ) {
+	binmode(RESTORE_INFO);
         while ( <RESTORE_INFO> ) {
             s/[\n\r]+//;
             next if ( !/^(\d+.*)/ );
@@ -254,6 +257,7 @@ sub RestoreInfoWrite
            "$bpc->{TopDir}/pc/$host/restores.old")
                 if ( -f "$bpc->{TopDir}/pc/$host/restores" );
     if ( open(RESTORE_INFO, ">$bpc->{TopDir}/pc/$host/restores") ) {
+	binmode(RESTORE_INFO);
         for ( $i = 0 ; $i < @Restores ; $i++ ) {
             my %b = %{$Restores[$i]};
             printf(RESTORE_INFO "%s\n",
@@ -335,6 +339,7 @@ sub HostInfoRead
                      "Can't open $bpc->{TopDir}/conf/hosts\n");
         return {};
     }
+    binmode(HOST_INFO);
     while ( <HOST_INFO> ) {
         s/[\n\r]+//;
         s/#.*//;
@@ -606,6 +611,7 @@ sub File2MD5
     $name = $1 if ( $name =~ /(.*)/ );
     return ("", 0) if ( $fileSize == 0 );
     return ("", -1) if ( !open(N, $name) );
+    binmode(N);
     $md5->reset();
     $md5->add($fileSize);
     if ( $fileSize > 262144 ) {
@@ -1096,6 +1102,7 @@ sub cmdSystemOrEval
 	    return $err        if ( !defined($stdoutCB) );
 	    return;
 	}
+	binmode(CHILD);
 	if ( !$pid ) {
 	    #
 	    # This is the child

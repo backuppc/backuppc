@@ -51,13 +51,14 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta3, released 1 Jun 2003.
+# Version 2.0.0, released 14 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 use strict;
+no  utf8;
 use lib "/usr/local/BackupPC/lib";
 use Archive::Zip qw(:ERROR_CODES);
 use File::Path;
@@ -132,6 +133,7 @@ my $fh = new IO::Handle;
 $fh->fdopen(fileno(STDOUT),"w");
 my $zipfh = Archive::Zip->new();
 
+binmode(STDOUT);
 foreach my $dir ( @ARGV ) {
     archiveWrite($zipfh, $dir);
 }

@@ -39,13 +39,14 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta3, released 1 Jun 2003.
+# Version 2.0.0, released 14 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 use strict;
+no  utf8;
 use CGI;
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
@@ -388,6 +389,7 @@ sub Action_View
     } elsif ( $type eq "docs" ) {
         $file = "$BinDir/../doc/BackupPC.html";
         if ( open(LOG, $file) ) {
+	    binmode(LOG);
             Header($Lang->{BackupPC__Documentation});
             print while ( <LOG> );
             close(LOG);
@@ -1018,6 +1020,7 @@ EOF
                          [qw(*RestoreReq)]);
         $dump->Indent(1);
         if ( open(REQ, ">$TopDir/pc/$hostDest/$reqFileName") ) {
+	    binmode(REQ);
             print(REQ $dump->Dump);
             close(REQ);
         } else {

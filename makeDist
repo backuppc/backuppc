@@ -41,8 +41,8 @@ use File::Copy;
 
 umask(0022);
 
-my $Version     = "2.0.0beta3";
-my $ReleaseDate = "1 Jun 2003";
+my $Version     = "2.0.0";
+my $ReleaseDate = "14 Jun 2003";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -162,6 +162,8 @@ sub InstallFile
     } else {
 	open(FILE, $file)   || die("can't open $file for reading\n");
 	open(OUT, ">$dest") || die("can't open $dest for writing\n");
+	binmode(FILE);
+	binmode(OUT);
 	while ( <FILE> ) {
 	    s/^# *Version \d+\.\d+[\.\w]*, released \d+ \w+ \d{4}\.?/# Version __VERSION__, released __RELEASEDATE__./;
 	    s/__VERSION__/$Version/g;
@@ -202,6 +204,7 @@ sub InstallFile
 sub config2pod
 {
     open(C, "conf/config.pl") || die("can't open conf/config.pl");
+    binmode(C);
     my($str, $out, $getHdr, @conf);
     my $first = 1;
     while ( <C> ) {
@@ -261,6 +264,7 @@ sub CheckConfigParams
     my $errors;
 
     open(F, $file) || die("can't open $file\n");
+    binmode(F);
     if ( $check ) {
         while ( <F> ) {
             s/\$(self|bpc)->{Conf}{([^}\$]+)}/if ( !defined($vars->{$2}) ) {
@@ -304,6 +308,7 @@ sub CheckLangUsage
 
     foreach my $file ( qw(cgi-bin/BackupPC_Admin bin/BackupPC_sendEmail) ) {
 	open(F, $file) || die("can't open $file");
+	binmode(F);
 	while ( <F> ) {
 	    s/\$Lang->{([^}]*)}/$vars->{$1} = 1;/eg;
 	}
@@ -312,6 +317,7 @@ sub CheckLangUsage
     foreach my $f ( <lib/BackupPC/Lang/*.pm> ) {
         my $done = {};
         open(F, $f) || die("can't open $f\n");
+	binmode(F);
         while ( <F> ) {
             s/#.*//g;
             s/\$Lang{([^}]*)}/

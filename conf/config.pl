@@ -153,7 +153,7 @@ $Conf{MaxOldLogFiles} = 14;
 $Conf{DfPath} = '/bin/df';
 
 #
-# Command to run df.  Several variables are substituted at run-time:
+# Command to run df.  The following variables are substituted at run-time:
 #
 #   $dfPath      path to df ($Conf{DfPath})
 #   $topDir      top-level BackupPC data directory
@@ -554,9 +554,6 @@ $Conf{BlackoutWeekDays}     = [1, 2, 3, 4, 5];
 #   - 'tar':    backup and restore via tar, tar over ssh, rsh or nfs.
 #               Good choice for linux/unix.
 #
-# A future version should support 'rsync' as a transport method for
-# more efficient backup of linux/unix machines (and perhaps WinXX??).
-#
 $Conf{XferMethod} = 'smb';
 
 #
@@ -575,7 +572,7 @@ $Conf{SmbClientPath} = '/usr/bin/smbclient';
 # Commands to run smbclient for a full dump, incremental dump or a restore.
 # This setting only matters if $Conf{XferMethod} = 'smb'.
 #
-# Several variables are substituted at run-time:
+# The following variables are substituted at run-time:
 #
 #    $smbClientPath   same as $Conf{SmbClientPath}
 #    $host            host to backup/restore
@@ -618,8 +615,7 @@ $Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
 # are sufficient to read all the files you want to backup.  Also, you
 # will probably want to add "/proc" to $Conf{BackupFilesExclude}.
 #
-# Several variables are substituted at run-time.  The following variables
-# are substituted at run-time:
+# The following variables are substituted at run-time:
 #
 #   $host        host name
 #   $hostIP      host's IP address
@@ -868,7 +864,7 @@ $Conf{NmbLookupPath} = '/usr/bin/nmblookup';
 
 #
 # NmbLookup command.  Given an IP address, does an nmblookup on that
-# IP address.  Several variables are substituted at run-time:
+# IP address.  The following variables are substituted at run-time:
 #
 #   $nmbLookupPath      path to nmblookup ($Conf{NmbLookupPath})
 #   $host               IP address
@@ -927,7 +923,7 @@ $Conf{FixedIPNetBiosNameCheck} = 0;
 $Conf{PingPath} = '/bin/ping';
 
 #
-# Ping command.  Several variables are substituted at run-time:
+# Ping command.  The following variables are substituted at run-time:
 #
 #   $pingPath      path to ping ($Conf{PingPath})
 #   $host          host name
@@ -1018,8 +1014,42 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #
 #    $Conf{DumpPreUserCmd} = '$sshPath -l root $host /usr/bin/dumpMysql';
 #
-# Various variable substitutions are available; see BackupPC_dump
-# or BackupPC_restore for the details.
+# The following variable substitutions are made at run time for
+# $Conf{DumpPreUserCmd} and $Conf{DumpPostUserCmd}:
+#
+#        $type         type of dump (incr or full)
+#        $xferOK       1 if the dump succeeded, 0 if it didn't
+#        $client       client name being backed up
+#        $host         host name (could be different from client name if
+#                                 $Conf{ClientNameAlias} is set)
+#        $hostIP       IP address of host
+#        $user         user name from the hosts file
+#        $moreUsers    list of additional users from the hosts file
+#        $share        the first share name
+#        $shares       list of all the share names
+#        $XferMethod   value of $Conf{XferMethod} (eg: tar, rsync, smb)
+#        $sshPath      value of $Conf{SshPath},
+#
+# The following variable substitutions are made at run time for
+# $Conf{RestorePreUserCmd} and $Conf{RestorePostUserCmd}:
+#
+#        $client       client name being backed up
+#        $xferOK       1 if the restore succeeded, 0 if it didn't
+#        $host         host name (could be different from client name if
+#                                 $Conf{ClientNameAlias} is set)
+#        $hostIP       IP address of host
+#        $user         user name from the hosts file
+#        $moreUsers    list of additional users from the hosts file
+#        $share        the first share name
+#        $XferMethod   value of $Conf{XferMethod} (eg: tar, rsync, smb)
+#        $sshPath      value of $Conf{SshPath},
+#        $type         set to "restore"
+#        $bkupSrcHost  host name of the restore source
+#        $bkupSrcShare share name of the restore source
+#        $bkupSrcNum   backup number of the restore source
+#        $pathHdrSrc   common starting path of restore source
+#        $pathHdrDest  common starting path of destination
+#        $fileList     list of files being restored
 #
 $Conf{DumpPreUserCmd}     = undef;
 $Conf{DumpPostUserCmd}    = undef;

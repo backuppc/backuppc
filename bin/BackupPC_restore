@@ -29,13 +29,14 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta3, released 1 Jun 2003.
+# Version 2.0.0, released 14 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 use strict;
+no  utf8;
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
@@ -320,6 +321,7 @@ if ( $useTar ) {
 	$stat{hostError} = "Can't fork to run tar";
 	exit(RestoreCleanup($client));
     }
+    binmode(TAR);
     if ( !$tarPid ) {
 	#
 	# This is the tarCreate child.  Clone STDERR to STDOUT,
@@ -612,6 +614,7 @@ sub UserCommandRun
     return if ( !defined($Conf{$type}) );
     my $vars = {
         xfer         => $xfer,
+        client       => $client,
         host         => $host,
         hostIP       => $hostIP,
         share        => $RestoreReq{shareDest},
@@ -622,7 +625,7 @@ sub UserCommandRun
 	moreUsers    => $Hosts->{$client}{moreUsers},
         XferLOG      => $RestoreLOG,
         stat         => \%stat,
-        xferOK       => $stat{xferOK},
+        xferOK       => $stat{xferOK} || 0,
 	type	     => $type,
 	bkupSrcHost  => $RestoreReq{hostSrc},
 	bkupSrcShare => $RestoreReq{shareSrc},

@@ -21,11 +21,23 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Minor tweaks to disable utf8 on utf8-capable machines (eg: RH8+).
+  Added "no utf8" to all programs, and added binmode() to relevant
+  file handles.
+
+#------------------------------------------------------------------------
+# Version 2.0.0beta3, 1 Jun 2003
+#------------------------------------------------------------------------
+
 * Several improvements to restore: cancel now reports the correct
   message and cleans up correctly.
 
 * Rsync with whitespace and wildcard excludes fixed by replacing
-  argList with argList+ in config.pl.
+  argList with argList+ in config.pl plus a fix to Lib.pm for
+  shell escaping array arguments.
+
+* Fixed rsync restore for character and block special devices
+  (major and minor device numbers weren't correctly restored).
 
 * Fixed typo in bin/BackupPC_restore (XferLOG -> RestoreLOG).
 

@@ -27,13 +27,14 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta3, released 1 Jun 2003.
+# Version 2.0.0, released 14 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 use strict;
+no  utf8;
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::Attrib qw(:all);
@@ -374,6 +375,7 @@ sub processClose
 mkpath("$OutDir/$ShareName", 0, 0777);
 open(NEW_FILES, ">>", "$TopDir/pc/$host/NewFileList")
                  || die("can't open $TopDir/pc/$host/NewFileList");
+binmode(NEW_FILES);
 binmode(STDIN);
 1 while ( TarReadFile(*STDIN) );
 1 while ( sysread(STDIN, my $discard, 1024) );

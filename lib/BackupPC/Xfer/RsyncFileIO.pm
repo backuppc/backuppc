@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta3, released 1 Jun 2003.
+# Version 2.0.0, released 14 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -734,6 +734,7 @@ sub fileDeltaRxNext
                     if ( open(F, "+>", "$fio->{outDirSh}RStmp") ) {
                         my $data;
 			my $byteCnt = 0;
+			binmode(F);
                         while ( $fh->read(\$data, 1024 * 1024) > 0 ) {
                             if ( syswrite(F, $data) != length($data) ) {
                                 $fio->log(sprintf("Can't write len=%d to %s",
@@ -760,6 +761,7 @@ sub fileDeltaRxNext
                 $fh->close;
             } else {
                 if ( open(F, "<", $attr->{fullPath}) ) {
+		    binmode(F);
                     $fio->{rxInFd} = *F;
                     $fio->{rxInName} = $attr->{fullPath};
                 } else {

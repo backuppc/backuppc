@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta3, released 1 Jun 2003.
+# Version 2.0.0, released 14 Jun 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -99,6 +99,7 @@ sub open
         } else {
             open(FH, "<", $fileName) || return;
         }
+	binmode(FH);
         $fh = *FH;
     }
     $compLevel = 0 if ( !$CompZlibOK );
@@ -353,6 +354,7 @@ sub compressCopy
         my $fh = BackupPC::FileZIO->open($destFileZ, 1, $compress);
         my $data;
         if ( defined($fh) && open(LOG, "<", $srcFile) ) {
+	    binmode(LOG);
             while ( sysread(LOG, $data, 65536) > 0 ) {
                 $fh->write(\$data);
             }

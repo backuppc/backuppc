@@ -40,6 +40,7 @@
 #========================================================================
 
 use strict;
+no  utf8;
 use vars qw(%Conf %OrigConf);
 use lib "./lib";
 
@@ -544,7 +545,8 @@ if ( -f $dest && !-f $confCopy ) {
                                            unless chown($uid, $gid, $confCopy);
     die("can't chmod $mode $confCopy\n")   unless chmod($mode, $confCopy);
 }
-open(OUT, ">$dest") || die("can't open $dest for writing\n");
+open(OUT, ">", $dest) || die("can't open $dest for writing\n");
+binmode(OUT);
 my $blockComment;
 foreach my $var ( @$newConf ) {
     if ( length($blockComment)
@@ -636,8 +638,10 @@ sub InstallFile
     if ( $binary ) {
 	die("can't copy($prog, $dest)\n") unless copy($prog, $dest);
     } else {
-	open(PROG, $prog)   || die("can't open $prog for reading\n");
-	open(OUT, ">$dest") || die("can't open $dest for writing\n");
+	open(PROG, $prog)     || die("can't open $prog for reading\n");
+	open(OUT, ">", $dest) || die("can't open $dest for writing\n");
+	binmode(PROG);
+	binmode(OUT);
 	while ( <PROG> ) {
 	    s/__INSTALLDIR__/$Conf{InstallDir}/g;
 	    s/__TOPDIR__/$Conf{TopDir}/g;
@@ -681,6 +685,7 @@ sub ConfigParse
 {
     my($file) = @_;
     open(C, $file) || die("can't open $file");
+    binmode(C);
     my($out, @conf, $var);
     my $comment = 1;
     my $allVars = {};

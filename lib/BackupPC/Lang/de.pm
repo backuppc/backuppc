@@ -579,7 +579,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Klicken Sie auf eine Datei um diese per download wiederherzustellen.
 </ul>
 
-\${h2("Contents of \${EscHTML(\$dirDisplay)}")}
+\${h2("Inhalt von \${EscHTML(\$dirDisplay)}")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">

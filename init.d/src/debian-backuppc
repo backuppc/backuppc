@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# DESCRIPTION
+#
+#   Startup init script for BackupPC on Debian.
+#
+# Distributed with BackupPC version __VERSION__, released __RELEASEDATE__.
+#
+
+set -e
+
+#
+BINDIR=__INSTALLDIR__/bin
+DATADIR=__TOPDIR__
+USER=__BACKUPPCUSER__
+#
+NAME=backuppc
+DAEMON=BackupPC
+
+test -x $BINDIR/$DAEMON || exit 0
+
+case "$1" in
+  start)
+    echo -n "Starting $NAME: "
+    start-stop-daemon --start --pidfile $DATADIR/log/BackupPC.pid \
+			    -c $USER --exec $BINDIR/$DAEMON -- -d
+    echo "ok."
+    ;;
+  stop)
+    echo -n "Stopping $NAME: "
+    start-stop-daemon --stop --pidfile $DATADIR/log/BackupPC.pid -u $USER \
+			    --oknodo --retry 30 -x /usr/bin/perl
+    echo "ok."
+      ;;
+  restart)
+    echo -n "Restarting $NAME: "
+    start-stop-daemon --stop --pidfile $DATADIR/log/BackupPC.pid -u $USER \
+			    --oknodo --retry 30 -x /usr/bin/perl
+    start-stop-daemon --start --pidfile $DATADIR/log/BackupPC.pid \
+			    -c $USER --exec $BINDIR/$DAEMON -- -d
+    echo "ok."
+    ;;
+  reload|force-reload)
+    echo "Reloading $NAME configuration files"
+    start-stop-daemon --stop --pidfile $DATADIR/log/BackupPC.pid \
+			    --signal 1 -x /usr/bin/perl
+    ;;
+  *)
+    echo "Usage: /etc/init.d/$NAME {start|stop|restart|reload}"
+    exit 1
+    ;;
+esac
+
+exit 0

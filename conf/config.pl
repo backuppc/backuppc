@@ -467,11 +467,7 @@ $Conf{IncrPeriod} = 0.97;
 # apart), and then 2 at an interval of 32 * $Conf{FullPeriod} (approx
 # 7-8 months apart).
 #
-# Note that you will have to increase $Conf{FullAgeMax} if you want
-# very old full backups to be kept.  Full backups are removed according
-# to both $Conf{FullKeepCnt} and $Conf{FullAgeMax}.
-#
-# Note also that these two settings are equivalent and both keep just
+# Example: these two settings are equivalent and both keep just
 # the four most recent full dumps:
 #
 #    $Conf{FullKeepCnt} = 4;
@@ -483,6 +479,10 @@ $Conf{FullKeepCnt} = 1;
 # Very old full backups are removed after $Conf{FullAgeMax} days.  However,
 # we keep at least $Conf{FullKeepCntMin} full backups no matter how old
 # they are.
+#
+# Note that $Conf{FullAgeMax} will be increased to $Conf{FullAgeMax}
+# times $Conf{FullPeriod} if $Conf{FullAgeMax} specifies enough
+# full backups to exceed $Conf{FullAgeMax}.
 #
 $Conf{FullKeepCntMin} = 1;
 $Conf{FullAgeMax}     = 90;

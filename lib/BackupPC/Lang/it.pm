@@ -1,6 +1,6 @@
 #!/bin/perl
 #
-# $Id: it.pm,v 1.5 2004/03/29 19:05:24 cbarratt Exp $
+# $Id: it.pm,v 1.7 2004/05/21 02:11:35 cbarratt Exp $
 #
 # Italian i18n file
 #
@@ -124,7 +124,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Server_Summary} = "BackupPC: prospetto server";
+$Lang{BackupPC__Server_Summary} = "BackupPC: prospetto host";
 $Lang{BackupPC__Archive} = "BackupPC: Archive";
 $Lang{BackupPC_Summary} = <<EOF;
 
@@ -384,14 +384,14 @@ Sono attualmente in coda le seguenti richieste di comandi:
 EOF
 
 # --------------------------------
-$Lang{Backup_PC__Log_File__file} = "BackupPC: file di log \$file";
+$Lang{Backup_PC__Log_File__file} = "BackupPC: file \$file";
 $Lang{Log_File__file__comment} = <<EOF;
-\${h1("File di log \$file \$comment")}
+\${h1("File \$file \$comment")}
 <p>
 EOF
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
-Contenuto del file di log <tt>\$file</tt> modificato il \$mtimeStr \$comment
+Contenuto del file <tt>\$file</tt> modificato il \$mtimeStr \$comment
 EOF
 
 # --------------------------------
@@ -1016,7 +1016,7 @@ $Lang{Archive_requested} = "Archivio richiesto da parte di \$User da \$ENV{REMOT
 # -------------------------------------------------
 
 $Lang{Status} = "Stato";
-$Lang{PC_Summary} = "Prospetto PC";
+$Lang{PC_Summary} = "Prospetto host";
 $Lang{LOG_file} = "File log";
 $Lang{LOG_files} = "File log";
 $Lang{Old_LOGs} = "Vecchi log";

@@ -1,5 +1,6 @@
 #!/bin/perl
 #
+# by Ralph Passgang <ralph@debianbase.de> (07.06.2004 for V2.1.0beta3)
 # by Ralph Passgang <ralph@debianbase.de> (06.05.2004 for V2.1.0beta2)
 # by Manfred Herrmann (11.03.2004 for V2.1.0beta0)
 # by Manfred Herrmann (V1.1) (some typo errors + 3 new strings)
@@ -24,7 +25,7 @@ $Lang{Type_incr} = "inkrementell";
 # -----
 
 $Lang{Only_privileged_users_can_view_admin_options} = "Nur privilegierte Nutzer können die Administrator Optionen einsehen.";
-$Lang{H_Admin_Options} = "BackupPC Server: Administrations Optionen";
+$Lang{H_Admin_Options} = "BackupPC: Server Administrationsoptionen";
 $Lang{Admin_Options} = "Admin Optionen";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
@@ -126,7 +127,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Server_Summary} = "BackupPC: Übersicht";
+$Lang{BackupPC__Server_Summary} = "BackupPC: Computer Übersicht";
 $Lang{BackupPC__Archive} = "BackupPC: Archivierung";
 $Lang{BackupPC_Summary}=<<EOF;
 
@@ -151,7 +152,7 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
     <td align="center"> #Voll </td>
     <td align="center"> Alter/Tagen </td>
     <td align="center"> Größe/GB </td>
-    <td align="center"> MB/Sek </td>
+    <td align="center"> MB/sek </td>
     <td align="center"> #Inkr </td>
     <td align="center"> Alter/Tage </td>
     <td align="center"> Status </td>
@@ -288,17 +289,17 @@ $Lang{Pool_Stat} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Backup_Requested_on__host} = "BackupServer: Backup Auftrag für \$host";
+$Lang{BackupPC__Backup_Requested_on__host} = "BackupPC: Backup Auftrag für \$host";
 # --------------------------------
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
 <p>
 Die Antwort des Servers war: \$reply
 <p>
-Gehe zurück zur <a href="\$MyURL?host=\$host">\$host home page</a>.
+Gehe zurück zur <a href="\$MyURL?host=\$host">\$host Hauptseite</a>.
 EOF
 # --------------------------------
-$Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupServer: Starte Backup Bestätigung für \$host";
+$Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: Starte Backup Bestätigung für \$host";
 # --------------------------------
 $Lang{Are_you_sure_start} = <<EOF;
 \${h1("Sind Sie sicher?")}
@@ -315,7 +316,7 @@ Möchten Sie das wirklich tun?
 </form>
 EOF
 # --------------------------------
-$Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupServer: Beende Backup Bestätigung für \$host";
+$Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: Beende Backup Bestätigung für \$host";
 # --------------------------------
 $Lang{Are_you_sure_stop} = <<EOF;
 
@@ -341,12 +342,12 @@ $Lang{Only_privileged_users_can_view_queues_} = "Nur berechtigte Benutzer können
 # --------------------------------
 $Lang{Only_privileged_users_can_archive} = "Nur berechtigte Benutzer könnnen archivieren.";
 # --------------------------------
-$Lang{BackupPC__Queue_Summary} = "BackupServer: Warteschlangen Übersicht";
+$Lang{BackupPC__Queue_Summary} = "BackupPC: Warteschlangen Übersicht";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Backup Warteschlangen Übersicht")}
 <br><br>
-\${h2("Benutzer Warteschlange Übersicht")}
+\${h2("Übersicht Benutzer Aufträge in der Warteschlange")}
 <p>
 Die folgenden Benutzer Aufträge sind eingereiht:
 </p>
@@ -358,7 +359,7 @@ Die folgenden Benutzer Aufträge sind eingereiht:
 </table>
 <br><br>
 
-\${h2("Hintergrund Warteschlange Übersicht")}
+\${h2("Übersicht Hintergrund Aufträge in der Warteschlange")}
 <p>
 Die folgenden Hintergrund Aufträge sind eingereiht:
 </p>
@@ -369,7 +370,7 @@ Die folgenden Hintergrund Aufträge sind eingereiht:
 \$strBg
 </table>
 <br><br>
-\${h2("Kommando Warteschlange Übersicht")}
+\${h2("Übersicht Kommando Aufträge in der Warteschlange")}
 <p>
 Die folgenden Kommando Aufträge sind eingereiht:
 </p>
@@ -383,14 +384,14 @@ Die folgenden Kommando Aufträge sind eingereiht:
 EOF
 
 # --------------------------------
-$Lang{Backup_PC__Log_File__file} = "BackupServer: LOG Datei \$file";
+$Lang{Backup_PC__Log_File__file} = "BackupPC: Datei \$file";
 $Lang{Log_File__file__comment} = <<EOF;
-\${h1("LOG Datei \$file \$comment")}
+\${h1("Datei \$file \$comment")}
 <p>
 EOF
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
-Inhalt der LOG Datei <tt>\$file</tt>, verändert am \$mtimeStr \$comment
+Inhalt der Datei <tt>\$file</tt>, verändert am \$mtimeStr \$comment
 EOF
 
 # --------------------------------
@@ -399,7 +400,7 @@ $Lang{skipped__skipped_lines} = "[ überspringe \$skipped Zeilen ]\n";
 $Lang{_pre___Can_t_open_log_file__file} = "<pre>\nKann LOG Datei nicht öffnen \$file\n";
 
 # --------------------------------
-$Lang{BackupPC__Log_File_History} = "BackupServer: LOG Datei Historie";
+$Lang{BackupPC__Log_File_History} = "BackupPC: LOG Datei Historie";
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("LOG Datei Historie \$hdr")}
 <p>
@@ -413,27 +414,27 @@ EOF
 
 # -------------------------------
 $Lang{Recent_Email_Summary} = <<EOF;
-\${h1("Letzte eMail Übersicht (Sortierung nach Zeitpunkt)")}
+\${h1("Übersicht der letzten eMails (Sortierung nach Zeitpunkt)")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Empfänger </td>
     <td align="center"> Computer </td>
     <td align="center"> Zeitpunkt </td>
-    <td align="center"> Titel </td></tr>
+    <td align="center"> Betreff </td></tr>
 \$str
 </table>
 EOF
  
 
 # ------------------------------
-$Lang{Browse_backup__num_for__host} = "BackupServer: Browsen des Backups \$num für Computer \$host";
+$Lang{Browse_backup__num_for__host} = "BackupPC: Browsen des Backups \$num für Computer \$host";
 
 # ------------------------------
-$Lang{Restore_Options_for__host} = "BackupServer: Restore Optionen für \$host";
+$Lang{Restore_Options_for__host} = "BackupPC: Restore Optionen für \$host";
 $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("Restore Optionen für \$host")}
 <p>
-Sie haben die folgenden Dateien/Verzeichnisse von der Freigabe \$share aus der Backup Nummer #\$num selektiert:
+Sie haben die folgenden Dateien/Verzeichnisse von der Freigabe \$share aus dem Backup mit der Nnummer #\$num selektiert:
 <ul>
 \$fileListStr
 </ul>
@@ -566,14 +567,14 @@ EOF
 
 
 # ------------------------------
-$Lang{Restore_Confirm_on__host} = "BackupServer: Restore Confirm on \$host";
+$Lang{Restore_Confirm_on__host} = "BackupPC: Restore Confirm on \$host";
 
 $Lang{Are_you_sure} = <<EOF;
 \${h1("Sind Sie sicher?")}
 <p>
 Sie starten eine direkte Wiederherstellung auf den Computer \$In{hostDest}.
 Die folgenden Dateien werden auf die Freigabe \$In{shareDest} wiederhergestellt, von
-der Backup Nummer \$num:
+dem Backup mit der Nummer \$num:
 <p>
 <table border>
 <tr><td>Original Datei/Verzeichnis:</td><td>Wird wiederhergestellt nach:</td></tr>
@@ -596,13 +597,13 @@ EOF
 
 
 # --------------------------
-$Lang{Restore_Requested_on__hostDest} = "BackupServer: Wiederherstellung beauftragt auf Computer \$hostDest";
+$Lang{Restore_Requested_on__hostDest} = "BackupPC: Wiederherstellung beauftragt auf Computer \$hostDest";
 $Lang{Reply_from_server_was___reply} = <<EOF;
 \${h1(\$str)}
 <p>
 Die Antwort des BackupServers war: \$reply
 <p>
-Zurück zur <a href="\$MyURL?host=\$hostDest">\$hostDest home page</a>.
+Zurück zur <a href="\$MyURL?host=\$hostDest">\$hostDest Hauptseite</a>.
 EOF
 
 $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
@@ -633,7 +634,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </p>
 \${h2("Backup Übersicht")}
 <p>
-Klicken Sie auf die Backup Nummer um durch Dateien zu browsen und bei Bedarf wiederherzustellen.
+Klicken Sie auf die Backupnummer um durch Dateien zu browsen und bei Bedarf wiederherzustellen.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
@@ -670,13 +671,13 @@ Klicken Sie auf die Backup Nummer um durch Dateien zu browsen und bei Bedarf wie
 <p>
 "Bestehende Dateien" bedeutet bereits im Pool vorhanden.
 "Neue Dateien" bedeutet neu zum Pool hinzugefügt.
-Leere Dateien und eventuelle Datei Fehler sind nicht in den Summen enthalten.
+Leere Dateien und eventuelle Dateifehler sind nicht in den Summen enthalten.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Gesamt </td>
-    <td align="center" colspan="2"> Bestehende Dateien </td>
-    <td align="center" colspan="2"> Neue Dateien </td>
+    <td align="center" colspan="2"> bestehende Dateien </td>
+    <td align="center" colspan="2"> neue Dateien </td>
 </tr>
 <tr class="tableheader">
     <td align="center"> Backup# </td>
@@ -790,8 +791,8 @@ $Lang{Backup_browse_for__host} = <<EOF;
         (vor \$backupAge Tagen),
 \$filledBackup
 <li> Verzeichnis eingeben: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
-<li> Klicken Sie auf ein Verzeichnis um dieses zu durchsuchen,
-<li> Klicken Sie auf eine Datei um diese per Download wiederherzustellen,
+<li> Klicken Sie auf ein Verzeichnis um dieses zu durchsuchen.
+<li> Klicken Sie auf eine Datei um diese per Download wiederherzustellen.
 <li> Einsehen der Backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">Historie</a> des aktuellen Verzeichnisses.
 </ul>
 </form>
@@ -842,11 +843,11 @@ $Lang{DirHistory_for__host} = <<EOF;
 <p>
 Diese Ansicht zeigt alle unterschiedlichen Versionen der Dateien in den Datensicherungen:
 <ul>
-<li> Klicken Sie eine Datensicherungs Nummer für die Datensicherungs Übersicht,
-<li> Wählen Sie hier einen Verzeichnis Namen: (\$Lang->{DirHistory_dirLink}) um Verzeichnisse anzuzeigen,
-<li> Klicken Sie auf eine Datei Version (\$Lang->{DirHistory_fileLink}0,
-     \$Lang->{DirHistory_fileLink}1, ...) für einen Download der Datei,
-<li> Dateien mit dem gleichen Inhalt in verschiedenen Datensicherungen haben die gleiche Versionsnummer,
+<li> Klicken Sie auf eine Datensicherungsnummer für die Datensicherungsübersicht.
+<li> Wählen Sie hier auf einen Verzeichnis Namen: (\$Lang->{DirHistory_dirLink}) um Verzeichnisse anzuzeigen.
+<li> Klicken Sie auf eine Dateiversion (\$Lang->{DirHistory_fileLink}0,
+     \$Lang->{DirHistory_fileLink}1, ...) für einen Download der Datei.
+<li> Dateien mit dem gleichen Inhalt in verschiedenen Datensicherungen haben die gleiche Versionsnummer.
 <li> Dateien oder Verzeichnisse, die in einer Datensicherung nicht vorhanden sind, haben dort keinen Eintrag.
 <li> Dateien mit der gleichen Version können unterschiedliche Attribute haben. Wählen Sie die Datensicherungsnummer um die Attribute anzuzeigen.
 </ul>
@@ -855,14 +856,14 @@ Diese Ansicht zeigt alle unterschiedlichen Versionen der Dateien in den Datensic
 
 <br>
 <table cellspacing="2" cellpadding="3">
-<tr class="fviewheader"><td>Datensicherung Nummer</td>\$backupNumStr</tr>
-<tr class="fviewheader"><td>Sicherung Zeitpunkt</td>\$backupTimeStr</tr>
+<tr class="fviewheader"><td>Datensicherungnummer</td>\$backupNumStr</tr>
+<tr class="fviewheader"><td>Sicherungszeitpunkt</td>\$backupTimeStr</tr>
 \$fileStr
 </table>
 EOF
 
 # ------------------------------
-$Lang{Restore___num_details_for__host} = "BackupServer: Restore #\$num Details für Computer \$host";
+$Lang{Restore___num_details_for__host} = "BackupPC: Restore #\$num Details für Computer \$host";
 
 $Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("Restore #\$num Details für Computer \$host")}
@@ -922,13 +923,13 @@ $Lang{Archive___num_details_for__host2 } = <<EOF;
 \${h1("Computer Liste")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td>Host</td><td>Datensicherung Nummer</td></tr>
+<tr class="tableheader"><td>Computer</td><td>Datensicherungsnummer</td></tr>
 \$HostListStr
 </table>
 EOF
 
 # -----------------------------------
-$Lang{Email_Summary} = "BackupServer: eMail Übersicht";
+$Lang{Email_Summary} = "BackupPC: eMail Übersicht";
 
 # -----------------------------------
 #  !! ERROR messages !!
@@ -1070,7 +1071,7 @@ $Lang{Prior_to_that__pings} = "vorher, Pings";
 
 # -----
 $Lang{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times} = <<EOF;
-<li>\$priorStr zu Computer \$host \$StatusHost{aliveCnt}
+<li>\$priorStr zu Computer \$host waren \$StatusHost{aliveCnt}
         mal fortlaufend erfolgreich.
 EOF
 
@@ -1117,7 +1118,7 @@ $Lang{fileHeader} = <<EOF;
     </tr>
 EOF
 
-$Lang{Home} = "Home";
+$Lang{Home} = "Hauptseite";
 $Lang{Browse} = "Datensicherungen anzeigen";
 $Lang{Last_bad_XferLOG} = "Letztes fehlerhafte XferLOG";
 $Lang{Last_bad_XferLOG_errors_only} = "Letztes fehlerhafte XferLOG (nur&nbsp;Fehler)";
@@ -1164,7 +1165,7 @@ Klicken Sie auf die Archiv Nummer um die Details anzuzeigen.
 <p>
 EOF
 
-$Lang{BackupPC__Documentation} = "BackupServer: Dokumentation";
+$Lang{BackupPC__Documentation} = "BackupPC: Dokumentation";
 
 $Lang{No} = "nein";
 $Lang{Yes} = "ja";
@@ -1211,7 +1212,7 @@ $Lang{Reason_archive_canceled_by_user} = "Archivierung abgebrochen durch Benutze
 # Email messages
 
 # No backup ever
-$Lang{EMailNoBackupEverSubj} = "BackupServer: keine Backups von \$host waren erfolgreich";
+$Lang{EMailNoBackupEverSubj} = "BackupPC: keine Backups von \$host waren erfolgreich";
 $Lang{EMailNoBackupEverMesg} = <<'EOF';
 To: $user$domain
 cc:
@@ -1219,7 +1220,7 @@ Subject: $subj
 
 Hallo $userName,
 
-Ihr Computer ($host) wurde durch den BackupServer noch nie erfolgreich gesichert.
+Ihr Computer ($host) wurde durch den Backup Server noch nie erfolgreich gesichert.
 
 Backups sollten automatisch erfolgen, wenn Ihr Computer am Netzwerk angeschlossen ist.
 Sie sollten Ihren Backup-Betreuer oder den IT-Dienstleister kontaktieren, wenn:
@@ -1241,7 +1242,7 @@ http://www.zipptec.de
 EOF
 
 # No recent backup
-$Lang{EMailNoBackupRecentSubj} = "BackupServer: keine neuen Backups für Computer \$host";
+$Lang{EMailNoBackupRecentSubj} = "BackupPC: keine neuen Backups für Computer \$host";
 $Lang{EMailNoBackupRecentMesg} = <<'EOF';
 To: $user$domain
 cc:

@@ -2,7 +2,7 @@
 
 #my %lang;
 #use strict;
-#File:  nl.pm       version 1.0.2
+#File:  nl.pm       version 1.3
 # --------------------------------
 
 $Lang{Start_Archive} = "Start Archivering";
@@ -117,7 +117,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Server_Summary} = "BackupPC: Server overzicht";
+$Lang{BackupPC__Server_Summary} = "BackupPC: Overzicht machines";
 $Lang{BackupPC__Archive} = "BackupPC: Archivering";
 $Lang{BackupPC_Summary}=<<EOF;
 
@@ -376,14 +376,14 @@ Deze aanvragen via opdracht staan momenteel in de wachtrij:
 EOF
 
 # --------------------------------
-$Lang{Backup_PC__Log_File__file} = "BackupPC: Logbestand \$file";
+$Lang{Backup_PC__Log_File__file} = "BackupPC: Bestand \$file";
 $Lang{Log_File__file__comment} = <<EOF;
-\${h1("Logbestand \$file \$comment")}
+\${h1("Bestand \$file \$comment")}
 <p>
 EOF
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
-Inhoud van logbestand <tt>\$file</tt>, gewijzigd \$mtimeStr \$comment
+Inhoud van bestand <tt>\$file</tt>, gewijzigd \$mtimeStr \$comment
 EOF
 
 # --------------------------------
@@ -1005,7 +1005,7 @@ $Lang{Archive_requested} = "Archivering aangevraagd door \$User vanaf \$ENV{REMO
 # -------------------------------------------------
 
 $Lang{Status} = "Status";
-$Lang{PC_Summary} = "PC overzicht";
+$Lang{PC_Summary} = "Overzicht machine";
 $Lang{LOG_file} = "LOG-bestand";
 $Lang{LOG_files} = "LOG-bestanden";
 $Lang{Old_LOGs} = "Oude LOGs";
@@ -1119,7 +1119,7 @@ $Lang{fileHeader} = <<EOF;
 EOF
 
 $Lang{Home} = "Home";
-$Lang{Browse} = "Bekijke backups";
+$Lang{Browse} = "Bekijken backups";
 $Lang{Last_bad_XferLOG} = "Laaste overdr.LOG met fouten";
 $Lang{Last_bad_XferLOG_errors_only} = "Laaste overdr.LOG (enkel foutmeldingen)";
 
@@ -1273,7 +1273,7 @@ van uw pc zou crashen. Hierin zijn nieuwe e-mail en bijlagen inbegrepen.
 Met vriendelijke groeten,
 BackupPC Genie
 http://backuppc.sourceforge.net
-eof
+EOF
 
 # Old Outlook files
 $Lang{EMailOutlookBackupSubj} = "BackupPC: Outlookbestanden op pc \$host moeten gebackupt worden";
@@ -1317,4 +1317,5 @@ $Lang{howLong_not_been_backed_up} = "(nog) niet succesvol gebackupt";
 $Lang{howLong_not_been_backed_up_for_days_days} = "reeds sedert \$days dagen niet gebackupt";
 
 #end of lang_nl.pm
+
 

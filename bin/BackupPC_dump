@@ -1102,8 +1102,25 @@ sub BackupExpire
         # Delete any old full backups, according to $Conf{FullKeepCntMin}
 	# and $Conf{FullAgeMax}.
         #
+	# First make sure that $Conf{FullAgeMax} is at least bigger
+	# than $Conf{FullPeriod} * $Conf{FullKeepCnt}, including
+	# the exponential array case.
+        #
+	my $fullKeepCnt = $Conf{FullKeepCnt};
+	$fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
+	my $oldestFull;
+	my $fullPeriod = int(0.5 + $Conf{FullPeriod});
+	for ( my $i = 0 ; $i < @$fullKeepCnt ; $i++ ) {
+	    $oldestFull += $fullKeepCnt->[$i] * $fullPeriod;
+	    $fullPeriod *= 2;
+	}
+	$oldestFull += $fullPeriod;	# add some buffer
+
         if ( $cntFull > $Conf{FullKeepCntMin}
                && $oldestFull > $Conf{FullAgeMax}
+               && $oldestFull > $oldestFull
+	       && $Conf{FullKeepCntMin} > 0
+	       && $Conf{FullAgeMax} > 0
                && (@Backups <= $firstFull + 1
                         || !$Backups[$firstFull + 1]{noFill}) ) {
             #

@@ -82,7 +82,8 @@ my $mesg = "";
 
 my @badHosts = ();
 foreach my $host ( sort(keys(%Status)) ) {
-    next if ( $Status{$host}{reason} ne "backup failed"
+    next if ( ($Status{$host}{reason} ne "Reason_backup_failed"
+               && $Status{$host}{reason} ne "Reason_restore_failed")
            || $Status{$host}{error} =~ /^lost network connection to host/ );
     push(@badHosts, "$host ($Status{$host}{error})");
 }

@@ -148,7 +148,8 @@ for my $pool ( qw(pool cpool) ) {
         $fileLinkMax   = 0;
         $fileCntRename = 0;
         %FixList       = ();
-        find({wanted => \&GetPoolStats}, "$TopDir/$pool/$dir");
+        find({wanted => \&GetPoolStats}, "$TopDir/$pool/$dir")
+					    if ( -d "$TopDir/$pool/$dir" );
         my $kb   = $blkCnt / 2;
         my $kbRm = $blkCntRm / 2;
         my $kb2  = $blkCnt2 / 2;

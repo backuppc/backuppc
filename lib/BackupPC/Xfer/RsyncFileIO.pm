@@ -711,6 +711,17 @@ sub fileDeltaRxStart
                   . " ($fio->{rxFile}{size} vs $rxSize)")
                         if ( $fio->{logLevel} >= 5 );
     }
+    #
+    # If compression was off and now on, or on and now off, then
+    # don't do an exact match.
+    #
+    if ( defined($fio->{rxLocalAttr})
+	    && !$fio->{rxLocalAttr}{compress} != !$fio->{xfer}{compress} ) {
+        $fio->{rxMatchBlk} = undef;     # compression changed, so no file match
+        $fio->log("$fio->{rxFile}{name}: compression changed, so no match"
+              . " ($fio->{rxLocalAttr}{compress} vs $fio->{xfer}{compress})")
+                    if ( $fio->{logLevel} >= 4 );
+    }
     delete($fio->{rxInFd});
     delete($fio->{rxOutFd});
     delete($fio->{rxDigest});

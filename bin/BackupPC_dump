@@ -348,7 +348,7 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
 }
 
 if ( !$opts{i} && !$opts{f} && $StatusHost{backoffTime} > time ) {
-    printf(LOG "%sskipping because of user requested delay (%.1f hours left)",
+    printf(LOG "%sskipping because of user requested delay (%.1f hours left)\n",
                 $bpc->timeStamp, ($StatusHost{backoffTime} - time) / 3600);
     NothingToDo($needLink);
 }

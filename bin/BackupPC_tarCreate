@@ -423,10 +423,28 @@ sub TarWriteFile
         TarWriteFileInfo($fh, $hdr);
         my($data, $size);
         while ( $f->read(\$data, $BufSize) > 0 ) {
+            if ( $size + length($data) > $hdr->{size} ) {
+                print(STDERR "Error: truncating $hdr->{fullPath} to"
+                           . " $hdr->{size} bytes\n");
+                $data = substr($data, 0, $hdr->{size} - $size);
+                $ErrorCnt++;
+            }
             TarWrite($fh, \$data);
             $size += length($data);
         }
         $f->close;
+        if ( $size != $hdr->{size} ) {
+            print(STDERR "Error: padding $hdr->{fullPath} to $hdr->{size}"
+                       . " bytes from $size bytes\n");
+            $ErrorCnt++;
+            while ( $size < $hdr->{size} ) {
+                my $len = $hdr->{size} - $size;
+                $len = $BufSize if ( $len > $BufSize );
+                $data = "\0" x $len;
+                TarWrite($fh, \$data);
+                $size += $len;
+            }
+        }
         TarWritePad($fh, $size);
 	$FileCnt++;
 	$ByteCnt += $size;

@@ -102,8 +102,10 @@ sub NewRequest
 	$Lang   = $bpc->Lang();
 	$ConfigMTime = $bpc->ConfigMTime();
     } elsif ( $bpc->ConfigMTime() != $ConfigMTime ) {
-        $bpc->ServerMesg("log Re-read config file because mtime changed");
-        $bpc->ServerMesg("server reload");
+	$bpc->ConfigRead();
+	%Conf   = $bpc->Conf();
+	$Lang   = $bpc->Lang();
+	$ConfigMTime = $bpc->ConfigMTime();
     }
 
     #
@@ -153,6 +155,15 @@ EOF
 	   $Hosts->{$host}{moreUsers} =
 	       {map {$_, 1} split(",", $Hosts->{$host}{moreUsers}) }
 	}
+    }
+
+    #
+    # Untaint the host name
+    #
+    if ( $In{host} =~ /^([\w.\s-]+)$/ ) {
+	$In{host} = $1;
+    } else {
+	delete($In{host});
     }
 }
 

@@ -269,8 +269,7 @@ BackupPC server data to tape.
 
 Various programs and scripts use rsync to provide hardlinked backups.
 See, for example, Mike Rubel's site (L<http://www.mikerubel.org/computers/rsync_snapshots>),
-JW Schultz's dirvish (L<http://www.pegasys.ws/dirvish> (although as of
-June 2004 this link doesn't work)),
+JW Schultz's dirvish (L<http://www.dirvish.org>),
 Ben Escoto's rdiff-backup (L<http://rdiff-backup.stanford.edu>),
 and John Bowman's rlbackup (L<http://www.math.ualberta.ca/imaging/rlbackup>).
 
@@ -1543,7 +1542,7 @@ status files to keep.
 Note that for direct restore to work, the $Conf{XferMethod} must
 be able to write to the client.  For example, that means an SMB
 share for smbclient needs to be writable, and the rsyncd module
-needs "read only" set to "yes".  This creates additional security
+needs "read only" set to "false".  This creates additional security
 risks.  If you only create read-only SMB shares (which is a good
 idea), then the direct restore will fail.  You can disable the
 direct restore option by setting $Conf{SmbClientRestoreCmd},

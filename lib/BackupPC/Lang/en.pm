@@ -784,8 +784,7 @@ EOF
 
 # --------
 $Lang{Last_status_is_state_StatusHost_state_reason_as_of_startTime} = <<EOF;
-<li>Last status is state \"\$StatusHost{state}\"\$reason
-    as of \$startTime.
+<li>Last status is state \"\$Lang->{\$StatusHost{state}}\"\$reason as of \$startTime.
 EOF
 
 # --------
@@ -889,5 +888,22 @@ $Lang{incremental} = "incr";
 $Lang{failed} = "failed";
 $Lang{success} = "success";
 $Lang{and} = "and";
+
+# ------
+# Hosts states and reasons
+$Lang{Status_idle} = "idle";
+$Lang{Status_backup_starting} = "backup starting";
+$Lang{Status_backup_in_progress} = "backup in progress";
+$Lang{Status_restore_starting} = "restore starting";
+$Lang{Status_restore_in_progress} = "restore in progress";
+$Lang{Status_link_pending} = "link pending";
+$Lang{Status_link_running} = "link running";
+
+$Lang{Reason_backup_done} = "backup done";
+$Lang{Reason_restore_done} = "restore done";
+$Lang{Reason_nothing_to_do} = "nothing to do";
+$Lang{Reason_backup_failed} = "backup failed";
+$Lang{Reason_no_ping} = "no ping";
+$Lang{Reason_backup_canceled_by_user} = "backup canceled by user";
 
 #end of lang_en.pm

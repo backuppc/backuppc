@@ -203,8 +203,8 @@ sub Action_Summary
     <td align="center"> $fullRate </td>
     <td align="center"> $incrCnt </td>
     <td align="center"> $incrAge </td>
-    <td align="center"> $Status{$host}{state} </td>
-    <td> $Status{$host}{reason} </td></tr>
+    <td align="center"> $Lang->{$Status{$host}{state}} </td>
+    <td> $Lang->{$Status{$host}{reason}} </td></tr>
 EOF
         if ( @Backups == 0 ) {
             $hostCntNone++;
@@ -1332,7 +1332,7 @@ EOF
                 $StatusHost{startTime} : $StatusHost{endTime});
     my $reason = "";
     if ( $StatusHost{reason} ne "" ) {
-        $reason = " ($StatusHost{reason})";
+        $reason = " ($Lang->{$StatusHost{reason}})";
     }
     $statusStr .= eval("qq{$Lang->{Last_status_is_state_StatusHost_state_reason_as_of_startTime}}");
 
@@ -1409,7 +1409,7 @@ EOF
         $jobStr .= "</tr>\n";
     }
     foreach my $host ( sort(keys(%Status)) ) {
-        next if ( $Status{$host}{reason} ne "backup failed" );
+        next if ( $Status{$host}{reason} ne "Reason_backup_failed" );
         my $startTime = timeStamp2($Status{$host}{startTime});
         my($errorTime, $XferViewStr);
         if ( $Status{$host}{errorTime} > 0 ) {

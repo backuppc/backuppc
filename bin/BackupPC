@@ -307,16 +307,16 @@ sub Main_Initialize
     # Requeue any pending links.
     #
     foreach my $host ( sort(keys(%$Hosts)) ) {
-        if ( $Status{$host}{state} eq "backup in progress" ) {
+        if ( $Status{$host}{state} eq "Status_backup_in_progress" ) {
             #
             # should we restart it?  skip it for now.
             #
-            $Status{$host}{state} = "idle";
-        } elsif ( $Status{$host}{state} eq "link pending"
-                || $Status{$host}{state} eq "link running" ) {
+            $Status{$host}{state} = "Status_idle";
+        } elsif ( $Status{$host}{state} eq "Status_link_pending"
+                || $Status{$host}{state} eq "Status_link_running" ) {
             QueueLink($host);
         } else {
-            $Status{$host}{state} = "idle";
+            $Status{$host}{state} = "Status_idle";
         }
         $Status{$host}{activeJob} = 0;
     }
@@ -432,7 +432,7 @@ sub Main_TryToRun_CmdQueue
         $Jobs{$host}{reqTime}   = $req->{reqTime};
         $Jobs{$host}{cmd}       = $cmd;
         $Jobs{$host}{type}      = $Status{$host}{type};
-        $Status{$host}{state}   = "link running";
+        $Status{$host}{state}   = "Status_link_running";
         $Status{$host}{activeJob} = 1;
         $Status{$host}{endTime} = time;
         $CmdJob = $host if ( $host ne $bpc->trashJob );
@@ -564,7 +564,7 @@ sub Main_TryToRun_Bg_or_User_Queue
         $Jobs{$host}{user}       = $user;
         $Jobs{$host}{type}       = $type;
         if ( !$req->{dhcp} ) {
-            $Status{$host}{state}     = "$type starting";
+            $Status{$host}{state}     = "Status_".$type."_starting";
             $Status{$host}{activeJob} = 1;
             $Status{$host}{startTime} = time;
             $Status{$host}{endTime}   = "";
@@ -788,7 +788,7 @@ sub Main_Check_Job_Messages
                     $Jobs{$newHost} = $Jobs{$host};
                     delete($Jobs{$host});
                     $host = $newHost;
-                    $Status{$host}{state}      = "backup starting";
+                    $Status{$host}{state}      = "Status_backup_starting";
                     $Status{$host}{activeJob}  = 1;
                     $Status{$host}{startTime}  = $Jobs{$host}{startTime};
                     $Status{$host}{endTime}    = "";
@@ -809,7 +809,7 @@ sub Main_Check_Job_Messages
                           $Jobs{$host}{dhcpHostIP}
                                 ? ", dhcp=$Jobs{$host}{dhcpHostIP}" : "",
                           ", share=$Jobs{$host}{shareName})\n");
-                $Status{$host}{state}     = "backup in progress";
+                $Status{$host}{state}     = "Status_backup_in_progress";
                 $Status{$host}{reason}    = "";
                 $Status{$host}{type}      = $1;
                 $Status{$host}{startTime} = time;
@@ -827,7 +827,7 @@ sub Main_Check_Job_Messages
                           $Jobs{$host}{tarPid} > 0
                                 ? ", tarPid=$Jobs{$host}{tarPid}" : "",
                           ")\n");
-                $Status{$host}{state}     = "restore in progress";
+                $Status{$host}{state}     = "Status_restore_in_progress";
                 $Status{$host}{reason}    = "";
                 $Status{$host}{type}      = "restore";
                 $Status{$host}{startTime} = time;
@@ -835,27 +835,27 @@ sub Main_Check_Job_Messages
                 $Status{$host}{aliveCnt}++;
             } elsif ( $mesg =~ /^(full|incr) backup complete/ ) {
                 print(LOG $bpc->timeStamp, "Finished $1 backup on $host\n");
-                $Status{$host}{reason}    = "backup done";
+                $Status{$host}{reason}    = "Reason_backup_done";
                 delete($Status{$host}{error});
                 delete($Status{$host}{errorTime});
                 $Status{$host}{endTime}   = time;
             } elsif ( $mesg =~ /^restore complete/ ) {
                 print(LOG $bpc->timeStamp, "Finished restore on $host\n");
-                $Status{$host}{reason}    = "restore done";
+                $Status{$host}{reason}    = "Reason_restore_done";
                 delete($Status{$host}{error});
                 delete($Status{$host}{errorTime});
                 $Status{$host}{endTime}   = time;
             } elsif ( $mesg =~ /^nothing to do/ ) {
-                $Status{$host}{state}     = "idle";
-                $Status{$host}{reason}    = "nothing to do";
+                $Status{$host}{state}     = "Status_idle";
+                $Status{$host}{reason}    = "Reason_nothing_to_do";
                 $Status{$host}{startTime} = time;
                 $Status{$host}{dhcpCheckCnt}--
                                 if ( $Status{$host}{dhcpCheckCnt} > 0 );
             } elsif ( $mesg =~ /^no ping response/
                             || $mesg =~ /^ping too slow/ ) {
-                $Status{$host}{state}     = "idle";
-                if ( $Status{$host}{reason} ne "backup failed" ) {
-                    $Status{$host}{reason}    = "no ping";
+                $Status{$host}{state}     = "Status_idle";
+                if ( $Status{$host}{reason} ne "Reason_backup_failed" ) {
+                    $Status{$host}{reason}    = "Reason_no_ping";
                     $Status{$host}{startTime} = time;
                 }
                 $Status{$host}{deadCnt}++;
@@ -863,8 +863,8 @@ sub Main_Check_Job_Messages
 		    $Status{$host}{aliveCnt} = 0;
 		}
             } elsif ( $mesg =~ /^dump failed: (.*)/ ) {
-                $Status{$host}{state}     = "idle";
-                $Status{$host}{reason}    = "backup failed";
+                $Status{$host}{state}     = "Status_idle";
+                $Status{$host}{reason}    = "Reason_backup_failed";
                 $Status{$host}{error}     = $1;
                 $Status{$host}{errorTime} = time;
                 $Status{$host}{endTime}   = time;
@@ -915,7 +915,7 @@ sub Main_Check_Job_Messages
                 my $cmd = $Jobs{$host}{cmd};
                 $cmd =~ s/$BinDir\///g;
                 print(LOG $bpc->timeStamp, "Finished $host ($cmd)\n");
-                $Status{$host}{state}    = "idle";
+                $Status{$host}{state}    = "Status_idle";
                 $Status{$host}{endTime}  = time;
                 $CmdJob = "";
                 $RunNightlyWhenIdle = 0 if ( $cmd eq "BackupPC_nightly"
@@ -926,11 +926,11 @@ sub Main_Check_Job_Messages
                 # processing for this host.
                 #
                 if ( defined($Status{$host})
-                            && ($Status{$host}{reason} eq "backup done"
+                            && ($Status{$host}{reason} eq "Reason_backup_done"
                                 || $Status{$host}{needLink}) ) {
                     QueueLink($host);
                 } elsif ( defined($Status{$host}) ) {
-                    $Status{$host}{state} = "idle";
+                    $Status{$host}{state} = "Status_idle";
                 }
             }
             delete($Jobs{$host});
@@ -1021,8 +1021,8 @@ sub Main_Check_Client_Messages
                     vec($FDread, $Jobs{$host}{fn}, 1) = 0;
                     close($Jobs{$host}{fh});
                     delete($Jobs{$host});
-                    $Status{$host}{state}     = "idle";
-                    $Status{$host}{reason}    = "backup canceled by $user";
+                    $Status{$host}{state}     = "Status_idle";
+                    $Status{$host}{reason}    = "Reason_backup_canceled_by_user"; #FIXME: user should be $user (we need to substitute the variable in the l10n stuff)
                     $Status{$host}{activeJob} = 0;
                     $Status{$host}{startTime} = time;
                     $reply = "ok: backup of $host cancelled";
@@ -1327,7 +1327,7 @@ sub QueueLink
     my($host) = @_;
 
     return if ( $CmdQueueOn{$host} );
-    $Status{$host}{state}    = "link pending";
+    $Status{$host}{state}    = "Status_link_pending";
     $Status{$host}{needLink} = 0;
     unshift(@CmdQueue, {
             host    => $host,
@@ -1367,7 +1367,7 @@ sub HostsUpdate
     #
     foreach my $host ( sort(keys(%$Hosts)) ) {
         next if ( defined($Status{$host}) );
-        $Status{$host}{state} = "idle";
+        $Status{$host}{state} = "Status_idle";
         print(LOG $bpc->timeStamp, "Added host $host to backup list\n");
     }
     foreach my $host ( sort(keys(%Status)) ) {

@@ -793,7 +793,7 @@ EOF
 
 # --------
 $Lang{Last_status_is_state_StatusHost_state_reason_as_of_startTime} = <<EOF;
-<li>L\'état courant est \"\$StatusHost{state}\"\$reason depuis \$startTime.
+<li>L\'état courant est \"\$Lang->{\$StatusHost{state}}\"\$reason depuis \$startTime.
 EOF
 
 # --------
@@ -897,5 +897,23 @@ $Lang{incremental} = "incrémental";
 $Lang{failed} = "échec";
 $Lang{success} = "succès";
 $Lang{and} = "et";
+
+# ------
+# Hosts states and reasons
+$Lang{Status_idle} = "inactif";
+$Lang{Status_backup_starting} = "début de la sauvegarde";
+$Lang{Status_backup_in_progress} = "sauvegarde en cours";
+$Lang{Status_restore_starting} = "début de la restoration";
+$Lang{Status_restore_in_progress} = "restoration en cours";
+$Lang{Status_link_pending} = "en attente de l'édition de liens";
+$Lang{Status_link_running} = "édition de liens en cours";
+
+$Lang{Reason_backup_done} = "sauvegarde terminée";
+$Lang{Reason_restore_done} = "restauration terminée";
+$Lang{Reason_nothing_to_do} = "rien à faire";
+$Lang{Reason_backup_failed} = "la sauvegarde a échouée";
+$Lang{Reason_no_ping} = "pas de ping";
+$Lang{Reason_backup_canceled_by_user} = "sauvegarde annulée par l'utilisateur";
+
 
 #end of lang_fr.pm

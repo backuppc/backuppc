@@ -1497,12 +1497,12 @@ h2 {
     font-size:1em;
     color:#000000
 }
-        
+
 p {
     font-family:arial,sans-serif;
     font-size:.9em
 }
-        
+
 a {
     font-family:arial,sans-serif;
     font-size:1em;
@@ -1512,16 +1512,16 @@ a {
 li {
     font-size:.9em;
 }
-        
+
 a:hover {
     color:#cc0000;
     text-decoration:none
 }
-        
+
 a.NavCurrent {
     font-weight:bold;
 }
-        
+
 a.navbar {
     padding-left:5px;
     padding-right:5px;
@@ -1536,7 +1536,7 @@ a.navbar {
     padding:3px;
     padding-left:10px
 }
-        
+
 .h2 {
     font-family:arial,sans-serif;
     font-size:1em;
@@ -1558,76 +1558,77 @@ a.navbar {
     font-weight:bold;
     background-color:#cccccc
 }
-    
+
 .fviewheader {
     font-weight:bold;
     font-size:.8em;
     color:#ffffff;
     background-color:#999999
 }
-    
+
 .fviewborder {
     border-bottom:1px solid #000000;
     border-left:1px dotted #666666;
     background-color:#dddddd;
     font-size:.9em;
 }
-    
+
 .fviewon {
-    background-color:#cccccc
+    background-color:#cccccc;
 }
 
 .fviewoff {
-    background-color:#ffffff
+    background-color:#ffffff;
 }
 
 .fview {
-    font-size:13px;
+    font-size:.8em;
     font-family:arial,sans-serif;
     text-decoration:none;
     line-height:15px
 }
 
 .fviewbold {
-    font-size:13px;
+    font-size:.9em;
     font-family:arial,sans-serif;
     text-decoration:none;
     line-height:15px;
-    font-weight:bold
+    font-weight:bold;
 }
 
 .histView {
     border-bottom:1px solid #000000;
     border-left:2px solid #ffffff;
-    background-color:#dddddd
+    background-color:#dddddd;
+    font-size:.9em;
 }
-    
+
 .histViewMis {
     border-bottom:1px solid #000000;
     background-color:#ffdddd
 }
-    
+
 div.NavMenu {
     width:18%;
     margin:0px;
     background-color:#ddeeee;
 }
-             
+
 div.NavMenu a {
     font-size:.8em;
     display:block;
     margin-left:8px;
     padding:2px;
 }
-             
+
 div.NavTitle {
     padding-left:10px;
     background-color:#99cc33;
     font-family:arial,sans-serif;
     color:#000000;
-    font-weight:bold
+    font-weight:bold;
 }
-             
+
 #Content {
     float:right;
     width:80%;

@@ -27,6 +27,12 @@
 * Added directory history display to BackupPC_Admin, allowing the
   user to quickly see which files changed between backups.
 
+* A failed full dump is now saved as a partial (incomplete) dump,
+  provided it includes some files.  This can be used for browsing,
+  restoring etc, and will also form the basis of resuming full
+  dumps.  Only one partial is kept, and it is removed as soon
+  as a success full (or a new partial) is done.
+
 * Browsing and directory history now sort the files in a
   case-insensitive manner.
 
@@ -34,6 +40,48 @@
   host search text box to the top of the hosts section.  This was
   done to move the variable-length part of the Nav bar (when all
   hosts are displayed) to the bottom.
+
+* In BackupPC_Admin, default REMOTE_USER to $Conf{BackupPCUser}
+  if it is not defined.  This allows the CGI interface to work
+  when AdminUsers = '*'.  Reported by Quentin Arce.
+
+* For SMB, code that detected files with a read-locked region (eg:
+  outlook .pst files), removed them and then tried to link with an
+  earlier version was broken.  This code missed a step of mangling
+  the file names.  This is now fixed.  Reported by Pierre Bourgin.
+
+* A backup of a share that has zero files is now considered
+  fatal. This is used to catch miscellaneous Xfer errors that
+  result in no files being backed up.  A new config parameter
+  $Conf{BackupZeroFilesIsFatal} (defaults to 1) and can be set to
+  zero to turn off this check. Suggested by Guillaume Filion.
+
+* SMB: now detect NT_STATUS_ACCESS_DENIED on entire share or BackupFilesOnly
+  (also ERRDOS - ERRnoaccess (Access denied.) for older versions of
+  smbclient.)  Suggested by Guillaume Filion.
+
+* SMB: now detects "tree connect failed: NT_STATUS_BAD_NETWORK_NAME" and
+  the dump is considered failed.
+
+* Rsync: Previously BackupFilesOnly = '/' did --include '/' --exclude '/*',
+  which just included the '/' directory and nothing below.  Now it
+  does just --include '/', which should include everything.
+  Reported by denon.
+
+* Add hostError to DumpPostUserCmd variable substitutions for both dump
+  and restore.
+
+* Verbose output in Lib.pm goes to STDERR, not STDOUT.  This now
+  makes BackupPC_dump -v work better.
+
+* Don't allow browsing with ".." in directory in case a user tries
+  to trick BackupPC_Admin into displaying directories outside where
+  they are allowed.
+
+* Required File::RsyncP version is now 0.44, since File::RsyncP 0.44
+  fixes large file (>2GB) bugs.  Large file bugs reported by Steve
+  Waltner.
+
 
 #------------------------------------------------------------------------
 # Version 2.0.0, 14 Jun 2003

@@ -623,6 +623,75 @@ $Conf{TarClientRestoreCmd} = '$sshPath -q -l root $host'
 $Conf{TarClientPath} = '/bin/tar';
 
 #
+# Path to rsync executable on the client
+#
+$Conf{RsyncClientPath} = '/bin/rsync';
+
+#
+# Full command to run rsync on the client machine
+#
+$Conf{RsyncClientCmd} = '$sshPath -q -l root $host $rsyncPath $argList';
+
+#
+# Full command to run rsync for restore on the client.
+#
+## $Conf{RsyncClientRestoreCmd} = '';
+
+#
+# Share name to backup.  For $Conf{XferMethod} = "rsync" this should
+# be a directory name, eg '/' or '/home'.  For $Conf{XferMethod} = "rsyncd"
+# this should be the name of the module to backup (ie: the name from
+# /etc/rsynd.conf).
+#
+$Conf{RsyncShareName} = '/';
+
+#
+# Rsync daemon port on the client, for $Conf{XferMethod} = "rsyncd".
+#
+$Conf{RsyncdClientPort} = 873;
+
+#
+# Key arguments to rsync server.  Do not edit these unless you
+# have a very thorough understanding of how File::RsyncP works.
+# Really, do not edit these.  See $Conf{RsyncClientArgs} instead.
+#
+$Conf{RsyncArgs} = [
+	    #
+	    # Do not edit these!
+	    #
+            '--numeric-ids',
+            '--perms',
+            '--owner',
+            '--group',
+            '--devices',
+            '--links',
+            '--block-size=2048',
+            '--relative',
+            '--recursive',
+];
+
+#
+# Additional Rsync arguments that are given to the remote (client)
+# rsync.  Unfortunately you need a pretty good understanding of
+# File::RsyncP to know which arguments will work; not all will.
+# Examples that should work are --exclude/--include, eg:
+#
+#   $Conf{RsyncClientArgs} = [
+#           '--exclude', '*.tmp',
+#   ];
+#
+$Conf{RsyncClientArgs} = [
+];
+
+#
+# Amount of verbosity in Rsync Xfer log files.  0 means be quiet,
+# 1 will give some general information, 2 will give one line per file,
+# 3 will include skipped files, higher values give more output.
+# 10 will include byte dumps of all data read/written, which will
+# make the log files huge.
+#
+$Conf{RsyncLogLevel} = 2;
+#
 # Full path for ssh. Security caution: normal users should not
 # allowed to write to this file or directory.
 #
@@ -978,11 +1047,13 @@ $Conf{CgiHeaderFontSize} = '3';
 
 #
 # Color scheme for CGI interface.  Default values give a very light blue
-# for the background navigation color and green for the header background.
-# (You call tell I'm a better programmer than graphical designer.)
+# for the background navigation color, green for the header background,
+# and white for the body background.  (You call tell I should stick to
+# programming and not graphical design.)
 #
 $Conf{CgiNavBarBgColor} = '#ddeeee';
 $Conf{CgiHeaderBgColor} = '#99cc33';
+$Conf{CgiBodyBgColor}   = '#ffffff';
 
 #
 # Additional CGI header text.  For example, if you wanted each CGI page
@@ -1001,6 +1072,18 @@ $Conf{CgiHeaders} = '<meta http-equiv="pragma" content="no-cache">';
 #     $Conf{CgiImageDir} = '/usr/local/apache/htdocs/BackupPC';
 #
 $Conf{CgiImageDir} = '';
+
+#
+# Additional mappings of file name extenions to Content-Type for
+# individual file restore.  See $Ext2ContentType in BackupPC_Admin
+# for the default setting.  You can add additional settings here,
+# or override any default settings.  Example:
+#
+#     $Conf{CgiExt2ContentType} = {
+#                 'pl'  => 'text/plain',
+#          };
+#
+$Conf{CgiExt2ContentType} = { };
 
 #
 # URL (without the leading http://host) for BackupPC's image directory.

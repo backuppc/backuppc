@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version 1.6.0_CVS, released 10 Dec 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -52,24 +52,27 @@ use Digest::MD5;
 sub new
 {
     my $class = shift;
-    my($topDir) = @_;
+    my($topDir, $installDir) = @_;
+
     my $self = bless {
         TopDir  => $topDir || '/data/BackupPC',
-        BinDir  => '/usr/local/BackupPC/bin',
-        LibDir  => '/usr/local/BackupPC/lib',
-        Version => '1.5.0',
+        BinDir  => $installDir || '/usr/local/BackupPC',
+        LibDir  => $installDir || '/usr/local/BackupPC',
+        Version => '1.6.0_CVS',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew
                     xferErrs xferBadFile xferBadShare tarErrs
                     compress sizeExistComp sizeNewComp
-                    noFill fillFromNum mangle
+                    noFill fillFromNum mangle xferMethod level
                 )],
         RestoreFields => [qw(
                     num startTime endTime result errorMsg nFiles size
                     tarCreateErrs xferErrs
                 )],
     }, $class;
+    $self->{BinDir} .= "/bin";
+    $self->{LibDir} .= "/lib";
     #
     # Clean up %ENV and setup other variables.
     #
@@ -391,6 +394,7 @@ sub RmTreeDefer
         my($d) = $1;
         my($f) = $2;
         my($cwd) = Cwd::fastcwd();
+        $cwd = $1 if ( $cwd =~ /(.*)/ );
         $self->RmTreeQuiet($d, $f);
         chdir($cwd) if ( $cwd );
     }
@@ -405,6 +409,7 @@ sub RmTreeTrashEmpty
     my(@files);
     my($cwd) = Cwd::fastcwd();
 
+    $cwd = $1 if ( $cwd =~ /(.*)/ );
     return if ( !-d $trashDir );
     my $d = DirHandle->new($trashDir)
       or carp "Can't read $trashDir: $!";
@@ -730,6 +735,7 @@ sub fileNameEltMangle
 {
     my($self, $name) = @_;
 
+    return "" if ( $name eq "" );
     $name =~ s{([%/\n\r])}{sprintf("%%%02x", ord($1))}eg;
     return "f$name";
 }

@@ -42,8 +42,10 @@ cancel backups and browse and restore files from backups.
 
 No client-side software is needed. On WinXX the standard smb
 protocol is used to extract backup data. On linux or unix clients,
-tar over ssh/rsh/nfs is used to extract backup data (or alternatively
-Samba can be installed on the linux or unix client to provide smb shares).
+rsync or tar (over ssh/rsh/nfs) is used to extract backup data.
+Alternatively, rsync can also be used on WinXX (using cygwin),
+and Samba could be installed on the linux or unix client to
+provide smb shares).
 
 =item *
 
@@ -51,7 +53,7 @@ Flexible restore options.  Single files can be downloaded from
 any backup directly from the CGI interface.  Zip or Tar archives
 for selected files or directories from any backup can also be
 downloaded from the CGI interface.  Finally, direct restore to
-the client machine (using SMB or tar) for selected files or
+the client machine (using smb or tar) for selected files or
 directories is also supported from the CGI interface.
 
 =item *
@@ -97,12 +99,18 @@ a smaller number of very old full backups.
 =item Incremental Backup
 
 An incremental backup is a backup of files that have changed (based on their
-modification time) since the last successful full backup.  To be safe,
-BackupPC backups all files that have changed since one hour prior to the
-start of the last successful full backup.  BackupPC can also be configured
-to keep a certain number of incremental backups, and to keep a smaller
-number of very old incremental backups.  (BackupPC does not support
-multi-level incremental backups, although it would be easy to do so.)
+modification time) since the last successful full backup.  For SMB and
+tar, BackupPC backups all files that have changed since one hour prior to the
+start of the last successful full backup.  Rsync is more clever: any files
+who attributes have changed (ie: uid, gid, mtime, modes, size) since the
+last full are backed up.  Deleted and new files are also detected by
+Rsync incrementals (SMB and tar are not able to detect deleted files or
+new files whose modification time is prior to the last full dump.
+
+BackupPC can also be configured to keep a certain number of incremental
+backups, and to keep a smaller number of very old incremental backups.
+(BackupPC does not support multi-level incremental backups, although it
+would be easy to do so.)
 
 BackupPC's CGI interface "fills-in" incremental backups based on the 
 last full backup, giving every backup a "full" appearance.  This makes
@@ -200,7 +208,13 @@ Do not send subscription requests to this address!
 =item Other Programs of Interest
 
 If you want to mirror linux or unix files or directories to a remote server
-you should look at rsync, L<http://rsync.samba.org>. 
+you should consider rsync, L<http://rsync.samba.org>.  BackupPC uses
+rsync as a transport mechanism; if you are already an rsync user you
+can think of BackupPC as adding efficient storage (compression and
+pooling) and a convenient user interface to rsync.
+
+Unison is a utility that can do two-way, interactive, synchronization.
+See L<http://www.cis.upenn.edu/~bcpierce/unison>.
 
 Two popular open source packages that do tape backup are
 Amanda (L<http://www.amanda.org>) and
@@ -272,10 +286,11 @@ appreciated.  Even negative feedback is helpful, for example "We
 evaluated BackupPC but didn't use it because it doesn't ...".
 
 Beyond being a satisfied user and telling other people about it, everyone
-is encouraged to add links to backuppc.sourceforge.net (I'll see then
-via Google) or otherwise publicize BackupPC.  Unlike the commercial
-products in this space, I have a zero budget (in both time and money)
-for marketing, PR and advertising, so it's up to all of you!
+is encouraged to add links to L<http://backuppc.sourceforge.net> (I'll
+see then via Google) or otherwise publicize BackupPC.  Unlike the
+commercial products in this space, I have a zero budget (in both
+time and money) for marketing, PR and advertising, so it's up to
+all of you!
 
 Also, everyone is encouraged to contribute patches, bug reports, feature
 and design suggestions, code, and documentation corrections or
@@ -319,10 +334,14 @@ L<http://www.cpan.org>.
 
 =item *
 
-Perl modules Compress::Zlib and Archive::Zip.  Try "perldoc Compress::Zlib"
-and "perldoc Archive::Zip" to see if you have these modules.  If not,
-fetch them from L<http://www.cpan.org> and see the instructions below
-for how to build and install them.
+Perl modules Compress::Zlib, Archive::Zip and Rsync.  Try "perldoc
+Compress::Zlib" and "perldoc Archive::Zip" to see if you have these
+modules.  If not, fetch them from L<http://www.cpan.org> and see the
+instructions below for how to build and install them.
+
+The Rsync module is available from L<http://backuppc.sourceforge.net>.
+You'll need to install the Rsync module if you want to use Rsync as
+a transport method.
 
 =item *
 
@@ -345,6 +364,15 @@ If you are using tar to backup linux/unix machines you should have version
 "tar --version" to check your version.  Various GNU mirrors have the newest
 versions of tar, see for example L<http://www.funet.fi/pub/gnu/alpha/gnu/tar>.
 As of July 2002 the latest versons is 1.13.25.
+
+=item *
+
+If you are using rsync to backup linux/unix machines you should have
+version 2.5.5 on each client machine.  See L<http://rsync.samba.org>.
+Use "rsync --version" to check your version.
+
+For BackupPC to use Rsync you will also need to install the perl Rsync
+module, which is available from L<http://backuppc.sourceforge.net>.
 
 =item *
 
@@ -404,10 +432,11 @@ Download the latest version from L<http://backuppc.sourceforge.net>.
 
 First off, to enable compression, you will need to install Compress::Zlib
 from L<http://www.cpan.org>.  It is optional, but strongly recommended.
-Also, to support restore via Zip archives you will need to install
+To support restore via Zip archives you will need to install
 Archive::Zip, also from L<http://www.cpan.org>.  You can run
 "perldoc Compress::Zlib" to see if this module is installed.
-To build and install these packages you should run these commands:
+Finally, you will need the Rsync module.  To build and install these
+packages you should run these commands:
 
     tar zxvf Archive-Zip-1.01.tar.gz
     cd Archive-Zip-1.01
@@ -486,13 +515,18 @@ share password:
 
 =item *
 
-As an environment variable PASSWD set before BackupPC starts. If you
-start BackupPC manually this PASSWD must be set manually first.
+As an environment variable BPC_SMB_PASSWD set before BackupPC starts.
+If you start BackupPC manually the BPC_SMB_PASSWD variable must be set
+manually first.  For backward compatability for v1.5.0 and prior, the
+environment variable PASSWD can be used if BPC_SMB_PASSWD is not set.
+Warning: on some systems it is possible to see environment variables of
+running processes.
 
 =item *
 
-Alternatively the PASSWD setting can be included in /etc/init.d/backuppc,
-in which case you must make sure this file is not world (other) readable.
+Alternatively the BPC_SMB_PASSWD setting can be included in
+/etc/init.d/backuppc, in which case you must make sure this file
+is not world (other) readable.
 
 =item *
 
@@ -2108,11 +2142,15 @@ This is especially troublesome for Outlook, which stores all its data
 in a single large file and keeps it locked whenever it is running.
 Since many users keep Outlook running all the time their machine
 is up their Outlook file will not be backed up.  Sadly, this file
-is the most important file to backup.  How do commercial backup
-systems solve this problem?
+is the most important file to backup.  As one workaround, Microsoft has
+a user-level application that periodically asks the user if they want to
+make a copy of their outlook.pst file.  This copy can then be backed up
+by BackupPC.  See L<http://office.microsoft.com/downloads/2002/pfbackup.aspx>.
 
 Similarly, all of the data for WinXX services like SQL databases,
-Exchange etc won't be backed up.
+Exchange etc won't be backed up.  If these applications support
+some kind of export or utility to save their data to disk then this
+can =used to create files that BackupPC can backup.
 
 So far, the best that BackupPC can do is send warning emails to
 the user saying that their outlook files haven't been backed up in

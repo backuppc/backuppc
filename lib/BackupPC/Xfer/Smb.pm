@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version 1.6.0_CVS, released 10 Dec 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -43,6 +43,7 @@ sub new
 {
     my($class, $bpc, $args) = @_;
 
+    $args ||= {};
     my $t = bless {
         bpc       => $bpc,
         conf      => { $bpc->Conf },
@@ -58,6 +59,20 @@ sub new
     return $t;
 }
 
+sub args
+{
+    my($t, $args) = @_;
+
+    foreach my $arg ( keys(%$args) ) {
+	$t->{$arg} = $args->{$arg};
+    }
+}
+
+sub useTar
+{
+    return 1;
+}
+
 sub start
 {
     my($t) = @_;
@@ -70,10 +85,15 @@ sub start
     #
     # First propagate the PASSWD setting 
     #
+    $ENV{PASSWD} = $ENV{BPC_SMB_PASSWD} if ( defined($ENV{BPC_SMB_PASSWD}) );
     $ENV{PASSWD} = $conf->{SmbSharePasswd}
                                  if ( defined($conf->{SmbSharePasswd}) );
     if ( !defined($ENV{PASSWD}) ) {
         $t->{_errStr} = "passwd not set for smbclient";
+        return;
+    }
+    if ( !defined($conf->{SmbClientPath}) || !-x $conf->{SmbClientPath} ) {
+        $t->{_errStr} = '$Conf{SmbClientPath} is not a valid executable';
         return;
     }
     if ( $t->{type} eq "restore" ) {
@@ -234,7 +254,10 @@ sub readOutput
         } elsif ( /^code 0 listing /
                     || /^code 0 opening /
                     || /^abandoning restore/i
-                    || /^Error: Looping in FIND_NEXT/i ) {
+                    || /^Error: Looping in FIND_NEXT/i
+                    || /^SUCCESS - 0/i
+                    || /^Call timed out: server did not respond/i
+                 ) {
             $t->{hostError} ||= $_;
         } elsif ( /smb: \\>/
                 || /^added interface/i

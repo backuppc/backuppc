@@ -14,7 +14,8 @@
 #   user name.
 #
 #   Also, this script needs to run as the BackupPC user.  To accomplish
-#   this the script is typically installed as setuid to the BackupPC user.
+#   this the script is typically installed as setuid to the BackupPC user,
+#   or it can run under mod_perl with httpd running as the BackupPC user.
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
@@ -38,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 1.5.0_CVS, released 2 Aug 2002.
+# Version 1.6.0_CVS, released 10 Dec 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -50,6 +51,7 @@ use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 use BackupPC::Attrib qw(:all);
+use BackupPC::View;
 use Data::Dumper;
 
 use vars qw($Cgi %In $MyURL $User %Conf $TopDir $BinDir $bpc);
@@ -418,6 +420,7 @@ sub Action_View
                         || /^\s+directory \\/
                         || /^Timezone is/
                         || /^\.\//
+                        || /^  /
 			    ) {
 		    $skipped++;
 		    next;
@@ -533,148 +536,91 @@ EOF
 sub Action_Browse
 {
     my $Privileged = CheckPermission($In{host});
-    my($i, $dirStr, $fileStr, $mangle);
-    my($numF, $compressF, $mangleF, $fullDirF);
-    my $checkBoxCnt = 0;      # checkbox counter
+    my($i, $dirStr, $fileStr, $attr);
+    my $checkBoxCnt = 0;
 
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_browse_backup_files}}"));
     }
-    my $host = $In{host};
-    my $num  = $In{num};
-    my $dir  = $In{dir};
-    if ( $host eq "" ) {
-        ErrorExit($Lang->{Empty_host_name});
-    }
+    my $host  = $In{host};
+    my $num   = $In{num};
+    my $share = $In{share};
+    my $dir   = $In{dir};
+
+    ErrorExit($Lang->{Empty_host_name}) if ( $host eq "" );
     #
     # Find the requested backup and the previous filled backup
     #
     my @Backups = $bpc->BackupInfoRead($host);
     for ( $i = 0 ; $i < @Backups ; $i++ ) {
-        if ( !$Backups[$i]{noFill} ) {
-            $numF      = $Backups[$i]{num};
-            $mangleF   = $Backups[$i]{mangle};
-            $compressF = $Backups[$i]{compress};
-        }
         last if ( $Backups[$i]{num} == $num );
     }
     if ( $i >= @Backups ) {
         ErrorExit("Backup number $num for host ${EscapeHTML($host)} does"
 	        . " not exist.");
     }
-    if ( !$Backups[$i]{noFill} ) {
-        # no need to back-fill a filled backup
-        $numF = $mangleF = $compressF = undef;
-    }
     my $backupTime = timeStamp2($Backups[$i]{startTime});
     my $backupAge = sprintf("%.1f", (time - $Backups[$i]{startTime})
                                     / (24 * 3600));
-    $mangle = $Backups[$i]{mangle};
+    my $view = BackupPC::View->new($bpc, $host, \@Backups);
+
     if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
-        if ( !opendir(DIR, "$TopDir/pc/$host/$num") ) {
-            ErrorExit(eval("qq{$Lang->{Can_t_browse_bad_directory_name}}"));
-        }
-        #
-        # Read this directory and find the first directory
-        #
-	foreach my $f ( readdir(DIR) ) {
-	    next if ( $f eq "." || $f eq ".." );
-	    if ( -d "$TopDir/pc/$host/$num/$f" ) {
-		$dir = "/$f";
-		last;
-	    }
-	}
-        closedir(DIR);
-	if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
+	$attr = $view->dirAttrib($num, "", "");
+	if ( keys(%$attr) > 0 ) {
+	    $share = (sort(keys(%$attr)))[0];
+	    $dir   = '/';
+	} else {
             ErrorExit(eval("qq{$Lang->{Directory___EscapeHTML}}"));
 	}
     }
-    my $relDir   = $dir;
-    my $fullDir  = "$TopDir/pc/$host/$num/$relDir";
-    if ( defined($numF) ) {
-	# get full path to filled backup
-	if ( $mangle && !$mangleF ) {
-	    $fullDirF = "$TopDir/pc/$host/$numF/"
-	    			. $bpc->fileNameUnmangle($relDir);
-	} else {
-	    $fullDirF = "$TopDir/pc/$host/$numF/$relDir";
-	}
-    }
-    my $currDir    = undef;
-    #
-    # Read attributes for the directory and optionally for the filled backup
-    #
-    my $attr  = BackupPC::Attrib->new({ compress => $Backups[$i]{compress}});
-    my $attrF = BackupPC::Attrib->new({ compress => $compressF})
-                                                    if ( defined($numF) );
-    $attr->read($fullDir) if ( -f $attr->fileName($fullDir) );
-    if ( defined($numF) && -f $attrF->fileName($fullDirF)
-                        && $attrF->read($fullDirF) ) {
-        $attr->merge($attrF);
-    }
+    my $relDir  = $dir;
+    my $currDir = undef;
+
     #
     # Loop up the directory tree until we hit the top.
     #
     my(@DirStrPrev);
     while ( 1 ) {
-        my($fLast, $fum, $fLastum, @DirStr);
+        my($fLast, $fLastum, @DirStr);
 
-        if ( $fullDir =~ m{(^|/)\.\.(/|$)} || !opendir(DIR, $fullDir) ) {
+	$attr = $view->dirAttrib($num, $share, $relDir);
+        if ( !defined($attr) ) {
             ErrorExit(eval("qq{$Lang->{Can_t_browse_bad_directory_name2}}"));
         }
-        #
-        # Read this directory and optionally the corresponding filled directory
-        #
-        my @Dir = readdir(DIR);
-        closedir(DIR);
-        if ( defined($numF) && opendir(DIR, $fullDirF) ) {
-            if ( $mangle == $mangleF ) {
-                @Dir = (@Dir, readdir(DIR));
-            } else {
-                foreach my $f ( readdir(DIR) ) {
-		    next if ( $f eq "." || $f eq ".." );
-		    push(@Dir, $bpc->fileNameMangle($f));
-                }
-            }
-            closedir(DIR);
-        }
+
         my $fileCnt = 0;          # file counter
         $fLast = $dirStr = "";
+
         #
         # Loop over each of the files in this directory
         #
-	my(@DirUniq);
-        foreach my $f ( sort({uc($a) cmp uc($b)} @Dir) ) {
-            next if ( $f eq "." || $f eq ".."
-                   || $f eq $fLast || ($mangle && $f eq "attrib") );
-            $fLast = $f;
-	    push(@DirUniq, $f);
-	}
-	while ( defined(my $f = shift(@DirUniq)) ) {
-            my $path = "$relDir/$f";
+	foreach my $f ( sort(keys(%$attr)) ) {
             my($dirOpen, $gotDir, $imgStr, $img);
-            $fum = $mangle ? $bpc->fileNameUnmangle($f) : $f;  # unmangled $f
-            my $fumURI = $fum;                                 # URI escaped $f
+            my $fURI = $f;                             # URI escaped $f
+            my $shareURI = $share;                     # URI escaped $share
+            my $path = "$relDir/$f";
+	    if ( $shareURI eq "" ) {
+		$shareURI = $path;
+		$path  = "";
+	    }
             $path =~ s{^/+}{/};
-            $path =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-            $fumURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-            $dirOpen = 1 if ( defined($currDir) && $f eq $currDir );
-            if ( -d "$fullDir/$f" ) {
+            $path     =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+            $fURI     =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+            $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+            $dirOpen  = 1 if ( defined($currDir) && $f eq $currDir );
+            if ( $attr->{$f}{type} == BPC_FTYPE_DIR ) {
                 #
                 # Display directory if it exists in current backup.
                 # First find out if there are subdirs
                 #
-                my @s = (defined($numF) && -d "$fullDirF/$f")
-                            ? stat("$fullDirF/$f")
-                            : stat("$fullDir/$f");
 		my($bold, $unbold, $BGcolor);
 		$img |= 1 << 6;
-		$img |= 1 << 5 if ( $s[3] > 2 );
+		$img |= 1 << 5 if ( $attr->{$f}{nlink} > 2 );
 		if ( $dirOpen ) {
 		    $bold = "<b>";
 		    $unbold = "</b>";
 		    $img |= 1 << 2;
-		    $img |= 1 << 3 if ( $s[3] > 2 );
+		    $img |= 1 << 3 if ( $attr->{$f}{nlink} > 2 );
 		}
 		my $imgFileName = sprintf("%07b.gif", $img);
 		$imgStr = "<img src=\"$Conf{CgiImageDirURL}/$imgFileName\" align=\"absmiddle\" width=\"9\" height=\"19\" border=\"0\">";
@@ -683,12 +629,12 @@ sub Action_Browse
 		} else {
 		    $BGcolor = "";
 		}
-		my $dirName = $fum;
+		my $dirName = $f;
 		$dirName =~ s/ /&nbsp;/g;
 		push(@DirStr, {needTick => 1,
 			       tdArgs   => $BGcolor,
 			       link     => <<EOF});
-<a href="$MyURL?action=browse&host=$host&num=$num&dir=$path">$imgStr</a><a href="$MyURL?action=browse&host=$host&num=$num&dir=$path" style="font-size:13px;font-family:arial;text-decoration:none;line-height:15px">&nbsp;$bold$dirName$unbold</a></td></tr>
+<a href="$MyURL?action=browse&host=$host&num=$num&share=$shareURI&dir=$path">$imgStr</a><a href="$MyURL?action=browse&host=$host&num=$num&share=$shareURI&dir=$path" style="font-size:13px;font-family:arial;text-decoration:none;line-height:15px">&nbsp;$bold$dirName$unbold</a></td></tr>
 EOF
                 $fileCnt++;
                 $gotDir = 1;
@@ -723,29 +669,32 @@ EOF
                 # This is the selected directory, so display all the files
                 #
                 my $attrStr;
-                if ( defined($a = $attr->get($fum)) ) {
+                if ( defined($a = $attr->{$f}) ) {
                     my $mtimeStr = $bpc->timeStamp($a->{mtime});
-                    my $typeStr  = $attr->fileType2Text($a->{type});
+		    # UGH -> fix this
+                    my $typeStr  = BackupPC::Attrib::fileType2Text(undef,
+								   $a->{type});
                     my $modeStr  = sprintf("0%o", $a->{mode} & 07777);
                     $attrStr .= <<EOF;
     <td align="center">$typeStr</td>
-    <td align="right">$modeStr</td>
+    <td align="center">$modeStr</td>
+    <td align="center">$a->{backupNum}</td>
     <td align="right">$a->{size}</td>
     <td align="right">$mtimeStr</td>
 </tr>
 EOF
                 } else {
-                    $attrStr .= "<td colspan=\"4\" align=\"center\"> </td>\n";
+                    $attrStr .= "<td colspan=\"5\" align=\"center\"> </td>\n";
                 }
                 if ( $gotDir ) {
                     $fileStr .= <<EOF;
-<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=browse&host=$host&num=$num&dir=$path">${EscapeHTML($fum)}</a></td>
+<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=browse&host=$host&num=$num&share=$shareURI&dir=$path">${EscapeHTML($f)}</a></td>
 $attrStr
 </tr>
 EOF
                 } else {
                     $fileStr .= <<EOF;
-<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=RestoreFile&host=$host&num=$num&dir=$path">${EscapeHTML($fum)}</a></td>
+<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=RestoreFile&host=$host&num=$num&share=$shareURI&dir=$path">${EscapeHTML($f)}</a></td>
 $attrStr
 </tr>
 EOF
@@ -754,19 +703,28 @@ EOF
             }
         }
 	@DirStrPrev = @DirStr;
-        last if ( $relDir eq "" );
+        last if ( $relDir eq "" && $share eq "" );
         # 
-        # Prune the last directory off $relDir
+        # Prune the last directory off $relDir, or at the very end
+	# do the top-level directory.
         #
-        $relDir =~ s/(.*)\/(.*)/$1/;
-        $currDir = $2;
-        $fullDir = "$TopDir/pc/$host/$num/$relDir";
-        $fullDirF = "$TopDir/pc/$host/$numF/$relDir" if ( defined($numF) );
+	if ( $relDir eq "" ) {
+	    $currDir = $share;
+	    $share = "";
+	} else {
+	    $relDir =~ s/(.*)\/(.*)/$1/;
+	    $currDir = $2;
+	}
     }
-    my $dirDisplay = $mangle ? $bpc->fileNameUnmangle($dir) : $dir;
-    $dirDisplay =~ s{//}{/}g;
+    $share = $currDir;
+    my $dirDisplay = "$share/$dir";
+    $dirDisplay =~ s{//+}{/}g;
+    $dirDisplay =~ s{/+$}{}g;
     my $filledBackup;
-    if ( defined($numF) ) {
+
+    if ( (my @mergeNums = @{$view->mergeNums}) > 1 ) {
+	shift(@mergeNums);
+	my $numF = join(", #", @mergeNums);
         $filledBackup = eval("qq{$Lang->{This_display_is_merged_with_backup}}");
     }
     Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"));
@@ -790,6 +748,21 @@ EOF
     } else {
 	$fileStr = eval("qq{$Lang->{The_directory_is_empty}}");
     }
+    my @otherDirs;
+    foreach my $i ( $view->backupList($share, $dir) ) {
+        next if ( $i == $num );
+        my $path = $dir;
+        my $shareURI = $share;
+        $path =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+        $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+        push(@otherDirs, <<EOF);
+<a href="$MyURL?action=browse&host=$host&num=$i&share=$shareURI&dir=$path">$i</a>
+EOF
+    }
+    if ( @otherDirs ) {
+	my $otherDirs  = join(", ", @otherDirs);
+        $filledBackup .= eval("qq{$Lang->{Visit_this_directory_in_backup}}");
+    }
  
     print (eval("qq{$Lang->{Backup_browse_for__host}}"));
     Trailer();
@@ -797,21 +770,18 @@ EOF
 
 sub Action_Restore
 {
-    my($str, $reply, $i);
+    my($str, $reply);
     my $Privileged = CheckPermission($In{host});
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_restore_backup_files}}"));
     }
-    my $host = $In{host};
-    my $num  = $In{num};
-    my(@fileList, $fileListStr, $hiddenStr, $share, $pathHdr, $badFileCnt);
+    my $host  = $In{host};
+    my $num   = $In{num};
+    my $share = $In{share};
+    my(@fileList, $fileListStr, $hiddenStr, $pathHdr, $badFileCnt);
     my @Backups = $bpc->BackupInfoRead($host);
-    for ( $i = 0 ; $i < @Backups ; $i++ ) {
-        last if ( $Backups[$i]{num} == $num );
-    }
-    my $mangle = $Backups[$i]{mangle};
-    ServerConnect();
 
+    ServerConnect();
     if ( !defined($Hosts->{$host}) ) {
         ErrorExit(eval("qq{$Lang->{Bad_host_name}}"));
     }
@@ -819,19 +789,14 @@ sub Action_Restore
         next if ( !defined($In{"fcb$i"}) );
         (my $name = $In{"fcb$i"}) =~ s/%([0-9A-F]{2})/chr(hex($1))/eg;
         $badFileCnt++ if ( $name =~ m{(^|/)\.\.(/|$)} );
-        if ( $name =~ m{^/+(.*?)(/.*)} ) {
-            $share = $1;
-            $name  = $mangle ? $bpc->fileNameUnmangle($2) : $2;
-            if ( @fileList == 0 ) {
-                $pathHdr = $name;
-            } else {
-                while ( substr($name, 0, length($pathHdr)) ne $pathHdr ) {
-                    $pathHdr = substr($pathHdr, 0, rindex($pathHdr, "/"));
-                }
-            }
-        }
+	if ( @fileList == 0 ) {
+	    $pathHdr = $name;
+	} else {
+	    while ( substr($name, 0, length($pathHdr)) ne $pathHdr ) {
+		$pathHdr = substr($pathHdr, 0, rindex($pathHdr, "/"));
+	    }
+	}
         push(@fileList, $name);
-        $share = $mangle ? $bpc->fileNameUnmangle($share) : $share;
         $hiddenStr .= <<EOF;
 <input type="hidden" name="fcb$i" value="$In{'fcb' . $i}">
 EOF
@@ -840,6 +805,7 @@ EOF
 EOF
     }
     $hiddenStr .= "<input type=\"hidden\" name=\"fcbMax\" value=\"$In{fcbMax}\">\n";
+    $hiddenStr .= "<input type=\"hidden\" name=\"share\" value=\"${EscapeHTML($share)}\">\n";
     $badFileCnt++ if ( $In{pathHdr} =~ m{(^|/)\.\.(/|$)} );
     $badFileCnt++ if ( $In{num} =~ m{(^|/)\.\.(/|$)} );
     if ( @fileList == 0 ) {
@@ -880,76 +846,71 @@ EOF
     } elsif ( $In{type} == 1 ) {
         #
         # Provide the selected files via a tar archive.
+	#
+	# We no longer use fork/exec (as in v1.5.0) since some mod_perls
+	# do not correctly preserve the stdout connection to the client
+	# browser, so we execute BackupPC_tarCreate in-line.
         #
-        $SIG{CHLD} = 'IGNORE';
-        my $pid = fork();
-        if ( !defined($pid) ) {
-            $bpc->ServerMesg(eval("qq{$Lang->{log_Can_t_fork_for_tar_restore_request_by__User}}"));
-            ErrorExit($Lang->{Can_t_fork_for_tar_restore});
-        }
-        if ( $pid ) {
-            #
-            # This is the parent.
-            #
-            my @fileListTrim = @fileList;
-            if ( @fileListTrim > 10 ) {
-                @fileListTrim = (@fileListTrim[0..9], '...');
-            }
-            $bpc->ServerMesg(eval("qq{$Lang->{log_User__User_downloaded_tar_archive_for__host}}"));
-            return;
-        }
-        #
-        # This is the child.  Print the headers and run BackupPC_tarCreate.
-        #
+	my @fileListTrim = @fileList;
+	if ( @fileListTrim > 10 ) {
+	    @fileListTrim = (@fileListTrim[0..9], '...');
+	}
+	$bpc->ServerMesg(eval("qq{$Lang->{log_User__User_downloaded_tar_archive_for__host}}"));
+
         my @pathOpts;
         if ( $In{relative} ) {
             @pathOpts = ("-r", $pathHdr, "-p", "");
         }
-        $bpc->ServerDisconnect();
-        print "Content-Type: application/x-gtar\n";
-        print "Content-Transfer-Encoding: binary\n";
-        print "Content-Disposition: attachment; filename=\"restore.tar\"\n\n";
-        exec("$BinDir/BackupPC_tarCreate",
+	#
+	# We use syswrite since BackupPC_tarCreate uses syswrite too.
+	# Need to test this with mod_perl: PaulL says it doesn't work.
+	#
+	syswrite(STDOUT, <<EOF);
+Content-Type: application/x-gtar
+Content-Transfer-Encoding: binary
+Content-Disposition: attachment; filename=\"restore.tar\"
+
+EOF
+	local(@ARGV);
+	@ARGV = (
              "-h", $host,
              "-n", $num,
              "-s", $share,
              @pathOpts,
              @fileList
-        );
+	);
+	do "$BinDir/BackupPC_tarCreate";
     } elsif ( $In{type} == 2 ) {
         #
         # Provide the selected files via a zip archive.
+	#
+	# We no longer use fork/exec (as in v1.5.0) since some mod_perls
+	# do not correctly preserve the stdout connection to the client
+	# browser, so we execute BackupPC_tarCreate in-line.
         #
-        $SIG{CHLD} = 'IGNORE';
-        my $pid = fork();
-        if ( !defined($pid) ) {
-            $bpc->ServerMesg(eval("qq{$Lang->{log_Can_t_fork_for_zip_restore_request_by__User}}"));
-            ErrorExit($Lang->{Can_t_fork_for_zip_restore});
-        }
-        if ( $pid ) {
-            #
-            # This is the parent.
-            #
-            my @fileListTrim = @fileList;
-            if ( @fileListTrim > 10 ) {
-                @fileListTrim = (@fileListTrim[0..9], '...');
-            }
-            $bpc->ServerMesg(eval("qq{$Lang->{log_User__User_downloaded_zip_archive_for__host}}"));
-            return;
-        }
-        #
-        # This is the child.  Print the headers and run BackupPC_tarCreate.
-        #
+	my @fileListTrim = @fileList;
+	if ( @fileListTrim > 10 ) {
+	    @fileListTrim = (@fileListTrim[0..9], '...');
+	}
+	$bpc->ServerMesg(eval("qq{$Lang->{log_User__User_downloaded_zip_archive_for__host}}"));
+
         my @pathOpts;
         if ( $In{relative} ) {
             @pathOpts = ("-r", $pathHdr, "-p", "");
         }
-        $bpc->ServerDisconnect();
-        print "Content-Type: application/zip\n";
-        print "Content-Transfer-Encoding: binary\n";
-        print "Content-Disposition: attachment; filename=\"restore.zip\"\n\n";
+	#
+	# We use syswrite since BackupPC_tarCreate uses syswrite too.
+	# Need to test this with mod_perl: PaulL says it doesn't work.
+	#
+	syswrite(STDOUT, <<EOF);
+Content-Type: application/zip
+Content-Transfer-Encoding: binary
+Content-Disposition: attachment; filename=\"restore.zip\"
+
+EOF
 	$In{compressLevel} = 5 if ( $In{compressLevel} !~ /^\d+$/ );
-        exec("$BinDir/BackupPC_zipCreate",
+	local(@ARGV);
+	@ARGV = (
              "-h", $host,
              "-n", $num,
              "-c", $In{compressLevel},
@@ -957,6 +918,7 @@ EOF
              @pathOpts,
              @fileList
         );
+        do "$BinDir/BackupPC_zipCreate";
     } elsif ( $In{type} == 3 ) {
         #
         # Do restore directly onto host
@@ -1040,14 +1002,14 @@ EOF
 
 sub Action_RestoreFile
 {
-    restoreFile($In{host}, $In{num}, $In{dir});
+    restoreFile($In{host}, $In{num}, $In{share}, $In{dir});
 }
 
 sub restoreFile
 {
-    my($host, $num, $dir, $skipHardLink, $origName) = @_;
+    my($host, $num, $share, $dir, $skipHardLink, $origName) = @_;
     my($Privileged) = CheckPermission($host);
-    my($i, $numF, $mangleF, $compressF, $mangle, $compress, $dirUM);
+
     #
     # Some common content (media) types from www.iana.org (via MIME::Types).
     #
@@ -1133,59 +1095,22 @@ sub restoreFile
 	'xwd'  => 'image/x-xwindowdump',
 	'z'    => 'application/x-compress',
 	'zip'  => 'application/zip',
+        %{$Conf{CgiExt2ContentType}},       # add site-specific values
     };
-
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_restore_backup_files2}}"));
     }
     ServerConnect();
-    my @Backups = $bpc->BackupInfoRead($host);
-    if ( $host eq "" ) {
-        ErrorExit($Lang->{Empty_host_name});
-    }
-    $dir = "/" if ( $dir eq "" );
-    for ( $i = 0 ; $i < @Backups ; $i++ ) {
-        if ( !$Backups[$i]{noFill} ) {
-            $numF      = $Backups[$i]{num};
-            $mangleF   = $Backups[$i]{mangle};
-            $compressF = $Backups[$i]{compress};
-        }
-        last if ( $Backups[$i]{num} == $num );
-    }
-    $mangle = $Backups[$i]{mangle};
-    $compress = $Backups[$i]{compress};
-    if ( !$Backups[$i]{noFill} ) {
-        # no need to back-fill a filled backup
-        $numF = $mangleF = $compressF = undef;
-    }
-    my $fullPath = "$TopDir/pc/$host/$num/$dir";
-    $fullPath =~ s{/+}{/}g;
-    if ( !-f $fullPath && defined($numF) ) {
-	my $dirF = $dir;
-	my $fullPathF;
-	if ( $mangle && !$mangleF ) {
-	    $fullPathF = "$TopDir/pc/$host/$numF/"
-				. $bpc->fileNameUnmangle($dir);
-	} else {
-	    $fullPathF = "$TopDir/pc/$host/$numF/$dir";
-	}
-	if ( -f $fullPathF ) {
-	    $fullPath = $fullPathF;
-	    $compress = $compressF;
-	}
-    }
-    if ( $fullPath =~ m{(^|/)\.\.(/|$)} || !-f $fullPath ) {
-        ErrorExit(eval("qq{$Lang->{Can_t_restore_bad_file}}"));
-    }
-    my $dirUM = $mangle ? $bpc->fileNameUnmangle($dir) : $dir;
-    my $attr = BackupPC::Attrib->new({compress => $compress});
-    my $fullDir = $fullPath;
-    $fullDir =~ s{(.*)/.*}{$1};
-    my $fileName = $1 if ( $dirUM =~ /.*\/(.*)/ );
-    $attr->read($fullDir) if ( -f $attr->fileName($fullDir) );
-    my $a = $attr->get($fileName);
+    ErrorExit($Lang->{Empty_host_name}) if ( $host eq "" );
 
-    my $f = BackupPC::FileZIO->open($fullPath, 0, $compress);
+    $dir = "/" if ( $dir eq "" );
+    my @Backups = $bpc->BackupInfoRead($host);
+    my $view = BackupPC::View->new($bpc, $host, \@Backups);
+    my $a = $view->fileAttrib($num, $share, $dir);
+    if ( $dir =~ m{(^|/)\.\.(/|$)} || !defined($a) ) {
+        ErrorExit("Can't restore bad file ${EscapeHTML($dir)}");
+    }
+    my $f = BackupPC::FileZIO->open($a->{fullPath}, 0, $a->{compress});
     my $data;
     if ( !$skipHardLink && $a->{type} == BPC_FTYPE_HARDLINK ) {
 	#
@@ -1198,20 +1123,15 @@ sub restoreFile
 	$f->close;
 	$linkName =~ s/^\.\///;
 	my $share = $1 if ( $dir =~ /^\/?(.*?)\// );
-	restoreFile($host, $num,
-		"$share/" . ($mangle ? $bpc->fileNameMangle($linkName)
-				     : $linkName), 1, $dir);
+	restoreFile($host, $num, $share, $linkName, 1, $dir);
 	return;
     }
-    $dirUM =~ s{//}{/}g;
-    $fullPath =~ s{//}{/}g;
-    $bpc->ServerMesg("log User $User recovered file $dirUM ($fullPath)");
+    $bpc->ServerMesg("log User $User recovered file $host/$num:$share/$dir ($a->{fullPath})");
     $dir = $origName if ( defined($origName) );
-    $dirUM = $mangle ? $bpc->fileNameUnmangle($dir) : $dir;
-    my $ext = $1 if ( $dirUM =~ /\.([^\/\.]+)$/ );
+    my $ext = $1 if ( $dir =~ /\.([^\/\.]+)$/ );
     my $contentType = $Ext2ContentType->{lc($ext)}
 				    || "application/octet-stream";
-    $fileName = $1 if ( $dirUM =~ /.*\/(.*)/ );
+    my $fileName = $1 if ( $dir =~ /.*\/(.*)/ );
     $fileName =~ s/"/\\"/g;
     print "Content-Type: $contentType\n";
     print "Content-Transfer-Encoding: binary\n";
@@ -1850,7 +1770,7 @@ sub Header
 <html><head>
 <title>$title</title>
 $Conf{CgiHeaders}
-</head><body>
+</head><body bgcolor="$Conf{CgiBodyBgColor}">
 <table cellpadding="0" cellspacing="0" border="0">
 <tr valign="top"><td valign="top" bgcolor="$Conf{CgiNavBarBgColor}" width="10%">
 EOF

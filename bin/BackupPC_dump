@@ -28,11 +28,11 @@
 #   full or incremental backup needs to be run.  If no backup is
 #   scheduled, or a ping to $host fails, then BackupPC_dump quits.
 #
-#   The backup is done using smbclient, extracting the dump into
-#   $TopDir/pc/$host/new.  The smbclient output is put into
-#   $TopDir/pc/$host/XferLOG.
+#   The backup is done using the selected XferMethod (smb, tar, rsync etc),
+#   extracting the dump into $TopDir/pc/$host/new.  The xfer output is
+#   put into $TopDir/pc/$host/XferLOG.
 #
-#   If the dump succeeds (based on parsing the output of smbclient):
+#   If the dump succeeds (based on parsing the output of the XferMethod):
 #     - $TopDir/pc/$host/new is renamed to $TopDir/pc/$host/nnn, where
 #           nnn is the next sequential dump number.
 #     - $TopDir/pc/$host/XferLOG is renamed to $TopDir/pc/$host/XferLOG.nnn.
@@ -67,19 +67,19 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version 1.6.0_CVS, released 10 Dec 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 use strict;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 use BackupPC::Xfer::Smb;
 use BackupPC::Xfer::Tar;
-
+use BackupPC::Xfer::Rsync;
 use File::Path;
 use Getopt::Std;
 
@@ -129,7 +129,10 @@ my $tarPid  = -1;
 #
 # Re-read config file, so we can include the PC-specific config
 #
-$bpc->ConfigRead($host);
+if ( defined(my $error = $bpc->ConfigRead($host)) ) {
+    print("Can't read PC's config file: $error\n");
+    exit(1);
+}
 %Conf = $bpc->Conf();
 
 #
@@ -191,9 +194,14 @@ if ( $opts{d} ) {
     print("DHCP $hostIP $host\n");
 }
 
-my($needLink, @Backups, $type);
+my($needLink, @Backups, $type, $lastBkupNum, $lastFullBkupNum);
 my $lastFull = 0;
 my $lastIncr = 0;
+
+if ( $Conf{FullPeriod} == -1 && !$opts{f} && !$opts{i}
+        || $Conf{FullPeriod} == -2 ) {
+    NothingToDo($needLink);
+}
 
 if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
              && $StatusHost{aliveCnt} >= $Conf{BlackoutGoodCnt} ) {
@@ -202,20 +210,16 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
     if ( $Conf{BlackoutHourBegin} <= $currHours
               && $currHours <= $Conf{BlackoutHourEnd}
               && grep($_ == $wday, @{$Conf{BlackoutWeekDays}}) ) {
-        print(LOG $bpc->timeStamp, "skipping because of blackout"
-                    . " (alive $StatusHost{aliveCnt} times)\n");
-        print("nothing to do\n");
-        print("link $host\n") if ( $needLink );
-        exit(1);
+#        print(LOG $bpc->timeStamp, "skipping because of blackout"
+#                    . " (alive $StatusHost{aliveCnt} times)\n");
+        NothingToDo($needLink);
     }
 }
 
 if ( !$opts{i} && !$opts{f} && $StatusHost{backoffTime} > time ) {
     printf(LOG "%sskipping because of user requested delay (%.1f hours left)",
                 $bpc->timeStamp, ($StatusHost{backoffTime} - time) / 3600);
-    print("nothing to do\n");
-    print("link $host\n") if ( $needLink );
-    exit(1);
+    NothingToDo($needLink);
 }
 
 #
@@ -231,9 +235,12 @@ BackupExpire($host);
 for ( my $i = 0 ; $i < @Backups ; $i++ ) {
     $needLink = 1 if ( $Backups[$i]{nFilesNew} eq ""
                         || -f "$Dir/NewFileList.$Backups[$i]{num}" );
+    $lastBkupNum = $Backups[$i]{num};
     if ( $Backups[$i]{type} eq "full" ) {
-        $lastFull = $Backups[$i]{startTime}
-                if ( $lastFull < $Backups[$i]{startTime} );
+	if ( $lastFull < $Backups[$i]{startTime} ) {
+	    $lastFull = $Backups[$i]{startTime};
+	    $lastFullBkupNum = $Backups[$i]{num};
+	}
     } else {
         $lastIncr = $Backups[$i]{startTime}
                 if ( $lastIncr < $Backups[$i]{startTime} );
@@ -252,9 +259,7 @@ if ( @Backups == 0
         && time - $lastFull > $Conf{IncrPeriod} * 24*3600) ) {
     $type = "incr";
 } else {
-    print("nothing to do\n");
-    print("link $host\n") if ( $needLink );
-    exit(0);
+    NothingToDo($needLink);
 }
 
 #
@@ -314,9 +319,12 @@ my $sizeExistComp = 0;
 my $nFilesTotal   = 0;
 my $sizeTotal     = 0;
 my($logMsg, %stat, $xfer, $ShareNames);
+my $newFilesFH;
 
 if ( $Conf{XferMethod} eq "tar" ) {
     $ShareNames = $Conf{TarShareName};
+} elsif ( $Conf{XferMethod} eq "rsync" || $Conf{XferMethod} eq "rsyncd" ) {
+    $ShareNames = $Conf{RsyncShareName};
 } else {
     $ShareNames = $Conf{SmbShareName};
 }
@@ -337,143 +345,197 @@ for my $shareName ( @$ShareNames ) {
         next;
     }
 
-    #
-    # Create a pipe to connect smbclient to BackupPC_tarExtract
-    # WH is the write handle for writing, provided to the transport
-    # program, and RH is the other end of the pipe for reading,
-    # provided to BackupPC_tarExtract.
-    #
-    pipe(RH, WH);
-
-    #
-    # fork a child for BackupPC_tarExtract.  TAR is a file handle
-    # on which we (the parent) read the stdout & stderr from
-    # BackupPC_tarExtract.
-    #
-    if ( !defined($tarPid = open(TAR, "-|")) ) {
-        print(LOG $bpc->timeStamp, "can't fork to run tar\n");
-        print("can't fork to run tar\n");
-        close(RH);
-        close(WH);
-        last;
+    if ( $Conf{XferMethod} eq "tar" ) {
+        #
+        # Use tar (eg: tar/ssh) as the transport program.
+        #
+        $xfer = BackupPC::Xfer::Tar->new($bpc);
+    } elsif ( $Conf{XferMethod} eq "rsync" || $Conf{XferMethod} eq "rsyncd" ) {
+        #
+        # Use rsync as the transport program.
+        #
+        if ( !defined($xfer = BackupPC::Xfer::Rsync->new($bpc)) ) {
+            print(LOG $bpc->timeStamp,
+                        "dump failed: File::RsyncP module is not installed\n");
+            print("dump failed: Rsync module is not installed\n");
+            exit(1);
+        }
+    } else {
+        #
+        # Default is to use smbclient (smb) as the transport program.
+        #
+        $xfer = BackupPC::Xfer::Smb->new($bpc);
     }
-    if ( !$tarPid ) {
-        #
-        # This is the tar child.  Close the write end of the pipe,
-        # clone STDERR to STDOUT, clone STDIN from RH, and then
-        # exec BackupPC_tarExtract.
-        #
-        setpgrp 0,0;
-        close(WH);
-        close(STDERR);
-        open(STDERR, ">&STDOUT");
-        close(STDIN);
-        open(STDIN, "<&RH");
-        exec("$BinDir/BackupPC_tarExtract '$host' '$shareName'"
-             . " $Conf{CompressLevel}");
-        print(LOG $bpc->timeStamp, "can't exec $BinDir/BackupPC_tarExtract\n");
-        exit(0);
+    my $useTar = $xfer->useTar;
+
+    if ( $useTar ) {
+	#
+	# This xfer method outputs a tar format file, so we start a
+	# BackupPC_tarExtract to extract the data.
+	#
+	# Create a pipe to connect the Xfer method to BackupPC_tarExtract
+	# WH is the write handle for writing, provided to the transport
+	# program, and RH is the other end of the pipe for reading,
+	# provided to BackupPC_tarExtract.
+	#
+	pipe(RH, WH);
+
+	#
+	# fork a child for BackupPC_tarExtract.  TAR is a file handle
+	# on which we (the parent) read the stdout & stderr from
+	# BackupPC_tarExtract.
+	#
+	if ( !defined($tarPid = open(TAR, "-|")) ) {
+	    print(LOG $bpc->timeStamp, "can't fork to run tar\n");
+	    print("can't fork to run tar\n");
+	    close(RH);
+	    close(WH);
+	    last;
+	}
+	if ( !$tarPid ) {
+	    #
+	    # This is the tar child.  Close the write end of the pipe,
+	    # clone STDERR to STDOUT, clone STDIN from RH, and then
+	    # exec BackupPC_tarExtract.
+	    #
+	    setpgrp 0,0;
+	    close(WH);
+	    close(STDERR);
+	    open(STDERR, ">&STDOUT");
+	    close(STDIN);
+	    open(STDIN, "<&RH");
+	    exec("$BinDir/BackupPC_tarExtract '$host' '$shareName'"
+		 . " $Conf{CompressLevel}");
+	    print(LOG $bpc->timeStamp,
+			"can't exec $BinDir/BackupPC_tarExtract\n");
+	    exit(0);
+	}
+    } elsif ( !defined($newFilesFH) ) {
+	#
+	# We need to create the NewFileList output file
+	#
+	local(*NEW_FILES);
+	open(NEW_FILES, ">$TopDir/pc/$host/NewFileList")
+		     || die("can't open $TopDir/pc/$host/NewFileList");
+	$newFilesFH = *NEW_FILES;
     }
 
     #
     # Run the transport program
     #
-    my $xferArgs = {
-        host      => $host,
-        hostIP    => $hostIP,
-        shareName => $shareName,
-        pipeRH    => *RH,
-        pipeWH    => *WH,
-        XferLOG   => $XferLOG,
-        outDir    => $Dir,
-        type      => $type,
-        lastFull  => $lastFull,
-    };
-    if ( $Conf{XferMethod} eq "tar" ) {
-        #
-        # Use tar (eg: tar/ssh) as the transport program.
-        #
-        $xfer = BackupPC::Xfer::Tar->new($bpc, $xferArgs);
-    } else {
-        #
-        # Default is to use smbclient (smb) as the transport program.
-        #
-        $xfer = BackupPC::Xfer::Smb->new($bpc, $xferArgs);
-    }
+    $xfer->args({
+        host        => $host,
+        hostIP      => $hostIP,
+        shareName   => $shareName,
+        pipeRH      => *RH,
+        pipeWH      => *WH,
+        XferLOG     => $XferLOG,
+	newFilesFH  => $newFilesFH,
+        outDir      => $Dir,
+        type        => $type,
+        lastFull    => $lastFull,
+	lastBkupNum => $lastBkupNum,
+	lastFullBkupNum => $lastFullBkupNum,
+	backups     => \@Backups,
+	compress    => $Conf{CompressLevel},
+	XferMethod  => => $Conf{XferMethod},
+    });
+
     if ( !defined($logMsg = $xfer->start()) ) {
-        print(LOG $bpc->timeStamp, $xfer->errStr, "\n");
-        print($xfer->errStr, "\n");
+        print(LOG $bpc->timeStamp, "xfer start failed: ", $xfer->errStr, "\n");
+        print("dump failed: ", $xfer->errStr, "\n");
         print("link $host\n") if ( $needLink );
         #
         # kill off the tar process, first nicely then forcefully
         #
-        kill(2, $tarPid);
-        sleep(1);
-        kill(9, $tarPid);
+	if ( $tarPid > 0 ) {
+	    kill(2, $tarPid);
+	    sleep(1);
+	    kill(9, $tarPid);
+	}
         exit(1);
     }
-    #
-    # The parent must close both handles on the pipe since the children
-    # are using these handles now.
-    #
-    close(RH);
-    close(WH);
+
     $xferPid = $xfer->xferPid;
-    print(LOG $bpc->timeStamp, $logMsg,
-                               " (xferPid=$xferPid, tarPid=$tarPid)\n");
-    print("started $type dump, pid=$xferPid, tarPid=$tarPid\n");
-
-    #
-    # Parse the output of the transfer program and BackupPC_tarExtract
-    # while they run.  Since we are reading from two or more children
-    # we use a select.
-    #
-    my($FDread, $tarOut, $mesg);
-    vec($FDread, fileno(TAR), 1) = 1;
-    $xfer->setSelectMask(\$FDread);
-
-    SCAN: while ( 1 ) {
-        my $ein = $FDread;
-        last if ( $FDread =~ /^\0*$/ );
-        select(my $rout = $FDread, undef, $ein, undef);
-        if ( vec($rout, fileno(TAR), 1) ) {
-            if ( sysread(TAR, $mesg, 8192) <= 0 ) {
-                vec($FDread, fileno(TAR), 1) = 0;
-                close(TAR);
-            } else {
-                $tarOut .= $mesg;
-            }
-        }
-        while ( $tarOut =~ /(.*?)[\n\r]+(.*)/s ) {
-            $_ = $1;
-            $tarOut = $2;
-            $XferLOG->write(\"tarExtract: $_\n");
-            if ( /^Done: (\d+) errors, (\d+) filesExist, (\d+) sizeExist, (\d+) sizeExistComp, (\d+) filesTotal, (\d+) sizeTotal/ ) {
-                $tarErrs       = $1;
-                $nFilesExist   = $2;
-                $sizeExist     = $3;
-                $sizeExistComp = $4;
-		$nFilesTotal   = $5;
-		$sizeTotal     = $6;
-            }
-        }
-        last if ( !$xfer->readOutput(\$FDread, $rout) );
-        while ( my $str = $xfer->logMsgGet ) {
-            print(LOG $bpc->timeStamp, "xfer: $str\n");
-        }
-        if ( $xfer->getStats->{fileCnt} == 1 ) {
-            #
-            # Make sure it is still the machine we expect.  We do this while
-            # the transfer is running to avoid a potential race condition if
-            # the ip address was reassigned by dhcp just before we started
-            # the transfer.
-            #
-            if ( my $errMsg = CorrectHostCheck($hostIP, $host) ) {
-                $stat{hostError} = $errMsg;
-                last SCAN;
-            }
-        }
+    if ( $useTar ) {
+	#
+	# The parent must close both handles on the pipe since the children
+	# are using these handles now.
+	#
+	close(RH);
+	close(WH);
+	print(LOG $bpc->timeStamp, $logMsg,
+				   " (xferPid=$xferPid, tarPid=$tarPid)\n");
+    } elsif ( $xferPid > 0 ) {
+	print(LOG $bpc->timeStamp, $logMsg, " (xferPid=$xferPid)\n");
+    } else {
+	print(LOG $bpc->timeStamp, $logMsg, "\n");
     }
+    print("started $type dump, pid=$xferPid, tarPid=$tarPid,"
+            . " share=$shareName\n");
+
+    if ( $useTar || $xferPid > 0 ) {
+	#
+	# Parse the output of the transfer program and BackupPC_tarExtract
+	# while they run.  Since we might be reading from two or more children
+	# we use a select.
+	#
+	my($FDread, $tarOut, $mesg);
+	vec($FDread, fileno(TAR), 1) = 1 if ( $useTar );
+	$xfer->setSelectMask(\$FDread);
+
+	SCAN: while ( 1 ) {
+	    my $ein = $FDread;
+	    last if ( $FDread =~ /^\0*$/ );
+	    select(my $rout = $FDread, undef, $ein, undef);
+	    if ( $useTar ) {
+		if ( vec($rout, fileno(TAR), 1) ) {
+		    if ( sysread(TAR, $mesg, 8192) <= 0 ) {
+			vec($FDread, fileno(TAR), 1) = 0;
+			close(TAR);
+		    } else {
+			$tarOut .= $mesg;
+		    }
+		}
+		while ( $tarOut =~ /(.*?)[\n\r]+(.*)/s ) {
+		    $_ = $1;
+		    $tarOut = $2;
+		    $XferLOG->write(\"tarExtract: $_\n");
+		    if ( /^Done: (\d+) errors, (\d+) filesExist, (\d+) sizeExist, (\d+) sizeExistComp, (\d+) filesTotal, (\d+) sizeTotal/ ) {
+			$tarErrs       = $1;
+			$nFilesExist   = $2;
+			$sizeExist     = $3;
+			$sizeExistComp = $4;
+			$nFilesTotal   = $5;
+			$sizeTotal     = $6;
+		    }
+		}
+	    }
+	    last if ( !$xfer->readOutput(\$FDread, $rout) );
+	    while ( my $str = $xfer->logMsgGet ) {
+		print(LOG $bpc->timeStamp, "xfer: $str\n");
+	    }
+	    if ( $xfer->getStats->{fileCnt} == 1 ) {
+		#
+		# Make sure it is still the machine we expect.  We do this while
+		# the transfer is running to avoid a potential race condition if
+		# the ip address was reassigned by dhcp just before we started
+		# the transfer.
+		#
+		if ( my $errMsg = CorrectHostCheck($hostIP, $host) ) {
+		    $stat{hostError} = $errMsg;
+		    last SCAN;
+		}
+	    }
+	}
+    } else {
+	#
+	# otherwise the xfer module does everything for us
+	#
+	($tarErrs, $nFilesExist, $sizeExist, $sizeExistComp,
+	    $nFilesTotal, $sizeTotal) = $xfer->run();
+    }
+
     #
     # Merge the xfer status (need to accumulate counts)
     #
@@ -496,15 +558,19 @@ for my $shareName ( @$ShareNames ) {
         #
         # kill off the tranfer program, first nicely then forcefully
         #
-        kill(2, $xferPid);
-        sleep(1);
-        kill(9, $xferPid);
+	if ( $xferPid > 0 ) {
+	    kill(2, $xferPid);
+	    sleep(1);
+	    kill(9, $xferPid);
+	}
         #
         # kill off the tar process, first nicely then forcefully
         #
-        kill(2, $tarPid);
-        sleep(1);
-        kill(9, $tarPid);
+	if ( $tarPid > 0 ) {
+	    kill(2, $tarPid);
+	    sleep(1);
+	    kill(9, $tarPid);
+	}
         #
         # don't do any more shares on this host
         #
@@ -512,6 +578,7 @@ for my $shareName ( @$ShareNames ) {
     }
 }
 $XferLOG->close();
+close($newFilesFH) if ( defined($newFilesFH) );
 
 my $lastNum  = -1;
 
@@ -641,11 +708,23 @@ print("$type backup complete\n");
 # Subroutines
 ###########################################################################
 
+sub NothingToDo
+{
+    my($needLink) = @_;
+
+    print("nothing to do\n");
+    print("link $host\n") if ( $needLink );
+    exit(0);
+}
+
 sub catch_signal
 {
     my $signame = shift;
+    my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
 
     print(LOG $bpc->timeStamp, "cleaning up after signal $signame\n");
+    $XferLOG->write(\"exiting after signal $signame\n");
+    $XferLOG->close();
     if ( $xferPid > 0 ) {
         if ( kill(2, $xferPid) <= 0 ) {
             sleep(1);
@@ -660,8 +739,15 @@ sub catch_signal
     }
     unlink("$Dir/timeStamp.level0");
     unlink("$Dir/NewFileList");
+    unlink("$Dir/XferLOG.bad");
+    unlink("$Dir/XferLOG.bad$fileExt");
+    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.bad$fileExt");
     $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
-    print("exiting after signal $signame\n");
+    if ( $signame eq "INT" ) {
+        print("dump failed: aborted by user (signal=$signame)\n");
+    } else {
+        print("dump failed: received signal=$signame\n");
+    }
     print("link $host\n") if ( $needLink );
     exit(1);
 }

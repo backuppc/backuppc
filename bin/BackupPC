@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version 1.6.0_CVS, released 10 Dec 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -55,7 +55,7 @@
 
 use strict;
 use vars qw(%Status %Info $Hosts);
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 
@@ -796,10 +796,11 @@ sub Main_Check_Job_Messages
                 } else {
                     print(LOG $bpc->timeStamp, "dhcp $host: $mesg\n");
                 }
-            } elsif ( $mesg =~ /^started (.*) dump, pid=(\d+), tarPid=(-?\d+)/ ) {
-                $Jobs{$host}{type}    = $1;
-                $Jobs{$host}{xferPid} = $2;
-                $Jobs{$host}{tarPid}  = $3;
+            } elsif ( $mesg =~ /^started (.*) dump, pid=(-?\d+), tarPid=(-?\d+), share=(.*)/ ) {
+                $Jobs{$host}{type}      = $1;
+                $Jobs{$host}{xferPid}   = $2;
+                $Jobs{$host}{tarPid}    = $3;
+                $Jobs{$host}{shareName} = $4;
                 print(LOG $bpc->timeStamp,
                           "Started $1 backup on $host"
                           . " (pid=$Jobs{$host}{pid}, xferPid=$2",
@@ -807,7 +808,7 @@ sub Main_Check_Job_Messages
                                 ? ", tarPid=$Jobs{$host}{tarPid}" : "",
                           $Jobs{$host}{dhcpHostIP}
                                 ? ", dhcp=$Jobs{$host}{dhcpHostIP}" : "",
-                          ")\n");
+                          ", share=$Jobs{$host}{shareName})\n");
                 $Status{$host}{state}     = "backup in progress";
                 $Status{$host}{reason}    = "";
                 $Status{$host}{type}      = $1;

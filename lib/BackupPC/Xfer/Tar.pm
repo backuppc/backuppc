@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version 1.6.0_CVS, released 10 Dec 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -43,6 +43,7 @@ sub new
 {
     my($class, $bpc, $args) = @_;
 
+    $args ||= {};
     my $t = bless {
         bpc       => $bpc,
         conf      => { $bpc->Conf },
@@ -56,6 +57,20 @@ sub new
     }, $class;
 
     return $t;
+}
+
+sub args
+{
+    my($t, $args) = @_;
+
+    foreach my $arg ( keys(%$args) ) {
+	$t->{$arg} = $args->{$arg};
+    }
+}
+
+sub useTar
+{
+    return 1;
 }
 
 sub start

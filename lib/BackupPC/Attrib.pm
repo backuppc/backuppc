@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version 1.6.0_CVS, released 10 Dec 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,6 +59,7 @@ use constant BPC_FTYPE_DIR      => 5;
 use constant BPC_FTYPE_FIFO     => 6;
 use constant BPC_FTYPE_SOCKET   => 8;
 use constant BPC_FTYPE_UNKNOWN  => 9;
+use constant BPC_FTYPE_DELETED  => 10;
 
 my @FILE_TYPES = qw(
                   BPC_FTYPE_FILE
@@ -70,6 +71,7 @@ my @FILE_TYPES = qw(
                   BPC_FTYPE_FIFO
                   BPC_FTYPE_SOCKET
                   BPC_FTYPE_UNKNOWN
+		  BPC_FTYPE_DELETED
              );
 
 #
@@ -85,6 +87,8 @@ my @FileType2Text = (
     "fifo",
     "?",
     "socket",
+    "?",
+    "deleted",
 );
 
 #
@@ -139,13 +143,18 @@ sub set
 {
     my($a, $fileName, $attrib) = @_;
 
-    $a->{files}{$fileName} = $attrib;
+    if ( !defined($attrib) ) {
+	delete($a->{files}{$fileName});
+    } else {
+	$a->{files}{$fileName} = $attrib;
+    }
 }
 
 sub get
 {
     my($a, $fileName) = @_;
-    return $a->{files}{$fileName};
+    return $a->{files}{$fileName} if ( defined($fileName) );
+    return $a->{files};
 }
 
 sub fileType2Text

@@ -223,7 +223,7 @@ EOF
 # --------------------------------
 $Lang{Backup_PC__Log_File__file} = "BackupPC: Log File \$file";
 $Lang{Log_File__file__comment} = <<EOF;
-"Log File \$file \$comment";
+\${h1("Log File \$file \$comment")}
 <p>
 EOF
 # --------------------------------
@@ -580,6 +580,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscapeHTML(\$share)}">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="action" value="$Lang{Restore}">
 <br>
@@ -675,15 +676,13 @@ $Lang{Can_t_browse_bad_directory_name} = "Can\'t browse bad directory name"
 $Lang{Directory___EscapeHTML} = "Directory \${EscapeHTML(\"\$TopDir/pc/\$host/\$num\")}"
 		    . " is empty";
 $Lang{Can_t_browse_bad_directory_name2} = "Can\'t browse bad directory name"
-	            . " \${EscapeHTML(\$fullDir)}";
+	            . " \${EscapeHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} = "Only privileged users can restore backup files"
                 . " for host \${EscapeHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Bad host name \${EscapeHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} = "You haven\'t selected any files; please go Back to"
                 . " select some files.";
 $Lang{Nice_try__but_you_can_t_put} = "Nice try, but you can\'t put \'..\' in any of the file names";
-$Lang{Can_t_fork_for_tar_restore} = "Can\'t fork for tar restore";
-$Lang{Can_t_fork_for_zip_restore} = "Can\'t fork for zip restore";
 $Lang{Host__doesn_t_exist} = "Host \${EscapeHTML(\$In{hostDest})} doesn\'t exist";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "You don\'t have permission to restore onto host"
 		    . " \${EscapeHTML(\$In{hostDest})}";
@@ -727,12 +726,9 @@ $Lang{Backup_requested_on_DHCP__host} = "Backup requested on DHCP \$host (\$In{h
 
 $Lang{Backup_requested_on__host_by__User} = "Backup requested on \$host by \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Backup stopped/dequeued on \$host by \$User";
-$Lang{log_Can_t_fork_for_tar_restore_request_by__User} = "log Can\'t fork for tar restore request by \$User";
 $Lang{log_User__User_downloaded_tar_archive_for__host} = "log User \$User downloaded tar archive for \$host,"
                            . " backup \$num; files were: "
 			   . " \${join(\", \", \@fileListTrim)}";
-
-$Lang{log_Can_t_fork_for_zip_restore_request_by__User} = "log Can\'t fork for zip restore request by \$User";
 
 $Lang{log_User__User_downloaded_zip_archive_for__host}= "log User \$User downloaded zip archive for \$host,"
                            . " backup \$num; files were: "
@@ -828,7 +824,7 @@ $Lang{Host_Inhost} = "Host \$In{host}";
 $Lang{checkAll} = <<EOF;
 <tr bgcolor="#ffffcc"><td>
 <input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Select all
-</td><td colspan="4" align="center">
+</td><td colspan="5" align="center">
 <input type="submit" name="Submit" value="Restore selected files">
 </td></tr>
 EOF
@@ -837,6 +833,7 @@ $Lang{fileHeader} = <<EOF;
     <tr bgcolor="\$Conf{CgiHeaderBgColor}"><td align=center> Name</td>
        <td align="center"> Type</td>
        <td align="center"> Mode</td>
+       <td align="center"> Backup#</td>
        <td align="center"> Size</td>
        <td align="center"> Mod time</td>
     </tr>
@@ -847,8 +844,11 @@ $Lang{Last_bad_XferLOG} = "Last bad XferLOG";
 $Lang{Last_bad_XferLOG_errors_only} = "Last bad XferLOG (errors&nbsp;only)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
-<li> This display is merged with backup #\$numF, the most recent prior
-     filled (full) dump.
+<li> This display is merged with backup #\$numF.
+EOF
+
+$Lang{Visit_this_directory_in_backup} = <<EOF;
+<li> Visit this directory in backup #\$otherDirs.
 EOF
 
 $Lang{Restore_Summary} = <<EOF;

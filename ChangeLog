@@ -21,6 +21,14 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Support for rsync and rsyncd.  Changes to BackupPC_dump and new
+  modules BackupPC::Xfer::Rsync and BackupPC::Xfer::RsyncFileIO.
+
+* Added new BackupPC::View module that creates views of backups
+  (handling merging etc).  Updated BackupPC_Admin, BackupPC_zipCreate
+  and BackupPC_tarCreate to use BackupPC::View.  This removes lots
+  of merging and mangling code from the higher-level code.
+
 * Added internationalization (i18n) code from Xavier Nicollet.
   Voila!  BackupPC_Admin now supports English and French, and
   adding more languages is now easy.

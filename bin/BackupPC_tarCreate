@@ -48,19 +48,20 @@
 #
 #========================================================================
 #
-# Version 1.5.0, released 2 Aug 2002.
+# Version 1.6.0_CVS, released 10 Dec 2002.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 use strict;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use File::Path;
 use Getopt::Std;
 use BackupPC::Lib;
 use BackupPC::Attrib qw(:all);
 use BackupPC::FileZIO;
+use BackupPC::View;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 my $TopDir = $bpc->TopDir();
@@ -90,30 +91,15 @@ if ( $opts{n} !~ /^(\d+)$/ ) {
 my $Num = $opts{n};
 
 my @Backups = $bpc->BackupInfoRead($Host);
-my($Compress, $Mangle, $CompressF, $MangleF, $NumF, $i);
 my $FileCnt = 0;
 my $ByteCnt = 0;
 my $DirCnt = 0;
 my $SpecialCnt = 0;
 my $ErrorCnt = 0;
 
+my $i;
 for ( $i = 0 ; $i < @Backups ; $i++ ) {
-    if ( !$Backups[$i]{noFill} ) {
-        #
-        # Remember the most recent filled backup
-        #
-        $NumF      = $Backups[$i]{num};
-        $MangleF   = $Backups[$i]{mangle};
-        $CompressF = $Backups[$i]{compress};
-    }
-    next if ( $Backups[$i]{num} != $Num );
-    $Compress = $Backups[$i]{compress};
-    $Mangle   = $Backups[$i]{mangle};
-    if ( !$Backups[$i]{noFill} ) {
-        # no need to back-fill a filled backup
-        $NumF = $MangleF = $CompressF = undef;
-    }
-    last;
+    last if ( $Backups[$i]{num} == $Num );
 }
 if ( $i >= @Backups ) {
     print(STDERR "$0: bad backup number $Num for host $Host\n");
@@ -126,11 +112,7 @@ if ( $opts{s} !~ /^([\w\s\.\/\$-]+)$/ ) {
     print(STDERR "$0: bad share name '$opts{s}'\n");
     exit(1);
 }
-my $ShareNameOrig = $opts{s};
-my $ShareName  = $Mangle  ? $bpc->fileNameEltMangle($ShareNameOrig)
-                          : $ShareNameOrig;
-my $ShareNameF = $MangleF ? $bpc->fileNameEltMangle($ShareNameOrig)
-                          : $ShareNameOrig;
+my $ShareName = $opts{s};
 
 #
 # This constant and the line of code below that uses it are borrowed
@@ -196,37 +178,16 @@ exit(0);
 sub archiveWrite
 {
     my($fh, $dir, $tarPathOverride) = @_;
-    if ( $dir =~ m{(^|/)\.\.(/|$)} || $dir !~ /^(.*)$/ ) {
+
+    my $view = BackupPC::View->new($bpc, $Host, \@Backups);
+
+    if ( $dir =~ m{(^|/)\.\.(/|$)} ) {
         print(STDERR "$0: bad directory '$dir'\n");
 	$ErrorCnt++;
-        next;
+        return;
     }
-    (my $DirOrig  = $1) =~ s{/+$}{};
-    $DirOrig      =~ s{^\.?/+}{};
-    my($Dir, $DirF, $FullPath, $FullPathF);
-    if ( $DirOrig eq "" ) {
-        $Dir = $DirF = "";
-        $FullPath  = "$TopDir/pc/$Host/$Num/$ShareName";
-        $FullPathF = "$TopDir/pc/$Host/$NumF/$ShareNameF"
-                                            if ( defined($NumF) );
-    } else {
-        $Dir       = $Mangle  ? $bpc->fileNameMangle($DirOrig) : $DirOrig;
-        $DirF      = $MangleF ? $bpc->fileNameMangle($DirOrig) : $DirOrig;
-        $FullPath  = "$TopDir/pc/$Host/$Num/$ShareName/$Dir";
-        $FullPathF = "$TopDir/pc/$Host/$NumF/$ShareNameF/$DirF"
-                                            if ( defined($NumF) );
-    }
-    if ( -f $FullPath ) {
-        TarWriteFile($fh, $FullPath, $Mangle, $Compress, $tarPathOverride);
-    } elsif ( -d $FullPath || (defined($NumF) && -d $FullPathF) ) {
-        MergeFind($fh, $FullPath, $FullPathF);
-    } elsif ( defined($NumF) && -f $FullPathF ) {
-        TarWriteFile($fh, $FullPathF, $MangleF, $CompressF, $tarPathOverride);
-    } else {
-        print(STDERR "$0: $Host, backup $Num, doesn't have a directory or file"
-                   . " $ShareNameOrig/$DirOrig\n");
-	$ErrorCnt++;
-    }
+    $view->find($Num, $ShareName, $dir, 0, \&TarWriteFile,
+                $fh, $tarPathOverride);
 }
 
 sub UidLookup
@@ -360,63 +321,11 @@ my $AttrDir;
 
 sub TarWriteFile
 {
-    my($fh, $fullName, $mangle, $compress, $tarPathOverride) = @_;
-    my($tarPath);
+    my($hdr, $fh, $tarPathOverride) = @_;
 
-    if ( $fullName =~ m{^\Q$TopDir/pc/$Host/$Num/$ShareName\E(.*)}
-        || (defined($NumF)
-            && $fullName =~ m{^\Q$TopDir/pc/$Host/$NumF/$ShareNameF\E(.*)}) ) {
-        $tarPath = $mangle ? $bpc->fileNameUnmangle($1) : $1;
-    } else {
-        print(STDERR "Unexpected file name from find: $fullName\n");
-        return;
-    }
+    my $tarPath = $hdr->{relPath};
     $tarPath = $tarPathOverride if ( defined($tarPathOverride) );
-    (my $dir = $fullName) =~ s{/([^/]*)$}{};
-    my $fileName = $mangle ? $bpc->fileNameUnmangle($1) : $1;
-    if ( $mangle && $AttrDir ne $dir ) {
-        $AttrDir = $dir;
-	$Attr = BackupPC::Attrib->new({ compress => $compress });
-	if ( -f $Attr->fileName($dir) && !$Attr->read($dir) ) {
-            print(STDERR "Can't read attribute file in $dir\n");
-            $ErrorCnt++;
-	    $Attr = undef;
-	}
-    }
-    my $hdr = $Attr->get($fileName) if ( defined($Attr) );
-    if ( !defined($hdr) ) {
-        #
-        # No attributes.  Must be an old style backup.  Reconstruct
-        # what we can.  Painful part is computing the size if compression
-        # is on: only method is to uncompress the file.
-        #
-        my @s = stat($fullName);
-        $hdr = {
-            type  => -d _ ? BPC_FTYPE_DIR : BPC_FTYPE_FILE,
-            mode  => $s[2],
-            uid   => $s[4],
-            gid   => $s[5],
-            size  => -f _ ? $s[7] : 0,
-            mtime => $s[9],
-        };
-        if ( $compress && -f _ ) {
-            #
-            # Compute the correct size by reading the whole file
-            #
-            my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
-            if ( !defined($f) ) {
-                print(STDERR "Unable to open file $fullName\n");
-		$ErrorCnt++;
-                return;
-            }
-            my($data, $size);
-            while ( $f->read(\$data, $BufSize) > 0 ) {
-                $size += length($data);
-            }
-            $f->close;
-            $hdr->{size} = $size;
-        }
-    }
+
     if ( defined($PathRemove)
             && substr($tarPath, 0, length($PathRemove)) eq $PathRemove ) {
         substr($tarPath, 0, length($PathRemove)) = $PathAdd;
@@ -436,9 +345,9 @@ sub TarWriteFile
         #
         # Regular file: write the header and file
         #
-        my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
+        my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
-            print(STDERR "Unable to open file $fullName\n");
+            print(STDERR "Unable to open file $hdr->{fullPath}\n");
             $ErrorCnt++;
 	    return;
         }
@@ -460,9 +369,9 @@ sub TarWriteFile
         #
 	# Start by reading the contents of the link.
 	#
-        my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
+        my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
-            print(STDERR "Unable to open file $fullName\n");
+            print(STDERR "Unable to open file $hdr->{fullPath}\n");
             $ErrorCnt++;
 	    return;
         }
@@ -508,9 +417,9 @@ sub TarWriteFile
         # Symbolic link: read the symbolic link contents into the header
         # and write the header.
         #
-        my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
+        my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
-            print(STDERR "Unable to open symlink file $fullName\n");
+            print(STDERR "Unable to open symlink file $hdr->{fullPath}\n");
             $ErrorCnt++;
             return;
         }
@@ -530,11 +439,12 @@ sub TarWriteFile
         # major and minor numbers from a plain file.
         #
         if ( $hdr->{type} != BPC_FTYPE_FIFO ) {
-            my $f = BackupPC::FileZIO->open($fullName, 0, $compress);
+            my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0,
+						$hdr->{compress});
             my $data;
             if ( !defined($f) || $f->read(\$data, $BufSize) < 0 ) {
                 print(STDERR "Unable to open/read char/block special file"
-                           . " $fullName\n");
+                           . " $hdr->{fullPath}\n");
 		$f->close if ( defined($f) );
 		$ErrorCnt++;
 		return;
@@ -551,65 +461,5 @@ sub TarWriteFile
     } else {
         print(STDERR "Got unknown type $hdr->{type} for $hdr->{name}\n");
 	$ErrorCnt++;
-    }
-}
-
-#
-# Does a recursive find of $dir, filling in from the (filled dump)
-# directory $dirF.  Handles the cases where $dir and $dirF might
-# or might not be mangled etc.
-#
-sub MergeFind
-{
-    my($fh, $dir, $dirF) = @_;
-
-    my(@Dir, $fLast);
-    if ( -d $dir ) {
-        TarWriteFile($fh, $dir, $Mangle, $Compress);
-    } elsif ( -d $dirF ) {
-        TarWriteFile($fh, $dirF, $MangleF, $CompressF);
-    }
-    if ( opendir(DIR, $dir) ) {
-        @Dir = readdir(DIR);
-        closedir(DIR);
-    }
-    if ( defined($NumF) && opendir(DIR, $dirF) ) {
-        if ( $Mangle == $MangleF ) {
-            @Dir = (@Dir, readdir(DIR));
-        } else {
-            foreach my $f ( readdir(DIR) ) {
-                if ( $Mangle ) {
-                    push(@Dir, $bpc->fileNameMangle($f));
-                } else {
-                    push(@Dir, $bpc->fileNameUnmangle($f));
-                }
-            }
-        }
-    }
-    foreach my $f ( sort({$a cmp $b} @Dir) ) {
-        next if ( $f eq "." || $f eq ".."
-               || $f eq $fLast || ($Mangle && $f eq "attrib") );
-        $fLast = $f;
-        my($fF) = $f;
-        if ( $Mangle != $MangleF ) {
-            $fF = $Mangle ? $bpc->fileNameUnmangle($f)
-                          : $bpc->fileNameMangle($f);
-        }
-        if ( -e "$dir/$f" ) {
-            if ( -d "$dir/$f" ) {
-                MergeFind($fh, "$dir/$f", "$dirF/$fF");
-            } else {
-                TarWriteFile($fh, "$dir/$f", $Mangle, $Compress);
-            }
-        } elsif ( -e "$dirF/$fF" ) {
-            if ( -d "$dirF/$fF" ) {
-                MergeFind($fh, "$dir/$f", "$dirF/$fF");
-            } else {
-                TarWriteFile($fh, "$dirF/$fF", $MangleF, $CompressF);
-            }
-        } else {
-            print(STDERR "$0: Botch on $dir, $dirF, $f, $fF\n");
-            $ErrorCnt++;
-        }
     }
 }

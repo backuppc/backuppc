@@ -9,8 +9,8 @@ use File::Copy;
 
 umask(0022);
 
-my $Version     = "1.5.0_CVS";
-my $ReleaseDate = "17 Sep 2002";
+my $Version     = "1.6.0_CVS";
+my $ReleaseDate = "10 Dec 2002";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -33,8 +33,11 @@ my @PerlSrc = qw(
     lib/BackupPC/Lang/en.pm
     lib/BackupPC/Lang/fr.pm
     lib/BackupPC/PoolWrite.pm
+    lib/BackupPC/View.pm
     lib/BackupPC/Xfer/Smb.pm
     lib/BackupPC/Xfer/Tar.pm
+    lib/BackupPC/Xfer/Rsync.pm
+    lib/BackupPC/Xfer/RsyncFileIO.pm
     lib/BackupPC/Zip/FileMember.pm
     cgi-bin/BackupPC_Admin
 );
@@ -43,15 +46,18 @@ my @PerlSrc = qw(
 # Check config parameters
 #
 my $ConfVars = {};
-CheckConfigParams("conf/config.pl", $ConfVars, 0);
+my $errCnt;
+
+$errCnt += CheckConfigParams("conf/config.pl", $ConfVars, 0);
 $ConfVars->{BackupPCUser} = 2;
 $ConfVars->{CgiDir} = 2;
 $ConfVars->{InstallDir} = 2;
 $ConfVars->{CgiImageDir} = 2;
 foreach my $file ( @PerlSrc ) {
-    CheckConfigParams($file, $ConfVars, 1);
+    $errCnt += CheckConfigParams($file, $ConfVars, 1);
 }
-my $errCnt;
+exit(1) if ( $errCnt );
+
 foreach my $var ( sort(keys(%$ConfVars) ) ) {
     next if ( $ConfVars->{$var} >= 2 || $var =~ /^\$/ );
     printf("Unused config parameter $var\n");
@@ -100,6 +106,7 @@ foreach my $file ( (@PerlSrc,
 }
 rmtree("doc", 0, 0);
 system("cd dist ; tar zcf BackupPC-$Version.tar.gz BackupPC-$Version");
+print("Distribution written to dist/BackupPC-$Version.tar.gz\n");
 
 ###########################################################################
 # Subroutines
@@ -135,9 +142,9 @@ sub InstallFile
 	    } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'[\w\d\.]+',/ ) {
 		print OUT "$1'$Version',\n";
 	    } elsif ( $file =~ /Lib.pm/ && /(.*BinDir *=> .*)'.*',/ ) {
-		print OUT "$1'__INSTALLDIR__/bin',\n";
+		print OUT "$1'__INSTALLDIR__',\n";
 	    } elsif ( $file =~ /Lib.pm/ && /(.*LibDir *=> .*)'.*',/ ) {
-		print OUT "$1'__INSTALLDIR__/lib',\n";
+		print OUT "$1'__INSTALLDIR__',\n";
 	    } else {
 		print OUT;
 	    }
@@ -211,19 +218,20 @@ sub config2pod
 sub CheckConfigParams
 {
     my($file, $vars, $check) = @_;
+    my $errors;
 
     open(F, $file) || die("can't open $file\n");
     if ( $check ) {
         while ( <F> ) {
             s/\$self->{Conf}{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
                     print("Unexpected Conf var $1 in $file\n");
-                    exit(1);
+                    $errors++;
                 } else {
                     $vars->{$1}++;
                 }/eg;
             s/\$[Cc]onf(?:->)?{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
                     print("Unexpected Conf var $1 in $file\n");
-                    exit(1);
+                    $errors++;
                 } else {
                     $vars->{$1}++;
                 }/eg;
@@ -235,4 +243,5 @@ sub CheckConfigParams
         }
     }
     close(F);
+    return $errors;
 }

@@ -90,7 +90,7 @@ while ( 1 ) {
     last if ( $ConfigPath eq ""
             || ($ConfigPath =~ /^\// && -r $ConfigPath && -w $ConfigPath) );
     my $problem = "is not an absolute path";
-    $problem = "is no writable"  if ( !-w $ConfigPath );
+    $problem = "is not writable" if ( !-w $ConfigPath );
     $problem = "is not readable" if ( !-r $ConfigPath );
     $problem = "doesn't exist"   if ( !-f $ConfigPath );
     print("The file '$ConfigPath' $problem.\n");
@@ -99,7 +99,7 @@ my $bpc;
 if ( $ConfigPath ne "" && -r $ConfigPath ) {
     (my $topDir = $ConfigPath) =~ s{/[^/]+/[^/]+$}{};
     die("BackupPC::Lib->new failed\n")
-            if ( !($bpc = BackupPC::Lib->new($topDir)) );
+            if ( !($bpc = BackupPC::Lib->new($topDir, ".")) );
     %Conf = $bpc->Conf();
     %OrigConf = %Conf;
     $Conf{TopDir} = $topDir;
@@ -124,6 +124,7 @@ my %Programs = (
     'gtar/tar' => "TarClientPath",
     smbclient  => "SmbClientPath",
     nmblookup  => "NmbLookupPath",
+    rsync      => "RsyncClientPath",
     ping       => "PingPath",
     df         => "DfPath",
     'ssh2/ssh' => "SshPath",
@@ -327,6 +328,8 @@ needs to know the URL to access these images.  Example:
     Apache image directory:  /usr/local/apache/htdocs/BackupPC
     URL for image directory: /BackupPC
 
+The URL for the image directory should start with a slash.
+
 EOF
     while ( 1 ) {
 	$Conf{CgiImageDir} = prompt("--> Apache image directory (full path)",
@@ -334,9 +337,9 @@ EOF
 	last if ( $Conf{CgiImageDir} =~ /^\// );
     }
     while ( 1 ) {
-	$Conf{CgiImageDirURL} = prompt("--> URL for image directory (omit http://host)",
+	$Conf{CgiImageDirURL} = prompt("--> URL for image directory (omit http://host; starts with '/')",
 					$Conf{CgiImageDirURL});
-	last if ( $Conf{CgiImageDirURL} ne "" );
+	last if ( $Conf{CgiImageDirURL} =~ /^\// );
     }
 }
 
@@ -409,9 +412,10 @@ unlink("$Conf{InstallDir}/bin/BackupPC_queueAll");
 
 printf("Installing library in $Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(BackupPC/Lib.pm BackupPC/FileZIO.pm BackupPC/Attrib.pm
-        BackupPC/PoolWrite.pm BackupPC/Xfer/Tar.pm BackupPC/Xfer/Smb.pm
-	BackupPC/Zip/FileMember.pm
-	BackupPC/Lang/en.pm BackupPC/Lang/fr.pm
+        BackupPC/PoolWrite.pm BackupPC/View.pm BackupPC/Xfer/Tar.pm
+        BackupPC/Xfer/Smb.pm BackupPC/Xfer/Rsync.pm
+        BackupPC/Xfer/RsyncFileIO.pm BackupPC/Zip/FileMember.pm
+        BackupPC/Lang/en.pm BackupPC/Lang/fr.pm
     ) ) {
     InstallFile("lib/$lib", "$Conf{InstallDir}/lib/$lib", 0444);
 }
@@ -461,13 +465,14 @@ $Conf{IncrFill} = 0;
 #
 if ( $^O eq "solaris" || $^O eq "sunos" ) {
     $Conf{PingArgs} ||= '-s $host 56 1';
-} elsif ( $^O eq "linux" || $^O eq "openbsd" || $^O eq "netbsd" ) {
+} elsif ( ($^O eq "linux" || $^O eq "openbsd" || $^O eq "netbsd")
+        && !system("$Conf{PingClientPath} -c 1 -w 3 localhost") ) {
     $Conf{PingArgs} ||= '-c 1 -w 3 $host';
 } else {
     $Conf{PingArgs} ||= '-c 1 $host';
 }
 
-my $confCopy = "$dest.pre-1.4.0.b1";
+my $confCopy = "$dest.pre-__VERSION__";
 if ( -f $dest && !-f $confCopy ) {
     #
     # Make copy of config file, preserving ownership and modes

@@ -94,6 +94,12 @@ sub NewRequest
     %In = $Cgi->Vars;
 
     #
+    # Default REMOTE_USER so in a miminal installation the user
+    # has a sensible default.
+    #
+    $ENV{REMOTE_USER} = $Conf{BackupPCUser} if ( !defined($ENV{REMOTE_USER}) );
+
+    #
     # We require that Apache pass in $ENV{SCRIPT_NAME} and $ENV{REMOTE_USER}.
     # The latter requires .ht_access style authentication.  Replace this
     # code if you are using some other type of authentication, and have
@@ -156,7 +162,6 @@ sub timeStamp2
 {
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)
               = localtime($_[0] == 0 ? time : $_[0] );
-    $year += 1900;
     $mon++;
     if ( $Conf{CgiDateFormatMMDD} ) {
         return sprintf("$mon/$mday %02d:%02d", $hour, $min);

@@ -105,9 +105,7 @@ sub action
         my $filled = $Backups[$i]{noFill} ? $Lang->{No} : $Lang->{Yes};
         $filled .= " ($Backups[$i]{fillFromNum}) "
                             if ( $Backups[$i]{fillFromNum} ne "" );
-	my $ltype;
-	if ($Backups[$i]{type} eq "full") { $ltype = $Lang->{full}; }
-	else { $ltype = $Lang->{incremental}; }
+	my $ltype = $Lang->{"backupType_$Backups[$i]{type}"};
         $str .= <<EOF;
 <tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center"> $ltype </td>

@@ -84,6 +84,9 @@ sub action
     $dir = "/$dir" if ( $dir !~ /^\// );
     my $relDir  = $dir;
     my $currDir = undef;
+    if ( $dir =~ m{(^|/)\.\.(/|$)} ) {
+        ErrorExit($Lang->{Nice_try__but_you_can_t_put});
+    }
 
     #
     # Loop up the directory tree until we hit the top.

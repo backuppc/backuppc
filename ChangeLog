@@ -27,20 +27,16 @@
   dumps.  Only one partial is kept, and it is removed as soon
   as a successful full (or a new partial) is done.
 
-  (Note: still needs some work to cleanup any partial files when the
-  dump is interrupted or fails).
-
 * Added support for resuming a full dump for rsync.  The partial
   full is kept, and to resume an incremental is done against the
   partial, and a full is done for the rest.
 
-  (Note: not tested!  Also needs a new File::RsyncP that I haven't
-  yet released.)
-
 * Added support for Rsync checksum caching.  Rsync checksum are
   appended to the compressed pool files.  This means that block
   and file checksums do not need to be recomputed on the server
-  when using rsync.
+  when using rsync.  Requires a patch to rsync to support fixed
+  checksum seeds.  This patch is included in the cygwin-rsyncd
+  release on http://backuppc.sourceforge.net.
 
 * Major addition of Archive feature from Josh Marshall.  Special
   clients can be configured to be archive targets (eg: tape drives,
@@ -78,7 +74,9 @@
   files.
 
 * Addition of administration options from Paul Lukins.  Initial
-  page allows server to be started/stopped/reloaded.
+  page allows server to be started/stopped/reloaded.  This still
+  needs some i18n work.  Currently the server start/stop is
+  commented out.
 
 * Split BackupPC_Admin into a set of modules, one for each major action.
   Each action is now a seperate module in lib/BackupPC/CGI.

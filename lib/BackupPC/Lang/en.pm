@@ -23,18 +23,20 @@ $Lang{Admin_Options} = "Admin Options";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
-\${h1("Server Control")}
+\${h2("Server Control")}
 <form action="\$MyURL" method="get">
 <table>
-  <tr><td>Stop the server:<td><input type="submit" name="action" value="Stop">
+  <!--<tr><td>Stop the server:<td><input type="submit" name="action" value="Stop">-->
   <tr><td>Reload the server configuration:<td><input type="submit" name="action" value="Reload">
 </table>
 </form>
-\${h1("Server Configuration")}
+<!--
+\${h2("Server Configuration")}
 <ul>
   <li><i>Other options can go here... e.g.,</i>
   <li>Edit server configuration
 </ul>
+-->
 EOF
 $Lang{Unable_to_connect_to_BackupPC_server} = "Unable to connect to BackupPC server",
             "This CGI script (\$MyURL) is unable to connect to the BackupPC"
@@ -459,7 +461,7 @@ selected will be overwritten!
 		window.open(URL,'','width=500,height=400');
 	 }
 	 </script>
-	 <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Search for available shares (NOT IMPLEMENTED)</a></td>
+	 <!--<a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Search for available shares (NOT IMPLEMENTED)</a>--></td>
 </tr><tr>
     <td>Restore the files to share</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/bin/perl
 #
 # $Id$
 #
@@ -28,18 +28,20 @@ $Lang{Admin_Options} = "Opzioni di amministrazione";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
-\${h1("Controllo server")}
+\${h2("Controllo server")}
 <form action="\$MyURL" method="get">
 <table>
-  <tr><td>Arresta il server:<td><input type="submit" name="action" value="Stop">
+<!--<tr><td>Arresta il server:<td><input type="submit" name="action" value="Stop">-->
   <tr><td>Ricarica la configurazione del server:<td><input type="submit" name="action" value="Reload">
 </table>
 </form>
-\${h1("Configurazione server")}
+<!--
+\${h2("Configurazione server")}
 <ul>
   <li><i>Other options can go here... e.g.,</i>
   <li>Modifica configurazione server
 </ul>
+-->
 EOF
 $Lang{Unable_to_connect_to_BackupPC_server} = "Impossibile connettersi al server BackupPC",
             "Questo script CGI (\$MyURL) non &egrave; in grado di connettersi al server"
@@ -467,7 +469,7 @@ sar&agrave; sovrascritto!
                window.open(URL,'','width=500,height=400');
         }
         </script>
-        <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Search for available shares (NOT IMPLEMENTED)</a></td>
+        <!--<a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Search for available shares (NOT IMPLEMENTED)</a>--></td>
 </tr><tr>
     <td>Ripristino dei file sulla condivisione</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"
@@ -1023,7 +1025,7 @@ $Lang{Documentation} = "Documentazione";
 #$Lang{Host_or_User_name} = "<small>Host o nome utente:</small>";
 $Lang{Go} = "Vai";
 $Lang{Hosts} = "Host";
-$Lang{Select_a_host} = "ENGLISH Select a host...";
+$Lang{Select_a_host} = "Selezionare un host...";
 
 $Lang{There_have_been_no_archives} = "<h2> Non ci sono state archiviazioni </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> Non &egrave; mai stato eseguito un backup per questo PC!!! </h2>\n";

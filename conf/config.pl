@@ -673,18 +673,23 @@ $Conf{BackupZeroFilesIsFatal} = 1;
 #
 # The valid values are:
 #
-#   - 'smb':    backup and restore via smbclient and the SMB protocol.
-#               Best choice for WinXX.
+#   - 'smb':     backup and restore via smbclient and the SMB protocol.
+#                Easiest choice for WinXX.
 #
-#   - 'rsync':  backup and restore via rsync (via rsh or ssh).
-#               Best choice for linux/unix.  Can also work on WinXX.
+#   - 'rsync':   backup and restore via rsync (via rsh or ssh).
+#                Best choice for linux/unix.  Good choice also for WinXX.
 #
-#   - 'rsyncd': backup and restre via rsync daemon on the client.
-#               Best choice for linux/unix if you have rsyncd running on
-#               the client.  Can also work on WinXX.
+#   - 'rsyncd':  backup and restre via rsync daemon on the client.
+#                Best choice for linux/unix if you have rsyncd running on
+#                the client.  Good choice also for WinXX.
 #
 #   - 'tar':    backup and restore via tar, tar over ssh, rsh or nfs.
 #               Good choice for linux/unix.
+#
+#   - 'archive': host is a special archive host.  Backups are not done.
+#                An archive host is used to archive other host's backups
+#                to permanent media, such as tape, CDR or DVD.
+#               
 #
 $Conf{XferMethod} = 'smb';
 

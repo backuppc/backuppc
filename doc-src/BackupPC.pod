@@ -697,7 +697,7 @@ DHCP addresses to search is specified in $Conf{DHCPAddressRanges}.
 
 Note also that the $Conf{ClientNameAlias} feature does not work for
 clients with DHCP set to 1.
-    
+
 =item User name
 
 This should be the unix login/email name of the user who "owns" or uses
@@ -834,7 +834,7 @@ is recommended.  Rsync is run on the remote client via rsh or ssh.
 
 The relevant configuration settings are $Conf{RsyncClientPath},
 $Conf{RsyncClientCmd}, $Conf{RsyncClientRestoreCmd}, $Conf{RsyncShareName},
-$Conf{RsyncArgs}, $Conf{RsyncRestoreArgs} and $Conf{RsyncLogLevel}.
+$Conf{RsyncArgs}, and $Conf{RsyncRestoreArgs}.
 
 =item rsyncd
 
@@ -844,10 +844,10 @@ the client machine and BackupPC connects directly to it.
 
 The relevant configuration settings are $Conf{RsyncdClientPort},
 $Conf{RsyncdUserName}, $Conf{RsyncdPasswd}, $Conf{RsyncdAuthRequired},
-$Conf{RsyncShareName}, $Conf{RsyncArgs}, $Conf{RsyncRestoreArgs}
-and $Conf{RsyncLogLevel}.  In the case of rsyncd, $Conf{RsyncShareName}
-is the name of an rsync module (ie: the thing in square brackets in
-rsyncd's conf file -- see rsyncd.conf), not a file system path.
+$Conf{RsyncShareName}, $Conf{RsyncArgs}, and $Conf{RsyncRestoreArgs}.
+$Conf{RsyncShareName} is the name of an rsync module (ie: the thing
+in square brackets in rsyncd's conf file -- see rsyncd.conf), not a
+file system path.
 
 Be aware that rsyncd will remove the leading '/' from path names in
 symbolic links if you specify "use chroot = no" in the rsynd.conf file.
@@ -2028,6 +2028,15 @@ Each archive type is specified by a BackupPC host with its XferMethod
 set to 'archive'. This allows for multiple configurations at sites where
 there might be a combination of tape and cd/dvd backups being made.
 
+BackupPC provides a menu that allows one or more hosts to be archived.
+The most recent backup of each host is archived using BackupPC_tarCreate,
+and the output is optionally compressed and split into fixed-sized
+files (eg: 650MB).
+
+The archive for each host is done by default using
+__INSTALLDIR__/BackupPC_archiveHost.  This script can be copied
+and customized as needed.
+
 =head2 Configuring an Archive Host
 
 To create an Archive Host, add it to the hosts file just as any other host
@@ -2039,13 +2048,13 @@ the Archive Hosts's pc directory, adding the following line:
 $Conf{XferMethod} = 'archive';
 
 To further customise the archive's parameters you can adding the changed
-parameters in the host's config.pl file. The parameters are explained in the config.pl
-file.
+parameters in the host's config.pl file. The parameters are explained in
+the config.pl file.  Parameters may be fixed or the user can be allowed 
+to change them (eg: output device).
 
-The example archive programs included with BackupPC are for a CD and 
-Tape archive. The programs are called BackupPC_archivecd and 
-BackupPC_archivetape. These are specified by the ArchiveClientCmd configuration
-parameter.
+The per-host archive command is $Conf{ArchiveClientCmd}.  By default
+this invokes __INSTALLDIR__/BackupPC_archiveHost, which you can
+copy and customize as necessary.
 
 =head2 Starting an Archive
 
@@ -3144,7 +3153,7 @@ See L<http://backuppc.sourceforge.net>.
 
 =head1 Copyright
 
-Copyright (C) 2001-2003 Craig Barratt
+Copyright (C) 2001-2004 Craig Barratt
 
 =head1 Credits
 

@@ -28,18 +28,20 @@ $Lang{Admin_Options} = "Admin Optionen";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
-\${h1("Server Steuerung")}
+\${h2("Server Steuerung")}
 <form action="\$MyURL" method="get">
 <table>
-  <tr><td>Server stoppen:<td><input type="submit" name="action" value="Stop">
+  <!--<tr><td>Server stoppen:<td><input type="submit" name="action" value="Stop">-->
   <tr><td>Server Konfiguration neu laden:<td><input type="submit" name="action" value="Reload">
 </table>
 </form>
-\${h1("Server Konfiguration")}
+<!--
+\${h2("Server Konfiguration")}
 <ul>
   <li><i>Andere Optionen sind hier möglich ... z.B.,</i>
   <li>Server Konfiguration editieren
 </ul>
+-->
 EOF
 $Lang{Unable_to_connect_to_BackupPC_server} = "Kann keine Verbindung zu BackupPC server herstellen",
             "Dieses CGI script (\$MyURL) kann keine Verbindung zu BackupPC"
@@ -464,7 +466,7 @@ Wiederherstellung korrekt ist)
                 window.open(URL,'','width=500,height=400');
          }
          </script>
-         <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Suche nach verfügbaren Freigaben (NICHT IMPLEMENTIERT)</a></td>
+         <!--<a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Suche nach verfügbaren Freigaben (NICHT IMPLEMENTIERT)</a>--></td>
 </tr><tr>
     <td>Restore auf Freigabe</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"

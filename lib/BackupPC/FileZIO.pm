@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0_CVS, released 13 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -220,7 +220,8 @@ sub readLine
     my($self) = @_;
     my $str;
 
-    while ( defined($self->{readLineBuf}) && !@{$self->{readLineBuf}} ) {
+    $self->{readLineBuf} = [] if ( !defined($self->{readLineBuf}) );
+    while ( !@{$self->{readLineBuf}} ) {
         $self->read(\$str, $CompMaxRead);
         if ( $str eq "" ) {
             $str = $self->{readLineFrag};

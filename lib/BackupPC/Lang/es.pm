@@ -25,18 +25,20 @@ $Lang{Admin_Options_Page} = <<EOF;
 ENG
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
-\${h1("Server Control")}
+\${h2("Server Control")}
 <form action="\$MyURL" method="get">
 <table>
-  <tr><td>Stop the server:<td><input type="submit" name="action" value="Stop">
+<!--<tr><td>Stop the server:<td><input type="submit" name="action" value="Stop">-->
   <tr><td>Reload the server configuration:<td><input type="submit" name="action" value="Reload">
 </table>
 </form>
-\${h1("Server Configuration")}
+<!--
+\${h2("Server Configuration")}
 <ul> 
   <li><i>Other options can go here... e.g.,</i>
   <li>Edit server configuration
 </ul>
+-->
 EOF
 $Lang{Unable_to_connect_to_BackupPC_server} = "Imposible conectar al servidor BackupPC",
             "Este script CGI (\$MyURL) no puede conectar al servidor BackupPC"
@@ -461,7 +463,7 @@ seleccionado será sobreescrito!
                 window.open(URL,'','width=500,height=400');
          }
          </script>
-         <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Search for available shares (NOT IMPLEMENTED)</a></td>
+         <!--<a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Search for available shares (NOT IMPLEMENTED)</a>--></td>
 </tr><tr>
     <td>Restaurar los archivos a la unidad</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"

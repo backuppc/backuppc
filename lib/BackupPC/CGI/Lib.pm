@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0_CVS, released 13 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -387,7 +387,7 @@ sub ConfirmIPAddress
 
 sub Header
 {
-    my($title, $content, $noBrowse) = @_;
+    my($title, $content, $noBrowse, $contentSub, $contentPost) = @_;
     my @adminLinks = (
         { link => "",                         name => $Lang->{Status},
                                               priv => 1},
@@ -449,23 +449,20 @@ EOF
 	    NavLink("?action=view&type=config&host=${EscURI($host)}",
 		    $Lang->{Config_file}, " class=\"navbar\"");
 	}
-	print <<EOF;
-</div>
-<div id="Content">
-$content
-<br><br><br>
-</div>
-<div class="NavMenu" style="height:100%" id="NavMenu">
-EOF
-    } else {
-        print <<EOF;
-<div id="Content">
-$content
+	print "</div>\n";
+    }
+    print("<div id=\"Content\">\n$content\n");
+    if ( defined($contentSub) && ref($contentSub) eq "CODE" ) {
+	while ( (my $s = &$contentSub()) ne "" ) {
+	    print($s);
+	}
+    }
+    print($contentPost) if ( defined($contentPost) );
+    print <<EOF;
 <br><br><br>
 </div>
 <div class="NavMenu" id="NavMenu" style="height:100%">
 EOF
-    }
     my $hostSelectbox = "<option value=\"#\">$Lang->{Select_a_host}</option>";
     my @hosts = GetUserHosts($In{host}, $Conf{CgiNavBarAdminAllHosts});
     if ( defined($Hosts) && %$Hosts > 0 && @hosts ) {

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0_CVS, released 13 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -52,7 +52,8 @@ sub action
     my($file, $comment);
     my $ext = $num ne "" ? ".$num" : "";
 
-    ErrorExit(eval("qq{$Lang->{Invalid_number__num}}")) if ( $num ne "" && $num !~ /^\d+$/ );
+    ErrorExit(eval("qq{$Lang->{Invalid_number__num}}"))
+		    if ( $num ne "" && $num !~ /^\d+$/ );
     if ( $type eq "XferLOG" ) {
         $file = "$TopDir/pc/$host/SmbLOG$ext";
         $file = "$TopDir/pc/$host/XferLOG$ext" if ( !-f $file && !-f "$file.z");
@@ -84,23 +85,14 @@ sub action
                                            && !-f $file );
     } elsif ( $type eq "docs" ) {
         $file = "$BinDir/../doc/BackupPC.html";
-        if ( open(LOG, $file) ) {
-	    binmode(LOG);
-            my $content;
-            $content .= $_ while ( <LOG> );
-            close(LOG);
-            Header($Lang->{BackupPC__Documentation}, $content);
-            Trailer();
-        } else {
-            ErrorExit(eval("qq{$Lang->{Unable_to_open__file__configuration_problem}}"));
-        }
-        return;
     } elsif ( $type eq "config" ) {
         $file = "$TopDir/conf/config.pl";
     } elsif ( $type eq "hosts" ) {
         $file = "$TopDir/conf/hosts";
+        $linkHosts = 1;
     } elsif ( $host ne "" ) {
         $file = "$TopDir/pc/$host/LOG$ext";
+        $linkHosts = 1;
     } else {
         $file = "$TopDir/log/LOG$ext";
         $linkHosts = 1;
@@ -112,88 +104,153 @@ sub action
         $file .= ".z";
         $compress = 1;
     }
-    my $content;
-    $content .= eval ("qq{$Lang->{Log_File__file__comment}}");
+    my($contentPre, $contentSub, $contentPost);
+    $contentPre .= eval("qq{$Lang->{Log_File__file__comment}}");
     if ( defined($fh = BackupPC::FileZIO->open($file, 0, $compress)) ) {
         my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
 
-	$content .= ( eval ("qq{$Lang->{Contents_of_log_file}}"));
+	$contentPre .= eval("qq{$Lang->{Contents_of_log_file}}");
 
-        $content .= "<pre>";
+        $contentPre .= "<pre>";
         if ( $type eq "XferErr" || $type eq "XferErrbad"
 				|| $type eq "RestoreErr"
 				|| $type eq "ArchiveErr" ) {
-	    my $skipped;
-            while ( 1 ) {
-                $_ = $fh->readLine();
-                if ( $_ eq "" ) {
-		    $content .= (eval ("qq{$Lang->{skipped__skipped_lines}}"))
-						    if ( $skipped );
-		    last;
+	    $contentSub = sub {
+		#
+		# Because the content might be large, we use
+		# a sub to return the data in 64K chunks.
+		#
+		my($skipped, $c, $s);
+		while ( length($c) < 65536 ) {
+		    $s = $fh->readLine();
+		    if ( $s eq "" ) {
+			$c .= eval("qq{$Lang->{skipped__skipped_lines}}")
+							if ( $skipped );
+			last;
+		    }
+		    $s =~ s/[\n\r]+//g;
+		    if ( $s =~ /smb: \\>/
+			    || $s =~ /^\s*(\d+) \(\s*\d+\.\d kb\/s\) (.*)$/
+			    || $s =~ /^tar: dumped \d+ files/
+			    || $s =~ /^\s*added interface/i
+			    || $s =~ /^\s*restore tar file /i
+			    || $s =~ /^\s*restore directory /i
+			    || $s =~ /^\s*tarmode is now/i
+			    || $s =~ /^\s*Total bytes written/i
+			    || $s =~ /^\s*Domain=/i
+			    || $s =~ /^\s*Getting files newer than/i
+			    || $s =~ /^\s*Output is \/dev\/null/
+			    || $s =~ /^\s*\([\d.,]* kb\/s\) \(average [\d\.]* kb\/s\)$/
+			    || $s =~ /^\s+directory \\/
+			    || $s =~ /^\s*Timezone is/
+			    || $s =~ /^\s*creating lame (up|low)case table/i
+			    || $s =~ /^\.\//
+			    || $s =~ /^  / ) {
+			$skipped++;
+			next;
+		    }
+		    $c .= eval("qq{$Lang->{skipped__skipped_lines}}")
+							 if ( $skipped );
+		    $skipped = 0;
+		    $c .= ${EscHTML($s)} . "\n";
 		}
-                if ( /smb: \\>/
-                        || /^\s*(\d+) \(\s*\d+\.\d kb\/s\) (.*)$/
-                        || /^tar: dumped \d+ files/
-                        || /^\s*added interface/i
-                        || /^\s*restore tar file /i
-                        || /^\s*restore directory /i
-                        || /^\s*tarmode is now/i
-                        || /^\s*Total bytes written/i
-                        || /^\s*Domain=/i
-                        || /^\s*Getting files newer than/i
-                        || /^\s*Output is \/dev\/null/
-                        || /^\s*\([\d.,]* kb\/s\) \(average [\d\.]* kb\/s\)$/
-                        || /^\s+directory \\/
-                        || /^\s*Timezone is/
-			|| /^\s*creating lame (up|low)case table/i
-                        || /^\.\//
-                        || /^  /
-			    ) {
-		    $skipped++;
-		    next;
-		}
-		$content .= (eval("qq{$Lang->{skipped__skipped_lines}}"))
-						     if ( $skipped );
-		$skipped = 0;
-                $content .= ${EscHTML($_)};
-            }
+		return $c;
+	    };
         } elsif ( $linkHosts ) {
-            while ( 1 ) {
-                $_ = $fh->readLine();
-                last if ( $_ eq "" );
-                my $s = ${EscHTML($_)};
-                $s =~ s/\b([\w-]+)\b/defined($Hosts->{$1})
-                                        ? ${HostLink($1)} : $1/eg;
-                $content .= $s;
-            }
+	    #
+	    # Because the content might be large, we use
+	    # a sub to return the data in 64K chunks.
+	    #
+	    $contentSub = sub {
+		my($c, $s);
+		while ( length($c) < 65536 ) {
+		    $s = $fh->readLine();
+		    last if ( $s eq "" );
+		    $s =~ s/[\n\r]+//g;
+		    $s = ${EscHTML($s)};
+		    $s =~ s/\b([\w-]+)\b/defined($Hosts->{$1})
+					    ? ${HostLink($1)} : $1/eg;
+		    $c .= $s . "\n";
+		}
+		return $c;
+            };
         } elsif ( $type eq "config" ) {
-            while ( 1 ) {
-                $_ = $fh->readLine();
-                last if ( $_ eq "" );
-                # remove any passwords and user names
-                s/(SmbSharePasswd.*=.*['"]).*(['"])/$1$2/ig;
-                s/(SmbShareUserName.*=.*['"]).*(['"])/$1$2/ig;
-                s/(RsyncdPasswd.*=.*['"]).*(['"])/$1$2/ig;
-                s/(ServerMesgSecret.*=.*['"]).*(['"])/$1$2/ig;
-                $content .= ${EscHTML($_)};
-            }
+	    #
+	    # Because the content might be large, we use
+	    # a sub to return the data in 64K chunks.
+	    #
+	    $contentSub = sub {
+		my($c, $s);
+		while ( length($c) < 65536 ) {
+		    $s = $fh->readLine();
+		    last if ( $s eq "" );
+		    $s =~ s/[\n\r]+//g;
+		    # remove any passwords and user names
+		    $s =~ s/(SmbSharePasswd.*=.*['"]).*(['"])/$1$2/ig;
+		    $s =~ s/(SmbShareUserName.*=.*['"]).*(['"])/$1$2/ig;
+		    $s =~ s/(RsyncdPasswd.*=.*['"]).*(['"])/$1$2/ig;
+		    $s =~ s/(ServerMesgSecret.*=.*['"]).*(['"])/$1$2/ig;
+		    $s = ${EscHTML($s)};
+		    $s =~ s[(\$Conf\{.*?\})][
+			my $c = $1;
+			my $s = lc($c);
+			$s =~ s{(\W)}{sprintf("%%%02x", ord($1) )}gxe;
+			"<a href=\"?action=view&type=docs#item_$s\">$c</a>"
+		    ]eg;
+		    $c .= $s . "\n";
+		}
+		return $c;
+            };
+        } elsif ( $type eq "docs" ) {
+	    #
+	    # Because the content might be large, we use
+	    # a sub to return the data in 64K chunks.
+	    #
+	    $contentSub = sub {
+		my($c, $s);
+		while ( length($c) < 65536 ) {
+		    $s = $fh->readLine();
+		    last if ( $s eq "" );
+		    $c .= $s;
+		}
+		return $c;
+            };
+	    #
+	    # Documentation a different header and no pre or post text,
+	    # so just handle it here
+	    #
+            Header($Lang->{BackupPC__Documentation}, "", 0, $contentSub);
+            Trailer();
+	    return;
         } else {
-            while ( 1 ) {
-                $_ = $fh->readLine();
-                last if ( $_ eq "" );
-                $content .= ${EscHTML($_)};
-            }
+	    #
+	    # Because the content might be large, we use
+	    # a sub to return the data in 64K chunks.
+	    #
+	    $contentSub = sub {
+		my($c, $s);
+		while ( length($c) < 65536 ) {
+		    $s = $fh->readLine();
+		    last if ( $s eq "" );
+		    $s =~ s/[\n\r]+//g;
+		    $s = ${EscHTML($s)};
+		    $c .= $s . "\n";
+		}
+		return $c;
+            };
         }
-        $fh->close();
     } else {
-	$content .= ( eval("qq{$Lang->{_pre___Can_t_open_log_file__file}}"));
+	if ( $type eq "docs" ) {
+	    ErrorExit(eval("qq{$Lang->{Unable_to_open__file__configuration_problem}}"));
+	}
+	$contentPre .= eval("qq{$Lang->{_pre___Can_t_open_log_file__file}}");
     }
-    $content .= <<EOF;
-</pre>
-EOF
+    $contentPost .= "</pre>\n" if ( $type ne "docs" );
     Header(eval("qq{$Lang->{Backup_PC__Log_File__file}}"),
-                    $content, !-f "$TopDir/pc/$host/backups" );
+                    $contentPre, !-f "$TopDir/pc/$host/backups",
+		    $contentSub, $contentPost);
     Trailer();
+    $fh->close() if ( defined($fh) );
 }
 
 1;

@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0_CVS, released 13 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -462,14 +462,17 @@ sub RmTreeQuiet
 	#
 	if ( !unlink($root) ) {
             if ( -d $root ) {
-                my $d = DirHandle->new($root)
-                  or print(STDERR "Can't read $pwd/$root: $!");
-                @files = $d->read;
-                $d->close;
-                @files = grep $_!~/^\.{1,2}$/, @files;
-                $bpc->RmTreeQuiet("$pwd/$root", \@files);
-                chdir($pwd);
-                rmdir($root) || rmdir($root);
+                my $d = DirHandle->new($root);
+		if ( !defined($d) ) {
+		    print(STDERR "Can't read $pwd/$root: $!\n");
+		} else {
+		    @files = $d->read;
+		    $d->close;
+		    @files = grep $_!~/^\.{1,2}$/, @files;
+		    $bpc->RmTreeQuiet("$pwd/$root", \@files);
+		    chdir($pwd);
+		    rmdir($root) || rmdir($root);
+		}
             } else {
                 unlink($root) || unlink($root);
             }

@@ -23,18 +23,20 @@ $Lang{Admin_Options} = "Options d'administration";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
-\${h1("Contrôle du serveur")}
+\${h2("Contrôle du serveur")}
 <form action="\$MyURL" method="get">
 <table>
-  <tr><td>Arrêter le serveur:<td><input type="submit" name="action" value="Arrêter">
-  <tr><td>Recharger la configuration:<td><input type="submit" name="action" value="Recharger">
+<!--<tr><td>Arrêter le serveur:<td><input type="submit" name="action" value="Arrêter">-->
+  <tr><td>Recharger la configuration:<td><input type="submit" name="action" value="Reload">
 </table>
 </form>
-\${h1("Configuration")}
+<!--
+\${h2("Server Configuration")}
 <ul>
   <li><i>Other options can go here... e.g.,</i>
   <li>Edit server configuration
 </ul>
+-->
 EOF
 $Lang{Unable_to_connect_to_BackupPC_server} = "Impossible de se connecter au serveur BackupPC",
             "Ce script CGI (\$MyURL) est incapable de se connecter au serverur BackupPC"
@@ -459,7 +461,7 @@ tous les fichiers correspondant à ceux que vous avez sélectionnés vont être effa
 		window.open(URL,'','width=500,height=400');
 	}
 	 </script>
-	 <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Chercher les partitions disponibles (NON IMPLANTE)</a></td>
+	 <!--<a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Chercher les partitions disponibles (NON IMPLANTE)</a>--></td>
 </tr><tr>
     <td>Restaurer les fichiers vers le partage</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"
@@ -1094,7 +1096,7 @@ EOF
 
 $Lang{checkAllHosts} = <<EOF;
 <tr><td class="fviewborder">
-<input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Select all
+<input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Tout sélectionner
 </td><td colspan="2" align="center" class="fviewborder">
 <input type="submit" name="Submit" value="Archive selected hosts">
 </td></tr>

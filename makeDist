@@ -116,6 +116,8 @@ my $errCnt;
 
 $errCnt += CheckConfigParams("conf/config.pl", $ConfVars, 0);
 
+$errCnt += CheckConfigParams("doc-src/BackupPC.pod", $ConfVars, 1);
+
 #
 # These config parameters are not used in the code, so ignore them.
 #
@@ -228,11 +230,26 @@ sub InstallFile
 	    s/^# *Version \d+\.\d+[\.\w]*, released \d+ \w+ \d{4}\.?/# Version __VERSION__, released __RELEASEDATE__./;
 	    s/__VERSION__/$Version/g;
 	    s/__RELEASEDATE__/$ReleaseDate/g;
-	    if ( $file =~ /BackupPC\.html$/ && !/A NAME="item_%24Conf/ ) {
-		s/\$Conf{([^}]*)}/
+	    if ( $file =~ /BackupPC\.html$/ ) {
+		#
+		# fixup for perl 5.6.x
+		#
+		if ( !/A NAME="item_%24Conf/i ) {
+		    s/\$Conf{([^}]*)}/
 			defined($ConfName{$1})
-			    ? "<A HREF=\"#$ConfName{$1}\">\$Conf{$1}<\/A>"
+			    ? "\L<A HREF=\"#$ConfName{$1}\">\E\$Conf{$1}<\/A>"
 			    : "\$Conf{$1}"/eg;
+		}
+		s/<(A NAME="item_%24Conf%7B.*?%7D).*?">/\L<$1">/ig;
+		s/^<DD>/<DD><P>/;
+		#
+		# fixup for perl 5.8.x
+		#
+		if ( /^<\/dt>/ ) {
+		    $_ .= <FILE>;
+		    s/^(<\/dt>\n<dd>)/$1<p>/s;
+		}
+		s/^<li><\/li>/<li>/;
 	    }
 	    if ( /__CONFIGPOD__/ ) {
 		print OUT $ConfPod;
@@ -296,7 +313,7 @@ sub config2pod
                 s/([^;])\s*$/$1 .../;
             }
             push(@conf, $_);
-            my $text = $_;
+            my $text = "\$Conf{$var}";
             $text =~ s/\s+/_/sg;
             $text =~ s{(\W)}{sprintf("%%%02X", ord($1) )}gxe;
             $text = substr($text, 0, 50);

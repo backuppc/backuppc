@@ -56,7 +56,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta0, released 23 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -108,11 +108,27 @@ sub write
     return if ( $a->{eof} );
     $a->{data} .= $$dataRef if ( defined($dataRef) );
     return if ( length($a->{data}) < $BufSize && defined($dataRef) );
-    if ( !defined($a->{digest}) && $a->{fileSize} > 0 ) {
+
+    #
+    # Correct the fileSize if it is wrong (rsync might transfer
+    # a file whose length is different to the length sent with the
+    # file list if the file changes between the file list sending
+    # and the file sending).  Here we only catch the case where
+    # we haven't computed the digest (ie: we have written no more
+    # than $BufSize.  We catch the big file case below.
+    #
+    if ( !defined($dataRef) && !defined($a->{digest})
+		&& $a->{fileSize} != length($a->{data}) ) {
+	$a->{fileSize} = length($a->{data});
+    }
+
+    if ( !defined($a->{digest}) && length($a->{data}) > 0 ) {
         #
         # build a list of all the candidate matching files
         #
         my $md5 = Digest::MD5->new;
+	$a->{fileSize} = length($a->{data})
+			    if ( $a->{fileSize} < length($a->{data}) );
         $a->{digest} = $a->{bpc}->Buffer2MD5($md5, $a->{fileSize}, \$a->{data});
         if ( !defined($a->{base} = $a->{bpc}->MD52Path($a->{digest},
                                                        $a->{compress})) ) {
@@ -151,7 +167,7 @@ sub write
         }
     }
     my $dataLen = length($a->{data});
-    if ( !defined($a->{fhOut}) && $a->{fileSize} > 0 ) {
+    if ( !defined($a->{fhOut}) && length($a->{data}) > 0 ) {
         #
         # See if the new chunk of data continues to match the
         # candidate files.
@@ -257,6 +273,74 @@ sub write
     foreach my $f ( @{$a->{files}} ) {
         $f->{fh}->close();
     }
+
+    #
+    # Make sure the fileSize was correct.  See above for comments about
+    # rsync.
+    #
+    if ( $a->{nWrite} != $a->{fileSize} ) {
+	#
+	# Oops, fileSize was wrong, so our MD5 digest was wrong and our
+	# effort to match files likely failed.  This is ugly, but our
+	# only choice at this point is to re-write the entire file with
+	# the correct length.  We need to rename the file, open it for
+	# reading, and then re-write the file with the correct length.
+	#
+
+	#print("Doing big file fixup ($a->{fileSize} != $a->{nWrite})\n");
+
+	my($fh, $fileName);
+	$a->{fileSize} = $a->{nWrite};
+	if ( $a->{fileName} =~ /(.*)\// ) {
+	    $fileName = $1;
+	} else {
+	    $fileName = ".";
+	}
+
+	#
+	# Find a unique target temporary file name
+	#
+	my $i = 0;
+	while ( -f "$fileName/t$$.$i" ) {
+	    $i++;
+	}
+	$fileName = "$fileName/t$$.$i";
+        $a->{fhOut}->close();
+	if ( !rename($a->{fileName}, $fileName)
+	  || !defined($fh = BackupPC::FileZIO->open($fileName, 0,
+					     $a->{compress})) ) {
+            push(@{$a->{errors}}, "Can't rename $a->{fileName} -> $fileName"
+	                        . " or open during size fixup\n");
+	} else {
+	    my $poolWrite = BackupPC::PoolWrite->new($a->{bpc}, $a->{fileName},
+					$a->{fileSize}, $a->{compress});
+	    my $nRead = 0;
+
+	    while ( $nRead < $a->{fileSize} ) {
+		my $thisRead = $a->{fileSize} - $nRead < $BufSize
+		 	     ? $a->{fileSize} - $nRead : $BufSize;
+		my $data;
+		my $n = $fh->read(\$data, $thisRead);
+		if ( $n != $thisRead ) {
+		    push(@{$a->{errors}},
+				"Unable to read $thisRead bytes during resize"
+			       . " from temp $fileName (got $n)\n");
+		    last;
+		}
+		$poolWrite->write(\$data);
+		$nRead += $thisRead;
+	    }
+	    $fh->close;
+	    unlink($fileName);
+	    if ( @{$a->{errors}} ) {
+		$poolWrite->close;
+		return (0, $a->{digest}, -s $a->{fileName}, $a->{errors});
+	    } else {
+		return $poolWrite->close;
+	    }
+	}
+    }
+
     if ( $a->{fileSize} == 0 ) {
         #
         # Simply create an empty file

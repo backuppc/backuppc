@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta0, released 23 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -65,6 +65,7 @@ sub new
 	attrib	     => {},
 	logHandler   => \&logHandler,
 	stats        => {
+	    errorCnt          => 0,
 	    TotalFileCnt      => 0,
 	    TotalFileSize     => 0,
 	    ExistFileCnt      => 0,
@@ -113,6 +114,7 @@ sub csumStart
 						       0,
 						       $attr->{compress})) ) {
         $fio->log("Can't open $attr->{fullPath} (name=$f->{name})");
+	$fio->{stats}{errorCnt}++;
         return -1;
     }
     if ( $needMD4) {
@@ -133,14 +135,16 @@ sub csumGet
 
     return if ( !defined($fio->{fh}) );
     if ( $fio->{fh}->read(\$fileData, $blockSize * $num) <= 0 ) {
-        return;
+	$fio->log("$fio->{file}{name}: csumGet is at EOF - zero padding\n");
+	$fio->{stats}{errorCnt}++;
+	$fileData = pack("c", 0) x ($blockSize * $num);
     }
     $fio->{csumDigest}->add($fileData) if ( defined($fio->{csumDigest}) );
     $fio->log(sprintf("%s: getting csum ($num,$csumLen,%d,0x%x)\n",
                             $fio->{file}{name},
                             length($fileData),
                             $fio->{checksumSeed}))
-                if ( $fio->{logLevel} >= 10 );
+                if ( $fio->{logLevel} >= 9 );
     return $fio->{digest}->blockDigest($fileData, $blockSize,
                                          $csumLen, $fio->{checksumSeed});
 }
@@ -175,6 +179,7 @@ sub readStart
                                            0,
                                            $attr->{compress})) ) {
         $fio->log("Can't open $attr->{fullPath} (name=$f->{name})");
+	$fio->{stats}{errorCnt}++;
         return;
     }
     $fio->log("$f->{name}: opened for read") if ( $fio->{logLevel} >= 4 );
@@ -489,6 +494,7 @@ sub makePath
     File::Path::mkpath($path, 0, 0777) if ( !-d $path );
     return $fio->attribSet($f) if ( -d $path );
     $fio->log("Can't create directory $path");
+    $fio->{stats}{errorCnt}++;
     return -1;
 }
 
@@ -678,7 +684,7 @@ sub fileDeltaRxNext
 					   $rxOutFile, $fio->{rxFile}{size},
                                            $fio->{xfer}{compress});
         $fio->log("$fio->{rxFile}{name}: opening output file $rxOutFile")
-                        if ( $fio->{logLevel} >= 10 );
+                        if ( $fio->{logLevel} >= 9 );
         $fio->{rxOutFile} = $rxOutFile;
         $fio->{rxOutFileRel} = $rxOutFileRel;
         $fio->{rxDigest} = File::RsyncP::Digest->new;
@@ -704,6 +710,7 @@ sub fileDeltaRxNext
                                                    0,
                                                    $attr->{compress})) ) {
                     $fio->log("Can't open $attr->{fullPath}");
+		    $fio->{stats}{errorCnt}++;
                     return -1;
                 }
                 if ( $attr->{size} < 10 * 1024 * 1024 ) {
@@ -715,6 +722,9 @@ sub fileDeltaRxNext
                     while ( $fh->read(\$data, 10 * 1024 * 1024) > 0 ) {
                         $fio->{rxInData} .= $data;
                     }
+		    $fio->log("$attr->{fullPath}: cached all $attr->{size}"
+			    . " bytes")
+				    if ( $fio->{logLevel} >= 9 );
                 } else {
                     #
                     # Create and write a temporary output file
@@ -723,20 +733,27 @@ sub fileDeltaRxNext
                                     if  ( -f "$fio->{outDirSh}RStmp" );
                     if ( open(F, "+>", "$fio->{outDirSh}RStmp") ) {
                         my $data;
+			my $byteCnt = 0;
                         while ( $fh->read(\$data, 1024 * 1024) > 0 ) {
                             if ( syswrite(F, $data) != length($data) ) {
                                 $fio->log(sprintf("Can't write len=%d to %s",
 				      length($data) , "$fio->{outDirSh}RStmp"));
                                 $fh->close;
+				$fio->{stats}{errorCnt}++;
                                 return -1;
                             }
+			    $byteCnt += length($data);
                         }
                         $fio->{rxInFd} = *F;
                         $fio->{rxInName} = "$fio->{outDirSh}RStmp";
                         seek($fio->{rxInFd}, 0, 0);
+			$fio->log("$attr->{fullPath}: copied $byteCnt,"
+				. "$attr->{size} bytes to $fio->{rxInName}")
+					if ( $fio->{logLevel} >= 9 );
                     } else {
                         $fio->log("Unable to open $fio->{outDirSh}RStmp");
                         $fh->close;
+			$fio->{stats}{errorCnt}++;
                         return -1;
                     }
                 }
@@ -747,6 +764,7 @@ sub fileDeltaRxNext
                     $fio->{rxInName} = $attr->{fullPath};
                 } else {
                     $fio->log("Unable to open $attr->{fullPath}");
+		    $fio->{stats}{errorCnt}++;
                     return -1;
                 }
             }
@@ -757,7 +775,8 @@ sub fileDeltaRxNext
                         if ( $fio->{logLevel} >= 9 );
         my $seekPosn = $fio->{rxMatchBlk} * $fio->{rxBlkSize};
         if ( defined($fio->{rxInFd}) && !seek($fio->{rxInFd}, $seekPosn, 0) ) {
-            $fio->log("Unable to seek $attr->{fullPath} to $seekPosn");
+            $fio->log("Unable to seek $attr->{rxInName} to $seekPosn");
+	    $fio->{stats}{errorCnt}++;
             return -1;
         }
         my $cnt = $fio->{rxMatchNext} - $fio->{rxMatchBlk};
@@ -774,10 +793,14 @@ sub fileDeltaRxNext
                 $data = substr($fio->{rxInData}, $seekPosn, $len);
 		$seekPosn += $len;
             } else {
-                if ( sysread($fio->{rxInFd}, $data, $len) != $len ) {
-                    $fio->log("Unable to read $len bytes from"
-                              . " $fio->{rxInName} "
-                              . "($i,$thisCnt,$fio->{rxBlkCnt})");
+		my $got = sysread($fio->{rxInFd}, $data, $len);
+                if ( $got != $len ) {
+		    my $inFileSize = -s $fio->{rxInName};
+                    $fio->log("Unable to read $len bytes from $fio->{rxInName}"
+                            . " got=$got, seekPosn=$seekPosn"
+                            . " ($i,$thisCnt,$fio->{rxBlkCnt},$inFileSize"
+			    . ",$attr->{size})");
+		    $fio->{stats}{errorCnt}++;
                     return -1;
                 }
             }
@@ -835,7 +858,8 @@ sub fileDeltaRxDone
 	    }
             $fh->close;
         } else {
-	    # ERROR
+	    $fio->log("cannot open $attr->{fullPath} for MD4 check");
+	    $fio->{stats}{errorCnt}++;
 	}
         $fio->log("$name got exact match")
                         if ( $fio->{logLevel} >= 5 );
@@ -893,6 +917,7 @@ sub fileDeltaRxDone
                             . $fio->{bpc}->fileNameMangle($name);
             if ( !link($attr->{fullPath}, $rxOutFile) ) {
                 $fio->log("Unable to link $attr->{fullPath} to $rxOutFile");
+		$fio->{stats}{errorCnt}++;
                 return -1;
             }
 	    #
@@ -953,17 +978,19 @@ sub fileListEltSend
 		    #
 		    $extraAttribs = { rdev => $1 * 256 + $2 };
 		} else {
-		    # ERROR
-		    $fio->log("$name: unexpected file contents $str");
+		    $fio->log("$name: unexpected special file contents $str");
+		    $fio->{stats}{errorCnt}++;
 		}
 	    } else {
 		# ERROR
 		$fio->log("$name: can't read exactly $a->{size} bytes");
+		$fio->{stats}{errorCnt}++;
 	    }
 	    $fh->close;
 	} else {
 	    # ERROR
 	    $fio->log("$name: can't open");
+	    $fio->{stats}{errorCnt}++;
 	}
     }
     my $f = {

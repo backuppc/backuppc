@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta0, released 23 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -374,6 +374,7 @@ sub processClose
 mkpath("$OutDir/$ShareName", 0, 0777);
 open(NEW_FILES, ">>", "$TopDir/pc/$host/NewFileList")
                  || die("can't open $TopDir/pc/$host/NewFileList");
+binmode(STDIN);
 1 while ( TarReadFile(*STDIN) );
 1 while ( sysread(STDIN, my $discard, 1024) );
 

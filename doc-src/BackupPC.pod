@@ -40,6 +40,11 @@ cancel backups and browse and restore files from backups.
 
 =item *
 
+The http/cgi user interface has internationalization (i18n) support,
+currently prodiving English, French and Spanish.
+
+=item *
+
 No client-side software is needed. On WinXX the standard smb
 protocol is used to extract backup data. On linux or unix clients,
 rsync or tar (over ssh/rsh/nfs) is used to extract backup data.
@@ -421,7 +426,7 @@ Rsync as a transport method.
 If you are using smb to backup WinXX machines you need smbclient and
 nmblookup from the samba package.  You will also need nmblookup if
 you are backing up linux/unix DHCP machines.  See L<http://www.samba.org>.
-Version >= 2.2.0 of Samba is required (smbclient's tar feature in
+Version 2.2.0 or later of Samba is required (smbclient's tar feature in
 2.0.8 and prior has bugs for file path lengths around 100 characters
 and generates bad output when file lengths change during the backup).
 
@@ -446,7 +451,7 @@ Use "rsync --version" to check your version.
 
 For BackupPC to use Rsync you will also need to install the perl
 File::RsyncP module, which is available from
-L<http://perlrsync.sourceforge.net>.  Version 0.31 is required.
+L<http://perlrsync.sourceforge.net>.  Version 0.31 or later is required.
 
 =item *
 
@@ -526,7 +531,7 @@ You can run "perldoc Archive::Zip" to see if this module is installed.
 To use rsync and rsyncd with BackupPC you will need to install File::RsyncP.
 You can run "perldoc File::RsyncP" to see if this module is installed.
 File::RsyncP is available from L<http://perlrsync.sourceforge.net>.
-Version 0.20 is required.
+Version 0.31 or later is required.
 
 =back
 
@@ -685,7 +690,7 @@ This is typically the host name or NetBios name of the client machine
 and should be in lower case.  The host name can contain spaces (escape
 with a backslash), but it is not recommended.
 
-Please read the second L<How BackupPC Finds Hosts|how backuppc finds hosts>.
+Please read the section L<How BackupPC Finds Hosts|how backuppc finds hosts>.
 
 In certain cases you might want several distinct clients to refer
 to the same physical machine.  For example, you might have a database
@@ -702,7 +707,7 @@ real host name of the machine.
 Starting with v2.0.0 the way hosts are discovered has changed and now
 in most cases you should specify 0 for the DHCP flag, even if the host
 has a dynamically assigned IP address.
-Please read the second L<How BackupPC Finds Hosts|how backuppc finds hosts>
+Please read the section L<How BackupPC Finds Hosts|how backuppc finds hosts>
 to understand whether you need to set the DHCP flag.
 
 You only need to set DHCP to 1 if your client machine doesn't
@@ -894,6 +899,10 @@ of SSH you have by typing "ssh" or "man ssh".)
 =over 4
 
 =item OpenSSH Instructions
+
+Depending upon your OpenSSH installation, many of these steps can be
+replaced by running the scripts ssh-user-config and ssh-host-config
+included with OpenSSH.  You still need to manually exchange the keys.
 
 =over 4
 
@@ -1248,6 +1257,7 @@ to Apache's httpd.conf file:
 	   SetHandler perl-script
 	   PerlHandler Apache::Registry
 	   Options ExecCGI
+	   PerlSendHeader On
 	</Location>
     </IfModule>
 
@@ -1813,7 +1823,7 @@ is always done to verify if two files are really the same.
 Identical files on multiples backups are represented by hard links.
 Hardlinks are used so that identical files all refer to the same
 physical file on the server's disk. Also, hard links maintain
-reference counts so that BackupPC knows when to deleted unused files
+reference counts so that BackupPC knows when to delete unused files
 from the pool.
 
 For the computer-science majors among you, you can think of the pooling
@@ -2882,12 +2892,16 @@ Copyright (C) 2001-2003 Craig Barratt
 
 Xavier Nicollet, with additions from Guillaume Filion, added the
 internationalization (i18n) support to the CGI interface for v2.0.0.
+Xavier provided the French translation fr.pm, with additions from
+Guillaume.
 
 Ryan Kucera contributed the directory navigation code and images
 for v1.5.0.  He also contributed the first skeleton of BackupPC_restore.
 
 Guillaume Filion wrote BackupPC_zipCreate and added the CGI support
 for zip download, in addition to some CGI cleanup, for v1.5.0.
+
+Javier provided the Spanish translation, es.pm.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.

@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta0, released 23 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -579,6 +579,7 @@ sub Action_Browse
             ErrorExit(eval("qq{$Lang->{Directory___EscHTML}}"));
 	}
     }
+    $dir = "/$dir" if ( $dir !~ /^\// );
     my $relDir  = $dir;
     my $currDir = undef;
 
@@ -605,12 +606,12 @@ sub Action_Browse
             my $fURI = $f;                             # URI escaped $f
             my $shareURI = $share;                     # URI escaped $share
 	    if ( $relDir eq "" ) {
-		$path = $f;
+		$path = "/$f";
 	    } else {
 		($path = "$relDir/$f") =~ s{//+}{/}g;
 	    }
 	    if ( $shareURI eq "" ) {
-		$shareURI = $path;
+		$shareURI = $f;
 		$path  = "/";
 	    }
             $path =~ s{^/+}{/};
@@ -719,12 +720,12 @@ EOF
         # Prune the last directory off $relDir, or at the very end
 	# do the top-level directory.
         #
-	if ( $relDir eq "" || $relDir eq "/" ) {
+	if ( $relDir eq "" || $relDir eq "/" || $relDir !~ /(.*)\/(.*)/ ) {
 	    $currDir = $share;
 	    $share = "";
 	    $relDir = "";
 	} else {
-	    $relDir =~ s/(.*)\/(.*)/$1/;
+	    $relDir  = $1;
 	    $currDir = $2;
 	}
     }

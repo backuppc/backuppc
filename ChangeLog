@@ -30,6 +30,8 @@
   now supports English and French, and adding more languages is
   now easy.  New config paramater $Conf{Language} sets the language.
 
+* Added Spanish translation es.pm from Javier.
+
 * Added optional user-defined pre/post dump/restore commands, allowing
   things like database shutdown/startup for dumps.
 
@@ -88,6 +90,11 @@
 
 * Added catching of SIG_PIPE to BackupPC_dump, and changed catch_signal
   to ignore multiple signals of the same type.
+
+* Added binmode(STDIN) to BackupPC_tarExtract, suggested by Pat LoPresti
+  to fix a problem a RedHat8 with perl 5.8.0.  It's unclear why this
+  helps, but it should be benign.  See:
+    http://sourceforge.net/mailarchive/forum.php?thread_id=1853018&forum_id=503
 
 * Added reporting of the largest number of hardlinks in the pool to the
   log file.

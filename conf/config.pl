@@ -429,7 +429,7 @@ $Conf{RestoreInfoKeepCnt} = 10;
 #    $Conf{BackupFilesOnly} = {
 #       'c' => ['/myFiles', '/important'],      # these are for 'c' share
 #       'd' => ['/moreFiles', '/archive'],      # these are for 'd' share
-#    }
+#    };
 #
 $Conf{BackupFilesOnly} = undef;
 
@@ -1179,9 +1179,9 @@ $Conf{CgiURL} = undef;
 
 #   
 # Language to use.  See lib/BackupPC/Lang for the list of supported
-# languages, which includes English (en) and French (fr).  Currently
-# this applies mainly to the CGI interface, but over time it might
-# also include log files and other text output.
+# languages, which include English (en), French (fr), and Spanish (es).
+# Currently the Language setting applies to the CGI interface and email
+# messages sent to users.  Log files and other text is still in English.
 #
 $Conf{Language} = 'en';
 

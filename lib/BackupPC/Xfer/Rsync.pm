@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta0, released 23 Feb 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -369,7 +369,9 @@ sub run
     } else {
 	$t->{xferOK} = 0;
     }
-    $t->{xferErrCnt} = $stats->{remoteErrCnt};
+    $t->{xferErrCnt} = $stats->{remoteErrCnt}
+		     + $stats->{childStats}{errorCnt}
+		     + $stats->{parentStats}{errorCnt};
     $t->{byteCnt}    = $stats->{childStats}{TotalFileSize}
 		     + $stats->{parentStats}{TotalFileSize};
     $t->{fileCnt}    = $stats->{childStats}{TotalFileCnt}

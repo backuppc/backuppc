@@ -454,11 +454,13 @@ $Conf{BackupFilesOnly} = undef;
 # For tar, if the exclude file contains a "/" it is assumed to be anchored
 # at the start of the string.  Since all the tar paths start with "./",
 # BackupPC prepends a "." if the exclude file starts with a "/".  Note
-# that GNU tar version >= 1.3.7 is required for the exclude option to
+# that GNU tar version >= 1.13.7 is required for the exclude option to
 # work correctly.  For linux or unix machines you should add
 # "/proc" to $Conf{BackupFilesExclude} unless you have specified
 # --one-file-system in $Conf{TarClientCmd} or --one-file-system in
-# $Conf{RsyncArgs}.
+# $Conf{RsyncArgs}.  Also, for tar, do not use a trailing "/" in
+# the directory name: a trailing "/" causes the name to not match
+# and the directory will not be excluded.
 #
 # Examples:
 #    $Conf{BackupFilesExclude} = '/temp';
@@ -995,13 +997,15 @@ $Conf{RestorePostUserCmd} = undef;
 
 #
 # Override the client's host name.  This allows multiple clients
-# to all refer to the same physical hostj.  This should only be
+# to all refer to the same physical host.  This should only be
 # set in the per-PC config file and is only used by BackupPC at
 # the last moment prior to generating the command used to backup
 # that machine (ie: the value of $Conf{ClientNameAlias} is invisible
-# everywhere else in BackupPC).  Eg:
+# everywhere else in BackupPC).  The setting can be a host name or
+# IP address, eg:
 #
 #         $Conf{ClientNameAlias} = 'realHostName';
+#         $Conf{ClientNameAlias} = '192.1.1.15';
 #
 # will cause the relevant smb/tar/rsync backup/restore commands to be
 # directed to realHostName, not the client name.
@@ -1238,6 +1242,17 @@ $Conf{CgiHeaderFontSize} = '3';
 $Conf{CgiNavBarBgColor} = '#ddeeee';
 $Conf{CgiHeaderBgColor} = '#99cc33';
 $Conf{CgiBodyBgColor}   = '#ffffff';
+
+#
+# Hilight colors based on status that are used in the PC summary page.
+#
+$Conf{CgiStatusHilightColor} = {
+    Reason_backup_failed           => '#ffcccc',
+    Reason_backup_done             => '#ccffcc',
+    Reason_no_ping                 => '#ffff99',
+    Reason_backup_in_progress      => '#66cc99',
+    Reason_backup_canceled_by_user => '#ff9900',
+};
 
 #
 # Additional CGI header text.  For example, if you wanted each CGI page

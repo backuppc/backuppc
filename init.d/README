@@ -29,6 +29,41 @@ You should then run the following commands as root:
 
 This will auto-start backuppc at run levels 3, 4 and 5.
 
+Debian Linux:
+============
+
+When configure.pl is run, the script debian-backuppc is created.
+
+(Can a Debian user add some instructions here??)
+
+Suse Linux:
+==========
+
+When configure.pl is run, the script suse-backuppc is created.
+
+(Can a Suse user add some instructions here??)
+
+Gentoo Linux:
+============
+
+When configure.pl is run, the script gentoo-backuppc and the init conf files
+gentoo-backuppc.conf are created. They should be copied to the following
+locations:
+
+    cp gentoo-backuppc /etc/init.d/backuppc
+    cp gentoo-backuppc.conf /etc/conf.d/backuppc
+
+You can test it by running these commands as root:
+
+    /etc/init.d/backuppc start
+    /etc/init.d/backuppc status
+    /etc/init.d/backuppc stop
+
+After copying these files, run the following  as root to make BackupPC to
+start automatically at boot (at the default run level):
+
+    rc-update add backuppc default
+
 Solaris:
 =======
 
@@ -42,4 +77,4 @@ and /etc/rc0.d.
 
 This will auto-start backuppc at run level 3 and stop it at run level 0.
 
-*** NOTE: the solaris startup script and instructions have not been tested ***
+(Can a Solaris user please tell me if these instructions are correct?)

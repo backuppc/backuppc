@@ -48,8 +48,8 @@ $Lang{BackupPC_Server_Status}= <<EOF;
     <td> Hora de Inicio </td>
     <td> Comando </td>
     <td align="center"> PID </td>
-    <td> Transfer. PID </td>
-    \$tarPidHdr</tr>
+    <td align="center"> Transfer. PID </td>
+    </tr>
 \$jobStr
 </table>
 <p>
@@ -755,6 +755,10 @@ $Lang{Hosts} = "Hosts";
 
 $Lang{This_PC_has_never_been_backed_up} = "<h2> !Nunca se ha hecho copia de seguridad de este PC! </h2>\n";
 $Lang{This_PC_is_used_by} = "<li>This PC es utilizado por \${UserLink(\$user)}";
+
+$Lang{Extracting_only_Errors} = "(Extracting only Errors)";
+$Lang{XferLOG} = "XferLOG";
+$Lang{Errors}  = "Errors";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;

@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta2, released 13 Apr 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -45,6 +45,7 @@ use File::Path;
 use BackupPC::Lib;
 use BackupPC::Attrib qw(:all);
 use BackupPC::FileZIO;
+use Data::Dumper;
 
 sub new
 {
@@ -72,6 +73,7 @@ sub dirCache
     my($m, $backupNum, $share, $dir) = @_;
     my($i, $level);
 
+    #print STDERR "dirCache($backupNum, $share, $dir)\n";
     $dir = "/$dir" if ( $dir !~ m{^/} );
     $dir =~ s{/+$}{};
     return if ( $m->{num} == $backupNum
@@ -103,7 +105,7 @@ sub dirCache
     #
     $m->{mergeNums} = [];
     for ( $i = $m->{idx} ; $level > 0 && $i >= 0 ; $i-- ) {
-	#print("Do $i ($m->{backups}[$i]{noFill},$m->{backups}[$i]{level})\n");
+	#print(STDERR "Do $i ($m->{backups}[$i]{noFill},$m->{backups}[$i]{level})\n");
 	#
 	# skip backups with the same or higher level
 	#
@@ -123,7 +125,7 @@ sub dirCache
             $sharePathM = $share . $dir;
         }
         $path .= $sharePathM;
-	#print("Opening $path\n");
+	#print(STDERR "Opening $path (share=$share)\n");
 	if ( !opendir(DIR, $path) ) {
             if ( $i == $m->{idx} ) {
                 #
@@ -148,6 +150,7 @@ sub dirCache
             $file = $1 if ( $file =~ /(.*)/ );
             my $fileUM = $file;
             $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
+            #print(STDERR "Doing $fileUM\n");
 	    #
 	    # skip special files
 	    #
@@ -231,6 +234,7 @@ sub dirCache
 	next if ( $m->{files}{$file}{type} != BPC_FTYPE_DELETED );
 	delete($m->{files}{$file});
     }
+    #print STDERR "Returning:\n", Dumper($m->{files});
 }
 
 #
@@ -239,12 +243,18 @@ sub dirCache
 sub fileAttrib
 {
     my($m, $backupNum, $share, $path) = @_;
-    my $dir = $path;
-    $dir =~ s{(.*)/(.*)}{$1};
-    my $file = $2;
 
-    $m->dirCache($backupNum, $share, $dir);
-    return $m->{files}{$file};
+    if ( $path =~ s{(.*)/+(.+)}{$1} ) {
+        my $file = $2;
+        $m->dirCache($backupNum, $share, $path);
+        return $m->{files}{$file};
+    } else {
+        #print STDERR "Got empty $path\n";
+        $m->dirCache($backupNum, "", "");
+        my %attr = %{$m->{files}{$share}};
+        $attr{relPath} = "/";
+        return \%attr;
+    }
 }
 
 #
@@ -328,7 +338,7 @@ sub findRecurse
 
     my $attr = $m->dirAttrib($backupNum, $share, $path);
     return if ( !defined($attr) );
-    foreach my $file ( keys(%$attr) ) {
+    foreach my $file ( sort(keys(%$attr)) ) {
         &$callback($attr->{$file}, @callbackArgs);
         next if ( !$depth || $attr->{$file}{type} != BPC_FTYPE_DIR );
         #

@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta0, released 23 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -135,12 +135,12 @@ sub csumGet
 
     return if ( !defined($fio->{fh}) );
     if ( $fio->{fh}->read(\$fileData, $blockSize * $num) <= 0 ) {
-	$fio->log("$fio->{file}{name}: csumGet is at EOF - zero padding\n");
+	$fio->log("$fio->{file}{name}: csumGet is at EOF - zero padding");
 	$fio->{stats}{errorCnt}++;
 	$fileData = pack("c", 0) x ($blockSize * $num);
     }
     $fio->{csumDigest}->add($fileData) if ( defined($fio->{csumDigest}) );
-    $fio->log(sprintf("%s: getting csum ($num,$csumLen,%d,0x%x)\n",
+    $fio->log(sprintf("%s: getting csum ($num,$csumLen,%d,0x%x)",
                             $fio->{file}{name},
                             length($fileData),
                             $fio->{checksumSeed}))
@@ -713,13 +713,13 @@ sub fileDeltaRxNext
 		    $fio->{stats}{errorCnt}++;
                     return -1;
                 }
-                if ( $attr->{size} < 10 * 1024 * 1024 ) {
+                if ( $attr->{size} < 16 * 1024 * 1024 ) {
                     #
-                    # Cache the entire old file if it is less than 10MB
+                    # Cache the entire old file if it is less than 16MB
                     #
                     my $data;
                     $fio->{rxInData} = "";
-                    while ( $fh->read(\$data, 10 * 1024 * 1024) > 0 ) {
+                    while ( $fh->read(\$data, 30 * 1024 * 1024) > 0 ) {
                         $fio->{rxInData} .= $data;
                     }
 		    $fio->log("$attr->{fullPath}: cached all $attr->{size}"
@@ -746,7 +746,7 @@ sub fileDeltaRxNext
                         }
                         $fio->{rxInFd} = *F;
                         $fio->{rxInName} = "$fio->{outDirSh}RStmp";
-                        seek($fio->{rxInFd}, 0, 0);
+                        sysseek($fio->{rxInFd}, 0, 0);
 			$fio->log("$attr->{fullPath}: copied $byteCnt,"
 				. "$attr->{size} bytes to $fio->{rxInName}")
 					if ( $fio->{logLevel} >= 9 );
@@ -774,7 +774,8 @@ sub fileDeltaRxNext
                   . "$lastBlk")
                         if ( $fio->{logLevel} >= 9 );
         my $seekPosn = $fio->{rxMatchBlk} * $fio->{rxBlkSize};
-        if ( defined($fio->{rxInFd}) && !seek($fio->{rxInFd}, $seekPosn, 0) ) {
+        if ( defined($fio->{rxInFd})
+			&& !sysseek($fio->{rxInFd}, $seekPosn, 0) ) {
             $fio->log("Unable to seek $attr->{rxInName} to $seekPosn");
 	    $fio->{stats}{errorCnt}++;
             return -1;
@@ -803,6 +804,7 @@ sub fileDeltaRxNext
 		    $fio->{stats}{errorCnt}++;
                     return -1;
                 }
+		$seekPosn += $len;
             }
             $fio->{rxOutFd}->write(\$data);
             $fio->{rxDigest}->add($data);
@@ -847,19 +849,21 @@ sub fileDeltaRxDone
         $fio->{rxDigest} = File::RsyncP::Digest->new;
         $fio->{rxDigest}->add(pack("V", $fio->{checksumSeed}));
         my $attr = $fio->{rxLocalAttr};
-        if ( defined($attr) && defined(my $fh = BackupPC::FileZIO->open(
+        if ( defined($attr) ) {
+	    if ( defined(my $fh = BackupPC::FileZIO->open(
 						       $attr->{fullPath},
 						       0,
 						       $attr->{compress})) ) {
-            my $data;
-	    while ( $fh->read(\$data, 4 * 65536) > 0 ) {
-		$fio->{rxDigest}->add($data);
-		$fio->{rxSize} += length($data);
+		my $data;
+		while ( $fh->read(\$data, 4 * 65536) > 0 ) {
+		    $fio->{rxDigest}->add($data);
+		    $fio->{rxSize} += length($data);
+		}
+		$fh->close;
+	    } else {
+		$fio->log("Can't open $attr->{fullPath} for MD4 check ($name)");
+		$fio->{stats}{errorCnt}++;
 	    }
-            $fh->close;
-        } else {
-	    $fio->log("cannot open $attr->{fullPath} for MD4 check");
-	    $fio->{stats}{errorCnt}++;
 	}
         $fio->log("$name got exact match")
                         if ( $fio->{logLevel} >= 5 );
@@ -873,8 +877,8 @@ sub fileDeltaRxDone
         $fio->log("$name got digests $md4Str vs $newStr")
     }
     if ( $md4 ne $newDigest ) {
-        $fio->log("$name md4 doesn't match")
-                    if ( $fio->{logLevel} >= 1 );
+        $fio->log("$name: fatal error: md4 doesn't match");
+	$fio->{stats}{errorCnt}++;
         if ( defined($fio->{rxOutFd}) ) {
             $fio->{rxOutFd}->close;
             unlink($fio->{rxOutFile});

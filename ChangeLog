@@ -21,6 +21,49 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Added German translation, provided by Manfred Herrmann.
+
+* Fixed large-file problem with rsync, reported by Manfred Herrmann.
+
+* Fixed zip and tar file download from CGI under mod_perl.  Reported
+  by Pierre Bourgin and Paul Lukins.
+
+* Fixed directory browsing and top-level directory browsing in 2.0.0beta0.
+  Reported by several users.
+
+* Added suse-linux init.d script from Leon Letto.
+
+* Added Gentoo linux init.d script from Tim Demarest.
+
+* Applied additional i18n strings from GFK and the translation team.
+
+* Fixed option parsing so that getopts errors are reported and we exit.
+
+* Changed reporting of Xfer PIDs so that rsync cancel works correctly.
+
+* Added -v option to BackupPC_dump for verbose output (useful when
+  you run the command manually).  Added messages for all exits.
+
+* If nmblookup returns multiple IP addresses, NetBiosHostIPFind()
+  now returns the first IP address that matches the subnet mask.
+  Suggested by Tim Demarest.
+
+* Fixed BackupPC::View so the top-level directory is handled correctly.
+  This allows the top-level share/directory to be restored via the
+  CGI interface.  Reported by several users.
+
+* Fixed RsyncFileIO failures on certain large files by replacing seek()
+  with sysseek().  Reported by Manfred Herrmann.
+
+* Added configurable highlighting of PC status in the CGI summary
+  screen; submitted by Tim Demarest.
+
+* Fixed command queue CGI display; submitted by Tim Demarest.
+
+#------------------------------------------------------------------------
+# Version 2.0.0beta1, 30 Mar 2003
+#------------------------------------------------------------------------
+
 * Support for rsync and rsyncd backup and restore.  Changes to
   BackupPC_dump, BackupPC_restore, and new modules BackupPC::Xfer::Rsync
   and BackupPC::Xfer::RsyncFileIO.
@@ -30,7 +73,7 @@
   now supports English and French, and adding more languages is
   now easy.  New config paramater $Conf{Language} sets the language.
 
-* Added Spanish translation es.pm from Javier.
+* Added Spanish translation es.pm from Javieri Gonzalez.
 
 * Added optional user-defined pre/post dump/restore commands, allowing
   things like database shutdown/startup for dumps.

@@ -5,7 +5,7 @@
 #
 # DESCRIPTION
 #
-#   Usage: BackupPC_dump [-i] [-f] [-d] [-e] <client>
+#   Usage: BackupPC_dump [-i] [-f] [-d] [-e] [-v] <client>
 #
 #   Flags:
 #
@@ -23,6 +23,8 @@
 #          dhcp hosts have correctly expired old backups.  Without this,
 #          dhcp hosts that are no longer on the network will not expire
 #          old backups.
+#
+#     -v   verbose.  for manual usage: prints failure reasons in more detail.
 #
 #   BackupPC_dump is run periodically by BackupPC to backup $client.
 #   The file $TopDir/pc/$client/backups is read to decide whether a
@@ -68,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -98,9 +100,8 @@ my $Hosts;
 $bpc->ChildInit();
 
 my %opts;
-getopts("defi", \%opts);
-if ( @ARGV != 1 ) {
-    print("usage: $0 [-d] [-e] [-f] [-i] <client>\n");
+if ( !getopts("defiv", \%opts) || @ARGV != 1 ) {
+    print("usage: $0 [-d] [-e] [-f] [-i] [-v] <client>\n");
     exit(1);
 }
 if ( $ARGV[0] !~ /^([\w\.\s-]+)$/ ) {
@@ -113,6 +114,8 @@ my $host;          # this is the real host name
 
 my($clientURI, $user);
 
+$bpc->verbose(1) if ( $opts{v} );
+
 if ( $opts{d} ) {
     #
     # The client name $client is simply a DHCP address.  We need to check
@@ -120,19 +123,35 @@ if ( $opts{d} ) {
     # host name via NetBios using nmblookup.
     #
     $hostIP = $client;
-    exit(1) if ( $bpc->CheckHostAlive($hostIP) < 0
-		    || $Conf{NmbLookupCmd} eq "" );
+    if ( $bpc->CheckHostAlive($hostIP) < 0 ) {
+	print("Exiting because CheckHostAlive($hostIP) failed\n")
+			    if ( $opts{v} );
+	exit(1);
+    }
+    if ( $Conf{NmbLookupCmd} eq "" ) {
+	print("Exiting because \$Conf{NmbLookupCmd} is empty\n")
+			    if ( $opts{v} );
+	exit(1);
+    }
     ($client, $user) = $bpc->NetBiosInfoGet($hostIP);
-    exit(1) if ( $host !~ /^([\w\.\s-]+)$/ );
+    if ( $client !~ /^([\w\.\s-]+)$/ ) {
+	print("Exiting because NetBiosInfoGet($hostIP) returned '$client',"
+	    . " an invalid host name\n")
+			    if ( $opts{v} );
+	exit(1)
+    }
     $Hosts = $bpc->HostInfoRead($client);
-    exit(1) if ( !defined($Hosts->{$client}) );
     $host = $client;
 } else {
     $Hosts = $bpc->HostInfoRead($client);
 }
+if ( !defined($Hosts->{$client}) ) {
+    print("Exiting because host $client does not exist in the hosts file\n");
+    exit(1)
+}
 
 my $Dir     = "$TopDir/pc/$client";
-my $xferPid = -1;
+my @xferPid = ();
 my $tarPid  = -1;
 
 #
@@ -152,6 +171,9 @@ $SIG{INT}  = \&catch_signal;
 $SIG{ALRM} = \&catch_signal;
 $SIG{TERM} = \&catch_signal;
 $SIG{PIPE} = \&catch_signal;
+$SIG{STOP} = \&catch_signal;
+$SIG{TSTP} = \&catch_signal;
+$SIG{TTIN} = \&catch_signal;
 my $Pid = $$;
 
 #
@@ -190,6 +212,8 @@ if ( !$opts{d} ) {
         # Ok, NS doesn't know about it.  Maybe it is a NetBios name
         # instead.
         #
+	print("Name server doesn't know about $host; trying NetBios\n")
+			if ( $opts{v} );
         if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
 	    print(LOG $bpc->timeStamp,
 			    "dump failed: Can't find host $host\n");
@@ -227,6 +251,8 @@ $bpc->ServerDisconnect();
 if ( $opts{d} ) {
     if ( $StatusHost{activeJob} ) {
         # oops, something is already running for this host
+	print("Exiting because backup is already running for $client\n")
+			if ( $opts{v} );
         exit(0);
     }
     print("DHCP $hostIP $clientURI\n");
@@ -347,6 +373,7 @@ if ( !defined($XferLOG) ) {
     print("dump failed: unable to open/create $Dir/XferLOG$fileExt\n");
     exit(1);
 }
+$XferLOG->writeTeeStdout(1) if ( $opts{v} );
 unlink("$Dir/NewFileList");
 my $startTime = time();
 
@@ -486,6 +513,7 @@ for my $shareName ( @$ShareNames ) {
 	backups     => \@Backups,
 	compress    => $Conf{CompressLevel},
 	XferMethod  => $Conf{XferMethod},
+	pidHandler  => \&pidHandler,
     });
 
     if ( !defined($logMsg = $xfer->start()) ) {
@@ -500,11 +528,17 @@ for my $shareName ( @$ShareNames ) {
 	    sleep(1);
 	    kill(9, $tarPid);
 	}
+	if ( @xferPid ) {
+	    kill(2, @xferPid);
+	    sleep(1);
+	    kill(9, @xferPid);
+	}
 	UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
         exit(1);
     }
 
-    $xferPid = $xfer->xferPid;
+    @xferPid = $xfer->xferPid;
+
     if ( $useTar ) {
 	#
 	# The parent must close both handles on the pipe since the children
@@ -512,17 +546,13 @@ for my $shareName ( @$ShareNames ) {
 	#
 	close(RH);
 	close(WH);
-	print(LOG $bpc->timeStamp, $logMsg,
-				   " (xferPid=$xferPid, tarPid=$tarPid)\n");
-    } elsif ( $xferPid > 0 ) {
-	print(LOG $bpc->timeStamp, $logMsg, " (xferPid=$xferPid)\n");
-    } else {
-	print(LOG $bpc->timeStamp, $logMsg, "\n");
     }
-    print("started $type dump, pid=$xferPid, tarPid=$tarPid,"
-            . " share=$shareName\n");
+    print(LOG $bpc->timeStamp, $logMsg, "\n");
+    print("started $type dump, share=$shareName\n");
 
-    if ( $useTar || $xferPid > 0 ) {
+    pidHandler(@xferPid);
+
+    if ( $useTar ) {
 	#
 	# Parse the output of the transfer program and BackupPC_tarExtract
 	# while they run.  Since we might be reading from two or more children
@@ -611,10 +641,10 @@ for my $shareName ( @$ShareNames ) {
         #
         # kill off the tranfer program, first nicely then forcefully
         #
-	if ( $xferPid > 0 ) {
-	    kill(2, $xferPid);
+	if ( @xferPid ) {
+	    kill(2, @xferPid);
 	    sleep(1);
-	    kill(9, $xferPid);
+	    kill(9, @xferPid);
 	}
         #
         # kill off the tar process, first nicely then forcefully
@@ -787,17 +817,15 @@ sub catch_signal
     UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
     $XferLOG->write(\"exiting after signal $signame\n");
     $XferLOG->close();
-    if ( $xferPid > 0 ) {
-        if ( kill(2, $xferPid) <= 0 ) {
-            sleep(1);
-            kill(9, $xferPid);
-        }
+    if ( @xferPid ) {
+        kill(2, @xferPid);
+	sleep(1);
+	kill(9, @xferPid);
     }
     if ( $tarPid > 0 ) {
-        if ( kill(2, $tarPid) <= 0 ) {
-            sleep(1);
-            kill(9, $tarPid);
-        }
+        kill(2, $tarPid);
+	sleep(1);
+	kill(9, $tarPid);
     }
     unlink("$Dir/timeStamp.level0");
     unlink("$Dir/NewFileList");
@@ -908,6 +936,23 @@ sub CorrectHostCheck
     return "host $host has mismatching netbios name $netBiosHost"
 		if ( $netBiosHost ne $host );
     return;
+}
+
+#
+# The Xfer method might tell us from time to time about processes
+# it forks.  We tell BackupPC about this (for status displays) and
+# keep track of the pids in case we cancel the backup
+#
+sub pidHandler
+{
+    @xferPid = @_;
+    @xferPid = grep(/./, @xferPid);
+    return if ( !@xferPid && $tarPid < 0 );
+    my @pids = @xferPid;
+    push(@pids, $tarPid) if ( $tarPid > 0 );
+    my $str = join(",", @pids);
+    $XferLOG->write(\"Xfer PIDs are now $str\n") if ( defined($XferLOG) );
+    print("xferPids $str\n");
 }
 
 #

@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -58,7 +58,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
-        Version => '2.0.0_CVS',
+        Version => '2.0.0beta1',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew
@@ -131,6 +131,14 @@ sub ConfValue
     my($bpc, $param) = @_;
 
     return $bpc->{Conf}{$param};
+}
+
+sub verbose
+{
+    my($bpc, $param) = @_;
+
+    $bpc->{verbose} = $param if ( defined($param) );
+    return $bpc->{verbose};
 }
 
 sub timeStamp
@@ -698,12 +706,16 @@ sub MakeFileLink
 sub CheckHostAlive
 {
     my($bpc, $host) = @_;
-    my($s, $pingCmd);
+    my($s, $pingCmd, $ret);
 
     #
     # Return success if the ping cmd is undefined or empty.
     #
-    return 0 if ( $bpc->{Conf}{PingCmd} eq "" );
+    if ( $bpc->{Conf}{PingCmd} eq "" ) {
+	print("CheckHostAlive: return ok because \$Conf{PingCmd} is empty\n")
+			if ( $bpc->{verbose} );
+	return 0;
+    }
 
     my $args = {
 	pingPath => $bpc->{Conf}{PingPath},
@@ -715,16 +727,32 @@ sub CheckHostAlive
     # Do a first ping in case the PC needs to wakeup
     #
     $s = $bpc->cmdSystemOrEval($pingCmd, undef, $args);
-    return -1 if ( $? );
+    if ( $? ) {
+	print("CheckHostAlive: first ping failed ($?, $!)\n")
+			if ( $bpc->{verbose} );
+	return -1;
+    }
 
     #
     # Do a second ping and get the round-trip time in msec
     #
     $s = $bpc->cmdSystemOrEval($pingCmd, undef, $args);
-    return -1 if ( $? );
-    return $1 if ( $s =~ /time=([\d\.]+)\s*ms/i );
-    return $1/1000 if ( $s =~ /time=([\d\.]+)\s*usec/i );
-    return 0;
+    if ( $? ) {
+	print("CheckHostAlive: second ping failed ($?, $!)\n")
+			if ( $bpc->{verbose} );
+	return -1;
+    }
+    if ( $s =~ /time=([\d\.]+)\s*ms/i ) {
+	$ret = $1;
+    } elsif ( $s =~ /time=([\d\.]+)\s*usec/i ) {
+	$ret =  $1/1000;
+    } else {
+	print("CheckHostAlive: can't extract round-trip time (not fatal)\n")
+				if ( $bpc->{verbose} );
+	$ret = 0;
+    }
+    print("CheckHostAlive: returning $ret\n") if ( $bpc->{verbose} );
+    return $ret;
 }
 
 sub CheckFileSystemUsage
@@ -757,7 +785,12 @@ sub NetBiosInfoGet
     #
     # Skip NetBios check if NmbLookupCmd is emtpy
     #
-    return ($host, undef) if ( $bpc->{Conf}{NmbLookupCmd} eq "" );
+    if ( $bpc->{Conf}{NmbLookupCmd} eq "" ) {
+	print("NetBiosInfoGet: return $host because \$Conf{NmbLookupCmd}"
+	    . " is empty\n")
+		if ( $bpc->{verbose} );
+	return ($host, undef);
+    }
 
     my $args = {
 	nmbLookupPath => $bpc->{Conf}{NmbLookupPath},
@@ -769,34 +802,67 @@ sub NetBiosInfoGet
         $netBiosHostName ||= $1 if ( $2 eq "00" );  # host is first 00
         $netBiosUserName   = $1 if ( $2 eq "03" );  # user is last 03
     }
-    return if ( !defined($netBiosHostName) );
-    return (lc($netBiosHostName), lc($netBiosUserName));
+    if ( !defined($netBiosHostName) ) {
+	print("NetBiosInfoGet: failed: can't parse return string\n")
+			if ( $bpc->{verbose} );
+	return;
+    }
+    $netBiosHostName = lc($netBiosHostName);
+    $netBiosUserName = lc($netBiosUserName);
+    print("NetBiosInfoGet: success, returning host $netBiosHostName,"
+        . " user $netBiosUserName\n")
+		if ( $bpc->{verbose} );
+    return ($netBiosHostName, $netBiosUserName);
 }
 
 #
 # Given a NetBios name lookup the IP address via NetBios.
+# In the case of a host returning multiple interfaces we
+# return the first IP address that matches the subnet mask.
+# If none match the subnet mask (or nmblookup doesn't print
+# the subnet mask) then just the first IP address is returned.
 #
 sub NetBiosHostIPFind
 {
     my($bpc, $host) = @_;
     my($netBiosHostName, $netBiosUserName);
-    my($s, $nmbCmd);
+    my($s, $nmbCmd, $subnet, $ipAddr, $firstIpAddr);
 
     #
     # Skip NetBios lookup if NmbLookupFindHostCmd is emtpy
     #
-    return $host if ( $bpc->{Conf}{NmbLookupFindHostCmd} eq "" );
+    if ( $bpc->{Conf}{NmbLookupFindHostCmd} eq "" ) {
+	print("NetBiosHostIPFind: return $host because"
+	    . " \$Conf{NmbLookupFindHostCmd} is empty\n")
+		if ( $bpc->{verbose} );
+	return $host;
+    }
 
     my $args = {
 	nmbLookupPath => $bpc->{Conf}{NmbLookupPath},
 	host	      => $host,
     };
     $nmbCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{NmbLookupFindHostCmd}, $args);
-    my $resp = $bpc->cmdSystemOrEval($nmbCmd, undef, $args);
-    if ( $resp =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+\Q$host/m ) {
-        return $1;
+    foreach my $resp ( split(/[\n\r]+/, $bpc->cmdSystemOrEval($nmbCmd, undef,
+							      $args) ) ) {
+	if ( $resp =~ /querying\s+\Q$host\E\s+on\s+(\d+\.\d+\.\d+\.\d+)/i ) {
+	    $subnet = $1;
+	    $subnet = $1 if ( $subnet =~ /^(.*?)(\.255)+$/ );
+	} elsif ( $resp =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+\Q$host/ ) {
+	    my $ip = $1;
+	    $firstIpAddr = $ip if ( !defined($firstIpAddr) );
+	    $ipAddr      = $ip if ( !defined($ipAddr) && $ip =~ /^\Q$subnet/ );
+	}
+    }
+    $ipAddr = $firstIpAddr if ( !defined($ipAddr) );
+    if ( defined($ipAddr) ) {
+	print("NetBiosHostIPFind: found IP address $ipAddr for host $host\n")
+			if ( $bpc->{verbose} );
+	return $ipAddr;
     } else {
-        return;
+	print("NetBiosHostIPFind: couldn't find IP address for host $host\n")
+			if ( $bpc->{verbose} );
+	return;
     }
 }
 
@@ -959,11 +1025,16 @@ sub cmdExecOrEval
     
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", $cmd) if ( ref($cmd) eq "ARRAY" );
+	print("cmdExecOrEval: about to eval perl code $cmd\n")
+			if ( $bpc->{verbose} );
         eval($cmd);
         print(STDERR "Perl code fragment for exec shouldn't return!!\n");
         exit(1);
     } else {
         $cmd = [split(/\s+/, $cmd)] if ( ref($cmd) ne "ARRAY" );
+	print("cmdExecOrEval: about to exec ",
+	      $bpc->execCmd2ShellCmd(@$cmd), "\n")
+			if ( $bpc->{verbose} );
         exec(@$cmd);
         print(STDERR "Exec failed for @$cmd\n");
         exit(1);
@@ -985,18 +1056,25 @@ sub cmdExecOrEval
 sub cmdSystemOrEval
 {
     my($bpc, $cmd, $stdoutCB, @args) = @_;
-    my($pid, $out);
+    my($pid, $out, $allOut);
     local(*CHILD);
     
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", $cmd) if ( ref($cmd) eq "ARRAY" );
-        my $out = eval($cmd);
+	print("cmdSystemOrEval: about to eval perl code $cmd\n")
+			if ( $bpc->{verbose} );
+        $out = eval($cmd);
 	$$stdoutCB .= $out if ( ref($stdoutCB) eq 'SCALAR' );
 	&$stdoutCB($out)   if ( ref($stdoutCB) eq 'CODE' );
+	print("cmdSystemOrEval: finished: got output $out\n")
+			if ( $bpc->{verbose} );
 	return $out        if ( !defined($stdoutCB) );
 	return;
     } else {
         $cmd = [split(/\s+/, $cmd)] if ( ref($cmd) ne "ARRAY" );
+	print("cmdSystemOrEval: about to system ",
+	      $bpc->execCmd2ShellCmd(@$cmd), "\n")
+			if ( $bpc->{verbose} );
         if ( !defined($pid = open(CHILD, "-|")) ) {
 	    my $err = "Can't fork to run @$cmd\n";
 	    $? = 1;
@@ -1022,10 +1100,13 @@ sub cmdSystemOrEval
 	    $$stdoutCB .= $_ if ( ref($stdoutCB) eq 'SCALAR' );
 	    &$stdoutCB($_)   if ( ref($stdoutCB) eq 'CODE' );
 	    $out .= $_ 	     if ( !defined($stdoutCB) );
+	    $allOut .= $_    if ( $bpc->{verbose} );
 	}
 	$? = 0;
 	close(CHILD);
     }
+    print("cmdSystemOrEval: finished: got output $allOut\n")
+			if ( $bpc->{verbose} );
     return $out;
 }
 

@@ -107,7 +107,7 @@ if ( !defined($Hosts) || $bpc->HostsMTime() != $HostsMTime ) {
     $HostsMTime = $bpc->HostsMTime();
     $Hosts = $bpc->HostInfoRead();
 
-    # turn operators list into a hash for quick lookups
+    # turn moreUsers list into a hash for quick lookups
     foreach my $host (keys %$Hosts) {
        $Hosts->{$host}{moreUsers} =
            {map {$_, 1} split(",", $Hosts->{$host}{moreUsers}) }
@@ -156,7 +156,7 @@ sub Action_Summary
         ErrorExit($Lang->{Only_privileged_users_can_view_PC_summaries} );
     }
     foreach my $host ( sort(keys(%Status)) ) {
-        my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate);
+        my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite);
         my @Backups = $bpc->BackupInfoRead($host);
         my $fullCnt = $incrCnt = 0;
         my $fullAge = $incrAge = -1;
@@ -193,9 +193,12 @@ sub Action_Summary
         $fullTot += $fullCnt;
         $incrTot += $incrCnt;
         $fullSize = sprintf("%.2f", $fullSize / 1000);
-	if (! $incrAge) { $incrAge = "&nbsp;"; }
+	$incrAge = "&nbsp;" if ( $incrAge eq "" );
+	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}};
+	$reasonHilite = " bgcolor=\"$reasonHilite\"" if ( $reasonHilite ne "" );
+
         $str = <<EOF;
-<tr><td> ${HostLink($host)} </td>
+<tr$reasonHilite><td> ${HostLink($host)} </td>
     <td align="center"> ${UserLink($Hosts->{$host}{user})} </td>
     <td align="center"> $fullCnt </td>
     <td align="center"> $fullAge </td>
@@ -312,12 +315,12 @@ EOF
     while ( @CmdQueue ) {
         my $req = pop(@CmdQueue);
         my $reqTime = timeStamp2($req->{reqTime});
-        (my $cmd = $req->{cmd}) =~ s/$BinDir\///;
+        (my $cmd = $req->{cmd}[0]) =~ s/$BinDir\///;
         $strCmd .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
     <td align="center"> $reqTime </td>
     <td align="center"> $req->{user} </td>
-    <td> $cmd </td></tr>
+    <td> $cmd $req->{cmd}[0] </td></tr>
 EOF
     }
     Header($Lang->{BackupPC__Queue_Summary});
@@ -349,16 +352,16 @@ sub Action_View
     } elsif ( $type eq "XferErrbad" ) {
         $file = "$TopDir/pc/$host/SmbLOG.bad";
         $file = "$TopDir/pc/$host/XferLOG.bad" if ( !-f $file && !-f "$file.z");
-        $comment = "(Extracting only Errors)";
+        $comment = $Lang->{Extracting_only_Errors};
     } elsif ( $type eq "XferErr" ) {
         $file = "$TopDir/pc/$host/SmbLOG$ext";
         $file = "$TopDir/pc/$host/XferLOG$ext" if ( !-f $file && !-f "$file.z");
-        $comment = "(Extracting only Errors)";
+        $comment = $Lang->{Extracting_only_Errors};
     } elsif ( $type eq "RestoreLOG" ) {
         $file = "$TopDir/pc/$host/RestoreLOG$ext";
     } elsif ( $type eq "RestoreErr" ) {
         $file = "$TopDir/pc/$host/RestoreLOG$ext";
-        $comment = "(Extracting only Errors)";
+        $comment = $Lang->{Extracting_only_Errors};
     } elsif ( $host ne "" && $type eq "config" ) {
         $file = "$TopDir/pc/$host/config.pl";
         $file = "$TopDir/conf/$host.pl"
@@ -859,10 +862,6 @@ EOF
         #
         # Provide the selected files via a tar archive.
 	#
-	# We no longer use fork/exec (as in v1.5.0) since some mod_perls
-	# do not correctly preserve the stdout connection to the client
-	# browser, so we execute BackupPC_tarCreate in-line.
-        #
 	my @fileListTrim = @fileList;
 	if ( @fileListTrim > 10 ) {
 	    @fileListTrim = (@fileListTrim[0..9], '...');
@@ -873,33 +872,30 @@ EOF
         if ( $In{relative} ) {
             @pathOpts = ("-r", $pathHdr, "-p", "");
         }
-	#
-	# We use syswrite since BackupPC_tarCreate uses syswrite too.
-	# Need to test this with mod_perl: PaulL says it doesn't work.
-	#
-	syswrite(STDOUT, <<EOF);
+	print(STDOUT <<EOF);
 Content-Type: application/x-gtar
 Content-Transfer-Encoding: binary
 Content-Disposition: attachment; filename=\"restore.tar\"
 
 EOF
-	local(@ARGV);
-	@ARGV = (
-             "-h", $host,
-             "-n", $num,
-             "-s", $share,
-             @pathOpts,
-             @fileList
+	#
+	# Fork the child off and manually copy the output to our stdout.
+	# This is necessary to ensure the output gets to the correct place
+	# under mod_perl.
+	#
+	$bpc->cmdSystemOrEval(["$BinDir/BackupPC_tarCreate",
+		 "-h", $host,
+		 "-n", $num,
+		 "-s", $share,
+		 @pathOpts,
+		 @fileList
+	    ],
+	    sub { print(@_); }
 	);
-	do "$BinDir/BackupPC_tarCreate";
     } elsif ( $In{type} == 2 ) {
         #
         # Provide the selected files via a zip archive.
 	#
-	# We no longer use fork/exec (as in v1.5.0) since some mod_perls
-	# do not correctly preserve the stdout connection to the client
-	# browser, so we execute BackupPC_tarCreate in-line.
-        #
 	my @fileListTrim = @fileList;
 	if ( @fileListTrim > 10 ) {
 	    @fileListTrim = (@fileListTrim[0..9], '...');
@@ -910,27 +906,28 @@ EOF
         if ( $In{relative} ) {
             @pathOpts = ("-r", $pathHdr, "-p", "");
         }
-	#
-	# We use syswrite since BackupPC_tarCreate uses syswrite too.
-	# Need to test this with mod_perl: PaulL says it doesn't work.
-	#
-	syswrite(STDOUT, <<EOF);
+	print(STDOUT <<EOF);
 Content-Type: application/zip
 Content-Transfer-Encoding: binary
 Content-Disposition: attachment; filename=\"restore.zip\"
 
 EOF
 	$In{compressLevel} = 5 if ( $In{compressLevel} !~ /^\d+$/ );
-	local(@ARGV);
-	@ARGV = (
-             "-h", $host,
-             "-n", $num,
-             "-c", $In{compressLevel},
-             "-s", $share,
-             @pathOpts,
-             @fileList
-        );
-        do "$BinDir/BackupPC_zipCreate";
+	#
+	# Fork the child off and manually copy the output to our stdout.
+	# This is necessary to ensure the output gets to the correct place
+	# under mod_perl.
+	#
+	$bpc->cmdSystemOrEval(["$BinDir/BackupPC_zipCreate",
+		 "-h", $host,
+		 "-n", $num,
+		 "-c", $In{compressLevel},
+		 "-s", $share,
+		 @pathOpts,
+		 @fileList
+	    ],
+	    sub { print(@_); }
+	);
     } elsif ( $In{type} == 3 ) {
         #
         # Do restore directly onto host
@@ -1262,8 +1259,8 @@ EOF
         $errStr .= <<EOF;
 <tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center"> $ltype </td>
-    <td align="center"> <a href="$MyURL?action=view&type=XferLOG&num=$Backups[$i]{num}&host=${EscURI($host)}">XferLOG</a>,
-                      <a href="$MyURL?action=view&type=XferErr&num=$Backups[$i]{num}&host=${EscURI($host)}">Errors</a> </td>
+    <td align="center"> <a href="$MyURL?action=view&type=XferLOG&num=$Backups[$i]{num}&host=${EscURI($host)}">$Lang->{XferLOG}</a>,
+                      <a href="$MyURL?action=view&type=XferErr&num=$Backups[$i]{num}&host=${EscURI($host)}">$Lang->{Errors}</a> </td>
     <td align="right">  $Backups[$i]{xferErrs} </td>
     <td align="right">  $Backups[$i]{xferBadFile} </td>
     <td align="right">  $Backups[$i]{xferBadShare} </td>
@@ -1395,7 +1392,7 @@ sub Action_GeneralInfo
     GetStatusInfo("info jobs hosts queueLen");
     my $Privileged = CheckPermission();
 
-    my($jobStr, $statusStr, $tarPidHdr);
+    my($jobStr, $statusStr);
     foreach my $host ( sort(keys(%Jobs)) ) {
         my $startTime = timeStamp2($Jobs{$host}{startTime});
         next if ( $host eq $bpc->trashJob
@@ -1403,6 +1400,7 @@ sub Action_GeneralInfo
         $Jobs{$host}{type} = $Status{$host}{type}
                     if ( $Jobs{$host}{type} eq "" && defined($Status{$host}));
         (my $cmd = $Jobs{$host}{cmd}) =~ s/$BinDir\///g;
+        (my $xferPid = $Jobs{$host}{xferPid}) =~ s/,/, /g;
         $jobStr .= <<EOF;
 <tr><td> ${HostLink($host)} </td>
     <td align="center"> $Jobs{$host}{type} </td>
@@ -1410,12 +1408,8 @@ sub Action_GeneralInfo
     <td> $startTime </td>
     <td> $cmd </td>
     <td align="center"> $Jobs{$host}{pid} </td>
-    <td align="center"> $Jobs{$host}{xferPid} </td>
+    <td align="center"> $xferPid </td>
 EOF
-        if ( $Jobs{$host}{tarPid} > 0 ) {
-            $jobStr .= "    <td align=\"center\"> $Jobs{$host}{tarPid} </td>\n";
-            $tarPidHdr ||= "<td align=\"center\"> tar PID </td>\n";
-        }
         $jobStr .= "</tr>\n";
     }
     foreach my $host ( sort(keys(%Status)) ) {
@@ -1432,8 +1426,8 @@ EOF
                 || -f "$TopDir/pc/$host/XferLOG.bad.z"
                 ) {
             $XferViewStr = <<EOF;
-<a href="$MyURL?action=view&type=XferLOGbad&host=${EscURI($host)}">XferLOG</a>,
-<a href="$MyURL?action=view&type=XferErrbad&host=${EscURI($host)}">XferErr</a>
+<a href="$MyURL?action=view&type=XferLOGbad&host=${EscURI($host)}">$Lang->{XferLOG}</a>,
+<a href="$MyURL?action=view&type=XferErrbad&host=${EscURI($host)}">$Lang->{Errors}</a>
 EOF
         } else {
             $XferViewStr = "";
@@ -1683,7 +1677,7 @@ sub CheckPermission
     }
     $PrivAdmin = $Privileged;
     $Privileged ||= $User eq $Hosts->{$host}{user};
-    $Privileged ||= defined($Hosts->{$host}{operators}{$User});
+    $Privileged ||= defined($Hosts->{$host}{moreUsers}{$User});
 
     return $Privileged;
 }

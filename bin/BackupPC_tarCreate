@@ -48,7 +48,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -69,9 +69,8 @@ my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
 
 my %opts;
-getopts("th:n:p:r:s:", \%opts);
 
-if ( @ARGV < 1 ) {
+if ( !getopts("th:n:p:r:s:", \%opts) || @ARGV < 1 ) {
     print(STDERR "usage: $0 [-t] [-h host] [-n dumpNum] [-s shareName]"
                . " [-r pathRemove] [-p pathAdd]"
                . " files/directories...\n");
@@ -227,13 +226,13 @@ sub TarWrite
     my $done = $WriteBufSz - length($WriteBuf);
     if ( syswrite($fh, $WriteBuf . substr($$dataRef, 0, $done))
                                 != $WriteBufSz ) {
-        print(STDERR "Unable to write to output file\n");
+        print(STDERR "Unable to write to output file ($!)\n");
         exit(1);
     }
     while ( $done + $WriteBufSz <= length($$dataRef) ) {
         if ( syswrite($fh, substr($$dataRef, $done, $WriteBufSz))
                             != $WriteBufSz ) {
-            print(STDERR "Unable to write to output file\n");
+            print(STDERR "Unable to write to output file ($!)\n");
             exit(1);
         }
         $done += $WriteBufSz;

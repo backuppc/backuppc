@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -246,6 +246,7 @@ sub write
     my $n = length($$dataRef);
 
     return if ( !$self->{write} );
+    print($$dataRef) if ( $self->{writeTeeStdout} );
     return 0 if ( $n == 0 );
     if ( !$self->{compress} ) {
         #
@@ -301,6 +302,14 @@ sub name
     my($self) = @_;
 
     return $self->{name};
+}
+
+sub writeTeeStdout
+{
+    my($self, $param) = @_;
+
+    $self->{writeTeeStdout} = $param if ( defined($param) );
+    return $self->{writeTeeStdout};
 }
 
 sub close

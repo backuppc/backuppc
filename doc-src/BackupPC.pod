@@ -1248,7 +1248,7 @@ you should turn it off:
     chmod u-s __CGIDIR__/BackupPC_Admin
 
 To tell Apache to use mod_perl to execute BackupPC_Admin, add this
-to Apache's httpd.conf file:
+to Apache's 1.x httpd.conf file:
 
     <IfModule mod_perl.c>
 	PerlModule Apache::Registry
@@ -1261,10 +1261,33 @@ to Apache's httpd.conf file:
 	</Location>
     </IfModule>
 
+For Apache 2.x and perl 5.8.x
+
+Apache 2.0.44 with Perl 5.8.0 on RedHat 7.1, Don Silvia reports that
+this works:
+
+    LoadModule perl_module modules/mod_perl.so
+    PerlModule Apache2
+
+    <Location /path/to/cgi/>
+	SetHandler perl-script
+	PerlResponseHandler ModPerl::Registry
+	PerlOptions +ParseHeaders
+	Options +ExecCGI
+
+	Order deny,allow
+	Deny from all
+	Allow from 192.168.0  
+	AuthName "Backup Admin"
+	AuthType Basic
+	AuthUserFile /path/to/user_file
+	Require valid-user
+    </Location>
+
 There are other optimizations and options with mod_perl.  For
 example, you can tell mod_perl to preload various perl modules,
 which saves memory compared to loading separate copies in every
-Apache process after they are forked. See Stas's definitive
+Apache process after they are forked.  See Stas's definitive
 mod_perl guide at L<http://perl.apache.org/guide>.
 
 =back
@@ -1311,7 +1334,8 @@ to hardcode the user to www you could add this to httpd.conf:
 Finally, you should also edit the config.pl file and adjust, as necessary,
 the CGI-specific settings.  They're near the end of the config file. In
 particular, you should specify which users or groups have administrator
-(privileged) access.  Also, the configure.pl script placed various
+(privileged) access: see the config settings $Conf{CgiAdminUserGroup}
+and $Conf{CgiAdminUsers}.  Also, the configure.pl script placed various
 images into $Conf{CgiImageDir} that BackupPC_Admin needs to serve
 up.  You should make sure that $Conf{CgiImageDirURL} is the correct
 URL for the image directory.
@@ -1534,40 +1558,86 @@ can now re-start BackupPC.
 =head2 Debugging installation problems
 
 This section will probably grow based on the types of questions on
-the BackupPC mail list.
+the BackupPC mail list.  Eventually the FAQ at
+L<http://backuppc.sourceforge.net/faq/> will include more details
+than this section.
+
+=over 4
+
+=item Check log files
 
 Assuming BackupPC can start correctly you should inspect __TOPDIR__/log/LOG
 for any errors.  Assuming backups for a particular host start, you
 should be able to look in __TOPDIR__/pc/$host/LOG for error messages
-specific to that host.
+specific to that host.  Always check both log files.
 
-The most likely problems will relate to connecting to the smb shares on
-each host.  On each failed backup, a file __TOPDIR__/pc/$host/XferERR will
-be created. This is the stderr output from smbclient. The first line
-will show the full smbclient command that was run. Based on the error
-messages you should figure out what is wrong.  Possible errors on the
-server side are invalid host, invalid share name, bad username or password.
-Possible errors on the client side are misconfiguration of the share,
-username or password.
+=item CGI script doesn't run
 
-You should run smbclient manually and verify that you can connect to
-the host in interactive mode, eg:
+Perhaps the most common program with the installation is getting the
+CGI script to run.  Often the setuid isn't configured correctly, or
+doesn't work on your system.
 
-    smbclient '\\hostName\shareName' -U userName
+First, try running BackupPC_Admin manually as the BackupPC user, eg:
 
-shareName should match the $Conf{SmbShareName} setting and userName
-should match the the $Conf{SmbShareUserName} setting.
+    su __BACKUPPCUSER__
+    __CGIDIR__/BackupPC_Admin
 
-You will be prompted for the password. You should then see this prompt:
+Now try running it as the httpd user (which ever user apache runs as);
 
-    smb: \>
+    su httpd
+    __CGIDIR__/BackupPC_Admin
 
-Verify that "ls" works and then type "quit" to exit.
+In both cases do you get normal html output?
 
-Secondly, you should also verify that nmblookup correctly returns
-the netbios name.  This is essential for DHCP hosts, and depending
-upon the setting of $Conf{FixedIPNetBiosNameCheck} might also be
-required for fixed IP address hosts too.  Run this command:
+If the first case works but the second case fails with an error that
+the wrong user is running the script then you have a setuid problem.
+(This assumes you are running BackupPC_Admin without mod_perl, and
+you therefore need seduid to work.  If you are using mod_perl then
+apache should run as user __BACKUPPCUSER__.)
+
+First you should make sure the cgi-bin directory is on a file system
+that doesn't have the "nosuid" mount option.  
+
+Next, experiment by creating this script:
+
+    #!/bin/perl
+
+    printf("My userid is $> (%s)\n", (getpwuid($>))[0]);
+
+then chown it to backuppc and chmod u+s:
+
+    root# chown backuppc testsetuid
+    root# chmod u+s testsetuid
+    root# chmod a+x testsetuid
+    root# ls -l testsetuid
+    -rwsr-xr-x    1 backuppc  wheel          76 Aug 26 09:46 testsetuid*
+
+Now run this program as a normal user.  What uid does it print?
+Try changing the first line of the script to directly call sperl:
+
+    #!/usr/bin/sperl5.8.0
+
+(modify according to your version and path).  Does this work
+instead?
+
+Finally, you should invoke the CGI script from a browser, using
+a URL like:
+
+    http://myHost/cgi-bin/BackupPC/BackupPC_Admin
+
+You should make sure REMOTE_USER is being set by apache (see the
+earlier section) so that user authentication works.  Make sure
+the config settings $Conf{CgiAdminUserGroup} and $Conf{CgiAdminUsers}
+correctly specify the privileged administrator users.
+
+=item Can't ping or find host
+
+Please read the section L<How BackupPC Finds Hosts|how backuppc finds hosts>.
+
+You should also verify that nmblookup correctly returns the netbios name.
+This is essential for DHCP hosts, and depending upon the setting of
+$Conf{FixedIPNetBiosNameCheck} might also be required for fixed IP
+address hosts too.  Run this command:
 
     nmblookup -A hostName
 
@@ -1583,6 +1653,46 @@ Verify that the host name is printed.  The output might look like:
             CRAIG           <03> -         P <ACTIVE> 
 
 The first name, converted to lower case, is used for the host name.
+
+=item Transport method doesn't work
+
+The BackupPC_dump command now has a -v option, so the easiest way to
+debug backup problems on a specific host is to run BackupPC_dump
+manually as the BackupPC user:
+
+    su __BACKUPPCUSER__
+    __INSTALLDIR__/bin/BackupPC_zcat
+
+The most likely problems will relate to connecting to the smb shares on
+each host.  On each failed backup, a file __TOPDIR__/pc/$host/XferLOG.bad.z
+will be created.  This is the stderr output from the transport program.
+You can view this file via the CGI interface, or manually uncompress it
+with;
+
+    __INSTALLDIR__/bin/BackupPC_zcat __TOPDIR__/pc/$host/XferLOG.bad.z | more
+
+The first line will show the full command that was run (eg: rsync, tar
+or smbclient).  Based on the error messages you should figure out what
+is wrong.  Possible errors on the server side are invalid host, invalid
+share name, bad username or password.  Possible errors on the client
+side are misconfiguration of the share, username or password.
+
+You should try running the command manually to see what happens.
+For example, for smbclient you should it manually and verify that
+you can connect to the host in interactive mode, eg:
+
+    smbclient '\\hostName\shareName' -U userName
+
+shareName should match the $Conf{SmbShareName} setting and userName
+should match the the $Conf{SmbShareUserName} setting.
+
+You will be prompted for the password. You should then see this prompt:
+
+    smb: \>
+
+Verify that "ls" works and then type "quit" to exit.
+
+=back
 
 =head1 Restore functions
 
@@ -2840,13 +2950,14 @@ the appropriate config file:
     ln -s ../../conf/ConfigWinDesktop.pl config.pl
 
 or, better yet, create a config.pl file in __TOPDIR__/pc/$host
-that contains this line:
+that includes the default config.pl file using perl's "do"
+command:
 
-    do "../../conf/ConfigWinDesktop.pl";
+    do "__TOPDIR__/conf/ConfigWinDesktop.pl";
 
 This alternative allows you to set other configuration options
-specific to each host (perhaps even overriding the settings in
-the included file).
+specific to each host after the "do" command (perhaps even
+overriding the settings in the included file).
 
 Note that you could also include snippets of configuration settings
 from the main configuration file.  However, be aware that the
@@ -2901,7 +3012,9 @@ for v1.5.0.  He also contributed the first skeleton of BackupPC_restore.
 Guillaume Filion wrote BackupPC_zipCreate and added the CGI support
 for zip download, in addition to some CGI cleanup, for v1.5.0.
 
-Javier provided the Spanish translation, es.pm.
+Javier Gonzalez provided the Spanish translation, es.pm.
+
+Manfred provided the German translation, de.pm.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.

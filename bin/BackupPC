@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -70,8 +70,7 @@ use Digest::MD5;
 # Handle command line options
 ###########################################################################
 my %opts;
-getopts("d", \%opts);
-if ( @ARGV != 0 ) {
+if ( !getopts("d", \%opts) || @ARGV != 0 ) {
     print("usage: $0 [-d]\n");
     exit(1);
 }
@@ -797,16 +796,11 @@ sub Main_Check_Job_Messages
                 } else {
                     print(LOG $bpc->timeStamp, "dhcp $host: $mesg\n");
                 }
-            } elsif ( $mesg =~ /^started (.*) dump, pid=(-?\d+), tarPid=(-?\d+), share=(.*)/ ) {
+            } elsif ( $mesg =~ /^started (.*) dump, share=(.*)/ ) {
                 $Jobs{$host}{type}      = $1;
-                $Jobs{$host}{xferPid}   = $2;
-                $Jobs{$host}{tarPid}    = $3;
-                $Jobs{$host}{shareName} = $4;
+                $Jobs{$host}{shareName} = $2;
                 print(LOG $bpc->timeStamp,
-                          "Started $1 backup on $host"
-                          . " (pid=$Jobs{$host}{pid}, xferPid=$2",
-                          $Jobs{$host}{tarPid} > 0
-                                ? ", tarPid=$Jobs{$host}{tarPid}" : "",
+                          "Started $1 backup on $host (pid=$Jobs{$host}{pid}",
                           $Jobs{$host}{dhcpHostIP}
                                 ? ", dhcp=$Jobs{$host}{dhcpHostIP}" : "",
                           ", share=$Jobs{$host}{shareName})\n");
@@ -818,16 +812,13 @@ sub Main_Check_Job_Messages
                 $Status{$host}{aliveCnt}++;
                 $Status{$host}{dhcpCheckCnt}--
                                 if ( $Status{$host}{dhcpCheckCnt} > 0 );
-            } elsif ( $mesg =~ /^started_restore (\S+) (\S+)/ ) {
-                $Jobs{$host}{type}    = "restore";
+            } elsif ( $mesg =~ /^xferPids (.*)/ ) {
                 $Jobs{$host}{xferPid} = $1;
-                $Jobs{$host}{tarPid}  = $2;
+            } elsif ( $mesg =~ /^started_restore/ ) {
+                $Jobs{$host}{type}    = "restore";
                 print(LOG $bpc->timeStamp,
                           "Started restore on $host"
-                          . " (pid=$Jobs{$host}{pid}, xferPid=$2",
-                          $Jobs{$host}{tarPid} > 0
-                                ? ", tarPid=$Jobs{$host}{tarPid}" : "",
-                          ")\n");
+                          . " (pid=$Jobs{$host}{pid})\n");
                 $Status{$host}{state}     = "Status_restore_in_progress";
                 $Status{$host}{reason}    = "";
                 $Status{$host}{type}      = "restore";
@@ -1022,11 +1013,17 @@ sub Main_Check_Client_Messages
                                "Stopping current backup of $host,"
                              . " request by $user (backoff=$backoff)\n");
                     kill(2, $Jobs{$host}{pid});
-                    vec($FDread, $Jobs{$host}{fn}, 1) = 0;
-                    close($Jobs{$host}{fh});
-                    delete($Jobs{$host});
+		    #
+		    # Don't close the pipe now; wait until the child
+		    # really exits later.  Otherwise close() will
+		    # block until the child has exited.
+		    #  old code:
+                    ##vec($FDread, $Jobs{$host}{fn}, 1) = 0;
+                    ##close($Jobs{$host}{fh});
+                    ##delete($Jobs{$host});
+
                     $Status{$host}{state}     = "Status_idle";
-                    $Status{$host}{reason}    = "Reason_backup_canceled_by_user"; #FIXME: user should be $user (we need to substitute the variable in the l10n stuff)
+                    $Status{$host}{reason}    = "Reason_backup_canceled_by_user";
                     $Status{$host}{activeJob} = 0;
                     $Status{$host}{startTime} = time;
                     $reply = "ok: backup of $host cancelled";

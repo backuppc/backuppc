@@ -41,8 +41,8 @@ use File::Copy;
 
 umask(0022);
 
-my $Version     = "2.0.0beta1";
-my $ReleaseDate = "30 Mar 2003";
+my $Version     = "2.0.0beta2";
+my $ReleaseDate = "13 Apr 2003";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -62,9 +62,10 @@ my @PerlSrc = qw(
     lib/BackupPC/Attrib.pm
     lib/BackupPC/FileZIO.pm
     lib/BackupPC/Lib.pm
+    lib/BackupPC/Lang/de.pm
     lib/BackupPC/Lang/en.pm
-    lib/BackupPC/Lang/fr.pm
     lib/BackupPC/Lang/es.pm
+    lib/BackupPC/Lang/fr.pm
     lib/BackupPC/PoolWrite.pm
     lib/BackupPC/View.pm
     lib/BackupPC/Xfer/Smb.pm
@@ -127,8 +128,11 @@ foreach my $file ( (@PerlSrc,
 		conf/hosts
 		init.d/README
 		init.d/src/debian-backuppc
+		init.d/src/gentoo-backuppc
+		init.d/src/gentoo-backuppc.conf
 		init.d/src/linux-backuppc
 		init.d/src/solaris-backuppc
+		init.d/src/suse-backuppc
 		doc/BackupPC.pod
 		doc/BackupPC.html
 		README

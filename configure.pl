@@ -416,6 +416,7 @@ foreach my $lib ( qw(BackupPC/Lib.pm BackupPC/FileZIO.pm BackupPC/Attrib.pm
         BackupPC/Xfer/Smb.pm BackupPC/Xfer/Rsync.pm
         BackupPC/Xfer/RsyncFileIO.pm BackupPC/Zip/FileMember.pm
         BackupPC/Lang/en.pm BackupPC/Lang/fr.pm BackupPC/Lang/es.pm
+        BackupPC/Lang/de.pm
     ) ) {
     InstallFile("lib/$lib", "$Conf{InstallDir}/lib/$lib", 0444);
 }
@@ -429,7 +430,8 @@ if ( $Conf{CgiImageDir} ne "" ) {
 }
 
 printf("Making init.d scripts\n");
-foreach my $init ( qw(linux-backuppc solaris-backuppc debian-backuppc) ) {
+foreach my $init ( qw(gentoo-backuppc gentoo-backuppc.conf linux-backuppc
+		      solaris-backuppc debian-backuppc suse-backuppc) ) {
     InstallFile("init.d/src/$init", "init.d/$init", 0444);
 }
 

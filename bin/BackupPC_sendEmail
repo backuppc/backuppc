@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,8 +59,7 @@ use vars qw(%UserEmailInfo);
 do "$TopDir/log/UserEmailInfo.pl";
 
 my %opts;
-getopts("t", \%opts);
-if ( @ARGV != 0 ) {
+if ( !getopts("t", \%opts) || @ARGV != 0 ) {
     print("usage: $0 [-t]\n");
     exit(1);
 }

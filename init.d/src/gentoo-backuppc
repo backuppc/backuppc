@@ -1,0 +1,45 @@
+#!/sbin/runscript
+#
+# DESCRIPTION
+#
+#   Startup init script for BackupPC on Gentoo` linux.
+#
+# Distributed with BackupPC version __VERSION__, released __RELEASEDATE__.
+#
+# description: Starts and stops the BackupPC server
+# Copy to /etc/init.d and run 'rc-update add backuppc default'
+
+# get our configuration options
+source /etc/conf.d/backuppc
+
+checkconfig() {
+	if [ ! -f ${CONF_FILE} ] ; then
+		eeror "No ${CONF_FILE} exists!"
+	fi
+}
+
+start() {
+	checkconfig || return 1
+	ebegin "Starting BackupPC"
+	start-stop-daemon --start --user ${USER} --pidfile ${PID_FILE} --exec ${EXEC} -- ${EXEC_OPTIONS}
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping BackupPC"
+	start-stop-daemon --stop --pidfile ${PID_FILE} --name BackupPC
+	eend $?
+}
+
+restart() {
+	ebegin "Restarting BackupPC"
+	svc_stop
+	svc_start
+	eend $? "Failed to restart BackupPC"
+}
+
+status() {
+	return
+	eend $?
+}
+

@@ -51,7 +51,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -75,9 +75,8 @@ my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
 
 my %opts;
-getopts("th:n:p:r:s:c:", \%opts);
 
-if ( @ARGV < 1 ) {
+if ( !getopts("th:n:p:r:s:c:", \%opts) || @ARGV < 1 ) {
     print(STDERR "usage: $0 [-t] [-h host] [-n dumpNum] [-s shareName]"
                . " [-r pathRemove] [-p pathAdd] [-c compressionLevel]"
                . " files/directories...\n");

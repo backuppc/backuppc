@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -79,7 +79,7 @@ my $startTime = time();
 my $Hosts = $bpc->HostInfoRead($client);
 
 my $Dir     = "$TopDir/pc/$client";
-my $xferPid = -1;
+my @xferPid = ();
 my $tarPid  = -1;
 
 #
@@ -254,6 +254,7 @@ my $xferArgs = {
     pathHdrSrc   => $RestoreReq{pathHdrSrc},
     pathHdrDest  => $RestoreReq{pathHdrDest},
     fileList     => $RestoreReq{fileList},
+    pidHandler   => \&pidHandler,
 };
 
 $xfer->args($xferArgs);
@@ -324,9 +325,12 @@ if ( $useTar ) {
     #
     close(WH);
 
-    $xferPid = $xfer->xferPid;
-    print(LOG $bpc->timeStamp, $logMsg, " (tarPid=$tarPid, xferPid=$xferPid)\n");
-    print("started restore, tarPid=$tarPid, xferPid=$xferPid\n");
+    @xferPid = $xfer->xferPid;
+
+    print(LOG $bpc->timeStamp, $logMsg, "\n");
+    print("started_restore\n");
+
+    pidHandler(@xferPid);
 
     #
     # Parse the output of the transfer program and BackupPC_tarCreate
@@ -384,8 +388,8 @@ if ( $useTar ) {
     #
     # otherwise the xfer module does everything for us
     #
-    print(LOG $bpc->timeStamp, "Starting restore (tarPid=-1, xferPid=-1)\n");
-    print("started restore, tarPid=-1, xferPid=-1\n");
+    print(LOG $bpc->timeStamp, "Starting restore\n");
+    print("started_restore\n");
     ($tarCreateFileCnt, $tarCreateByteCnt,
 	$tarCreateErrCnt, $tarCreateErr) = $xfer->run();
 }
@@ -434,17 +438,15 @@ sub catch_signal
     # Note: needs to be tested for each kind of XferMethod
     #
     print(LOG $bpc->timeStamp, "cleaning up after signal $signame\n");
-    if ( $xferPid > 0 ) {
-        if ( kill(2, $xferPid) <= 0 ) {
-            sleep(1);
-            kill(9, $xferPid);
-        }
+    if ( @xferPid ) {
+        kill(2, @xferPid);
+	sleep(1);
+	kill(9, @xferPid);
     }
     if ( $tarPid > 0 ) {
-        if ( kill(2, $tarPid) <= 0 ) {
-            sleep(1);
-            kill(9, $tarPid);
-        }
+        kill(2, $tarPid);
+	sleep(1);
+	kill(9, $tarPid);
     }
     $stat{xferOK} = 0;
     $stat{hostError} = "aborted by signal $signame";
@@ -464,15 +466,19 @@ sub RestoreCleanup
 	#
 	# kill off the tranfer program, first nicely then forcefully
 	#
-	kill(2, $xferPid) if ( $xferPid > 0 );
-	sleep(1);
-	kill(9, $xferPid) if ( $xferPid > 0 );
+	if ( @xferPid ) {
+	    kill(2, @xferPid);
+	    sleep(1);
+	    kill(9, @xferPid);
+	}
 	#
 	# kill off the tar process, first nicely then forcefully
 	#
-	kill(2, $tarPid) if ( $tarPid > 0 );
-	sleep(1);
-	kill(9, $tarPid) if ( $tarPid > 0 );
+	if ( $tarPid > 0 ) {
+	    kill(2, $tarPid);
+	    sleep(1);
+	    kill(9, $tarPid);
+	}
     }
 
     my $lastNum  = -1;
@@ -551,6 +557,23 @@ sub RestoreCleanup
 	print("restore complete\n");
 	return;
     }
+}
+
+#
+# The Xfer method might tell us from time to time about processes
+# it forks.  We tell BackupPC about this (for status displays) and
+# keep track of the pids in case we cancel the backup
+#
+sub pidHandler
+{
+    @xferPid = @_;
+    @xferPid = grep(/./, @xferPid);
+    return if ( !@xferPid && $tarPid < 0 );
+    my @pids = @xferPid;
+    push(@pids, $tarPid) if ( $tarPid > 0 );
+    my $str = join(",", @pids);
+    $XferLOG->write(\"Xfer PIDs are now $str\n") if ( defined($XferLOG) );
+    print("xferPids $str\n");
 }
 
 #

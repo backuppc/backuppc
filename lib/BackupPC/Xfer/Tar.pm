@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0_CVS, released 3 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -263,7 +263,7 @@ sub xferPid
 {
     my($t) = @_;
 
-    return $t->{xferPid};
+    return ($t->{xferPid});
 }
 
 sub logMsg

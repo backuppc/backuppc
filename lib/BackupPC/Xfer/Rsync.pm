@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta0, released 23 Feb 2003.
+# Version 2.0.0beta1, released 30 Mar 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -265,16 +265,20 @@ sub start
     $t->{rs} = File::RsyncP->new({
 	logLevel     => $conf->{RsyncLogLevel},
 	rsyncCmd     => sub {
+			    $bpc->verbose(0);
 			    $bpc->cmdExecOrEval($rsyncClientCmd, $args);
 			},
 	rsyncCmdType => "full",
 	rsyncArgs    => $rsyncArgs,
 	timeout      => $conf->{ClientTimeout},
 	logHandler   => sub {
-			  my($str) = @_;
-			  $str .= "\n";
-			  $t->{XferLOG}->write(\$str);
+			    my($str) = @_;
+			    $str .= "\n";
+			    $t->{XferLOG}->write(\$str);
 		        },
+	pidHandler   => sub {
+			    $t->{pidHandler}(@_);
+			},
 	fio          => BackupPC::Xfer::RsyncFileIO->new({
 			    xfer       => $t,
 			    bpc        => $t->{bpc},
@@ -424,7 +428,7 @@ sub xferPid
 {
     my($t) = @_;
 
-    return -1;
+    return ();
 }
 
 sub logMsg

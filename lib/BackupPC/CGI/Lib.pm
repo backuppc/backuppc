@@ -447,7 +447,7 @@ EOF
                 NavLink("?host=${EscURI($host)}",
                         "$host $Lang->{Home}", " class=\"navbar\"");
                 NavLink("?action=browse&host=${EscURI($host)}",
-                        "Browse backups", " class=\"navbar\"");
+                        $Lang->{Browse}, " class=\"navbar\"");
                 NavLink("?action=view&type=LOG&host=${EscURI($host)}",
                         $Lang->{LOG_file}, " class=\"navbar\"");
                 NavLink("?action=LOGlist&host=${EscURI($host)}",

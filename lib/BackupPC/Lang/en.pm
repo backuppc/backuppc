@@ -1085,6 +1085,7 @@ $Lang{fileHeader} = <<EOF;
 EOF
 
 $Lang{Home} = "Home";
+$Lang{Browse} = "Browse backups";
 $Lang{Last_bad_XferLOG} = "Last bad XferLOG";
 $Lang{Last_bad_XferLOG_errors_only} = "Last bad XferLOG (errors&nbsp;only)";
 

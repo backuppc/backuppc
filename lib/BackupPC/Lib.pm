@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta1, released 9 Apr 2004.
+# Version 2.1.0beta2, released 23 May 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,7 +59,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
-        Version => '2.1.0beta1',
+        Version => '2.1.0beta2',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew
@@ -1198,6 +1198,24 @@ sub cmdSystemOrEval
     print(STDERR "cmdSystemOrEval: finished: got output $allOut\n")
 			if ( $bpc->{verbose} );
     return $out;
+}
+
+#
+# Promotes $conf->{BackupFilesOnly}, $conf->{BackupFilesExclude}
+# to hashes and $conf->{$shareName} to an array
+#
+sub backupFileConfFix
+{
+    my($bpc, $conf, $shareName) = @_;
+
+    $conf->{$shareName} = [ $conf->{$shareName} ]
+                    if ( ref($conf->{$shareName}) ne "ARRAY" );
+    foreach my $param qw(BackupFilesOnly BackupFilesExclude) {
+        next if ( !defined($conf->{$param}) || ref($conf->{$param}) eq "HASH" );
+        $conf->{$param} = [ $conf->{$param} ]
+				if ( ref($conf->{$param}) ne "ARRAY" );
+        $conf->{$param} = { map { $_ => $conf->{$param} }                                                       @{$conf->{$shareName}} };
+    }
 }
 
 1;

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta1, released 9 Apr 2004.
+# Version 2.1.0beta2, released 23 May 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -86,9 +86,6 @@ EOF
     }
     if ( $badFileCnt ) {
         ErrorExit($Lang->{Nice_try__but_you_can_t_put});
-    }
-    if ( @fileList == 1 ) {
-	$pathHdr =~ s/(.*)\/.*/$1/;
     }
     $pathHdr = "/" if ( $pathHdr eq "" );
     if ( $In{type} != 0 && @fileList == $In{fcbMax} ) {

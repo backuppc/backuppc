@@ -333,6 +333,35 @@ collisions with the attrib file.
 
 =item *
 
+Adding support for FTP (via Net::FTP) and/or wget (for HTTP and FTP)
+as additional XferMethods.  One question with ftp is whether you can
+support incrementals.  It should be possible. For example, you could
+use Net::FTP->ls to list each directory, and get the file sizes and
+mtimes.  That would allow incrementals to be supported: only backup
+the files that have different sizes or mtimes for an incremental.
+You also need the ls() function to recurse directories.  The code
+would need to be robust to the different formats returned by ls() on
+different clients.
+
+For wget there would be a new module called BackupPC::Xfer::Wget that
+uses wget.  Wget can do both http and ftp.  Certainly backing up a web
+site via ftp is better than http, especially when there is active
+content and not just static pages.  But the benefit of supporting http
+is that you could use it to backup config pages of network hardware
+(eg: routers etc).  So if a router fails you have a copy of the config
+screens and settings. (And the future tripwire feature on the todo
+list could tell you if someone messed with the router settings.)
+Probably the only choice with wget is to fetch all the files
+(either via ftp or http) into a temporary directory, then run
+tar on that directory and pipe it into BackupPC_tarExtract.
+
+The advantage of using wget is you get both http and ftp.
+The disadvantage is that you can't support incrementals
+with wget, but you can with Net::FTP.  Also people will
+find wget harder to configure and run.
+
+=item *
+
 Replacing smbclient with the perl module FileSys::SmbClient.  This
 gives much more direct control of the smb transfer, allowing
 incrementals to depend on any attribute change (eg: exist, mtime,
@@ -491,8 +520,7 @@ As of June 2003 the latest version is 1.13.25.
 
 If you are using rsync to backup linux/unix machines you should have
 version 2.5.5 or higher on each client machine.  See
-L<http://rsync.samba.org>. Use "rsync --version" to check your
-version.
+L<http://rsync.samba.org>. Use "rsync --version" to check your version.
 
 For BackupPC to use Rsync you will also need to install the perl
 File::RsyncP module, which is available from
@@ -586,7 +614,7 @@ You can run "perldoc Archive::Zip" to see if this module is installed.
 To use rsync and rsyncd with BackupPC you will need to install File::RsyncP.
 You can run "perldoc File::RsyncP" to see if this module is installed.
 File::RsyncP is available from L<http://perlrsync.sourceforge.net>.
-Version 0.44 or later is required.
+Version 0.51 or later is required.
 
 =back
 
@@ -848,6 +876,12 @@ cygwin-rsync. It contains rsync.exe, template setup files and the
 minimal set of cygwin libraries for everything to run.  The README file
 contains instructions for running rsync as a service, so it starts
 automatically everytime you boot your machine.
+
+If you build your own rsync, for rsync 2.6.2 it is strongly
+recommended you apply the patch in the cygwin-rsync package on
+L<http://backuppc.sourceforge.net>.  This patch adds the --checksum-seed
+option for checksum caching, and also sends all errors to the client,
+which is important so BackupPC can log all file access errors.
 
 Otherwise, to use SMB, you need to create shares for the data you want
 to backup. Open "My Computer", right click on the drive (eg: C), and
@@ -2720,6 +2754,72 @@ storage cost of flushing is negligible.
 To easily decompress a BackupPC compressed file, the script
 BackupPC_zcat can be found in __INSTALLDIR__/bin.  For each
 file name argument it inflates the file and writes it to stdout.
+
+=head2 Rsync checksum caching
+
+An incremental backup with rsync compares attributes on the client
+with the last full backup.  Any files with identical attributes
+are skipped.  A full backup with rsync sets the --ignore-times
+option, which causes every file to be examined independent of
+attributes.
+
+Each file is examined by generating block checksums (default 2K
+blocks) on the receiving side (that's the BackupPC side), sending
+those checksums to the client, where the remote rsync matches those
+checksums with the corresponding file.  The matching blocks and new
+data is sent back, allowing the client file to be reassembled.
+A checksum for the entire file is sent to as an extra check the
+the reconstructed file is correct.
+
+This results in significant disk IO and computation for BackupPC:
+every file in a full backup, or any file with non-matching attributes
+in an incremental backup, needs to be uncompressed, block checksums
+computed and sent.  Then the receiving side reassembles the file and
+has to verify the whole-file checksum.  Even if the file is identical,
+prior to 2.1.0, BackupPC had to read and uncompress the file twice,
+once to compute the block checksums and later to verify the whole-file
+checksum.
+
+Starting in 2.1.0, BackupPC supports optional checksum caching,
+which means the block and file checksums only need to be computed
+once for each file.  This results in a significant performance
+improvement.  This only works for compressed pool files.
+It is enabled by adding
+
+	'--checksum-seed=32761',
+
+to $Conf{RsyncArgs} and $Conf{RsyncRestoreArgs}.
+
+Rsync versions prior to and including rsync-2.6.2 need a small patch to
+add support for the --checksum-seed option.  This patch is available in
+the cygwin-rsyncd package at L<http://backuppc.sourceforge.net>.
+This patch is already included in rsync CVS, so it will be standard
+in future versions of rsync.
+
+When this option is present, BackupPC will add block and file checksums
+to the compressed pool file the next time a pool file is used and it
+doesn't already have cached checksums.  The first time a new file is
+written to the pool, the checksums are not appended.  The next time
+checksums are needed for a file, they are computed and added.  So the
+full performance benefit of checksum caching won't be noticed until the
+third time a pool file is used (eg: the third full backup).
+
+With checksum caching enabled, there is a risk that should a file's contents
+in the pool be corrupted due to a disk problem, but the cached checksums
+are still correct, the corruption will not be detected by a full backup,
+since the file contents are no longer read and compared.  To reduce the
+chance that this remains undetected, BackupPC can recheck cached checksums
+for a fraction of the files.  This fraction is set with the
+$Conf{RsyncCsumCacheVerifyProb} setting.  The default value of 0.01 means
+that 1% of the time a file's checksums are read, the checksums are verified.
+This reduces performance slightly, but, over time, ensures that files
+contents are in sync with the cached checksums.
+
+The format of the cached checksum data can be discovered by looking at
+the code.  Basically, the first byte of the compressed file is changed
+to denote that checksums are appended.  The block and file checksum
+data, plus some other information and magic word, are appended to the
+compressed file.  This allows the cache update to be done in-place.
 
 =head2 File name mangling
 

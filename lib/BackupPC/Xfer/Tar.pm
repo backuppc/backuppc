@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta1, released 9 Apr 2004.
+# Version 2.1.0beta2, released 23 May 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -92,24 +92,11 @@ sub start
     } else {
 	#
 	# Turn $conf->{BackupFilesOnly} and $conf->{BackupFilesExclude}
-	# into a hash of arrays of files
+	# into a hash of arrays of files, and $conf->{TarShareName}
+	# to an array
 	#
-	$conf->{TarShareName} = [ $conf->{TarShareName} ]
-			unless ref($conf->{TarShareName}) eq "ARRAY";
-	foreach my $param qw(BackupFilesOnly BackupFilesExclude) {
-	    next if ( !defined($conf->{$param}) );
-	    if ( ref($conf->{$param}) eq "ARRAY" ) {
-		$conf->{$param} = {
-			$conf->{TarShareName}[0] => $conf->{$param}
-		};
-	    } elsif ( ref($conf->{$param}) eq "HASH" ) {
-		# do nothing
-	    } else {
-		$conf->{$param} = {
-			$conf->{TarShareName}[0] => [ $conf->{$param} ]
-		};
-	    }
-	}
+	$bpc->backupFileConfFix($conf, "TarShareName");
+
         if ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
             {

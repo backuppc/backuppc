@@ -715,7 +715,7 @@ EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
-${h1("Resumen de archivo del Host \$host")}
+\${h1("Resumen de archivo del Host \$host")}
 <p>
 \$warnStr
 <ul>
@@ -834,7 +834,7 @@ $Lang{DirHistory_dirLink}  = "dir";
 $Lang{DirHistory_fileLink} = "v";
 
 $Lang{DirHistory_for__host} = <<EOF;
-${h1("Histórico de copia de seguridad del directorio en \$host")}
+\${h1("Histórico de copia de seguridad del directorio en \$host")}
 <p>
 Esta pantalla muestra cada versión única de archivos de entre todas
 las copias de seguridad:

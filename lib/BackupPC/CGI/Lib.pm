@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta1, released 9 Apr 2004.
+# Version 2.1.0beta2, released 23 May 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -408,7 +408,7 @@ sub Header
                                               priv => 1},
         { link => "?action=queue",            name => $Lang->{Current_queues},
                                               priv => 1},
-        @{$Conf{CgiNavBarLinks}},
+        @{$Conf{CgiNavBarLinks} || []},
     );
     my $host = $In{host};
 

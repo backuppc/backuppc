@@ -21,7 +21,10 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-** Add checksum caching info and file format to the docs.
+* $Conf{BackupFilesOnly} and $Conf{BackupFilesExclude} now apply
+  to every share, rather than just the first, in the case where
+  they are arrays and there are multiple shares.  Suggested
+  by Andy Evans.
 
 * On the phase 2 retry pass with rsync, verify the cached checksums
   if checksum caching is turned on.  This will catch the case of
@@ -32,7 +35,7 @@
 
 * configure.pl now supports an optional batch mode.  Command-line
   options are used to specify all the information that configure.pl
-  needs.  This is useful for buidling auto-install packages.
+  needs.  This is useful for building auto-install packages.
   Also, configure.pl now includes pod documentation, so you can do
   "perldoc configure.pl" to see all the command-line options.
   Suggested, tested and tweaked by Stuart Herbert for possible

@@ -811,12 +811,29 @@ $Conf{SshPath} = '/usr/bin/ssh';
 $Conf{NmbLookupPath} = '/usr/bin/nmblookup';
 
 #
-# NmbLookup command.  Several variables are substituted at run-time:
+# NmbLookup command.  Given an IP address, does an nmblookup on that
+# IP address.  Several variables are substituted at run-time:
 #
 #   $nmbLookupPath      path to nmblookup ($Conf{NmbLookupPath})
 #   $host               host name
 #
 $Conf{NmbLookupCmd} = '$nmbLookupPath -A $host';
+
+#
+# NmbLookup command.  Given a netbios name, finds that host by doing
+# a NetBios multicast.  Several variables are substituted at run-time:
+#
+#   $nmbLookupPath      path to nmblookup ($Conf{NmbLookupPath})
+#   $host               NetBios name
+#
+# In some cases you might need to change the broadcast address, for
+# example if nmblookup uses 192.168.255.255 by default and you find
+# that doesn't work, try 192.168.1.255 (or your equivalent class C
+# address) using the -B option:
+#
+#    $Conf{NmbLookupFindHostCmd} = '$nmbLookupPath -B 192.168.1.255 $host';
+#
+$Conf{NmbLookupFindHostCmd} = '$nmbLookupPath $host';
 
 #
 # For fixed IP address hosts, BackupPC_dump can also verify the netbios
@@ -934,6 +951,13 @@ $Conf{DumpPreUserCmd}     = undef;
 $Conf{DumpPostUserCmd}    = undef;
 $Conf{RestorePreUserCmd}  = undef;
 $Conf{RestorePostUserCmd} = undef;
+
+#
+# Override the client's host name.  This allows multiple clients
+# to all refer to the same physical hosts.  This should only be
+# set in the per-PC config file.
+#
+$Conf{ClientNameAlias} = undef;
 
 #
 # Advanced option for asking BackupPC to load additional perl modules.

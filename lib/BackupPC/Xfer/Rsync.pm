@@ -52,9 +52,9 @@ BEGIN {
         $RsyncLibOK = 0;
         $RsyncLibErr = "File::RsyncP module doesn't exist";
     } else {
-        if ( $File::RsyncP::VERSION < 0.44 ) {
+        if ( $File::RsyncP::VERSION < 0.50 ) {
             $RsyncLibOK = 0;
-            $RsyncLibErr = "File::RsyncP module version too old: need 0.44";
+            $RsyncLibErr = "File::RsyncP module version too old: need 0.50";
         } else {
             $RsyncLibOK = 1;
         }

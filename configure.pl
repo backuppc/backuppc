@@ -642,7 +642,7 @@ sub ConfigParse
     my $comment = 1;
     my $allVars = {};
     while ( <C> ) {
-        if ( /^\s*#/ ) {
+        if ( /^#/ ) {
             if ( $comment ) {
                 $out .= $_;
             } else {

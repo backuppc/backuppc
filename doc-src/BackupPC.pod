@@ -41,7 +41,7 @@ cancel backups and browse and restore files from backups.
 =item *
 
 The http/cgi user interface has internationalization (i18n) support,
-currently prodiving English, French and Spanish.
+currently providing English, French and Spanish.
 
 =item *
 
@@ -346,7 +346,7 @@ implementation effort. The program xdelta (v1) on SourceForge (see
 L<http://sourceforge.net/projects/xdelta>) uses an rsync algorithm for
 doing efficient binary file deltas.  Rather than using an external
 program, File::RsyncP will eventually get the necessary delta
-generataion code from rsync.
+generation code from rsync.
 
 =back
 
@@ -2695,6 +2695,10 @@ do the tar octal conversion for file sizes from 2GB-4GB.  BackupPC_tarExtract
 knows about this bug and can recover the correct file size.  So smbclient
 transport works up to 4GB file sizes.
 
+Rsync running on Cygwin is limited to either 2GB or 4GB file sizes.
+More testing needs to be done to verify the file size limit for
+rsync on various platforms.
+
 =back
 
 =item Some tape backup systems aren't smart about hard links
@@ -3014,7 +3018,7 @@ for zip download, in addition to some CGI cleanup, for v1.5.0.
 
 Javier Gonzalez provided the Spanish translation, es.pm.
 
-Manfred provided the German translation, de.pm.
+Manfred Herrmann provided the German translation, de.pm.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.

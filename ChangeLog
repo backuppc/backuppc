@@ -82,6 +82,11 @@
 * Fixed CGI browse navigation bug that causes BackupPC_Admin to wedge
   when directories were selected in a certain order.
 
+* Fixed BackupPC::PoolWrite so that it can recover when the initial
+  file size is wrong.  This is needed since rsync could write a file
+  whose size is different from the initial size returned in the
+  file list when that file is updated while rsync is running.
+
 * Added binmode(STDIN) to BackupPC_tarExtract, suggested by Pat LoPresti
   to fix a problem a RedHat8 with perl 5.8.0.  It's unclear why this
   helps, but it should be benign.  See:

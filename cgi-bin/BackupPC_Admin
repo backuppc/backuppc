@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 2.0.0beta2, released 13 Apr 2003.
+# Version 2.0.0beta2, released 11 May 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -76,7 +76,7 @@ $User   = $ENV{REMOTE_USER};
 
 if ( !defined($bpc) ) {
     ErrorExit($Lang->{BackupPC__Lib__new_failed__check_apache_error_log})
-	if ( !($bpc = BackupPC::Lib->new) );
+	if ( !($bpc = BackupPC::Lib->new(undef, undef, 1)) );
     $TopDir = $bpc->TopDir();
     $BinDir = $bpc->BinDir();
     %Conf   = $bpc->Conf();
@@ -100,7 +100,16 @@ $ENV{PATH} = $Conf{MyPath};
 #
 if ( $Conf{BackupPCUserVerify}
         && $> != (my $uid = (getpwnam($Conf{BackupPCUser}))[2]) ) {
-    ErrorExit(eval("qq{$Lang->{Wrong_user__my_userid_is___}}"));
+    ErrorExit(eval("qq{$Lang->{Wrong_user__my_userid_is___}}"), <<EOF);
+This script needs to run as the user specified in \$Conf{BackupPCUser},
+which is set to $Conf{BackupPCUser}.
+<p>
+This is an installation problem.  If you are using mod_perl then
+it appears that Apache is not running as user $Conf{BackupPCUser}.
+If you are not using mod_perl, then most like setuid is not working
+properly on BackupPC_Admin.  Check the permissions on
+$Conf{CgiDir}/BackupPC_Admin and look at the documentation.
+EOF
 }
 
 if ( !defined($Hosts) || $bpc->HostsMTime() != $HostsMTime ) {
@@ -1610,6 +1619,16 @@ sub ErrorExit
     $Conf{CgiHeaderFontSize} ||= "3";  
     $Conf{CgiNavBarBgColor}  ||= "#ddeeee";
     $Conf{CgiHeaderBgColor}  ||= "#99cc33";
+
+    if ( 1 || !defined($ENV{REMOTE_USER}) ) {
+	$mesg .= <<EOF;
+<p>
+Note: \$ENV{REMOTE_USER} is not set, which could mean there is an
+installation problem.  BackupPC_Admin expects Apache to authenticate
+the user and pass their user name into this script as the REMOTE_USER
+environment variable.  See the documentation.
+EOF
+    }
 
     $bpc->ServerMesg("log User $User (host=$In{host}) got CGI error: $head")
                             if ( defined($bpc) );

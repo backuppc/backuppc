@@ -42,8 +42,8 @@ use Getopt::Std;
 
 umask(0022);
 
-my $Version     = "2.1.0beta0";
-my $ReleaseDate = "20 Mar 2004";
+my $Version     = "2.1.0beta0_CVS";
+my $ReleaseDate = "29 Mar 2004";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -188,6 +188,7 @@ foreach my $file ( (@PerlSrc,
 	    qw(
 		conf/config.pl
 		conf/hosts
+		conf/BackupPC_stnd.css
 		init.d/README
 		init.d/src/debian-backuppc
 		init.d/src/gentoo-backuppc
@@ -227,7 +228,7 @@ sub InstallFile
 	binmode(FILE);
 	binmode(OUT);
 	while ( <FILE> ) {
-	    s/^# *Version \d+\.\d+[\.\w]*, released \d+ \w+ \d{4}\.?/# Version __VERSION__, released __RELEASEDATE__./;
+	    s/^([#*\s]+)Version \d+\.\d+[\.\w]*, released \d+ \w+ \d{4}\.?/$1Version __VERSION__, released __RELEASEDATE__./;
 	    s/__VERSION__/$Version/g;
 	    s/__RELEASEDATE__/$ReleaseDate/g;
 	    if ( $file =~ /BackupPC\.html$/ ) {

@@ -96,10 +96,13 @@ BackupPC is Open Source software hosted by SourceForge.
 
 =item Full Backup
 
-A full backup is a complete backup of a share. BackupPC can be configured to
-do a full backup at a regular interval (often weekly). BackupPC can also
-be configured to keep a certain number of full backups, and to keep
-a smaller number of very old full backups.
+A full backup is a complete backup of a share. BackupPC can be
+configured to do a full backup at a regular interval (typically
+weekly).  BackupPC can be configured to keep a certain number
+of full backups.  Exponential expiry is also supported, allowing
+full backups with various vintages to be kept (for example, a
+settable number of most recent weekly fulls, plus a settable
+number of older fulls that are 2, 4, 8, or 16 weeks apart).
 
 =item Incremental Backup
 
@@ -120,6 +123,23 @@ would be easy to do so.)
 BackupPC's CGI interface "fills-in" incremental backups based on the 
 last full backup, giving every backup a "full" appearance.  This makes
 browsing and restoring backups easier.
+
+=item Partial Backup
+
+When a full backup fails or is canceled, and some files have already
+been backed up, BackupPC keeps a partial backup containing just the
+files that were backed up successfully.  The partial backup is removed
+when the next successful backup completes, or if another full backup
+fails resulting in a newer partial backup.  A failed full backup
+that has not backed up any files, or any failed incremental backup,
+is removed; no partial backup is saved in these cases.
+
+The partial backup may be browsed or used to restore files just like
+a successful full or incremental backup.
+
+With the rsync transfer method the partial backup is used to resume
+the next full backup, avoiding the need to retransfer the file data
+already in the partial backup.
 
 =item Identical Files
 

@@ -470,6 +470,16 @@ if ( $Conf{CgiImageDir} ne "" ) {
 	(my $destImg = $img) =~ s{^images/}{};
 	InstallFile($img, "$Conf{CgiImageDir}/$destImg", 0444, 1);
     }
+
+    #
+    # Install new CSS file, making a backup copy if necessary
+    #
+    my $cssBackup = "$Conf{CgiImageDir}/BackupPC_stnd.css.pre-__VERSION__";
+    if ( -f "$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
+	rename("$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
+    }
+    InstallFile("conf/BackupPC_stnd.css",
+	        "$Conf{CgiImageDir}/BackupPC_stnd.css", 0444, 0);
 }
 
 printf("Making init.d scripts\n");
@@ -534,6 +544,11 @@ if ( defined($Conf{SmbClientArgs}) ) {
 }
 
 #
+# CSS is now stored in a file rather than a big config variable.
+#
+delete($Conf{CSSstylesheet});
+
+#
 # The blackout timing settings are now stored in a list of hashes, rather
 # than three scalar parameters.
 #
@@ -553,7 +568,15 @@ if ( defined($Conf{BlackoutHourBegin}) ) {
 #
 # $Conf{RsyncLogLevel} has been replaced by $Conf{XferLogLevel}
 #
-$Conf{XferLogLevel} = $Conf{RsyncLogLevel};
+if ( defined($Conf{RsyncLogLevel}) ) {
+    $Conf{XferLogLevel} = $Conf{RsyncLogLevel};
+    delete($Conf{RsyncLogLevel});
+}
+
+#
+# In 2.1.0 the default for $Conf{CgiNavBarAdminAllHosts} is now 1
+#
+$Conf{CgiNavBarAdminAllHosts} = 1;
 
 #
 # IncrFill should now be off

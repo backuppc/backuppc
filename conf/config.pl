@@ -108,6 +108,13 @@ $Conf{UmaskMode} = 027;
 #
 # The default value is every hour except midnight.
 #
+# The first entry of $Conf{WakeupSchedule} is when BackupPC_nightly
+# is run.  No other backups can run while BackupPC_nightly is
+# running.  You might want to re-arrange the entries in
+# $Conf{WakeupSchedule} (they don't have to be ascending) so that
+# the first entry is when you want BackupPC_nightly to run
+# (eg: when you don't expect a lot of regular backups to run).
+#
 $Conf{WakeupSchedule} = [1..23];
 
 #
@@ -336,10 +343,6 @@ $Conf{TarShareName} = '/';
 # These special settings are useful for a client that is no longer
 # being backed up (eg: a retired machine), but you wish to keep the
 # last backups available for browsing or restoring to other machines.
-#
-# Also, you might create a virtual client (by setting $Conf{ClientNameAlias})
-# for restoring to a DVD or permanent media and you would set
-# $Conf{FullPeriod} to -2 so that it is never backed up.
 #
 $Conf{FullPeriod} = 6.97;
 
@@ -960,6 +963,14 @@ $Conf{RsyncArgs} = [
             '--times',
             '--block-size=2048',
             '--recursive',
+
+	    #
+	    # If you are using a patched client rsync that supports the
+	    # --fixed-csumseed option (see http://backuppc.sourceforge.net),
+	    # then uncomment this to enabled rsync checksum cachcing
+	    #
+	    #'--fixed-csumseed',
+
 	    #
 	    # Add additional arguments here
 	    #
@@ -977,17 +988,25 @@ $Conf{RsyncRestoreArgs} = [
 	    #
 	    # Do not edit these!
 	    #
-	    "--numeric-ids",
-	    "--perms",
-	    "--owner",
-	    "--group",
-	    "--devices",
-	    "--links",
-	    "--times",
-	    "--block-size=2048",
-	    "--relative",
-	    "--ignore-times",
-	    "--recursive",
+	    '--numeric-ids',
+	    '--perms',
+	    '--owner',
+	    '--group',
+	    '--devices',
+	    '--links',
+	    '--times',
+	    '--block-size=2048',
+	    '--relative',
+	    '--ignore-times',
+	    '--recursive',
+
+	    #
+	    # If you are using a patched client rsync that supports the
+	    # --fixed-csumseed option (see http://backuppc.sourceforge.net),
+	    # then uncomment this to enabled rsync checksum cachcing
+	    #
+	    #'--fixed-csumseed',
+
 	    #
 	    # Add additional arguments here
 	    #
@@ -1535,11 +1554,11 @@ $Conf{CgiDateFormatMMDD} = 1;
 
 #
 # If set, the complete list of hosts appears in the left navigation
-# bar for administrators.  Otherwise, just the hosts for which the
-# user is listed in the host file (as either the user or in moreUsers)
+# bar pull-down for administrators.  Otherwise, just the hosts for which
+# the user is listed in the host file (as either the user or in moreUsers)
 # are displayed.
 #
-$Conf{CgiNavBarAdminAllHosts} = 0;
+$Conf{CgiNavBarAdminAllHosts} = 1;
 
 #
 # Hilight colors based on status that are used in the PC summary page.
@@ -1589,171 +1608,8 @@ $Conf{CgiExt2ContentType} = { };
 $Conf{CgiImageDirURL} = '';
 
 #
-# CSS stylesheet for the CGI interface.
+# CSS stylesheet for the CGI interface.  It is stored in the
+# $Conf{CgiImageDir} directory and accessed via the
+# $Conf{CgiImageDirURL} URL.
 #
-$Conf{CSSstylesheet} = <<'EOF';
-<style type="text/css">
-body {
-    font-family:arial,sans-serif;
-    font-size:1em;
-    background-color:#ffffff;
-    margin:2px 5px 0px 2px;
-    height:100%
-}
-
-h1 {
-    font-family:arial,sans-serif;
-    font-size:1.5em;
-    color:#000000
-}
-
-h2 {
-    font-family:arial,sans-serif;
-    font-size:1em;
-    color:#000000
-}
-
-p {
-    font-family:arial,sans-serif;
-    font-size:.9em
-}
-
-a {
-    font-family:arial,sans-serif;
-    color:#3333ff
-}
-
-li {
-    font-size:.9em;
-}
-
-a:hover {
-    color:#cc0000;
-    text-decoration:none
-}
-
-a.NavCurrent {
-    font-weight:bold;
-}
-
-a.navbar {
-    padding-left:5px;
-    padding-right:5px;
-}
-
-.h1 {
-    font-family:arial,sans-serif;
-    font-size:1.5em;
-    color:#000000;
-    font-weight:bold;
-    background-color:#99cc33;
-    padding:3px;
-    padding-left:6px;
-    margin-bottom:5px;
-}
-
-.h2 {
-    font-family:arial,sans-serif;
-    font-size:1em;
-    color:#000000;
-    font-weight:bold;
-    background-color:#ddeeee;
-    padding:3px;
-    padding-left:6px;
-    margin-top:3px;
-    margin-bottom:1px;
-}
-
-.tableStnd {
-}
-
-.tableheader {
-    font-size:.8em;
-    font-weight:bold;
-    background-color:#cccccc;
-}
-
-.border {
-    font-size:.9em;
-}
-
-.fviewheader {
-    font-weight:bold;
-    font-size:.8em;
-    color:#ffffff;
-    background-color:#999999;
-}
-
-.fviewborder {
-    border-bottom:1px solid #000000;
-    border-left:1px dotted #666666;
-    background-color:#dddddd;
-    font-size:.9em;
-}
-
-.fviewon {
-    background-color:#cccccc;
-}
-
-.fviewoff {
-    background-color:#ffffff;
-}
-
-.fview {
-    font-size:.8em;
-    font-family:arial,sans-serif;
-    text-decoration:none;
-    line-height:15px;
-}
-
-.fviewbold {
-    font-size:.9em;
-    font-family:arial,sans-serif;
-    text-decoration:none;
-    line-height:15px;
-    font-weight:bold;
-}
-
-.histView {
-    border-bottom:1px solid #000000;
-    border-left:2px solid #ffffff;
-    background-color:#dddddd;
-    font-size:.9em;
-}
-
-.histViewMis {
-    border-bottom:1px solid #000000;
-    background-color:#ffdddd;
-}
-
-div.NavMenu {
-    width:18%;
-    margin:0px;
-    background-color:#ddeeee;
-}
-
-div.NavMenu a {
-    font-size:.8em;
-    display:block;
-    margin-left:8px;
-    padding:2px;
-}
-
-div.NavTitle {
-    padding-left:10px;
-    background-color:#99cc33;
-    font-family:arial,sans-serif;
-    color:#000000;
-    font-weight:bold;
-    margin-bottom:2px;
-}
-
-#Content {
-    float:right;
-    width:80%;
-    left:20%;
-    top:10px;
-    position:absolute;
-}
-</style>
-EOF
+$Conf{CgiCSSFile} = 'BackupPC_stnd.css';

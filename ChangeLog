@@ -21,6 +21,22 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* The CSS definition has been removed from the config.pl file and
+  is now a separate file, BackupPC_stnd.css.  A new config variable,
+  $Conf{CgiCSSFile}, gives the name of the CSS file to use.
+  Suggested by Ender Mathias.
+
+* Fixed the filling of the host name select box for admins.
+  The default $Conf{CgiNavBarAdminAllHosts} is now 1.
+  Reported by Doug Lytle.
+
+* Cleaned up warning message for restore using rsync when checksum
+  caching is on, but when file didn't have cached checksums.
+
+#------------------------------------------------------------------------
+# Version 2.1.0beta0, 20 Mar 2004
+#------------------------------------------------------------------------
+
 * A failed full dump is now saved as a partial (incomplete) dump,
   provided it includes some files.  This can be used for browsing,
   restoring etc, and will also form the basis of resuming full

@@ -106,6 +106,7 @@ sub csumStart
 {
     my($fio, $f, $needMD4, $defBlkSize) = @_;
 
+    $defBlkSize ||= $fio->{blockSize};
     my $attr = $fio->attribGet($f);
     $fio->{file} = $f;
     $fio->csumEnd if ( defined($fio->{csum}) );

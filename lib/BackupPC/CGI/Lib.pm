@@ -320,9 +320,10 @@ sub CheckPermission
         $Privileged ||= $Conf{CgiAdminUsers} eq "*";
     }
     $PrivAdmin = $Privileged;
+    return $Privileged if ( !defined($host) );
+
     $Privileged ||= $User eq $Hosts->{$host}{user};
     $Privileged ||= defined($Hosts->{$host}{moreUsers}{$User});
-
     return $Privileged;
 }
 
@@ -334,7 +335,7 @@ sub CheckPermission
 #
 sub GetUserHosts
 {
-    my($host, $getAll) = @_;
+    my($getAll) = @_;
     my @hosts;
 
     if ( $getAll && CheckPermission() ) {
@@ -414,7 +415,7 @@ sub Header
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
 <title>$title</title>
-$Conf{CSSstylesheet}
+<link rel=stylesheet type="text/css" href="$Conf{CgiImageDirURL}/$Conf{CgiCSSFile}" title="CSSFile">
 $Conf{CgiHeaders}
 </head><body onLoad="document.getElementById('NavMenu').style.height=document.body.scrollHeight">
 <img src="$Conf{CgiImageDirURL}/logo.gif" hspace="5" vspace="7"><br>
@@ -464,7 +465,7 @@ EOF
 <div class="NavMenu" id="NavMenu" style="height:100%">
 EOF
     my $hostSelectbox = "<option value=\"#\">$Lang->{Select_a_host}</option>";
-    my @hosts = GetUserHosts($In{host}, $Conf{CgiNavBarAdminAllHosts});
+    my @hosts = GetUserHosts($Conf{CgiNavBarAdminAllHosts});
     if ( defined($Hosts) && %$Hosts > 0 && @hosts ) {
 	NavSectionTitle($Lang->{Hosts});
         foreach my $host ( @hosts ) {

@@ -48,20 +48,17 @@ sub action
     GetStatusInfo("hosts");
     my $Privileged = CheckPermission();
 
-    foreach my $host ( GetUserHosts(undef, 1) ) {
+    foreach my $host ( GetUserHosts(1) ) {
         my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite);
 	my($shortErr);
         my @Backups = $bpc->BackupInfoRead($host);
         my $fullCnt = $incrCnt = 0;
         my $fullAge = $incrAge = -1;
 
-        if ( defined(my $error = $bpc->ConfigRead($host)) ) {
-            print("dump failed: Can't read PC's config file: $error\n");
-            exit(1);
-        }
+        $bpc->ConfigRead($host);
         %Conf = $bpc->Conf();
 
-        if ($Conf{XferMethod} eq "archive" ) {
+        if ( $Conf{XferMethod} eq "archive" ) {
             next;
         }
 

@@ -1,0 +1,176 @@
+/*
+ * BackupPC standard CSS definitions
+ *
+ * Version 2.1.0beta0, released 20 Mar 2004.
+ *
+ * See http://backuppc.sourceforge.net.
+ *
+ * AUTHOR
+ *   Craig Barratt  <cbarratt@users.sourceforge.net>
+ *
+ * COPYRIGHT
+ *   Copyright (C) 2004  Craig Barratt
+ */
+
+body {
+    font-family:arial,sans-serif;
+    font-size:1em;
+    background-color:#ffffff;
+    margin:2px 5px 0px 2px;
+    height:100%
+}
+
+h1 {
+    font-family:arial,sans-serif;
+    font-size:1.5em;
+    color:#000000
+}
+
+h2 {
+    font-family:arial,sans-serif;
+    font-size:1em;
+    color:#000000
+}
+
+p {
+    font-family:arial,sans-serif;
+    font-size:.9em
+}
+
+a {
+    font-family:arial,sans-serif;
+    color:#3333ff
+}
+
+li {
+    font-size:.9em;
+}
+
+a:hover {
+    color:#cc0000;
+    text-decoration:none
+}
+
+a.NavCurrent {
+    font-weight:bold;
+}
+
+a.navbar {
+    padding-left:5px;
+    padding-right:5px;
+}
+
+.h1 {
+    font-family:arial,sans-serif;
+    font-size:1.5em;
+    color:#000000;
+    font-weight:bold;
+    background-color:#99cc33;
+    padding:3px;
+    padding-left:6px;
+    margin-bottom:5px;
+}
+
+.h2 {
+    font-family:arial,sans-serif;
+    font-size:1em;
+    color:#000000;
+    font-weight:bold;
+    background-color:#ddeeee;
+    padding:3px;
+    padding-left:6px;
+    margin-top:3px;
+    margin-bottom:1px;
+}
+
+.tableStnd {
+}
+
+.tableheader {
+    font-size:.8em;
+    font-weight:bold;
+    background-color:#cccccc;
+}
+
+.border {
+    font-size:.9em;
+}
+
+.fviewheader {
+    font-weight:bold;
+    font-size:.8em;
+    color:#ffffff;
+    background-color:#999999;
+}
+
+.fviewborder {
+    border-bottom:1px solid #000000;
+    border-left:1px dotted #666666;
+    background-color:#dddddd;
+    font-size:.9em;
+}
+
+.fviewon {
+    background-color:#cccccc;
+}
+
+.fviewoff {
+    background-color:#ffffff;
+}
+
+.fview {
+    font-size:.8em;
+    font-family:arial,sans-serif;
+    text-decoration:none;
+    line-height:15px;
+}
+
+.fviewbold {
+    font-size:.9em;
+    font-family:arial,sans-serif;
+    text-decoration:none;
+    line-height:15px;
+    font-weight:bold;
+}
+
+.histView {
+    border-bottom:1px solid #000000;
+    border-left:2px solid #ffffff;
+    background-color:#dddddd;
+    font-size:.9em;
+}
+
+.histViewMis {
+    border-bottom:1px solid #000000;
+    background-color:#ffdddd;
+}
+
+div.NavMenu {
+    width:18%;
+    margin:0px;
+    background-color:#ddeeee;
+}
+
+div.NavMenu a {
+    font-size:.8em;
+    display:block;
+    margin-left:8px;
+    padding:2px;
+}
+
+div.NavTitle {
+    padding-left:10px;
+    background-color:#99cc33;
+    font-family:arial,sans-serif;
+    color:#000000;
+    font-weight:bold;
+    margin-bottom:2px;
+}
+
+#Content {
+    float:right;
+    width:80%;
+    left:20%;
+    top:10px;
+    position:absolute;
+}

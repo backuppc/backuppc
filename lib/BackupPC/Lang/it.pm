@@ -1,6 +1,6 @@
 #!/bin/perl
 #
-# $Id$
+# $Id: it.pm,v 1.4 2004/03/21 01:46:46 cbarratt Exp $
 #
 # Italian i18n file
 #
@@ -869,10 +869,10 @@ EOF
 # ------------------------------
 $Lang{Restore___num_details_for__host} = "BackupPC: dettagli ripristino numero \$num per \$host";
 
-$Lang{Restore___num_details_for__host2 } = <<EOF;
+$Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("Dettagli ripristino numero \$num per \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="50%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> Numero </td><td class="border"> \$Restores[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Richiesto da </td><td class="border"> \$RestoreReq{user} </td></tr>
 <tr><td class="tableheader"> Data richiesta </td><td class="border"> \$reqTime </td></tr>

@@ -98,8 +98,8 @@ sub new
     return $self;
 }
 
-my $BufSize  = 1048576;     # 1MB or 2^20
-my $MaxFiles = 20;
+my $BufSize  = 1048576;  # 1MB or 2^20
+my $MaxFiles = 20;       # max number of compare files open at one time
 
 sub write
 {
@@ -119,6 +119,8 @@ sub write
     #
     if ( !defined($dataRef) && !defined($a->{digest})
 		&& $a->{fileSize} != length($a->{data}) ) {
+	#my $newSize = length($a->{data});
+	#print("Fixing file size from $a->{fileSize} to $newSize\n");
 	$a->{fileSize} = length($a->{data});
     }
 
@@ -310,6 +312,7 @@ sub write
 		push(@{$a->{errors}}, "Can't rename $a->{fileName} -> $fileName"
 				    . " or open during size fixup\n");
 	    }
+	    #print("Using temporary name $fileName\n");
 	} elsif ( defined($a->{files}) && defined($a->{files}[0]) ) {
 	    #
 	    # We haven't written anything yet, so just use the
@@ -317,6 +320,7 @@ sub write
 	    #
 	    $fh = $a->{files}[0]->{fh};
 	    $fh->rewind;
+	    #print("Using compare file $a->{files}[0]->{name}\n");
 	}
 	if ( defined($fh) ) {
 	    my $poolWrite = BackupPC::PoolWrite->new($a->{bpc}, $a->{fileName},

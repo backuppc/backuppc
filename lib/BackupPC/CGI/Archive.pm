@@ -43,7 +43,11 @@ use Data::Dumper;
 sub action
 {
     my $archHost = $In{host};
+    my $Privileged = CheckPermission();
 
+    if ( !$Privileged ) {
+	ErrorExit($Lang->{Only_privileged_users_can_archive} );
+    }
     if ( $In{type} == 0 ) {
         my($fullTot, $fullSizeTot, $incrTot, $incrSizeTot, $str,
            $strNone, $strGood, $hostCntGood, $hostCntNone, $checkBoxCnt,
@@ -51,11 +55,7 @@ sub action
 
         $hostCntGood = $hostCntNone = $checkBoxCnt = $fullSizeTot = 0;
         GetStatusInfo("hosts");
-        my $Privileged = CheckPermission();
 
-        if ( !$Privileged ) {
-            ErrorExit($Lang->{Only_privileged_users_can_archive} );
-        }
         foreach my $host ( sort(keys(%Status)) ) {
             my($fullDur, $incrCnt, $fullSize, $fullRate);
             my @Backups = $bpc->BackupInfoRead($host);
@@ -98,7 +98,6 @@ EOF
     } else {
         my(@HostList, @BackupList, $HostListStr, $hiddenStr, $pathHdr,
            $badFileCnt, $reply, $str);
-        my $Privileged = CheckPermission();
         my $args = {
             SplitPath    => $bpc->{Conf}{SplitPath},
             ParPath      => $bpc->{Conf}{ParPath},
@@ -112,9 +111,6 @@ EOF
             topDir       => $bpc->{TopDir},
         };
 
-        if ( !$Privileged ) {
-            ErrorExit($Lang->{Only_privileged_users_can_archive} );
-        }
         ServerConnect();
 
         for ( my $i = 0 ; $i < $In{fcbMax} ; $i++ ) {

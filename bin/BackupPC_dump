@@ -280,14 +280,15 @@ my $partialNum;
 if ( $Conf{FullPeriod} == -1 && !$opts{f} && !$opts{i}
         || $Conf{FullPeriod} == -2 ) {
     print(STDERR "Exiting because backups are disabled with"
-               . "\$Conf{FullPeriod} = $Conf{FullPeriod}\n") if ( $opts{v} );
+               . " \$Conf{FullPeriod} = $Conf{FullPeriod}\n") if ( $opts{v} );
     #
     # Tell BackupPC to ignore old failed backups on hosts that
     # have backups disabled.
     #
     print("backups disabled\n")
-		if ( $StatusHost{reason} ne "Reason_backup_done"
-		     && time - $StatusHost{startTime} > 2 * 24 * 3600 );
+		if ( defined($StatusHost{errorTime})
+		     && $StatusHost{reason} ne "Reason_backup_done"
+		     && time - $StatusHost{errorTime} > 4 * 24 * 3600 );
     NothingToDo($needLink);
 }
 

@@ -104,7 +104,7 @@ EOF
 	#
 	my $hostDestSel;
         my @hosts;
-	foreach my $h ( GetUserHosts() ) {
+	foreach my $h ( GetUserHosts(1) ) {
 	    my $sel = " selected" if ( $h eq $In{host} );
 	    $hostDestSel .= "<option value=\"$h\"$sel>${EscHTML($h)}</option>";
             push(@hosts, $h);
@@ -265,7 +265,8 @@ EOF
             my $targetFile = $f;
 	    (my $strippedShare = $share) =~ s/^\///;
 	    (my $strippedShareDest = $In{shareDest}) =~ s/^\///;
-            substr($targetFile, 0, length($pathHdr)) = $In{pathHdr};
+            substr($targetFile, 0, length($pathHdr)) = "/$In{pathHdr}/";
+	    $targetFile =~ s{//+}{/}g;
             $fileListStr .= <<EOF;
 <tr><td>$host:/$strippedShare$f</td><td>$In{hostDest}:/$strippedShareDest$targetFile</td></tr>
 EOF
@@ -293,6 +294,9 @@ EOF
             $reqFileName = "restoreReq.$$.$i";
             last if ( !-f "$TopDir/pc/$hostDest/$reqFileName" );
         }
+	my $inPathHdr = $In{pathHdr};
+	$inPathHdr = "/$inPathHdr" if ( $inPathHdr !~ m{^/} );
+	$inPathHdr = "$inPathHdr/" if ( $inPathHdr !~ m{/$} );
         my %restoreReq = (
 	    # source of restore is hostSrc, #num, path shareSrc/pathHdrSrc
             num         => $In{num},
@@ -303,7 +307,7 @@ EOF
 	    # destination of restore is hostDest:shareDest/pathHdrDest
             hostDest    => $hostDest,
             shareDest   => $In{shareDest},
-            pathHdrDest => $In{pathHdr},
+            pathHdrDest => $inPathHdr,
 
 	    # list of files to restore
             fileList    => \@fileList,

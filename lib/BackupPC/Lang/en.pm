@@ -860,10 +860,10 @@ EOF
 # ------------------------------
 $Lang{Restore___num_details_for__host} = "BackupPC: Restore #\$num details for \$host";
 
-$Lang{Restore___num_details_for__host2 } = <<EOF;
+$Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("Restore #\$num Details for \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="50%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> Number </td><td class="border"> \$Restores[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Requested by </td><td class="border"> \$RestoreReq{user} </td></tr>
 <tr><td class="tableheader"> Request time </td><td class="border"> \$reqTime </td></tr>

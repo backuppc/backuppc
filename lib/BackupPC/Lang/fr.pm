@@ -117,7 +117,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Server_Summary} = "BackupPC: Résumé du serveur";
+$Lang{BackupPC__Server_Summary} = "BackupPC: Bilan des PC";
 $Lang{BackupPC__Archive} = "BackupPC: Archivage";
 $Lang{BackupPC_Summary}=<<EOF;
 
@@ -376,14 +376,14 @@ Les demandes de commande suivantes sont actuellement en attente :
 EOF
 
 # --------------------------------
-$Lang{Backup_PC__Log_File__file} = "BackupPC: Fichier journal \$file";
+$Lang{Backup_PC__Log_File__file} = "BackupPC: Fichier \$file";
 $Lang{Log_File__file__comment} = <<EOF;
-\${h1("Fichier journal \$file \$comment")}
+\${h1("Fichier \$file \$comment")}
 <p>
 EOF
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
-Contenu du fichier journal <tt>\$file</tt>, modifié le \$mtimeStr \$comment
+Contenu du fichier <tt>\$file</tt>, modifié le \$mtimeStr \$comment
 EOF
 
 # --------------------------------

@@ -38,6 +38,7 @@ package BackupPC::CGI::Restore;
 
 use strict;
 use BackupPC::CGI::Lib qw(:all);
+use Data::Dumper;
 
 sub action
 {

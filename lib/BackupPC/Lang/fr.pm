@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 
 #my %lang;
 #use strict;
@@ -614,22 +614,37 @@ EOF
 # ------------------------------
 $Lang{DirHistory_backup_for__host} = "BackupPC: Historique de sauvegarde des répertoires de \$host";
 
-$Lang{DirHistory_for__host} = <<EOF;
-\${h1("Historique de sauvegarde pour \$host")}
+#
+# These two strings are used to build the links for directories and
+# file versions.  Files are appended with a version number.
+#
+$Lang{DirHistory_dirLink}  = "(ENGLISH) dir";
+$Lang{DirHistory_fileLink} = "(ENGLISH) v";
 
+$Lang{DirHistory_for__host} = <<EOF;
+\${h1("Historique de sauvegarde des répertoires de \$host")}
+<p>
 Voici les versions des fichiers pour toutes les sauvegardes:
 <ul>
 <li> Cliquez sur un numéro de sauvegarde pour revenir à la navigation de sauvegarde,
-<li> Cliquez sur un répertoire pour naviguer dans celui-ci,
-<li> Cliquez sur une version d'un fichier pour la télécharger.
+<li> Cliquez sur un répertoire (\$Lang->{DirHistory_dirLink}) pour naviguer
+     dans celui-ci,
+<li> Cliquez sur une version d'un fichier (\$Lang->{DirHistory_fileLink}0,
+     \$Lang->{DirHistory_fileLink}1, ...) pour la télécharger.
+<li> (ENGLISH) Files with the same contents between different backups have the same
+     version number,
+<li> (ENGLISH) Files or directories not present in a particular backup have an
+     empty box.
+<li> (ENGLISH) Files shown with the same version might have different attributes.
+     Select the backup number to see the file attributes.
 </ul>
 
 \${h2("Historique de \${EscHTML(\$dirDisplay)}")}
 
 <br>
-<table border>
-<tr><td>No. de sauvegarde</td>\$backupNumStr</tr>
-<tr><td>Date</td>\$backupTimeStr</tr>
+<table border bgcolor="#ffffcc">
+<tr bgcolor="\$Conf{CgiHeaderBgColor}"><td>No. de sauvegarde</td>\$backupNumStr</tr>
+<tr bgcolor="\$Conf{CgiHeaderBgColor}"><td>Date</td>\$backupTimeStr</tr>
 \$fileStr
 </table>
 EOF

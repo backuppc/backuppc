@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 
 #my %lang;
 
@@ -617,24 +617,39 @@ EOF
 # ------------------------------
 $Lang{DirHistory_backup_for__host} = "(ENGLISH) BackupPC: Directory backup history for \$host";
 
-$Lang{DirHistory_for__host} = <<EOF;
-(ENGLISH)
-\${h1("Backup history for \$host")}
+#
+# These two strings are used to build the links for directories and
+# file versions.  Files are appended with a version number.
+#
+$Lang{DirHistory_dirLink}  = "(ENGLISH) dir";
+$Lang{DirHistory_fileLink} = "(ENGLISH) v";
 
+$Lang{DirHistory_for__host} = <<EOF;
+\${h1("Directory backup history for \$host")}
+(ENGLISH)
+<p>
 This display shows each unique version of files across all
 the backups:
 <ul>
 <li> Click on a backup number to return to the backup browser,
-<li> Click on a directory link to navigate into that directory,
-<li> Click on a file version link to download that file.
+<li> Click on a directory link (\$Lang->{DirHistory_dirLink}) to navigate
+     into that directory,
+<li> Click on a file version link (\$Lang->{DirHistory_fileLink}0,
+     \$Lang->{DirHistory_fileLink}1, ...) to download that file,
+<li> Files with the same contents between different backups have the same
+     version number,
+<li> Files or directories not present in a particular backup have an
+     empty box.
+<li> Files shown with the same version might have different attributes.
+     Select the backup number to see the file attributes.
 </ul>
 
 \${h2("History of \${EscHTML(\$dirDisplay)}")}
 
 <br>
-<table border>
-<tr><td>Backup number</td>\$backupNumStr</tr>
-<tr><td>Backup time</td>\$backupTimeStr</tr>
+<table border bgcolor="#ffffcc">
+<tr bgcolor="\$Conf{CgiHeaderBgColor}"><td>Backup number</td>\$backupNumStr</tr>
+<tr bgcolor="\$Conf{CgiHeaderBgColor}"><td>Backup time</td>\$backupTimeStr</tr>
 \$fileStr
 </table>
 EOF

@@ -85,7 +85,7 @@ sub action
 	my $nameCnt = 0;
 	(my $fDisp  = "${EscHTML($f)}") =~ s/ /&nbsp;/g;
 	$fileStr   .= "<tr><td align=left>$fDisp</td>";
-	my($colSpan, $url, $inode, $type);
+	my($colSpan, $url, $inode, $type, $tdColor);
 	for ( $i = 0 ; $i < @Backups ; $i++ ) {
 	    my($path);
 	    if ( $colSpan > 0 ) {
@@ -102,11 +102,23 @@ sub action
 		    $colSpan++;
 		    next;
 		}
-		$fileStr .= "<td align=center colspan=$colSpan>$url</td>";
+		#
+		# Also handle the case of a sequence of missing files
+		#
+		if ( !defined($hist->{$f}[$i]) && $inode == -3 ) {
+		    $colSpan++;
+		    next;
+		}
+		$fileStr .= "<td align=center colspan=$colSpan$tdColor>"
+			  . "$url</td>";
 		$colSpan = 0;
+		$tdColor = "";
 	    }
 	    if ( !defined($hist->{$f}[$i]) ) {
-		$fileStr .= "<td></td>";
+		$colSpan = 1;
+		$url     = "&nbsp;";
+		$inode   = -3;			# special value for missing
+		$tdColor = ' bgcolor="#ffffaa"';
 		next;
 	    }
             if ( $dir eq "" ) {
@@ -118,17 +130,21 @@ sub action
 	    $path =~ s/([^\w.\/-])/uc sprintf("%%%02X", ord($1))/eg;
 	    my $num = $hist->{$f}[$i]{backupNum};
 	    if ( $hist->{$f}[$i]{type} == BPC_FTYPE_DIR ) {
-		$inode = -2;
+		$inode = -2;			# special value for dir
 		$type  = $hist->{$f}[$i]{type};
 		$url   = <<EOF;
-<a href="$MyURL?action=dirHistory&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">dir</a>
+<a href="$MyURL?action=dirHistory&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$Lang->{DirHistory_dirLink}</a>
 EOF
 	    } else {
 		$inode = $hist->{$f}[$i]{inode};
 		$type  = $hist->{$f}[$i]{type};
+		#
+		# special value for empty file
+		#
 		$inode = -1 if ( $hist->{$f}[$i]{size} == 0 );
 		if ( !defined($inode2name{$inode}) ) {
-		    $inode2name{$inode} = "v$nameCnt";
+		    $inode2name{$inode}
+				= "$Lang->{DirHistory_fileLink}$nameCnt";
 		    $nameCnt++;
 		}
 		$url = <<EOF;
@@ -138,7 +154,7 @@ EOF
 	    $colSpan = 1;
 	}
 	if ( $colSpan > 0 ) {
-	    $fileStr .= "<td align=center colspan=$colSpan>$url</td>";
+	    $fileStr .= "<td align=center colspan=$colSpan$tdColor>$url</td>";
 	    $colSpan = 0;
 	}
 	$fileStr .= "</tr>\n";

@@ -428,7 +428,7 @@ sub dirHistory
 	    my $a = $attr->get;
 	    foreach my $fileUM ( keys(%$a) ) {
 		next if ( $a->{$fileUM}{type} != BPC_FTYPE_DELETED );
-		$files->{$fileUM}[$i] = undef;
+		$files->{$fileUM}[$i] = undef if ( defined($files->{$fileUM}) );
 	    }
 	}
     }

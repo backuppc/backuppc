@@ -324,8 +324,8 @@ sub TarWriteHeader
 	#
 	# sprintf octal only handles up to 2^32 - 1
 	#
-	my $sizeStr = sprintf("%03o", $hdr->{size} / (1 << 24))
-		    . sprintf("%08o", $hdr->{size} % (1 << 24));
+	$sizeStr = sprintf("%03o", $hdr->{size} / (1 << 24))
+		 . sprintf("%08o", $hdr->{size} % (1 << 24));
     } else {
 	$sizeStr = sprintf("%011o", $hdr->{size});
     }

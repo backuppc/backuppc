@@ -91,6 +91,7 @@ my @PerlSrc = qw(
     lib/BackupPC/Lang/en.pm
     lib/BackupPC/Lang/es.pm
     lib/BackupPC/Lang/fr.pm
+    lib/BackupPC/Lang/it.pm
     lib/BackupPC/Xfer/Archive.pm
     lib/BackupPC/Xfer/Smb.pm
     lib/BackupPC/Xfer/Tar.pm
@@ -113,10 +114,23 @@ my $ConfVars = {};
 my $errCnt;
 
 $errCnt += CheckConfigParams("conf/config.pl", $ConfVars, 0);
+
+#
+# These config parameters are not used in the code, so ignore them.
+#
 $ConfVars->{BackupPCUser} = 2;
-$ConfVars->{CgiDir} = 2;
-$ConfVars->{InstallDir} = 2;
-$ConfVars->{CgiImageDir} = 2;
+$ConfVars->{CgiDir}       = 2;
+$ConfVars->{InstallDir}   = 2;
+$ConfVars->{CgiImageDir}  = 2;
+
+#
+# These config parameters are used in the code to be backward compatible,
+# but are not present in the current config file, so ignore them.
+#
+$ConfVars->{BlackoutHourBegin} = 2;
+$ConfVars->{BlackoutHourEnd}   = 2;
+$ConfVars->{BlackoutWeekDays}  = 2;
+
 foreach my $file ( @PerlSrc ) {
     $errCnt += CheckConfigParams($file, $ConfVars, 1);
 }
@@ -404,7 +418,7 @@ sub CheckLangTags
     my($en, $enVars) = LangParse("lib/BackupPC/Lang/en.pm");
     my($errors);
 
-    foreach my $lang ( qw(fr.pm de.pm es.pm) ) {
+    foreach my $lang ( qw(fr.pm de.pm es.pm it.pm) ) {
 	my($d, $dVars) = LangParse("lib/BackupPC/Lang/$lang");
 	foreach my $v1 ( @$en ) {
 	    my $v2 = shift(@$d);

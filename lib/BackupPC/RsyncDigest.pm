@@ -165,7 +165,9 @@ sub digestStart
             #
             close($fh);
             $fio->digestAdd($fileName,
-                    $blockSize || $fio->blockSize($fileSize, $defBlkSize),
+                    $blockSize
+			|| BackupPC::RsyncDigest->blockSize($fileSize,
+							    $defBlkSize),
                     $checksumSeed);
             #
             # now re-open the file and re-read the first byte

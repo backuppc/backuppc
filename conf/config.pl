@@ -361,8 +361,74 @@ $Conf{IncrPeriod} = 0.97;
 # extra old backups will be removed.
 #
 # If filling of incremental dumps is off the oldest backup always
-# has to be a full (ie: filled) dump.  This might mean an extra full
-# dump is kept until the second oldest (incremental) dump expires.
+# has to be a full (ie: filled) dump.  This might mean one or two
+# extra full dumps are kept until the oldest incremental backups expire.
+#
+# Exponential backup expiry is also supported.  This allows you to specify:
+#
+#   - num fulls to keep at intervals of 1 * $Conf{FullPeriod}, followed by
+#   - num fulls to keep at intervals of 2 * $Conf{FullPeriod},
+#   - num fulls to keep at intervals of 4 * $Conf{FullPeriod},
+#   - num fulls to keep at intervals of 8 * $Conf{FullPeriod},
+#   - num fulls to keep at intervals of 16 * $Conf{FullPeriod},
+#
+# and so on.  This works by deleting every other full as each expiry
+# boundary is crossed.
+#
+# Exponential expiry is specified using an array for $Conf{FullKeepCnt}:
+#
+#   $Conf{FullKeepCnt} = [4, 2, 3];
+#
+# Entry #n specifies how many fulls to keep at an interval of
+# 2^n * $Conf{FullPeriod} (ie: 1, 2, 4, 8, 16, 32, ...).
+#
+# The example above specifies keeping 4 of the most recent full backups
+# (1 week interval) two full backups at 2 week intervals, and 3 full
+# backups at 4 week intervals, eg:
+#
+#    full 0 19 weeks old   \
+#    full 1 15 weeks old    >---  3 backups at 4 * $Conf{FullPeriod}
+#    full 2 11 weeks old   / 
+#    full 3  7 weeks old   \____  2 backups at 2 * $Conf{FullPeriod}
+#    full 4  5 weeks old   /
+#    full 5  3 weeks old   \
+#    full 6  2 weeks old    \___  4 backups at 1 * $Conf{FullPeriod}
+#    full 7  1 week old     /
+#    full 8  current       /
+#
+# On a given week the spacing might be less than shown as each backup
+# ages through each expiry period.  For example, one week later, a
+# new full is completed and the oldest is deleted, giving:
+#
+#    full 0 16 weeks old   \
+#    full 1 12 weeks old    >---  3 backups at 4 * $Conf{FullPeriod}
+#    full 2  8 weeks old   / 
+#    full 3  6 weeks old   \____  2 backups at 2 * $Conf{FullPeriod}
+#    full 4  4 weeks old   /
+#    full 5  3 weeks old   \
+#    full 6  2 weeks old    \___  4 backups at 1 * $Conf{FullPeriod}
+#    full 7  1 week old     /
+#    full 8  current       /
+#
+# You can specify 0 as a count (except in the first entry), and the
+# array can be as long as you wish.  For example:
+#
+#   $Conf{FullKeepCnt} = [4, 0, 4, 0, 0, 2];
+#
+# This will keep 10 full dumps, 4 most recent at 1 * $Conf{FullPeriod},
+# followed by 4 at an interval of 4 * $Conf{FullPeriod} (approx 1 month
+# apart), and then 2 at an interval of 32 * $Conf{FullPeriod} (approx
+# 7-8 months apart).
+#
+# Note that you will have to increase $Conf{FullAgeMax} if you want
+# very old full backups to be kept.  Full backups are removed according
+# to both $Conf{FullKeepCnt} and $Conf{FullAgeMax}.
+#
+# Note also that these two settings are equivalent and both keep just
+# the four most recent full dumps:
+#
+#    $Conf{FullKeepCnt} = 4;
+#    $Conf{FullKeepCnt} = [4];
 #
 $Conf{FullKeepCnt} = 1;
 
@@ -372,7 +438,7 @@ $Conf{FullKeepCnt} = 1;
 # they are.
 #
 $Conf{FullKeepCntMin} = 1;
-$Conf{FullAgeMax}     = 60;
+$Conf{FullAgeMax}     = 90;
 
 #
 # Number of incremental backups to keep.  Must be >= 1.
@@ -495,6 +561,9 @@ $Conf{BackupFilesOnly} = undef;
 # the directory name: a trailing "/" causes the name to not match
 # and the directory will not be excluded.
 #
+# Users report that for smbclient you should specify a directory
+# followed by "/*", eg: "/proc/*", instead of just "/proc".
+#
 # Examples:
 #    $Conf{BackupFilesExclude} = '/temp';
 #    $Conf{BackupFilesExclude} = ['/temp'];     # same as first example
@@ -512,8 +581,7 @@ $Conf{BackupFilesExclude} = undef;
 # each PC a count of consecutive good pings is maintained. Once a PC has
 # at least $Conf{BlackoutGoodCnt} consecutive good pings it is subject
 # to "blackout" and not backed up during hours and days specified by
-# $Conf{BlackoutWeekDays}, $Conf{BlackoutHourBegin} and
-# $Conf{BlackoutHourEnd}.
+# $Conf{BlackoutPeriods}.
 #
 # To allow for periodic rebooting of a PC or other brief periods when a
 # PC is not on the network, a number of consecutive bad pings is allowed
@@ -539,13 +607,52 @@ $Conf{BlackoutBadPingLimit} = 3;
 $Conf{BlackoutGoodCnt}      = 7;
 
 #
-# The default settings specify the blackout period from 7:00am to
-# 7:30pm local time on Mon-Fri.  For $Conf{BlackoutWeekDays},
-# 0 is Sunday, 1 is Monday etc.
+# One or more blackout periods can be specified.  If a client is
+# subject to blackout then no regular (non-manual) backups will
+# be started during any of these periods.  hourBegin and hourEnd
+# specify hours fro midnight and weekDays is a list of days of
+# the week where 0 is Sunday, 1 is Monday etc.
 #
-$Conf{BlackoutHourBegin}    = 7.0;
-$Conf{BlackoutHourEnd}      = 19.5;
-$Conf{BlackoutWeekDays}     = [1, 2, 3, 4, 5];
+# For example:
+#
+#    $Conf{BlackoutPeriods} = [
+#	{
+#	    hourBegin =>  7.0,
+#	    hourEnd   => 19.5,
+#	    weekDays  => [1, 2, 3, 4, 5],
+#	},
+#    ];
+#
+# specifies one blackout period from 7:00am to 7:30pm local time
+# on Mon-Fri.
+#
+# The blackout period can also span midnight by setting
+# hourBegin > hourEnd, eg:
+#
+#    $Conf{BlackoutPeriods} = [
+#	{
+#	    hourBegin =>  7.0,
+#	    hourEnd   => 19.5,
+#	    weekDays  => [1, 2, 3, 4, 5],
+#	},
+#	{
+#	    hourBegin => 23,
+#	    hourEnd   =>  5,
+#	    weekDays  => [5, 6],
+#	},
+#    ];
+#
+# This specifies one blackout period from 7:00am to 7:30pm local time
+# on Mon-Fri, and a second period from 11pm to 5am on Friday and
+# Saturday night.
+#
+$Conf{BlackoutPeriods} = [
+    {
+	hourBegin =>  7.0,
+	hourEnd   => 19.5,
+	weekDays  => [1, 2, 3, 4, 5],
+    },
+];
 
 #
 # A backup of a share that has zero files is considered fatal. This is
@@ -609,6 +716,10 @@ $Conf{SmbClientPath} = '/usr/bin/smbclient';
 #    $X_option        exclude option (if $fileList is an exclude list)
 #    $timeStampFile   start time for incremental dump
 #
+# If your smb share is read-only then direct restores will fail.
+# You should set $Conf{SmbClientRestoreCmd} to undef and the
+# corresponding CGI restore option will be removed.
+#
 $Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
 	    . ' $I_option -U $userName -E -N -d 1'
             . ' -c tarmode\\ full -Tc$X_option - $fileList';
@@ -656,7 +767,7 @@ $Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
 #
 # This setting only matters if $Conf{XferMethod} = 'tar'.
 #
-$Conf{TarClientCmd} = '$sshPath -q -n -l root $host'
+$Conf{TarClientCmd} = '$sshPath -q -x -n -l root $host'
                     . ' $tarPath -c -v -f - -C $shareName+'
                     . ' --totals';
 
@@ -709,7 +820,11 @@ $Conf{TarIncrArgs} = '--newer=$incrDate+ $fileList+';
 #
 # This setting only matters if $Conf{XferMethod} = "tar".
 #
-$Conf{TarClientRestoreCmd} = '$sshPath -q -l root $host'
+# If you want to disable direct restores using tar, you should set
+# $Conf{TarClientRestoreCmd} to undef and the corresponding CGI
+# restore option will be removed.
+#
+$Conf{TarClientRestoreCmd} = '$sshPath -q -x -l root $host'
 		   . ' $tarPath -x -p --numeric-owner --same-owner'
 		   . ' -v -f - -C $shareName+';
 
@@ -741,7 +856,7 @@ $Conf{RsyncClientPath} = '/bin/rsync';
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
-$Conf{RsyncClientCmd} = '$sshPath -l root $host $rsyncPath $argList+';
+$Conf{RsyncClientCmd} = '$sshPath -q -x -l root $host $rsyncPath $argList+';
 
 #
 # Full command to run rsync for restore on the client.  The following
@@ -758,7 +873,7 @@ $Conf{RsyncClientCmd} = '$sshPath -l root $host $rsyncPath $argList+';
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
-$Conf{RsyncClientRestoreCmd} = '$sshPath -l root $host $rsyncPath $argList+';
+$Conf{RsyncClientRestoreCmd} = '$sshPath -q -x -l root $host $rsyncPath $argList+';
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should
@@ -842,6 +957,9 @@ $Conf{RsyncArgs} = [
 # Arguments to rsync for restore.  Do not edit the first set unless you
 # have a thorough understanding of how File::RsyncP works.
 #
+# If you want to disable direct restores using rsync (eg: is the module
+# is read-only), you should set $Conf{RsyncRestoreArgs} to undef and
+# the corresponding CGI restore option will be removed.
 #
 $Conf{RsyncRestoreArgs} = [
 	    #
@@ -1036,7 +1154,7 @@ $Conf{PingCmd} = '$pingPath -c 1 $host';
 # Example:
 #
 # $Conf{ServerInitdPath}     = '/etc/init.d/backuppc';
-# $Conf{ServerInitdStartCmd} = '$sshPath -l root $serverHost'
+# $Conf{ServerInitdStartCmd} = '$sshPath -q -x -l root $serverHost'
 #                            . ' $serverInitdPath start'
 #                            . ' < /dev/null >& /dev/null';
 #
@@ -1121,7 +1239,7 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 # shut down and restart a database server, or to dump a database
 # to files for backup.  Example:
 #
-#    $Conf{DumpPreUserCmd} = '$sshPath -l root $host /usr/bin/dumpMysql';
+#    $Conf{DumpPreUserCmd} = '$sshPath -q -x -l root $host /usr/bin/dumpMysql';
 #
 # The following variable substitutions are made at run time for
 # $Conf{DumpPreUserCmd} and $Conf{DumpPostUserCmd}:
@@ -1375,10 +1493,10 @@ $Conf{CgiURL} = undef;
 #   
 # Language to use.  See lib/BackupPC/Lang for the list of supported
 # languages, which include English (en), French (fr), Spanish (es),
-# and German (de).
+# German (de), and Italian (it).
 #
 # Currently the Language setting applies to the CGI interface and email
-# messages sent to users.  Log files and other text is still in English.
+# messages sent to users.  Log files and other text are still in English.
 #
 $Conf{Language} = 'en';
 

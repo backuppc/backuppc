@@ -282,32 +282,48 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
     my($currHours) = $hour + $min / 60 + $sec / 3600;
     my $blackout;
+
     #
-    # Allow blackout to span midnight (specified by BlackoutHourBegin
-    # being greater than BlackoutHourEnd)
+    # Handle backward compatibility with original separate scalar
+    # parameters.
     #
-    if ( $Conf{BlackoutHourBegin} > $Conf{BlackoutHourEnd} ) {
-        $blackout = $Conf{BlackoutHourBegin} <= $currHours
-                               || $currHours <= $Conf{BlackoutHourEnd};
-	if ( $currHours <= $Conf{BlackoutHourEnd} ) {
-	    #
-	    # This is after midnight, so decrement the weekday for the
-	    # weekday check (eg: Monday 11pm-1am means Monday 2300 to
-	    # Tuesday 0100, not Monday 2300-2400 plus Monday 0000-0100).
-	    #
-	    $wday--;
-	    $wday += 7 if ( $wday < 0 );
-	}
-    } else {
-        $blackout = $Conf{BlackoutHourBegin} <= $currHours
-                               && $currHours <= $Conf{BlackoutHourEnd};
+    if ( defined($Conf{BlackoutHourBegin}) ) {
+        push(@{$Conf{BlackoutPeriods}},
+             {
+                 hourBegin => $Conf{BlackoutHourBegin},
+                 hourEnd   => $Conf{BlackoutHourEnd},
+                 weekDays  => $Conf{BlackoutWeekDays},
+             }
+        );
     }
-    if ( $blackout && grep($_ == $wday, @{$Conf{BlackoutWeekDays}}) ) {
-#        print(LOG $bpc->timeStamp, "skipping because of blackout"
-#                    . " (alive $StatusHost{aliveCnt} times)\n");
-	print(STDERR "Skipping $client because of blackout\n")
-			if ( $opts{v} );
-        NothingToDo($needLink);
+    foreach my $p ( @{$Conf{BlackoutPeriods}} ) {
+        #
+        # Allow blackout to span midnight (specified by BlackoutHourBegin
+        # being greater than BlackoutHourEnd)
+        #
+        if ( $p->{hourBegin} > $p->{hourEnd} ) {
+            $blackout = $p->{hourBegin} <= $currHours
+                          || $currHours <= $p->{hourEnd};
+            if ( $currHours <= $p->{hourEnd} ) {
+                #
+                # This is after midnight, so decrement the weekday for the
+                # weekday check (eg: Monday 11pm-1am means Monday 2300 to
+                # Tuesday 0100, not Monday 2300-2400 plus Monday 0000-0100).
+                #
+                $wday--;
+                $wday += 7 if ( $wday < 0 );
+            }
+        } else {
+            $blackout = $p->{hourBegin} <= $currHours
+                          && $currHours <= $p->{hourEnd};
+        }
+        if ( $blackout && grep($_ == $wday, @{$p->{weekDays}}) ) {
+#           print(LOG $bpc->timeStamp, "skipping because of blackout"
+#                      . " (alive $StatusHost{aliveCnt} times)\n");
+            print(STDERR "Skipping $client because of blackout\n")
+                            if ( $opts{v} );
+            NothingToDo($needLink);
+        }
     }
 }
 
@@ -408,7 +424,7 @@ if ( !defined($XferLOG) ) {
     exit(1);
 }
 $XferLOG->writeTeeStderr(1) if ( $opts{v} );
-unlink("$Dir/NewFileList");
+unlink("$Dir/NewFileList") if ( -f "$Dir/NewFileList" );
 my $startTime = time();
 
 my $tarErrs       = 0;
@@ -830,17 +846,17 @@ sub BackupFailCleanup
 {
     my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
 
-    if ( $type ne "full"
-            || ($nFilesTotal == 0 && $xfer->getStats->{fileCnt} == 0) ) {
+    if ( $type ne "full" ) {
+#            || ($nFilesTotal == 0 && $xfer->getStats->{fileCnt} == 0) ) {
         #
         # No point in saving this dump; get rid of eveything.
         #
-        unlink("$Dir/timeStamp.level0");
-        unlink("$Dir/SmbLOG.bad");
-        unlink("$Dir/SmbLOG.bad$fileExt");
-        unlink("$Dir/XferLOG.bad");
-        unlink("$Dir/XferLOG.bad$fileExt");
-        unlink("$Dir/NewFileList");
+        unlink("$Dir/timeStamp.level0")    if ( -f "$Dir/timeStamp.level0" );
+        unlink("$Dir/SmbLOG.bad")          if ( -f "$Dir/SmbLOG.bad" );
+        unlink("$Dir/SmbLOG.bad$fileExt")  if ( -f "$Dir/SmbLOG.bad$fileExt" );
+        unlink("$Dir/XferLOG.bad")         if ( -f "$Dir/XferLOG.bad" );
+        unlink("$Dir/XferLOG.bad$fileExt") if ( -f "$Dir/XferLOG.bad$fileExt" );
+        unlink("$Dir/NewFileList")         if ( -f "$Dir/NewFileList" );
         rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.bad$fileExt");
         $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
         print("dump failed: $stat{hostError}\n");
@@ -869,6 +885,14 @@ sub BackupExpire
     my(@Backups) = $bpc->BackupInfoRead($client);
     my($cntFull, $cntIncr, $firstFull, $firstIncr, $oldestIncr, $oldestFull);
 
+    if ( $Conf{FullKeepCnt} <= 0 ) {
+        print(LOG $bpc->timeStamp,
+                  "Invalid value for \$Conf{FullKeepCnt}=$Conf{FullKeepCnt}\n");
+	print(STDERR
+            "Invalid value for \$Conf{FullKeepCnt}=$Conf{FullKeepCnt}\n")
+			    if ( $opts{v} );
+        return;
+    }
     while ( 1 ) {
 	$cntFull = $cntIncr = 0;
 	$oldestIncr = $oldestFull = 0;
@@ -901,9 +925,15 @@ sub BackupExpire
 	    print(LOG $bpc->timeStamp,
                       "removing incr backup $Backups[$firstIncr]{num}\n");
             BackupRemove($client, \@Backups, $firstIncr);
-	} elsif ( ($cntFull > $Conf{FullKeepCnt}
-                    || ($cntFull > $Conf{FullKeepCntMin}
-                        && $oldestFull > $Conf{FullAgeMax}))
+            next;
+        }
+
+        #
+        # Delete any old full backups, according to $Conf{FullKeepCntMin}
+	# and $Conf{FullAgeMax}.
+        #
+        if ( $cntFull > $Conf{FullKeepCntMin}
+               && $oldestFull > $Conf{FullAgeMax}
                && (@Backups <= $firstFull + 1
                         || !$Backups[$firstFull + 1]{noFill}) ) {
             #
@@ -914,13 +944,92 @@ sub BackupExpire
             # filled.)
             # 
 	    print(LOG $bpc->timeStamp,
-                   "removing full backup $Backups[$firstFull]{num}\n");
+                   "removing old full backup $Backups[$firstFull]{num}\n");
             BackupRemove($client, \@Backups, $firstFull);
-	} else {
-	    last;
-	}
+            next;
+        }
+
+        #
+        # Do new-style full backup expiry, which includes the the case
+	# where $Conf{FullKeepCnt} is an array.
+        #
+        last if ( !BackupFullExpire($client, \@Backups) );
     }
     $bpc->BackupInfoWrite($client, @Backups);
+}
+
+#
+# Handle full backup expiry, using exponential periods.
+#
+sub BackupFullExpire
+{
+    my($client, $Backups) = @_;
+    my $fullCnt = 0;
+    my $fullPeriod = $Conf{FullPeriod};
+    my $origFullPeriod = $fullPeriod;
+    my $fullKeepCnt = $Conf{FullKeepCnt};
+    my $fullKeepIdx = 0;
+    my(@delete, @fullList);
+
+    #
+    # Don't delete anything if $Conf{FullPeriod} or $Conf{FullKeepCnt} are
+    # not defined - possibly a corrupted config.pl file.
+    #
+    return if ( !defined($Conf{FullPeriod}) || !defined($Conf{FullKeepCnt}) );
+
+    #
+    # If regular backups are still disabled with $Conf{FullPeriod} < 0,
+    # we still expire backups based on a typical FullPeriod value - weekly.
+    #
+    $fullPeriod = 7 if ( $fullPeriod <= 0 );
+
+    $fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
+
+    for ( my $i = 0 ; $i < @$Backups ; $i++ ) {
+        next if ( $Backups->[$i]{type} ne "full" );
+        push(@fullList, $i);
+    }
+    for ( my $k = @fullList - 1 ; $k >= 0 ; $k-- ) {
+        my $i = $fullList[$k];
+        my $prevFull = $fullList[$k-1] if ( $k > 0 );
+        #
+        # Don't delete any full that is followed by an unfilled backup,
+        # since it is needed for restore.
+        #
+        my $noDelete = $i + 1 < @$Backups ? $Backups->[$i+1]{noFill} : 0;
+
+        if ( !$noDelete && 
+              ($fullKeepIdx >= @$fullKeepCnt
+              || $k > 0
+                 && $fullKeepIdx > 0
+                 && $Backups->[$i]{startTime} - $Backups->[$prevFull]{startTime}
+                             < ($fullPeriod - $origFullPeriod / 2) * 24 * 3600
+               )
+            ) {
+            #
+            # Delete the full backup
+            #
+            #printf("Deleting backup $i ($prevFull)\n");
+            push(@delete, $i);
+        } else {
+            $fullCnt++;
+            while ( $fullKeepIdx < @$fullKeepCnt
+                     && $fullCnt >= $fullKeepCnt->[$fullKeepIdx] ) {
+                $fullKeepIdx++;
+                $fullCnt = 0;
+                $fullPeriod = 2 * $fullPeriod;
+            }
+        }
+    }
+    #
+    # Now actually delete the backups
+    #
+    for ( my $i = @delete - 1 ; $i >= 0 ; $i-- ) {
+        print(LOG $bpc->timeStamp,
+               "removing full backup $Backups->[$delete[$i]]{num}\n");
+        BackupRemove($client, $Backups, $delete[$i]);
+    }
+    return @delete;
 }
 
 #
@@ -987,7 +1096,12 @@ sub BackupSave
     $Backups[$i]{mangle}        = 1;        # name mangling always on for v1.04+
     $bpc->BackupInfoWrite($client, @Backups);
 
-    unlink("$Dir/timeStamp.level0");
+    unlink("$Dir/timeStamp.level0") if ( -f "$Dir/timeStamp.level0" );
+    foreach my $ext ( qw(bad bad.z) ) {
+	next if ( !-f "$Dir/XferLOG.$ext" );
+	unlink("$Dir/XferLOG.$ext.old") if ( -f "$Dir/XferLOG.$ext" );
+	rename("$Dir/XferLOG.$ext", "$Dir/XferLOG.$ext.old");
+    }
 
     #
     # Now remove the bad files, replacing them if possible with links to

@@ -21,35 +21,26 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* A failed full dump is now saved as a partial (incomplete) dump,
+  provided it includes some files.  This can be used for browsing,
+  restoring etc, and will also form the basis of resuming full
+  dumps.  Only one partial is kept, and it is removed as soon
+  as a successful full (or a new partial) is done.
+
+  (Note: still needs some work to cleanup any partial files when the
+  dump is interrupted or fails).
+
 * Added support for resuming a full dump for rsync.  The partial
   full is kept, and to resume an incremental is done against the
   partial, and a full is done for the rest.
 
+  (Note: not tested!  Also needs a new File::RsyncP that I haven't
+  yet released.)
+
 * Added support for Rsync checksum caching.  Rsync checksum are
-  appended to the compressed pool files.
-
-* Added support for smbclient from samba version 3.0.0.
-
-* Added options for block size, buffer size and share wild-card to
-  BackupPC_tarCreate.
-
-* Add creation of per-PC directory in BackupPC/CGI/Restore.pm in
-  case it doesn't already exist.  Reported by XXX.
-
-* Replace PingClientPath with PingPath in configure.pl.
-
-* GFK updated fr.pm from en.pm.
-
-* Various tweaks to recent changes, including additional patches
-  from Josh and Paul.  Added host selection list to restore page.
-  Tweak CSS and layout.
-
-* Fixed $Conf{HardLinkMax} limit check in BackupPC::Lib; reported
-  by Ross Skaliotis.
-
-* Major changes from Ryan Kucera to add style sheets to the CGI
-  interface, allowing easy customization.  Added new icons and
-  BackupPC logo.  Numerous navigation improvements.
+  appended to the compressed pool files.  This means that block
+  and file checksums do not need to be recomputed on the server
+  when using rsync.
 
 * Major addition of Archive feature from Josh Marshall.  Special
   clients can be configured to be archive targets (eg: tape drives,
@@ -57,28 +48,125 @@
   archives are created, optionally compressed and split and written
   to the output device.  Logs are maintained and are browsable.
 
+* Major changes from Ryan Kucera to add style sheets to the CGI
+  interface, allowing easy customization.  Added new icons and
+  BackupPC logo.  Numerous navigation improvements.
+
+* Added directory history display to BackupPC_Admin, allowing the
+  user to quickly see which files changed between backups on a
+  per-directory basis.
+
+* Added exponential expiry option for full dumps.  This allows you
+  to specify
+  
+   - how many fulls to keep at intervals of $Conf{FullPeriod}, followed by
+   - how many fulls to keep at intervals of 2 * $Conf{FullPeriod},
+   - how many fulls to keep at intervals of 4 * $Conf{FullPeriod},
+   - how many fulls to keep at intervals of 8 * $Conf{FullPeriod},
+   - how many fulls to keep at intervals of 16 * $Conf{FullPeriod},
+
+  and so on.  This allows you, for example, to keep 4 weekly fulls,
+  followed by 6 fulls every 4 weeks (approx 1 month) and 2 fulls at
+  16 weeks, for roughly 1 year of history.  This works by deleting
+  every other full as each expiry boundary is crossed.  Suggested
+  by David Cramblett.
+
+* Added Italian language translation it.pm from Lorenzo Cappelletti.
+
+* Major updates to language files for new features and tags changes.
+  Updated makeDist to do pedantic consistency checking of language
+  files.
+
 * Addition of administration options from Paul Lukins.  Initial
   page allows server to be started/stopped/reloaded.
 
 * Split BackupPC_Admin into a set of modules, one for each major action.
   Each action is now a seperate module in lib/BackupPC/CGI.
 
-* Added directory history display to BackupPC_Admin, allowing the
-  user to quickly see which files changed between backups.
+* Allow the blackout period begin/end to span midnight.  Adapted
+  from patch submitted by David Smith.
 
-* A failed full dump is now saved as a partial (incomplete) dump,
-  provided it includes some files.  This can be used for browsing,
-  restoring etc, and will also form the basis of resuming full
-  dumps.  Only one partial is kept, and it is removed as soon
-  as a success full (or a new partial) is done.
+* Allow multiple blackout periods, with new config variable
+  $Conf{BlackoutPeriods} that replaces the old variables
+  $Conf{BlackoutHourBegin}, $Conf{BlackoutHourEnd}, and
+  $Conf{BlackoutWeekDays}.  Based on patch submitted by
+  Lorenzo Cappelletti.
+
+* Disabled alarms after forks to avoid timeouts in children that
+  do not reset their alarm.  Prompted by ideas from James Leu.
+
+* Added options for block size, buffer size and share wild-card to
+  BackupPC_tarCreate.  Also added negative backup number options
+  that are relative to the last (so -1 is the last), suggested by
+  William McKee and Carl Soderstrom.
+
+* Add creation of per-PC directory in BackupPC/CGI/Restore.pm in
+  case it doesn't already exist.
+
+* Added -q -x to all ssh commands in conf/config.pl.  Suggested by
+  SI Reasoning and Niranjan Ghate.
+
+* Changed restore code so that option #1 (direct restore) can be
+  disabled if the restore command is undefined.  Disabling direct
+  restore is necessary if the share is read-only.  Suggested by
+  Rich B from SAIC.
+
+* Changed regexp in lib/BackupPC/Smb.pm to allow numbers with both
+  a decimal point or comma for international versions of Samba.
+  Patch submitted by Frank Gard.
 
 * Browsing and directory history now sort the files in a
   case-insensitive manner.
+
+* Changed exec() syntax to allow executing commands whose path
+  contains spaces.
 
 * Swapped the Server and Hosts sections on the Nav bar.  Moved the
   host search text box to the top of the hosts section.  This was
   done to move the variable-length part of the Nav bar (when all
   hosts are displayed) to the bottom.
+
+* Fixed a bug in tar restore related to how the common prefix path is
+  removed.  Now ensure that the common path is at a directory boundary.
+  Reported by Patrick Neuner.
+
+* Added --chuid ${USER} to init.d/src/gentoo-backuppc.  Suggested by
+  SI Reasoning, Pascal Pochol, Michael Evanoff and others.
+
+* Added Suse notes to init.d/README from Bruno Vernay.
+
+* Added Apache 2 documentation fix from Michael Tuzi.
+
+#------------------------------------------------------------------------
+# Version 2.0.2, 6 Oct 2003
+#------------------------------------------------------------------------
+
+* Fixed stupid last-minute change in octal size conversion in
+  Backup_tarExtract.
+
+#-----------------------------------------------------------------------
+# Version 2.0.1, 5 Oct 2003
+#------------------------------------------------------------------------
+
+* Fixed handling of >= 8GB files in BackupPC_tarExtract and >= 4GB
+  files in BackupPC_tarCreate.
+
+* Removed smbclient size repair in BackupPC_tarExtract for files
+  between 2GB and 4GB.  This means that BackupPC_tarExtract 2.0.1
+  doesn't behave the same as 2.0.0 for file sizes between 2GB and 4GB
+  extacted using smbclient 2.2.x.  If you have problems backing up
+  files whose size is between 2GB and 4GB using smbclient 2.2.x
+  you should upgrade smbclient to 3.0, since it now generates
+  correct file sizes.
+
+* Replace PingClientPath with PingPath in configure.pl.
+
+* Removed -T (taint mode) on binaries installed in configure.pl.
+
+* Added support for smbclient from samba version 3.0.0.
+
+* Fixed $Conf{HardLinkMax} limit check in BackupPC::Lib; reported
+  by Ross Skaliotis.
 
 * In BackupPC_Admin, default REMOTE_USER to $Conf{BackupPCUser}
   if it is not defined.  This allows the CGI interface to work

@@ -41,7 +41,10 @@ Suse Linux:
 
 When configure.pl is run, the script suse-backuppc is created.
 
-(Can a Suse user add some instructions here??)
+Using Suse 9.0 "chkconfig --level" doesn't work, so you should run:
+
+    chkconfig backuppc 345
+    chkconfig --list backuppc
 
 Gentoo Linux:
 ============

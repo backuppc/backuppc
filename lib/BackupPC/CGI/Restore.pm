@@ -63,7 +63,7 @@ sub action
         (my $name = $In{"fcb$i"}) =~ s/%([0-9A-F]{2})/chr(hex($1))/eg;
         $badFileCnt++ if ( $name =~ m{(^|/)\.\.(/|$)} );
 	if ( @fileList == 0 ) {
-	    $pathHdr = $name;
+	    $pathHdr = substr($name, 0, rindex($name, "/"));
 	} else {
 	    while ( substr($name, 0, length($pathHdr)) ne $pathHdr ) {
 		$pathHdr = substr($pathHdr, 0, rindex($pathHdr, "/"));

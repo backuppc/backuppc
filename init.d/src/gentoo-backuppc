@@ -21,7 +21,7 @@ checkconfig() {
 start() {
 	checkconfig || return 1
 	ebegin "Starting BackupPC"
-	start-stop-daemon --start --user ${USER} --pidfile ${PID_FILE} --exec ${EXEC} -- ${EXEC_OPTIONS}
+	start-stop-daemon --start --chuid ${USER} --user ${USER} --pidfile ${PID_FILE} --exec ${EXEC} -- ${EXEC_OPTIONS}
 	eend $?
 }
 

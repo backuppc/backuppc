@@ -222,7 +222,12 @@ sub start
             }
         }
         if ( $t->{type} eq "full" ) {
-            $logMsg = "full backup started for directory $t->{shareName}";
+	    if ( $t->{partialNum} ) {
+		$logMsg = "full backup started for directory $t->{shareName};"
+		        . " updating partial $t->{partialNum}";
+	    } else {
+		$logMsg = "full backup started for directory $t->{shareName}";
+	    }
         } else {
             $incrDate = $bpc->timeStamp($t->{lastFull} - 3600, 1);
             $logMsg = "incr backup started back to $incrDate for directory"
@@ -281,6 +286,7 @@ sub start
 	rsyncCmdType => "full",
 	rsyncArgs    => $rsyncArgs,
 	timeout      => $conf->{ClientTimeout},
+	doPartial    => defined($t->{partialNum}) ? 1 : undef,
 	logHandler   => sub {
 			    my($str) = @_;
 			    $str .= "\n";

@@ -438,6 +438,7 @@ foreach my $lib ( qw(
 	BackupPC/Lang/fr.pm
 	BackupPC/Lang/es.pm
         BackupPC/Lang/de.pm
+        BackupPC/Lang/it.pm
         BackupPC/CGI/AdminOptions.pm
 	BackupPC/CGI/Archive.pm
 	BackupPC/CGI/ArchiveInfo.pm
@@ -529,6 +530,23 @@ if ( defined($Conf{SmbClientArgs}) ) {
         }
     }
     delete($Conf{SmbClientArgs});
+}
+
+#
+# The blackout timing settings are now stored in a list of hashes, rather
+# than three scalar parameters.
+#
+if ( defined($Conf{BlackoutHourBegin}) ) {
+    $Conf{BlackoutPeriods} = [
+	 {
+	     hourBegin => $Conf{BlackoutHourBegin},
+	     hourEnd   => $Conf{BlackoutHourEnd},
+	     weekDays  => $Conf{BlackoutWeekDays},
+	 } 
+    ];
+    delete($Conf{BlackoutHourBegin});
+    delete($Conf{BlackoutHourEnd});
+    delete($Conf{BlackoutWeekDays});
 }
 
 #
@@ -643,15 +661,18 @@ will need to do:
 Enjoy!
 EOF
 
-if ( $ENV{LANG} =~ /utf/i && $^V ge v5.8.0 ) {
+if ( `$Conf{PerlPath} -V` =~ /uselargefiles=undef/ ) {
     print <<EOF;
 
-WARNING: Your LANG environment variable is set to $ENV{LANG}, which
-doesn't behave well with this version of perl.  Please set the
-LANG environment variable to en_US before running BackupPC.
+WARNING: your perl, $Conf{PerlPath}, does not support large files.
+This means BackupPC won't be able to backup files larger than 2GB.
+To solve this problem you should build/install a new version of perl
+with large file support enabled.  Use
 
-On RH-8 this setting is in the file /etc/sysconfig/i18n, or you
-could set it in BackupPC's init.d script.
+    $Conf{PerlPath} -V | egrep uselargefiles
+
+to check if perl has large file support (undef means no support).
+
 EOF
 }
 

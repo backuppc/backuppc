@@ -191,6 +191,10 @@ sub checksumSeed
     my($fio, $checksumSeed) = @_;
 
     $fio->{checksumSeed} = $checksumSeed;
+    $fio->log("Checksum caching enabled (checksumSeed = $checksumSeed)")
+		    if ( $fio->{logLevel} >= 1 && $checksumSeed == 32761 );
+    $fio->log("Checksum seed is $checksumSeed")
+		    if ( $fio->{logLevel} >= 2 && $checksumSeed != 32761 );
 }
 
 sub dirs
@@ -639,6 +643,10 @@ sub attrSkippedFile
     $fio->{rxLocalAttr} = $attr;
     $fio->{rxFile} = $f;
     $fio->{rxSize} = $attr->{size};
+    delete($fio->{rxInFd});
+    delete($fio->{rxOutFd});
+    delete($fio->{rxDigest});
+    delete($fio->{rxInData});
     return $fio->fileDeltaRxDone();
 }
 

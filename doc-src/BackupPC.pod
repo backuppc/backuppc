@@ -41,7 +41,7 @@ cancel backups and browse and restore files from backups.
 =item *
 
 The http/cgi user interface has internationalization (i18n) support,
-currently providing English, French, German and Spanish.
+currently providing English, French, German, Spanish and Italian.
 
 =item *
 
@@ -228,7 +228,9 @@ BackupPC server data to tape.
 Various programs and scripts use rsync to provide hardlinked backups.
 See, for example, Mike Rubel's site (L<http://www.mikerubel.org>),
 J. W. Schultz's dirvish (L<http://www.pegasys.ws/dirvish>),
+Ben Escoto's rdiff-backup (L<http://rdiff-backup.stanford.edu>),
 and John Bowman's rlbackup (L<http://www.math.ualberta.ca/imaging/rlbackup>).
+
 BackupPC provides many additional features, such as compressed storage,
 hardlinking any matching files (rather than just files with the same name),
 and storing special files without root privileges.  But these other scripts
@@ -246,12 +248,6 @@ releases of BackupPC:
 =item *
 
 Adding hardlink support to rsync.
-
-=item *
-
-Adding block and file checksum caching to rsync.  This will significantly
-increase performance since the server doesn't have to read each file
-(twice) to compute the block and file checksums.
 
 =item *
 
@@ -273,29 +269,6 @@ Add backend SQL support for various BackupPC metadata, including
 configuration parameters, client lists, and backup and restore
 information.  At installation time the backend data engine will
 be specified (eg: MySQL, ascii text etc).
-
-=item *
-
-Disconnect the notion of a physical host and a backup client.
-Currently there is a one-to-one match between physical hosts
-and backup clients.  Instead, the current notion of a host
-should be replaced by a backup client.  Each backup client
-corresponds to a physical host.  A physical host could have
-several backup clients.  This is useful for backing up
-different types of data, or backing up different portions
-of a machine with different frequencies or settings.
-
-(Note: this has already been implemented in 2.0.0.)
-
-=item *
-
-Resuming incomplete full backups.  Useful if a machine
-(eg: laptop) is disconnected from the network during a backup,
-or if the user manually stops a backup.  This would be supported
-initially for rsync.  The partial dump would be kept, and be
-browsable.  When the next dump starts, an incremental against
-the partial dump would be done to make sure it was up to date,
-and then the rest of the full dump would be done.
 
 =item *
 
@@ -323,14 +296,6 @@ In fact, since incrementals will now be more "accurate", you could
 choose to never to full dumps (except the first time), or at a
 minimum do them infrequently: each incremental would depend upon
 the last, giving a continuous chain of differential dumps.
-
-=item *
-
-Add a backup browsing feature that shows backup history by file.
-So rather than a single directory view, it would be a table showing
-the files (down) and the backups (across).  The internal hardlinks
-encode which files are identical across backups.  You could immediately
-see which files changed on which backups.
 
 =item *
 
@@ -501,6 +466,15 @@ a separate copy of the file to be saved during backup. Outlook is even
 more troublesome, since it keeps this file locked all the time, so it
 cannot be read by smbclient whenever Outlook is running.  See the
 L<Limitations|limitations> section for more discussion of this problem.
+
+In addition to total disk space, you shold make sure you have
+plenty of inodes on your BackupPC data partition. Some users have
+reported running out of inodes on their BackupPC data partition.
+So even if you have plenty of disk space, BackupPC will report
+failures when the inodes are exhausted.  This is a particular
+problem with ext2/ext3 file systems that have a fixed number of
+inodes when the file system is built.  Use "df -i" to see your
+inode usage.
 
 =head2 Step 1: Getting BackupPC
 
@@ -806,12 +780,18 @@ and then set $Conf{XferMethod} to "tar" (use tar on the network
 mounted file system).
 
 Also, to make sure that file names with 8-bit characters are correctly
-transferred by smbclient you should add this to samba's smb.conf file:
+transferred by smbclient you should add this to samba's smb.conf file
+for samba 2.x:
 
     [global]
 	# Accept the windows charset
 	client code page = 850
 	character set = ISO8859-1
+
+For samba 3.x this should instead be:
+
+    [global]
+	unix charset = ISO8859-1
 
 This setting should work for western europe.  
 See L<http://www.oreilly.com/catalog/samba/chapter/book/ch08_03.html>
@@ -869,6 +849,10 @@ and $Conf{RsyncLogLevel}.  In the case of rsyncd, $Conf{RsyncShareName}
 is the name of an rsync module (ie: the thing in square brackets in
 rsyncd's conf file -- see rsyncd.conf), not a file system path.
 
+Be aware that rsyncd will remove the leading '/' from path names in
+symbolic links if you specify "use chroot = no" in the rsynd.conf file.
+See the rsyncd.conf manual page for more information.
+
 =back
 
 For linux/unix machines you should not backup "/proc".  This directory
@@ -902,6 +886,10 @@ privileged user) can ssh as root on the client, without being prompted
 for a password. There are two common versions of ssh: v1 and v2. Here
 are some instructions for one way to setup ssh.  (Check which version
 of SSH you have by typing "ssh" or "man ssh".)
+
+=item Mac OS X
+
+In general this should be similar to Linux/Unix machines.
 
 =over 4
 
@@ -1035,9 +1023,9 @@ Copy BackupPC's public key (BackupPC_id_rsa_1024_a.pub) to the
 =item Fix permissions
 
 You will probably need to make sure that all the files
-in /.ssh2 have no group or other read/write permission:
+in ~/.ssh2 have no group or other read/write permission:
 
-    chmod -R go-rwx /.ssh2
+    chmod -R go-rwx ~/.ssh2
 
 You should do the same thing for the BackupPC user on the server.
 
@@ -1083,7 +1071,7 @@ Next, force protocol version 1 by adding:
 
 to BackupPC's ~/.ssh/config on the server.
 
-Next, run "chmod -R go-rwx ~/.ssh" on the server and "chmod -R go-rwx /.ssh"
+Next, run "chmod -R go-rwx ~/.ssh" on the server and "chmod -R go-rwx ~/.ssh"
 on the client.
 
 Finally, test using:
@@ -1269,12 +1257,12 @@ to Apache's 1.x httpd.conf file:
     </IfModule>
 
 Apache 2.0.44 with Perl 5.8.0 on RedHat 7.1, Don Silvia reports that
-this works:
+this works (with tweaks from Michael Tuzi):
 
     LoadModule perl_module modules/mod_perl.so
     PerlModule Apache2
 
-    <Location /path/to/cgi/>
+    <Directory /path/to/cgi/>
 	SetHandler perl-script
 	PerlResponseHandler ModPerl::Registry
 	PerlOptions +ParseHeaders
@@ -1287,7 +1275,7 @@ this works:
 	AuthType Basic
 	AuthUserFile /path/to/user_file
 	Require valid-user
-    </Location>
+    </Directory>
 
 There are other optimizations and options with mod_perl.  For
 example, you can tell mod_perl to preload various perl modules,
@@ -3166,14 +3154,23 @@ Xavier provided the French translation fr.pm, with additions from
 Guillaume.
 
 Ryan Kucera contributed the directory navigation code and images
-for v1.5.0.  He also contributed the first skeleton of BackupPC_restore.
+for v1.5.0.  He contributed the first skeleton of BackupPC_restore.
+He also added a significant revision to the CGI interface, including
+CSS tags, in v2.1.0.
 
 Guillaume Filion wrote BackupPC_zipCreate and added the CGI support
 for zip download, in addition to some CGI cleanup, for v1.5.0.
+Guillaume continues to support fr.pm updates for each
+new version.
 
-Javier Gonzalez provided the Spanish translation, es.pm.
+Josh Marshall implemented the Archive feature in v2.1.0.
 
-Manfred Herrmann provided the German translation, de.pm.
+Javier Gonzalez provided the Spanish translation, es.pm for v2.0.0.
+
+Manfred Herrmann provided the German translation, de.pm for v2.0.0.
+Manfred continues to support de.pm updates for each new version.
+
+Lorenzo Cappelletti provided the Italian translation, it.pm for v2.1.0.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.

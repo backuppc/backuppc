@@ -254,7 +254,7 @@ EOF
 
 $Lang{BackupPC_Archive2_parity} = <<EOF;
 <tr>
-    <td>Number of Parity Files</td>
+    <td>Percentage of Parity Data (0 = disable, 5 = typical)</td>
     <td><input type="numeric" value="\$ArchivePar" name="par"></td>
 </tr>
 EOF

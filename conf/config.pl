@@ -141,6 +141,50 @@ $Conf{MaxUserBackups} = 4;
 $Conf{MaxPendingCmds} = 10;
 
 #
+# How many BackupPC_nightly processes to run in parallel.
+#
+# Each night, at the first wakeup listed in $Conf{WakeupSchedule},
+# BackupPC_nightly is run.  Its job is to remove unneeded files
+# in the pool, ie: files that only have one link.  To avoid race
+# conditions, BackupPC_nightly runs only when there are no backups
+# running, and no backups will start while it runs.
+#
+# So to reduce the elapsed time, you might want to increase this
+# setting to run several BackupPC_nightly processes in parallel
+# (eg: 4, or even 8).
+#
+$Conf{MaxBackupPCNightlyJobs} = 2;
+
+#
+# How many days (runs) it takes BackupPC_nightly to traverse the
+# entire pool.  Normally this is 1, which means every night it runs,
+# it does traverse the entire pool removing unused pool files.
+#
+# Other valid values are 2, 4, 8, 16.  This causes BackupPC_nightly to
+# traverse 1/2, 1/4, 1/8 or 1/16th of the pool each night, meaning it
+# takes 2, 4, 8 or 16 days to completely traverse the pool.  The
+# advantage is that each night the running time of BackupPC_nightly
+# is reduced roughly in proportion, since the total job is split
+# over multiple days.  The disadvantage is that unused pool files
+# take longer to get deleted, which will slightly increase disk
+# usage.
+#
+# Note that even when $Conf{BackupPCNightlyPeriod} > 1, BackupPC_nightly
+# still runs every night.  It just does less work each time it runs.
+#
+# Examples:
+#
+#    $Conf{BackupPCNightlyPeriod} = 1;   # entire pool is checked every night
+#
+#    $Conf{BackupPCNightlyPeriod} = 2;   # two days to complete pool check
+#                                        # (different half each night)
+#
+#    $Conf{BackupPCNightlyPeriod} = 4;   # four days to complete pool check
+#                                        # (different quarter each night)
+#
+$Conf{BackupPCNightlyPeriod} = 1;
+
+#
 # Maximum number of log files we keep around in log directory.
 # These files are aged nightly.  A setting of 14 means the log
 # directory will contain about 2 weeks of old log files, in
@@ -172,7 +216,7 @@ $Conf{DfCmd} = '$dfPath $topDir';
 #
 
 $Conf{SplitPath} = '/usr/bin/split';
-$Conf{ParPath}   = '/usr/bin/par';
+$Conf{ParPath}   = '/usr/bin/par2';
 $Conf{CatPath}   = '/bin/cat';
 $Conf{GzipPath}  = '/bin/gzip';
 $Conf{Bzip2Path} = '/usr/bin/bzip2';
@@ -1036,8 +1080,9 @@ $Conf{ArchiveComp} = 'gzip';
 #
 # Archive Parity Files
 #
-# The number of Parity Files to generate.
-# Uses the commandline par available from
+# The amount of Parity data to generate, as a percentage
+# of the archive size.
+# Uses the commandline par2 (par2cmdline) available from
 # http://parchive.sourceforge.net
 #
 # Only useful for file dumps.
@@ -1064,14 +1109,14 @@ $Conf{ArchiveSplit} = 650;
 #   $Installdir    The installation directory of BackupPC
 #   $tarCreatePath The path to BackupPC_tarCreate
 #   $splitpath     The path to the split program
-#   $parpath       The path to the par program
+#   $parpath       The path to the par2 program
 #   $host          The host to archive
 #   $backupnumber  The backup number of the host to archive
 #   $compression   The path to the compression program
 #   $compext       The extension assigned to the compression type
 #   $splitsize     The number of bytes to split archives into
 #   $archiveloc    The location to put the archive
-#   $parfile       The number of par files to create
+#   $parfile       The amount of parity data to create (percentage)
 #
 $Conf{ArchiveClientCmd} = '$Installdir/bin/BackupPC_archiveHost'
 	. ' $tarCreatePath $splitpath $parpath $host $backupnumber'
@@ -1312,7 +1357,7 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #        $HostList     list of hosts being archived
 #        $BackupList   list of backup numbers for the hosts being archived
 #        $archiveloc   location where the archive is sent to
-#        $parfile      number of par files being generated
+#        $parfile      amount of parity data being generated (percentage)
 #        $compression  compression program being used (eg: cat, gzip, bzip2)
 #        $compext      extension used for compression type (eg: raw, gz, bz2)
 #        $splitsize    size of the files that the archive creates

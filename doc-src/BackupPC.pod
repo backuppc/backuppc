@@ -267,6 +267,11 @@ releases of BackupPC:
 
 =item *
 
+Develop a FAQ and move some significant parts of this document
+to the FAQ (eg: ssh setup, this roadmap etc).  Volunteers?
+
+=item *
+
 Adding hardlink support to rsync.
 
 =item *
@@ -299,14 +304,15 @@ file size, uid, gid), and better support for include and exclude.
 Currently smbclient incrementals only depend upon mtime, so
 deleted files or renamed files are not detected.  FileSys::SmbClient
 would also allow resuming of incomplete full backups in the
-same manner as rsync will.
+same manner as rsync will.  (I'm not sure if FileSys::SmbClient
+has been updated for samba 3.x.)
 
 =item *
 
-Support --listed-incremental or --incremental for tar,
-so that incrementals will depend upon any attribute change (eg: exist,
-mtime, file size, uid, gid), rather than just mtime.  This will allow
-tar to be to as capable as FileSys::SmbClient and rsync.
+Possibly support --listed-incremental or --incremental for tar, so that
+incrementals will depend upon any attribute change (eg: exist, mtime,
+file size, uid, gid), rather than just mtime.  This will allow tar to
+be to as capable as FileSys::SmbClient and rsync.
 
 =item *
 
@@ -316,6 +322,53 @@ In fact, since incrementals will now be more "accurate", you could
 choose to never to full dumps (except the first time), or at a
 minimum do them infrequently: each incremental would depend upon
 the last, giving a continuous chain of differential dumps.
+
+=item *
+
+Improve the warning messages about locked files on WinXX machines,
+so that more file types than just outlook pst files will produce
+warning emails (and configuration settings for specifying the
+file extensions that produce email warngings).
+
+=item *
+
+Long term, support bare metal restore.  For *nix machines there's
+not a lot to do (althought rsync needs hardlink support).  For
+WinXX machines the file locking problem has to get resolved.
+Plus ACL save/restore would need to be supported.  This is
+really long term.
+
+=item *
+
+Support client pull for restores.  For example, BackupPC could
+emulate an rsync server.  That way you could boot a knoppix cd,
+and you wouldn't need perl, BackupPC, ssh setup or anything on
+the client to restore.  You would just run an rsync command like:
+
+    rsync -aH BackupPCServer::moduleName /path/to/emtpy/disk
+
+ModuleName could contain the client name, share name and backup number.
+There would have to be some way of specifying the password; perhaps
+the CGI could be used to "turn on" rsynd for a specific client and
+a specific time period (eg: only listens for X minutes, only serves
+up a specific client backup, accepts connections from a specific IP).
+BackupPC listens for and serves the request; it's not a real rsyncd on
+the server.
+
+=item *
+
+Add support for wget as an XferMethod.  This would allow ftp and http
+files to be backed up.  This might be useful, for example, for backing
+up the configuration of a router (via http), so that you have a
+backup copy of all the router setup screens in case the router
+fails.
+
+=item *
+
+Possibly support client push for backups, in addition to the
+existing server pull.  This would be helpful for clients behind
+firewalls who can connect to the server, but the server cannot
+see the client.
 
 =item *
 
@@ -2255,6 +2308,15 @@ any files in the pool that only have a single hard link (meaning no backups
 are using that file).  Again, to avoid race conditions, BackupPC_nightly
 is only run when there are no BackupPC_dump or BackupPC_link processes
 running.
+
+To improve the running time for BackupPC_nightly, several
+BackupPC_nightly processes can be run concurrently, based on
+the $Conf{MaxBackupPCNightlyJobs} setting.
+
+If BackupPC_nightly still takes too long to run,
+$Conf{BackupPCNightlyPeriod} can be used to split
+BackupPC_nightly's pool traversal across multiple nights,
+proportionally reducing its runtime each night.
 
 =back
 

@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta0, released 20 Mar 2004.
+# Version 2.1.0beta1, released 9 Apr 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -173,6 +173,7 @@ my $SigName = "";
 # Misc variables
 #
 my($RunNightlyWhenIdle, $FirstWakeup, $CmdJob, $ServerInetPort);
+my($BackupPCNightlyJobs, $BackupPCNightlyLock);
 
 #
 # Complete the rest of the initialization
@@ -374,14 +375,89 @@ sub Main_TryToRun_nightly
 	$CmdQueueOn{$bpc->trashJob} = 1;
     }
     if ( keys(%Jobs) == $trashCleanRunning && $RunNightlyWhenIdle == 1 ) {
-	push(@CmdQueue, {
-		host    => $bpc->adminJob,
-		user    => "BackupPC",
-		reqTime => time,
-		cmd     => ["$BinDir/BackupPC_nightly"],
-	    });
-	$CmdQueueOn{$bpc->adminJob} = 1;
-	$RunNightlyWhenIdle = 2;
+
+        #
+        # Queue multiple nightly jobs based on the configuration
+        #
+	$Conf{MaxBackupPCNightlyJobs} = 1
+		    if ( $Conf{MaxBackupPCNightlyJobs} <= 0 );
+	$Conf{BackupPCNightlyPeriod} = 1
+		    if ( $Conf{BackupPCNightlyPeriod} <= 0 );
+	#
+	# Decide what subset of the 16 top-level directories 0..9a..f
+	# we run BackupPC_nightly on, based on $Conf{BackupPCNightlyPeriod}.
+	# If $Conf{BackupPCNightlyPeriod} == 1 then we run 0..15 every
+	# time.  If $Conf{BackupPCNightlyPeriod} == 2 then we run
+	# 0..7 one night and 89a-f the next night.  And so on.
+	#
+	# $Info{NightlyPhase} counts which night, from 0 to
+	# $Conf{BackupPCNightlyPeriod} - 1.
+	#
+        my $start = int($Info{NightlyPhase} * 16
+			    / $Conf{BackupPCNightlyPeriod});
+	my $end = int(($Info{NightlyPhase} + 1) * 16
+			    / $Conf{BackupPCNightlyPeriod});
+	$end = $start + 1 if ( $end <= $start );
+	$Info{NightlyPhase}++;
+	$Info{NightlyPhase} = 0 if ( $end >= 16 );
+
+	#
+	# Zero out the data we expect to get from BackupPC_nightly.
+	# In the future if we want to split BackupPC_nightly over
+	# more than one night we will only zero out the portion
+	# that we are running right now.
+	#
+	for my $p ( qw(pool cpool) ) {
+	    for ( my $i = $start ; $i < $end ; $i++ ) {
+		$Info{pool}{$p}[$i]{FileCnt}       = 0;
+		$Info{pool}{$p}[$i]{DirCnt}        = 0;
+		$Info{pool}{$p}[$i]{Kb}            = 0;
+		$Info{pool}{$p}[$i]{Kb2}           = 0;
+		$Info{pool}{$p}[$i]{KbRm}          = 0;
+		$Info{pool}{$p}[$i]{FileCntRm}     = 0;
+		$Info{pool}{$p}[$i]{FileCntRep}    = 0;
+		$Info{pool}{$p}[$i]{FileRepMax}    = 0;
+		$Info{pool}{$p}[$i]{FileCntRename} = 0;
+		$Info{pool}{$p}[$i]{FileLinkMax}   = 0;
+		$Info{pool}{$p}[$i]{Time}          = 0;
+	    }
+	}
+	print(LOG $bpc->timeStamp,
+		sprintf("Running %d BackupPC_nightly jobs from %d..%d"
+		      . " (out of 0..15)\n",
+		      $Conf{MaxBackupPCNightlyJobs}, $start, $end - 1));
+
+	#
+	# Now queue the $Conf{MaxBackupPCNightlyJobs} jobs.
+	# The granularity on start and end is now 0..256.
+	#
+	$start *= 16;
+	$end   *= 16;
+	my $start0 = $start;
+        for ( my $i = 0 ; $i < $Conf{MaxBackupPCNightlyJobs} ; $i++ ) {
+            #
+            # The first nightly job gets the -m option (does email, log aging).
+            # All jobs get the start and end options from 0..255 telling
+            # them which parts of the pool to traverse.
+            #
+            my $cmd = ["$BinDir/BackupPC_nightly"];
+            push(@$cmd, "-m") if ( $i == 0 );
+            push(@$cmd, $start);
+            $start = $start0 + int(($end - $start0)
+				  * ($i + 1) / $Conf{MaxBackupPCNightlyJobs});
+            push(@$cmd, $start - 1);
+
+            my $job = $bpc->adminJob($i);
+            unshift(@CmdQueue, {
+                    host    => $job,
+                    user    => "BackupPC",
+                    reqTime => time,
+                    cmd     => $cmd,
+                });
+            $CmdQueueOn{$job} = 1;
+        }
+        $RunNightlyWhenIdle = 2;
+
     }
 }
 
@@ -397,7 +473,11 @@ sub Main_TryToRun_nightly
 sub Main_TryToRun_CmdQueue
 {
     my($req, $host);
-    if ( $CmdJob eq "" && @CmdQueue > 0 && $RunNightlyWhenIdle != 1 ) {
+
+    while ( $CmdJob eq "" && @CmdQueue > 0 && $RunNightlyWhenIdle != 1
+            || @CmdQueue > 0 && $RunNightlyWhenIdle == 2
+                             && $bpc->isAdminJob($CmdQueue[0]->{host})
+                ) {
         local(*FH);
         $req = pop(@CmdQueue);
 
@@ -435,8 +515,9 @@ sub Main_TryToRun_CmdQueue
         vec($FDread, $Jobs{$host}{fn}, 1) = 1;
         $Jobs{$host}{startTime} = time;
         $Jobs{$host}{reqTime}   = $req->{reqTime};
-	$cmd                    = join(" ", @$cmd);
+	$cmd                    = $bpc->execCmd2ShellCmd(@$cmd);
         $Jobs{$host}{cmd}       = $cmd;
+        $Jobs{$host}{user}      = $req->{user};
         $Jobs{$host}{type}      = $Status{$host}{type};
         $Status{$host}{state}   = "Status_link_running";
         $Status{$host}{activeJob} = 1;
@@ -444,6 +525,10 @@ sub Main_TryToRun_CmdQueue
         $CmdJob = $host if ( $host ne $bpc->trashJob );
         $cmd =~ s/$BinDir\///g;
         print(LOG $bpc->timeStamp, "Running $cmd (pid=$pid)\n");
+	if ( $cmd =~ /^BackupPC_nightly\s/ ) {
+	    $BackupPCNightlyJobs++;
+	    $BackupPCNightlyLock++;
+	}
     }
 }
 
@@ -468,7 +553,7 @@ sub Main_TryToRun_Bg_or_User_Queue
         #
         # CmdJob and trashClean don't count towards MaxBackups / MaxUserBackups
         #
-        $nJobs-- if ( $CmdJob ne "" );
+        $nJobs -= $BackupPCNightlyJobs if ( $CmdJob ne "" );
         $nJobs-- if ( defined($Jobs{$bpc->trashJob} ) );
         if ( $nJobs < $Conf{MaxBackups} + $Conf{MaxUserBackups}
                         && @UserQueue > 0 ) {
@@ -571,7 +656,7 @@ sub Main_TryToRun_Bg_or_User_Queue
         $Jobs{$host}{startTime}  = time;
         $Jobs{$host}{reqTime}    = $req->{reqTime};
         $Jobs{$host}{userReq}    = $req->{userReq};
-        $Jobs{$host}{cmd}        = join(" ", $progName, @args);
+        $Jobs{$host}{cmd}        = $bpc->execCmd2ShellCmd($progName, @args);
         $Jobs{$host}{user}       = $user;
         $Jobs{$host}{type}       = $type;
 	$Status{$host}{userReq}  = $req->{userReq}
@@ -922,33 +1007,32 @@ sub Main_Check_Job_Messages
 		}
             } elsif ( $mesg =~ /^log\s+(.*)/ ) {
                 print(LOG $bpc->timeStamp, "$1\n");
-            } elsif ( $mesg =~ /^BackupPC_stats = (.*)/ ) {
-                my @f = split(/,/, $1);
-                $Info{"$f[0]FileCnt"}       = $f[1];
-                $Info{"$f[0]DirCnt"}        = $f[2];
-                $Info{"$f[0]Kb"}            = $f[3];
-                $Info{"$f[0]Kb2"}           = $f[4];
-                $Info{"$f[0]KbRm"}          = $f[5];
-                $Info{"$f[0]FileCntRm"}     = $f[6];
-                $Info{"$f[0]FileCntRep"}    = $f[7];
-                $Info{"$f[0]FileRepMax"}    = $f[8];
-                $Info{"$f[0]FileCntRename"} = $f[9];
-                $Info{"$f[0]FileLinkMax"}   = $f[10];
-                $Info{"$f[0]Time"}          = time;
-                printf(LOG "%s%s nightly clean removed %d files of"
-                           . " size %.2fGB\n",
-                             $bpc->timeStamp, ucfirst($f[0]),
-                             $Info{"$f[0]FileCntRm"},
-                             $Info{"$f[0]KbRm"} / (1000 * 1024));
-                printf(LOG "%s%s is %.2fGB, %d files (%d repeated, "
-			   . "%d max chain, %d max links), %d directories\n",
-                             $bpc->timeStamp, ucfirst($f[0]),
-                             $Info{"$f[0]Kb"} / (1000 * 1024),
-                             $Info{"$f[0]FileCnt"}, $Info{"$f[0]FileCntRep"},
-			     $Info{"$f[0]FileRepMax"},
-			     $Info{"$f[0]FileLinkMax"}, $Info{"$f[0]DirCnt"});
+            } elsif ( $mesg =~ /^BackupPC_stats (\d+) = (.*)/ ) {
+                my $chunk = int($1 / 16);
+                my @f = split(/,/, $2);
+                $Info{pool}{$f[0]}[$chunk]{FileCnt}       += $f[1];
+                $Info{pool}{$f[0]}[$chunk]{DirCnt}        += $f[2];
+                $Info{pool}{$f[0]}[$chunk]{Kb}            += $f[3];
+                $Info{pool}{$f[0]}[$chunk]{Kb2}           += $f[4];
+                $Info{pool}{$f[0]}[$chunk]{KbRm}          += $f[5];
+                $Info{pool}{$f[0]}[$chunk]{FileCntRm}     += $f[6];
+                $Info{pool}{$f[0]}[$chunk]{FileCntRep}    += $f[7];
+                $Info{pool}{$f[0]}[$chunk]{FileRepMax}     = $f[8]
+                        if ( $Info{pool}{$f[0]}[$chunk]{FileRepMax} < $f[8] );
+                $Info{pool}{$f[0]}[$chunk]{FileCntRename} += $f[9];
+                $Info{pool}{$f[0]}[$chunk]{FileLinkMax}    = $f[10]
+                        if ( $Info{pool}{$f[0]}[$chunk]{FileLinkMax} < $f[10] );
+                $Info{pool}{$f[0]}[$chunk]{Time}           = time;
             } elsif ( $mesg =~ /^BackupPC_nightly lock_off/ ) {
-		$RunNightlyWhenIdle = 0;
+		$BackupPCNightlyLock--;
+                if ( $BackupPCNightlyLock == 0 ) {
+                    #
+                    # This means the last BackupPC_nightly is done with
+		    # the pool clean, so it's to start running regular
+		    # backups again.
+                    #
+                    $RunNightlyWhenIdle = 0;
+		}
             } elsif ( $mesg =~ /^processState\s+(.+)/ ) {
                 $Jobs{$host}{processState} = $1;
             } elsif ( $mesg =~ /^link\s+(.+)/ ) {
@@ -964,15 +1048,81 @@ sub Main_Check_Job_Messages
         if ( $nbytes <= 0 ) {
             close($Jobs{$host}{fh});
             vec($FDread, $Jobs{$host}{fn}, 1) = 0;
-            if ( $CmdJob eq $host ) {
+            if ( $CmdJob eq $host || $bpc->isAdminJob($host) ) {
                 my $cmd = $Jobs{$host}{cmd};
                 $cmd =~ s/$BinDir\///g;
                 print(LOG $bpc->timeStamp, "Finished $host ($cmd)\n");
                 $Status{$host}{state}    = "Status_idle";
                 $Status{$host}{endTime}  = time;
-                $CmdJob = "";
-                $RunNightlyWhenIdle = 0 if ( $cmd eq "BackupPC_nightly"
-                                            && $RunNightlyWhenIdle );
+                if ( $cmd =~ /^BackupPC_nightly\s/ ) {
+                    $BackupPCNightlyJobs--;
+		    #print(LOG $bpc->timeStamp, "BackupPC_nightly done; now"
+		    #         . " have $BackupPCNightlyJobs running\n");
+                    if ( $BackupPCNightlyJobs <= 0 ) {
+                        $BackupPCNightlyJobs = 0;
+                        $RunNightlyWhenIdle = 0;
+                        $CmdJob = "";
+			#
+			# Combine the 16 per-directory results
+			#
+			for my $p ( qw(pool cpool) ) {
+			    $Info{"${p}FileCnt"}       = 0;
+			    $Info{"${p}DirCnt"}        = 0;
+			    $Info{"${p}Kb"}            = 0;
+			    $Info{"${p}Kb2"}           = 0;
+			    $Info{"${p}KbRm"}          = 0;
+			    $Info{"${p}FileCntRm"}     = 0;
+			    $Info{"${p}FileCntRep"}    = 0;
+			    $Info{"${p}FileRepMax"}    = 0;
+			    $Info{"${p}FileCntRename"} = 0;
+			    $Info{"${p}FileLinkMax"}   = 0;
+			    $Info{"${p}Time"}          = 0;
+			    for ( my $i = 0 ; $i < 16 ; $i++ ) {
+				$Info{"${p}FileCnt"}
+				       += $Info{pool}{$p}[$i]{FileCnt};
+				$Info{"${p}DirCnt"}
+				       += $Info{pool}{$p}[$i]{DirCnt};
+				$Info{"${p}Kb"}
+				       += $Info{pool}{$p}[$i]{Kb};
+				$Info{"${p}Kb2"}
+				       += $Info{pool}{$p}[$i]{Kb2};
+				$Info{"${p}KbRm"}
+				       += $Info{pool}{$p}[$i]{KbRm};
+				$Info{"${p}FileCntRm"}
+				       += $Info{pool}{$p}[$i]{FileCntRm};
+				$Info{"${p}FileCntRep"}
+				       += $Info{pool}{$p}[$i]{FileCntRep};
+				$Info{"${p}FileRepMax"}
+					= $Info{pool}{$p}[$i]{FileRepMax}
+					  if ( $Info{"${p}FileRepMax"} <
+					      $Info{pool}{$p}[$i]{FileRepMax} );
+				$Info{"${p}FileCntRename"}
+				       += $Info{pool}{$p}[$i]{FileCntRename};
+				$Info{"${p}FileLinkMax"}
+					= $Info{pool}{$p}[$i]{FileLinkMax}
+					  if ( $Info{"${p}FileLinkMax"} <
+					     $Info{pool}{$p}[$i]{FileLinkMax} );
+				$Info{"${p}Time"} = $Info{pool}{$p}[$i]{Time}
+					  if ( $Info{"${p}Time"} <
+						 $Info{pool}{$p}[$i]{Time} );
+			    }
+			    printf(LOG "%s%s nightly clean removed %d files of"
+				   . " size %.2fGB\n",
+				     $bpc->timeStamp, ucfirst($p),
+				     $Info{"${p}FileCntRm"},
+				     $Info{"${p}KbRm"} / (1000 * 1024));
+			    printf(LOG "%s%s is %.2fGB, %d files (%d repeated, "
+				   . "%d max chain, %d max links), %d directories\n",
+				     $bpc->timeStamp, ucfirst($p),
+				     $Info{"${p}Kb"} / (1000 * 1024),
+				     $Info{"${p}FileCnt"}, $Info{"${p}FileCntRep"},
+				     $Info{"${p}FileRepMax"},
+				     $Info{"${p}FileLinkMax"}, $Info{"${p}DirCnt"});
+			}
+                    }
+                } else {
+                    $CmdJob = "";
+                }
             } else {
                 #
                 # Queue BackupPC_link to complete the backup
@@ -1118,6 +1268,8 @@ sub Main_Check_Client_Messages
                 }
             } elsif ( $cmd =~ /^backup all$/ ) {
                 QueueAllPCs();
+            } elsif ( $cmd =~ /^BackupPC_nightly run$/ ) {
+                $RunNightlyWhenIdle = 1;
             } elsif ( $cmd =~ /^backup (\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ) {
                 my $hostIP = $1;
                 $host      = $2;
@@ -1492,7 +1644,7 @@ sub HostsUpdate
     }
     foreach my $host ( sort(keys(%Status)) ) {
         next if ( $host eq $bpc->trashJob
-                     || $host eq $bpc->adminJob
+                     || $bpc->isAdminJob($host)
                      || defined($Hosts->{$host})
                      || defined($Jobs{$host})
                      || $BgQueueOn{$host}

@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta0, released 20 Mar 2004.
+# Version 2.1.0beta1, released 9 Apr 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -283,7 +283,9 @@ sub GetStatusInfo
     eval($reply);
     # ignore status related to admin and trashClean jobs
     if ( $status =~ /\bhosts\b/ ) {
-        delete($Status{$bpc->adminJob});
+	foreach my $host ( grep(/admin/, keys(%Status)) ) {
+	    delete($Status{$host}) if ( $bpc->isAdminJob($host) );
+	}
         delete($Status{$bpc->trashJob});
     }
 }

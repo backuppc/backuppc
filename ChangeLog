@@ -33,6 +33,24 @@
 * Cleaned up warning message for restore using rsync when checksum
   caching is on, but when file didn't have cached checksums.
 
+* Fixed BackupPC_archiveHost to support par2 (par2cmdline).
+  Patch submitted by Jaco Bongers and adapted by Josh Marshall.
+
+* Improved stat() usage in BackupPC_nightly, plus some other cleanup,
+  giving a significant performance improvement.  Patch submitted by
+  Wayne Scott.
+
+* Allow several BackupPC_nightly processes to run in parallel based
+  on new $Conf{MaxBackupPCNightlyJobs} setting.  This speeds up the
+  traversal of the pool, reducing the overall run time for
+  BackupPC_nightly.
+
+* Allow BackupPC_nightly to split the pool traversal across several
+  nightly runs.  This improves the running time per night, at the expense
+  of a slight increase in disk storage as unused pool files might not
+  be deleted for a couple of days.  Controller by new config setting
+  $Conf{BackupPCNightlyPeriod}.
+
 #------------------------------------------------------------------------
 # Version 2.1.0beta0, 20 Mar 2004
 #------------------------------------------------------------------------

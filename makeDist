@@ -42,8 +42,8 @@ use Getopt::Std;
 
 umask(0022);
 
-my $Version     = "2.1.0beta0_CVS";
-my $ReleaseDate = "29 Mar 2004";
+my $Version     = "2.1.0beta1";
+my $ReleaseDate = "9 Apr 2004";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(

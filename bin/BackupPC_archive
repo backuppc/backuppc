@@ -8,10 +8,10 @@
 #   Usage: BackupPC_archive <user> <archiveclient> <reqFileName>
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Josh Marshall
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2003  Craig Barratt
+#   Copyright (C) 2001-2004  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta0, released 20 Mar 2004.
+# Version 2.1.0beta1, released 9 Apr 2004.
 #
 # See http://backuppc.sourceforge.net.
 #

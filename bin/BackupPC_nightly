@@ -4,20 +4,37 @@
 # BackupPC_nightly: Nightly cleanup & statistics script.
 #
 # DESCRIPTION
+#
 #   BackupPC_nightly performs several administrative tasks:
 #
-#     - monthly aging of per-PC log files
+#      - monthly aging of per-PC log files (only with -m option)
 #
-#     - pruning files from pool no longer used (ie: those with only one
-#       hard link).
+#      - pruning files from pool no longer used (ie: those with only one
+#        hard link).
 #
-#     - sending email to users and administrators.
+#      - sending email to users and administrators (only with -m option)
+#
+#   Usage: BackupPC_nightly [-m] poolRangeStart poolRangeEnd
+#
+#   Flags:
+#
+#     -m   Do monthly aging of per-PC log files and sending of email.
+#          Otherise, BackupPC_nightly just does pool pruning.
+#
+#   The poolRangeStart and poolRangeEnd arguments are integers from 0 to 255.
+#   These specify which parts of the pool to process.  There are 256 2nd-level
+#   directories in the pool (0/0, 0/1, ..., f/e, f/f).  BackupPC_nightly
+#   processes the given subset of this list (0 means 0/0, 255 means f/f).
+#   Therefore, arguments of 0 255 process the entire pool, 0 127 does
+#   the first half (ie: 0/0 through 7/f), 127 255 does the other half
+#   (eg: 8/0 through f/f) and 0 15 does just the first 1/16 of the pool
+#   (ie: 0/0 through 0/f).
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2003  Craig Barratt
+#   Copyright (C) 2001-2004  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -35,7 +52,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta0, released 20 Mar 2004.
+# Version 2.1.0beta1, released 9 Apr 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -46,6 +63,7 @@ no  utf8;
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
+use Getopt::Std;
 
 use File::Find;
 use File::Path;
@@ -55,56 +73,43 @@ die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
+my(%Status, %Info, %Jobs, @BgQueue, @UserQueue, @CmdQueue);
 
 $bpc->ChildInit();
 
-my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
-if ( $err ) {
-    print("Can't connect to server ($err)\n");
+my %opts;
+if ( !getopts("m", \%opts) || @ARGV != 2 ) {
+    print("usage: $0 [-m] poolRangeStart poolRangeEnd\n");
     exit(1);
 }
-my $reply = $bpc->ServerMesg("status hosts");
-$reply = $1 if ( $reply =~ /(.*)/s );
-my(%Status, %Info, %Jobs, @BgQueue, @UserQueue, @CmdQueue);
-eval($reply);
+if ( $ARGV[0] !~ /^(\d+)$/ || $1 > 255 ) {
+    print("$0: bad poolRangeStart '$ARGV[0]'\n");
+    exit(1);
+}
+my $poolRangeStart = $1;
+if ( $ARGV[1] !~ /^(\d+)$/ || $1 > 255 ) {
+    print("$0: bad poolRangeEnd '$ARGV[1]'\n");
+    exit(1);
+}
+my $poolRangeEnd = $1;
+
+if ( $opts{m} ) {
+    my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
+    if ( $err ) {
+        print("Can't connect to server ($err)\n");
+        exit(1);
+    }
+    my $reply = $bpc->ServerMesg("status hosts");
+    $reply = $1 if ( $reply =~ /(.*)/s );
+    eval($reply);
+}
 
 ###########################################################################
 # When BackupPC_nightly starts, BackupPC will not run any simultaneous
 # BackupPC_dump commands.  We first do things that contend with
 # BackupPC_dump, eg: aging per-PC log files etc.
 ###########################################################################
-
-#
-# Do per-PC log file aging
-#
-my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-if ( $mday == 1 ) {
-    foreach my $host ( keys(%Status) ) {
-	my $lastLog = $Conf{MaxOldPerPCLogFiles} - 1;
-        unlink("$TopDir/pc/$host/LOG.$lastLog")
-                if ( -f "$TopDir/pc/$host/LOG.$lastLog" );
-        unlink("$TopDir/pc/$host/LOG.$lastLog.z")
-                if ( -f "$TopDir/pc/$host/LOG.$lastLog.z" );
-	for ( my $i = $lastLog - 1 ; $i >= 0 ; $i-- ) {
-	    my $j = $i + 1;
-	    if ( -f "$TopDir/pc/$host/LOG.$i" ) {
-                rename("$TopDir/pc/$host/LOG.$i", "$TopDir/pc/$host/LOG.$j");
-            } elsif ( -f "$TopDir/pc/$host/LOG.$i.z" ) {
-                rename("$TopDir/pc/$host/LOG.$i.z",
-                       "$TopDir/pc/$host/LOG.$j.z");
-            }
-	}
-	#
-	# Compress the log file LOG -> LOG.0.z (if enabled).
-	# Otherwise, just rename LOG -> LOG.0.
-	#
-	BackupPC::FileZIO->compressCopy("$TopDir/pc/$host/LOG",
-                                        "$TopDir/pc/$host/LOG.0.z",
-                                        "$TopDir/pc/$host/LOG.0",
-                                        $Conf{CompressLevel}, 1);
-        open(LOG, ">", "$TopDir/pc/$host/LOG") && close(LOG);
-    }
-}
+doPerPCLogFileAging() if ( $opts{m} );
 
 ###########################################################################
 # Get statistics on the pool, and remove files that have only one link.
@@ -126,53 +131,70 @@ my $fileCntRename; # number of renamed files (to keep file numbering
                    # contiguous)
 my %FixList;       # list of paths that need to be renamed to avoid
                    # new holes
-for my $pool ( qw(pool cpool) ) {
-    $fileCnt       = 0;
-    $dirCnt        = 0;
-    $blkCnt        = 0;
-    $fileCntRm     = 0;
-    $blkCntRm      = 0;
-    $blkCnt2       = 0;
-    $fileCntRep    = 0;
-    $fileRepMax    = 0;
-    $fileLinkMax   = 0;
-    $fileCntRename = 0;
-    %FixList       = ();
-    find({wanted => \&GetPoolStats, no_chdir => 1}, "$TopDir/$pool");
-    my $kb   = $blkCnt / 2;
-    my $kbRm = $blkCntRm / 2;
-    my $kb2  = $blkCnt2 / 2;
+my @hexChars = qw(0 1 2 3 4 5 6 7 8 9 a b c d e f);
 
-    #
-    # Now make sure that files with repeated checksums are still
-    # sequentially numbered
-    #
-    foreach my $name ( sort(keys(%FixList)) ) {
-        my $rmCnt = $FixList{$name} + 1;
-        my $new = -1;
-        for ( my $old = -1 ; ; $old++ ) {
-            my $oldName = $name;
-            $oldName .= "_$old" if ( $old >= 0 );
-            if ( !-f $oldName ) {
-                #
-                # We know we are done when we have missed at least
-                # the number of files that were removed from this
-                # base name, plus a couple just to be sure
-                #
-                last if ( $rmCnt-- <= 0 );
-                next;
+for my $pool ( qw(pool cpool) ) {
+    for ( my $i = $poolRangeStart ; $i <= $poolRangeEnd ; $i++ ) {
+        my $dir        = "$hexChars[int($i / 16)]/$hexChars[$i % 16]";
+        # print("Doing $pool/$dir\n") if ( ($i % 16) == 0 );
+        $fileCnt       = 0;
+        $dirCnt        = 0;
+        $blkCnt        = 0;
+        $fileCntRm     = 0;
+        $blkCntRm      = 0;
+        $blkCnt2       = 0;
+        $fileCntRep    = 0;
+        $fileRepMax    = 0;
+        $fileLinkMax   = 0;
+        $fileCntRename = 0;
+        %FixList       = ();
+        find({wanted => \&GetPoolStats}, "$TopDir/$pool/$dir");
+        my $kb   = $blkCnt / 2;
+        my $kbRm = $blkCntRm / 2;
+        my $kb2  = $blkCnt2 / 2;
+
+	#
+	# Main BackupPC_nightly counts the top-level directory
+	#
+	$dirCnt++ if ( $opts{m} && -d "$TopDir/$pool" && $i == 0 );
+
+	#
+	# Also count the next level directories
+	#
+	$dirCnt++ if ( ($i % 16) == 0
+		       && -d "$TopDir/$pool/$hexChars[int($i / 16)]" );
+
+        #
+        # Now make sure that files with repeated checksums are still
+        # sequentially numbered
+        #
+        foreach my $name ( sort(keys(%FixList)) ) {
+            my $rmCnt = $FixList{$name} + 1;
+            my $new = -1;
+            for ( my $old = -1 ; ; $old++ ) {
+                my $oldName = $name;
+                $oldName .= "_$old" if ( $old >= 0 );
+                if ( !-f $oldName ) {
+                    #
+                    # We know we are done when we have missed at least
+                    # the number of files that were removed from this
+                    # base name, plus a couple just to be sure
+                    #
+                    last if ( $rmCnt-- <= 0 );
+                    next;
+                }
+                my $newName = $name;
+                $newName .= "_$new" if ( $new >= 0 );
+                $new++;
+                next if ( $oldName eq $newName );
+                rename($oldName, $newName);
+                $fileCntRename++;
             }
-            my $newName = $name;
-            $newName .= "_$new" if ( $new >= 0 );
-            $new++;
-            next if ( $oldName eq $newName );
-            rename($oldName, $newName);
-            $fileCntRename++;
         }
+        print("BackupPC_stats $i = $pool,$fileCnt,$dirCnt,$kb,$kb2,$kbRm,"
+                              . "$fileCntRm,$fileCntRep,$fileRepMax,"
+                              . "$fileCntRename,$fileLinkMax\n");
     }
-    print("BackupPC_stats = $pool,$fileCnt,$dirCnt,$kb,$kb2,$kbRm,$fileCntRm,"
-                          . "$fileCntRep,$fileRepMax,$fileCntRename,"
-			  . "$fileLinkMax\n");
 }
 
 ###########################################################################
@@ -186,42 +208,79 @@ printf("BackupPC_nightly lock_off\n");
 ###########################################################################
 # Send email 
 ###########################################################################
-system("$BinDir/BackupPC_sendEmail");
+if ( $opts{m} ) {
+    print("log BackupPC_nightly now running BackupPC_sendEmail\n");
+    system("$BinDir/BackupPC_sendEmail")
+}
+
+#
+# Do per-PC log file aging
+#
+sub doPerPCLogFileAging
+{
+    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    if ( $mday == 1 ) {
+        foreach my $host ( keys(%Status) ) {
+            my $lastLog = $Conf{MaxOldPerPCLogFiles} - 1;
+            unlink("$TopDir/pc/$host/LOG.$lastLog")
+                    if ( -f "$TopDir/pc/$host/LOG.$lastLog" );
+            unlink("$TopDir/pc/$host/LOG.$lastLog.z")
+                    if ( -f "$TopDir/pc/$host/LOG.$lastLog.z" );
+            for ( my $i = $lastLog - 1 ; $i >= 0 ; $i-- ) {
+                my $j = $i + 1;
+                if ( -f "$TopDir/pc/$host/LOG.$i" ) {
+                    rename("$TopDir/pc/$host/LOG.$i",
+                           "$TopDir/pc/$host/LOG.$j");
+                } elsif ( -f "$TopDir/pc/$host/LOG.$i.z" ) {
+                    rename("$TopDir/pc/$host/LOG.$i.z",
+                           "$TopDir/pc/$host/LOG.$j.z");
+                }
+            }
+            #
+            # Compress the log file LOG -> LOG.0.z (if enabled).
+            # Otherwise, just rename LOG -> LOG.0.
+            #
+            BackupPC::FileZIO->compressCopy("$TopDir/pc/$host/LOG",
+                                            "$TopDir/pc/$host/LOG.0.z",
+                                            "$TopDir/pc/$host/LOG.0",
+                                            $Conf{CompressLevel}, 1);
+            open(LOG, ">", "$TopDir/pc/$host/LOG") && close(LOG);
+        }
+    }
+}
 
 sub GetPoolStats
 {
-    my($name) = $File::Find::name;
-    my($baseName)  = "";
-    my(@s);
+    my($nlinks, $nblocks) = (lstat($_))[3, 12];
  
-    return if ( !-d && !-f );
-    $dirCnt += -d;
-    $name = $1 if ( $name =~ /(.*)/ );
-    @s = stat($name);
-    if ( $name =~ /(.*)_(\d+)$/ ) {
-	$baseName = $1;
-	if ( $s[3] != 1 ) {
-            $fileRepMax = $2 + 1 if ( $fileRepMax <= $2 );
+    if ( -d _ ) {
+        $dirCnt++;
+        return;
+    } elsif ( ! -f _ ) {
+        return;
+    }
+    if ( $nlinks == 1 ) {
+        $blkCntRm += $nblocks;
+        $fileCntRm++;
+        unlink($_);
+        #
+        # We must keep repeated files numbered sequential (ie: files
+        # that have the same checksum are appended with _0, _1 etc).
+        # There are two cases: we remove the base file xxxx, but xxxx_0
+        # exists, or we remove any file of the form xxxx_nnn.  We remember
+        # the base name and fix it up later (not in the middle of find).
+        #
+        my($baseName);
+        ($baseName = $File::Find::name) =~ s/_\d+$//;
+        $FixList{$baseName}++;
+    } else {
+        if ( /_(\d+)$/ ) {
+            $fileRepMax = $1 + 1 if ( $fileRepMax <= $1 );
             $fileCntRep++;
         }
-    }
-    if ( -f && $s[3] == 1 ) {
-        $blkCntRm += $s[12];
-        $fileCntRm++;
-        unlink($name);
-	#
-	# We must keep repeated files numbered sequential (ie: files
-	# that have the same checksum are appended with _0, _1 etc).
-	# There are two cases: we remove the base file xxxx, but xxxx_0
-	# exists, or we remove any file of the form xxxx_nnn.  We remember
-	# the base name and fix it up later (not in the middle of find).
-	#
-	$baseName = $name if ( $baseName eq "" );
-	$FixList{$baseName}++;
-    } else {
-        $fileCnt += -f;
-        $blkCnt  += $s[12];
-        $blkCnt2 += $s[12] if ( -f && $s[3] == 2 );
-	$fileLinkMax = $s[3] if ( $fileLinkMax < $s[3] );
+        $fileCnt += 1;
+        $blkCnt  += $nblocks;
+        $blkCnt2 += $nblocks if ( $nlinks == 2 );
+        $fileLinkMax = $nlinks if ( $fileLinkMax < $nlinks );
     }
 }

@@ -565,6 +565,7 @@ sub UserCommandRun
         hostIP       => $hostIP,
         share        => $RestoreReq{shareDest},
         XferMethod   => $Conf{XferMethod},
+        sshPath      => $Conf{SshPath},
         LOG          => *LOG,
         XferLOG      => $RestoreLOG,
         stat         => \%stat,

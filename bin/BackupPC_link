@@ -70,7 +70,7 @@ if ( @ARGV != 1 ) {
     print("usage: $0 <host>\n");
     exit(1);
 }
-if ( $ARGV[0] !~ /^([\w\.-\s]+)$/ ) {
+if ( $ARGV[0] !~ /^([\w\.\s-]+)$/ ) {
     print("$0: bad host name '$ARGV[0]'\n");
     exit(1);
 }

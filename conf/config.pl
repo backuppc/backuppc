@@ -547,15 +547,15 @@ $Conf{SmbClientPath} = '/usr/bin/smbclient';
 #    $timeStampFile   start time for incremental dump
 #
 $Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
-	    . '$I_option -U $userName -E -N -d 1'
+	    . ' $I_option -U $userName -E -N -d 1'
             . ' -c tarmode\\ full -Tc$X_option - $fileList';
 
 $Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
-	    . '$I_option -U $userName -E -N -d 1'
+	    . ' $I_option -U $userName -E -N -d 1'
 	    . ' -c tarmode\\ full -TcN$X_option $timeStampFile - $fileList';
 
 $Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
-            . '$I_option -U $userName -E -N -d 1'
+            . ' $I_option -U $userName -E -N -d 1'
             . ' -c tarmode\\ full -Tx -';
 
 #
@@ -956,6 +956,8 @@ $Conf{RestorePostUserCmd} = undef;
 # Override the client's host name.  This allows multiple clients
 # to all refer to the same physical hosts.  This should only be
 # set in the per-PC config file.
+#
+# Note: this setting doesn't work for DHCP hosts.
 #
 $Conf{ClientNameAlias} = undef;
 

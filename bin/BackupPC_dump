@@ -102,7 +102,7 @@ if ( @ARGV != 1 ) {
     print("usage: $0 [-d] [-e] [-f] [-i] <client>\n");
     exit(1);
 }
-if ( $ARGV[0] !~ /^([\w\.-\s]+)$/ ) {
+if ( $ARGV[0] !~ /^([\w\.\s-]+)$/ ) {
     print("$0: bad client name '$ARGV[0]'\n");
     exit(1);
 }
@@ -121,7 +121,7 @@ if ( $opts{d} ) {
     $hostIP = $client;
     exit(1) if ( $bpc->CheckHostAlive($hostIP) < 0 );
     ($client, $user) = $bpc->NetBiosInfoGet($hostIP);
-    exit(1) if ( $host !~ /^([\w\.-]+)$/ );
+    exit(1) if ( $host !~ /^([\w\.\s-]+)$/ );
     my $hosts = $bpc->HostInfoRead($client);
     exit(1) if ( !defined($hosts->{$client}) );
     $host = $client;
@@ -913,6 +913,7 @@ sub UserCommandRun
         share   => $ShareNames->[0],
         shares  => $ShareNames,
         XferMethod => $Conf{XferMethod},
+        sshPath => $Conf{SshPath},
         LOG     => *LOG,
         XferLOG => $XferLOG,
         stat    => \%stat,

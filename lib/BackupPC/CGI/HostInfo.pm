@@ -287,16 +287,50 @@ EOF
         $statusStr .= eval("qq{$Lang->{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times}}");
 
         if ( $StatusHost{aliveCnt} >= $Conf{BlackoutGoodCnt}
-                && $Conf{BlackoutGoodCnt} >= 0 && $Conf{BlackoutHourBegin} >= 0
-                && $Conf{BlackoutHourEnd} >= 0 ) {
+                && $Conf{BlackoutGoodCnt} >= 0 ) {
+            #
+            # Handle backward compatibility with original separate scalar
+            # blackout parameters.
+            #
+            if ( defined($Conf{BlackoutHourBegin}) ) {
+                push(@{$Conf{BlackoutPeriods}},
+                     {
+                         hourBegin => $Conf{BlackoutHourBegin},
+                         hourEnd   => $Conf{BlackoutHourEnd},
+                         weekDays  => $Conf{BlackoutWeekDays},
+                     }
+                );
+            }
+
+            #
+            # TODO: this string needs i18n.  Also, comma-separated
+            # list with "and" for the last element might not translate
+            # correctly.
+            #
             my(@days) = qw(Sun Mon Tue Wed Thu Fri Sat);
-            my($days) = join(", ", @days[@{$Conf{BlackoutWeekDays}}]);
-            my($t0) = sprintf("%d:%02d", $Conf{BlackoutHourBegin},
-                            60 * ($Conf{BlackoutHourBegin}
-                                     - int($Conf{BlackoutHourBegin})));
-            my($t1) = sprintf("%d:%02d", $Conf{BlackoutHourEnd},
-                            60 * ($Conf{BlackoutHourEnd}
-                                     - int($Conf{BlackoutHourEnd})));
+            my $blackoutStr;
+            my $periodCnt = 0;
+            foreach my $p ( @{$Conf{BlackoutPeriods}} ) {
+                next if ( ref($p->{weekDays}) ne "ARRAY"
+                            || !defined($p->{hourBegin})
+                            || !defined($p->{hourEnd})
+                        );
+                my $days = join(", ", @days[@{$p->{weekDays}}]);
+                my $t0   = sprintf("%d:%02d", $p->{hourBegin},
+                              60 * ($p->{hourBegin} - int($p->{hourBegin})));
+                my $t1   = sprintf("%d:%02d", $p->{hourEnd},
+                              60 * ($p->{hourEnd} - int($p->{hourEnd})));
+                if ( $periodCnt ) {
+                    $blackoutStr .= ", ";
+                    if ( $periodCnt == @{$Conf{BlackoutPeriods}} - 1 ) {
+                        $blackoutStr .= eval("qq{$Lang->{and}}");
+                        $blackoutStr .= " ";
+                    }
+                }
+                $blackoutStr
+                        .= eval("qq{$Lang->{__time0_to__time1_on__days}}");
+                $periodCnt++;
+            }
             $statusStr .= eval("qq{$Lang->{Because__host_has_been_on_the_network_at_least__Conf_BlackoutGoodCnt_consecutive_times___}}");
         }
     }

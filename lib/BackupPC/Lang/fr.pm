@@ -1070,8 +1070,10 @@ EOF
 
 $Lang{Because__host_has_been_on_the_network_at_least__Conf_BlackoutGoodCnt_consecutive_times___} = <<EOF;
 <li>Du fait que \$host a été présent sur le réseau au moins \$Conf{BlackoutGoodCnt}
-fois consécutives, il ne sera pas sauvegardé de \$t0 à \$t1 pendant \$days.
+fois consécutives, il ne sera pas sauvegardé de \$blackoutStr.
 EOF
+
+$Lang{__time0_to__time1_on__days} = "\$t0 à \$t1 pendant \$days";
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
 <li>Les sauvegardes sont reportées pour \$hours heures

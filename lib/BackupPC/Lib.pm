@@ -48,6 +48,7 @@ use File::Compare;
 use Socket;
 use Cwd;
 use Digest::MD5;
+use Config;
 
 sub new
 {
@@ -92,7 +93,7 @@ sub new
     if ( !$noUserCheck
 	    && $bpc->{Conf}{BackupPCUserVerify}
 	    && $> != (my $uid = (getpwnam($bpc->{Conf}{BackupPCUser}))[2]) ) {
-	print("Wrong user: my userid is $>, instead of $uid"
+	print(STDERR "Wrong user: my userid is $>, instead of $uid"
 	    . " ($bpc->{Conf}{BackupPCUser})\n");
 	return;
     }
@@ -152,6 +153,20 @@ sub verbose
 
     $bpc->{verbose} = $param if ( defined($param) );
     return $bpc->{verbose};
+}
+
+sub sigName2num
+{
+    my($bpc, $sig) = @_;
+
+    if ( !defined($bpc->{SigName2Num}) ) {
+	my $i = 0;
+	foreach my $name ( split(' ', $Config{sig_name}) ) {
+	    $bpc->{SigName2Num}{$name} = $i;
+	    $i++;
+	}
+    }
+    return $bpc->{SigName2Num}{$sig};
 }
 
 #
@@ -434,7 +449,7 @@ sub RmTreeQuiet
     if ( defined($roots) && length($roots) ) {
       $roots = [$roots] unless ref $roots;
     } else {
-      print "RmTreeQuiet: No root path(s) specified\n";
+      print(STDERR "RmTreeQuiet: No root path(s) specified\n");
     }
     chdir($pwd);
     foreach $root (@{$roots}) {
@@ -448,7 +463,7 @@ sub RmTreeQuiet
 	if ( !unlink($root) ) {
             if ( -d $root ) {
                 my $d = DirHandle->new($root)
-                  or print "Can't read $pwd/$root: $!";
+                  or print(STDERR "Can't read $pwd/$root: $!");
                 @files = $d->read;
                 $d->close;
                 @files = grep $_!~/^\.{1,2}$/, @files;
@@ -1154,7 +1169,7 @@ sub cmdSystemOrEval
 	    # force list-form of exec(), ie: no shell even for 1 arg
 	    #
 	    exec { $cmd->[0] } @$cmd;
-            print("Exec of @$cmd failed\n");
+            print(STDERR "Exec of @$cmd failed\n");
             exit(1);
 	}
 	#

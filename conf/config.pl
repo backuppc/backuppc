@@ -689,6 +689,13 @@ $Conf{BackupZeroFilesIsFatal} = 1;
 $Conf{XferMethod} = 'smb';
 
 #
+# Level of verbosity in Xfer log files.  0 means be quiet, 1 will give
+# will give one line per file, 2 will also show skipped files on
+# incrementals, higher values give more output.
+#
+$Conf{XferLogLevel} = 1;
+
+#
 # Full path for smbclient. Security caution: normal users should not
 # allowed to write to this file or directory.
 #
@@ -980,15 +987,6 @@ $Conf{RsyncRestoreArgs} = [
 	    # Add additional arguments here
 	    #
 ];
-
-#
-# Amount of verbosity in Rsync Xfer log files.  0 means be quiet,
-# 1 will give will give one line per file, 2 will also show skipped
-# files on incrementals, higher values give more output.  10 will
-# include byte dumps of all data read/written, which will make the
-# log files huge.
-#
-$Conf{RsyncLogLevel} = 1;
 
 #
 # Archive Destination

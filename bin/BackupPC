@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0_CVS, released 13 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -772,7 +772,7 @@ sub Main_Check_Job_Messages
                     if ( defined($Jobs{$newHost}) ) {
                         print(LOG $bpc->timeStamp,
                                 "Backup on $newHost is already running\n");
-                        kill(2, $Jobs{$host}{pid});
+                        kill($bpc->sigName2num("INT"), $Jobs{$host}{pid});
                         $nbytes = 0;
                         last;
                     }
@@ -835,6 +835,13 @@ sub Main_Check_Job_Messages
                 delete($Status{$host}{error});
                 delete($Status{$host}{errorTime});
                 $Status{$host}{endTime}   = time;
+            } elsif ( $mesg =~ /^backups disabled/ ) {
+                print(LOG $bpc->timeStamp,
+			    "Ignoring old backup error on $host\n");
+                $Status{$host}{reason}    = "Reason_backup_done";
+                delete($Status{$host}{error});
+                delete($Status{$host}{errorTime});
+                $Status{$host}{endTime}   = time;
             } elsif ( $mesg =~ /^restore complete/ ) {
                 print(LOG $bpc->timeStamp, "Finished restore on $host\n");
                 $Status{$host}{reason}    = "Reason_restore_done";
@@ -873,25 +880,46 @@ sub Main_Check_Job_Messages
 		}
             } elsif ( $mesg =~ /^dump failed: (.*)/ ) {
                 $Status{$host}{state}     = "Status_idle";
-                $Status{$host}{reason}    = "Reason_backup_failed";
-                $Status{$host}{error}     = $1;
-                $Status{$host}{errorTime} = time;
-                $Status{$host}{endTime}   = time;
-                print(LOG $bpc->timeStamp, "Backup failed on $host ($1)\n");
+		$Status{$host}{error}     = $1;
+		$Status{$host}{errorTime} = time;
+		$Status{$host}{endTime}   = time;
+		if ( $Status{$host}{reason}
+			eq "Reason_backup_canceled_by_user" ) {
+		    print(LOG $bpc->timeStamp,
+			    "Backup canceled on $host ($1)\n");
+		} else {
+		    $Status{$host}{reason} = "Reason_backup_failed";
+		    print(LOG $bpc->timeStamp,
+			    "Backup failed on $host ($1)\n");
+		}
             } elsif ( $mesg =~ /^restore failed: (.*)/ ) {
                 $Status{$host}{state}     = "Status_idle";
-                $Status{$host}{reason}    = "Reason_restore_failed";
                 $Status{$host}{error}     = $1;
                 $Status{$host}{errorTime} = time;
                 $Status{$host}{endTime}   = time;
-                print(LOG $bpc->timeStamp, "Restore failed on $host ($1)\n");
+		if ( $Status{$host}{reason}
+			 eq "Reason_restore_canceled_by_user" ) {
+		    print(LOG $bpc->timeStamp,
+			    "Restore canceled on $host ($1)\n");
+		} else {
+		    $Status{$host}{reason} = "Reason_restore_failed";
+		    print(LOG $bpc->timeStamp,
+			    "Restore failed on $host ($1)\n");
+		}
             } elsif ( $mesg =~ /^archive failed: (.*)/ ) {
                 $Status{$host}{state}     = "Status_idle";
-                $Status{$host}{reason}    = "Reason_archive_failed";
                 $Status{$host}{error}     = $1;
                 $Status{$host}{errorTime} = time;
                 $Status{$host}{endTime}   = time;
-                print(LOG $bpc->timeStamp, "Archive failed on $host ($1)\n");
+		if ( $Status{$host}{reason}
+			 eq "Reason_archive_canceled_by_user" ) {
+		    print(LOG $bpc->timeStamp,
+			    "Archive canceled on $host ($1)\n");
+		} else {
+		    $Status{$host}{reason} = "Reason_archive_failed";
+		    print(LOG $bpc->timeStamp,
+			    "Archive failed on $host ($1)\n");
+		}
             } elsif ( $mesg =~ /^log\s+(.*)/ ) {
                 print(LOG $bpc->timeStamp, "$1\n");
             } elsif ( $mesg =~ /^BackupPC_stats = (.*)/ ) {
@@ -1043,7 +1071,7 @@ sub Main_Check_Client_Messages
                     print(LOG $bpc->timeStamp,
                                "Stopping current $Jobs{$host}{type} of $host,"
                              . " request by $user (backoff=$backoff)\n");
-                    kill(2, $Jobs{$host}{pid});
+                    kill($bpc->sigName2num("INT"), $Jobs{$host}{pid});
 		    #
 		    # Don't close the pipe now; wait until the child
 		    # really exits later.  Otherwise close() will
@@ -1066,7 +1094,7 @@ sub Main_Check_Client_Messages
 		    }
                     $Status{$host}{activeJob} = 0;
                     $Status{$host}{startTime} = time;
-                    $reply = "ok: $Jobs{$host}{type} of $host cancelled";
+                    $reply = "ok: $Jobs{$host}{type} of $host canceled";
                 } elsif ( $BgQueueOn{$host} || $UserQueueOn{$host} ) {
                     print(LOG $bpc->timeStamp,
                                "Stopping pending backup of $host,"
@@ -1074,7 +1102,7 @@ sub Main_Check_Client_Messages
                     @BgQueue = grep($_->{host} ne $host, @BgQueue);
                     @UserQueue = grep($_->{host} ne $host, @UserQueue);
                     $BgQueueOn{$host} = $UserQueueOn{$host} = 0;
-                    $reply = "ok: pending backup of $host cancelled";
+                    $reply = "ok: pending backup of $host canceled";
                 } else {
                     print(LOG $bpc->timeStamp,
                                "Nothing to do for stop backup of $host,"
@@ -1484,7 +1512,7 @@ sub catch_signal
     if ( $SigName ) {
         $SigName = shift;
         foreach my $host ( keys(%Jobs) ) {
-            kill(2, $Jobs{$host}{pid});
+            kill($bpc->sigName2num("INT"), $Jobs{$host}{pid});
         }
         #
         # In case we are inside the exit handler, reopen the log file
@@ -1604,11 +1632,11 @@ sub ServerShutdown
     print(LOG $bpc->timeStamp, "$mesg\n");
     if ( keys(%Jobs) ) {
         foreach my $host ( keys(%Jobs) ) {
-            kill(2, $Jobs{$host}{pid});
+            kill($bpc->sigName2num("INT"), $Jobs{$host}{pid});
         }
         sleep(1);
         foreach my $host ( keys(%Jobs) ) {
-            kill(9, $Jobs{$host}{pid});
+            kill($bpc->sigName2num("KILL"), $Jobs{$host}{pid});
         }
         %Jobs = ();
     }

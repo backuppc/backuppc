@@ -128,7 +128,7 @@ while ( 1 ) {
     #
     my $noFill = 1;
     my $fillFromNum;
-    if ( $Backups[$num]{type} eq "full" ) {
+    if ( $Backups[$num]{type} ne "incr" ) {
         $noFill = 0
     } elsif ( $Conf{IncrFill} ) {
         my $i;

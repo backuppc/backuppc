@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id: it.pm,v 1.1 2004/02/23 07:42:57 cbarratt Exp $
+# $Id$
 #
 # Italian i18n file
 #
@@ -119,13 +119,13 @@ EOF
 
 # --------------------------------
 $Lang{BackupPC__Server_Summary} = "BackupPC: prospetto server";
-+$Lang{BackupPC__Archive} = "BackupPC: Archive";
-+$Lang{BackupPC_Summary} = <<EOF;
+$Lang{BackupPC__Archive} = "BackupPC: Archive";
+$Lang{BackupPC_Summary} = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
 Questo rapporto di stato &egrave; stato generato il \$now.
-<p>
+</p>
 
 \${h2("Host con backup buoni")}
 <p>
@@ -136,15 +136,16 @@ Ci sono \$hostCntGood host sottoposti a backup per un totale di:
 <li> \$incrTot backup incrementali per una dimensione totale di \${incrSizeTot}GB
      (prima del processo di pooling e compressione).
 </ul>
-<table border>
-<tr><td> Host </td>
+</p>
+<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<tr class="tableheader"><td> Host </td>
     <td align="center"> Utente </td>
     <td align="center"> Completi </td>
-    <td align="center"> Et&agrave; completi<br>(giorni) </td>
-    <td align="center"> Dimensione completi<br>(GB) </td>
-    <td align="center"> Velocit&agrave<br>(MB/s) </td>
+    <td align="center"> Et&agrave; completi (giorni) </td>
+    <td align="center"> Dimensione completi (GB) </td>
+    <td align="center"> Velocit&agrave (MB/s) </td>
     <td align="center"> Incrementali </td>
-    <td align="center"> Et&agrave; incrementali<br>(giorni) </td>
+    <td align="center"> Et&agrave; incrementali (giorni) </td>
     <td align="center"> Stato </td>
     <td align="center"> Ultimo tentativo </td></tr>
 \$strGood
@@ -158,11 +159,11 @@ Ci sono \$hostCntNone host senza alcun backup.
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Utente </td>
     <td align="center"> Completi </td>
-    <td align="center"> Et&agrave; completi<br>(giorni) </td>
-    <td align="center"> Dimensione completi<br>(GB) </td>
-    <td align="center"> Velocit&agrave<br>(MB/s) </td>
+    <td align="center"> Et&agrave; completi (giorni) </td>
+    <td align="center"> Dimensione completi (GB) </td>
+    <td align="center"> Velocit&agrave (MB/s) </td>
     <td align="center"> Incrementali </td>
-    <td align="center"> Et&agrave; incrementali<br>(giorni) </td>
+    <td align="center"> Et&agrave; incrementali (giorni) </td>
     <td align="center"> Stato </td>
     <td align="center"> Ultimo tentativo </td></tr>
 \$strNone
@@ -209,7 +210,7 @@ totale di \${fullSizeTot}GB
 <table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> Host</td>
     <td align="center"> Utente </td>
-    <td align="center"> Dimensione<br>backup </td>
+    <td align="center"> Dimensione backup </td>
 \$strGood
 \$checkAllHosts
 </table>
@@ -355,6 +356,7 @@ Sono state accodate le seguenti richieste degli utenti:
 \${h2("Prospetto code in background")}
 <p>
 Sono attualmente in coda le seguenti richieste di background:
+</p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Data richiesta </td>
@@ -365,6 +367,7 @@ Sono attualmente in coda le seguenti richieste di background:
 \${h2("Prospetto coda comandi")}
 <p>
 Sono attualmente in coda le seguenti richieste di comandi:
+</p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Data richiesta </td>
@@ -444,7 +447,6 @@ su \$host.
 </p><p>
 <b>Attenzione:</b> ogni file esistente che corrisponde ai file selezionati
 sar&agrave; sovrascritto!
-
 </p>
 <form action="\$MyURL" method="post" name="direct">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
@@ -465,13 +467,13 @@ sar&agrave; sovrascritto!
                window.open(URL,'','width=500,height=400');
         }
         </script>
-        <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.d irect.hostDest.options.value)">Search for available shares (NOT IMPLEMENTED)</a></td>
+        <a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Search for available shares (NOT IMPLEMENTED)</a></td>
 </tr><tr>
     <td>Ripristino dei file sulla condivisione</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"
 	 name="shareDest"></td>
 </tr><tr>
-    <td>Ripristino dei file al di sotto della directory<br>
+    <td>Ripristino dei file al di sotto della directory
         (relativa alla condivisione)</td>
     <td valign="top"><input type="text" size="40" maxlength="256"
 	value="\${EscHTML(\$pathHdr)}" name="pathHdr"></td>
@@ -488,6 +490,7 @@ EOF
   
 # ------------------------------
 $Lang{Option_2__Download_Zip_archive} = <<EOF;
+<p>
 \${h2("Opzione 2: scaricamento archivio zip")}
 <p>
 &Egrave; possibile scaricare un archivio zip contenente tutti i
@@ -525,7 +528,7 @@ $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 Archive::Zip non &egrave; installato e non &egrave; quindi possibile
 scaricare un archivio zip.
 Contattare l\'amministratore di sistemaper installare Archive::Zip da
-a href="http://www.cpan.org">www.cpan.org</a>.
+<a href="http://www.cpan.org">www.cpan.org</a>.
 </p>
 EOF
 
@@ -595,7 +598,7 @@ $Lang{Reply_from_server_was___reply} = <<EOF;
 <p>
 La risposta del server &grave; stata: \$reply
 <p>
-Ritorna alla <a href="\$MyURL?host=\$host">homepage di \$hostDest</a>.
+Ritorna alla <a href="\$MyURL?host=\$hostDest">homepage di \$hostDest</a>.
 EOF
 
 $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
@@ -615,6 +618,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <ul>
 \$statusStr
 </ul>
+</p>
 \${h2("Azioni utente")}
 <p>
 <form action="\$MyURL" method="get">
@@ -628,12 +632,12 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Cliccare sul numero di bakcup per sfogliare e ripristinare i file di backup.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center"> Numero<br>backup </td>
+<tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
     <td align="center"> Completo </td>
     <td align="center"> Data avvio </td>
-    <td align="center"> Durata<br>(minuti) </td>
-    <td align="center"> Et&agrave;<br>(giorni) </td>
+    <td align="center"> Durata (minuti) </td>
+    <td align="center"> Et&agrave; (giorni) </td>
     <td align="center"> Percorso backup server </td>
 </tr>
 \$str
@@ -646,13 +650,13 @@ Cliccare sul numero di bakcup per sfogliare e ripristinare i file di backup.
 \${h2("Prospetto errori trasferimento")}
 <br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td align="center"> Numero<br>backup </td>
+<tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
     <td align="center"> Vedere </td>
-    <td align="center"> Numero errori<br>trasferimento </td>
-    <td align="center"> Numero file<br>con problemi </td>
-    <td align="center"> Numero condivisioni<br>con problemi </td>
-    <td align="center"> Numero<br>errori tar </td>
+    <td align="center"> Numero errori trasferimento </td>
+    <td align="center"> Numero file con problemi </td>
+    <td align="center"> Numero condivisioni con problemi </td>
+    <td align="center"> Numero errori tar </td>
 </tr>
 \$errStr
 </table>
@@ -664,6 +668,7 @@ I file esistenti sono quelli gi&agrave; presenti nel pool; i file nuovi sono
 quelli aggiunti al pool.
 I file vuoti e gli errori SMB non sono conteggiati nei contatori di
 riutilizzo e file nuovi.
+</p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totali </td>
@@ -671,15 +676,15 @@ riutilizzo e file nuovi.
     <td align="center" colspan="2"> File nuovi </td>
 </tr>
 <tr class="tableheader">
-    <td align="center"> Numero<br>backup </td>
+    <td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
-    <td align="center"> Numero<br>file </td>
-    <td align="center"> Dimensione<br>(MB) </td>
-    <td align="center"> Velocit&agrave<br>(MB/s) </td>
-    <td align="center"> Numero<br>file </td>
-    <td align="center"> Dimensione<br>(MB) </td>
-    <td align="center"> Numero<br>file </td>
-    <td align="center"> Dimensione<br>(MB) </td>
+    <td align="center"> Numero file </td>
+    <td align="center"> Dimensione (MB) </td>
+    <td align="center"> Velocit&agrave (MB/s) </td>
+    <td align="center"> Numero file </td>
+    <td align="center"> Dimensione (MB) </td>
+    <td align="center"> Numero file </td>
+    <td align="center"> Dimensione (MB) </td>
 </tr>
 \$sizeStr
 </table>
@@ -695,15 +700,15 @@ nuovi.
     <td align="center" colspan="3"> File esistenti </td>
     <td align="center" colspan="3"> File nuovi </td>
 </tr>
-<tr class="tableheader"><td align="center"> Numero<br>backup </td>
+<tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
-    <td align="center"> Livello<br>compressione </td>
-    <td align="center"> Dimensione<br>(MB) </td>
-    <td align="center"> Compresso<br>(MB) </td>
-    <td align="center"> Tasso<br>compressione </td>
-    <td align="center"> Dimensione<br>(MB) </td>
-    <td align="center"> Compresso<br>(MB) </td>
-    <td align="center"> Tasso<br>compressione </td>
+    <td align="center"> Livello compressione </td>
+    <td align="center"> Dimensione (MB) </td>
+    <td align="center"> Compresso (MB) </td>
+    <td align="center"> Tasso compressione </td>
+    <td align="center"> Dimensione (MB) </td>
+    <td align="center"> Compresso (MB) </td>
+    <td align="center"> Tasso compressione </td>
 </tr>
 \$compStr
 </table>
@@ -799,16 +804,13 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <br>
 <table width="100%">
 <tr><td valign="top">
-    <!--Navigate here:-->
     <br><table align="center" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border="0" width="100%" align="left" cellpadding="3" cellspacing
-  ="1">
-        <table border="0" width="100%" align="left" cellpadding="2" cellspacing="1">
+        <table border="0" width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -820,7 +822,6 @@ $Lang{Backup_browse_for__host} = <<EOF;
 This is now in the checkAll row
 <input type="submit" name="Submit" value="Ripristina file selezionati">
 -->
-</td></tr></table>
 </form>
 EOF
 
@@ -870,24 +871,24 @@ $Lang{Restore___num_details_for__host2 } = <<EOF;
 \${h1("Dettagli ripristino numero \$num per \$host")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="50%">
-<tr><td class="tableheader"> Numero </td><td> \$Restores[\$i]{num} </td></tr>
-<tr><td class="tableheader"> Richiesto da </td><td> \$RestoreReq{user} </td></tr>
-<tr><td class="tableheader"> Data richiesta </td><td> \$reqTime </td></tr>
-<tr><td class="tableheader"> Risultato </td><td> \$Restores[\$i]{result} </td></tr>
-<tr><td class="tableheader"> Messaggio d\'errore </td><td> \$Restores[\$i]{errorMsg} </td></tr>
-<tr><td class="tableheader"> Host sorgente </td><td> \$RestoreReq{hostSrc} </td></tr>
-<tr><td class="tableheader"> Numero backup<br>sorgente </td><td> \$RestoreReq{num} </td></tr>
-<tr><td class="tableheader"> Condivisione<br>sorgente </td><td> \$RestoreReq{shareSrc} </td></tr>
-<tr><td class="tableheader"> Host destinazione </td><td> \$RestoreReq{hostDest} </td></tr>
-<tr><td class="tableheader"> Condivisione<br>destinazione </td><td> \$RestoreReq{shareDest} </td></tr>
-<tr><td class="tableheader"> Data avvio </td><td> \$startTime </td></tr>
-<tr><td class="tableheader"> Durata </td><td> \$duration min </td></tr>
-<tr><td class="tableheader"> Numero file </td><td> \$Restores[\$i]{nFiles} </td></tr>
-<tr><td class="tableheader"> Dimensione totale </td><td> \${MB}MB </td></tr>
-<tr><td class="tableheader"> Tasso<br>trasferimento </td><td> \$MBperSecMB/s </td></tr>
-<tr><td class="tableheader"> Errori<br>creazione tar </td><td> \$Restores[\$i]{tarCreateErrs} </td></tr>
-<tr><td class="tableheader"> Errori<br>trasferimento </td><td> \$Restores[\$i]{xferErrs} </td></tr>
-<tr><td class="tableheader"> File log<br>trasferimento </td><td>
+<tr><td class="tableheader"> Numero </td><td class="border"> \$Restores[\$i]{num} </td></tr>
+<tr><td class="tableheader"> Richiesto da </td><td class="border"> \$RestoreReq{user} </td></tr>
+<tr><td class="tableheader"> Data richiesta </td><td class="border"> \$reqTime </td></tr>
+<tr><td class="tableheader"> Risultato </td><td class="border"> \$Restores[\$i]{result} </td></tr>
+<tr><td class="tableheader"> Messaggio d\'errore </td><td class="border"> \$Restores[\$i]{errorMsg} </td></tr>
+<tr><td class="tableheader"> Host sorgente </td><td class="border"> \$RestoreReq{hostSrc} </td></tr>
+<tr><td class="tableheader"> Numero backup sorgente </td><td class="border"> \$RestoreReq{num} </td></tr>
+<tr><td class="tableheader"> Condivisione sorgente </td><td class="border"> \$RestoreReq{shareSrc} </td></tr>
+<tr><td class="tableheader"> Host destinazione </td><td class="border"> \$RestoreReq{hostDest} </td></tr>
+<tr><td class="tableheader"> Condivisione destinazione </td><td class="border"> \$RestoreReq{shareDest} </td></tr>
+<tr><td class="tableheader"> Data avvio </td><td class="border"> \$startTime </td></tr>
+<tr><td class="tableheader"> Durata </td><td class="border"> \$duration min </td></tr>
+<tr><td class="tableheader"> Numero file </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
+<tr><td class="tableheader"> Dimensione totale </td><td class="border"> \${MB}MB </td></tr>
+<tr><td class="tableheader"> Tasso trasferimento </td><td class="border"> \$MBperSecMB/s </td></tr>
+<tr><td class="tableheader"> Errori creazione tar </td><td class="border"> \$Restores[\$i]{tarCreateErrs} </td></tr>
+<tr><td class="tableheader"> Errori trasferimento </td><td class="border"> \$Restores[\$i]{xferErrs} </td></tr>
+<tr><td class="tableheader"> File log trasferimento </td><td class="border">
 <a href="\$MyURL?action=view&type=RestoreLOG&num=\$Restores[\$i]{num}&host=\$host">Vedi</a>,
 <a href="\$MyURL?action=view&type=RestoreErr&num=\$Restores[\$i]{num}&host=\$host">Errori</a>
 </tr></tr>
@@ -1082,8 +1083,10 @@ EOF
 
 $Lang{Because__host_has_been_on_the_network_at_least__Conf_BlackoutGoodCnt_consecutive_times___} = <<EOF;
 <li>Poich&eacute; \$host &egrave; rimasto in rete per almeno \$Conf{BlackoutGoodCnt}
-volte consecutive, il backup non sar&agrave; effettuato dalle \$t0 alle \$t1 di \$days.
+volte consecutive, il backup non sar&agrave; effettuato dalle \$blackoutStr.
 EOF
+
+$Lang{__time0_to__time1_on__days} = "\$t0 alle \$t1 di \$days";
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
 <li>I backup sono stati posticipati per \$hours ore
@@ -1138,14 +1141,14 @@ $Lang{Restore_Summary} = <<EOF;
 <p>
 Fare clic sul numero del ripristino per maggiori dettagli.
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td align="center"> Numero<br>ripristino </td>
+<tr class="tableheader"><td align="center"> Numero ripristino </td>
     <td align="center"> Risultato </td>
     <td align="right"> Data avvio</td>
-    <td align="right"> Durata<br>(minuti)</td>
-    <td align="right"> Numero<br>file </td>
-    <td align="right"> Dimensione<br>(MB) </td>
-    <td align="right"> Numero<br>errori tar </td>
-    <td align="right"> Numero errori<br>trasferimento </td>
+    <td align="right"> Durata (minuti)</td>
+    <td align="right"> Numero file </td>
+    <td align="right"> Dimensione (MB) </td>
+    <td align="right"> Numero errori tar </td>
+    <td align="right"> Numero errori trasferimento </td>
 </tr>
 \$restoreStr
 </table>
@@ -1157,10 +1160,10 @@ $Lang{Archive_Summary} = <<EOF;
 <p>
 Fare clic sul numero di archivio per maggiori dettagli.
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td align="center"> Numero<br>archivio</td>
+<tr class="tableheader"><td align="center"> Numero archivio</td>
     <td align="center"> Risultato </td>
-    <td align="right"> Data<br>avvio</td>
-    <td align="right"> Durata<br>minuti</td>
+    <td align="right"> Data avvio</td>
+    <td align="right"> Durata minuti</td>
 </tr>
 \$ArchiveStr
 </table>
@@ -1200,6 +1203,7 @@ $Lang{Status_link_running} = "collegamenti in esecuzione";
 
 $Lang{Reason_backup_done}    = "backup eseguito";
 $Lang{Reason_restore_done}   = "restore eseguito";
+$Lang{Reason_archive_done}   = "archivio eseguito";
 $Lang{Reason_nothing_to_do}  = "nulla da fare";
 $Lang{Reason_backup_failed}  = "backup fallito";
 $Lang{Reason_restore_failed} = "restore fallito";

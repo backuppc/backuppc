@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0_CVS, released 13 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -231,12 +231,14 @@ sub readOutput
 	# ignore the log file time stamps from smbclient introduced
 	# in version 3.0.0 - don't even write them to the log file.
 	#
-	next if ( m{^\[\d+/\d+/\d+ +\d+:\d+:\d+.*\] +(client/cli|lib/util_unistr).*\(\d+\)} );
-        $t->{XferLOG}->write(\"$_\n");
+	if ( m{^\[\d+/\d+/\d+ +\d+:\d+:\d+.*\] +(client/cli|lib/util_unistr).*\(\d+\)} ) {
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 5 );
+            next;
+        }
         #
         # refresh our inactivity alarm
         #
-        alarm($conf->{ClientTimeout});
+        alarm($conf->{ClientTimeout}) if ( !$t->{abort} );
         $t->{lastOutputLine} = $_ if ( !/^$/ );
         #
         # This section is highly dependent on the version of smbclient.
@@ -250,15 +252,20 @@ sub readOutput
             $fileName =~ s/^\/*//;
             $t->{byteCnt} += $sambaFileSize;
             $t->{fileCnt}++;
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 2 );
         } elsif ( /restore tar file (.*) of size (\d+) bytes/ ) {
             $t->{byteCnt} += $2;
             $t->{fileCnt}++;
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
         } elsif ( /^\s*tar: dumped \d+ files/ ) {
             $t->{xferOK} = 1;
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
         } elsif ( /^\s*tar: restored \d+ files/ ) {
             $t->{xferOK} = 1;
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
         } elsif ( /^\s*read_socket_with_timeout: timeout read. /i ) {
             $t->{hostAbort} = 1;
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
         } elsif ( /^code 0 listing /
                     || /^\s*code 0 opening /
                     || /^\s*abandoning restore/i
@@ -272,6 +279,7 @@ sub readOutput
 		$t->{XferLOG}->write(\"This backup will fail because: $_\n");
 		$t->{hostError} = $_;
 	    }
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
         } elsif ( /^\s*NT_STATUS_ACCESS_DENIED listing (.*)/
 	       || /^\s*ERRDOS - ERRnoaccess \(Access denied\.\) listing (.*)/ ) {
 	    my $badDir = $1;
@@ -283,6 +291,9 @@ sub readOutput
 		$t->{XferLOG}->write(\"This backup will fail because: $_\n");
 		$t->{hostError} ||= $_;
 	    }
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
+        } elsif ( /^\s*directory \\/i ) {
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 2 );
         } elsif ( /smb: \\>/
                 || /^\s*added interface/i
                 || /^\s*tarmode is now/i
@@ -290,13 +301,13 @@ sub readOutput
                 || /^\s*Domain=/i
                 || /^\([\d\.]* kb\/s\) \(average [\d\.]* kb\/s\)$/i
                 || /^\s*Getting files newer than/i
-                || /^\s*directory \\/i
 		|| /^\s*restore directory \\/i
                 || /^\s*Output is \/dev\/null/i
                 || /^\s*Timezone is/i
                 || /^\s*creating lame (up|low)case table/i
 	    ) {
             # ignore these messages
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
         } else {
             $t->{xferErrCnt}++;
             $t->{xferBadShareCnt}++ if ( /^ERRDOS - ERRbadshare/ );
@@ -329,9 +340,18 @@ sub readOutput
 			file  => $badFile
 		    });
             }
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
         }
     }
     return 1;
+}
+
+sub abort
+{
+    my($t, $reason) = @_;
+
+    $t->{abort} = 1;
+    $t->{abortReason} = $reason;
 }
 
 sub setSelectMask

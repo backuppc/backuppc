@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0_CVS, released 13 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -24,9 +24,8 @@ use strict;
 use File::Path;
 use BackupPC::Attrib qw(:all);
 use BackupPC::View;
-use BackupPC::RsyncDigest;
+use BackupPC::Xfer::RsyncDigest;
 use BackupPC::PoolWrite;
-use Data::Dumper;
 
 use constant S_IFMT       => 0170000;	# type of file
 use constant S_IFDIR      => 0040000; 	# directory
@@ -112,9 +111,9 @@ sub csumStart
     $fio->csumEnd if ( defined($fio->{csum}) );
     return -1 if ( $attr->{type} != BPC_FTYPE_FILE );
     (my $err, $fio->{csum}, my $blkSize)
-         = BackupPC::RsyncDigest->digestStart($attr->{fullPath}, $attr->{size},
-                         0, $defBlkSize, $fio->{checksumSeed}, $needMD4,
-                         $attr->{compress}, 1);
+         = BackupPC::Xfer::RsyncDigest->digestStart($attr->{fullPath},
+			 $attr->{size}, 0, $defBlkSize, $fio->{checksumSeed},
+			 $needMD4, $attr->{compress}, 1);
     if ( $err ) {
         $fio->log("Can't get rsync digests from $attr->{fullPath}"
                 . " (err=$err, name=$f->{name})");
@@ -878,6 +877,7 @@ sub fileDeltaRxDone
 {
     my($fio, $md4) = @_;
     my $name = $1 if ( $fio->{rxFile}{name} =~ /(.*)/ );
+    my $ret;
 
     close($fio->{rxInFd})  if ( defined($fio->{rxInFd}) );
     unlink("$fio->{outDirSh}RStmp") if  ( -f "$fio->{outDirSh}RStmp" );
@@ -899,7 +899,7 @@ sub fileDeltaRxDone
                 # fetch the md4 file digest, not the block digests.
                 #
                 my($err, $csum, $blkSize)
-                         = BackupPC::RsyncDigest->digestStart(
+                         = BackupPC::Xfer::RsyncDigest->digestStart(
                                  $attr->{fullPath}, $attr->{size},
                                  0, 2048, $fio->{checksumSeed}, 1,
                                  $attr->{compress});
@@ -935,6 +935,8 @@ sub fileDeltaRxDone
                 $fio->{rxOutFd}->close;
                 unlink($fio->{rxOutFile});
             }
+            delete($fio->{rxFile});
+	    delete($fio->{rxOutFile});
             return 1;
         }
     }
@@ -976,32 +978,34 @@ sub fileDeltaRxDone
             if ( !link($attr->{fullPath}, $rxOutFile) ) {
                 $fio->log("Unable to link $attr->{fullPath} to $rxOutFile");
 		$fio->{stats}{errorCnt}++;
-                return -1;
-            }
-	    #
-	    # Cumulate the stats
-	    #
-	    $fio->{stats}{TotalFileCnt}++;
-	    $fio->{stats}{TotalFileSize} += $fio->{rxSize};
-	    $fio->{stats}{ExistFileCnt}++;
-	    $fio->{stats}{ExistFileSize} += $fio->{rxSize};
-	    $fio->{stats}{ExistFileCompSize} += -s $rxOutFile;
-	    $fio->{rxFile}{size} = $fio->{rxSize};
-	    return $fio->attribSet($fio->{rxFile});
+		$ret = -1;
+            } else {
+		#
+		# Cumulate the stats
+		#
+		$fio->{stats}{TotalFileCnt}++;
+		$fio->{stats}{TotalFileSize} += $fio->{rxSize};
+		$fio->{stats}{ExistFileCnt}++;
+		$fio->{stats}{ExistFileSize} += $fio->{rxSize};
+		$fio->{stats}{ExistFileCompSize} += -s $rxOutFile;
+		$fio->{rxFile}{size} = $fio->{rxSize};
+		$ret = $fio->attribSet($fio->{rxFile});
+	    }
         }
-    }
-    if ( defined($fio->{rxOutFd}) ) {
+    } else {
 	my $exist = $fio->processClose($fio->{rxOutFd},
 				       $fio->{rxOutFileRel},
 				       $fio->{rxSize}, 1);
 	$fio->logFileAction($exist ? "pool" : "create", $fio->{rxFile})
 			    if ( $fio->{logLevel} >= 1 );
 	$fio->{rxFile}{size} = $fio->{rxSize};
-	return $fio->attribSet($fio->{rxFile});
+	$ret = $fio->attribSet($fio->{rxFile});
     }
     delete($fio->{rxDigest});
     delete($fio->{rxInData});
-    return;
+    delete($fio->{rxFile});
+    delete($fio->{rxOutFile});
+    return $ret;
 }
 
 #
@@ -1102,9 +1106,21 @@ sub finish
     my($fio, $isChild) = @_;
 
     #
+    # If we are aborting early, remove the last file since
+    # it was not complete
+    #
+    if ( $isChild && defined($fio->{rxFile}) ) {
+	unlink("$fio->{outDirSh}RStmp") if  ( -f "$fio->{outDirSh}RStmp" );
+	if ( defined($fio->{rxFile}) ) {
+	    unlink($fio->{rxOutFile});
+	    $fio->log("finish: removing in-process file $fio->{rxFile}{name}");
+	}
+    }
+
+    #
     # Flush the attributes if this is the child
     #
-    $fio->attribWrite(undef);
+    $fio->attribWrite(undef) if ( $isChild );
 }
 
 #sub is_tainted

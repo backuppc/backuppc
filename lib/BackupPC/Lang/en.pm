@@ -1072,8 +1072,10 @@ EOF
 
 $Lang{Because__host_has_been_on_the_network_at_least__Conf_BlackoutGoodCnt_consecutive_times___} = <<EOF;
 <li>Because \$host has been on the network at least \$Conf{BlackoutGoodCnt}
-consecutive times, it will not be backed up from \$t0 to \$t1 on \$days.
+consecutive times, it will not be backed up from \$blackoutStr.
 EOF
+
+$Lang{__time0_to__time1_on__days} = "\$t0 to \$t1 on \$days";
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
 <li>Backups are deferred for \$hours hours

@@ -15,7 +15,7 @@
 #   Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2003  Craig Barratt
+#   Copyright (C) 2001-2004  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -432,6 +432,7 @@ foreach my $lib ( qw(
 	BackupPC/Xfer/Tar.pm
         BackupPC/Xfer/Smb.pm
 	BackupPC/Xfer/Rsync.pm
+	BackupPC/Xfer/RsyncDigest.pm
         BackupPC/Xfer/RsyncFileIO.pm
 	BackupPC/Zip/FileMember.pm
         BackupPC/Lang/en.pm
@@ -548,6 +549,11 @@ if ( defined($Conf{BlackoutHourBegin}) ) {
     delete($Conf{BlackoutHourEnd});
     delete($Conf{BlackoutWeekDays});
 }
+
+#
+# $Conf{RsyncLogLevel} has been replaced by $Conf{XferLogLevel}
+#
+$Conf{XferLogLevel} = $Conf{RsyncLogLevel};
 
 #
 # IncrFill should now be off

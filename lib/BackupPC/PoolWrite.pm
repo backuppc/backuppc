@@ -115,7 +115,7 @@ sub write
     # file list if the file changes between the file list sending
     # and the file sending).  Here we only catch the case where
     # we haven't computed the digest (ie: we have written no more
-    # than $BufSize.  We catch the big file case below.
+    # than $BufSize).  We catch the big file case below.
     #
     if ( !defined($dataRef) && !defined($a->{digest})
 		&& $a->{fileSize} != length($a->{data}) ) {
@@ -270,9 +270,6 @@ sub write
     # We are at EOF, so finish up
     #
     $a->{eof} = 1;
-    foreach my $f ( @{$a->{files}} ) {
-        $f->{fh}->close();
-    }
 
     #
     # Make sure the fileSize was correct.  See above for comments about
@@ -291,27 +288,37 @@ sub write
 
 	my($fh, $fileName);
 	$a->{fileSize} = $a->{nWrite};
-	if ( $a->{fileName} =~ /(.*)\// ) {
-	    $fileName = $1;
-	} else {
-	    $fileName = ".";
-	}
 
-	#
-	# Find a unique target temporary file name
-	#
-	my $i = 0;
-	while ( -f "$fileName/t$$.$i" ) {
-	    $i++;
+	if ( defined($a->{fhOut}) ) {
+	    if ( $a->{fileName} =~ /(.*)\// ) {
+		$fileName = $1;
+	    } else {
+		$fileName = ".";
+	    }
+	    #
+	    # Find a unique target temporary file name
+	    #
+	    my $i = 0;
+	    while ( -f "$fileName/t$$.$i" ) {
+		$i++;
+	    }
+	    $fileName = "$fileName/t$$.$i";
+	    $a->{fhOut}->close();
+	    if ( !rename($a->{fileName}, $fileName)
+	      || !defined($fh = BackupPC::FileZIO->open($fileName, 0,
+						 $a->{compress})) ) {
+		push(@{$a->{errors}}, "Can't rename $a->{fileName} -> $fileName"
+				    . " or open during size fixup\n");
+	    }
+	} elsif ( defined($a->{files}) && defined($a->{files}[0]) ) {
+	    #
+	    # We haven't written anything yet, so just use the
+	    # compare file to copy from.
+	    #
+	    $fh = $a->{files}[0]->{fh};
+	    $fh->rewind;
 	}
-	$fileName = "$fileName/t$$.$i";
-        $a->{fhOut}->close();
-	if ( !rename($a->{fileName}, $fileName)
-	  || !defined($fh = BackupPC::FileZIO->open($fileName, 0,
-					     $a->{compress})) ) {
-            push(@{$a->{errors}}, "Can't rename $a->{fileName} -> $fileName"
-	                        . " or open during size fixup\n");
-	} else {
+	if ( defined($fh) ) {
 	    my $poolWrite = BackupPC::PoolWrite->new($a->{bpc}, $a->{fileName},
 					$a->{fileSize}, $a->{compress});
 	    my $nRead = 0;
@@ -331,7 +338,7 @@ sub write
 		$nRead += $thisRead;
 	    }
 	    $fh->close;
-	    unlink($fileName);
+	    unlink($fileName) if ( defined($fileName) );
 	    if ( @{$a->{errors}} ) {
 		$poolWrite->close;
 		return (0, $a->{digest}, -s $a->{fileName}, $a->{errors});
@@ -339,6 +346,13 @@ sub write
 		return $poolWrite->close;
 	    }
 	}
+    }
+
+    #
+    # Close the compare files
+    #
+    foreach my $f ( @{$a->{files}} ) {
+        $f->{fh}->close();
     }
 
     if ( $a->{fileSize} == 0 ) {
@@ -392,6 +406,23 @@ sub close
     my($a) = @_;
 
     return $a->write(undef);
+}
+
+#
+# Abort a pool write
+#
+sub abort
+{
+    my($a) = @_;
+
+    if ( defined($a->{fhOut}) ) {
+	$a->{fhOut}->close();
+	unlink($a->{fileName});
+    }
+    foreach my $f ( @{$a->{files}} ) {
+        $f->{fh}->close();
+    }
+    $a->{files} = [];
 }
 
 #

@@ -278,7 +278,7 @@ sub start
     #
     $t->{rsyncClientCmd} = $rsyncClientCmd;
     $t->{rs} = File::RsyncP->new({
-	logLevel     => $conf->{RsyncLogLevel},
+	logLevel     => $t->{logLevel} || $conf->{RsyncLogLevel},
 	rsyncCmd     => sub {
 			    $bpc->verbose(0);
 			    $bpc->cmdExecOrEval($rsyncClientCmd, $args);
@@ -287,11 +287,25 @@ sub start
 	rsyncArgs    => $rsyncArgs,
 	timeout      => $conf->{ClientTimeout},
 	doPartial    => defined($t->{partialNum}) ? 1 : undef,
-	logHandler   => sub {
-			    my($str) = @_;
-			    $str .= "\n";
-			    $t->{XferLOG}->write(\$str);
-		        },
+	logHandler   =>
+                sub {
+                    my($str) = @_;
+                    $str .= "\n";
+                    $t->{XferLOG}->write(\$str);
+                    if ( $str =~ /^Remote\[1\]: read errors mapping "(.*)"/ ) {
+                        #
+                        # Files with read errors (eg: region locked files
+                        # on WinXX) are filled with 0 by rsync.  Remember
+                        # them and delete them later.
+                        #
+                        my $badFile = $1;
+                        $badFile =~ s/^\/+//;
+                        push(@{$t->{badFiles}}, {
+                                share => $t->{shareName},
+                                file  => $badFile
+                            });
+                    }
+                },
 	pidHandler   => sub {
 			    $t->{pidHandler}(@_);
 			},
@@ -300,7 +314,8 @@ sub start
 			    bpc        => $t->{bpc},
 			    conf       => $t->{conf},
 			    backups    => $t->{backups},
-			    logLevel   => $conf->{RsyncLogLevel},
+			    logLevel   => $t->{logLevel}
+                                              || $conf->{RsyncLogLevel},
 			    logHandler => sub {
 					      my($str) = @_;
 					      $str .= "\n";
@@ -425,6 +440,15 @@ sub run
 		+ $stats->{parentStats}{TotalFileSize},
 	);
     }
+}
+
+sub abort
+{
+    my($t, $reason) = @_;
+    my $rs = $t->{rs};
+
+    $rs->abort($reason);
+    return 1;
 }
 
 sub setSelectMask

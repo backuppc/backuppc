@@ -264,6 +264,7 @@ my $xferArgs = {
     pipeWH       => *WH,
     XferLOG      => $RestoreLOG,
     XferMethod   => $Conf{XferMethod},
+    logLevel     => $Conf{XferLogLevel},
     bkupSrcHost  => $RestoreReq{hostSrc},
     bkupSrcShare => $RestoreReq{shareSrc},
     bkupSrcNum   => $RestoreReq{num},
@@ -493,17 +494,17 @@ sub RestoreCleanup
 	# kill off the tranfer program, first nicely then forcefully
 	#
 	if ( @xferPid ) {
-	    kill(2, @xferPid);
+	    kill($bpc->sigName2num("INT"), @xferPid);
 	    sleep(1);
-	    kill(9, @xferPid);
+	    kill($bpc->sigName2num("KILL"), @xferPid);
 	}
 	#
 	# kill off the tar process, first nicely then forcefully
 	#
 	if ( $tarPid > 0 ) {
-	    kill(2, $tarPid);
+	    kill($bpc->sigName2num("INT"), $tarPid);
 	    sleep(1);
-	    kill(9, $tarPid);
+	    kill($bpc->sigName2num("KILL"), $tarPid);
 	}
     }
 

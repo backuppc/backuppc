@@ -222,17 +222,19 @@ sub readOutput
     while ( $t->{tarOut} =~ /(.*?)[\n\r]+(.*)/s ) {
         $_ = $1;
         $t->{tarOut} = $2;
-        $t->{XferLOG}->write(\"$_\n");
         #
         # refresh our inactivity alarm
         #
-        alarm($conf->{ClientTimeout});
+        alarm($conf->{ClientTimeout}) if ( !$t->{abort} );
         $t->{lastOutputLine} = $_ if ( !/^$/ );
         if ( /^Total bytes written: / ) {
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
             $t->{xferOK} = 1;
         } elsif ( /^\./ ) {
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 2 );
             $t->{fileCnt}++;
         } else {
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
             $t->{xferErrCnt}++;
 	    #
 	    # If tar encounters a minor error, it will exit with a non-zero
@@ -241,9 +243,32 @@ sub readOutput
 	    #
 	    $t->{tarBadExitOk} = 1
 		    if ( $t->{xferOK} && /Error exit delayed from previous / );
+            #
+            # Also remember files that had read errors
+            #
+            if ( /: \.\/(.*): Read error at byte / ) {
+                my $badFile = $1;
+                push(@{$t->{badFiles}}, {
+                        share => $t->{shareName},
+                        file  => $badFile
+                    });
+            }
+
 	}
     }
     return 1;
+}
+
+sub abort
+{
+    my($t, $reason) = @_;
+    my @xferPid = $t->xferPid;
+
+    $t->{abort} = 1;
+    $t->{abortReason} = $reason;
+    if ( @xferPid ) {
+	kill($t->{bpc}->sigName2num("INT"), @xferPid);
+    }
 }
 
 sub setSelectMask

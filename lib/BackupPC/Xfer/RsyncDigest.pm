@@ -1,10 +1,10 @@
 #============================================================= -*-perl-*-
 #
-# BackupPC::RsyncDigest package
+# BackupPC::Xfer::RsyncDigest package
 #
 # DESCRIPTION
 #
-#   This library defines a BackupPC::RsyncDigest class for computing
+#   This library defines a BackupPC::Xfer::RsyncDigest class for computing
 #   and caching rsync checksums.
 #
 # AUTHOR
@@ -35,7 +35,7 @@
 #
 #========================================================================
 
-package BackupPC::RsyncDigest;
+package BackupPC::Xfer::RsyncDigest;
 
 use strict;
 
@@ -166,7 +166,7 @@ sub digestStart
             close($fh);
             $fio->digestAdd($fileName,
                     $blockSize
-			|| BackupPC::RsyncDigest->blockSize($fileSize,
+			|| BackupPC::Xfer::RsyncDigest->blockSize($fileSize,
 							    $defBlkSize),
                     $checksumSeed);
             #
@@ -211,8 +211,9 @@ sub digestStart
         # or blocksize doesn't match.  Open the file and prepare to
         # compute the checksums.
         #
-        $blockSize = BackupPC::RsyncDigest->blockSize($fileSize, $defBlkSize)
-                                        if ( $blockSize == 0 );
+        $blockSize
+	    = BackupPC::Xfer::RsyncDigest->blockSize($fileSize, $defBlkSize)
+				    if ( $blockSize == 0 );
         $fio->{checksumSeed} = $checksumSeed;
         $fio->{blockSize}    = $blockSize;
         $fio->{fh} = BackupPC::FileZIO->open($fileName, 0, $compress);

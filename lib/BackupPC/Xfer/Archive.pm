@@ -137,6 +137,10 @@ sub errStr
     return $t->{_errStr};
 }
 
+sub abort
+{
+}
+
 sub xferPid
 {
     my($t) = @_;

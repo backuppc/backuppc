@@ -244,9 +244,9 @@ sub ArchiveCleanup
 	# kill off the tranfer program, first nicely then forcefully
 	#
 	if ( @xferPid ) {
-	    kill(2, @xferPid);
+	    kill($bpc->sigName2num("INT"), @xferPid);
 	    sleep(1);
-	    kill(9, @xferPid);
+	    kill($bpc->sigName2num("KILL"), @xferPid);
 	}
     }
 

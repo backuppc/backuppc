@@ -42,20 +42,22 @@ use BackupPC::FileZIO;
 use BackupPC::PoolWrite;
 use File::Path;
 
+use constant S_IFMT       => 0170000;   # type of file
+
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
 
 if ( @ARGV != 3 ) {
-    print("usage: $0 <host> <shareName> <compressLevel>\n");
+    print("usage: $0 <client> <shareName> <compressLevel>\n");
     exit(1);
 }
 if ( $ARGV[0] !~ /^([\w\.\s-]+)$/ ) {
-    print("$0: bad host name '$ARGV[0]'\n");
+    print("$0: bad client name '$ARGV[0]'\n");
     exit(1);
 }
-my $host = $1;
+my $client = $1;
 if ( $ARGV[1] !~ /^([\w\s\.\/\$-]+)$/ ) {
     print("$0: bad share name '$ARGV[1]'\n");
     exit(1);
@@ -67,6 +69,28 @@ if ( $ARGV[2] !~ /^(\d+)$/ ) {
     exit(1);
 }
 my $Compress = $1;
+my $Abort = 0;
+my $AbortReason;
+
+#
+# Re-read config file, so we can include the PC-specific config
+#
+if ( defined(my $error = $bpc->ConfigRead($client)) ) {
+    print("BackupPC_tarExtract: Can't read PC's config file: $error\n");
+    exit(1);
+}
+%Conf = $bpc->Conf();
+
+#
+# Catch various signals
+#
+$SIG{INT}  = \&catch_signal;
+$SIG{ALRM} = \&catch_signal;
+$SIG{TERM} = \&catch_signal;
+$SIG{PIPE} = \&catch_signal;
+$SIG{STOP} = \&catch_signal;
+$SIG{TSTP} = \&catch_signal;
+$SIG{TTIN} = \&catch_signal;
 
 #
 # This constant and the line of code below that uses it is borrowed
@@ -83,7 +107,7 @@ my $tar_header_length = 512;
 my $BufSize  = 1048576;     # 1MB or 2^20
 my $MaxFiles = 20;
 my $Errors   = 0;
-my $OutDir   = "$TopDir/pc/$host/new";
+my $OutDir   = "$TopDir/pc/$client/new";
 my %Attrib   = ();
 
 my $ExistFileCnt      = 0;
@@ -99,12 +123,15 @@ sub TarRead
 
     $data = "\0" x $totBytes;
     while ( $numBytes < $totBytes ) {
+	return if ( $Abort );
         $newBytes = sysread($fh,
                         substr($data, $numBytes, $totBytes - $numBytes),
                         $totBytes - $numBytes);
         if ( $newBytes <= 0 ) {
-            print(STDERR "Unexpected end of tar archive (tot = $totBytes,"
+            print("Unexpected end of tar archive (tot = $totBytes,"
                    . " num = $numBytes, posn = " . sysseek($fh, 0, 1) . ")\n");
+            $Abort = 1;
+            $AbortReason = "Unexpected end of tar archive";
             $Errors++;
             return;
         }
@@ -140,7 +167,8 @@ sub TarReadFileInfo
 
     while ( 1 ) {
         $head = TarReadHeader($fh);
-        return if ( $head eq "" || $head eq "\0" x $tar_header_length );
+        return if ( $Abort || $head eq ""
+			   || $head eq "\0" x $tar_header_length );
         ($name,		# string
             $mode,	# octal number
             $uid,	# octal number
@@ -198,7 +226,7 @@ sub TarReadFileInfo
         $prefix   = "";
         substr ($head, 148, 8) = "        ";
         if (unpack ("%16C*", $head) != $chksum) {
-           print(STDERR "$name: checksum error at "
+           print("$name: checksum error at "
                         . sysseek($fh, 0, 1) , "\n");
            $Errors++;
         }
@@ -215,6 +243,8 @@ sub TarReadFileInfo
             TarFlush($fh, $size);
             next;
         }
+        printf("Got file '%s', mode 0%o, size %g, type %d\n",
+                $name, $mode, $size, $type) if ( $Conf{XferLogLevel} >= 3 );
         $name     = $longName if ( defined($longName) );
         $linkname = $longLink if ( defined($longLink) );
         $name     =~ s{^\./+}{};
@@ -262,7 +292,7 @@ sub TarReadFile
 	$Attrib{$dir} = BackupPC::Attrib->new({ compress => $Compress });
 	if ( -f $Attrib{$dir}->fileName("$OutDir/$dir")
                     && !$Attrib{$dir}->read("$OutDir/$dir") ) {
-            printf(STDERR "Unable to read attribute file %s\n",
+            printf("Unable to read attribute file %s\n",
                                 $Attrib{$dir}->fileName("$OutDir/$dir"));
             $Errors++;
 	}
@@ -271,6 +301,7 @@ sub TarReadFile
         #
         # Directory
         #
+        logFileAction("create", $f) if ( $Conf{XferLogLevel} >= 1 );
         mkpath("$OutDir/$ShareName/$f->{mangleName}", 0, 0777)
                             if ( !-d "$OutDir/$ShareName/$f->{mangleName}" );
     } elsif ( $f->{type} == BPC_FTYPE_FILE ) {
@@ -287,14 +318,24 @@ sub TarReadFile
                                 ? $f->{size} - $nRead : $BufSize;
             my $data = TarRead($fh, $thisRead);
             if ( $data eq "" ) {
-                print(STDERR "Unexpected end of tar archive during read\n");
-                $Errors++;
+		if ( !$Abort ) {
+		    print("Unexpected end of tar archive during read\n");
+                    $AbortReason = "Unexpected end of tar archive";
+		    $Errors++;
+		}
+		$poolWrite->abort;
+                $Abort = 1;
+		unlink("$OutDir/$ShareName/$f->{mangleName}");
+		print("Removing partial file $f->{name}\n");
                 return;
             }
             $poolWrite->write(\$data);
             $nRead += $thisRead;
         }
-        processClose($poolWrite, "$ShareName/$f->{mangleName}", $f->{size});
+        my $exist = processClose($poolWrite, "$ShareName/$f->{mangleName}",
+                                 $f->{size});
+	logFileAction($exist ? "pool" : "create", $f)
+                                 if ( $Conf{XferLogLevel} >= 1 );
         TarFlush($fh, $f->{size});
     } elsif ( $f->{type} == BPC_FTYPE_HARDLINK ) {
         #
@@ -310,7 +351,10 @@ sub TarReadFile
                                          "$OutDir/$ShareName/$f->{mangleName}",
                                          $f->{size}, $Compress);
         $poolWrite->write(\$f->{linkname});
-        processClose($poolWrite, "$ShareName/$f->{mangleName}", $f->{size});
+        my $exist = processClose($poolWrite, "$ShareName/$f->{mangleName}",
+                                 $f->{size});
+	logFileAction($exist ? "pool" : "create", $f)
+                                 if ( $Conf{XferLogLevel} >= 1 );
     } elsif ( $f->{type} == BPC_FTYPE_SYMLINK ) {
         #
         # Symbolic link: write the value of the link to a plain file,
@@ -324,7 +368,10 @@ sub TarReadFile
                                          "$OutDir/$ShareName/$f->{mangleName}",
                                          $f->{size}, $Compress);
         $poolWrite->write(\$f->{linkname});
-        processClose($poolWrite, "$ShareName/$f->{mangleName}", $f->{size});
+        my $exist = processClose($poolWrite, "$ShareName/$f->{mangleName}",
+                                 $f->{size});
+	logFileAction($exist ? "pool" : "create", $f)
+                                 if ( $Conf{XferLogLevel} >= 1 );
     } elsif ( $f->{type} == BPC_FTYPE_CHARDEV
            || $f->{type} == BPC_FTYPE_BLOCKDEV
            || $f->{type} == BPC_FTYPE_FIFO ) {
@@ -345,7 +392,10 @@ sub TarReadFile
                                          length($data), $Compress);
         $poolWrite->write(\$data);
         $f->{size} = length($data);
-        processClose($poolWrite, "$ShareName/$f->{mangleName}", length($data));
+        my $exist = processClose($poolWrite, "$ShareName/$f->{mangleName}",
+                                 length($data));
+	logFileAction($exist ? "pool" : "create", $f)
+                                 if ( $Conf{XferLogLevel} >= 1 );
     } else {
         print("Got unknown type $f->{type} for $f->{name}\n");
 	$Errors++;
@@ -384,7 +434,7 @@ sub processClose
     my($exists, $digest, $outSize, $errs) = $poolWrite->close;
 
     if ( @$errs ) {
-        print(STDERR join("", @$errs));
+        print(join("", @$errs));
         $Errors += @$errs;
     }
     $TotalFileCnt++;
@@ -396,15 +446,63 @@ sub processClose
     } elsif ( $outSize > 0 ) {
         print(NEW_FILES "$digest $origSize $fileName\n");
     }
+    return $exists && $origSize > 0;
+}
+
+#
+# Generate a log file message for a completed file
+#
+sub logFileAction
+{
+    my($action, $f) = @_;
+    my $owner = "$f->{uid}/$f->{gid}";
+    my $name = $f->{name};
+    $name = "." if ( $name eq "" );
+    my $type  = (("", "p", "c", "", "d", "", "b", "", "", "", "l", "", "s"))
+		    [($f->{mode} & S_IFMT) >> 12];
+    $type = "h" if ( $f->{type} == BPC_FTYPE_HARDLINK );
+
+    printf("  %-6s %1s%4o %9s %11.0f %s\n",
+				$action,
+				$type,
+				$f->{mode} & 07777,
+				$owner,
+				$f->{size},
+				$name);
+}
+
+sub catch_signal
+{
+    my $sigName = shift;
+
+    #
+    # The first time we receive a signal we try to gracefully
+    # abort the backup.  This allows us to keep a partial dump
+    # with the in-progress file deleted and attribute caches
+    # flushed to disk etc.
+    #
+    print("BackupPC_tarExtract: got signal $sigName\n");
+    if ( !$Abort ) {
+	$Abort++;
+	$AbortReason = "received signal $sigName";
+	return;
+    }
+
+    #
+    # This is a second signal: time to clean up.
+    #
+    print("BackupPC_tarExtract: quitting on second signal $sigName\n");
+    close(NEW_FILES);
+    exit(1)
 }
 
 mkpath("$OutDir/$ShareName", 0, 0777);
-open(NEW_FILES, ">>", "$TopDir/pc/$host/NewFileList")
-                 || die("can't open $TopDir/pc/$host/NewFileList");
+open(NEW_FILES, ">>", "$TopDir/pc/$client/NewFileList")
+                 || die("can't open $TopDir/pc/$client/NewFileList");
 binmode(NEW_FILES);
 binmode(STDIN);
-1 while ( TarReadFile(*STDIN) );
-1 while ( sysread(STDIN, my $discard, 1024) );
+1 while ( !$Abort && TarReadFile(*STDIN) );
+1 while ( !$Abort && sysread(STDIN, my $discard, 1024) );
 
 #
 # Flush out remaining attributes.
@@ -413,6 +511,10 @@ foreach my $d ( keys(%Attrib) ) {
     attributeWrite($d);
 }
 close(NEW_FILES);
+
+if ( $Abort ) {
+    print("BackupPC_tarExtact aborting ($AbortReason)\n");
+}
 
 #
 # Report results to BackupPC_dump

@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0_CVS, released 13 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -86,6 +86,7 @@ use BackupPC::Xfer::Tar;
 use BackupPC::Xfer::Rsync;
 use Socket;
 use File::Path;
+use File::Find;
 use Getopt::Std;
 
 ###########################################################################
@@ -98,6 +99,8 @@ my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
 my $NeedPostCmd;
 my $Hosts;
+my $SigName;
+my $Abort;
 
 $bpc->ChildInit();
 
@@ -203,6 +206,8 @@ if ( $opts{e} ) {
 # For archive hosts we don't bother any further
 #
 if ($Conf{XferMethod} eq "archive" ) {
+    print(STDERR "Exiting because the XferMethod is set to archive\n")
+                if ( $opts{v} );
     exit(0);
 }
 
@@ -274,6 +279,15 @@ my $partialNum;
 
 if ( $Conf{FullPeriod} == -1 && !$opts{f} && !$opts{i}
         || $Conf{FullPeriod} == -2 ) {
+    print(STDERR "Exiting because backups are disabled with"
+               . "\$Conf{FullPeriod} = $Conf{FullPeriod}\n") if ( $opts{v} );
+    #
+    # Tell BackupPC to ignore old failed backups on hosts that
+    # have backups disabled.
+    #
+    print("backups disabled\n")
+		if ( $StatusHost{reason} ne "Reason_backup_done"
+		     && time - $StatusHost{startTime} > 2 * 24 * 3600 );
     NothingToDo($needLink);
 }
 
@@ -301,6 +315,10 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
         # Allow blackout to span midnight (specified by BlackoutHourBegin
         # being greater than BlackoutHourEnd)
         #
+        next if ( ref($p->{weekDays}) ne "ARRAY" 
+                    || !defined($p->{hourBegin})
+                    || !defined($p->{hourEnd})
+                );
         if ( $p->{hourBegin} > $p->{hourEnd} ) {
             $blackout = $p->{hourBegin} <= $currHours
                           || $currHours <= $p->{hourEnd};
@@ -423,10 +441,41 @@ if ( !defined($XferLOG) ) {
     print("dump failed: unable to open/create $Dir/XferLOG$fileExt\n");
     exit(1);
 }
+
+#
+# Ignore the partial dump in the case of an incremental.
+# A partial is a partial full.
+#
+if ( $type ne "full" ) {
+    $partialNum = undef;
+    $partialIdx = -1;
+}
+
+#
+# If this is a partial, copy the old XferLOG file
+#
+if ( $partialNum ) {
+    my($compress, $fileName);
+    if ( -f "$Dir/XferLOG.$partialNum.z" ) {
+	$fileName = "$Dir/XferLOG.$partialNum.z";
+	$compress = 1;
+    } elsif ( -f "$Dir/XferLOG.$partialNum" ) {
+	$fileName = "$Dir/XferLOG.$partialNum";
+	$compress = 0;
+    }
+    if ( my $oldLOG = BackupPC::FileZIO->open($fileName, 0, $compress) ) {
+	my $data;
+	while ( $oldLOG->read(\$data, 65536) > 0 ) {
+	    $XferLOG->write(\$data);
+	}
+	$oldLOG->close;
+    }
+}
+
 $XferLOG->writeTeeStderr(1) if ( $opts{v} );
 unlink("$Dir/NewFileList") if ( -f "$Dir/NewFileList" );
-my $startTime = time();
 
+my $startTime     = time();
 my $tarErrs       = 0;
 my $nFilesExist   = 0;
 my $sizeExist     = 0;
@@ -576,6 +625,7 @@ for my $shareName ( @$ShareNames ) {
 	backups     => \@Backups,
 	compress    => $Conf{CompressLevel},
 	XferMethod  => $Conf{XferMethod},
+	logLevel    => $Conf{XferLogLevel},
 	pidHandler  => \&pidHandler,
         partialNum  => $partialNum,
     });
@@ -588,14 +638,14 @@ for my $shareName ( @$ShareNames ) {
         # kill off the tar process, first nicely then forcefully
         #
 	if ( $tarPid > 0 ) {
-	    kill(2, $tarPid);
+	    kill($bpc->sigName2num("INT"), $tarPid);
 	    sleep(1);
-	    kill(9, $tarPid);
+	    kill($bpc->sigName2num("KILL"), $tarPid);
 	}
 	if ( @xferPid ) {
-	    kill(2, @xferPid);
+	    kill($bpc->sigName2num("INT"), @xferPid);
 	    sleep(1);
-	    kill(9, @xferPid);
+	    kill($bpc->sigName2num("KILL"), @xferPid);
 	}
 	UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
         exit(1);
@@ -642,7 +692,14 @@ for my $shareName ( @$ShareNames ) {
 		while ( $tarOut =~ /(.*?)[\n\r]+(.*)/s ) {
 		    $_ = $1;
 		    $tarOut = $2;
-		    $XferLOG->write(\"tarExtract: $_\n");
+                    if ( /^  / ) {
+                        $XferLOG->write(\"$_\n");
+                    } else {
+                        $XferLOG->write(\"tarExtract: $_\n");
+                    }
+                    if ( /^BackupPC_tarExtact aborting \((.*)\)/ ) {
+                        $stat{hostError} = $1;
+                    }
 		    if ( /^Done: (\d+) errors, (\d+) filesExist, (\d+) sizeExist, (\d+) sizeExistComp, (\d+) filesTotal, (\d+) sizeTotal/ ) {
 			$tarErrs       += $1;
 			$nFilesExist   += $2;
@@ -709,17 +766,17 @@ for my $shareName ( @$ShareNames ) {
         # kill off the tranfer program, first nicely then forcefully
         #
 	if ( @xferPid ) {
-	    kill(2, @xferPid);
+	    kill($bpc->sigName2num("INT"), @xferPid);
 	    sleep(1);
-	    kill(9, @xferPid);
+	    kill($bpc->sigName2num("KILL"), @xferPid);
 	}
         #
         # kill off the tar process, first nicely then forcefully
         #
 	if ( $tarPid > 0 ) {
-	    kill(2, $tarPid);
+	    kill($bpc->sigName2num("INT"), $tarPid);
 	    sleep(1);
-	    kill(9, $tarPid);
+	    kill($bpc->sigName2num("KILL"), $tarPid);
 	}
         #
         # don't do any more shares on this host
@@ -737,6 +794,8 @@ if ( $type eq "full" && $stat{hostError} eq ""
     $stat{xferOK} = 0;
 }
 
+$stat{xferOK} = 0 if ( $Abort );
+
 #
 # Do one last check to make sure it is still the machine we expect.
 #
@@ -746,7 +805,6 @@ if ( $stat{xferOK} && (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
 }
 
 UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
-$XferLOG->close();
 close($newFilesFH) if ( defined($newFilesFH) );
 
 my $endTime = time();
@@ -755,25 +813,31 @@ my $endTime = time();
 # If the dump failed, clean up
 #
 if ( !$stat{xferOK} ) {
-    #
-    # wait a short while and see if the system is still alive
-    #
     $stat{hostError} = $stat{lastOutputLine} if ( $stat{hostError} eq "" );
     if ( $stat{hostError} ) {
         print(LOG $bpc->timeStamp,
                   "Got fatal error during xfer ($stat{hostError})\n");
+	$XferLOG->write(\"Got fatal error during xfer ($stat{hostError})\n");
     }
-    sleep(10);
-    if ( $bpc->CheckHostAlive($hostIP) < 0 ) {
-        $stat{hostAbort} = 1;
+    if ( !$Abort ) {
+	#
+	# wait a short while and see if the system is still alive
+	#
+	sleep(5);
+	if ( $bpc->CheckHostAlive($hostIP) < 0 ) {
+	    $stat{hostAbort} = 1;
+	}
+	if ( $stat{hostAbort} ) {
+	    $stat{hostError} = "lost network connection during backup";
+	}
+	print(LOG $bpc->timeStamp, "Backup aborted ($stat{hostError})\n");
+	$XferLOG->write(\"Backup aborted ($stat{hostError})\n");
+    } else {
+	$XferLOG->write(\"Backup aborted by user signal\n");
     }
-    if ( $stat{hostAbort} ) {
-        $stat{hostError} = "lost network connection during backup";
-    }
-    print(LOG $bpc->timeStamp, "Dump aborted ($stat{hostError})\n");
 
     #
-    # This exits.
+    # Close the log file and call BackupFailCleanup, which exits.
     #
     BackupFailCleanup();
 }
@@ -807,50 +871,147 @@ sub NothingToDo
 
 sub catch_signal
 {
-    my $signame = shift;
+    my $sigName = shift;
 
     #
-    # Children quit quietly on ALRM
+    # The first time we receive a signal we try to gracefully
+    # abort the backup.  This allows us to keep a partial dump
+    # with the in-progress file deleted and attribute caches
+    # flushed to disk etc.
     #
-    exit(1) if ( $Pid != $$ && $signame eq "ALRM" );
+    if ( !length($SigName) ) {
+	my $reason;
+	if ( $sigName eq "INT" ) {
+	    $reason = "aborted by user (signal=$sigName)";
+	} else {
+	    $reason = "aborted by signal=$sigName";
+	}
+	if ( $Pid == $$ ) {
+	    #
+	    # Parent logs a message
+	    #
+	    print(LOG $bpc->timeStamp,
+		    "Aborting backup up after signal $sigName\n");
+
+	    #
+	    # Tell xfer to abort
+	    #
+	    $xfer->abort($reason);
+
+	    #
+	    # Send ALRMs to BackupPC_tarExtract if we are using it
+	    #
+	    if ( $tarPid > 0 ) {
+		kill($bpc->sigName2num("ARLM"), $tarPid);
+	    }
+
+	    #
+	    # Schedule a 20 second timer in case the clean
+	    # abort doesn't complete
+	    #
+	    alarm(20);
+	} else {
+	    #
+	    # Children ignore anything other than ALRM and INT
+	    #
+	    if ( $sigName ne "ALRM" && $sigName ne "INT" ) {
+		return;
+	    }
+
+	    #
+	    # The child also tells xfer to abort
+	    #
+	    $xfer->abort($reason);
+
+	    #
+	    # Schedule a 15 second timer in case the clean
+	    # abort doesn't complete
+	    #
+	    alarm(15);
+	}
+	$SigName = $sigName;
+	$Abort = 1;
+	return;
+    }
+
+    #
+    # This is a second signal: time to clean up.
+    #
+    if ( $Pid != $$ && ($sigName eq "ALRM" || $sigName eq "INT") ) {
+	#
+	# Children quit quietly on ALRM or INT
+	#
+	exit(1)
+    }
 
     #
     # Ignore other signals in children
     #
     return if ( $Pid != $$ );
 
-    print(LOG $bpc->timeStamp, "cleaning up after signal $signame\n");
-    $SIG{$signame} = 'IGNORE';
+    $SIG{$sigName} = 'IGNORE';
     UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
-    $XferLOG->write(\"exiting after signal $signame\n");
-    $XferLOG->close();
+    $XferLOG->write(\"exiting after signal $sigName\n");
     if ( @xferPid ) {
-        kill(2, @xferPid);
+        kill($bpc->sigName2num("INT"), @xferPid);
 	sleep(1);
-	kill(9, @xferPid);
+	kill($bpc->sigName2num("KILL"), @xferPid);
     }
     if ( $tarPid > 0 ) {
-        kill(2, $tarPid);
+        kill($bpc->sigName2num("INT"), $tarPid);
 	sleep(1);
-	kill(9, $tarPid);
+	kill($bpc->sigName2num("KILL"), $tarPid);
     }
-    if ( $signame eq "INT" ) {
-        $stat{hostError} = "aborted by user (signal=$signame)";
+    if ( $sigName eq "INT" ) {
+        $stat{hostError} = "aborted by user (signal=$sigName)";
     } else {
-        $stat{hostError} = "received signal=$signame";
+        $stat{hostError} = "received signal=$sigName";
     }
     BackupFailCleanup();
+}
+
+sub CheckForNewFiles
+{
+    if ( -f _ && $File::Find::name !~ /\/fattrib$/ ) {
+        $nFilesTotal++;
+    } elsif ( -d _ ) {
+	#
+	# No need to check entire tree
+	#
+        $File::Find::prune = 1 if ( $nFilesTotal );
+    }
 }
 
 sub BackupFailCleanup
 {
     my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
+    my $keepPartial = 0;
 
-    if ( $type ne "full" ) {
-#            || ($nFilesTotal == 0 && $xfer->getStats->{fileCnt} == 0) ) {
+    #
+    # We keep this backup if it is a full and we actually backed
+    # up some files.
+    #
+    if ( $type eq "full" ) {
+	if ( $nFilesTotal == 0 && $xfer->getStats->{fileCnt} == 0 ) {
+	    #
+	    # Xfer didn't report any files, but check in the new
+	    # directory just in case.
+	    #
+	    find(\&CheckForNewFiles, "$Dir/new");
+	    $keepPartial = 1 if ( $nFilesTotal );
+	} else {
+	    #
+	    # Xfer reported some files
+	    #
+	    $keepPartial = 1;
+	}
+    }
+
+    if ( !$keepPartial ) {
         #
         # No point in saving this dump; get rid of eveything.
         #
+        $XferLOG->close();
         unlink("$Dir/timeStamp.level0")    if ( -f "$Dir/timeStamp.level0" );
         unlink("$Dir/SmbLOG.bad")          if ( -f "$Dir/SmbLOG.bad" );
         unlink("$Dir/SmbLOG.bad$fileExt")  if ( -f "$Dir/SmbLOG.bad$fileExt" );
@@ -860,6 +1021,7 @@ sub BackupFailCleanup
         rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.bad$fileExt");
         $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
         print("dump failed: $stat{hostError}\n");
+        $XferLOG->close();
         print("link $clientURI\n") if ( $needLink );
         exit(1);
     }
@@ -1063,15 +1225,12 @@ sub BackupSave
         $num = $Backups[$i]{num} if ( $num < $Backups[$i]{num} );
     }
     $num++;
-    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/$num")
-                                if ( -d "$Dir/$num" );
+    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/$num") if ( -d "$Dir/$num" );
     if ( !rename("$Dir/new", "$Dir/$num") ) {
-        print(LOG $bpc->timeStamp,
-                  "Rename $Dir/new -> $Dir/$num failed\n");
+        print(LOG $bpc->timeStamp, "Rename $Dir/new -> $Dir/$num failed\n");
         $stat{xferOK} = 0;
     }
-    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.$num$fileExt");
-    rename("$Dir/NewFileList", "$Dir/NewFileList.$num");
+    $needLink = 1 if ( -f "$Dir/NewFileList" );
 
     #
     # Add the new backup information to the backup file
@@ -1122,22 +1281,27 @@ sub BackupSave
 	    next if ( !-f "$Dir/$Backups[$j]{num}/$file" );
 	    if ( !link("$Dir/$Backups[$j]{num}/$file",
 				"$Dir/$num/$shareM/$fileM") ) {
-		print(LOG $bpc->timeStamp,
-			  "Unable to link $num/$shareM/$fileM to"
-			. " $Backups[$j]{num}/$file\n");
+		my $str = \"Unable to link $num/$f->{share}/$f->{file} to"
+                         . " $Backups[$j]{num}/$f->{share}/$f->{file}\n";
+		$XferLOG->write(\$str);
 	    } else {
-		print(LOG $bpc->timeStamp,
-			  "Bad file $num/$shareM/$fileM replaced by link to"
-			. " $Backups[$j]{num}/$file\n");
+		my $str = "Bad file $num/$f->{share}/$f->{file} replaced"
+                        . " by link to"
+                        . " $Backups[$j]{num}/$f->{share}/$f->{file}\n";
+		$XferLOG->write(\$str);
 	    }
 	    last;
 	}
 	if ( $j < 0 ) {
-	    print(LOG $bpc->timeStamp,
-		      "Removed bad file $num/$shareM/$fileM (no older"
-		    . " copy to link to)\n");
+	    my $str = "Removed bad file $num/$f->{share}/$f->{file}"
+                    . " (no older copy to link to)\n";
+	    $XferLOG->write(\$str);
 	}
     }
+    $XferLOG->close();
+    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.$num$fileExt");
+    rename("$Dir/NewFileList", "$Dir/NewFileList.$num");
+
     return $num;
 }
 

@@ -23,14 +23,14 @@ $Lang{Admin_Options} = "Options d'administration";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
-\${h1("Server Control")}
+\${h1("Contrôle du serveur")}
 <form action="\$MyURL" method="get">
 <table>
   <tr><td>Arrêter le serveur:<td><input type="submit" name="action" value="Arrêter">
   <tr><td>Recharger la configuration:<td><input type="submit" name="action" value="Recharger">
 </table>
 </form>
-\${h1("Server Configuration")}
+\${h1("Configuration")}
 <ul>
   <li><i>Other options can go here... e.g.,</i>
   <li>Edit server configuration

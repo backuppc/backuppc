@@ -52,9 +52,9 @@ BEGIN {
         $RsyncLibOK = 0;
         $RsyncLibErr = "File::RsyncP module doesn't exist";
     } else {
-        if ( $File::RsyncP::VERSION < 0.41 ) {
+        if ( $File::RsyncP::VERSION < 0.44 ) {
             $RsyncLibOK = 0;
-            $RsyncLibErr = "File::RsyncP module version too old: need 0.41";
+            $RsyncLibErr = "File::RsyncP module version too old: need 0.44";
         } else {
             $RsyncLibOK = 1;
         }
@@ -176,8 +176,17 @@ sub start
                 # To make this easier we do all the includes first and all
                 # of the excludes at the end (hopefully they commute).
                 #
+                $file =~ s{/$}{};
                 $file = "/$file";
                 $file =~ s{//+}{/}g;
+		if ( $file eq "/" ) {
+		    #
+		    # This is a special case: if the user specifies
+		    # "/" then just include it and don't exclude "/*".
+		    #
+                    push(@inc, $file) if ( !$incDone{$file} );
+		    next;
+		}
                 my $f = "";
                 while ( $file =~ m{^/([^/]*)(.*)} ) {
                     my $elt = $1;
@@ -215,7 +224,7 @@ sub start
         if ( $t->{type} eq "full" ) {
             $logMsg = "full backup started for directory $t->{shareName}";
         } else {
-            $incrDate = $bpc->timeStampISO($t->{lastFull} - 3600, 1);
+            $incrDate = $bpc->timeStamp($t->{lastFull} - 3600, 1);
             $logMsg = "incr backup started back to $incrDate for directory"
                     . " $t->{shareName}";
         }

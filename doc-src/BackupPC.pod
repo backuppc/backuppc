@@ -446,12 +446,13 @@ As of June 2003 the latest version is 1.13.25.
 =item *
 
 If you are using rsync to backup linux/unix machines you should have
-version 2.5.5 on each client machine.  See L<http://rsync.samba.org>.
-Use "rsync --version" to check your version.
+version 2.5.5 or higher on each client machine.  See
+L<http://rsync.samba.org>. Use "rsync --version" to check your
+version.
 
 For BackupPC to use Rsync you will also need to install the perl
 File::RsyncP module, which is available from
-L<http://perlrsync.sourceforge.net>.  Version 0.41 or later is required.
+L<http://perlrsync.sourceforge.net>.  Version 0.44 or later is required.
 
 =item *
 
@@ -531,7 +532,7 @@ You can run "perldoc Archive::Zip" to see if this module is installed.
 To use rsync and rsyncd with BackupPC you will need to install File::RsyncP.
 You can run "perldoc File::RsyncP" to see if this module is installed.
 File::RsyncP is available from L<http://perlrsync.sourceforge.net>.
-Version 0.41 or later is required.
+Version 0.44 or later is required.
 
 =back
 
@@ -754,9 +755,9 @@ Here's a simple example of a hosts file:
 
 =head2 Step 5: Client Setup
 
-Two methods for getting backup data from a client are
-supported: smb and tar. Smb is the preferred method for WinXX clients
-and tar is preferred method for linux/unix clients.
+Two methods for getting backup data from a client are supported: smb and
+tar. Smb is the preferred method for WinXX clients and tar is preferred
+method for linux/unix clients.
 
 The transfer method is set using the $Conf{XferMethod} configuration
 setting. If you have a mixed environment (ie: you will use smb for some
@@ -779,11 +780,19 @@ The preferred setup for WinXX clients is to set $Conf{XferMethod} to "smb".
 prepared to run rsync/cygwin on your WinXX client.  More information
 about this will be provided via the FAQ.)
 
-You need to create shares for the data you want to backup.
-Open "My Computer", right click on the drive (eg: C), and
-select "Sharing..." (or select "Properties" and select the
-"Sharing" tab).  In this dialog box you can enable sharing,
-select the share name and permissions.
+If you want to use rsyncd for WinXX clients you can find a pre-packaged
+zip file on L<http://backuppc.sourceforge.net>. The package is called
+cygwin-rsync. It contains rsync.exe, template setup files and the
+minimal set of cygwin libraries for everything to run.  The README file
+contains instructions for running rsync as a service, so it starts
+automatically everytime you boot your machine.
+
+Otherwise, to use SMB, you need to create shares for the data you want
+to backup. Open "My Computer", right click on the drive (eg: C), and
+select "Sharing..." (or select "Properties" and select the "Sharing"
+tab). In this dialog box you can enable sharing, select the share name
+and permissions.  Many machines will be configured by default to share
+the entire C drive as C$ using the administrator password.
 
 If this machine uses DHCP you will also need to make sure the
 NetBios name is set.  Go to Control Panel|System|Network Identification

@@ -530,6 +530,14 @@ $Conf{BlackoutHourBegin}    = 7.0;
 $Conf{BlackoutHourEnd}      = 19.5;
 $Conf{BlackoutWeekDays}     = [1, 2, 3, 4, 5];
 
+#
+# A backup of a share that has zero files is considered fatal. This is
+# used to catch miscellaneous Xfer errors that result in no files being
+# backed up.  If you have shares that might be empty (and therefore an
+# empty backup is valid) you should set this flag to 0.
+#
+$Conf{BackupZeroFilesIsFatal} = 1;
+
 ###########################################################################
 # General per-PC configuration settings
 # (can be overridden in the per-PC config.pl)

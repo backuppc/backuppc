@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/bin/perl -T
 #
 # by Manfred Herrmann (V1.1) (some typo errors + 3 new strings)
 # CVS-> Revision ???
@@ -571,14 +571,21 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
+<form name="form0" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
 <ul>
 <li> Sie browsen das Backup #\$num, erstellt am \$backupTime
         (vor \$backupAge Tagen),
 \$filledBackup
 <li> Klicken Sie auf ein Verzeichnis um dieses zu durchsuchen,
 <li> Klicken Sie auf eine Datei um diese per download wiederherzustellen,
-<li> (ENGLISH) You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
+<li> (ENGLISH)You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
+<li> (ENGLISH)Enter directory: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
 </ul>
+</form>
 
 \${h2("Inhalt von \${EscHTML(\$dirDisplay)}")}
 <form name="form1" method="post" action="\$MyURL">
@@ -919,8 +926,9 @@ EOF
 #$Lang{on} = "on";
 $Lang{off} = "aus";
 
-$Lang{full} = "voll";
-$Lang{incremental} = "incr";
+$Lang{backupType_full}    = "voll";
+$Lang{backupType_incr}    = "incr";
+$Lang{backupType_partial} = "(ENGLISH)partial";
 
 $Lang{failed} = "fehler";
 $Lang{success} = "erfolgreich";

@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/bin/perl -T
 
 #my %lang;
 
@@ -570,14 +570,21 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
+<form name="form0" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
 <ul>
 <li> Está revisando la copia de seguridad Nº\$num, que comenzó hacia las \$backupTime
         (hace \$backupAge dias),
 \$filledBackup
 <li> Haga click en uno de los directorios de abajo para revisar sus contenidos,
 <li> Haga click en un archivo para restaurarlo,
-<li> (ENGLISH) You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
+<li> (ENGLISH)You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
+<li> (ENGLISH)Enter directory: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
 </ul>
+</form>
 
 \${h2("Contenido de \${EscHTML(\$dirDisplay)}")}
 <form name="form1" method="post" action="\$MyURL">
@@ -918,8 +925,9 @@ EOF
 #$Lang{on} = "activo";
 $Lang{off} = "inactivo";
 
-$Lang{full} = "completo";
-$Lang{incremental} = "incremental";
+$Lang{backupType_full}    = "completo";
+$Lang{backupType_incr}    = "incremental";
+$Lang{backupType_partial} = "(ENGLISH)partial";
 
 $Lang{failed} = "fallido";
 $Lang{success} = "éxito";

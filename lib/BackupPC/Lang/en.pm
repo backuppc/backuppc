@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/bin/perl -T
 
 #my %lang;
 
@@ -568,6 +568,11 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
+<form name="form0" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
 <ul>
 <li> You are browsing backup #\$num, which started around \$backupTime
         (\$backupAge days ago),
@@ -575,7 +580,9 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Click on a directory below to navigate into that directory,
 <li> Click on a file below to restore that file,
 <li> You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
+<li> Enter directory: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
 </ul>
+</form>
 
 \${h2("Contents of \${EscHTML(\$dirDisplay)}")}
 <form name="form1" method="post" action="\$MyURL">
@@ -915,8 +922,9 @@ EOF
 #$Lang{on} = "on";
 $Lang{off} = "off";
 
-$Lang{full} = "full";
-$Lang{incremental} = "incr";
+$Lang{backupType_full}    = "full";
+$Lang{backupType_incr}    = "incr";
+$Lang{backupType_partial} = "partial";
 
 $Lang{failed} = "failed";
 $Lang{success} = "success";

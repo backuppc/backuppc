@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/bin/perl -T
 
 #my %lang;
 #use strict;
@@ -567,14 +567,21 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
+<form name="form0" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
 <ul>
 <li> Vous naviguez dans la sauvegarde n°\$num, qui a commencé vers \$backupTime
         (il y a \$backupAge jours),
 \$filledBackup
 <li> Cliquer dans un répertoire ci-dessous pour y naviguer,
 <li> Cliquer dans un fichier ci-dessous pour le restaurer,
-<li> Vous pouvez voir l'<a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">historique</a> de sauvegarde du répertoire courant.
+<li> (ENGLISH) You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
+<li> (ENGLISH)Enter directory: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
 </ul>
+</form>
 
 \${h2("Contenu de \${EscHTML(\$dirDisplay)}")}
 <form name="form1" method="post" action="\$MyURL">
@@ -612,7 +619,7 @@ This is now in the checkAll row
 EOF
 
 # ------------------------------
-$Lang{DirHistory_backup_for__host} = "BackupPC: Historique de sauvegarde des répertoires de \$host";
+$Lang{DirHistory_backup_for__host} = "(ENGLISH) BackupPC: Directory backup history for \$host";
 
 #
 # These two strings are used to build the links for directories and
@@ -622,29 +629,31 @@ $Lang{DirHistory_dirLink}  = "(ENGLISH) dir";
 $Lang{DirHistory_fileLink} = "(ENGLISH) v";
 
 $Lang{DirHistory_for__host} = <<EOF;
-\${h1("Historique de sauvegarde des répertoires de \$host")}
+\${h1("Directory backup history for \$host")}
+(ENGLISH)
 <p>
-Voici les versions des fichiers pour toutes les sauvegardes:
+This display shows each unique version of files across all
+the backups:
 <ul>
-<li> Cliquez sur un numéro de sauvegarde pour revenir à la navigation de sauvegarde,
-<li> Cliquez sur un répertoire (\$Lang->{DirHistory_dirLink}) pour naviguer
-     dans celui-ci,
-<li> Cliquez sur une version d'un fichier (\$Lang->{DirHistory_fileLink}0,
-     \$Lang->{DirHistory_fileLink}1, ...) pour la télécharger.
-<li> (ENGLISH) Files with the same contents between different backups have the same
+<li> Click on a backup number to return to the backup browser,
+<li> Click on a directory link (\$Lang->{DirHistory_dirLink}) to navigate
+     into that directory,
+<li> Click on a file version link (\$Lang->{DirHistory_fileLink}0,
+     \$Lang->{DirHistory_fileLink}1, ...) to download that file,
+<li> Files with the same contents between different backups have the same
      version number,
-<li> (ENGLISH) Files or directories not present in a particular backup have an
+<li> Files or directories not present in a particular backup have an
      empty box.
-<li> (ENGLISH) Files shown with the same version might have different attributes.
+<li> Files shown with the same version might have different attributes.
      Select the backup number to see the file attributes.
 </ul>
 
-\${h2("Historique de \${EscHTML(\$dirDisplay)}")}
+\${h2("History of \${EscHTML(\$dirDisplay)}")}
 
 <br>
 <table border bgcolor="#ffffcc">
-<tr bgcolor="\$Conf{CgiHeaderBgColor}"><td>No. de sauvegarde</td>\$backupNumStr</tr>
-<tr bgcolor="\$Conf{CgiHeaderBgColor}"><td>Date</td>\$backupTimeStr</tr>
+<tr bgcolor="\$Conf{CgiHeaderBgColor}"><td>Backup number</td>\$backupNumStr</tr>
+<tr bgcolor="\$Conf{CgiHeaderBgColor}"><td>Backup time</td>\$backupTimeStr</tr>
 \$fileStr
 </table>
 EOF
@@ -919,8 +928,9 @@ EOF
 #$Lang{on} = "actif";
 $Lang{off} = "inactif";
 
-$Lang{full} = "complet";
-$Lang{incremental} = "incrémental";
+$Lang{backupType_full}    = "complet";
+$Lang{backupType_incr}    = "incrémental";
+$Lang{backupType_partial} = "(ENGLISH)partial";
 
 $Lang{failed} = "échec";
 $Lang{success} = "succès";

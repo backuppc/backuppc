@@ -62,7 +62,7 @@ sub new
     }, $class;
     for ( my $i = 0 ; $i < @{$m->{backups}} ; $i++ ) {
 	next if ( defined($m->{backups}[$i]{level}) );
-	$m->{backups}[$i]{level} = $m->{backups}[$i]{type} eq "full" ? 0 : 1;
+	$m->{backups}[$i]{level} = $m->{backups}[$i]{type} eq "incr" ? 1 : 0;
     }
     $m->{topDir} = $m->{bpc}->TopDir();
     return $m;

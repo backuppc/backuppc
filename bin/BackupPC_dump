@@ -263,6 +263,7 @@ if ( $opts{d} ) {
 my($needLink, @Backups, $type, $lastBkupNum, $lastFullBkupNum);
 my $lastFull = 0;
 my $lastIncr = 0;
+my $partialIdx = -1;
 
 if ( $Conf{FullPeriod} == -1 && !$opts{f} && !$opts{i}
         || $Conf{FullPeriod} == -2 ) {
@@ -307,9 +308,11 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
 	    $lastFull = $Backups[$i]{startTime};
 	    $lastFullBkupNum = $Backups[$i]{num};
 	}
-    } else {
+    } elsif ( $Backups[$i]{type} eq "incr" ) {
         $lastIncr = $Backups[$i]{startTime}
                 if ( $lastIncr < $Backups[$i]{startTime} );
+    } elsif ( $Backups[$i]{type} eq "partial" ) {
+        $partialIdx = $i;
     }
 }
 
@@ -385,7 +388,7 @@ my $sizeExist     = 0;
 my $sizeExistComp = 0;
 my $nFilesTotal   = 0;
 my $sizeTotal     = 0;
-my($logMsg, %stat, $xfer, $ShareNames);
+my($logMsg, %stat, $xfer, $ShareNames, $noFilesErr);
 my $newFilesFH;
 
 if ( $Conf{XferMethod} eq "tar" ) {
@@ -637,6 +640,9 @@ for my $shareName ( @$ShareNames ) {
     # Merge the xfer status (need to accumulate counts)
     #
     my $newStat = $xfer->getStats;
+    if ( $newStat->{fileCnt} == 0 ) {
+       $noFilesErr ||= "No files dumped for share $shareName";
+    }
     foreach my $k ( (keys(%stat), keys(%$newStat)) ) {
         next if ( !defined($newStat->{$k}) );
         if ( $k =~ /Cnt$/ ) {
@@ -674,7 +680,15 @@ for my $shareName ( @$ShareNames ) {
         last;
     }
 }
-my $lastNum  = -1;
+
+#
+# If any share had zero files then consider the dump bad
+#
+if ( $stat{hostError} eq ""
+       && length($noFilesErr) && $Conf{BackupZeroFilesIsFatal} ) {
+    $stat{hostError} = $noFilesErr;
+    $stat{xferOK} = 0;
+}
 
 #
 # Do one last check to make sure it is still the machine we expect.
@@ -688,22 +702,6 @@ UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
 $XferLOG->close();
 close($newFilesFH) if ( defined($newFilesFH) );
 
-if ( $stat{xferOK} ) {
-    @Backups = $bpc->BackupInfoRead($client);
-    for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-        $lastNum = $Backups[$i]{num} if ( $lastNum < $Backups[$i]{num} );
-    }
-    $lastNum++;
-    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/$lastNum")
-                                if ( -d "$Dir/$lastNum" );
-    if ( !rename("$Dir/new", "$Dir/$lastNum") ) {
-        print(LOG $bpc->timeStamp,
-                  "Rename $Dir/new -> $Dir/$lastNum failed\n");
-        $stat{xferOK} = 0;
-    }
-    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.$lastNum$fileExt");
-    rename("$Dir/NewFileList", "$Dir/NewFileList.$lastNum");
-}
 my $endTime = time();
 
 #
@@ -726,75 +724,19 @@ if ( !$stat{xferOK} ) {
         $stat{hostError} = "lost network connection during backup";
     }
     print(LOG $bpc->timeStamp, "Dump aborted ($stat{hostError})\n");
-    unlink("$Dir/timeStamp.level0");
-    unlink("$Dir/SmbLOG.bad");
-    unlink("$Dir/SmbLOG.bad$fileExt");
-    unlink("$Dir/XferLOG.bad");
-    unlink("$Dir/XferLOG.bad$fileExt");
-    unlink("$Dir/NewFileList");
-    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.bad$fileExt");
-    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
-    print("dump failed: $stat{hostError}\n");
-    print("link $clientURI\n") if ( $needLink );
-    exit(1);
+
+    #
+    # This exits.
+    #
+    BackupFailCleanup();
 }
 
-#
-# Add the new backup information to the backup file
-#
-@Backups = $bpc->BackupInfoRead($client);
-my $i = @Backups;
-$Backups[$i]{num}           = $lastNum;
-$Backups[$i]{type}          = $type;
-$Backups[$i]{startTime}     = $startTime;
-$Backups[$i]{endTime}       = $endTime;
-$Backups[$i]{size}          = $sizeTotal;
-$Backups[$i]{nFiles}        = $nFilesTotal;
-$Backups[$i]{xferErrs}      = $stat{xferErrCnt} || 0;
-$Backups[$i]{xferBadFile}   = $stat{xferBadFileCnt} || 0;
-$Backups[$i]{xferBadShare}  = $stat{xferBadShareCnt} || 0;
-$Backups[$i]{nFilesExist}   = $nFilesExist;
-$Backups[$i]{sizeExist}     = $sizeExist;
-$Backups[$i]{sizeExistComp} = $sizeExistComp;
-$Backups[$i]{tarErrs}       = $tarErrs;
-$Backups[$i]{compress}      = $Conf{CompressLevel};
-$Backups[$i]{noFill}        = $type eq "full" ? 0 : 1;
-$Backups[$i]{mangle}        = 1;        # name mangling always on for v1.04+
-$bpc->BackupInfoWrite($client, @Backups);
-
-unlink("$Dir/timeStamp.level0");
-
-#
-# Now remove the bad files, replacing them if possible with links to
-# earlier backups.
-#
-foreach my $file ( $xfer->getBadFiles ) {
-    my $j;
-    unlink("$Dir/$lastNum/$file");
-    for ( $j = $i - 1 ; $j >= 0 ; $j-- ) {
-        next if ( !-f "$Dir/$Backups[$j]{num}/$file" );
-        if ( !link("$Dir/$Backups[$j]{num}/$file", "$Dir/$lastNum/$file") ) {
-            print(LOG $bpc->timeStamp,
-                      "Unable to link $lastNum/$file to"
-                    . " $Backups[$j]{num}/$file\n");
-        } else {
-            print(LOG $bpc->timeStamp,
-                      "Bad file $lastNum/$file replaced by link to"
-                    . " $Backups[$j]{num}/$file\n");
-        }
-        last;
-    }
-    if ( $j < 0 ) {
-        print(LOG $bpc->timeStamp,
-                  "Removed bad file $lastNum/$file (no older"
-                . " copy to link to)\n");
-    }
-}
+my $newNum = BackupSave();
 
 my $otherCount = $stat{xferErrCnt} - $stat{xferBadFileCnt}
                                    - $stat{xferBadShareCnt};
 print(LOG $bpc->timeStamp,
-          "$type backup $lastNum complete, $stat{fileCnt} files,"
+          "$type backup $newNum complete, $stat{fileCnt} files,"
         . " $stat{byteCnt} bytes,"
         . " $stat{xferErrCnt} xferErrs ($stat{xferBadFileCnt} bad files,"
         . " $stat{xferBadShareCnt} bad shares, $otherCount other)\n");
@@ -819,7 +761,6 @@ sub NothingToDo
 sub catch_signal
 {
     my $signame = shift;
-    my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
 
     #
     # Children quit quietly on ALRM
@@ -846,19 +787,44 @@ sub catch_signal
 	sleep(1);
 	kill(9, $tarPid);
     }
-    unlink("$Dir/timeStamp.level0");
-    unlink("$Dir/NewFileList");
-    unlink("$Dir/XferLOG.bad");
-    unlink("$Dir/XferLOG.bad$fileExt");
-    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.bad$fileExt");
-    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
     if ( $signame eq "INT" ) {
-        print("dump failed: aborted by user (signal=$signame)\n");
+        $stat{hostError} = "aborted by user (signal=$signame)";
     } else {
-        print("dump failed: received signal=$signame\n");
+        $stat{hostError} = "received signal=$signame";
     }
+    BackupFailCleanup();
+}
+
+sub BackupFailCleanup
+{
+    my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
+
+    if ( $type ne "full"
+            || ($nFilesTotal == 0 && $xfer->getStats->{fileCnt} == 0) ) {
+        #
+        # No point in saving this dump; get rid of eveything.
+        #
+        unlink("$Dir/timeStamp.level0");
+        unlink("$Dir/SmbLOG.bad");
+        unlink("$Dir/SmbLOG.bad$fileExt");
+        unlink("$Dir/XferLOG.bad");
+        unlink("$Dir/XferLOG.bad$fileExt");
+        unlink("$Dir/NewFileList");
+        rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.bad$fileExt");
+        $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
+        print("dump failed: $stat{hostError}\n");
+        print("link $clientURI\n") if ( $needLink );
+        exit(1);
+    }
+    #
+    # Ok, now we should save this as a partial dump
+    #
+    $type = "partial";
+    my $newNum = BackupSave();
+    print("dump failed: $stat{hostError}\n");
     print("link $clientURI\n") if ( $needLink );
-    exit(1);
+    print(LOG $bpc->timeStamp, "Saved partial dump $newNum\n");
+    exit(2);
 }
 
 #
@@ -875,7 +841,7 @@ sub BackupExpire
     while ( 1 ) {
 	$cntFull = $cntIncr = 0;
 	$oldestIncr = $oldestFull = 0;
-	for ( $i = 0 ; $i < @Backups ; $i++ ) {
+	for ( my $i = 0 ; $i < @Backups ; $i++ ) {
 	    if ( $Backups[$i]{type} eq "full" ) {
 		$firstFull = $i if ( $cntFull == 0 );
 		$cntFull++;
@@ -903,17 +869,7 @@ sub BackupExpire
             # 
 	    print(LOG $bpc->timeStamp,
                       "removing incr backup $Backups[$firstIncr]{num}\n");
-	    $bpc->RmTreeDefer("$TopDir/trash",
-                              "$Dir/$Backups[$firstIncr]{num}");
-	    unlink("$Dir/SmbLOG.$Backups[$firstIncr]{num}")
-                        if ( -f "$Dir/SmbLOG.$Backups[$firstIncr]{num}" );
-	    unlink("$Dir/SmbLOG.$Backups[$firstIncr]{num}.z")
-                        if ( -f "$Dir/SmbLOG.$Backups[$firstIncr]{num}.z" );
-	    unlink("$Dir/XferLOG.$Backups[$firstIncr]{num}")
-                        if ( -f "$Dir/XferLOG.$Backups[$firstIncr]{num}" );
-	    unlink("$Dir/XferLOG.$Backups[$firstIncr]{num}.z")
-                        if ( -f "$Dir/XferLOG.$Backups[$firstIncr]{num}.z" );
-	    splice(@Backups, $firstIncr, 1);
+            BackupRemove($client, \@Backups, $firstIncr);
 	} elsif ( ($cntFull > $Conf{FullKeepCnt}
                     || ($cntFull > $Conf{FullKeepCntMin}
                         && $oldestFull > $Conf{FullAgeMax}))
@@ -928,22 +884,137 @@ sub BackupExpire
             # 
 	    print(LOG $bpc->timeStamp,
                    "removing full backup $Backups[$firstFull]{num}\n");
-	    $bpc->RmTreeDefer("$TopDir/trash",
-                              "$Dir/$Backups[$firstFull]{num}");
-	    unlink("$Dir/SmbLOG.$Backups[$firstFull]{num}")
-                        if ( -f "$Dir/SmbLOG.$Backups[$firstFull]{num}" );
-	    unlink("$Dir/SmbLOG.$Backups[$firstFull]{num}.z")
-                        if ( -f "$Dir/SmbLOG.$Backups[$firstFull]{num}.z" );
-	    unlink("$Dir/XferLOG.$Backups[$firstFull]{num}")
-                        if ( -f "$Dir/XferLOG.$Backups[$firstFull]{num}" );
-	    unlink("$Dir/XferLOG.$Backups[$firstFull]{num}.z")
-                        if ( -f "$Dir/XferLOG.$Backups[$firstFull]{num}.z" );
-	    splice(@Backups, $firstFull, 1);
+            BackupRemove($client, \@Backups, $firstFull);
 	} else {
 	    last;
 	}
     }
     $bpc->BackupInfoWrite($client, @Backups);
+}
+
+#
+# Removes any partial backups
+#
+sub BackupPartialRemove
+{
+    my($client, $Backups) = @_;
+
+    for ( my $i = @$Backups - 1 ; $i >= 0 ; $i-- ) {
+        next if ( $Backups->[$i]{type} ne "partial" );
+        BackupRemove($client, $Backups, $i);
+    }
+}
+
+sub BackupSave
+{
+    my @Backups = $bpc->BackupInfoRead($client);
+    my $num  = -1;
+
+    #
+    # Since we got a good backup we should remove any partial dumps
+    # (the new backup might also be a partial, but that's ok).
+    #
+    BackupPartialRemove($client, \@Backups);
+
+    #
+    # Number the new backup
+    #
+    for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+        $num = $Backups[$i]{num} if ( $num < $Backups[$i]{num} );
+    }
+    $num++;
+    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/$num")
+                                if ( -d "$Dir/$num" );
+    if ( !rename("$Dir/new", "$Dir/$num") ) {
+        print(LOG $bpc->timeStamp,
+                  "Rename $Dir/new -> $Dir/$num failed\n");
+        $stat{xferOK} = 0;
+    }
+    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.$num$fileExt");
+    rename("$Dir/NewFileList", "$Dir/NewFileList.$num");
+
+    #
+    # Add the new backup information to the backup file
+    #
+    my $i = @Backups;
+    $Backups[$i]{num}           = $num;
+    $Backups[$i]{type}          = $type;
+    $Backups[$i]{startTime}     = $startTime;
+    $Backups[$i]{endTime}       = $endTime;
+    $Backups[$i]{size}          = $sizeTotal;
+    $Backups[$i]{nFiles}        = $nFilesTotal;
+    $Backups[$i]{xferErrs}      = $stat{xferErrCnt} || 0;
+    $Backups[$i]{xferBadFile}   = $stat{xferBadFileCnt} || 0;
+    $Backups[$i]{xferBadShare}  = $stat{xferBadShareCnt} || 0;
+    $Backups[$i]{nFilesExist}   = $nFilesExist;
+    $Backups[$i]{sizeExist}     = $sizeExist;
+    $Backups[$i]{sizeExistComp} = $sizeExistComp;
+    $Backups[$i]{tarErrs}       = $tarErrs;
+    $Backups[$i]{compress}      = $Conf{CompressLevel};
+    $Backups[$i]{noFill}        = $type eq "incr" ? 1 : 0;
+    $Backups[$i]{level}         = $type eq "incr" ? 1 : 0;
+    $Backups[$i]{mangle}        = 1;        # name mangling always on for v1.04+
+    $bpc->BackupInfoWrite($client, @Backups);
+
+    unlink("$Dir/timeStamp.level0");
+
+    #
+    # Now remove the bad files, replacing them if possible with links to
+    # earlier backups.
+    #
+    foreach my $f ( $xfer->getBadFiles ) {
+	my $j;
+	my $shareM = $bpc->fileNameEltMangle($f->{share});
+	my $fileM  = $bpc->fileNameMangle($f->{file});
+	unlink("$Dir/$num/$shareM/$fileM");
+	for ( $j = $i - 1 ; $j >= 0 ; $j-- ) {
+	    my $file;
+	    if ( $Backups[$j]{mangle} ) {
+		$file = "$shareM/$fileM";
+	    } else {
+		$file = "$f->{share}/$f->{file}";
+	    }
+	    next if ( !-f "$Dir/$Backups[$j]{num}/$file" );
+	    if ( !link("$Dir/$Backups[$j]{num}/$file",
+				"$Dir/$num/$shareM/$fileM") ) {
+		print(LOG $bpc->timeStamp,
+			  "Unable to link $num/$shareM/$fileM to"
+			. " $Backups[$j]{num}/$file\n");
+	    } else {
+		print(LOG $bpc->timeStamp,
+			  "Bad file $num/$shareM/$fileM replaced by link to"
+			. " $Backups[$j]{num}/$file\n");
+	    }
+	    last;
+	}
+	if ( $j < 0 ) {
+	    print(LOG $bpc->timeStamp,
+		      "Removed bad file $num/$shareM/$fileM (no older"
+		    . " copy to link to)\n");
+	}
+    }
+    return $num;
+}
+
+#
+# Removes a specific backup
+#
+sub BackupRemove
+{
+    my($client, $Backups, $idx) = @_;
+    my($Dir) = "$TopDir/pc/$client";
+
+    $bpc->RmTreeDefer("$TopDir/trash",
+                      "$Dir/$Backups->[$idx]{num}");
+    unlink("$Dir/SmbLOG.$Backups->[$idx]{num}")
+                if ( -f "$Dir/SmbLOG.$Backups->[$idx]{num}" );
+    unlink("$Dir/SmbLOG.$Backups->[$idx]{num}.z")
+                if ( -f "$Dir/SmbLOG.$Backups->[$idx]{num}.z" );
+    unlink("$Dir/XferLOG.$Backups->[$idx]{num}")
+                if ( -f "$Dir/XferLOG.$Backups->[$idx]{num}" );
+    unlink("$Dir/XferLOG.$Backups->[$idx]{num}.z")
+                if ( -f "$Dir/XferLOG.$Backups->[$idx]{num}.z" );
+    splice(@{$Backups}, $idx, 1);
 }
 
 sub CorrectHostCheck
@@ -997,6 +1068,7 @@ sub UserCommandRun
         XferLOG    => $XferLOG,
         stat       => \%stat,
         xferOK     => $stat{xferOK} || 0,
+	hostError  => $stat{hostError},
 	type	   => $type,
     };
     my $cmd = $bpc->cmdVarSubstitute($Conf{$type}, $vars);

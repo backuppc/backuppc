@@ -21,6 +21,13 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fixed stupid last-minute change in octal size conversion in
+  Backup_tarExtract.
+
+#------------------------------------------------------------------------
+# Version 2.0.1, 5 Oct 2003
+#------------------------------------------------------------------------
+
 * Fixed handling of >= 8GB files in BackupPC_tarExtract and >= 4GB
   files in BackupPC_tarCreate.
 

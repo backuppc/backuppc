@@ -33,7 +33,7 @@
 #
 #========================================================================
 #
-# Version 2.0.1, released 5 Oct 2003.
+# Version 2.0.2, released 6 Oct 2003.
 #
 # See http://backuppc.sourceforge.net.
 #

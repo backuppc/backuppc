@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 2.0.1, released 5 Oct 2003.
+# Version 2.0.2, released 6 Oct 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -35,7 +35,7 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC2.0.1/lib";
+use lib "/usr/local/BackupPC2.0.2/lib";
 use BackupPC::Lib;
 use BackupPC::Attrib qw(:all);
 use BackupPC::FileZIO;
@@ -182,8 +182,13 @@ sub TarReadFileInfo
 	    # To avoid integer overflow in case we are in the 4GB - 8GB
 	    # range, we do the conversion in two parts.
 	    #
-	    $size = oct(substr($size, 0, 2)) * (1 << 24)
-		  + oct(substr($size, 3));
+            if ( $size =~ /([0-9]{9,})/ ) {
+                my $len = length($1);
+                $size = oct(substr($1, 0, $len - 8)) * (1 << 24)
+                      + oct(substr($1, $len - 8));
+            } else {
+                $size = oct($size);
+            }
 	}
         $mtime    = oct $mtime;
         $chksum   = oct $chksum;

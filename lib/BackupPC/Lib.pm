@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.1, released 5 Oct 2003.
+# Version 2.0.2, released 6 Oct 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -55,10 +55,10 @@ sub new
     my($topDir, $installDir, $noUserCheck) = @_;
 
     my $bpc = bless {
-        TopDir  => $topDir || '/data/BackupPC2.0.1',
-        BinDir  => $installDir || '/usr/local/BackupPC2.0.1',
-        LibDir  => $installDir || '/usr/local/BackupPC2.0.1',
-        Version => '2.0.1',
+        TopDir  => $topDir || '/data/BackupPC2.0.2',
+        BinDir  => $installDir || '/usr/local/BackupPC2.0.2',
+        LibDir  => $installDir || '/usr/local/BackupPC2.0.2',
+        Version => '2.0.2',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew

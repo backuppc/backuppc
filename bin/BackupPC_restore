@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.0.1, released 5 Oct 2003.
+# Version 2.0.2, released 6 Oct 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -37,7 +37,7 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC2.0.1/lib";
+use lib "/usr/local/BackupPC2.0.2/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 use BackupPC::Xfer::Smb;

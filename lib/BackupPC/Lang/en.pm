@@ -12,6 +12,9 @@ $Lang{Start_Incr_Backup} = "Start Incr Backup";
 $Lang{Stop_Dequeue_Backup} = "Stop/Dequeue Backup";
 $Lang{Restore} = "Restore";
 
+$Lang{Type_full} = "full";
+$Lang{Type_incr} = "incremental";
+
 # -----
 
 $Lang{Only_privileged_users_can_view_admin_options} = "Only privileged users can view admin options.";

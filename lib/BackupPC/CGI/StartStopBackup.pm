@@ -46,7 +46,7 @@ sub action
     my $start = 1 if ( $In{action} eq $Lang->{Start_Incr_Backup}
                        || $In{action} eq $Lang->{Start_Full_Backup} );
     my $doFull = $In{action} eq $Lang->{Start_Full_Backup} ? 1 : 0;
-    my $type = $doFull ? "full" : "incremental";
+    my $type = $doFull ? $Lang->{Type_full} : $Lang->{Type_incr};
     my $host = $In{host};
     my $Privileged = CheckPermission($host);
 

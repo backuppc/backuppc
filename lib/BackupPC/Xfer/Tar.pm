@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -189,6 +189,7 @@ sub start
         #
         # Run the tar command
         #
+	alarm(0);
 	$bpc->cmdExecOrEval($tarClientCmd, $args);
         # should not be reached, but just in case...
         $t->{_errStr} = "Can't exec @$tarClientCmd";

@@ -21,6 +21,21 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Added support for resuming a full dump for rsync.  The partial
+  full is kept, and to resume an incremental is done against the
+  partial, and a full is done for the rest.
+
+* Added support for Rsync checksum caching.  Rsync checksum are
+  appended to the compressed pool files.
+
+* Added support for smbclient from samba version 3.0.0.
+
+* Added options for block size, buffer size and share wild-card to
+  BackupPC_tarCreate.
+
+* Add creation of per-PC directory in BackupPC/CGI/Restore.pm in
+  case it doesn't already exist.  Reported by XXX.
+
 * Replace PingClientPath with PingPath in configure.pl.
 
 * GFK updated fr.pm from en.pm.
@@ -106,7 +121,6 @@
 * Required File::RsyncP version is now 0.44, since File::RsyncP 0.44
   fixes large file (>2GB) bugs.  Large file bugs reported by Steve
   Waltner.
-
 
 #------------------------------------------------------------------------
 # Version 2.0.0, 14 Jun 2003

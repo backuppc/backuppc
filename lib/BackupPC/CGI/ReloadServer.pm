@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -41,10 +41,9 @@ use BackupPC::CGI::Lib qw(:all);
 
 sub action
 {
-    if ( defined($bpc) ) {
-        $bpc->ServerMesg("log User $User requested server configuration reload");
-        $bpc->ServerMesg("server reload");
-    }
+    ServerConnect();
+    $bpc->ServerMesg("log User $User requested server configuration reload");
+    $bpc->ServerMesg("server reload");
     print $Cgi->redirect($MyURL);
 }
 

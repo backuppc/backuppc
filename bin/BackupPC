@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC: Main program for PC backups.
@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -818,6 +818,17 @@ sub Main_Check_Job_Messages
                 $Status{$host}{startTime} = time;
                 $Status{$host}{deadCnt}   = 0;
                 $Status{$host}{aliveCnt}++;
+            } elsif ( $mesg =~ /^started_archive/ ) {
+                $Jobs{$host}{type}    = "archive";
+                print(LOG $bpc->timeStamp,
+                          "Started archive on $host"
+                          . " (pid=$Jobs{$host}{pid})\n");
+                $Status{$host}{state}     = "Status_archive_in_progress";
+                $Status{$host}{reason}    = "";
+                $Status{$host}{type}      = "archive";
+                $Status{$host}{startTime} = time;
+                $Status{$host}{deadCnt}   = 0;
+                $Status{$host}{aliveCnt}++;
             } elsif ( $mesg =~ /^(full|incr) backup complete/ ) {
                 print(LOG $bpc->timeStamp, "Finished $1 backup on $host\n");
                 $Status{$host}{reason}    = "Reason_backup_done";
@@ -827,6 +838,12 @@ sub Main_Check_Job_Messages
             } elsif ( $mesg =~ /^restore complete/ ) {
                 print(LOG $bpc->timeStamp, "Finished restore on $host\n");
                 $Status{$host}{reason}    = "Reason_restore_done";
+                delete($Status{$host}{error});
+                delete($Status{$host}{errorTime});
+                $Status{$host}{endTime}   = time;
+            } elsif ( $mesg =~ /^archive complete/ ) {
+                print(LOG $bpc->timeStamp, "Finished archive on $host\n");
+                $Status{$host}{reason}    = "Reason_archive_done";
                 delete($Status{$host}{error});
                 delete($Status{$host}{errorTime});
                 $Status{$host}{endTime}   = time;
@@ -868,6 +885,13 @@ sub Main_Check_Job_Messages
                 $Status{$host}{errorTime} = time;
                 $Status{$host}{endTime}   = time;
                 print(LOG $bpc->timeStamp, "Restore failed on $host ($1)\n");
+            } elsif ( $mesg =~ /^archive failed: (.*)/ ) {
+                $Status{$host}{state}     = "Status_idle";
+                $Status{$host}{reason}    = "Reason_archive_failed";
+                $Status{$host}{error}     = $1;
+                $Status{$host}{errorTime} = time;
+                $Status{$host}{endTime}   = time;
+                print(LOG $bpc->timeStamp, "Archive failed on $host ($1)\n");
             } elsif ( $mesg =~ /^log\s+(.*)/ ) {
                 print(LOG $bpc->timeStamp, "$1\n");
             } elsif ( $mesg =~ /^BackupPC_stats = (.*)/ ) {
@@ -1225,7 +1249,7 @@ sub Main_Check_Client_Messages
             } elsif ( $cmd =~ /^server\s+(\w+)/ ) {
                 my($type) = $1;
                 if ( $type eq 'reload' ) {
-                    ServerReload("Reloading server configuration...");
+                    ServerReload("Reloading config/host files via CGI request");
                 } elsif ( $type eq 'shutdown' ) {
                     $reply = "Shutting down...\n";
                     syswrite($Clients{$client}{fh}, $reply, length($reply));

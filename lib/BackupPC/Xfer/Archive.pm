@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -90,35 +90,41 @@ sub run
     $t->{xferOK} = 1;
     @HostList = $t->{HostList};
     @BackupList = $t->{BackupList};
-    my $i=0;
-    my $tarCreatePath = $conf->{InstallDir} . "/bin/BackupPC_tarCreate";
+    my $i = 0;
+    my $tarCreatePath = "$conf->{InstallDir}/bin/BackupPC_tarCreate";
     while (${@HostList[0]}[$i]) {
-      #
-      # Merge variables into @archiveClientCmd
-      #
-      my $cmdargs = {
-          archiveloc   => $t->{archiveloc},
-          parfile      => $t->{parfile},
-          compression  => $t->{compression},
-          compext      => $t->{compext},
-          splitsize    => $t->{splitsize},
-          host         => ${@HostList[0]}[$i],
-          backupnumber => ${@BackupList[0]}[$i],
-          Installdir    => $conf->{InstallDir},
-          tarCreatePath => $tarCreatePath,
-          splitpath     => $conf->{SplitPath},
-          parpath       => $conf->{ParPath},
-      };
+        #
+        #   Merge variables into @archiveClientCmd
+        #
+        my $errStr;
+        my $cmdargs = {
+            archiveloc    => $t->{archiveloc},
+            parfile       => $t->{parfile},
+            compression   => $t->{compression},
+            compext       => $t->{compext},
+            splitsize     => $t->{splitsize},
+            host          => ${@HostList[0]}[$i],
+            backupnumber  => ${@BackupList[0]}[$i],
+            Installdir    => $conf->{InstallDir},
+            tarCreatePath => $tarCreatePath,
+            splitpath     => $conf->{SplitPath},
+            parpath       => $conf->{ParPath},
+        };
 
-      $archiveClientCmd2 = $bpc->cmdVarSubstitute($archiveClientCmd, $cmdargs);
-      $t->{XferLOG}->write(\"Executing: @$archiveClientCmd2\n");
+        $archiveClientCmd2 = $bpc->cmdVarSubstitute($archiveClientCmd,
+                                                    $cmdargs);
+        $t->{XferLOG}->write(\"Executing: @$archiveClientCmd2\n");
 
-       $bpc->cmdSystemOrEval($archiveClientCmd2,
+        $bpc->cmdSystemOrEval($archiveClientCmd2,
             sub {
+                $errStr = $_[0];
                 $t->{XferLOG}->write(\$_[0]);
             });
-
-      $i++;
+        if ( $? ) {
+            ($t->{_errStr} = $errStr) =~ s/[\n\r]+//;
+            return;
+        }
+        $i++;
     }
     $t->{XferLOG}->write(\"Completed Archive\n");
     return "Completed Archive";

@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_tarCreate: create a tar archive of an existing dump
@@ -6,20 +6,23 @@
 #
 # DESCRIPTION
 #  
-#   Usage: BackupPC_tarCreate [-t] [-h host] [-n dumpNum] [-s shareName]
-#		    [-r pathRemove] [-p pathAdd] files/directories...
+#   Usage: BackupPC_tarCreate [options] files/directories...
 #
 #   Flags:
 #     Required options:
 #
-#       -h host         host from which the tar archive is created
-#       -n dumpNum      dump number from which the tar archive is created
-#       -s shareName    share name from which the tar archive is created
+#       -h host         Host from which the tar archive is created.
+#       -n dumpNum      Dump number from which the tar archive is created.
+#                       A negative number means relative to the end (eg -1
+#                       means the most recent dump, -2 2nd most recent etc).
+#       -s shareName    Share name from which the tar archive is created.
 #
 #     Other options:
 #       -t              print summary totals
 #       -r pathRemove   path prefix that will be replaced with pathAdd
 #       -p pathAdd      new path prefix
+#       -b BLOCKS       BLOCKS x 512 bytes per record (default 20; same as tar)
+#       -w writeBufSz   write buffer size (default 1MB)
 #
 #     The -h, -n and -s options specify which dump is used to generate
 #     the tar archive.  The -r and -p options can be used to relocate
@@ -48,7 +51,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -71,10 +74,23 @@ my %Conf   = $bpc->Conf();
 
 my %opts;
 
-if ( !getopts("th:n:p:r:s:", \%opts) || @ARGV < 1 ) {
-    print(STDERR "usage: $0 [-t] [-h host] [-n dumpNum] [-s shareName]"
-               . " [-r pathRemove] [-p pathAdd]"
-               . " files/directories...\n");
+if ( !getopts("th:n:p:r:s:b:w:", \%opts) || @ARGV < 1 ) {
+    print STDERR <<EOF;
+usage: $0 [options] files/directories...
+  Required options:
+     -h host         host from which the tar archive is created
+     -n dumpNum      dump number from which the tar archive is created
+                     A negative number means relative to the end (eg -1
+                     means the most recent dump, -2 2nd most recent etc).
+     -s shareName    share name from which the tar archive is created
+
+  Other options:
+     -t              print summary totals
+     -r pathRemove   path prefix that will be replaced with pathAdd
+     -p pathAdd      new path prefix
+     -b BLOCKS       BLOCKS x 512 bytes per record (default 20; same as tar)
+     -w writeBufSz   write buffer size (default 1048576 = 1MB)
+EOF
     exit(1);
 }
 
@@ -84,7 +100,7 @@ if ( $opts{h} !~ /^([\w\.\s-]+)$/ ) {
 }
 my $Host = $opts{h};
 
-if ( $opts{n} !~ /^(\d+)$/ ) {
+if ( $opts{n} !~ /^(-?\d+)$/ ) {
     print(STDERR "$0: bad dump number '$opts{n}'\n");
     exit(1);
 }
@@ -98,6 +114,7 @@ my $SpecialCnt = 0;
 my $ErrorCnt = 0;
 
 my $i;
+$Num = $Backups[@Backups + $Num]{num} if ( -@Backups <= $Num && $Num < 0 );
 for ( $i = 0 ; $i < @Backups ; $i++ ) {
     last if ( $Backups[$i]{num} == $Num );
 }
@@ -108,11 +125,12 @@ if ( $i >= @Backups ) {
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
 my $PathAdd    = $1 if ( $opts{p} =~ /(.+)/ );
-if ( $opts{s} !~ /^([\w\s\.\/\$-]+)$/ ) {
+if ( $opts{s} !~ /^([\w\s\.\/\$-]+)$/ && $opts{s} ne "*" ) {
     print(STDERR "$0: bad share name '$opts{s}'\n");
     exit(1);
 }
-my $ShareName = $opts{s};
+our $ShareName = $opts{s};
+our $view = BackupPC::View->new($bpc, $Host, \@Backups);
 
 #
 # This constant and the line of code below that uses it are borrowed
@@ -126,9 +144,9 @@ my $tar_pack_header
     = 'a100 a8 a8 a8 a12 a12 A8 a1 a100 a6 a2 a32 a32 a8 a8 a155 x12';
 my $tar_header_length = 512;
 
-my $BufSize    = 1048576;     # 1MB or 2^20
+my $BufSize    = $opts{w} || 1048576;     # 1MB or 2^20
 my $WriteBuf   = "";
-my $WriteBufSz = 20 * $tar_header_length;
+my $WriteBufSz = ($opts{b} || 20) * $tar_header_length;
 
 my(%UidCache, %GidCache);
 my(%HardLinkExtraFiles, @HardLinks);
@@ -138,21 +156,23 @@ my(%HardLinkExtraFiles, @HardLinks);
 #
 binmode(STDOUT);
 my $fh = *STDOUT;
-foreach my $dir ( @ARGV ) {
-    archiveWrite($fh, $dir);
-}
-
-#
-# Write out any hardlinks (if any)
-#
-foreach my $hdr ( @HardLinks ) {
-    $hdr->{size} = 0;
-    if ( defined($PathRemove)
-	  && substr($hdr->{linkname}, 0, length($PathRemove)+1)
-		    eq ".$PathRemove" ) {
-        substr($hdr->{linkname}, 0, length($PathRemove)+1) = ".$PathAdd";
+if ( $ShareName eq "*" ) {
+    my $PathRemoveOrig = $PathRemove;
+    my $PathAddOrig    = $PathAdd;
+    foreach $ShareName ( $view->shareList($Num) ) {
+        #print(STDERR "Doing share ($ShareName)\n");
+        $PathRemove = "/" if ( !defined($PathRemoveOrig) );
+        ($PathAdd = "/$ShareName/$PathAddOrig") =~ s{//+}{/}g;
+        foreach my $dir ( @ARGV ) {
+            archiveWrite($fh, $dir);
+        }
+        archiveWriteHardLinks($fh);
     }
-    TarWriteFileInfo($fh, $hdr);
+} else {
+    foreach my $dir ( @ARGV ) {
+        archiveWrite($fh, $dir);
+    }
+    archiveWriteHardLinks($fh);
 }
 
 #
@@ -170,6 +190,13 @@ if ( $opts{t} ) {
     print STDERR "Done: $FileCnt files, $ByteCnt bytes, $DirCnt dirs,",
 		 " $SpecialCnt specials, $ErrorCnt errors\n";
 }
+if ( $ErrorCnt && !$FileCnt && !$DirCnt ) {
+    #
+    # Got errors, with no files or directories; exit with non-zero
+    # status
+    #
+    exit(1);
+}
 exit(0);
 
 ###########################################################################
@@ -180,15 +207,38 @@ sub archiveWrite
 {
     my($fh, $dir, $tarPathOverride) = @_;
 
-    my $view = BackupPC::View->new($bpc, $Host, \@Backups);
-
     if ( $dir =~ m{(^|/)\.\.(/|$)} ) {
         print(STDERR "$0: bad directory '$dir'\n");
 	$ErrorCnt++;
         return;
     }
-    $view->find($Num, $ShareName, $dir, 0, \&TarWriteFile,
-                $fh, $tarPathOverride);
+    $dir = "/" if ( $dir eq "." );
+    #print(STDERR "calling find with $Num, $ShareName, $dir\n");
+    if ( $view->find($Num, $ShareName, $dir, 0, \&TarWriteFile,
+                $fh, $tarPathOverride) < 0 ) {
+        print(STDERR "$0: bad share or directory '$ShareName/$dir'\n");
+	$ErrorCnt++;
+        return;
+    }
+}
+
+#
+# Write out any hardlinks (if any)
+#
+sub archiveWriteHardLinks
+{
+    my $fh = @_;
+    foreach my $hdr ( @HardLinks ) {
+        $hdr->{size} = 0;
+        if ( defined($PathRemove)
+              && substr($hdr->{linkname}, 0, length($PathRemove)+1)
+                        eq ".$PathRemove" ) {
+            substr($hdr->{linkname}, 0, length($PathRemove)+1) = ".$PathAdd";
+        }
+        TarWriteFileInfo($fh, $hdr);
+    }
+    @HardLinks = ();
+    %HardLinkExtraFiles = ();
 }
 
 sub UidLookup
@@ -262,12 +312,29 @@ sub TarWriteHeader
                                              : "";
     my $devminor = defined($hdr->{devminor}) ? sprintf("%07o", $hdr->{devminor})
                                              : "";
+    my $sizeStr;
+    if ( $hdr->{size} >= 2 * 65536 * 65536 ) {
+	#
+	# GNU extension for files >= 8GB: send size in big-endian binary
+	#
+	$sizeStr = pack("c4 N N", 0x80, 0, 0, 0,
+				  $hdr->{size} / (65536 * 65536),
+				  $hdr->{size} % (65536 * 65536));
+    } elsif ( $hdr->{size} >= 1 * 65536 * 65536 ) {
+	#
+	# sprintf octal only handles up to 2^32 - 1
+	#
+	my $sizeStr = sprintf("%03o", $hdr->{size} / (1 << 24))
+		    . sprintf("%08o", $hdr->{size} % (1 << 24));
+    } else {
+	$sizeStr = sprintf("%011o", $hdr->{size});
+    }
     my $data = pack($tar_pack_header,
                      substr($hdr->{name}, 0, 99),
                      sprintf("%07o", $hdr->{mode}),
                      sprintf("%07o", $hdr->{uid}),
                      sprintf("%07o", $hdr->{gid}),
-                     sprintf("%011o", $hdr->{size}),
+                     $sizeStr,
                      sprintf("%011o", $hdr->{mtime}),
                      "",        #checksum field - space padded by pack("A8")
                      $hdr->{type},
@@ -327,6 +394,7 @@ sub TarWriteFile
     my $tarPath = $hdr->{relPath};
     $tarPath = $tarPathOverride if ( defined($tarPathOverride) );
 
+    $tarPath =~ s{//+}{/}g;
     if ( defined($PathRemove)
             && substr($tarPath, 0, length($PathRemove)) eq $PathRemove ) {
         substr($tarPath, 0, length($PathRemove)) = $PathAdd;

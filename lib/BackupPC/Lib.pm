@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1088,7 +1088,12 @@ sub cmdExecOrEval
 	print(STDERR "cmdExecOrEval: about to exec ",
 	      $bpc->execCmd2ShellCmd(@$cmd), "\n")
 			if ( $bpc->{verbose} );
-        exec(map { m/(.*)/ } @$cmd);		# untaint
+	alarm(0);
+	$cmd = [map { m/(.*)/ } @$cmd];		# untaint
+	#
+	# force list-form of exec(), ie: no shell even for 1 arg
+	#
+        exec { $cmd->[0] } @$cmd;
         print(STDERR "Exec failed for @$cmd\n");
         exit(1);
     }
@@ -1143,7 +1148,12 @@ sub cmdSystemOrEval
 	    #
             close(STDERR);
 	    open(STDERR, ">&STDOUT");
-	    exec(map { m/(.*)/ } @$cmd);		# untaint
+	    alarm(0);
+	    $cmd = [map { m/(.*)/ } @$cmd];		# untaint
+	    #
+	    # force list-form of exec(), ie: no shell even for 1 arg
+	    #
+	    exec { $cmd->[0] } @$cmd;
             print("Exec of @$cmd failed\n");
             exit(1);
 	}

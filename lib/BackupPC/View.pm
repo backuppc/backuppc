@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -78,18 +78,11 @@ sub dirCache
     $dir =~ s{/+$}{};
     return if ( $m->{num} == $backupNum
                 && $m->{share} eq $share
+                && defined($m->{dir})
                 && $m->{dir} eq $dir );
-    if ( $m->{num} != $backupNum ) {
-	for ( $i = 0 ; $i < @{$m->{backups}} ; $i++ ) {
-	    last if ( $m->{backups}[$i]{num} == $backupNum );
-	}
-	if ( $i >= @{$m->{backups}} ) {
-	    $m->{idx} = -1;
-	    return;
-	}
-	$m->{num} = $backupNum;
-	$m->{idx} = $i;
-    }
+    $m->backupNumCache($backupNum) if ( $m->{num} != $backupNum );
+    return if ( $m->{idx} < 0 );
+
     $m->{files} = {};
     $level = $m->{backups}[$m->{idx}]{level} + 1;
 
@@ -238,12 +231,60 @@ sub dirCache
 }
 
 #
+# Return list of shares for this backup
+#
+sub shareList
+{
+    my($m, $backupNum) = @_;
+    my @shareList;
+
+    $m->backupNumCache($backupNum) if ( $m->{num} != $backupNum );
+    return if ( $m->{idx} < 0 );
+
+    my $mangle = $m->{backups}[$m->{idx}]{mangle};
+    my $path = "$m->{topDir}/pc/$m->{host}/$backupNum/";
+    return if ( !opendir(DIR, $path) );
+    my @dir = readdir(DIR);
+    closedir(DIR);
+    foreach my $file ( @dir ) {
+        $file = $1 if ( $file =~ /(.*)/ );
+        next if ( $file eq "attrib" && $mangle
+               || $file eq "."
+               || $file eq ".." );
+        my $fileUM = $file;
+        $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
+        push(@shareList, $fileUM);
+    }
+    $m->{dir} = undef;
+    return @shareList;
+}
+
+sub backupNumCache
+{
+    my($m, $backupNum) = @_;
+
+    if ( $m->{num} != $backupNum ) {
+        my $i;
+	for ( $i = 0 ; $i < @{$m->{backups}} ; $i++ ) {
+	    last if ( $m->{backups}[$i]{num} == $backupNum );
+	}
+	if ( $i >= @{$m->{backups}} ) {
+	    $m->{idx} = -1;
+	    return;
+	}
+	$m->{num} = $backupNum;
+	$m->{idx} = $i;
+    }
+}
+
+#
 # Return the attributes of a specific file
 #
 sub fileAttrib
 {
     my($m, $backupNum, $share, $path) = @_;
 
+    #print(STDERR "fileAttrib($backupNum, $share, $path)\n");
     if ( $path =~ s{(.*)/+(.+)}{$1} ) {
         my $file = $2;
         $m->dirCache($backupNum, $share, $path);
@@ -251,9 +292,10 @@ sub fileAttrib
     } else {
         #print STDERR "Got empty $path\n";
         $m->dirCache($backupNum, "", "");
-        my %attr = %{$m->{files}{$share}};
-        $attr{relPath} = "/";
-        return \%attr;
+        my $attr = $m->{files}{$share};
+        return if ( !defined($attr) );
+        $attr->{relPath} = "/";
+        return $attr;
     }
 }
 
@@ -454,6 +496,7 @@ sub find
 {
     my($m, $backupNum, $share, $path, $depth, $callback, @callbackArgs) = @_;
 
+    #print(STDERR "find: got $backupNum, $share, $path\n");
     #
     # First call the callback on the given $path
     #

@@ -42,14 +42,13 @@ use File::Copy;
 umask(0022);
 
 my $Version     = "2.1.0_CVS";
-my $ReleaseDate = "3 Jul 2003";
+my $ReleaseDate = "8 Feb 2004";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
     bin/BackupPC
     bin/BackupPC_archive
-    bin/BackupPC_archivecd
-    bin/BackupPC_archivetape
+    bin/BackupPC_archiveHost
     bin/BackupPC_dump
     bin/BackupPC_link
     bin/BackupPC_nightly
@@ -216,6 +215,8 @@ sub InstallFile
 		print OUT "$1'__INSTALLDIR__',\n";
 	    } elsif ( $file =~ /Lib.pm/ && /(.*LibDir *=> .*)'.*',/ ) {
 		print OUT "$1'__INSTALLDIR__',\n";
+	    } elsif ( $file =~ /BackupPC_Admin/ && /(my *\$installDir *= *)'.*'/ ) {
+		print OUT "$1'__INSTALLDIR__/lib';\n";
 	    } else {
 		print OUT;
 	    }

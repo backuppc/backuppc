@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -387,7 +387,7 @@ sub ConfirmIPAddress
 
 sub Header
 {
-    my($title, $content) = @_;
+    my($title, $content, $noBrowse) = @_;
     my @adminLinks = (
         { link => "",                         name => $Lang->{Status},
                                               priv => 1},
@@ -430,7 +430,7 @@ EOF
 	NavLink("?host=${EscURI($host)}",
 		"$host $Lang->{Home}", " class=\"navbar\"");
 	NavLink("?action=browse&host=${EscURI($host)}",
-		$Lang->{Browse}, " class=\"navbar\"");
+		$Lang->{Browse}, " class=\"navbar\"") if ( !$noBrowse );
 	NavLink("?action=view&type=LOG&host=${EscURI($host)}",
 		$Lang->{LOG_file}, " class=\"navbar\"");
 	NavLink("?action=LOGlist&host=${EscURI($host)}",

@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -244,9 +244,10 @@ sub start
         $argList = ['--server', '--sender', @$rsyncArgs,
                               '.', $t->{shareNameSlash}];
 	$fioArgs = {
-	    client  => $t->{client},
-	    share   => $t->{shareName},
-	    viewNum => $t->{lastFullBkupNum},
+	    client     => $t->{client},
+	    share      => $t->{shareName},
+	    viewNum    => $t->{lastFullBkupNum},
+            partialNum => $t->{partialNum},
 	};
     }
 

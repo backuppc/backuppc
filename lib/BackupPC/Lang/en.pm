@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 
 #my %lang;
 #use strict;
@@ -83,7 +83,7 @@ $Lang{BackupPC_Server_Status}= <<EOF;
 
 \${h2("Currently Running Jobs")}
 <p>
-<table cellspacing="1" cellpadding="3">
+<table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Host </td>
     <td> Type </td>
     <td> User </td>
@@ -98,7 +98,7 @@ $Lang{BackupPC_Server_Status}= <<EOF;
 
 \${h2("Failures that need attention")}
 <p>
-<table cellspacing="1" cellpadding="3">
+<table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Host </td>
     <td align="center"> Type </td>
     <td align="center"> User </td>
@@ -113,7 +113,7 @@ EOF
 # --------------------------------
 $Lang{BackupPC__Server_Summary} = "BackupPC: Server Summary";
 $Lang{BackupPC__Archive} = "BackupPC: Archive";
-$Lang{BackupPC_Summary}=<<EOF;
+$Lang{BackupPC_Summary} = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
@@ -130,7 +130,7 @@ There are \$hostCntGood hosts that have been backed up, for a total of:
      (prior to pooling and compression).
 </ul>
 </p>
-<table cellpadding="3" cellspacing="1">
+<table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> User </td>
     <td align="center"> #Full </td>
@@ -148,7 +148,7 @@ There are \$hostCntGood hosts that have been backed up, for a total of:
 <p>
 There are \$hostCntNone hosts with no backups.
 <p>
-<table cellpadding="3" cellspacing="1">
+<table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> User </td>
     <td align="center"> #Full </td>
@@ -163,8 +163,7 @@ There are \$hostCntNone hosts with no backups.
 </table>
 EOF
 
-$Lang{BackupPC_Archive}=<<EOF;
-
+$Lang{BackupPC_Archive} = <<EOF;
 \${h1(qq{$Lang{BackupPC__Archive}})}
 <script language="javascript" type="text/javascript">
 <!--
@@ -198,21 +197,21 @@ There are \$hostCntGood hosts that have been backed up for a total size of \${fu
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="type" value="1">
+<input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="action" value="Archive">
-<table cellpadding="3" cellspacing="1">
+<table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> Host</td>
     <td align="center"> User </td>
     <td align="center"> Backup Size </td>
 \$strGood
 \$checkAllHosts
-</form>
 </table>
+</form>
 <p>
 
-</table>
 EOF
 
-$Lang{BackupPC_Archive2}=<<EOF;
+$Lang{BackupPC_Archive2} = <<EOF;
 \${h1(qq{$Lang{BackupPC__Archive}})}
 About to archive the following hosts
 <ul>
@@ -221,31 +220,48 @@ About to archive the following hosts
 <form action="\$MyURL" method="post">
 \$hiddenStr
 <input type="hidden" name="action" value="Archive">
+<input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="type" value="2">
 <input type="hidden" value="0" name="archive_type">
-<table border="1">
-<tr>
-    <td>Archive Location/Device</td>
-    <td><input type="text" value="\$ArchiveDest" name="archive_device"></td>
-<tr>
-    <td>Compression</td>
-    <td><input type="radio" value="0" name="compression" \$ArchiveCompNone>None<br>
-    <input type="radio" value="1" name="compression" \$ArchiveCompGzip>gzip<br>
-    <input type="radio" value="2" name="compression" \$ArchiveCompBzip2>bzip2</tr>
-</tr>
-<tr>
-    <td>Number of Parity Files</td>
-    <td><input type="numeric" value="\$ArchivePar" name="par"></td>
-</tr>
-<tr>
-    <td>Split output into:</td>
-    <td><input type="numeric" value="\$ArchiveSplit" name="splitsize">Megabytes</td>
-</tr>
+<table class="tableStnd" border cellspacing="1" cellpadding="3">
+\$paramStr
 <tr>
     <td colspan=2><input type="submit" value="Start the Archive" name=""></td>
 </tr>
 </form>
 </table>
+EOF
+
+$Lang{BackupPC_Archive2_location} = <<EOF;
+<tr>
+    <td>Archive Location/Device</td>
+    <td><input type="text" value="\$ArchiveDest" name="archive_device"></td>
+</tr>
+EOF
+
+$Lang{BackupPC_Archive2_compression} = <<EOF;
+<tr>
+    <td>Compression</td>
+    <td>
+    <input type="radio" value="0" name="compression" \$ArchiveCompNone>None<br>
+    <input type="radio" value="1" name="compression" \$ArchiveCompGzip>gzip<br>
+    <input type="radio" value="2" name="compression" \$ArchiveCompBzip2>bzip2
+    </td>
+</tr>
+EOF
+
+$Lang{BackupPC_Archive2_parity} = <<EOF;
+<tr>
+    <td>Number of Parity Files</td>
+    <td><input type="numeric" value="\$ArchivePar" name="par"></td>
+</tr>
+EOF
+
+$Lang{BackupPC_Archive2_split} = <<EOF;
+<tr>
+    <td>Split output into</td>
+    <td><input type="numeric" value="\$ArchiveSplit" name="splitsize">Megabytes</td>
+</tr>
 EOF
 
 # -----------------------------------
@@ -321,7 +337,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 The following user requests are currently queued:
 </p>
-<table cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Req Time </td>
     <td> User </td></tr>
@@ -333,7 +349,7 @@ The following user requests are currently queued:
 <p>
 The following background requests are currently queued:
 </p>
-<table cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Req Time </td>
     <td> User </td></tr>
@@ -344,7 +360,7 @@ The following background requests are currently queued:
 <p>
 The following command requests are currently queued:
 </p>
-<table cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Req Time </td>
     <td> User </td>
@@ -374,7 +390,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Log File History";
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("Log File History \$hdr")}
 <p>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> File </td>
     <td align="center"> Size </td>
     <td align="center"> Modification time </td></tr>
@@ -386,7 +402,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Recent Email Summary (Reverse time order)")}
 <p>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Recipient </td>
     <td align="center"> Host </td>
     <td align="center"> Time </td>
@@ -415,6 +431,9 @@ Please select one of the following options.
 </p>
 \${h2("Option 1: Direct Restore")}
 <p>
+EOF
+
+$Lang{Restore_Options_for__host_Option1} = <<EOF;
 You can start a restore that will restore these files directly onto
 \$host.
 </p><p>
@@ -455,9 +474,14 @@ selected will be overwritten!
 </form>
 EOF
 
+$Lang{Restore_Options_for__host_Option1_disabled} = <<EOF;
+Direct restore has been disabled for host \${EscHTML(\$hostDest)}.
+Please select one of the other restore options.
+EOF
+
 # ------------------------------
 $Lang{Option_2__Download_Zip_archive} = <<EOF;
-
+<p>
 \${h2("Option 2: Download Zip archive")}
 <p>
 You can download a Zip archive containing all the files/directories you have
@@ -489,6 +513,7 @@ EOF
 # ------------------------------
 
 $Lang{Option_2__Download_Zip_archive2} = <<EOF;
+<p>
 \${h2("Option 2: Download Zip archive")}
 <p>
 Archive::Zip is not installed so you will not be able to download a
@@ -598,7 +623,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Click on the backup number to browse and restore backup files.
 </p>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> Filled </td>
@@ -616,7 +641,7 @@ Click on the backup number to browse and restore backup files.
 <br><br>
 \${h2("Xfer Error Summary")}
 <br><br>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> View </td>
@@ -635,7 +660,7 @@ Existing files are those already in the pool; new files are those added
 to the pool.
 Empty files and SMB errors aren\'t counted in the reuse and new counts.
 </p>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totals </td>
     <td align="center" colspan="2"> Existing Files </td>
@@ -661,7 +686,7 @@ Empty files and SMB errors aren\'t counted in the reuse and new counts.
 Compression performance for files already in the pool and newly
 compressed files.
 </p>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Existing Files </td>
     <td align="center" colspan="3"> New Files </td>
@@ -698,7 +723,6 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 <input type="submit" value="$Lang{Start_Archive}" name="action">
 <input type="submit" value="$Lang{Stop_Dequeue_Archive}" name="action">
 </form>
-
 
 \$ArchiveStr
 
@@ -837,7 +861,7 @@ $Lang{Restore___num_details_for__host} = "BackupPC: Restore #\$num details for \
 $Lang{Restore___num_details_for__host2 } = <<EOF;
 \${h1("Restore #\$num Details for \$host")}
 <p>
-<table cellspacing="1" cellpadding="3" width="50%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="50%">
 <tr><td class="tableheader"> Number </td><td class="border"> \$Restores[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Requested by </td><td class="border"> \$RestoreReq{user} </td></tr>
 <tr><td class="tableheader"> Request time </td><td class="border"> \$reqTime </td></tr>
@@ -860,10 +884,10 @@ $Lang{Restore___num_details_for__host2 } = <<EOF;
 <a href="\$MyURL?action=view&type=RestoreErr&num=\$Restores[\$i]{num}&host=\$host">Errors</a>
 </tr></tr>
 </table>
-<p>
+</p>
 \${h1("File/Directory list")}
 <p>
-<table cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="100%">
 <tr class="tableheader"><td>Original file/dir</td><td>Restored to</td></tr>
 \$fileListStr
 </table>
@@ -875,15 +899,15 @@ $Lang{Archive___num_details_for__host} = "BackupPC: Archive #\$num details for \
 $Lang{Archive___num_details_for__host2 } = <<EOF;
 \${h1("Archive #\$num Details for \$host")}
 <p>
-<table border>
-<tr><td> Number </td><td> \$Archives[\$i]{num} </td></tr>
-<tr><td> Requested by </td><td> \$ArchiveReq{user} </td></tr>
-<tr><td> Request time </td><td> \$reqTime </td></tr>
-<tr><td> Result </td><td> \$Archives[\$i]{result} </td></tr>
-<tr><td> Error Message </td><td> \$Archives[\$i]{errorMsg} </td></tr>
-<tr><td> Start time </td><td> \$startTime </td></tr>
-<tr><td> Duration </td><td> \$duration min </td></tr>
-<tr><td> Xfer log file </td><td>
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="50%">
+<tr><td class="tableheader"> Number </td><td class="border"> \$Archives[\$i]{num} </td></tr>
+<tr><td class="tableheader"> Requested by </td><td class="border"> \$ArchiveReq{user} </td></tr>
+<tr><td class="tableheader"> Request time </td><td class="border"> \$reqTime </td></tr>
+<tr><td class="tableheader"> Result </td><td class="border"> \$Archives[\$i]{result} </td></tr>
+<tr><td class="tableheader"> Error Message </td><td class="border"> \$Archives[\$i]{errorMsg} </td></tr>
+<tr><td class="tableheader"> Start time </td><td class="border"> \$startTime </td></tr>
+<tr><td class="tableheader"> Duration </td><td class="border"> \$duration min </td></tr>
+<tr><td class="tableheader"> Xfer log file </td><td class="border">
 <a href="\$MyURL?action=view&type=ArchiveLOG&num=\$Archives[\$i]{num}&host=\$host">View</a>,
 <a href="\$MyURL?action=view&type=ArchiveErr&num=\$Archives[\$i]{num}&host=\$host">Errors</a>
 </tr></tr>
@@ -891,8 +915,8 @@ $Lang{Archive___num_details_for__host2 } = <<EOF;
 <p>
 \${h1("Host list")}
 <p>
-<table border>
-<tr><td>Host</td><td>Backup Number</td></tr>
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<tr class="tableheader"><td>Host</td><td>Backup Number</td></tr>
 \$HostListStr
 </table>
 EOF
@@ -958,16 +982,14 @@ Until I see \$host at a particular DHCP address, you can only
 start this request from the client machine itself.
 EOF
 
-########################
-# ok you can do it then
-########################
+# ------------------------------------
+# !! Server Mesg !!
+# ------------------------------------
 
 $Lang{Backup_requested_on_DHCP__host} = "Backup requested on DHCP \$host (\$In{hostIP}) by"
 		                      . " \$User from \$ENV{REMOTE_ADDR}";
-
 $Lang{Backup_requested_on__host_by__User} = "Backup requested on \$host by \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Backup stopped/dequeued on \$host by \$User";
-
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restore requested to host \$hostDest, backup #\$num,"
 	     . " by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archive requested by \$User from \$ENV{REMOTE_ADDR}";
@@ -1054,7 +1076,7 @@ EOF
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
 <li>Backups are deferred for \$hours hours
-(<a href=\"\$MyURL?action=Stop/Dequeue%20Backup&host=\$host\">change this number</a>).
+(<a href=\"\$MyURL?action=\${EscURI(\$Lang->{Stop_Dequeue_Archive})}&host=\$host\">change this number</a>).
 EOF
 
 $Lang{tryIP} = " and \$StatusHost{dhcpHostIP}";
@@ -1104,7 +1126,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Restore Summary")}
 <p>
 Click on the restore number for more details.
-<table cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Restore# </td>
     <td align="center"> Result </td>
     <td align="right"> Start Date</td>
@@ -1123,8 +1145,8 @@ $Lang{Archive_Summary} = <<EOF;
 \${h2("Archive Summary")}
 <p>
 Click on the archive number for more details.
-<table border>
-<tr><td align="center"> Archive# </td>
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<tr class="tableheader"><td align="center"> Archive# </td>
     <td align="center"> Result </td>
     <td align="right"> Start Date</td>
     <td align="right"> Dur/mins</td>
@@ -1165,14 +1187,17 @@ $Lang{Status_restore_in_progress} = "restore in progress";
 $Lang{Status_link_pending} = "link pending";
 $Lang{Status_link_running} = "link running";
 
-$Lang{Reason_backup_done} = "backup done";
-$Lang{Reason_restore_done} = "restore done";
-$Lang{Reason_nothing_to_do} = "nothing to do";
-$Lang{Reason_backup_failed} = "backup failed";
+$Lang{Reason_backup_done}    = "backup done";
+$Lang{Reason_restore_done}   = "restore done";
+$Lang{Reason_archive_done}   = "archive done";
+$Lang{Reason_nothing_to_do}  = "nothing to do";
+$Lang{Reason_backup_failed}  = "backup failed";
 $Lang{Reason_restore_failed} = "restore failed";
-$Lang{Reason_no_ping} = "no ping";
-$Lang{Reason_backup_canceled_by_user} = "backup canceled by user";
+$Lang{Reason_archive_failed} = "archive failed";
+$Lang{Reason_no_ping}        = "no ping";
+$Lang{Reason_backup_canceled_by_user}  = "backup canceled by user";
 $Lang{Reason_restore_canceled_by_user} = "restore canceled by user";
+$Lang{Reason_archive_canceled_by_user} = "archive canceled by user";
 
 # ---------
 # Email messages

@@ -433,9 +433,9 @@ $Conf{IncrFill} = 0;
 $Conf{RestoreInfoKeepCnt} = 10;
 
 #
-# Number of archive logs to keep.  BackupPC remembers information about
-# each archive request.  This number per archive client will be kept around before
-# the oldest ones are pruned.
+# Number of archive logs to keep.  BackupPC remembers information
+# about each archive request.  This number per archive client will
+# be kept around before the oldest ones are pruned.
 #
 $Conf{ArchiveInfoKeepCnt} = 10;
 
@@ -919,7 +919,7 @@ $Conf{ArchiveSplit} = 650;
 # Archive Command
 #
 # This is the command that is called to actually run the archive process
-#  The following variables are substituted at run-time:
+# for each host.  The following variables are substituted at run-time:
 #
 #   $Installdir    The installation directory of BackupPC
 #   $tarCreatePath The path to BackupPC_tarCreate
@@ -933,7 +933,9 @@ $Conf{ArchiveSplit} = 650;
 #   $archiveloc    The location to put the archive
 #   $parfile       The number of par files to create
 #
-$Conf{ArchiveClientCmd} = '$Installdir/bin/BackupPC_archivecd $tarCreatePath $splitpath $parpath $host $backupnumber $compression $compext $splitsize $archiveloc $parfile /';
+$Conf{ArchiveClientCmd} = '$Installdir/bin/BackupPC_archiveHost'
+	. ' $tarCreatePath $splitpath $parpath $host $backupnumber'
+	. ' $compression $compext $splitsize $archiveloc $parfile *';
 
 #
 # Full path for ssh. Security caution: normal users should not
@@ -1419,11 +1421,6 @@ $Conf{CgiDateFormatMMDD} = 1;
 $Conf{CgiNavBarAdminAllHosts} = 0;
 
 #
-# Color scheme for CGI interface.
-#
-$Conf{CgiHeaderBgColor} = '#99cc33';
-
-#
 # Hilight colors based on status that are used in the PC summary page.
 #
 $Conf{CgiStatusHilightColor} = {
@@ -1435,10 +1432,7 @@ $Conf{CgiStatusHilightColor} = {
 };
 
 #
-# Additional CGI header text.  For example, if you wanted each CGI page
-# to auto refresh every 900 seconds, you could add this text:
-#
-#       <meta http-equiv="refresh" content="900">
+# Additional CGI header text.
 #
 $Conf{CgiHeaders} = '<meta http-equiv="pragma" content="no-cache">';
 
@@ -1505,7 +1499,6 @@ p {
 
 a {
     font-family:arial,sans-serif;
-    font-size:1em;
     color:#3333ff
 }
 
@@ -1534,7 +1527,8 @@ a.navbar {
     font-weight:bold;
     background-color:#99cc33;
     padding:3px;
-    padding-left:10px
+    padding-left:6px;
+    margin-bottom:5px;
 }
 
 .h2 {
@@ -1544,26 +1538,29 @@ a.navbar {
     font-weight:bold;
     background-color:#ddeeee;
     padding:3px;
-    padding-left:10px
+    padding-left:6px;
+    margin-top:3px;
+    margin-bottom:1px;
 }
 
-.border {
-    border-bottom:1px solid #000000;
-    border-left:1px dotted #666666;
-    font-size:.9em;
+.tableStnd {
 }
 
 .tableheader {
     font-size:.8em;
     font-weight:bold;
-    background-color:#cccccc
+    background-color:#cccccc;
+}
+
+.border {
+    font-size:.9em;
 }
 
 .fviewheader {
     font-weight:bold;
     font-size:.8em;
     color:#ffffff;
-    background-color:#999999
+    background-color:#999999;
 }
 
 .fviewborder {
@@ -1585,7 +1582,7 @@ a.navbar {
     font-size:.8em;
     font-family:arial,sans-serif;
     text-decoration:none;
-    line-height:15px
+    line-height:15px;
 }
 
 .fviewbold {
@@ -1605,7 +1602,7 @@ a.navbar {
 
 .histViewMis {
     border-bottom:1px solid #000000;
-    background-color:#ffdddd
+    background-color:#ffdddd;
 }
 
 div.NavMenu {
@@ -1627,6 +1624,7 @@ div.NavTitle {
     font-family:arial,sans-serif;
     color:#000000;
     font-weight:bold;
+    margin-bottom:2px;
 }
 
 #Content {

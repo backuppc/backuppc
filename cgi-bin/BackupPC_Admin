@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-w
 #
 # BackupPC_Admin: Apache/CGI interface for BackupPC.
@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -90,6 +90,19 @@ $In{action} ||= "hostInfo"    if ( defined($In{host}) );
 $In{action}   = "summary" if ( !defined($ActionDispatch{$In{action}}) && !CheckPermission());
 $In{action}   = "generalInfo" if ( !defined($ActionDispatch{$In{action}}) );
 my $action    = $ActionDispatch{$In{action}};
+
+#
+# For some reason under mod_perl, the use lib above is unreliable,
+# and sometimes the module below cannot be found.  Explicitly push
+# the directory onto INC if it is missing.  This is an ugly hack;
+# need to figure out what's really going on...
+#
+my $installDir = '/usr/local/BackupPC/lib';
+push(@INC, $installDir) if ( !grep($_ eq $installDir, @INC) );
+
+#
+# Load the relevant action script and run it
+#
 require "BackupPC/CGI/$action.pm"
 	    if ( !defined($BackupPC::CGI::{"${action}::"}) );
 $BackupPC::CGI::{"${action}::"}{action}();

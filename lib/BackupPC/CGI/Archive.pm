@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -42,10 +42,12 @@ use Data::Dumper;
 
 sub action
 {
+    my $archHost = $In{host};
+
     if ( $In{type} == 0 ) {
         my($fullTot, $fullSizeTot, $incrTot, $incrSizeTot, $str,
-        $strNone, $strGood, $hostCntGood, $hostCntNone, $checkBoxCnt,
-        $backupnumber);
+           $strNone, $strGood, $hostCntGood, $hostCntNone, $checkBoxCnt,
+           $backupnumber);
 
         $hostCntGood = $hostCntNone = $checkBoxCnt = $fullSizeTot = 0;
         GetStatusInfo("hosts");
@@ -91,12 +93,11 @@ EOF
 <input type="hidden" name="archivehost" value="$In{'archivehost'}">
 EOF
         my $content = eval("qq{$Lang->{BackupPC_Archive}}");
-        Header(eval("qq{$Lang->{BackupPC__Archive}}"),$content);
+        Header(eval("qq{$Lang->{BackupPC__Archive}}"), $content, 1);
         Trailer();
     } else {
-
-        my(@HostList, @BackupList, $HostListStr, $hiddenStr, $pathHdr, $badFileCnt, $reply, $str);
-
+        my(@HostList, @BackupList, $HostListStr, $hiddenStr, $pathHdr,
+           $badFileCnt, $reply, $str);
         my $Privileged = CheckPermission();
         my $args = {
             SplitPath    => $bpc->{Conf}{SplitPath},
@@ -137,8 +138,9 @@ EOF
         if ( @HostList == 0 ) {
             ErrorExit($Lang->{You_haven_t_selected_any_hosts});
         }
-        my ($ArchiveDest, $ArchiveCompNone, $ArchiveCompGzip, $ArchiveCompBzip2, $ArchivePar, $ArchiveSplit);
-        $ArchiveDest       = $bpc->{Conf}{ArchiveDest};
+        my ($ArchiveDest, $ArchiveCompNone, $ArchiveCompGzip,
+            $ArchiveCompBzip2, $ArchivePar, $ArchiveSplit);
+        $ArchiveDest = $bpc->{Conf}{ArchiveDest};
         if ( $bpc->{Conf}{ArchiveComp} eq "none" ) {
             $ArchiveCompNone   = "checked";
         } else {
@@ -154,16 +156,30 @@ EOF
         } else {
             $ArchiveCompBzip2  = "";
         }
-        $ArchivePar        = $bpc->{Conf}{ArchivePar};
-        $ArchiveSplit      = $bpc->{Conf}{ArchiveSplit};
+        $ArchivePar   = $bpc->{Conf}{ArchivePar};
+        $ArchiveSplit = $bpc->{Conf}{ArchiveSplit};
 
         if ( $In{type} == 1 ) {
             #
             # Tell the user what options they have
             #
-
+            my $paramStr = "";
+            if ( $bpc->{Conf}{ArchiveClientCmd} =~ /\$archiveloc\b/ ) {
+                $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_location}}");
+            }
+            if ( $bpc->{Conf}{ArchiveClientCmd} =~ /\$compression\b/ ) {
+                $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_compression}}");
+            }
+            if ( $bpc->{Conf}{ArchiveClientCmd} =~ /\$parfile\b/
+                    && -x $bpc->{Conf}{ParPath} ) {
+                $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_parity}}");
+            }
+            if ( $bpc->{Conf}{ArchiveClientCmd} =~ /\$splitsize\b/
+                    && -x $bpc->{Conf}{SplitPath} ) {
+                $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_split}}");
+            }
             my $content = eval("qq{$Lang->{BackupPC_Archive2}}");
-            Header(eval("qq{$Lang->{BackupPC__Archive}}"),$content);
+            Header(eval("qq{$Lang->{BackupPC__Archive}}"), $content, 1);
             Trailer();
         } elsif ( $In{type} == 2 ) {
             my $reqFileName;
@@ -172,20 +188,15 @@ EOF
                 $reqFileName = "archiveReq.$$.$i";
                 last if ( !-f "$TopDir/pc/$archivehost/$reqFileName" );
             }
-            my $compname;
-            if ( $In{compression} == 2 ) { # bzip2 compression
+            my($compname, $compext);
+            if ( $In{compression} == 2 ) {          # bzip2 compression
                 $compname = $Conf{Bzip2Path};
-            } elsif ( $In{compression} == 1 ) { # gzip compression
-                $compname = $Conf{GzipPath};
-            } else { # No Compression
-                $compname = $Conf{CatPath};
-            }
-            my $compext;
-            if ( $In{compression} == 2 ) { # bzip2 compression
                 $compext = '.bz2';
-            } elsif ( $In{compression} == 1 ) { # gzip compression
+            } elsif ( $In{compression} == 1 ) {     # gzip compression
+                $compname = $Conf{GzipPath};
                 $compext = '.gz';
             } else { # No Compression
+                $compname = $Conf{CatPath};
                 $compext = '.raw';
             }
             my $fullsplitsize = $In{splitsize} . '000000';
@@ -198,7 +209,6 @@ EOF
                 parfile     => $In{par},
                 splitsize   => $fullsplitsize,
                 host        => $archivehost,
-
 
                 # list of hosts to restore
                 HostList    => \@HostList,
@@ -219,17 +229,14 @@ EOF
             } else {
                 ErrorExit($Lang->{Can_t_open_create} );
             }
-        $reply = $bpc->ServerMesg("archive $User $archivehost $reqFileName");
-
-        $str = eval("qq{$Lang->{Archive_requested}}");
+            $reply = $bpc->ServerMesg("archive $User $archivehost $reqFileName");
+            $str = eval("qq{$Lang->{Archive_requested}}");
 
             my $content = eval("qq{$Lang->{BackupPC_Archive_Reply_from_server}}");
-            Header(eval("qq{$Lang->{BackupPC__Archive}}"),$content);
+            Header(eval("qq{$Lang->{BackupPC__Archive}}"), $content, 1);
             Trailer();
         }
-
     }
-
 }
 
 1;

@@ -1,0 +1,134 @@
+#!/bin/perl
+#=============================================================
+#
+# BackupPC_archiveHost: Archive files for a single host
+#
+# DESCRIPTION
+#
+#   Usage: BackupPC_archiveHost tarCreatePath splitPath parPath host bkupNum \
+#               compPath fileExt splitSize outLoc parFile share
+#
+#   This script is run for each host to create an archive.
+#
+#   This script is executed by BackupPC_archive, based on the setting
+#   of $Conf{ArchiveClientCmd}.  This script can be copied and modified
+#   for site-specific behavior.  Update $Conf{ArchiveClientCmd} to point
+#   at your customized archive script.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001-2003  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 2.1.0_CVS, released 8 Feb 2004.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+use File::Path;
+use lib "/usr/local/BackupPC/lib";
+use BackupPC::Lib;
+
+#
+# Pick up the command-line arguments
+#
+if ( @ARGV != 11 ) {
+    print <<EOF;
+Usage: $0 tarCreatePath splitPath parPath host bkupNum \\
+          compPath fileExt splitSize outLoc parFile share
+EOF
+    exit(1);
+}
+my $tarCreate    = $ARGV[0];
+my $splitPath    = $ARGV[1];
+my $parPath      = $ARGV[2];
+my $host         = $ARGV[3];
+my $bkupNum      = $ARGV[4];
+my $compPath     = $ARGV[5];
+my $fileExt      = $ARGV[6];
+my $splitSize    = $ARGV[7];
+my $outLoc       = $ARGV[8];
+my $parfile      = $ARGV[9];
+my $share        = $ARGV[10];
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+
+#
+# Make sure the specified programs are executable
+#
+foreach my $prog ( ($tarCreate, $compPath, $splitPath, $parPath) ) {
+    next if ( $prog eq "" || -x $prog );
+    print("Error: $prog is not an executable program\n");
+    exit(1);
+}
+my $mesg = "Writing tar archive for host $host, backup #$bkupNum";
+
+#
+# Build the command we will run
+#
+$share  = $bpc->shellEscape($share);
+$host   = $bpc->shellEscape($host);
+my $cmd = "$tarCreate -t -h $host -n $bkupNum -s $share . ";
+$cmd   .= "| $compPath " if ( $compPath ne "cat" && $compPath ne "" );
+if ( -b $outLoc || -c $outLoc || -f $outLoc ) {
+    #
+    # Output file is a device or a regular file, so don't use split
+    #
+    $cmd  .= ">> $outLoc";
+    $mesg .= " to $outLoc";
+} else {
+    mkpath($outLoc) if ( !-d $outLoc );
+    if ( !-d $outLoc ) {
+        print("Error: unable to create output directory $outLoc\n");
+        exit(1);
+    }
+    if ( $splitSize && -x $splitPath ) {
+        $cmd  .= "| $splitPath -b $splitSize - $outLoc/$host.$bkupNum.tar$fileExt.";
+        $mesg .= ", split to output files $outLoc/$host.$bkupNum.tar$fileExt.*";
+    } else {
+        $cmd  .= "> $outLoc/$host.$bkupNum.tar$fileExt";
+        $mesg .= " to output file $outLoc/$host.$bkupNum.tar$fileExt";
+    }
+}
+print("$mesg\n");
+
+#
+# Run the command
+#
+my $ret = system($cmd);
+if ( $ret ) {
+    print("Error: $tarCreate, compress or split failed\n");
+    exit(1);
+}
+
+#
+# Run optional parity file generation (only if the output is a directory,
+# ie: not a tape device).
+#
+if ( -d $outLoc && -x $parPath ) {
+    print("Running $parPath to create parity files\n");
+    $ret = system("$parPath a -n $parfile $outLoc/$host.$bkupNum.tar$fileExt.par $outLoc/$host.$bkupNum.tar$fileExt.*");
+    if ( $ret ) {
+        print("Error: $parPath failed\n");
+        exit(1);
+    }
+}

@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_sendEmail: send status emails to users and admins
@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -169,6 +169,7 @@ foreach my $host ( sort(keys(%Status)) ) {
     my $user = $Hosts->{$host}{user};
     next if ( time - $UserEmailInfo{$user}{lastTime}
                         < $Conf{EMailNotifyMinDays} * 24*3600 );
+    next if ($Conf{XferMethod} eq "archive" );
     my @Backups = $bpc->BackupInfoRead($host);
     my $numBackups = @Backups;
     if ( $numBackups == 0 ) {
@@ -215,8 +216,8 @@ foreach my $host ( sort(keys(%Status)) ) {
         while ( 1 ) {
             my $s = $fh->readLine();
             last if ( $s eq "" );
-            if ( $s =~ /^Error reading file.*\.pst : ERRDOS - ERRlock/
-                  || $s =~ /^Error reading file.*\.pst\. Got 0 bytes/ ) {
+            if ( $s =~ /^\s*Error reading file.*\.pst : ERRDOS - ERRlock/
+                  || $s =~ /^\s*Error reading file.*\.pst\. Got 0 bytes/ ) {
                 $badOutlook = 1;
                 last;
             }

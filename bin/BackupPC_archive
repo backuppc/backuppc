@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_archive: Archive files for an archive client.
@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -72,8 +72,6 @@ $reqFileName = $1;
 
 my $startTime = time();
 
-#my $Hosts = $bpc->HostInfoRead($client);
-
 my $Dir     = "$TopDir/pc/$client";
 my @xferPid = ();
 
@@ -113,6 +111,7 @@ if ( !(my $ret = do "$Dir/$reqFileName") ) {
     $stat{hostError} = $err;
     exit(ArchiveCleanup($client));
 }
+
 #
 # Re-read config file, so we can include the PC-specific config
 #
@@ -191,7 +190,9 @@ if ( !defined($logMsg = $xfer->start()) ) {
 }
 
 print(LOG $bpc->timeStamp, "Starting archive\n");
+print("started_archive\n");
 $xfer->run();
+$stat{xferOK} = 0 if ( defined($stat{hostError} = $xfer->errStr) );
 alarm(0);
 
 exit(ArchiveCleanup($client));
@@ -277,7 +278,7 @@ sub ArchiveCleanup
 	$stat{hostError} = $stat{lastOutputLine} if ( $stat{hostError} eq "" );
 	sleep(2);
 	$stat{hostAbort} = 1;
-	$ArchiveLOG->write(\"Archive failed: $stat{hostError}\n")
+	$ArchiveLOG->write(\"Archive failed: $stat{hostError}")
 					    if ( defined($ArchiveLOG) );
     }
 
@@ -309,7 +310,7 @@ sub ArchiveCleanup
 	return 1;
     } else {
         print(LOG $bpc->timeStamp, "Archive Complete\n");
-	print("Archive Complete\n");
+	print("archive complete\n");
 	return;
     }
 }

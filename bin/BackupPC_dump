@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_dump: Dump a single client.
@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -270,6 +270,7 @@ my($needLink, @Backups, $type, $lastBkupNum, $lastFullBkupNum);
 my $lastFull = 0;
 my $lastIncr = 0;
 my $partialIdx = -1;
+my $partialNum;
 
 if ( $Conf{FullPeriod} == -1 && !$opts{f} && !$opts{i}
         || $Conf{FullPeriod} == -2 ) {
@@ -280,11 +281,32 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
              && $StatusHost{aliveCnt} >= $Conf{BlackoutGoodCnt} ) {
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
     my($currHours) = $hour + $min / 60 + $sec / 3600;
-    if ( $Conf{BlackoutHourBegin} <= $currHours
-              && $currHours <= $Conf{BlackoutHourEnd}
-              && grep($_ == $wday, @{$Conf{BlackoutWeekDays}}) ) {
+    my $blackout;
+    #
+    # Allow blackout to span midnight (specified by BlackoutHourBegin
+    # being greater than BlackoutHourEnd)
+    #
+    if ( $Conf{BlackoutHourBegin} > $Conf{BlackoutHourEnd} ) {
+        $blackout = $Conf{BlackoutHourBegin} <= $currHours
+                               || $currHours <= $Conf{BlackoutHourEnd};
+	if ( $currHours <= $Conf{BlackoutHourEnd} ) {
+	    #
+	    # This is after midnight, so decrement the weekday for the
+	    # weekday check (eg: Monday 11pm-1am means Monday 2300 to
+	    # Tuesday 0100, not Monday 2300-2400 plus Monday 0000-0100).
+	    #
+	    $wday--;
+	    $wday += 7 if ( $wday < 0 );
+	}
+    } else {
+        $blackout = $Conf{BlackoutHourBegin} <= $currHours
+                               && $currHours <= $Conf{BlackoutHourEnd};
+    }
+    if ( $blackout && grep($_ == $wday, @{$Conf{BlackoutWeekDays}}) ) {
 #        print(LOG $bpc->timeStamp, "skipping because of blackout"
 #                    . " (alive $StatusHost{aliveCnt} times)\n");
+	print(STDERR "Skipping $client because of blackout\n")
+			if ( $opts{v} );
         NothingToDo($needLink);
     }
 }
@@ -319,6 +341,7 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
                 if ( $lastIncr < $Backups[$i]{startTime} );
     } elsif ( $Backups[$i]{type} eq "partial" ) {
         $partialIdx = $i;
+        $partialNum = $Backups[$i]{num};
     }
 }
 
@@ -384,7 +407,7 @@ if ( !defined($XferLOG) ) {
     print("dump failed: unable to open/create $Dir/XferLOG$fileExt\n");
     exit(1);
 }
-$XferLOG->writeTeeStdout(1) if ( $opts{v} );
+$XferLOG->writeTeeStderr(1) if ( $opts{v} );
 unlink("$Dir/NewFileList");
 my $startTime = time();
 
@@ -499,6 +522,7 @@ for my $shareName ( @$ShareNames ) {
 	    open(STDERR, ">&STDOUT");
 	    close(STDIN);
 	    open(STDIN, "<&RH");
+	    alarm(0);
 	    exec("$BinDir/BackupPC_tarExtract", $client, $shareName,
 			 $Conf{CompressLevel});
 	    print(LOG $bpc->timeStamp,
@@ -537,6 +561,7 @@ for my $shareName ( @$ShareNames ) {
 	compress    => $Conf{CompressLevel},
 	XferMethod  => $Conf{XferMethod},
 	pidHandler  => \&pidHandler,
+        partialNum  => $partialNum,
     });
 
     if ( !defined($logMsg = $xfer->start()) ) {

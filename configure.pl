@@ -411,7 +411,7 @@ printf("Installing binaries in $Conf{InstallDir}/bin\n");
 foreach my $prog ( qw(BackupPC BackupPC_dump BackupPC_link BackupPC_nightly
         BackupPC_sendEmail BackupPC_tarCreate BackupPC_trashClean
         BackupPC_tarExtract BackupPC_compressPool BackupPC_zcat
-        BackupPC_archive BackupPC_archivecd BackupPC_archivetape 
+        BackupPC_archive BackupPC_archiveHost
         BackupPC_restore BackupPC_serverMesg BackupPC_zipCreate ) ) {
     InstallFile("bin/$prog", "$Conf{InstallDir}/bin/$prog", 0555);
 }
@@ -691,7 +691,7 @@ sub InstallFile
 	    s/__CGIDIR__/$Conf{CgiDir}/g;
 	    if ( $first && /^#.*bin\/perl/ ) {
 		#
-		# Fill in correct path to perl (no taint for >= 2.1.0).
+		# Fill in correct path to perl (no taint for >= 2.0.1).
 		#
 		print OUT "#!$Conf{PerlPath}\n";
 	    } else {

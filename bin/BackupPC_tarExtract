@@ -1,4 +1,4 @@
-#!/bin/perl -T
+#!/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_tarExtract: extract data from a dump
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -161,9 +161,35 @@ sub TarReadFileInfo
         $mode     = oct $mode;
         $uid      = oct $uid;
         $gid      = oct $gid;
-        $size     =~ s/^6/2/;       # fix bug in smbclient for >=2GB files
-        $size     =~ s/^7/3/;       # fix bug in smbclient for >=2GB files
-        $size     = oct $size;
+	if ( ord($size) == 128 ) {
+	    #
+	    # GNU tar extension: for >=8GB files the size is stored
+	    # in big endian binary.
+	    #
+	    $size = 65536 * 65536 * unpack("N", substr($size, 4, 4))
+				  + unpack("N", substr($size, 8, 4));
+	} else {
+	    #
+	    # We used to have a patch here for smbclient 2.2.x.  For file
+	    # sizes between 2 and 4GB it sent the wrong size.  But since
+	    # samba 3.0.0 has been released we no longer support this
+	    # patch since valid files could have sizes that start with
+	    # 6 or 7 in octal (eg: 6-8GB files).
+	    #
+	    # $size =~ s/^6/2/;       # fix bug in smbclient for >=2GB files
+	    # $size =~ s/^7/3/;       # fix bug in smbclient for >=2GB files
+	    #
+	    # To avoid integer overflow in case we are in the 4GB - 8GB
+	    # range, we do the conversion in two parts.
+	    #
+            if ( $size =~ /([0-9]{9,})/ ) {
+                my $len = length($1);
+                $size = oct(substr($1, 0, $len - 8)) * (1 << 24)
+                      + oct(substr($1, $len - 8));
+            } else {
+                $size = oct($size);
+            }
+	}
         $mtime    = oct $mtime;
         $chksum   = oct $chksum;
         $devmajor = oct $devmajor;

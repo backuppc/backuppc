@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -76,7 +76,7 @@ sub action
     }
     ReadUserEmailInfo();
 
-    if ($Conf{XferMethod} eq "archive" ) {
+    if ( $Conf{XferMethod} eq "archive" ) {
         my @Archives = $bpc->ArchiveInfoRead($host);
         my ($ArchiveStr,$warnStr);
 
@@ -112,7 +112,7 @@ EOF
         }
 
         my $content = eval("qq{$Lang->{Host__host_Archive_Summary2}}");
-        Header(eval("qq{$Lang->{Host__host_Archive_Summary}}"), $content);
+        Header(eval("qq{$Lang->{Host__host_Archive_Summary}}"), $content, 1);
         Trailer();
         return;
     }

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -75,7 +75,8 @@ sub action
 EOF
     }
     my $content = eval("qq{$Lang->{Log_File_History__hdr}}");
-    Header($Lang->{BackupPC__Log_File_History}, $content);
+    Header($Lang->{BackupPC__Log_File_History},
+                $content, !-f "$TopDir/pc/$host/backups");
     Trailer();
 }
 

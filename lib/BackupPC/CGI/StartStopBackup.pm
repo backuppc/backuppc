@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -87,7 +87,8 @@ sub action
                                   ($StatusHost{backoffTime} - time) / 3600);
             }
             my $content = eval ("qq{$Lang->{Are_you_sure_stop}}");
-            Header($Lang->{BackupPC__Stop_Backup_Confirm_on__host},$content);
+            Header(eval("qq{$Lang->{BackupPC__Stop_Backup_Confirm_on__host}}"),
+                        $content);
         }
         Trailer();
     }

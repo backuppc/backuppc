@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -102,7 +102,7 @@ sub open
 	binmode(FH);
         $fh = *FH;
     }
-    $compLevel = 0 if ( !$CompZlibOK );
+    $compLevel  = 0 if ( !$CompZlibOK );
     my $self = bless {
         fh           => $fh,
         name         => $fileName,
@@ -115,6 +115,7 @@ sub open
             $self->{deflate} = $self->myDeflateInit;
         } else {
             $self->{inflate} = $self->myInflateInit;
+            $self->{inflateStart} = 1;
         }
     }
     return $self;
@@ -157,11 +158,42 @@ sub read
             return $n if ( $n < 0 );
             $self->{eof} = 1 if ( $n == 0 );
         }
+        if ( $self->{inflateStart} && $self->{dataIn} ne "" ) {
+            my $chr = substr($self->{dataIn}, 0, 1);
+
+            $self->{inflateStart} = 0;
+            if ( $chr eq chr(0xd6) ) {
+                #
+                # Flag 0xd6 means this is a compressed file with
+                # appended md4 block checksums for rsync.  Change
+                # the first byte back to 0x78 and proceed.
+                #
+                ##print("Got 0xd6 block: normal\n");
+                substr($self->{dataIn}, 0, 1) = chr(0x78);
+            } elsif ( $chr eq chr(0xb3) ) {
+                #
+                # Flag 0xb3 means this is the start of the rsync
+                # block checksums, so consider this as EOF for
+                # the compressed file.  Also seek the file so
+                # it is positioned at the 0xb3.
+                #
+                seek($self->{fh}, -length($self->{dataIn}), 1);
+                $self->{eof} = 1;
+                $self->{dataIn} = "";
+                ##print("Got 0xb3 block: considering eof\n");
+                last;
+            } else {
+                #
+                # normal case: nothing to do
+                #
+            }
+        }
         my($data, $err) = $self->{inflate}->inflate($self->{dataIn});
         $self->{dataOut} .= $data;
         if ( $err == Z_STREAM_END ) {
             #print("R");
             $self->{inflate} = $self->myInflateInit;
+            $self->{inflateStart} = 1;
         } elsif ( $err != Z_OK ) {
             $$dataRef = "";
             return -1;
@@ -215,6 +247,7 @@ sub rewind
     $self->{dataIn}  = '';
     $self->{eof}     = 0;
     $self->{inflate} = $self->myInflateInit;
+    $self->{inflateStart} = 1;
     return sysseek($self->{fh}, 0, 0);
 }
 
@@ -247,7 +280,7 @@ sub write
     my $n = length($$dataRef);
 
     return if ( !$self->{write} );
-    print($$dataRef) if ( $self->{writeTeeStdout} );
+    print(STDERR $$dataRef) if ( $self->{writeTeeStderr} );
     return 0 if ( $n == 0 );
     if ( !$self->{compress} ) {
         #
@@ -305,12 +338,12 @@ sub name
     return $self->{name};
 }
 
-sub writeTeeStdout
+sub writeTeeStderr
 {
     my($self, $param) = @_;
 
-    $self->{writeTeeStdout} = $param if ( defined($param) );
-    return $self->{writeTeeStdout};
+    $self->{writeTeeStderr} = $param if ( defined($param) );
+    return $self->{writeTeeStderr};
 }
 
 sub close

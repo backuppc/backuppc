@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -39,6 +39,7 @@ package BackupPC::CGI::Restore;
 use strict;
 use BackupPC::CGI::Lib qw(:all);
 use Data::Dumper;
+use File::Path;
 
 sub action
 {
@@ -102,15 +103,47 @@ EOF
 	# Build list of hosts
 	#
 	my $hostDestSel;
+        my @hosts;
 	foreach my $h ( GetUserHosts() ) {
 	    my $sel = " selected" if ( $h eq $In{host} );
 	    $hostDestSel .= "<option value=\"$h\"$sel>${EscHTML($h)}</option>";
+            push(@hosts, $h);
 	}
 
         #
         # Tell the user what options they have
         #
 	$content .= eval("qq{$Lang->{Restore_Options_for__host2}}");
+
+        #
+        # If there is a single host, make sure direct restore is enabled
+        #
+        if ( @hosts == 1 ) {
+            #
+            # Pick up the host's config file
+            #
+            $bpc->ConfigRead($hosts[0]);
+            %Conf = $bpc->Conf();
+
+            #
+            # Decide if option 1 (direct restore) is available based
+            # on whether the restore command is set.
+            #
+            my $cmd = $Conf{XferMethod} eq "smb" ? $Conf{SmbClientRestoreCmd}
+                    : $Conf{XferMethod} eq "tar" ? $Conf{TarClientRestoreCmd}
+                    : $Conf{XferMethod} eq "archive" ? undef
+                    : $Conf{RsyncRestoreArgs};
+            if ( defined($cmd) ) {
+                $content .= eval(
+                    "qq{$Lang->{Restore_Options_for__host_Option1}}");
+            } else {
+                my $hostDest = $hosts[0];
+                $content .= eval(
+                    "qq{$Lang->{Restore_Options_for__host_Option1_disabled}}");
+            }
+        } else {
+            $content .= eval("qq{$Lang->{Restore_Options_for__host_Option1}}");
+        }
 
 	#
 	# Verify that Archive::Zip is available before showing the
@@ -208,6 +241,25 @@ EOF
 	if ( !CheckPermission($In{hostDest}) ) {
 	    ErrorExit(eval("qq{$Lang->{You_don_t_have_permission_to_restore_onto_host}}"));
 	}
+        #
+        # Pick up the destination host's config file
+        #
+        my $hostDest = $1 if ( $In{hostDest} =~ /(.*)/ );
+        $bpc->ConfigRead($hostDest);
+        %Conf = $bpc->Conf();
+
+        #
+        # Decide if option 1 (direct restore) is available based
+        # on whether the restore command is set.
+        #
+        my $cmd = $Conf{XferMethod} eq "smb" ? $Conf{SmbClientRestoreCmd}
+                : $Conf{XferMethod} eq "tar" ? $Conf{TarClientRestoreCmd}
+                : $Conf{XferMethod} eq "archive" ? undef
+                : $Conf{RsyncRestoreArgs};
+        if ( !defined($cmd) ) {
+	    ErrorExit(eval("qq{$Lang->{Restore_Options_for__host_Option1_disabled}}"));
+        }
+
         $fileListStr = "";
         foreach my $f ( @fileList ) {
             my $targetFile = $f;
@@ -264,6 +316,8 @@ EOF
                          [  \%restoreReq],
                          [qw(*RestoreReq)]);
         $dump->Indent(1);
+        mkpath("$TopDir/pc/$hostDest", 0, 0777)
+                                    if ( !-d "$TopDir/pc/$hostDest" );
         if ( open(REQ, ">$TopDir/pc/$hostDest/$reqFileName") ) {
 	    binmode(REQ);
             print(REQ $dump->Dump);

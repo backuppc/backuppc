@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -121,7 +121,8 @@ sub action
 
         $content .= "<pre>";
         if ( $type eq "XferErr" || $type eq "XferErrbad"
-				|| $type eq "RestoreErr" ) {
+				|| $type eq "RestoreErr"
+				|| $type eq "ArchiveErr" ) {
 	    my $skipped;
             while ( 1 ) {
                 $_ = $fh->readLine();
@@ -133,17 +134,18 @@ sub action
                 if ( /smb: \\>/
                         || /^\s*(\d+) \(\s*\d+\.\d kb\/s\) (.*)$/
                         || /^tar: dumped \d+ files/
-                        || /^added interface/i
-                        || /^restore tar file /i
-                        || /^restore directory /i
-                        || /^tarmode is now/i
-                        || /^Total bytes written/i
-                        || /^Domain=/i
-                        || /^Getting files newer than/i
-                        || /^Output is \/dev\/null/
-                        || /^\([\d\.]* kb\/s\) \(average [\d\.]* kb\/s\)$/
+                        || /^\s*added interface/i
+                        || /^\s*restore tar file /i
+                        || /^\s*restore directory /i
+                        || /^\s*tarmode is now/i
+                        || /^\s*Total bytes written/i
+                        || /^\s*Domain=/i
+                        || /^\s*Getting files newer than/i
+                        || /^\s*Output is \/dev\/null/
+                        || /^\s*\([\d.,]* kb\/s\) \(average [\d\.]* kb\/s\)$/
                         || /^\s+directory \\/
-                        || /^Timezone is/
+                        || /^\s*Timezone is/
+			|| /^\s*creating lame (up|low)case table/i
                         || /^\.\//
                         || /^  /
 			    ) {
@@ -189,7 +191,8 @@ sub action
     $content .= <<EOF;
 </pre>
 EOF
-    Header(eval("qq{$Lang->{Backup_PC__Log_File__file}}"), $content);
+    Header(eval("qq{$Lang->{Backup_PC__Log_File__file}}"),
+                    $content, !-f "$TopDir/pc/$host/backups" );
     Trailer();
 }
 

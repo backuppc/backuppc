@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 3 Jul 2003.
+# Version 2.1.0_CVS, released 8 Feb 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -24,7 +24,7 @@ use strict;
 use File::Path;
 use BackupPC::Attrib qw(:all);
 use BackupPC::View;
-use BackupPC::PoolWrite;
+use BackupPC::RsyncDigest;
 use BackupPC::PoolWrite;
 use Data::Dumper;
 
@@ -82,6 +82,7 @@ sub new
 					 $fio->{backups});
     $fio->{full}     = $fio->{xfer}{type} eq "full" ? 1 : 0;
     $fio->{newFilesFH} = $fio->{xfer}{newFilesFH};
+    $fio->{partialNum} = undef if ( !$fio->{full} );
     return $fio;
 }
 
@@ -104,25 +105,23 @@ sub logHandlerSet
 #
 sub csumStart
 {
-    my($fio, $f, $needMD4) = @_;
+    my($fio, $f, $needMD4, $defBlkSize) = @_;
 
     my $attr = $fio->attribGet($f);
     $fio->{file} = $f;
-    $fio->csumEnd if ( defined($fio->{fh}) );
-    return if ( $attr->{type} != BPC_FTYPE_FILE );
-    if ( !defined($fio->{fh} = BackupPC::FileZIO->open($attr->{fullPath},
-						       0,
-						       $attr->{compress})) ) {
-        $fio->log("Can't open $attr->{fullPath} (name=$f->{name})");
+    $fio->csumEnd if ( defined($fio->{csum}) );
+    return -1 if ( $attr->{type} != BPC_FTYPE_FILE );
+    (my $err, $fio->{csum}, my $blkSize)
+         = BackupPC::RsyncDigest->digestStart($attr->{fullPath}, $attr->{size},
+                         0, $defBlkSize, $fio->{checksumSeed}, $needMD4,
+                         $attr->{compress}, 1);
+    if ( $err ) {
+        $fio->log("Can't get rsync digests from $attr->{fullPath}"
+                . " (err=$err, name=$f->{name})");
 	$fio->{stats}{errorCnt}++;
         return -1;
     }
-    if ( $needMD4) {
-        $fio->{csumDigest} = File::RsyncP::Digest->new;
-        $fio->{csumDigest}->add(pack("V", $fio->{checksumSeed}));
-    } else {
-        delete($fio->{csumDigest});
-    }
+    return $blkSize;
 }
 
 sub csumGet
@@ -132,40 +131,16 @@ sub csumGet
 
     $num     ||= 100;
     $csumLen ||= 16;
-
-    return if ( !defined($fio->{fh}) );
-    if ( $fio->{fh}->read(\$fileData, $blockSize * $num) <= 0 ) {
-	$fio->log("$fio->{file}{name}: csumGet is at EOF - zero padding");
-	$fio->{stats}{errorCnt}++;
-	$fileData = pack("c", 0) x ($blockSize * $num);
-    }
-    $fio->{csumDigest}->add($fileData) if ( defined($fio->{csumDigest}) );
-    $fio->log(sprintf("%s: getting csum ($num,$csumLen,%d,0x%x)",
-                            $fio->{file}{name},
-                            length($fileData),
-                            $fio->{checksumSeed}))
-                if ( $fio->{logLevel} >= 9 );
-    return $fio->{digest}->blockDigest($fileData, $blockSize,
-                                         $csumLen, $fio->{checksumSeed});
+    return if ( !defined($fio->{csum}) );
+    return $fio->{csum}->digestGet($num, $csumLen);
 }
 
 sub csumEnd
 {
     my($fio) = @_;
 
-    return if ( !defined($fio->{fh}) );
-    #
-    # make sure we read the entire file for the file MD4 digest
-    #
-    if ( defined($fio->{csumDigest}) ) {
-	my $fileData;
-	while ( $fio->{fh}->read(\$fileData, 65536) > 0 ) {
-            $fio->{csumDigest}->add($fileData);
-        }
-    }
-    $fio->{fh}->close();
-    delete($fio->{fh});
-    return $fio->{csumDigest}->digest if ( defined($fio->{csumDigest}) );
+    return if ( !defined($fio->{csum}) );
+    return $fio->{csum}->digestEnd();
 }
 
 sub readStart
@@ -252,9 +227,19 @@ sub viewCacheDir
     #
     $fio->{viewCache}{$shareM}
 		= $fio->{view}->dirAttrib($fio->{viewNum}, $share, $dir);
+    #
+    # also cache partial backup attrib data too
+    #
+    if ( defined($fio->{partialNum}) ) {
+        foreach my $d ( keys(%{$fio->{partialCache}}) ) {
+            delete($fio->{partialCache}{$d}) if ( $shareM !~ m{^\Q$d/} );
+        }
+        $fio->{partialCache}{$shareM}
+                    = $fio->{view}->dirAttrib($fio->{partialNum}, $share, $dir);
+    }
 }
 
-sub attribGet
+sub attribGetWhere
 {
     my($fio, $f) = @_;
     my($dir, $fname, $share, $shareM);
@@ -278,7 +263,21 @@ sub attribGet
     }
     $fio->viewCacheDir($share, $dir);
     $shareM .= "/$dir" if ( $dir ne "" );
-    return $fio->{viewCache}{$shareM}{$fname};
+    if ( defined(my $attr = $fio->{viewCache}{$shareM}{$fname}) ) {
+        return ($attr, 0);
+    } elsif ( defined(my $attr = $fio->{partialCache}{$shareM}{$fname}) ) {
+        return ($attr, 1);
+    } else {
+        return;
+    }
+}
+
+sub attribGet
+{
+    my($fio, $f) = @_;
+
+    my($attr) = $fio->attribGetWhere($f);
+    return $attr;
 }
 
 sub mode2type
@@ -375,9 +374,10 @@ sub attribWrite
     return if ( !defined($fio->{attrib}{$d}) );
     #
     # Set deleted files in the attributes.  Any file in the view
-    # that doesn't have attributes is deleted.  All files sent by
-    # rsync have attributes temporarily set so we can do deletion
-    # detection.  We also prune these temporary attributes.
+    # that doesn't have attributes is flagged as deleted for
+    # incremental dumps.  All files sent by rsync have attributes
+    # temporarily set so we can do deletion detection.  We also
+    # prune these temporary attributes.
     #
     if ( $d ne "" ) {
 	my $dir;
@@ -407,7 +407,7 @@ sub attribWrite
 				    name => $name,
 				}) if ( $fio->{logLevel} >= 2 );
 		    }
-		} else {
+		} elsif ( !$fio->{full} ) {
 		    ##print("Delete file $f\n");
 		    $fio->logFileAction("delete", {
 				%{$fio->{viewCache}{$d}{$f}},
@@ -604,13 +604,42 @@ sub logFileAction
 }
 
 #
-# Later we'll use this function to complete a prior unfinished dump.
-# We'll do an incremental on the part we have already, and then a
-# full or incremental against the rest.
+# If there is a partial and we are doing a full, we do an incremental
+# against the partial and a full against the rest.  This subroutine
+# is how we tell File::RsyncP which files to ignore attributes on
+# (ie: against the partial dump we do consider the attributes, but
+# otherwise we ignore attributes).
 #
 sub ignoreAttrOnFile
 {
-    return undef;
+    my($fio, $f) = @_;
+
+    return if ( !defined($fio->{partialNum}) );
+    my($attr, $isPartial) = $fio->attribGetWhere($f);
+    $fio->log("$f->{name}: just checking attributes from partial")
+                                if ( $isPartial && $fio->{logLevel} >= 5 );
+    return !$isPartial;
+}
+
+#
+# This is called by File::RsyncP when a file is skipped because the
+# attributes match.
+#
+sub attrSkippedFile
+{
+    my($fio, $f, $attr) = @_;
+
+    #
+    # Unless this is a partial, this is normal so ignore it.
+    #
+    return if ( !defined($fio->{partialNum}) );
+
+    $fio->log("$f->{name}: skipped in partial; adding link")
+                                    if ( $fio->{logLevel} >= 5 );
+    $fio->{rxLocalAttr} = $attr;
+    $fio->{rxFile} = $f;
+    $fio->{rxSize} = $attr->{size};
+    return $fio->fileDeltaRxDone();
 }
 
 #
@@ -696,8 +725,7 @@ sub fileDeltaRxNext
         # Need to copy the sequence of blocks that matched.  If the file
         # is compressed we need to make a copy of the uncompressed file,
         # since the compressed file is not seekable.  Future optimizations
-        # would be to keep the uncompressed file in memory (eg, up to say
-        # 10MB), only create an uncompressed copy if the matching
+        # could include only creating an uncompressed copy if the matching
         # blocks were not monotonic, and to only do this if there are
         # matching blocks (eg, maybe the entire file is new).
         #
@@ -843,50 +871,66 @@ sub fileDeltaRxDone
     my($fio, $md4) = @_;
     my $name = $1 if ( $fio->{rxFile}{name} =~ /(.*)/ );
 
-    if ( !defined($fio->{rxDigest}) ) {
-        #
-        # File was exact match, but we still need to verify the
-        # MD4 checksum.  Therefore open and read the file.
-        #
-        $fio->{rxDigest} = File::RsyncP::Digest->new;
-        $fio->{rxDigest}->add(pack("V", $fio->{checksumSeed}));
-        my $attr = $fio->{rxLocalAttr};
-        if ( defined($attr) ) {
-	    if ( defined(my $fh = BackupPC::FileZIO->open(
-						       $attr->{fullPath},
-						       0,
-						       $attr->{compress})) ) {
-		my $data;
-		while ( $fh->read(\$data, 4 * 65536) > 0 ) {
-		    $fio->{rxDigest}->add($data);
-		    $fio->{rxSize} += length($data);
-		}
-		$fh->close;
-	    } else {
-		$fio->log("Can't open $attr->{fullPath} for MD4 check ($name)");
-		$fio->{stats}{errorCnt}++;
-	    }
-	}
-        $fio->log("$name got exact match")
-                        if ( $fio->{logLevel} >= 5 );
-    }
     close($fio->{rxInFd})  if ( defined($fio->{rxInFd}) );
     unlink("$fio->{outDirSh}RStmp") if  ( -f "$fio->{outDirSh}RStmp" );
-    my $newDigest = $fio->{rxDigest}->digest;
-    if ( $fio->{logLevel} >= 3 ) {
-        my $md4Str = unpack("H*", $md4);
-        my $newStr = unpack("H*", $newDigest);
-        $fio->log("$name got digests $md4Str vs $newStr")
-    }
-    if ( $md4 ne $newDigest ) {
-        $fio->log("$name: fatal error: md4 doesn't match");
-	$fio->{stats}{errorCnt}++;
-        if ( defined($fio->{rxOutFd}) ) {
-            $fio->{rxOutFd}->close;
-            unlink($fio->{rxOutFile});
+
+    #
+    # Check the final md4 digest
+    #
+    if ( defined($md4) ) {
+        my $newDigest;
+        if ( !defined($fio->{rxDigest}) ) {
+            #
+            # File was exact match, but we still need to verify the
+            # MD4 checksum.  Compute the md4 digest (or fetch the
+            # cached one.)
+            #
+            if ( defined(my $attr = $fio->{rxLocalAttr}) ) {
+                #
+                # block size doesn't matter: we're only going to
+                # fetch the md4 file digest, not the block digests.
+                #
+                my($err, $csum, $blkSize)
+                         = BackupPC::RsyncDigest->digestStart(
+                                 $attr->{fullPath}, $attr->{size},
+                                 0, 2048, $fio->{checksumSeed}, 1,
+                                 $attr->{compress});
+                if ( $err ) {
+                    $fio->log("Can't open $attr->{fullPath} for MD4"
+                            . " check (err=$err, $name)");
+                    $fio->{stats}{errorCnt}++;
+                } else {
+                    $newDigest = $csum->digestEnd;
+                }
+                $fio->{rxSize} = $attr->{size};
+            } else {
+		#
+		# Empty file; just create an empty file digest
+		#
+		$fio->{rxDigest} = File::RsyncP::Digest->new;
+		$fio->{rxDigest}->add(pack("V", $fio->{checksumSeed}));
+		$newDigest = $fio->{rxDigest}->digest;
+	    }
+            $fio->log("$name got exact match") if ( $fio->{logLevel} >= 5 );
+        } else {
+            $newDigest = $fio->{rxDigest}->digest;
         }
-        return 1;
+        if ( $fio->{logLevel} >= 3 ) {
+            my $md4Str = unpack("H*", $md4);
+            my $newStr = unpack("H*", $newDigest);
+            $fio->log("$name got digests $md4Str vs $newStr")
+        }
+        if ( $md4 ne $newDigest ) {
+            $fio->log("$name: fatal error: md4 doesn't match");
+            $fio->{stats}{errorCnt}++;
+            if ( defined($fio->{rxOutFd}) ) {
+                $fio->{rxOutFd}->close;
+                unlink($fio->{rxOutFile});
+            }
+            return 1;
+        }
     }
+
     #
     # One special case is an empty file: if the file size is
     # zero we need to open the output file to create it.

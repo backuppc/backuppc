@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -77,7 +77,7 @@ sub new
     $fio->{shareM}   = $fio->{bpc}->fileNameEltMangle($fio->{share});
     $fio->{outDir}   = "$fio->{xfer}{outDir}/new/";
     $fio->{outDirSh} = "$fio->{outDir}/$fio->{shareM}/";
-    $fio->{view}     = BackupPC::View->new($fio->{bpc}, $fio->{host},
+    $fio->{view}     = BackupPC::View->new($fio->{bpc}, $fio->{client},
 					 $fio->{backups});
     $fio->{full}     = $fio->{xfer}{type} eq "full" ? 1 : 0;
     $fio->{newFilesFH} = $fio->{xfer}{newFilesFH};
@@ -723,7 +723,7 @@ sub fileDeltaRxNext
                     #
                     unlink("$fio->{outDirSh}RStmp")
                                     if  ( -f "$fio->{outDirSh}RStmp" );
-                    if ( open(F, ">+$fio->{outDirSh}RStmp") ) {
+                    if ( open(F, ">+", "$fio->{outDirSh}RStmp") ) {
                         my $data;
                         while ( $fh->read(\$data, 1024 * 1024) > 0 ) {
                             if ( syswrite(F, $data) != length($data) ) {
@@ -744,7 +744,7 @@ sub fileDeltaRxNext
                 }
                 $fh->close;
             } else {
-                if ( open(F, $attr->{fullPath}) ) {
+                if ( open(F, "<", $attr->{fullPath}) ) {
                     $fio->{rxInFd} = *F;
                     $fio->{rxInName} = $attr->{fullPath};
                 } else {

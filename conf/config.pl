@@ -531,17 +531,32 @@ $Conf{XferMethod} = 'smb';
 $Conf{SmbClientPath} = '/usr/bin/smbclient';
 
 #
-# Additional optional arguments to smbclient.
-#
-# Some users have reported that the -b option can be used to improve
-# performance of smbclient.  The default value is 4096, and if you
-# find smbclient has low throughput you might try a value of 2048, eg:
-#
-#     $Conf{SmbClientArgs} = '-b 2048';
-#
+# Commands to run smbclient for a full dump, incremental dump or a restore.
 # This setting only matters if $Conf{XferMethod} = 'smb'.
 #
-$Conf{SmbClientArgs} = '';
+# Several variables are substituted at run-time:
+#
+#    $smbClientPath   same as $Conf{SmbClientPath}
+#    $host            host to backup/restore
+#    $hostIP          host IP address
+#    $shareName       share name
+#    $userName        user name
+#    $fileList        list of files to backup (based on exclude/include)
+#    $I_option        optional -I option to smbclient
+#    $X_option        exclude option (if $fileList is an exclude list)
+#    $timeStampFile   start time for incremental dump
+#
+$Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
+	    . '$I_option -U $userName -E -N -d 1'
+            . ' -c tarmode\\ full -Tc$X_option - $fileList';
+
+$Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
+	    . '$I_option -U $userName -E -N -d 1'
+	    . ' -c tarmode\\ full -TcN$X_option $timeStampFile - $fileList';
+
+$Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
+            . '$I_option -U $userName -E -N -d 1'
+            . ' -c tarmode\\ full -Tx -';
 
 #
 # Full command to run tar on the client.  GNU tar is required.  You will

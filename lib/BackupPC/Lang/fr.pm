@@ -284,7 +284,7 @@ directement sur \$host.
 tous les fichiers correspondant à ceux que vous avez sélectionnés vont être effacés !
 
 <form action="\$MyURL" method="post">
-<input type="hidden" name="host" value="\${EscapeHTML(\$host)}">
+<input type="hidden" name="host" value="\${EscHTML(\$host)}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="3">
 \$hiddenStr
@@ -292,16 +292,16 @@ tous les fichiers correspondant à ceux que vous avez sélectionnés vont être effa
 <table border="0">
 <tr>
     <td>Restaurer les fichiers vers l\'hôte</td>
-    <td><input type="text" size="40" value="\${EscapeHTML(\$host)}"
+    <td><input type="text" size="40" value="\${EscHTML(\$host)}"
 	 name="hostDest"></td>
 </tr><tr>
     <td>Restaurer les fichiers vers le partage</td>
-    <td><input type="text" size="40" value="\${EscapeHTML(\$share)}"
+    <td><input type="text" size="40" value="\${EscHTML(\$share)}"
 	 name="shareDest"></td>
 </tr><tr>
     <td>Restaurer les fichiers du répertoire<br>(relatif au partage)</td>
     <td valign="top"><input type="text" size="40" maxlength="256"
-	value="\${EscapeHTML(\$pathHdr)}" name="pathHdr"></td>
+	value="\${EscHTML(\$pathHdr)}" name="pathHdr"></td>
 </tr><tr>
     <td><input type="submit" value="Démarrer la restauration" name=""></td>
 </table>
@@ -322,13 +322,13 @@ cette archive peut devenir très très large.  Cela peut prendre plusieurs minutes
 et transférer cette archive, et vous aurez besoin d\'assez d\'espace disque pour le stocker.
 <p>
 <form action="\$MyURL" method="post">
-<input type="hidden" name="host" value="\${EscapeHTML(\$host)}">
+<input type="hidden" name="host" value="\${EscHTML(\$host)}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="2">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
 <input type="checkbox" value="1" name="relative" checked> Faire l\'archive relative à
-\${EscapeHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
+\${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (Autrement l\'archive contiendra les chemins complets).
 <br>
 Compression (0=désactivée, 1=rapide,...,9=meilleure)
@@ -366,13 +366,13 @@ pour créer et transférer l\'archive, et vous aurez besoin d'assez
 d\'espace disque local pour la stocker.
 <p>
 <form action="\$MyURL" method="post">
-<input type="hidden" name="host" value="\${EscapeHTML(\$host)}">
+<input type="hidden" name="host" value="\${EscHTML(\$host)}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="1">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
 <input type="checkbox" value="1" name="relative" checked> Faire l\'archive relative à
-\${EscapeHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
+\${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (Autrement l\'archive contiendra des chemins absolus).
 <br>
 <input type="submit" value="Télécharger le fichier Tar" name="">
@@ -395,10 +395,10 @@ Vous êtes sur le point de démarrer une restauration directement sur la machine \
 </table>
 
 <form action="\$MyURL" method="post">
-<input type="hidden" name="host" value="\${EscapeHTML(\$host)}">
-<input type="hidden" name="hostDest" value="\${EscapeHTML(\$In{hostDest})}">
-<input type="hidden" name="shareDest" value="\${EscapeHTML(\$In{shareDest})}">
-<input type="hidden" name="pathHdr" value="\${EscapeHTML(\$In{pathHdr})}">
+<input type="hidden" name="host" value="\${EscHTML(\$host)}">
+<input type="hidden" name="hostDest" value="\${EscHTML(\$In{hostDest})}">
+<input type="hidden" name="shareDest" value="\${EscHTML(\$In{shareDest})}">
+<input type="hidden" name="pathHdr" value="\${EscHTML(\$In{pathHdr})}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="4">
 \$hiddenStr
@@ -575,11 +575,11 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Cliquer dans un fichier ci-dessous pour le restaurer.
 </ul>
 
-\${h2("Contenu de \${EscapeHTML(\$dirDisplay)}")}
+\${h2("Contenu de \${EscHTML(\$dirDisplay)}")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
-<input type="hidden" name="share" value="\${EscapeHTML(\$share)}">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="action" value="$Lang{Restore}">
 <br>
@@ -664,41 +664,41 @@ $Lang{Wrong_user__my_userid_is___} =
               "Mauvais utilisateur: mon userid est \$>, à la place de \$uid (\$Conf{BackupPCUser})\n";
 $Lang{Only_privileged_users_can_view_PC_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les résumés des PC.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
-                  "Seuls les utilisateurs privilégiés peuvent arrêter ou démarrer des sauvegardes sur \${EscapeHTML(\$host)}.";
+                  "Seuls les utilisateurs privilégiés peuvent arrêter ou démarrer des sauvegardes sur \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Numéro invalide \$num";
 $Lang{Unable_to_open__file__configuration_problem} = "Impossible d\'ouvrir \$file: problème de configuration ?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Seuls les utilisateurs privilégiés peuvent voir les fichier de jounal ou les fichiers de configuration.";
 $Lang{Only_privileged_users_can_view_log_files} = "Seuls les utilisateurs privilégiés peuvent voir les fichiers de journal.";
 $Lang{Only_privileged_users_can_view_email_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les compte-rendu des courriels.";
-$Lang{Only_privileged_users_can_browse_backup_files} = "Seuls les utilisateurs privilégiés peuvent parcourir les fichiers de sauvegarde pour l'hôte \${EscapeHTML(\$In{host})}.";
+$Lang{Only_privileged_users_can_browse_backup_files} = "Seuls les utilisateurs privilégiés peuvent parcourir les fichiers de sauvegarde pour l'hôte \${EscHTML(\$In{host})}.";
 $Lang{Empty_host_name} = "Nom d\'hôte vide.";
-$Lang{Directory___EscapeHTML} = "Le répertoire \${EscapeHTML(\"\$TopDir/pc/\$host/\$num\")}"
+$Lang{Directory___EscHTML} = "Le répertoire \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
 		    . " est vide";
 $Lang{Can_t_browse_bad_directory_name2} = "Ne peut pas parcourir "
-	            . " \${EscapeHTML(\$relDir)}:"
+	            . " \${EscHTML(\$relDir)}:"
                     . " mauvais nom de répertoire";
 $Lang{Only_privileged_users_can_restore_backup_files} = "Seuls les utilisateurs privilégiés peuvent restaurer "
                 . " des fichiers de sauvegarde"
-                . " pour l\'hôte \${EscapeHTML(\$In{host})}.";
-$Lang{Bad_host_name} = "Mauvais nom d\'hôte \${EscapeHTML(\$host)}";
+                . " pour l\'hôte \${EscHTML(\$In{host})}.";
+$Lang{Bad_host_name} = "Mauvais nom d\'hôte \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Vous n'avez sélectionné aucun fichier; "
     . "vous pouvez revenir en arrière pour sélectionner des fichiers.";
 $Lang{Nice_try__but_you_can_t_put} = "Bien tenté, mais vous ne pouvez pas mettre \'..\' dans"
                                    . " n\'importe quel nom de fichier.";
-$Lang{Host__doesn_t_exist} = "L'hôte \${EscapeHTML(\$In{hostDest})} n\'existe pas.";
+$Lang{Host__doesn_t_exist} = "L'hôte \${EscHTML(\$In{hostDest})} n\'existe pas.";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "Vous n\'avez pas la permission de restaurer sur l\'hôte"
-		    . " \${EscapeHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create} = "Ne peut pas ouvrir/créer ". "\${EscapeHTML(\"\$TopDir/pc/\$hostDest/\$reqFileName\")}";
+		    . " \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create} = "Ne peut pas ouvrir/créer ". "\${EscHTML(\"\$TopDir/pc/\$hostDest/\$reqFileName\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Seuls les utilisateurs privilégiés peuvent restaurer"
                 . " des fichiers de sauvegarde"
-                . " pour l\'hôte \${EscapeHTML(\$host)}.";
+                . " pour l\'hôte \${EscHTML(\$host)}.";
 $Lang{Empty_host_name} = "Nom d\'hôte vide";
-$Lang{Unknown_host_or_user} = "\${EscapeHTML(\$host)}, hôte ou utilisateur inconnu.";
+$Lang{Unknown_host_or_user} = "\${EscHTML(\$host)}, hôte ou utilisateur inconnu.";
 $Lang{Only_privileged_users_can_view_information_about} = "Seuls les utilisateurs privilégiés peuvent accéder aux "
-                . " informations sur l\'hôte \${EscapeHTML(\$host)}." ;
+                . " informations sur l\'hôte \${EscHTML(\$host)}." ;
 $Lang{Only_privileged_users_can_view_restore_information} = "Seuls les utilisateurs privilégiés peuvent restaurer "
     ."des informations.";
-$Lang{Restore_number__num_for_host__does_not_exist} = "Restauration numéro \$num de l\'hôte \${EscapeHTML(\$host)} n\'existe pas";
+$Lang{Restore_number__num_for_host__does_not_exist} = "Restauration numéro \$num de l\'hôte \${EscHTML(\$host)} n\'existe pas";
 
 $Lang{Unable_to_connect_to_BackupPC_server} = "Impossible de se connecter au server BackupPC."
           . "Ce script CGI (\$MyURL) ne peut pas se connecter au serveur  BackupPC"
@@ -707,7 +707,7 @@ $Lang{Unable_to_connect_to_BackupPC_server} = "Impossible de se connecter au ser
             "Peut-être que BackupPC n\'a pas été lancé ou il y a une erreur "
           . " de configuration. Veuillez faire suivre ce message à votre administrateur système.";
 
-$Lang{Can_t_find_IP_address_for} = "Ne peut pas trouver d\'adresse IP pour \${EscapeHTML(\$host)}";
+$Lang{Can_t_find_IP_address_for} = "Ne peut pas trouver d\'adresse IP pour \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host} = <<EOF;
 L\'hôte est un serveur DHCP, et je ne connais pas son adresse IP. J\'ai 
 vérifié le nom netbios de \$ENV{REMOTE_ADDR}\$tryIP, et j\'ai trouvé que 
@@ -792,8 +792,8 @@ $Lang{Last_status_is_state_StatusHost_state_reason_as_of_startTime} = <<EOF;
 EOF
 
 # --------
-$Lang{Last_error_is____EscapeHTML_StatusHost_error} = <<EOF;
-<li>La dernière erreur est \"\${EscapeHTML(\$StatusHost{error})}\"
+$Lang{Last_error_is____EscHTML_StatusHost_error} = <<EOF;
+<li>La dernière erreur est \"\${EscHTML(\$StatusHost{error})}\"
 EOF
 
 # ------
@@ -879,7 +879,7 @@ $Lang{No} = "non";
 $Lang{Yes} = "oui";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">Le repertoire \${EscapeHTML(\$dirDisplay)} est vide
+<tr><td bgcolor="#ffffff">Le repertoire \${EscHTML(\$dirDisplay)} est vide
 </td></tr>
 EOF
 

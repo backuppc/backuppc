@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -50,7 +50,7 @@ if ( @ARGV != 3 ) {
     print("usage: $0 <host> <shareName> <compressLevel>\n");
     exit(1);
 }
-if ( $ARGV[0] !~ /^([\w\.-]+)$/ ) {
+if ( $ARGV[0] !~ /^([\w\.-\s]+)$/ ) {
     print("$0: bad host name '$ARGV[0]'\n");
     exit(1);
 }
@@ -76,7 +76,7 @@ my $Compress = $1;
 #                 Copyright 1998 Stephen Zander. All rights reserved.
 #
 my $tar_unpack_header
-    = 'A100 A8 A8 A8 A12 A12 A8 A1 A100 A6 A2 A32 A32 A8 A8 A155 x12';
+    = 'Z100 A8 A8 A8 A12 A12 A8 A1 Z100 A6 A2 Z32 Z32 A8 A8 A155 x12';
 my $tar_header_length = 512;
 
 my $BufSize  = 1048576;     # 1MB or 2^20
@@ -372,7 +372,7 @@ sub processClose
 }
 
 mkpath("$OutDir/$ShareName", 0, 0777);
-open(NEW_FILES, ">>$TopDir/pc/$host/NewFileList")
+open(NEW_FILES, ">>", "$TopDir/pc/$host/NewFileList")
                  || die("can't open $TopDir/pc/$host/NewFileList");
 1 while ( TarReadFile(*STDIN) );
 1 while ( sysread(STDIN, my $discard, 1024) );

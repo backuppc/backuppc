@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -82,11 +82,7 @@ sub start
     local(*TAR);
 
     if ( $t->{type} eq "restore" ) {
-	if ( ref($conf->{TarClientRestoreCmd}) eq "ARRAY" ) {
-	    $tarClientCmd = $conf->{TarClientRestoreCmd};
-	} else {
-	    $tarClientCmd = [split(/ +/, $conf->{TarClientRestoreCmd})];
-	}
+	$tarClientCmd = $conf->{TarClientRestoreCmd};
         $logMsg = "restore started below directory $t->{shareName}";
 	#
 	# restores are considered to work unless we see they fail
@@ -149,15 +145,17 @@ sub start
     #
     # Merge variables into @tarClientCmd
     #
-    $tarClientCmd = $bpc->cmdVarSubstitute($tarClientCmd, {
+    my $args = {
         host      => $t->{host},
         hostIP    => $t->{hostIP},
+        client    => $t->{client},
         incrDate  => $incrDate,
         shareName => $t->{shareName},
 	fileList  => \@fileList,
         tarPath   => $conf->{TarClientPath},
         sshPath   => $conf->{SshPath},
-    });
+    };
+    $tarClientCmd = $bpc->cmdVarSubstitute($tarClientCmd, $args);
     if ( !defined($t->{xferPid} = open(TAR, "-|")) ) {
         $t->{_errStr} = "Can't fork to run tar";
         return;
@@ -191,11 +189,12 @@ sub start
         #
         # Run the tar command
         #
-	$bpc->cmdExecOrEval($tarClientCmd);
+	$bpc->cmdExecOrEval($tarClientCmd, $args);
         # should not be reached, but just in case...
         $t->{_errStr} = "Can't exec @$tarClientCmd";
         return;
     }
+    my $str = "Running: " . $bpc->execCmd2ShellCmd(@$tarClientCmd) . "\n";
     $t->{XferLOG}->write(\"Running: @$tarClientCmd\n");
     alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;

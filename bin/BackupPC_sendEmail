@@ -38,7 +38,7 @@
 #========================================================================
 
 use strict;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 
@@ -282,7 +282,7 @@ if ( !$opts{t} ) {
     my $dumpStr = Data::Dumper->Dump(
              [\%UserEmailInfo],
              [qw(*UserEmailInfo)]);
-    if ( open(HOST, ">$TopDir/log/UserEmailInfo.pl") ) {
+    if ( open(HOST, ">", "$TopDir/log/UserEmailInfo.pl") ) {
         print(HOST $dumpStr);
         close(HOST);
     }

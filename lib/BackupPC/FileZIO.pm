@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -95,9 +95,9 @@ sub open
         $fh = $fileName;
     } else {
         if ( $write ) {
-            open(FH, ">$fileName") || return;
+            open(FH, ">", $fileName) || return;
         } else {
-            open(FH, "<$fileName") || return;
+            open(FH, "<", $fileName) || return;
         }
         $fh = *FH;
     }
@@ -343,7 +343,7 @@ sub compressCopy
     if ( $CompZlibOK && $compress > 0 ) {
         my $fh = BackupPC::FileZIO->open($destFileZ, 1, $compress);
         my $data;
-        if ( defined($fh) && open(LOG, $srcFile) ) {
+        if ( defined($fh) && open(LOG, "<", $srcFile) ) {
             while ( sysread(LOG, $data, 65536) > 0 ) {
                 $fh->write(\$data);
             }

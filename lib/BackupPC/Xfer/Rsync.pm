@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -128,7 +128,7 @@ sub start
 	$remoteDir    =~ s{//+}{/}g;
         $argList = ['--server', @$rsyncArgs, '.', $remoteDir];
 	$fioArgs = {
-	    host     => $t->{bkupSrcHost},
+	    client   => $t->{bkupSrcHost},
 	    share    => $t->{bkupSrcShare},
 	    viewNum  => $t->{bkupSrcNum},
 	    fileList => $t->{fileList},
@@ -234,7 +234,7 @@ sub start
         $argList = ['--server', '--sender', @$rsyncArgs,
                               '.', $t->{shareNameSlash}];
 	$fioArgs = {
-	    host    => $t->{host},
+	    client  => $t->{client},
 	    share   => $t->{shareName},
 	    viewNum => $t->{lastFullBkupNum},
 	};
@@ -243,16 +243,17 @@ sub start
     #
     # Merge variables into $rsyncClientCmd
     #
-    $rsyncClientCmd = $bpc->cmdVarSubstitute($rsyncClientCmd,
-            {
-                host      => $t->{host},
-                hostIP    => $t->{hostIP},
-                shareName => $t->{shareName},
-                shareNameSlash => $t->{shareNameSlash},
-                rsyncPath => $conf->{RsyncClientPath},
-                sshPath   => $conf->{SshPath},
-                argList   => $argList,
-            });
+    my $args = {
+	host      => $t->{host},
+	hostIP    => $t->{hostIP},
+	client    => $t->{client},
+	shareName => $t->{shareName},
+	shareNameSlash => $t->{shareNameSlash},
+	rsyncPath => $conf->{RsyncClientPath},
+	sshPath   => $conf->{SshPath},
+	argList   => $argList,
+    };
+    $rsyncClientCmd = $bpc->cmdVarSubstitute($rsyncClientCmd, $args);
 
     #
     # Create the Rsync object, and tell it to use our own File::RsyncP::FileIO
@@ -263,7 +264,7 @@ sub start
     $t->{rs} = File::RsyncP->new({
 	logLevel     => $conf->{RsyncLogLevel},
 	rsyncCmd     => sub {
-			    $bpc->cmdExecOrEval($rsyncClientCmd);
+			    $bpc->cmdExecOrEval($rsyncClientCmd, $args);
 			},
 	rsyncCmdType => "full",
 	rsyncArgs    => $rsyncArgs,
@@ -317,7 +318,10 @@ sub run
 	#
 	# Run rsync command
 	#
-	$t->{XferLOG}->write(\"Running: @{$t->{rsyncClientCmd}}\n");
+	my $str = "Running: "
+	        . $t->{bpc}->execCmd2ShellCmd(@{$t->{rsyncClientCmd}})
+		. "\n";
+	$t->{XferLOG}->write(\$str);
 	$rs->remoteStart($remoteSend, $remoteDir);
     } else {
 	#
@@ -326,6 +330,9 @@ sub run
 	if ( defined(my $err = $rs->serverConnect($t->{hostIP},
 					     $conf->{RsyncdClientPort})) ) {
 	    $t->{hostError} = $err;
+	    my $str = "Error connecting to rsync daemon at $t->{hostIP}"
+		    . ":$conf->{RsyncdClientPort}: $err\n";
+	    $t->{XferLOG}->write(\$str);
 	    return;
 	}
 	#
@@ -338,6 +345,9 @@ sub run
                                              $conf->{RsyncdUserName},
                                              $conf->{RsyncdPasswd},
                                              $conf->{RsyncdAuthRequired})) ) {
+	    my $str = "Error connecting to module $module at $t->{hostIP}"
+		    . ":$conf->{RsyncdClientPort}: $err\n";
+	    $t->{XferLOG}->write(\$str);
 	    $t->{hostError} = $err;
 	    return;
 	}

@@ -288,7 +288,7 @@ You can start a restore that will restore these files directly onto
 selected will be overwritten!
 
 <form action="\$MyURL" method="post">
-<input type="hidden" name="host" value="\${EscapeHTML(\$host)}">
+<input type="hidden" name="host" value="\${EscHTML(\$host)}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="3">
 \$hiddenStr
@@ -296,16 +296,16 @@ selected will be overwritten!
 <table border="0">
 <tr>
     <td>Restore the files to host</td>
-    <td><input type="text" size="40" value="\${EscapeHTML(\$host)}"
+    <td><input type="text" size="40" value="\${EscHTML(\$host)}"
 	 name="hostDest"></td>
 </tr><tr>
     <td>Restore the files to share</td>
-    <td><input type="text" size="40" value="\${EscapeHTML(\$share)}"
+    <td><input type="text" size="40" value="\${EscHTML(\$share)}"
 	 name="shareDest"></td>
 </tr><tr>
     <td>Restore the files below dir<br>(relative to share)</td>
     <td valign="top"><input type="text" size="40" maxlength="256"
-	value="\${EscapeHTML(\$pathHdr)}" name="pathHdr"></td>
+	value="\${EscHTML(\$pathHdr)}" name="pathHdr"></td>
 </tr><tr>
     <td><input type="submit" value="Start Restore" name=""></td>
 </table>
@@ -327,13 +327,13 @@ create and transfer the archive, and you will need enough local disk
 space to store it.
 <p>
 <form action="\$MyURL" method="post">
-<input type="hidden" name="host" value="\${EscapeHTML(\$host)}">
+<input type="hidden" name="host" value="\${EscHTML(\$host)}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="2">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
 <input type="checkbox" value="1" name="relative" checked> Make archive relative
-to \${EscapeHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
+to \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (otherwise archive will contain full paths).
 <br>
 Compression (0=off, 1=fast,...,9=best)
@@ -370,13 +370,13 @@ create and transfer the archive, and you will need enough local disk
 space to store it.
 <p>
 <form action="\$MyURL" method="post">
-<input type="hidden" name="host" value="\${EscapeHTML(\$host)}">
+<input type="hidden" name="host" value="\${EscHTML(\$host)}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="1">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
 <input type="checkbox" value="1" name="relative" checked> Make archive relative
-to \${EscapeHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
+to \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (otherwise archive will contain full paths).
 <br>
 <input type="submit" value="Download Tar File" name="">
@@ -400,10 +400,10 @@ backup number \$num:
 </table>
 
 <form action="\$MyURL" method="post">
-<input type="hidden" name="host" value="\${EscapeHTML(\$host)}">
-<input type="hidden" name="hostDest" value="\${EscapeHTML(\$In{hostDest})}">
-<input type="hidden" name="shareDest" value="\${EscapeHTML(\$In{shareDest})}">
-<input type="hidden" name="pathHdr" value="\${EscapeHTML(\$In{pathHdr})}">
+<input type="hidden" name="host" value="\${EscHTML(\$host)}">
+<input type="hidden" name="hostDest" value="\${EscHTML(\$In{hostDest})}">
+<input type="hidden" name="shareDest" value="\${EscHTML(\$In{shareDest})}">
+<input type="hidden" name="pathHdr" value="\${EscHTML(\$In{pathHdr})}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="4">
 \$hiddenStr
@@ -576,11 +576,11 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Click on a file below to restore that file.
 </ul>
 
-\${h2("Contents of \${EscapeHTML(\$dirDisplay)}")}
+\${h2("Contents of \${EscHTML(\$dirDisplay)}")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
-<input type="hidden" name="share" value="\${EscapeHTML(\$share)}">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="action" value="$Lang{Restore}">
 <br>
@@ -662,38 +662,38 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Only privileged users can stop or start backups on"
-		. " \${EscapeHTML(\$host)}.";
+		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Invalid number \$num";
 $Lang{Unable_to_open__file__configuration_problem} = "Unable to open \$file: configuration problem?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Only privileged users can view log or config files.";
 $Lang{Only_privileged_users_can_view_log_files} = "Only privileged users can view log files.";
 $Lang{Only_privileged_users_can_view_email_summaries} = "Only privileged users can view email summaries.";
 $Lang{Only_privileged_users_can_browse_backup_files} = "Only privileged users can browse backup files"
-                . " for host \${EscapeHTML(\$In{host})}.";
+                . " for host \${EscHTML(\$In{host})}.";
 $Lang{Empty_host_name} = "Empty host name.";
-$Lang{Directory___EscapeHTML} = "Directory \${EscapeHTML(\"\$TopDir/pc/\$host/\$num\")}"
+$Lang{Directory___EscHTML} = "Directory \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
 		    . " is empty";
 $Lang{Can_t_browse_bad_directory_name2} = "Can\'t browse bad directory name"
-	            . " \${EscapeHTML(\$relDir)}";
+	            . " \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} = "Only privileged users can restore backup files"
-                . " for host \${EscapeHTML(\$In{host})}.";
-$Lang{Bad_host_name} = "Bad host name \${EscapeHTML(\$host)}";
+                . " for host \${EscHTML(\$In{host})}.";
+$Lang{Bad_host_name} = "Bad host name \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} = "You haven\'t selected any files; please go Back to"
                 . " select some files.";
 $Lang{Nice_try__but_you_can_t_put} = "Nice try, but you can\'t put \'..\' in any of the file names";
-$Lang{Host__doesn_t_exist} = "Host \${EscapeHTML(\$In{hostDest})} doesn\'t exist";
+$Lang{Host__doesn_t_exist} = "Host \${EscHTML(\$In{hostDest})} doesn\'t exist";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "You don\'t have permission to restore onto host"
-		    . " \${EscapeHTML(\$In{hostDest})}";
+		    . " \${EscHTML(\$In{hostDest})}";
 $Lang{Can_t_open_create} = "Can\'t open/create "
-                    . "\${EscapeHTML(\"\$TopDir/pc/\$hostDest/\$reqFileName\")}";
+                    . "\${EscHTML(\"\$TopDir/pc/\$hostDest/\$reqFileName\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Only privileged users can restore backup files"
-                . " for host \${EscapeHTML(\$host)}.";
+                . " for host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name} = "Empty host name";
-$Lang{Unknown_host_or_user} = "Unknown host or user \${EscapeHTML(\$host)}";
+$Lang{Unknown_host_or_user} = "Unknown host or user \${EscHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} = "Only privileged users can view information about"
-                . " host \${EscapeHTML(\$host)}." ;
+                . " host \${EscHTML(\$host)}." ;
 $Lang{Only_privileged_users_can_view_restore_information} = "Only privileged users can view restore information.";
-$Lang{Restore_number__num_for_host__does_not_exist} = "Restore number \$num for host \${EscapeHTML(\$host)} does"
+$Lang{Restore_number__num_for_host__does_not_exist} = "Restore number \$num for host \${EscHTML(\$host)} does"
 	        . " not exist.";
 
 $Lang{Unable_to_connect_to_BackupPC_server} = "Unable to connect to BackupPC server",
@@ -703,7 +703,7 @@ $Lang{Unable_to_connect_to_BackupPC_server} = "Unable to connect to BackupPC ser
             "Perhaps the BackupPC server is not running or there is a "
           . " configuration error.  Please report this to your Sys Admin.";
 
-$Lang{Can_t_find_IP_address_for} = "Can\'t find IP address for \${EscapeHTML(\$host)}";
+$Lang{Can_t_find_IP_address_for} = "Can\'t find IP address for \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host} = <<EOF;
 \$host is a DHCP host, and I don\'t know its IP address.  I checked the
 netbios name of \$ENV{REMOTE_ADDR}\$tryIP, and found that that machine
@@ -784,8 +784,8 @@ $Lang{Last_status_is_state_StatusHost_state_reason_as_of_startTime} = <<EOF;
 EOF
 
 # --------
-$Lang{Last_error_is____EscapeHTML_StatusHost_error} = <<EOF;
-<li>Last error is \"\${EscapeHTML(\$StatusHost{error})}\"
+$Lang{Last_error_is____EscHTML_StatusHost_error} = <<EOF;
+<li>Last error is \"\${EscHTML(\$StatusHost{error})}\"
 EOF
 
 # ------
@@ -871,7 +871,7 @@ $Lang{No} = "no";
 $Lang{Yes} = "yes";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">The directory \${EscapeHTML(\$dirDisplay)} is empty
+<tr><td bgcolor="#ffffff">The directory \${EscHTML(\$dirDisplay)} is empty
 </td></tr>
 EOF
 

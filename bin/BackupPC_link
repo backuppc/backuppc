@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -70,7 +70,7 @@ if ( @ARGV != 1 ) {
     print("usage: $0 <host>\n");
     exit(1);
 }
-if ( $ARGV[0] !~ /^([\w\.-]+)$/ ) {
+if ( $ARGV[0] !~ /^([\w\.-\s]+)$/ ) {
     print("$0: bad host name '$ARGV[0]'\n");
     exit(1);
 }
@@ -105,7 +105,7 @@ while ( 1 ) {
     #
     $CurrDumpDir = "$Dir/$Backups[$num]{num}";
     $Compress = $Backups[$num]{compress};
-    if ( open(NEW, "$Dir/NewFileList.$Backups[$num]{num}") ) {
+    if ( open(NEW, "<", "$Dir/NewFileList.$Backups[$num]{num}") ) {
         while ( <NEW> ) {
             chomp;
             next if ( !/(\w+) (\d+) (.*)/ );

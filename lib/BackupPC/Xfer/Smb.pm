@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -79,7 +79,8 @@ sub start
     my $bpc = $t->{bpc};
     my $conf = $t->{conf};
     my $I_option = $t->{hostIP} eq $t->{host} ? "" : " -I $t->{hostIP}";
-    my($fileList, $optX, $smbClientCmd, $logMsg);
+    my(@fileList, $X_option, $smbClientCmd, $logMsg);
+    my($timeStampFile);
     local(*SMB);
 
     #
@@ -97,11 +98,7 @@ sub start
         return;
     }
     if ( $t->{type} eq "restore" ) {
-        $smbClientCmd =
-              "$conf->{SmbClientPath} '\\\\$t->{host}\\$t->{shareName}'"
-            . "$I_option -U '$conf->{SmbShareUserName}' -E -N -d 1"
-            . " $conf->{SmbClientArgs}"
-            . " -c 'tarmode full' -Tx -";
+        $smbClientCmd = $conf->{SmbClientRestoreCmd};
         $logMsg = "restore started for share $t->{shareName}";
     } else {
 	#
@@ -126,43 +123,45 @@ sub start
 	}
         if ( defined($conf->{BackupFilesOnly}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
-                $file =~ s/'/\\'/g;
-                $fileList .= "'$file' ";
+		push(@fileList, $file);
             }
         } elsif ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
             {
-                $file =~ s/'/\\'/g;
-                $fileList .= "'$file' ";
+		push(@fileList, $file);
             }
 	    #
 	    # Allow simple wildcards in exclude list by specifying "r" option.
 	    #
-            $optX = "rX";
+            $X_option = "rX";
         }
         if ( $t->{type} eq "full" ) {
-            $smbClientCmd =
-                  "$conf->{SmbClientPath} '\\\\$t->{host}\\$t->{shareName}'"
-                . "$I_option -U '$conf->{SmbShareUserName}' -E -N -d 1"
-                . " $conf->{SmbClientArgs}"
-                . " -c 'tarmode full'"
-                . " -Tc$optX - $fileList";
+	    $smbClientCmd = $conf->{SmbClientFullCmd};
             $logMsg = "full backup started for share $t->{shareName}";
         } else {
-            my $timeStampFile = "$t->{outDir}/timeStamp.level0";
-            open(LEV0, ">$timeStampFile") && close(LEV0);
+            $timeStampFile = "$t->{outDir}/timeStamp.level0";
+            open(LEV0, ">", $timeStampFile) && close(LEV0);
             utime($t->{lastFull} - 3600, $t->{lastFull} - 3600, $timeStampFile);
-            $smbClientCmd =
-                  "$conf->{SmbClientPath} '\\\\$t->{host}\\$t->{shareName}'"
-                . "$I_option -U '$conf->{SmbShareUserName}' -E -N -d 1"
-                . " $conf->{SmbClientArgs}"
-                . " -c 'tarmode full'"
-                . " -TcN$optX $timeStampFile - $fileList";
+	    $smbClientCmd = $conf->{SmbClientIncrCmd};
             $logMsg = "incr backup started back to "
                         . $bpc->timeStamp($t->{lastFull} - 3600, 0)
                         . "for share $t->{shareName}";
         }
     }
+    my $args = {
+	smbClientPath => $conf->{SmbClientPath},
+	host          => $t->{host},
+	hostIP	      => $t->{hostIP},
+	client	      => $t->{client},
+	shareName     => $t->{shareName},
+	userName      => $conf->{SmbShareUserName},
+	fileList      => \@fileList,
+	I_option      => $I_option,
+	X_option      => $X_option,
+	timeStampFile => $timeStampFile,
+    };
+    $smbClientCmd = $bpc->cmdVarSubstitute($smbClientCmd, $args);
+
     if ( !defined($t->{xferPid} = open(SMB, "-|")) ) {
         $t->{_errStr} = "Can't fork to run smbclient";
         return;
@@ -194,14 +193,15 @@ sub start
             open(STDOUT, ">&$t->{pipeWH}");
         }
         #
-        # exec smbclient.
+        # Run smbclient.
         #
-        exec($smbClientCmd);
+        $bpc->cmdExecOrEval($smbClientCmd, $args);
         # should not be reached, but just in case...
         $t->{_errStr} = "Can't exec $conf->{SmbClientPath}";
         return;
     }
-    $t->{XferLOG}->write(\"Running: $smbClientCmd\n");
+    my $str = "Running: " . $bpc->execCmd2ShellCmd(@$smbClientCmd) . "\n";
+    $t->{XferLOG}->write(\$str);
     alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
     return $logMsg;

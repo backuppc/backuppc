@@ -49,7 +49,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -173,7 +173,7 @@ sub doCompress
                 -Bufsize => 65536,
                 -Level   => $Compress,
            );
-    if ( !open(FH, $TestMode ? "<$file" : "+<$file") ) {
+    if ( !open(FH, $TestMode ? "<" : "+<", $file) ) {
         print("Error: Can't open $file for read/write\n");
         $Errors++;
         return;
@@ -196,7 +196,7 @@ sub doCompress
         }
         $dataOut .= $fragOut;
         if ( !$copy && length($dataOut) > $CompMaxWrite ) {
-            if ( !open(OUT, "+>$file.__z") ) {
+            if ( !open(OUT, "+>", "$file.__z") ) {
                 print("Error: Can't open $file.__z for write\n");
                 $Errors++;
                 close(FH);
@@ -237,7 +237,7 @@ sub doCompress
     my $newFile = cpoolFileName($file);
     if ( $TestMode ) {
         close(FH);
-        if ( !open(FH, ">$newFile") ) {
+        if ( !open(FH, ">", $newFile) ) {
             print("Error: Can't open $newFile for write\n");
             $Errors++;
             close(FH);
@@ -323,7 +323,7 @@ sub checkRead
     my($n, $nd, $r, $d, $d0);
     local(*FH);
 
-    if ( !open(FH, $file) ) {
+    if ( !open(FH, "<", $file) ) {
         print("can't open $file for check\n");
         $Errors++;
         $f->close();
@@ -357,7 +357,7 @@ sub checkReadLine
     my($n, $nd, $r, $d, $d0);
     local(*FH);
 
-    if ( !open(FH, $file) ) {
+    if ( !open(FH, "<", $file) ) {
         print("can't open $file for check\n");
         $Errors++;
         $f->close();

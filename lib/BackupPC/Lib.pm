@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -58,7 +58,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
-        Version => '1.6.0_CVS',
+        Version => '2.0.0_CVS',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew
@@ -314,8 +314,19 @@ sub HostInfoRead
         s/[\n\r]+//;
         s/#.*//;
         s/\s+$//;
-        next if ( /^\s*$/ || !/^([\w\.-]+\s+.*)/ );
-        @fld = split(/\s+/, $1);
+        next if ( /^\s*$/ || !/^([\w\.-\\]+\s+.*)/ );
+        #
+        # Split on white space, except if preceded by \
+        # using zero-width negative look-behind assertion
+	# (always wanted to use one of those).
+        #
+        @fld = split(/(?<!\\)\s+/, $1);
+        #
+        # Remove any \
+        #
+        foreach ( @fld ) {
+            s{\\(\s)}{$1}g;
+        }
         if ( @hdr ) {
             if ( defined($host) ) {
                 next if ( lc($fld[0]) ne $host );
@@ -720,6 +731,10 @@ sub CheckFileSystemUsage
     return $1;
 }
 
+#
+# Given an IP address, return the host name and user name via
+# NetBios.
+#
 sub NetBiosInfoGet
 {
     my($bpc, $host) = @_;
@@ -738,6 +753,28 @@ sub NetBiosInfoGet
     }
     return if ( !defined($netBiosHostName) );
     return (lc($netBiosHostName), lc($netBiosUserName));
+}
+
+#
+# Given a NetBios name lookup the IP address via NetBios.
+#
+sub NetBiosHostIPFind
+{
+    my($bpc, $host) = @_;
+    my($netBiosHostName, $netBiosUserName);
+    my($s, $nmbCmd);
+
+    my $args = {
+	nmbLookupPath => $bpc->{Conf}{NmbLookupPath},
+	host	      => $host,
+    };
+    $nmbCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{NmbLookupFindHostCmd}, $args);
+    my $resp = $bpc->cmdSystemOrEval($nmbCmd, undef, $args);
+    if ( $resp =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+\Q$host/m ) {
+        return $1;
+    } else {
+        return;
+    }
 }
 
 sub fileNameEltMangle
@@ -792,6 +829,43 @@ sub shellEscape
 }
 
 #
+# For printing exec commands (which don't use a shell) so they look like
+# a valid shell command this function should be called with the exec
+# args.  The shell command string is returned.
+#
+sub execCmd2ShellCmd
+{
+    my($bpc, @args) = @_;
+    my $str;
+
+    foreach my $a ( @args ) {
+	$str .= " " if ( $str ne "" );
+	$str .= $bpc->shellEscape($a);
+    }
+    return $str;
+}
+
+#
+# Do a URI-style escape to protect/encode special characters
+#
+sub uriEsc
+{
+    my($bpc, $s) = @_;
+    $s =~ s{([^\w.\/-])}{sprintf("%%%02X", ord($1));}eg;
+    return $s;
+}
+
+#
+# Do a URI-style unescape to restore special characters
+#
+sub uriUnesc
+{
+    my($bpc, $s) = @_;
+    $s =~ s{%(..)}{chr(hex($1))}eg;
+    return $s;
+}
+
+#
 # Do variable substitution prior to execution of a command.
 #
 sub cmdVarSubstitute
@@ -806,7 +880,18 @@ sub cmdVarSubstitute
     if ( (ref($template) eq "ARRAY" ? $template->[0] : $template) =~ /^\&/ ) {
         return $template;
     }
-    $template = [split(/\s+/, $template)] if ( ref($template) ne "ARRAY" );
+    if ( ref($template) ne "ARRAY" ) {
+	#
+	# Split at white space, except if escaped by \
+	#
+	$template = [split(/(?<!\\)\s+/, $template)];
+	#
+	# Remove the \ that escaped white space.
+	#
+        foreach ( @$template ) {
+            s{\\(\s)}{$1}g;
+        }
+    }
     #
     # Merge variables into @tarClientCmd
     #
@@ -815,7 +900,7 @@ sub cmdVarSubstitute
         # Replace scalar variables first
         #
         $arg =~ s{\$(\w+)(\+?)}{
-            defined($vars->{$1}) && ref($vars->{$1}) ne "ARRAY"
+            exists($vars->{$1}) && ref($vars->{$1}) ne "ARRAY"
                 ? ($2 eq "+" ? $bpc->shellEscape($vars->{$1}) : $vars->{$1})
                 : "\$$1"
         }eg;

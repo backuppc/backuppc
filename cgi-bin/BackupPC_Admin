@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -243,15 +243,16 @@ sub Action_StartStopBackup
     if ( $In{doit} ) {
         if ( $start ) {
 	    if ( $Hosts->{$host}{dhcp} ) {
-		$reply = $bpc->ServerMesg("backup $In{hostIP} $host"
-					. " $User $doFull");
+		$reply = $bpc->ServerMesg("backup $In{hostIP} ${EscURI($host)}"
+				    . " $User $doFull");
 		$str = eval("qq{$Lang->{Backup_requested_on_DHCP__host}}");
 	    } else {
-		$reply = $bpc->ServerMesg("backup $host $host $User $doFull");
+		$reply = $bpc->ServerMesg("backup ${EscURI($host)}"
+				    . " ${EscURI($host)} $User $doFull");
 		$str = eval("qq{$Lang->{Backup_requested_on__host_by__User}}");
 	    }
         } else {
-            $reply = $bpc->ServerMesg("stop $host $User $In{backoff}");
+            $reply = $bpc->ServerMesg("stop ${EscURI($host)} $User $In{backoff}");
             $str = eval("qq{$Lang->{Backup_stopped_dequeued_on__host_by__User}}");
         }
 
@@ -267,7 +268,7 @@ sub Action_StartStopBackup
             print (eval("qq{$Lang->{Are_you_sure_start}}"));
         } else {
             my $backoff = "";
-            GetStatusInfo("host($host)");
+            GetStatusInfo("host(${EscURI($host)})");
             if ( $StatusHost{backoffTime} > time ) {
                 $backoff = sprintf("%.1f",
                                   ($StatusHost{backoffTime} - time) / 3600);
@@ -432,13 +433,13 @@ sub Action_View
 		print(eval("qq{$Lang->{skipped__skipped_lines}}"))
 						     if ( $skipped );
 		$skipped = 0;
-                print ${EscapeHTML($_)};
+                print ${EscHTML($_)};
             }
         } elsif ( $linkHosts ) {
             while ( 1 ) {
                 $_ = $fh->readLine();
                 last if ( $_ eq "" );
-                my $s = ${EscapeHTML($_)};
+                my $s = ${EscHTML($_)};
                 $s =~ s/\b([\w-]+)\b/defined($Hosts->{$1})
                                         ? ${HostLink($1)} : $1/eg;
                 print $s;
@@ -451,13 +452,13 @@ sub Action_View
                 s/(SmbSharePasswd.*=.*['"]).*(['"])/$1$2/ig;
                 s/(SmbShareUserName.*=.*['"]).*(['"])/$1$2/ig;
                 s/(ServerMesgSecret.*=.*['"]).*(['"])/$1$2/ig;
-                print ${EscapeHTML($_)};
+                print ${EscHTML($_)};
             }
         } else {
             while ( 1 ) {
                 $_ = $fh->readLine();
                 last if ( $_ eq "" );
-                print ${EscapeHTML($_)};
+                print ${EscHTML($_)};
             }
         }
         $fh->close();
@@ -481,7 +482,7 @@ sub Action_LOGlist
     my($url0, $hdr, $root, $str);
     if ( $host ne "" ) {
         $root = "$TopDir/pc/$host/LOG";
-        $url0 = "&host=$host";
+        $url0 = "&host=${EscURI($host)}";
         $hdr = "for host $host";
     } else {
         $root = "$TopDir/log/LOG";
@@ -561,7 +562,7 @@ sub Action_Browse
         last if ( $Backups[$i]{num} == $num );
     }
     if ( $i >= @Backups ) {
-        ErrorExit("Backup number $num for host ${EscapeHTML($host)} does"
+        ErrorExit("Backup number $num for host ${EscHTML($host)} does"
 	        . " not exist.");
     }
     my $backupTime = timeStamp2($Backups[$i]{startTime});
@@ -575,7 +576,7 @@ sub Action_Browse
 	    $share = (sort(keys(%$attr)))[0];
 	    $dir   = '/';
 	} else {
-            ErrorExit(eval("qq{$Lang->{Directory___EscapeHTML}}"));
+            ErrorExit(eval("qq{$Lang->{Directory___EscHTML}}"));
 	}
     }
     my $relDir  = $dir;
@@ -609,9 +610,9 @@ sub Action_Browse
 		$path  = "/";
 	    }
             $path =~ s{^/+}{/};
-            $path     =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-            $fURI     =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-            $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+            $path     =~ s/([^\w.\/-])/uc sprintf("%%%02X", ord($1))/eg;
+            $fURI     =~ s/([^\w.\/-])/uc sprintf("%%%02X", ord($1))/eg;
+            $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02X", ord($1))/eg;
             $dirOpen  = 1 if ( defined($currDir) && $f eq $currDir );
             if ( $attr->{$f}{type} == BPC_FTYPE_DIR ) {
                 #
@@ -639,7 +640,7 @@ sub Action_Browse
 		push(@DirStr, {needTick => 1,
 			       tdArgs   => $BGcolor,
 			       link     => <<EOF});
-<a href="$MyURL?action=browse&host=$host&num=$num&share=$shareURI&dir=$path">$imgStr</a><a href="$MyURL?action=browse&host=$host&num=$num&share=$shareURI&dir=$path" style="font-size:13px;font-family:arial;text-decoration:none;line-height:15px">&nbsp;$bold$dirName$unbold</a></td></tr>
+<a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$imgStr</a><a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path" style="font-size:13px;font-family:arial;text-decoration:none;line-height:15px">&nbsp;$bold$dirName$unbold</a></td></tr>
 EOF
                 $fileCnt++;
                 $gotDir = 1;
@@ -691,15 +692,16 @@ EOF
                 } else {
                     $attrStr .= "<td colspan=\"5\" align=\"center\"> </td>\n";
                 }
+		(my $fDisp = "${EscHTML($f)}") =~ s/ /&nbsp;/g;
                 if ( $gotDir ) {
                     $fileStr .= <<EOF;
-<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=browse&host=$host&num=$num&share=$shareURI&dir=$path">${EscapeHTML($f)}</a></td>
+<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a></td>
 $attrStr
 </tr>
 EOF
                 } else {
                     $fileStr .= <<EOF;
-<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=RestoreFile&host=$host&num=$num&share=$shareURI&dir=$path">${EscapeHTML($f)}</a></td>
+<tr bgcolor="#ffffcc"><td><input type="checkbox" name="fcb$checkBoxCnt" value="$path">&nbsp;<a href="$MyURL?action=RestoreFile&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$fDisp</a></td>
 $attrStr
 </tr>
 EOF
@@ -760,7 +762,7 @@ EOF
         my $shareURI = $share;
         $path =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
         $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-        push(@otherDirs, "<a href=\"$MyURL?action=browse&host=$host&num=$i"
+        push(@otherDirs, "<a href=\"$MyURL?action=browse&host=${EscURI($host)}&num=$i"
                        . "&share=$shareURI&dir=$path\">$i</a>");
 
     }
@@ -768,7 +770,6 @@ EOF
 	my $otherDirs  = join(",\n", @otherDirs);
         $filledBackup .= eval("qq{$Lang->{Visit_this_directory_in_backup}}");
     }
- 
     print (eval("qq{$Lang->{Backup_browse_for__host}}"));
     Trailer();
 }
@@ -806,11 +807,11 @@ sub Action_Restore
 <input type="hidden" name="fcb$i" value="$In{'fcb' . $i}">
 EOF
         $fileListStr .= <<EOF;
-<li> ${EscapeHTML($name)}
+<li> ${EscHTML($name)}
 EOF
     }
     $hiddenStr .= "<input type=\"hidden\" name=\"fcbMax\" value=\"$In{fcbMax}\">\n";
-    $hiddenStr .= "<input type=\"hidden\" name=\"share\" value=\"${EscapeHTML($share)}\">\n";
+    $hiddenStr .= "<input type=\"hidden\" name=\"share\" value=\"${EscHTML($share)}\">\n";
     $badFileCnt++ if ( $In{pathHdr} =~ m{(^|/)\.\.(/|$)} );
     $badFileCnt++ if ( $In{num} =~ m{(^|/)\.\.(/|$)} );
     if ( @fileList == 0 ) {
@@ -996,8 +997,8 @@ EOF
         } else {
             ErrorExit(eval("qq{$Lang->{Can_t_open_create}}"));
         }
-	$reply = $bpc->ServerMesg("restore $ipAddr"
-			. " $hostDest $User $reqFileName");
+	$reply = $bpc->ServerMesg("restore ${EscURI($ipAddr)}"
+			. " ${EscURI($hostDest)} $User $reqFileName");
 	$str = eval("qq{$Lang->{Restore_requested_to_host__hostDest__backup___num}}");
         Header(eval("qq{$Lang->{Restore_Requested_on__hostDest}}"));
 	print (eval("qq{$Lang->{Reply_from_server_was___reply}}"));
@@ -1113,7 +1114,7 @@ sub restoreFile
     my $view = BackupPC::View->new($bpc, $host, \@Backups);
     my $a = $view->fileAttrib($num, $share, $dir);
     if ( $dir =~ m{(^|/)\.\.(/|$)} || !defined($a) ) {
-        ErrorExit("Can't restore bad file ${EscapeHTML($dir)}");
+        ErrorExit("Can't restore bad file ${EscHTML($dir)}");
     }
     my $f = BackupPC::FileZIO->open($a->{fullPath}, 0, $a->{compress});
     my $data;
@@ -1175,7 +1176,7 @@ sub Action_HostInfo
         }
         $In{host} = $host;
     }
-    GetStatusInfo("host($host)");
+    GetStatusInfo("host(${EscURI($host)})");
     $bpc->ConfigRead($host);
     %Conf = $bpc->Conf();
     my $Privileged = CheckPermission($host);
@@ -1209,7 +1210,7 @@ sub Action_HostInfo
                   (1 - $Backups[$i]{sizeNewComp} / $Backups[$i]{sizeNew}));
         }
         my $age = sprintf("%.1f", (time - $Backups[$i]{startTime}) / (24*3600));
-        my $browseURL = "$MyURL?action=browse&host=$host&num=$Backups[$i]{num}";
+        my $browseURL = "$MyURL?action=browse&host=${EscURI($host)}&num=$Backups[$i]{num}";
         my $filled = $Backups[$i]{noFill} ? $Lang->{No} : $Lang->{Yes};
         $filled .= " ($Backups[$i]{fillFromNum}) "
                             if ( $Backups[$i]{fillFromNum} ne "" );
@@ -1255,8 +1256,8 @@ EOF
         $errStr .= <<EOF;
 <tr><td align="center"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center"> $ltype </td>
-    <td align="center"> <a href="$MyURL?action=view&type=XferLOG&num=$Backups[$i]{num}&host=$host">XferLOG</a>,
-                      <a href="$MyURL?action=view&type=XferErr&num=$Backups[$i]{num}&host=$host">Errors</a> </td>
+    <td align="center"> <a href="$MyURL?action=view&type=XferLOG&num=$Backups[$i]{num}&host=${EscURI($host)}">XferLOG</a>,
+                      <a href="$MyURL?action=view&type=XferErr&num=$Backups[$i]{num}&host=${EscURI($host)}">Errors</a> </td>
     <td align="right">  $Backups[$i]{xferErrs} </td>
     <td align="right">  $Backups[$i]{xferBadFile} </td>
     <td align="right">  $Backups[$i]{xferBadShare} </td>
@@ -1277,7 +1278,7 @@ EOF
 	my $Restores_Result = $Lang->{failed};
 	if ($Restores[$i]{result} ne "failed") { $Restores_Result = $Lang->{success}; }
 	$restoreStr  .= <<EOF;
-<tr><td align="center"><a href="$MyURL?action=restoreInfo&num=$Restores[$i]{num}&host=$host">$Restores[$i]{num}</a> </td>
+<tr><td align="center"><a href="$MyURL?action=restoreInfo&num=$Restores[$i]{num}&host=${EscURI($host)}">$Restores[$i]{num}</a> </td>
     <td align="center"> $Restores_Result </td>
     <td align="right"> $startTime </td>
     <td align="right"> $duration </td>
@@ -1340,7 +1341,7 @@ EOF
     $statusStr .= eval("qq{$Lang->{Last_status_is_state_StatusHost_state_reason_as_of_startTime}}");
 
     if ( $StatusHost{error} ne "" ) {
-        $statusStr .= eval("qq{$Lang->{Last_error_is____EscapeHTML_StatusHost_error}}");
+        $statusStr .= eval("qq{$Lang->{Last_error_is____EscHTML_StatusHost_error}}");
     }
     my $priorStr = "Pings";
     if ( $StatusHost{deadCnt} > 0 ) {
@@ -1424,8 +1425,8 @@ EOF
                 || -f "$TopDir/pc/$host/XferLOG.bad.z"
                 ) {
             $XferViewStr = <<EOF;
-<a href="$MyURL?action=view&type=XferLOGbad&host=$host">XferLOG</a>,
-<a href="$MyURL?action=view&type=XferErrbad&host=$host">XferErr</a>
+<a href="$MyURL?action=view&type=XferLOGbad&host=${EscURI($host)}">XferLOG</a>,
+<a href="$MyURL?action=view&type=XferErrbad&host=${EscURI($host)}">XferErr</a>
 EOF
         } else {
             $XferViewStr = "";
@@ -1438,7 +1439,7 @@ EOF
     <td align="right"> $startTime </td>
     <td> $XferViewStr </td>
     <td align="right"> $errorTime </td>
-    <td> ${EscapeHTML($shortErr)} </td></tr>
+    <td> ${EscHTML($shortErr)} </td></tr>
 EOF
     }
     my $now          = timeStamp2(time);
@@ -1549,7 +1550,7 @@ sub HostLink
     my($host) = @_;
     my($s);
     if ( defined($Hosts->{$host}) || defined($Status{$host}) ) {
-        $s = "<a href=\"$MyURL?host=$host\">$host</a>";
+        $s = "<a href=\"$MyURL?host=${EscURI($host)}\">$host</a>";
     } else {
         $s = $host;
     }
@@ -1574,23 +1575,23 @@ sub UserLink
     return \$s;
 }
 
-sub EscapeHTML
+sub EscHTML
 {
     my($s) = @_;
     $s =~ s/&/&amp;/g;
     $s =~ s/\"/&quot;/g;
     $s =~ s/>/&gt;/g;
     $s =~ s/</&lt;/g;
-    $s =~ s{([^[:print:]])}{sprintf("&\#x%02X", ord($1));}eg;
+    $s =~ s{([^[:print:]])}{sprintf("&\#x%02X;", ord($1));}eg;
     return \$s;
 }
 
-##sub URIEncode
-##{
-##    my($s) = @_;
-##    $s =~ s{(['"&%[:^print:]])}{sprintf("%%%02X", ord($1));}eg;
-##    return \$s;
-##}
+sub EscURI
+{
+    my($s) = @_;
+    $s =~ s{([^\w.\/-])}{sprintf("%%%02X", ord($1));}eg;
+    return \$s;
+}
 
 sub ErrorExit
 {
@@ -1721,7 +1722,7 @@ sub ConfirmIPAddress
 	my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($ipAddr);
 	if ( $netBiosHost ne $host ) {
 	    my($tryIP);
-	    GetStatusInfo("host($host)");
+	    GetStatusInfo("host(${EscURI($host)})");
 	    if ( defined($StatusHost{dhcpHostIP})
 			&& $StatusHost{dhcpHostIP} ne $ipAddr ) {
 		$tryIP = eval("qq{$Lang->{tryIP}}");
@@ -1788,20 +1789,20 @@ EOF
         my $host = $In{host};
         NavSectionTitle( eval("qq{$Lang->{Host_Inhost}}") );
         NavSectionStart();
-        NavLink("?host=$host", $Lang->{Home});
-        NavLink("?action=view&type=LOG&host=$host", $Lang->{LOG_file});
-        NavLink("?action=LOGlist&host=$host", $Lang->{Old_LOGs});
+        NavLink("?host=${EscURI($host)}", $Lang->{Home});
+        NavLink("?action=view&type=LOG&host=${EscURI($host)}", $Lang->{LOG_file});
+        NavLink("?action=LOGlist&host=${EscURI($host)}", $Lang->{Old_LOGs});
         if ( -f "$TopDir/pc/$host/SmbLOG.bad"
                     || -f "$TopDir/pc/$host/SmbLOG.bad.z"
                     || -f "$TopDir/pc/$host/XferLOG.bad"
                     || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
-            NavLink("?action=view&type=XferLOGbad&host=$host",
+            NavLink("?action=view&type=XferLOGbad&host=${EscURI($host)}",
                                 $Lang->{Last_bad_XferLOG});
-            NavLink("?action=view&type=XferErrbad&host=$host",
+            NavLink("?action=view&type=XferErrbad&host=${EscURI($host)}",
                                 $Lang->{Last_bad_XferLOG_errors_only});
         }
         if ( -f "$TopDir/pc/$host/config.pl" ) {
-            NavLink("?action=view&type=config&host=$host", $Lang->{Config_file});
+            NavLink("?action=view&type=config&host=${EscURI($host)}", $Lang->{Config_file});
         }
         NavSectionEnd();
     }
@@ -1809,7 +1810,7 @@ EOF
     if ( defined($Hosts) && %$Hosts > 0 ) {
         NavSectionStart(0);
         foreach my $host ( GetUserHosts() ) {
-            NavLink("?host=$host", $host);
+            NavLink("?host=${EscURI($host)}", $host);
         }
         NavSectionEnd();
     }

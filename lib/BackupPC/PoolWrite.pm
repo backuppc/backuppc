@@ -56,7 +56,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -258,7 +258,7 @@ sub write
         # Simply create an empty file
         #
         local(*OUT);
-        if ( !open(OUT, ">$a->{fileName}") ) {
+        if ( !open(OUT, ">", $a->{fileName}) ) {
             push(@{$a->{errors}}, "Can't open $a->{fileName} for empty"
                                 . " output\n");
         } else {

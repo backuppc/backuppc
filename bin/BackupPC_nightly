@@ -35,7 +35,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -101,7 +101,7 @@ if ( $mday == 1 ) {
                                         "$TopDir/pc/$host/LOG.0.z",
                                         "$TopDir/pc/$host/LOG.0",
                                         $Conf{CompressLevel}, 1);
-        open(LOG, ">$TopDir/pc/$host/LOG") && close(LOG);
+        open(LOG, ">", "$TopDir/pc/$host/LOG") && close(LOG);
     }
 }
 

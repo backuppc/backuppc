@@ -1,11 +1,11 @@
 #!/bin/perl -T
 #============================================================= -*-perl-*-
 #
-# BackupPC_dump: Dump a single PC.
+# BackupPC_dump: Dump a single client.
 #
 # DESCRIPTION
 #
-#   Usage: BackupPC_dump [-i] [-f] [-d] [-e] <host>
+#   Usage: BackupPC_dump [-i] [-f] [-d] [-e] <client>
 #
 #   Flags:
 #
@@ -14,33 +14,34 @@
 #
 #     -f   Do a full dump, overriding any scheduling.
 #
-#     -d   Host is a DHCP pool address, so initially we have no
-#          idea which machine this actually is.  BackupPC_dump
-#          determines the actual PC host name by using the NetBios
-#          name.
+#     -d   Host is a DHCP pool address, and the client argument
+#          just an IP address.  We lookup the NetBios name from
+#          the IP address.
 #
-#     -e   Just do an dump expiry check for the host.  Don't do anything else.  #          This is used periodically by BackupPC to make sure that dhcp hosts
-#          have correctly expired old backups.  Without this, dhcp hosts that
-#          are no longer on the network will not expire old backups.
+#     -e   Just do an dump expiry check for the client.  Don't do anything
+#          else.  This is used periodically by BackupPC to make sure that
+#          dhcp hosts have correctly expired old backups.  Without this,
+#          dhcp hosts that are no longer on the network will not expire
+#          old backups.
 #
-#   BackupPC_dump is run periodically by BackupPC to backup $host.
-#   The file $TopDir/pc/$host/backups is read to decide whether a
+#   BackupPC_dump is run periodically by BackupPC to backup $client.
+#   The file $TopDir/pc/$client/backups is read to decide whether a
 #   full or incremental backup needs to be run.  If no backup is
-#   scheduled, or a ping to $host fails, then BackupPC_dump quits.
+#   scheduled, or a ping to $client fails, then BackupPC_dump quits.
 #
 #   The backup is done using the selected XferMethod (smb, tar, rsync etc),
-#   extracting the dump into $TopDir/pc/$host/new.  The xfer output is
-#   put into $TopDir/pc/$host/XferLOG.
+#   extracting the dump into $TopDir/pc/$client/new.  The xfer output is
+#   put into $TopDir/pc/$client/XferLOG.
 #
 #   If the dump succeeds (based on parsing the output of the XferMethod):
-#     - $TopDir/pc/$host/new is renamed to $TopDir/pc/$host/nnn, where
+#     - $TopDir/pc/$client/new is renamed to $TopDir/pc/$client/nnn, where
 #           nnn is the next sequential dump number.
-#     - $TopDir/pc/$host/XferLOG is renamed to $TopDir/pc/$host/XferLOG.nnn.
-#     - $TopDir/pc/$host/backups is updated.
+#     - $TopDir/pc/$client/XferLOG is renamed to $TopDir/pc/$client/XferLOG.nnn.
+#     - $TopDir/pc/$client/backups is updated.
 #
 #   If the dump fails:
-#     - $TopDir/pc/$host/new is moved to $TopDir/trash for later removal.
-#     - $TopDir/pc/$host/XferLOG is renamed to $TopDir/pc/$host/XferLOG.bad
+#     - $TopDir/pc/$client/new is moved to $TopDir/trash for later removal.
+#     - $TopDir/pc/$client/XferLOG is renamed to $TopDir/pc/$client/XferLOG.bad
 #           for later viewing.
 #
 #   BackupPC_dump communicates to BackupPC via printing to STDOUT.
@@ -67,7 +68,7 @@
 #
 #========================================================================
 #
-# Version 1.6.0_CVS, released 10 Dec 2002.
+# Version 2.0.0_CVS, released 18 Jan 2003.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -98,40 +99,44 @@ $bpc->ChildInit();
 my %opts;
 getopts("defi", \%opts);
 if ( @ARGV != 1 ) {
-    print("usage: $0 [-d] [-e] [-f] [-i] <host>\n");
+    print("usage: $0 [-d] [-e] [-f] [-i] <client>\n");
     exit(1);
 }
-if ( $ARGV[0] !~ /^([\w\.-]+)$/ ) {
-    print("$0: bad host name '$ARGV[0]'\n");
+if ( $ARGV[0] !~ /^([\w\.-\s]+)$/ ) {
+    print("$0: bad client name '$ARGV[0]'\n");
     exit(1);
 }
-my $hostIP = $1;
-my($host, $user);
+my $client = $1;   # BackupPC's client name (might not be real host name)
+my $hostIP;        # this is the IP address
+my $host;          # this is the real host name
+
+my($clientURI, $user);
 
 if ( $opts{d} ) {
     #
-    # The host name $hostIP is simply a DHCP address.  We need to check
+    # The client name $client is simply a DHCP address.  We need to check
     # if there is any machine at this address, and if so, get the actual
     # host name via NetBios using nmblookup.
     #
+    $hostIP = $client;
     exit(1) if ( $bpc->CheckHostAlive($hostIP) < 0 );
-    ($host, $user) = $bpc->NetBiosInfoGet($hostIP);
+    ($client, $user) = $bpc->NetBiosInfoGet($hostIP);
     exit(1) if ( $host !~ /^([\w\.-]+)$/ );
-    my $hosts = $bpc->HostInfoRead($host);
-    exit(1) if ( !defined($hosts->{$host}) );
-} else {
-    $host = $hostIP;
+    my $hosts = $bpc->HostInfoRead($client);
+    exit(1) if ( !defined($hosts->{$client}) );
+    $host = $client;
 }
 
-my $Dir     = "$TopDir/pc/$host";
+my $Dir     = "$TopDir/pc/$client";
 my $xferPid = -1;
 my $tarPid  = -1;
 
 #
 # Re-read config file, so we can include the PC-specific config
 #
-if ( defined(my $error = $bpc->ConfigRead($host)) ) {
-    print("Can't read PC's config file: $error\n");
+$clientURI = $bpc->uriEsc($client);
+if ( defined(my $error = $bpc->ConfigRead($client)) ) {
+    print("dump failed: Can't read PC's config file: $error\n");
     exit(1);
 }
 %Conf = $bpc->Conf();
@@ -151,10 +156,36 @@ alarm($Conf{ClientTimeout});
 
 mkpath($Dir, 0, 0777) if ( !-d $Dir );
 if ( !-f "$Dir/LOCK" ) {
-    open(LOCK, ">$Dir/LOCK") && close(LOCK);
+    open(LOCK, ">", "$Dir/LOCK") && close(LOCK);
 }
-open(LOG, ">>$Dir/LOG");
+open(LOG, ">>", "$Dir/LOG");
 select(LOG); $| = 1; select(STDOUT);
+
+if ( !$opts{d} ) {
+    #
+    # In the non-DHCP case, make sure the host can be looked up
+    # via NS, or otherwise find the IP address via NetBios.
+    #
+    if ( $Conf{ClientNameAlias} ne "" ) {
+        $host = $Conf{ClientNameAlias};
+    } else {
+        $host = $client;
+    }
+    if ( !defined(gethostbyname($host)) ) {
+        #
+        # Ok, NS doesn't know about it.  Maybe it is a NetBios name
+        # instead.
+        #
+        if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
+	    print(LOG $bpc->timeStamp,
+			    "dump failed: Can't find host $host\n");
+            print("dump failed: Can't find host $host\n");
+            exit(1);
+        }
+    } else {
+        $hostIP = $host;
+    }
+}
 
 ###########################################################################
 # Figure out what to do and do it
@@ -164,7 +195,7 @@ select(LOG); $| = 1; select(STDOUT);
 # For the -e option we just expire backups and quit
 #
 if ( $opts{e} ) {
-    BackupExpire($host);
+    BackupExpire($client);
     exit(0);
 }
 
@@ -178,7 +209,7 @@ if ( $err ne "" ) {
     print(LOG $bpc->timeStamp, "Can't connect to server ($err)\n");
     exit(1);
 }
-my $reply = $bpc->ServerMesg("status host($host)");
+my $reply = $bpc->ServerMesg("status host($clientURI)");
 $reply = $1 if ( $reply =~ /(.*)/s );
 my(%StatusHost);
 eval($reply);
@@ -192,7 +223,7 @@ if ( $opts{d} ) {
         # oops, something is already running for this host
         exit(0);
     }
-    print("DHCP $hostIP $host\n");
+    print("DHCP $hostIP $clientURI\n");
 }
 
 my($needLink, @Backups, $type, $lastBkupNum, $lastFullBkupNum);
@@ -226,13 +257,13 @@ if ( !$opts{i} && !$opts{f} && $StatusHost{backoffTime} > time ) {
 #
 # Now see if there are any old backups we should delete
 #
-BackupExpire($host);
+BackupExpire($client);
 
 #
 # Read Backup information, and find times of the most recent full and
 # incremental backups
 #
-@Backups = $bpc->BackupInfoRead($host);
+@Backups = $bpc->BackupInfoRead($client);
 for ( my $i = 0 ; $i < @Backups ; $i++ ) {
     $needLink = 1 if ( $Backups[$i]{nFilesNew} eq ""
                         || -f "$Dir/NewFileList.$Backups[$i]{num}" );
@@ -270,13 +301,13 @@ my $delay = $bpc->CheckHostAlive($hostIP);
 if ( $delay < 0 ) {
     print(LOG $bpc->timeStamp, "no ping response\n");
     print("no ping response\n");
-    print("link $host\n") if ( $needLink );
+    print("link $clientURI\n") if ( $needLink );
     exit(1);
 } elsif ( $delay > $Conf{PingMaxMsec} ) {
     printf(LOG "%sping too slow: %.4gmsec\n", $bpc->timeStamp, $delay);
     printf("ping too slow: %.4gmsec (threshold is %gmsec)\n",
                     $delay, $Conf{PingMaxMsec});
-    print("link $host\n") if ( $needLink );
+    print("link $clientURI\n") if ( $needLink );
     exit(1);
 }
 
@@ -413,8 +444,8 @@ for my $shareName ( @$ShareNames ) {
 	    open(STDERR, ">&STDOUT");
 	    close(STDIN);
 	    open(STDIN, "<&RH");
-	    exec("$BinDir/BackupPC_tarExtract '$host' '$shareName'"
-		 . " $Conf{CompressLevel}");
+	    exec("$BinDir/BackupPC_tarExtract", $client, $shareName,
+			 $Conf{CompressLevel});
 	    print(LOG $bpc->timeStamp,
 			"can't exec $BinDir/BackupPC_tarExtract\n");
 	    exit(0);
@@ -424,8 +455,8 @@ for my $shareName ( @$ShareNames ) {
 	# We need to create the NewFileList output file
 	#
 	local(*NEW_FILES);
-	open(NEW_FILES, ">$TopDir/pc/$host/NewFileList")
-		     || die("can't open $TopDir/pc/$host/NewFileList");
+	open(NEW_FILES, ">", "$TopDir/pc/$client/NewFileList")
+		     || die("can't open $TopDir/pc/$client/NewFileList");
 	$newFilesFH = *NEW_FILES;
     }
 
@@ -434,6 +465,7 @@ for my $shareName ( @$ShareNames ) {
     #
     $xfer->args({
         host        => $host,
+        client      => $client,
         hostIP      => $hostIP,
         shareName   => $shareName,
         pipeRH      => *RH,
@@ -453,7 +485,7 @@ for my $shareName ( @$ShareNames ) {
     if ( !defined($logMsg = $xfer->start()) ) {
         print(LOG $bpc->timeStamp, "xfer start failed: ", $xfer->errStr, "\n");
         print("dump failed: ", $xfer->errStr, "\n");
-        print("link $host\n") if ( $needLink );
+        print("link $clientURI\n") if ( $needLink );
         #
         # kill off the tar process, first nicely then forcefully
         #
@@ -512,12 +544,12 @@ for my $shareName ( @$ShareNames ) {
 		    $tarOut = $2;
 		    $XferLOG->write(\"tarExtract: $_\n");
 		    if ( /^Done: (\d+) errors, (\d+) filesExist, (\d+) sizeExist, (\d+) sizeExistComp, (\d+) filesTotal, (\d+) sizeTotal/ ) {
-			$tarErrs       = $1;
-			$nFilesExist   = $2;
-			$sizeExist     = $3;
-			$sizeExistComp = $4;
-			$nFilesTotal   = $5;
-			$sizeTotal     = $6;
+			$tarErrs       += $1;
+			$nFilesExist   += $2;
+			$sizeExist     += $3;
+			$sizeExistComp += $4;
+			$nFilesTotal   += $5;
+			$sizeTotal     += $6;
 		    }
 		}
 	    }
@@ -542,8 +574,13 @@ for my $shareName ( @$ShareNames ) {
 	#
 	# otherwise the xfer module does everything for us
 	#
-	($tarErrs, $nFilesExist, $sizeExist, $sizeExistComp,
-	    $nFilesTotal, $sizeTotal) = $xfer->run();
+	my @results = $xfer->run();
+	$tarErrs       += $results[0];
+	$nFilesExist   += $results[1];
+	$sizeExist     += $results[2];
+	$sizeExistComp += $results[3];
+	$nFilesTotal   += $results[4];
+	$sizeTotal     += $results[5];
     }
 
     #
@@ -602,7 +639,7 @@ $XferLOG->close();
 close($newFilesFH) if ( defined($newFilesFH) );
 
 if ( $stat{xferOK} ) {
-    @Backups = $bpc->BackupInfoRead($host);
+    @Backups = $bpc->BackupInfoRead($client);
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
         $lastNum = $Backups[$i]{num} if ( $lastNum < $Backups[$i]{num} );
     }
@@ -648,14 +685,14 @@ if ( !$stat{xferOK} ) {
     rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.bad$fileExt");
     $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
     print("dump failed: $stat{hostError}\n");
-    print("link $host\n") if ( $needLink );
+    print("link $clientURI\n") if ( $needLink );
     exit(1);
 }
 
 #
 # Add the new backup information to the backup file
 #
-@Backups = $bpc->BackupInfoRead($host);
+@Backups = $bpc->BackupInfoRead($client);
 my $i = @Backups;
 $Backups[$i]{num}           = $lastNum;
 $Backups[$i]{type}          = $type;
@@ -673,7 +710,7 @@ $Backups[$i]{tarErrs}       = $tarErrs;
 $Backups[$i]{compress}      = $Conf{CompressLevel};
 $Backups[$i]{noFill}        = $type eq "full" ? 0 : 1;
 $Backups[$i]{mangle}        = 1;        # name mangling always on for v1.04+
-$bpc->BackupInfoWrite($host, @Backups);
+$bpc->BackupInfoWrite($client, @Backups);
 
 unlink("$Dir/timeStamp.level0");
 
@@ -712,7 +749,7 @@ print(LOG $bpc->timeStamp,
         . " $stat{xferErrCnt} xferErrs ($stat{xferBadFileCnt} bad files,"
         . " $stat{xferBadShareCnt} bad shares, $otherCount other)\n");
 
-BackupExpire($host);
+BackupExpire($client);
 
 print("$type backup complete\n");
 
@@ -725,7 +762,7 @@ sub NothingToDo
     my($needLink) = @_;
 
     print("nothing to do\n");
-    print("link $host\n") if ( $needLink );
+    print("link $clientURI\n") if ( $needLink );
     exit(0);
 }
 
@@ -761,7 +798,7 @@ sub catch_signal
     } else {
         print("dump failed: received signal=$signame\n");
     }
-    print("link $host\n") if ( $needLink );
+    print("link $clientURI\n") if ( $needLink );
     exit(1);
 }
 
@@ -771,9 +808,9 @@ sub catch_signal
 #
 sub BackupExpire
 {
-    my($host) = @_;
-    my($Dir) = "$TopDir/pc/$host";
-    my(@Backups) = $bpc->BackupInfoRead($host);
+    my($client) = @_;
+    my($Dir) = "$TopDir/pc/$client";
+    my(@Backups) = $bpc->BackupInfoRead($client);
     my($cntFull, $cntIncr, $firstFull, $firstIncr, $oldestIncr, $oldestFull);
 
     while ( 1 ) {
@@ -847,7 +884,7 @@ sub BackupExpire
 	    last;
 	}
     }
-    $bpc->BackupInfoWrite($host, @Backups);
+    $bpc->BackupInfoWrite($client, @Backups);
 }
 
 sub CorrectHostCheck
@@ -870,6 +907,7 @@ sub UserCommandRun
     return if ( !defined($Conf{$type}) );
     my $vars = {
         xfer    => $xfer,
+        client  => $client,
         host    => $host,
         hostIP  => $hostIP,
         share   => $ShareNames->[0],

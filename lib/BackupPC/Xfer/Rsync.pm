@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0beta0, released 20 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -52,6 +52,9 @@ BEGIN {
         $RsyncLibOK = 0;
         $RsyncLibErr = "File::RsyncP module doesn't exist";
     } else {
+	#
+	# Note: also update configure.pl when this version number is changed!
+	#
         if ( $File::RsyncP::VERSION < 0.50 ) {
             $RsyncLibOK = 0;
             $RsyncLibErr = "File::RsyncP module version too old: need 0.50";

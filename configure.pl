@@ -670,7 +670,7 @@ EOF
 if ( `$Conf{PerlPath} -V` =~ /uselargefiles=undef/ ) {
     print <<EOF;
 
-WARNING: your perl, $Conf{PerlPath}, does not support large files.
+Warning: your perl, $Conf{PerlPath}, does not support large files.
 This means BackupPC won't be able to backup files larger than 2GB.
 To solve this problem you should build/install a new version of perl
 with large file support enabled.  Use
@@ -678,8 +678,13 @@ with large file support enabled.  Use
     $Conf{PerlPath} -V | egrep uselargefiles
 
 to check if perl has large file support (undef means no support).
-
 EOF
+}
+
+eval "use File::RsyncP;";
+if ( !$@ && $File::RsyncP::VERSION < 0.50 ) {
+    print("\nWarning: you need to upgrade File::RsyncP;"
+        . " I found $File::RsyncP::VERSION and BackupPC needs 0.50\n");
 }
 
 exit(0);

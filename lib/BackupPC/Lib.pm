@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 13 Mar 2004.
+# Version 2.1.0beta0, released 20 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,7 +59,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC',
         BinDir  => $installDir || '/usr/local/BackupPC',
         LibDir  => $installDir || '/usr/local/BackupPC',
-        Version => '2.1.0_CVS',
+        Version => '2.1.0beta0',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew

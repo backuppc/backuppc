@@ -56,7 +56,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0_CVS, released 8 Feb 2004.
+# Version 2.1.0beta0, released 20 Mar 2004.
 #
 # See http://backuppc.sourceforge.net.
 #

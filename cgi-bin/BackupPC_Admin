@@ -261,8 +261,8 @@ sub Action_StartStopBackup
         if ( $start ) {
 	    my $ipAddr = ConfirmIPAddress($host);
 
-            Header($Lang->{BackupPC__Start_Backup_Confirm_on__host});
-            print (eval ("qq{$Lang->{Are_you_sure_start}}"));
+            Header(eval("qq{$Lang->{BackupPC__Start_Backup_Confirm_on__host}}"));
+            print (eval("qq{$Lang->{Are_you_sure_start}}"));
         } else {
             my $backoff = "";
             GetStatusInfo("host($host)");

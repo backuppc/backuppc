@@ -228,6 +228,7 @@ sub start
         # transferred, even though it is a full dump.
         #
 	$rsyncArgs = $conf->{RsyncArgs};
+	$rsyncArgs = [@$rsyncArgs, @fileList] if ( @fileList );
         $rsyncArgs = [@$rsyncArgs, "--ignore-times"]
                                     if ( $t->{type} eq "full" );
 	$rsyncClientCmd = $conf->{RsyncClientCmd};

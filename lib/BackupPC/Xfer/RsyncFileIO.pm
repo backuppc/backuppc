@@ -754,7 +754,7 @@ sub fileDeltaRxNext
 	my $lastBlk = $fio->{rxMatchNext} - 1;
         $fio->log("$fio->{rxFile}{name}: writing blocks $fio->{rxMatchBlk}.."
                   . "$lastBlk")
-                        if ( $fio->{logLevel} >= 10 );
+                        if ( $fio->{logLevel} >= 9 );
         my $seekPosn = $fio->{rxMatchBlk} * $fio->{rxBlkSize};
         if ( defined($fio->{rxInFd}) && !seek($fio->{rxInFd}, $seekPosn, 0) ) {
             $fio->log("Unable to seek $attr->{fullPath} to $seekPosn");
@@ -772,6 +772,7 @@ sub fileDeltaRxNext
             }
             if ( defined($fio->{rxInData}) ) {
                 $data = substr($fio->{rxInData}, $seekPosn, $len);
+		$seekPosn += $len;
             } else {
                 if ( sysread($fio->{rxInFd}, $data, $len) != $len ) {
                     $fio->log("Unable to read $len bytes from"
@@ -799,7 +800,7 @@ sub fileDeltaRxNext
         #
         my $len = length($newData);
         $fio->log("$fio->{rxFile}{name}: writing $len bytes new data")
-                        if ( $fio->{logLevel} >= 10 );
+                        if ( $fio->{logLevel} >= 9 );
         $fio->{rxOutFd}->write(\$newData);
         $fio->{rxDigest}->add($newData);
 	$fio->{rxSize} += length($newData);

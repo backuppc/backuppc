@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+# DESCRIPTION
+#
+# Startup init script for BackupPC for Slackware.
+#
+# Distributed with BackupPC version __VERSION__, released __RELEASEDATE__.
+#
+# Provided by Tony Nelson.
+#
+
+start() {
+    #
+    # You can set the SMB share password here is you wish.  Otherwise
+    # you should put it in the config.pl script.
+    # If you put it here make sure this file has no read permissions
+    # for normal users!  See the documentation for more information.
+    #
+    #BPC_SMB_PASSWD=
+    #export BPC_SMB_PASSWD
+    #
+    su backuppc -c "__INSTALLDIR__/bin/BackupPC -d"
+}
+
+stop() {
+    /usr/bin/pkill -f "__INSTALLDIR__/bin/BackupPC -d"
+}
+
+restart() {
+    stop
+    start
+}	
+
+reload() {
+    /usr/bin/pkill -1 -f "__INSTALLDIR__/bin/BackupPC -d"
+}
+
+case "$1" in
+  start)
+  	start
+	;;
+  stop)
+  	stop
+	;;
+  restart)
+  	restart
+	;;
+  reload)
+  	reload
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart|reload}"
+	exit 1
+esac
+
+exit $?

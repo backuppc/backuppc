@@ -1015,6 +1015,7 @@ $Lang{Documentation} = "Dokumentation";
 #$Lang{Host_or_User_name} = "<small>Computer oder User Name:</small>";
 $Lang{Go} = "gehe zu";
 $Lang{Hosts} = "Computer";
+$Lang{Select_a_host} = "ENGLISH Select a host...";
 
 $Lang{There_have_been_no_archives} = "<h2> ENG There have been no archives </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> Dieser Computer wurde nie gesichert!! </h2>\n";

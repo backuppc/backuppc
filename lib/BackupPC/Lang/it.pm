@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# $Id$
+# $Id: it.pm,v 1.1 2004/02/23 07:42:57 cbarratt Exp $
 #
 # Italian i18n file
 #
@@ -1022,6 +1022,7 @@ $Lang{Documentation} = "Documentazione";
 #$Lang{Host_or_User_name} = "<small>Host o nome utente:</small>";
 $Lang{Go} = "Vai";
 $Lang{Hosts} = "Host";
+$Lang{Select_a_host} = "ENGLISH Select a host...";
 
 $Lang{There_have_been_no_archives} = "<h2> Non ci sono state archiviazioni </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> Non &egrave; mai stato eseguito un backup per questo PC!!! </h2>\n";

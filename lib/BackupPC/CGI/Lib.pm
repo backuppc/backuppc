@@ -466,7 +466,7 @@ $content
 <div class="NavMenu" id="NavMenu" style="height:100%">
 EOF
     }
-    my $hostSelectbox = "<option value=\"#\">Select a host...</option>";
+    my $hostSelectbox = "<option value=\"#\">$Lang->{Select_a_host}</option>";
     my @hosts = GetUserHosts($In{host}, $Conf{CgiNavBarAdminAllHosts});
     if ( defined($Hosts) && %$Hosts > 0 && @hosts ) {
 	NavSectionTitle($Lang->{Hosts});

@@ -68,7 +68,7 @@ $Lang{BackupPC_Server_Status}= <<EOF;
      version \$Info{Version}, démarré le \$serverStartTime.
 <li> Ce rapport à été généré le \$now.
 <li> La configuration a été chargée pour la dernière fois à \$configLoadTime.
-<li> La prochaine file d\'attente sera remplie le \$nextWakeupTime.
+<li> La prochaine file d\'attente sera remplie à \$nextWakeupTime.
 <li> Autres infos:
     <ul>
         <li>\$numBgQueue demandes de sauvegardes en attente depuis le dernier réveil automatique,
@@ -1010,6 +1010,7 @@ $Lang{Documentation} = "Documentation";
 #$Lang{Host_or_User_name} = "<small>Hôte ou Nom d\'utilisateur:</small>";
 $Lang{Go} = "Chercher";
 $Lang{Hosts} = "Hôtes";
+$Lang{Select_a_host} = "Choisissez un hôte...";
 
 $Lang{There_have_been_no_archives} = "<h2> Il n'y a pas d'archives </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> Ce PC n'a jamais été sauvegardé !! </h2>\n";

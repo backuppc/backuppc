@@ -1012,6 +1012,7 @@ $Lang{Documentation} = "Documentation";
 #$Lang{Host_or_User_name} = "<small>Host or User name:</small>";
 $Lang{Go} = "Go";
 $Lang{Hosts} = "Hosts";
+$Lang{Select_a_host} = "Select a host...";
 
 $Lang{There_have_been_no_archives} = "<h2> There have been no archives </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> This PC has never been backed up!! </h2>\n";

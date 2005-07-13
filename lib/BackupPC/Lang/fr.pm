@@ -17,7 +17,7 @@ $Lang{Type_incr} = "incrémentielle";
 
 # -----
 
-$Lang{Only_privileged_users_can_view_admin_options} = "Seulement les usagers ayant les privilèges appropriés peuvent voir les options d'administration.";
+$Lang{Only_privileged_users_can_view_admin_options} = "Seuls les utilisateurs privilégiés peuvent voir les options d'administration.";
 $Lang{H_Admin_Options} = "BackupPC: Options d'administration";
 $Lang{Admin_Options} = "Options d'administration";
 $Lang{Admin_Options_Page} = <<EOF;
@@ -39,7 +39,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 -->
 EOF
 $Lang{Unable_to_connect_to_BackupPC_server} = "Impossible de se connecter au serveur BackupPC",
-            "Ce script CGI (\$MyURL) est incapable de se connecter au serverur BackupPC"
+            "Ce script CGI (\$MyURL) est incapable de se connecter au serveur BackupPC"
           . " sur \$Conf{ServerHost} au port \$Conf{ServerPort}.  L'erreur"
           . " est: \$err."
           . " Il est possible que le serveur BackupPC ne roule pas ou qu'il y a une erreur "
@@ -142,7 +142,7 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
     <td align="center"> Nb complètes </td>
     <td align="center"> Complètes Âge/Jours </td>
     <td align="center"> Complètes Taille/Go </td>
-    <td align="center"> Vitesse Mo/sec </td>
+    <td align="center"> Vitesse Mo/s </td>
     <td align="center"> Nb incrémentielles </td>
     <td align="center"> Incrémentielles Âge/Jours </td>
     <td align="center"> État actuel </td>
@@ -160,7 +160,7 @@ Il y a \$hostCntNone hôtes sans sauvegardes.
     <td align="center"> Nb complètes </td>
     <td align="center"> Complètes Âge/jour </td>
     <td align="center"> Complètes Taille/Go </td>
-    <td align="center"> Vitesse Mo/sec </td>
+    <td align="center"> Vitesse Mo/s </td>
     <td align="center"> Nb incrémentielles </td>
     <td align="center"> Incrémentielles Âge/jours </td>
     <td align="center"> État actuel </td>
@@ -207,7 +207,7 @@ Il y a \$hostCntGood hôtes qui ont étés sauvegardés représentant \${fullSizeTot}
 <input type="hidden" name="action" value="Archive">
 <table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> Host</td>
-    <td align="center"> Usager </td>
+    <td align="center"> Utilisateur </td>
     <td align="center"> Taille </td>
 \$strGood
 \$checkAllHosts
@@ -273,7 +273,7 @@ EOF
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
         <li>La mise en commun est constituée de \$info->{"\${name}FileCnt"} fichiers
-            et \$info->{"\${name}DirCnt"} repertoires représentant \${poolSize} Go (depuis le \$poolTime),
+            et \$info->{"\${name}DirCnt"} répertoires représentant \${poolSize} Go (depuis le \$poolTime),
         <li>Le hachage de mise en commun des fichiers donne \$info->{"\${name}FileCntRep"} fichiers répétés
             avec comme plus longue chaîne \$info->{"\${name}FileRepMax"},
         <li>Le nettoyage nocturne a effacé \$info->{"\${name}FileCntRm"} fichiers, soit
@@ -286,7 +286,7 @@ $Lang{BackupPC__Backup_Requested_on__host} = "BackupPC: Sauvegarde demandée sur 
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
 <p>
-La réponse du serveur a été: \$reply
+La réponse du serveur a été : \$reply
 <p>
 Retourner à la page d\'accueil de <a href="\$MyURL?host=\$host">\$host</a>.
 EOF
@@ -332,7 +332,7 @@ EOF
 # --------------------------------
 $Lang{Only_privileged_users_can_view_queues_} = "Seuls les utilisateurs privilégiés peuvent voir les files.";
 # --------------------------------
-$Lang{Only_privileged_users_can_archive} = "(ENSLIGH) Only privileged users can Archive.";
+$Lang{Only_privileged_users_can_archive} = "Seuls les utilisateurs privilégiés peuvent archiver.";
 # --------------------------------
 $Lang{BackupPC__Queue_Summary} = "BackupPC: Résumé de la file";
 # --------------------------------
@@ -406,7 +406,7 @@ EOF
 
 # -------------------------------
 $Lang{Recent_Email_Summary} = <<EOF;
-\${h1("Résumé des courriels récents (Du plus récent au plus vieux)")}
+\${h1("Résumé des courriels récents (du plus récent au plus vieux)")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Destinataire </td>
@@ -426,13 +426,13 @@ $Lang{Restore_Options_for__host} = "BackupPC: Options de restauration sur \$host
 $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("Options de restauration sur \$host")}
 <p>
-Vous avez sélectionné les fichiers/repertoires suivants depuis
+Vous avez sélectionné les fichiers/répertoires suivants depuis
 le partage \$share, sauvegarde numéro \$num:
 <ul>
 \$fileListStr
 </ul>
 </p><p>
-Vous avez trois choix pour restaurer ces fichiers/repertoires.
+Vous avez trois choix pour restaurer ces fichiers/répertoires.
 Veuillez sélectionner une des options suivantes.
 </p>
 \${h2("Option 1: Restauration directe")}
@@ -591,7 +591,7 @@ $Lang{Restore_Requested_on__hostDest} = "BackupPC: Restauration demandée sur \$h
 $Lang{Reply_from_server_was___reply} = <<EOF;
 \${h1(\$str)}
 <p>
-La réponse du serveur est: \$reply
+La réponse du serveur est : \$reply
 <p>
 Retourner à la page d\'accueil de <a href="\$MyURL?host=\$hostDest">\$hostDest </a>.
 EOF
@@ -599,7 +599,7 @@ EOF
 $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
 \${h1(\$str)}
 <p>
-La réponse du serveur est: \$reply
+La réponse du serveur est : \$reply
 EOF
 
 
@@ -632,7 +632,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
     <td align="center"> Type </td>
     <td align="center"> Fusionnée </td> 
     <td align="center"> Date de démarrage </td>
-    <td align="center"> Durée/mins </td>
+    <td align="center"> Durée/min </td>
     <td align="center"> Âge/jours </td>
     <td align="center"> Chemin d\'accès de la sauvegarde sur le serveur </td>
 </tr>
@@ -662,7 +662,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 <p>
 Les fichiers existants sont ceux qui sont déjà sur le serveur; 
 Les nouveaux fichiers sont ceux qui ont été ajoutés au serveur.
-Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés parmis les nouveaux et les réutilisés.
+Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés parmi les nouveaux et les réutilisés.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
@@ -675,7 +675,7 @@ Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés parmis les no
     <td align="center"> Type </td>
     <td align="center"> Nb de Fichiers </td>
     <td align="center"> Taille/Mo </td>
-    <td align="center"> Mo/sec </td>
+    <td align="center"> Mo/s </td>
     <td align="center"> Nb de Fichiers </td>
     <td align="center"> Taille/Mo </td>
     <td align="center"> Nb de Fichiers </td>
@@ -712,7 +712,7 @@ EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Résumé de l'archivage pour l'hôte \$host";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
-\${h1("Host \$host Archive Summary")}
+\${h1("Résumé de l'archivage pour l\'hôte \$host")}
 <p>
 \$warnStr
 <ul>
@@ -834,7 +834,7 @@ $Lang{DirHistory_fileLink} = "v";
 $Lang{DirHistory_for__host} = <<EOF;
 \${h1("Historique des sauvegardes de répertoires pour \$host")}
 <p>
-Cette page montre chaque version des fichiers parmis toutes sauvegardes:
+Cette page montre chaque version des fichiers parmi toutes sauvegardes:
 <ul>
 <li> Cliquez sur un numéro de sauvegarde pour revenir à la navigation de sauvegarde,
 <li> Cliquez sur un répertoire (\$Lang->{DirHistory_dirLink}) pour naviguer
@@ -846,7 +846,7 @@ Cette page montre chaque version des fichiers parmis toutes sauvegardes:
 <li> Les fichiers qui ne sont pas présents sur une sauvegarde en particulier 
      sont représentés par une boite vide.
 <li> Les fichiers montrés avec la même version peuvent avoir des attributs différents. 
-     Choissisez le numéro de sauvegarde pour voir les attributs de fichiers.
+     Choisissez le numéro de sauvegarde pour voir les attributs de fichiers.
 </ul>
 
 \${h2("Historique de \${EscHTML(\$dirDisplay)}")}
@@ -860,10 +860,10 @@ Cette page montre chaque version des fichiers parmis toutes sauvegardes:
 EOF
 
 # ------------------------------
-$Lang{Restore___num_details_for__host} = "BackupPC: Détails de la restauration n° \$num pour \$host"; 
+$Lang{Restore___num_details_for__host} = "BackupPC: Détails de la restauration n°\$num pour \$host"; 
 
 $Lang{Restore___num_details_for__host2} = <<EOF;
-\${h1("Détails de la restauration n° \$num pour \$host")} 
+\${h1("Détails de la restauration n°\$num pour \$host")} 
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> Numéro </td><td class="border"> \$Restores[\$i]{num} </td></tr>
@@ -880,7 +880,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 <tr><td class="tableheader"> Durée </td><td class="border"> \$duration min </td></tr>
 <tr><td class="tableheader"> Nombre de fichier </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
 <tr><td class="tableheader"> Grosseur totale </td><td class="border"> \${MB} Mo </td></tr>
-<tr><td class="tableheader"> Taux de transfert </td><td class="border"> \$MBperSec Mo/sec </td></tr>
+<tr><td class="tableheader"> Taux de transfert </td><td class="border"> \$MBperSec Mo/s </td></tr>
 <tr><td class="tableheader"> Erreurs de TarCreate </td><td class="border"> \$Restores[\$i]{tarCreateErrs} </td></tr>
 <tr><td class="tableheader"> Erreurs de transfert </td><td class="border"> \$Restores[\$i]{xferErrs} </td></tr>
 <tr><td class="tableheader"> Journal de transfert </td><td class="border">
@@ -898,10 +898,10 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 EOF
 
 # ------------------------------
-$Lang{Archive___num_details_for__host} = "BackupPC: Détails de l'archivage no. \$num pour \$host";
+$Lang{Archive___num_details_for__host} = "BackupPC: Détails de l'archivage n°\$num pour \$host";
 
 $Lang{Archive___num_details_for__host2 } = <<EOF;
-\${h1("Archive #\$num Details for \$host")}
+\${h1("Détails de l'archivage n°\$num pour \$host")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> Numéro </td><td class="border"> \$Archives[\$i]{num} </td></tr>
@@ -970,11 +970,11 @@ $Lang{Empty_host_name} = "Nom d\'hôte vide";
 $Lang{Unknown_host_or_user} = "\${EscHTML(\$host)}, hôte ou utilisateur inconnu.";
 $Lang{Only_privileged_users_can_view_information_about} = "Seuls les utilisateurs privilégiés peuvent accéder aux "
                 . " informations sur l\'hôte \${EscHTML(\$host)}." ;
-$Lang{Only_privileged_users_can_view_archive_information} = "Seuls les usagers ayant les privilèges nécessaires peuvent voir les informations d'archivage.";
+$Lang{Only_privileged_users_can_view_archive_information} = "Seuls les utilisateurs privilégiés peuvent voir les informations d'archivage.";
 $Lang{Only_privileged_users_can_view_restore_information} = "Seuls les utilisateurs privilégiés peuvent restaurer des informations.";
 $Lang{Restore_number__num_for_host__does_not_exist} = "Restauration numéro \$num de l\'hôte \${EscHTML(\$host)} n\'existe pas";
 
-$Lang{Archive_number__num_for_host__does_not_exist} = "L'archive no \$num pour l'hôte \${EscHTML(\$host)} n'existe pas.";
+$Lang{Archive_number__num_for_host__does_not_exist} = "L'archive n°\$num pour l'hôte \${EscHTML(\$host)} n'existe pas.";
 
 $Lang{Can_t_find_IP_address_for} = "Ne peut pas trouver d\'adresse IP pour \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host} = <<EOF;
@@ -995,7 +995,7 @@ $Lang{Backup_requested_on_DHCP__host} = "Demande de sauvegarde sur l\'hôte \$hos
 $Lang{Backup_requested_on__host_by__User} = "Sauvegarde demandée sur \$host par \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Sauvegarde Arrêtée/déprogrammée pour \$host par \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restauration demandée pour l\'hôte \$hostDest, "
-             . "sauvegarde n° \$num, par \$User depuis \$ENV{REMOTE_ADDR}";
+             . "sauvegarde n°\$num, par \$User depuis \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivage demandé par \$User de \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------
@@ -1028,7 +1028,7 @@ $Lang{Errors}  = "Erreurs";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
-<li>Dernier email envoyé à \${UserLink(\$user)} le \$mailTime, avait comme sujet "\$subj".
+<li>Dernier courriel envoyé à \${UserLink(\$user)} le \$mailTime, avait comme sujet "\$subj".
 EOF
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
@@ -1062,7 +1062,7 @@ EOF
 
 # ------
 $Lang{Pings_to_host_have_failed_StatusHost_deadCnt__consecutive_times} = <<EOF;
-<li>Les pings vers \$host ont échoués \$StatusHost{deadCnt} fois consécutives.
+<li>Les pings vers \$host ont échoué \$StatusHost{deadCnt} fois consécutives.
 EOF
 
 # -----
@@ -1137,7 +1137,7 @@ Cliquer sur le numéro de restauration pour plus de détails.
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Résultat </td>
     <td align="right"> Date de départ</td>
-    <td align="right"> Durée/mins</td>
+    <td align="right"> Durée/min</td>
     <td align="right"> Nb fichiers </td>
     <td align="right"> Mo </td>
     <td align="right"> Nb errs tar </td>
@@ -1169,7 +1169,7 @@ $Lang{No} = "non";
 $Lang{Yes} = "oui";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">Le repertoire \${EscHTML(\$dirDisplay)} est vide
+<tr><td bgcolor="#ffffff">Le répertoire \${EscHTML(\$dirDisplay)} est vide
 </td></tr>
 EOF
 
@@ -1189,8 +1189,8 @@ $Lang{and} = "et";
 $Lang{Status_idle} = "inactif";
 $Lang{Status_backup_starting} = "début de la sauvegarde";
 $Lang{Status_backup_in_progress} = "sauvegarde en cours";
-$Lang{Status_restore_starting} = "début de la restoration";
-$Lang{Status_restore_in_progress} = "restoration en cours";
+$Lang{Status_restore_starting} = "début de la restauration";
+$Lang{Status_restore_in_progress} = "restauration en cours";
 $Lang{Status_link_pending} = "en attente de l'édition de liens";
 $Lang{Status_link_running} = "édition de liens en cours";
 
@@ -1220,7 +1220,7 @@ $userName,
 
 Notre logiciel de copies de sécurité n'a jamais réussi à
 prendre de sauvegarde de votre ordinateur ($host). Les sauvegardes
-devraient normallement survenir lorsque votre ordinateur est connecté
+devraient normalement survenir lorsque votre ordinateur est connecté
 au réseau. Vous devriez contacter le support informatique si:
 
   - Votre ordinateur est régulièrement connecté au réseau, ce qui
@@ -1235,7 +1235,7 @@ Autrement, veuillez vous assurer que votre ordinateur est connecté
 au réseau lorsque ce sera possible.
 
 Merci de votre attention,
-BackupPC Genie
+BackupPC Génie
 http://backuppc.sourceforge.net
 EOF
 
@@ -1250,7 +1250,7 @@ $userName,
 
 Aucune sauvegarde de votre ordinateur n'a été effectuée depuis $days
 jours. $numBackups sauvegardes ont étés effectuées du $firstTime
-jusqu'il y à $days jours. Les sauvegardes devraient normallement
+jusqu'il y à $days jours. Les sauvegardes devraient normalement
 survenir lorsque votre ordinateur est connecté au réseau.
 
 Si votre ordinateur a été connecté au réseau plus de quelques heures
@@ -1265,7 +1265,7 @@ les fichiers attachés) ne pourra être restauré si une problème survient
 avec votre ordinateur.
 
 Merci de votre attention,
-BackupPC Genie
+BackupPC Génie
 http://backuppc.sourceforge.net
 EOF
 
@@ -1284,7 +1284,7 @@ calendriers. $numBackups sauvegardes ont étés effectuées du $firstTime
 au $lastTime.  Par contre, Outlook bloque ses fichiers lorsqu'il est
 ouvert, ce qui empêche de les sauvegarder.
 
-Il est recommendé d'effectuer une sauvegarde de vos fichiers Outlook
+Il est recommandé d'effectuer une sauvegarde de vos fichiers Outlook
 quand vous serez connecté au réseau en quittant Outlook et tout autre
 application, et en visitant ce lien avec votre fureteur web:
 
@@ -1297,7 +1297,7 @@ fureteur avec de vérifier le bon fonctionnement de la sauvegarde. La
 sauvegarde devrait prendre quelques minutes à s'effectuer.
 
 Merci de votre attention,
-BackupPC Genie
+BackupPC Génie
 http://backuppc.sourceforge.net
 EOF
 

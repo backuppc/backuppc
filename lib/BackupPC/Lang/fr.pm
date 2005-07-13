@@ -40,10 +40,10 @@ $Lang{Admin_Options_Page} = <<EOF;
 EOF
 $Lang{Unable_to_connect_to_BackupPC_server} = "Impossible de se connecter au serveur BackupPC",
             "Ce script CGI (\$MyURL) est incapable de se connecter au serveur BackupPC"
-          . " sur \$Conf{ServerHost} au port \$Conf{ServerPort}.  L'erreur"
+          . " sur \$Conf{ServerHost} au port \$Conf{ServerPort}. L'erreur"
           . " est: \$err."
-          . " Il est possible que le serveur BackupPC ne roule pas ou qu'il y a une erreur "
-          . " de configuration. Veuillez contacter votre administrateur système.";
+          . " Il est possible que le serveur BackupPC ne fonctionne pas actuellement ou qu'il"
+          . " y ait une erreur de configuration. Veuillez contacter votre administrateur système.";
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">
@@ -75,7 +75,7 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         <li>\$numCmdQueue requêtes de commandes en attente,
         \$poolInfo
         <li>L\'espace de stockage a été récemment rempli à \$Info{DUlastValue}%
-            (\$DUlastTime), le maximum d\'aujourd\'hui est \$Info{DUDailyMax}% (\$DUmaxTime)
+            (\$DUlastTime), le maximum aujourd\'hui a été de \$Info{DUDailyMax}% (\$DUmaxTime)
             et hier le maximum était \$Info{DUDailyMaxPrev}%.
     </ul>
 </ul>
@@ -198,7 +198,7 @@ $Lang{BackupPC_Archive}=<<EOF;
 //-->
 </script>
 
-Il y a \$hostCntGood hôtes qui ont étés sauvegardés représentant \${fullSizeTot} Go
+Il y a \$hostCntGood hôtes qui ont été sauvegardés représentant \${fullSizeTot} Go
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -291,7 +291,7 @@ La réponse du serveur a été : \$reply
 Retourner à la page d\'accueil de <a href="\$MyURL?host=\$host">\$host</a>.
 EOF
 # --------------------------------
-$Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: Confirmation du départ de la sauvegarde de \$host";
+$Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: Confirmation du démarrage de la sauvegarde de \$host";
 # --------------------------------
 $Lang{Are_you_sure_start} = <<EOF;
 \${h1("Êtes vous certain ?")}
@@ -302,7 +302,7 @@ Vous allez bientôt démarrer une sauvegarde \$type depuis \$host.
 <input type="hidden" name="host" value="\$host">
 <input type="hidden" name="hostIP" value="\$ipAddr">
 <input type="hidden" name="doit" value="1">
-Voulez vous vraiment le faire ?
+Voulez-vous vraiment le faire ?
 <input type="submit" value="\$In{action}" name="action">
 <input type="submit" value="Non" name="">
 </form>
@@ -493,9 +493,9 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
 Vous pouvez télécharger une archive compressée (.zip) contenant tous les fichiers/répertoires que vous 
 avez sélectionnés. Vous pouvez utiliser une application locale, comme Winzip, pour voir ou extraire n\'importe quel fichier.
 </p><p>
-<b>Attention:</b> en fonction de quels fichiers/répertoires vous avez sélectionné,
-cette archive peut devenir très très large.  Cela peut prendre plusieurs minutes pour créer
-et transférer cette archive, et vous aurez besoin d\'assez d\'espace disque pour le stocker.
+<b>Attention:</b> en fonction des fichiers/répertoires que vous avez sélectionnés,
+cette archive peut devenir très très volumineuse. Cela peut prendre plusieurs minutes pour créer
+et transférer cette archive, et vous aurez besoin d\'assez d\'espace disque pour la stocker.
 </p>
 <form action="\$MyURL" method="post">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
@@ -538,8 +538,8 @@ que vous avez sélectionnés. Vous pourrez alors utiliser une application locale,
 comme tar ou winzip pour voir ou extraire n\'importe quel fichier.
 </p><p>
 <b>Attention:</b> en fonction des fichiers/répertoires que vous avez sélectionnés,
-cette archive peut devenir très très large.  Cela peut prendre plusieurs minutes
-pour créer et transférer l\'archive, et vous aurez besoin d'assez
+cette archive peut devenir très très volumineuse.  Cela peut prendre plusieurs minutes
+pour créer et transférer l\'archive, et vous aurez besoin d\'assez
 d\'espace disque local pour la stocker.
 </p>
 <form action="\$MyURL" method="post">
@@ -745,7 +745,7 @@ $Lang{NavSectionTitle_} = "Serveur";
 
 # -------------------------
 $Lang{Backup_browse_for__host} = <<EOF;
-\${h1("Navigation dans la sauvegarde pour \$host")}
+\${h1("Navigation dans la sauvegarde de \$host")}
 
 <script language="javascript" type="text/javascript">
 <!--
@@ -784,9 +784,9 @@ $Lang{Backup_browse_for__host} = <<EOF;
         (il y a \$backupAge jours),
 \$filledBackup
 <li> Entrez le répertoire: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
-<li> Cliquer dans un répertoire ci-dessous pour y naviguer,
-<li> Cliquer dans un fichier ci-dessous pour le restaurer,
-<li> Vous pouvez l'<a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">historique</a> de sauvegarde du répertoire courant.
+<li> Cliquer sur un répertoire ci-dessous pour y naviguer,
+<li> Cliquer sur un fichier ci-dessous pour le restaurer,
+<li> Vous pouvez voir l'<a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">historique</a> des différentes sauvegardes du répertoire courant.
 </ul>
 </form>
 
@@ -822,7 +822,7 @@ This is now in the checkAll row
 EOF
 
 # ------------------------------
-$Lang{DirHistory_backup_for__host} = "BackupPC: Historique des sauvegardes de répertoires pour \$host";
+$Lang{DirHistory_backup_for__host} = "BackupPC: Historique des sauvegardes du répertoire courant pour \$host";
 
 #
 # These two strings are used to build the links for directories and
@@ -832,15 +832,15 @@ $Lang{DirHistory_dirLink}  = "rep";
 $Lang{DirHistory_fileLink} = "v";
 
 $Lang{DirHistory_for__host} = <<EOF;
-\${h1("Historique des sauvegardes de répertoires pour \$host")}
+\${h1("Historique des sauvegardes du répertoire courant pour \$host")}
 <p>
-Cette page montre chaque version des fichiers parmi toutes sauvegardes:
+Cette page montre toutes les version disponibles des fichiers sauvegardés pour le répertoire courant :
 <ul>
 <li> Cliquez sur un numéro de sauvegarde pour revenir à la navigation de sauvegarde,
 <li> Cliquez sur un répertoire (\$Lang->{DirHistory_dirLink}) pour naviguer
      dans celui-ci.
 <li> Cliquez sur une version d'un fichier (\$Lang->{DirHistory_fileLink}0,
-     \$Lang->{DirHistory_fileLink}1, ...) pour la télécharger.
+     \$Lang->{DirHistory_fileLink}1, ...) pour le télécharger.
 <li> Les fichiers avec des contenus identiques pour plusieurs sauvegardes ont 
      le même numéro de version.
 <li> Les fichiers qui ne sont pas présents sur une sauvegarde en particulier 
@@ -879,7 +879,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 <tr><td class="tableheader"> Début </td><td class="border"> \$startTime </td></tr>
 <tr><td class="tableheader"> Durée </td><td class="border"> \$duration min </td></tr>
 <tr><td class="tableheader"> Nombre de fichier </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
-<tr><td class="tableheader"> Grosseur totale </td><td class="border"> \${MB} Mo </td></tr>
+<tr><td class="tableheader"> Taille totale </td><td class="border"> \${MB} Mo </td></tr>
 <tr><td class="tableheader"> Taux de transfert </td><td class="border"> \$MBperSec Mo/s </td></tr>
 <tr><td class="tableheader"> Erreurs de TarCreate </td><td class="border"> \$Restores[\$i]{tarCreateErrs} </td></tr>
 <tr><td class="tableheader"> Erreurs de transfert </td><td class="border"> \$Restores[\$i]{xferErrs} </td></tr>
@@ -935,13 +935,13 @@ $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new a
 $Lang{Wrong_user__my_userid_is___} =  
               "Mauvais utilisateur: mon userid est \$>, à la place de \$uid "
               . "(\$Conf{BackupPCUser})\n";
-#$Lang{Only_privileged_users_can_view_PC_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les résumés des PC.";
+#$Lang{Only_privileged_users_can_view_PC_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les résumés des machines.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Seuls les utilisateurs privilégiés peuvent arrêter ou démarrer des sauvegardes sur "
                   . " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Numéro invalide \$num";
 $Lang{Unable_to_open__file__configuration_problem} = "Impossible d\'ouvrir \$file: problème de configuration ?";
-$Lang{Only_privileged_users_can_view_log_or_config_files} = "Seuls les utilisateurs privilégiés peuvent voir les fichier de jounal ou les fichiers de configuration.";
+$Lang{Only_privileged_users_can_view_log_or_config_files} = "Seuls les utilisateurs privilégiés peuvent voir les fichiers de journal ou les fichiers de configuration.";
 $Lang{Only_privileged_users_can_view_log_files} = "Seuls les utilisateurs privilégiés peuvent voir les fichiers de journal.";
 $Lang{Only_privileged_users_can_view_email_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les compte-rendu des courriels.";
 $Lang{Only_privileged_users_can_browse_backup_files} = "Seuls les utilisateurs privilégiés peuvent parcourir les fichiers de sauvegarde"
@@ -954,10 +954,10 @@ $Lang{Can_t_browse_bad_directory_name2} = "Ne peut pas parcourir "
 $Lang{Only_privileged_users_can_restore_backup_files} = "Seuls les utilisateurs privilégiés peuvent restaurer "
                 . " des fichiers de sauvegarde pour l\'hôte \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Mauvais nom d\'hôte \${EscHTML(\$host)}";
-$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Vous n'avez sélectionné aucun fichier; "
+$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Vous n\'avez sélectionné aucun fichier; "
     . "vous pouvez revenir en arrière pour sélectionner des fichiers.";
-$Lang{You_haven_t_selected_any_hosts} = "Vous avez sélectionné aucun hôte; veuillez retourné à la page précédente pour"
-                . " faire la sélection d'un hôte.";
+$Lang{You_haven_t_selected_any_hosts} = "Vous n\'avez sélectionné aucun hôte; veuillez retourner à la page précédente pour"
+                . " faire la sélection d\'un hôte.";
 $Lang{Nice_try__but_you_can_t_put} = "Bien tenté, mais vous ne pouvez pas mettre \'..\' dans n\'importe quel nom de fichier.";
 $Lang{Host__doesn_t_exist} = "L'hôte \${EscHTML(\$In{hostDest})} n\'existe pas.";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "Vous n\'avez pas la permission de restaurer sur l\'hôte"
@@ -972,7 +972,7 @@ $Lang{Only_privileged_users_can_view_information_about} = "Seuls les utilisateur
                 . " informations sur l\'hôte \${EscHTML(\$host)}." ;
 $Lang{Only_privileged_users_can_view_archive_information} = "Seuls les utilisateurs privilégiés peuvent voir les informations d'archivage.";
 $Lang{Only_privileged_users_can_view_restore_information} = "Seuls les utilisateurs privilégiés peuvent restaurer des informations.";
-$Lang{Restore_number__num_for_host__does_not_exist} = "Restauration numéro \$num de l\'hôte \${EscHTML(\$host)} n\'existe pas";
+$Lang{Restore_number__num_for_host__does_not_exist} = "La restauration numéro \$num de l\'hôte \${EscHTML(\$host)} n\'existe pas";
 
 $Lang{Archive_number__num_for_host__does_not_exist} = "L'archive n°\$num pour l'hôte \${EscHTML(\$host)} n'existe pas.";
 
@@ -1003,7 +1003,7 @@ $Lang{Archive_requested} = "Archivage demandé par \$User de \$ENV{REMOTE_ADDR}";
 # -------------------------------------------------
 
 $Lang{Status} = "État";
-$Lang{PC_Summary} = "Bilan des PC";
+$Lang{PC_Summary} = "Bilan des machines";
 $Lang{LOG_file} = "Fichier journal";
 $Lang{LOG_files} = "Fichiers journaux";
 $Lang{Old_LOGs} = "Vieux journaux";
@@ -1019,8 +1019,8 @@ $Lang{Hosts} = "Hôtes";
 $Lang{Select_a_host} = "Choisissez un hôte...";
 
 $Lang{There_have_been_no_archives} = "<h2> Il n'y a pas d'archives </h2>\n";
-$Lang{This_PC_has_never_been_backed_up} = "<h2> Ce PC n'a jamais été sauvegardé !! </h2>\n";
-$Lang{This_PC_is_used_by} = "<li>Ce PC est utilisé par \${UserLink(\$user)}";
+$Lang{This_PC_has_never_been_backed_up} = "<h2> Cette machine n'a jamais été sauvegardée!! </h2>\n";
+$Lang{This_PC_is_used_by} = "<li>Cette machine est utilisée par \${UserLink(\$user)}";
 
 $Lang{Extracting_only_Errors} = "(Extraction des erreurs seulement)";
 $Lang{XferLOG} = "JournalXfer";
@@ -1028,7 +1028,7 @@ $Lang{Errors}  = "Erreurs";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
-<li>Dernier courriel envoyé à \${UserLink(\$user)} le \$mailTime, avait comme sujet "\$subj".
+<li>Le dernier courriel envoyé à \${UserLink(\$user)} le \$mailTime, avait comme sujet "\$subj".
 EOF
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
@@ -1047,7 +1047,7 @@ EOF
 
 # ---------
 $Lang{A_command_for_host_is_on_the_command_queue_will_run_soon} = <<EOF;
-<li>Une commande pour l\'hôte \$host est dans la liste d\'attente des commandes (sera lancé bientôt).
+<li>Une commande pour l\'hôte \$host est dans la liste d\'attente des commandes (sera lancée bientôt).
 EOF
 
 # --------
@@ -1075,8 +1075,8 @@ $Lang{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times} = <<
 EOF
 
 $Lang{Because__host_has_been_on_the_network_at_least__Conf_BlackoutGoodCnt_consecutive_times___} = <<EOF;
-<li>Du fait que \$host a été présent sur le réseau au moins \$Conf{BlackoutGoodCnt}
-fois consécutives, il ne sera pas sauvegardé de \$blackoutStr.
+<li>\$host a été présent sur le réseau au moins \$Conf{BlackoutGoodCnt}
+fois consécutives, il ne sera donc pas sauvegardé de \$blackoutStr.
 EOF
 
 $Lang{__time0_to__time1_on__days} = "\$t0 à \$t1 pendant \$days";
@@ -1118,15 +1118,15 @@ EOF
 
 $Lang{Home} = "Accueil";
 $Lang{Browse} = "Explorer les sauvegardes";
-$Lang{Last_bad_XferLOG} = "Dernier bilan des transferts échouées";
-$Lang{Last_bad_XferLOG_errors_only} = "Dernier bilan des transferts échouées (erreurs&nbsp;seulement)";
+$Lang{Last_bad_XferLOG} = "Bilan des derniers transferts échoués";
+$Lang{Last_bad_XferLOG_errors_only} = "Bilan des derniers transferts échoués (erreurs&nbsp;seulement)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
 <li> Cet affichage est fusionné avec la sauvegarde n°\$numF, la plus récente copie intégrale.
 EOF
 
 $Lang{Visit_this_directory_in_backup} = <<EOF;
-<li> Choisissez la sauvegarde que vous désirez voir: <select onChange="window.location=this.value">\$otherDirs </select>
+<li> Choisissez la sauvegarde que vous désirez voir : <select onChange="window.location=this.value">\$otherDirs </select>
 EOF
 
 $Lang{Restore_Summary} = <<EOF;
@@ -1198,8 +1198,8 @@ $Lang{Reason_backup_done}    = "sauvegarde terminée";
 $Lang{Reason_restore_done}   = "restauration terminée";
 $Lang{Reason_archive_done}   = "archivage terminé";
 $Lang{Reason_nothing_to_do}  = "rien à faire";
-$Lang{Reason_backup_failed}  = "la sauvegarde a échouée";
-$Lang{Reason_restore_failed} = "la restauration a échouée";
+$Lang{Reason_backup_failed}  = "la sauvegarde a échoué";
+$Lang{Reason_restore_failed} = "la restauration a échoué";
 $Lang{Reason_archive_failed} = "l'archivage a échoué";
 $Lang{Reason_no_ping}        = "pas de ping";
 $Lang{Reason_backup_canceled_by_user}  = "sauvegarde annulée par l'utilisateur";
@@ -1219,9 +1219,9 @@ Subject: $subj
 $userName,
 
 Notre logiciel de copies de sécurité n'a jamais réussi à
-prendre de sauvegarde de votre ordinateur ($host). Les sauvegardes
+effectuer la sauvegarde de votre ordinateur ($host). Les sauvegardes
 devraient normalement survenir lorsque votre ordinateur est connecté
-au réseau. Vous devriez contacter le support informatique si:
+au réseau. Vous devriez contacter le support informatique si :
 
   - Votre ordinateur est régulièrement connecté au réseau, ce qui
     signifie qu'il y aurait un problème de configuration
@@ -1231,8 +1231,8 @@ au réseau. Vous devriez contacter le support informatique si:
     votre ordinateur ni ne voulez recevoir d'autres messages
     comme celui-ci.
 
-Autrement, veuillez vous assurer que votre ordinateur est connecté
-au réseau lorsque ce sera possible.
+Dans le cas contraire, veuillez vous assurer que votre ordinateur est 
+connecté au réseau lorsque ce sera possible.
 
 Merci de votre attention,
 BackupPC Génie
@@ -1240,7 +1240,7 @@ http://backuppc.sourceforge.net
 EOF
 
 # No recent backup
-$Lang{EMailNoBackupRecentSubj} = "BackupPC: auncune sauvegarde récente de \$host";
+$Lang{EMailNoBackupRecentSubj} = "BackupPC: aucune sauvegarde récente de \$host";
 $Lang{EMailNoBackupRecentMesg} = <<'EOF';
 To: $user$domain
 cc:
@@ -1250,7 +1250,7 @@ $userName,
 
 Aucune sauvegarde de votre ordinateur n'a été effectuée depuis $days
 jours. $numBackups sauvegardes ont étés effectuées du $firstTime
-jusqu'il y à $days jours. Les sauvegardes devraient normalement
+jusqu'à il y a $days jours. Les sauvegardes devraient normalement
 survenir lorsque votre ordinateur est connecté au réseau.
 
 Si votre ordinateur a été connecté au réseau plus de quelques heures
@@ -1259,9 +1259,9 @@ informatique pour savoir pourquoi les sauvegardes ne s'effectuent pas.
 
 Autrement, si vous êtes en dehors du bureau, il n'y a pas d'autres
 choses que vous pouvez faire, à part faire des copies de vos fichiers
-importants sur d'autres media. Vous devez réaliser que tout fichier crée
+importants sur d'autres medias. Vous devez réaliser que tout fichier crée
 ou modifié durant les $days derniers jours (incluant les courriels et
-les fichiers attachés) ne pourra être restauré si une problème survient
+les fichiers attachés) ne pourra pas être restauré si une problème survient
 avec votre ordinateur.
 
 Merci de votre attention,
@@ -1285,15 +1285,15 @@ au $lastTime.  Par contre, Outlook bloque ses fichiers lorsqu'il est
 ouvert, ce qui empêche de les sauvegarder.
 
 Il est recommandé d'effectuer une sauvegarde de vos fichiers Outlook
-quand vous serez connecté au réseau en quittant Outlook et tout autre
-application, et en visitant ce lien avec votre fureteur web:
+quand vous serez connecté au réseau en quittant Outlook et toute autre
+application, et en visitant ce lien avec votre navigateur web:
 
     $CgiURL?host=$host               
 
 Choisissez "Démarrer la sauvegarde incrémentielle" deux fois afin
 d'effectuer une nouvelle sauvegarde. Vous pouvez ensuite choisir
 "Retourner à la page de $host" et appuyer sur "Recharger" dans votre
-fureteur avec de vérifier le bon fonctionnement de la sauvegarde. La
+navigateur avec de vérifier le bon fonctionnement de la sauvegarde. La
 sauvegarde devrait prendre quelques minutes à s'effectuer.
 
 Merci de votre attention,
@@ -1301,7 +1301,7 @@ BackupPC Génie
 http://backuppc.sourceforge.net
 EOF
 
-$Lang{howLong_not_been_backed_up} = "jamais étés sauvegardés";
+$Lang{howLong_not_been_backed_up} = "jamais été sauvegardés";
 $Lang{howLong_not_been_backed_up_for_days_days} = "pas été sauvegardés depuis \$days jours";
 
 #end of lang_fr.pm

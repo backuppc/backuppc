@@ -117,7 +117,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Server_Summary} = "BackupPC: Bilan des PC";
+$Lang{BackupPC__Server_Summary} = "BackupPC: Bilan des machines";
 $Lang{BackupPC__Archive} = "BackupPC: Archivage";
 $Lang{BackupPC_Summary}=<<EOF;
 

@@ -47,9 +47,9 @@ $Lang{Unable_to_connect_to_BackupPC_server} = "Impossible de se connecter au ser
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">
-Le serveur BackupPC sur <tt>\$Conf{ServerHost}</tt> aur port <tt>\$Conf{ServerPort}</tt>
+Le serveur BackupPC sur <tt>\$Conf{ServerHost}</tt>, port <tt>\$Conf{ServerPort}</tt>
 n'est pas en fonction (vous l'avez peut-être arrêté, ou vous ne l'avez pas encore démarré).<br>
-Voulez-vous le démarrer
+Voulez-vous le démarrer?
 <input type="hidden" name="action" value="startServer">
 <input type="submit" value="Démarrer le serveur" name="ignore">
 </form>
@@ -323,7 +323,7 @@ Vous êtes sur le point d\'arrêter/supprimer de la file les sauvegardes de \$host
 En outre, prière de ne pas démarrer d\'autres sauvegarde pour
 <input type="text" name="backoff" size="10" value="\$backoff"> heures.
 <p>
-Voulez vous vraiment le faire ?
+Voulez-vous vraiment le faire ?
 <input type="submit" value="\$In{action}" name="action">
 <input type="submit" value="Non" name="">
 </form>
@@ -646,7 +646,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 \${h2("Résumé des erreurs de transfert")}
 <br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td align="center"> Nb sauvegarde </td>
+<tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
     <td align="center"> Voir </td>
     <td align="center"> Nb erreurs transfert </td>
@@ -662,7 +662,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 <p>
 Les fichiers existants sont ceux qui sont déjà sur le serveur; 
 Les nouveaux fichiers sont ceux qui ont été ajoutés au serveur.
-Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés parmi les nouveaux et les réutilisés.
+Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés dans les fichiers nouveaux ou réutilisés.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
@@ -671,7 +671,7 @@ Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés parmi les nou
     <td align="center" colspan="2"> Nouveaux fichiers </td>
 </tr>
 <tr class="tableheader">
-    <td align="center"> Nb de sauvegarde  </td>
+    <td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
     <td align="center"> Nb de Fichiers </td>
     <td align="center"> Taille/Mo </td>
@@ -699,10 +699,10 @@ récemment compressés.
     <td align="center"> Type </td>
     <td align="center"> Niveau de Compression </td>
     <td align="center"> Taille/Mo </td>
-    <td align="center"> Comp/Mo </td>
+    <td align="center"> Taille compressée/Mo </td>
     <td align="center"> Compression </td>
     <td align="center"> Taille/Mo </td>
-    <td align="center"> Comp/Mo </td>
+    <td align="center"> Taille compressée/Mo </td>
     <td align="center"> Compression </td>
 </tr>
 \$compStr
@@ -712,7 +712,7 @@ EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Résumé de l'archivage pour l'hôte \$host";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
-\${h1("Résumé de l'archivage pour l\'hôte \$host")}
+\${h1("Résumé de l\'archivage pour l\'hôte \$host")}
 <p>
 \$warnStr
 <ul>
@@ -954,9 +954,9 @@ $Lang{Can_t_browse_bad_directory_name2} = "Ne peut pas parcourir "
 $Lang{Only_privileged_users_can_restore_backup_files} = "Seuls les utilisateurs privilégiés peuvent restaurer "
                 . " des fichiers de sauvegarde pour l\'hôte \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Mauvais nom d\'hôte \${EscHTML(\$host)}";
-$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Vous n\'avez sélectionné aucun fichier; "
+$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Vous n\'avez sélectionné aucun fichier ; "
     . "vous pouvez revenir en arrière pour sélectionner des fichiers.";
-$Lang{You_haven_t_selected_any_hosts} = "Vous n\'avez sélectionné aucun hôte; veuillez retourner à la page précédente pour"
+$Lang{You_haven_t_selected_any_hosts} = "Vous n\'avez sélectionné aucun hôte ; veuillez retourner à la page précédente pour"
                 . " faire la sélection d\'un hôte.";
 $Lang{Nice_try__but_you_can_t_put} = "Bien tenté, mais vous ne pouvez pas mettre \'..\' dans n\'importe quel nom de fichier.";
 $Lang{Host__doesn_t_exist} = "L'hôte \${EscHTML(\$In{hostDest})} n\'existe pas.";
@@ -974,7 +974,7 @@ $Lang{Only_privileged_users_can_view_archive_information} = "Seuls les utilisate
 $Lang{Only_privileged_users_can_view_restore_information} = "Seuls les utilisateurs privilégiés peuvent restaurer des informations.";
 $Lang{Restore_number__num_for_host__does_not_exist} = "La restauration numéro \$num de l\'hôte \${EscHTML(\$host)} n\'existe pas";
 
-$Lang{Archive_number__num_for_host__does_not_exist} = "L'archive n°\$num pour l'hôte \${EscHTML(\$host)} n'existe pas.";
+$Lang{Archive_number__num_for_host__does_not_exist} = "L\'archive n°\$num pour l\'hôte \${EscHTML(\$host)} n\'existe pas.";
 
 $Lang{Can_t_find_IP_address_for} = "Ne peut pas trouver d\'adresse IP pour \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host} = <<EOF;
@@ -1019,7 +1019,7 @@ $Lang{Hosts} = "Hôtes";
 $Lang{Select_a_host} = "Choisissez un hôte...";
 
 $Lang{There_have_been_no_archives} = "<h2> Il n'y a pas d'archives </h2>\n";
-$Lang{This_PC_has_never_been_backed_up} = "<h2> Cette machine n'a jamais été sauvegardée!! </h2>\n";
+$Lang{This_PC_has_never_been_backed_up} = "<h2> Cette machine n'a jamais été sauvegardée !! </h2>\n";
 $Lang{This_PC_is_used_by} = "<li>Cette machine est utilisée par \${UserLink(\$user)}";
 
 $Lang{Extracting_only_Errors} = "(Extraction des erreurs seulement)";
@@ -1139,7 +1139,7 @@ Cliquer sur le numéro de restauration pour plus de détails.
     <td align="right"> Date de départ</td>
     <td align="right"> Durée/min</td>
     <td align="right"> Nb fichiers </td>
-    <td align="right"> Mo </td>
+    <td align="right"> Taille/Mo </td>
     <td align="right"> Nb errs tar </td>
     <td align="right"> Nb errs trans </td>
 </tr>
@@ -1261,7 +1261,7 @@ Autrement, si vous êtes en dehors du bureau, il n'y a pas d'autres
 choses que vous pouvez faire, à part faire des copies de vos fichiers
 importants sur d'autres medias. Vous devez réaliser que tout fichier crée
 ou modifié durant les $days derniers jours (incluant les courriels et
-les fichiers attachés) ne pourra pas être restauré si une problème survient
+les fichiers attachés) ne pourra pas être restauré si un problème survient
 avec votre ordinateur.
 
 Merci de votre attention,

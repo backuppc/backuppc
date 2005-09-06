@@ -741,7 +741,7 @@ $Conf{BackupZeroFilesIsFatal} = 1;
 #   - 'rsync':   backup and restore via rsync (via rsh or ssh).
 #                Best choice for linux/unix.  Good choice also for WinXX.
 #
-#   - 'rsyncd':  backup and restre via rsync daemon on the client.
+#   - 'rsyncd':  backup and restore via rsync daemon on the client.
 #                Best choice for linux/unix if you have rsyncd running on
 #                the client.  Good choice also for WinXX.
 #
@@ -1337,7 +1337,7 @@ $Conf{PingMaxMsec} = 20;
 # Despite the name, this parameter sets the timeout for all transport
 # methods (tar, smb etc).
 #
-$Conf{ClientTimeout} = 7200;
+$Conf{ClientTimeout} = 72000;
 
 #
 # Maximum number of log files we keep around in each PC's directory
@@ -1510,7 +1510,7 @@ $Conf{EMailUserDestDomain} = '';
 #   To: $user$domain
 #   cc:
 #   Subject: $subj
-#   
+#   $headers
 #   Dear $userName,
 #   
 #   This is a site-specific email message.
@@ -1538,7 +1538,7 @@ $Conf{EMailNotifyOldBackupDays} = 7.0;
 #   To: $user$domain
 #   cc:
 #   Subject: $subj
-#   
+#   $headers
 #   Dear $userName,
 #   
 #   This is a site-specific email message.
@@ -1566,7 +1566,7 @@ $Conf{EMailNotifyOldOutlookDays} = 5.0;
 #   To: $user$domain
 #   cc:
 #   Subject: $subj
-#   
+#   $headers
 #   Dear $userName,
 #   
 #   This is a site-specific email message.

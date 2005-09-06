@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 2.1.2, released 5 Sep 2005.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -55,9 +55,10 @@ BEGIN {
 	#
 	# Note: also update configure.pl when this version number is changed!
 	#
-        if ( $File::RsyncP::VERSION < 0.51 ) {
+        if ( $File::RsyncP::VERSION < 0.52 ) {
             $RsyncLibOK = 0;
-            $RsyncLibErr = "File::RsyncP module version too old: need 0.50";
+            $RsyncLibErr = "File::RsyncP module version"
+                         . " ($File::RsyncP::VERSION) too old: need 0.52";
         } else {
             $RsyncLibOK = 1;
         }

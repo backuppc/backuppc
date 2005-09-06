@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 2.1.2, released 5 Sep 2005.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -78,7 +78,7 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "/usr/local/BackupPC2.1.0/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 use BackupPC::Xfer::Smb;
@@ -434,7 +434,11 @@ $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
 #
 # Setup file extension for compression and open XferLOG output file
 #
-$Conf{CompressLevel} = 0 if ( !BackupPC::FileZIO->compOk );
+if ( $Conf{CompressLevel} && !BackupPC::FileZIO->compOk ) {
+    print(LOG $bpc->timeStamp, "dump failed: can't find Compress::Zlib\n");
+    print("dump failed: can't find Compress::Zlib\n");
+    exit(1);
+}
 my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
 my $XferLOG = BackupPC::FileZIO->open("$Dir/XferLOG$fileExt", 1,
                                      $Conf{CompressLevel});
@@ -1110,6 +1114,7 @@ sub BackupExpire
 	$fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
 	my $fullAgeMax;
 	my $fullPeriod = int(0.5 + $Conf{FullPeriod});
+        $fullPeriod = 7 if ( $fullPeriod <= 0 );
 	for ( my $i = 0 ; $i < @$fullKeepCnt ; $i++ ) {
 	    $fullAgeMax += $fullKeepCnt->[$i] * $fullPeriod;
 	    $fullPeriod *= 2;
@@ -1196,8 +1201,8 @@ sub BackupFullExpire
             #
             # Delete the full backup
             #
-            #printf("Deleting backup $i ($prevFull)\n");
-            push(@delete, $i);
+            #print("Deleting backup $i ($prevFull)\n");
+            unshift(@delete, $i);
         } else {
             $fullCnt++;
             while ( $fullKeepIdx < @$fullKeepCnt
@@ -1337,6 +1342,11 @@ sub BackupRemove
 {
     my($client, $Backups, $idx) = @_;
     my($Dir) = "$TopDir/pc/$client";
+
+    if ( $Backups->[$idx]{num} eq "" ) {
+        print("BackupRemove: ignoring empty backup number for idx $idx\n");
+        return;
+    }
 
     $bpc->RmTreeDefer("$TopDir/trash",
                       "$Dir/$Backups->[$idx]{num}");

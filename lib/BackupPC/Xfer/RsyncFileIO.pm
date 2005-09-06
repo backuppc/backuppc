@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 2.1.2, released 5 Sep 2005.
 #
 # See http://backuppc.sourceforge.net.
 #

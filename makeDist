@@ -42,8 +42,8 @@ use Getopt::Std;
 
 umask(0022);
 
-my $Version     = "2.1.0pl1";
-my $ReleaseDate = "15 Aug 2004";
+my $Version     = "2.1.2";
+my $ReleaseDate = "5 Sep 2005";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -258,7 +258,7 @@ sub InstallFile
 	    }
 	    if ( /__CONFIGPOD__/ ) {
 		print OUT $ConfPod;
-	    } elsif ( /^use lib ".*BackupPC\/lib";/
+	    } elsif ( /^use lib ".*BackupPC[\d.]*\/lib";/
 		    || /^use lib "\/home\/pcbackup\/install\/lib";/ ) {
 		print OUT "use lib \"__INSTALLDIR__/lib\";\n";
 	    } elsif ( $file =~ /Lib.pm/ && /(.*TopDir *=> .*)'.*',/ ) {

@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 2.1.2, released 5 Sep 2005.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -56,7 +56,7 @@
 use strict;
 no  utf8;
 use vars qw(%Status %Info $Hosts);
-use lib "/usr/local/BackupPC/lib";
+use lib "/usr/local/BackupPC2.1.0/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 
@@ -66,6 +66,7 @@ use Getopt::Std;
 use Socket;
 use Carp;
 use Digest::MD5;
+use POSIX qw(setsid);
 
 ###########################################################################
 # Handle command line options
@@ -260,10 +261,22 @@ sub Main_Initialize
 
     if ( $opts{d} ) {
         #
-        # daemonize by forking
+        # daemonize by forking; more robust method per:
+        #       http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=301057
         #
-        defined(my $pid = fork) or die "Can't fork: $!";
+        my $pid;
+        defined($pid = fork) or die("Can't fork: $!");
+        exit if( $pid );   # parent exits
+
+        POSIX::setsid();
+        defined($pid = fork) or die("Can't fork: $!");
         exit if $pid;   # parent exits
+
+        chdir ("/") or die("Cannot chdir to /: $!\n");
+        close(STDIN);
+        open(STDIN , ">/dev/null") or die("Cannot open /dev/null as stdin\n");
+        # STDOUT and STDERR are handled in LogFileOpen() right below,
+        # otherwise we would have to reopen them too.
     }
 
     #
@@ -922,6 +935,7 @@ sub Main_Check_Job_Messages
                 delete($Status{$host}{error});
                 delete($Status{$host}{errorTime});
                 $Status{$host}{endTime}   = time;
+                $Status{$host}{lastGoodBackupTime} = time;
             } elsif ( $mesg =~ /^backups disabled/ ) {
                 print(LOG $bpc->timeStamp,
 			    "Ignoring old backup error on $host\n");
@@ -1540,10 +1554,29 @@ sub StatusWrite
 #
 sub HostSortCompare
 {
+    #
+    # Hosts with errors go before hosts without errors
+    #
     return -1 if ( $Status{$a}{error} ne "" && $Status{$b}{error} eq "" );
+
+    #
+    # Hosts with no errors go after hosts with errors
+    #
+
     return  1 if ( $Status{$a}{error} eq "" && $Status{$b}{error} ne "" );
-    return $Status{$a}{endTime} <=> $Status{$b}{endTime};
+
+    #
+    # hosts with the older last good backups sort earlier
+    #
+    my $r = $Status{$a}{lastGoodBackupTime} <=> $Status{$b}{lastGoodBackupTime};
+    return $r if ( $r );
+
+    #
+    # Finally, just sort based on host name
+    #
+    return $a cmp $b;
 }
+
 
 #
 # Queue all the hosts for backup.  This means queuing all the fixed

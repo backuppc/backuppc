@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 2.1.2, released 5 Sep 2005.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -37,7 +37,7 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "/usr/local/BackupPC2.1.0/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 use BackupPC::Xfer::Smb;
@@ -186,7 +186,10 @@ if ( (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
 #
 # Setup file extension for compression and open RestoreLOG output file
 #
-$Conf{CompressLevel} = 0 if ( !BackupPC::FileZIO->compOk );
+if ( $Conf{CompressLevel} && !BackupPC::FileZIO->compOk ) {
+    $stat{hostError} = "Compress:Zlib not found";
+    exit(RestoreCleanup($client));
+}
 my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
 my $RestoreLOG = BackupPC::FileZIO->open("$Dir/RestoreLOG$fileExt", 1,
                                      $Conf{CompressLevel});

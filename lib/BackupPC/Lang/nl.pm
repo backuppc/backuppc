@@ -274,8 +274,7 @@ EOF
 $Lang{Pool_Stat} = <<EOF;
         <li>Gebruikte backupschijfruimte is \${poolSize}GB groot en bevat \$info->{"\${name}FileCnt"} bestanden
             en \$info->{"\${name}DirCnt"} mappen (op \$poolTime),
-        <li>Schijfruimte bevat \$info->{"\${name}FileCntRep"} identieke 
-            bestanden (langste reeks is \$info->{"\${name}FileRepMax"},
+        <li>Schijfruimte bevat \$info->{"\${name}FileCntRep"} bestanden                     met identieke hashcodes                                                         (langste reeks is \$info->{"\${name}FileRepMax"},
         <li>Nachtelijke opruiming verwijderde \$info->{"\${name}FileCntRm"} bestanden
             met een grootte van \${poolRmSize}GB (ongeveer \$poolTime),
 EOF

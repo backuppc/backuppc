@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 2.1.2, released 5 Sep 2005.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -289,6 +289,8 @@ sub GetStatusInfo
 {
     my($status) = @_;
     ServerConnect();
+    %Status = ()     if ( $status =~ /\bhosts\b/ );
+    %StatusHost = () if ( $status =~ /\bhost\(/ );
     my $reply = $bpc->ServerMesg("status $status");
     $reply = $1 if ( $reply =~ /(.*)/s );
     eval($reply);
@@ -459,7 +461,8 @@ EOF
 		    $Lang->{Last_bad_XferLOG_errors_only},
 		    " class=\"navbar\"");
 	}
-	if ( -f "$TopDir/pc/$host/config.pl" ) {
+        if ( -f "$TopDir/pc/$host/config.pl"
+                    || ($host ne "config" && -f "$TopDir/conf/$host.pl") ) {
 	    NavLink("?action=view&type=config&host=${EscURI($host)}",
 		    $Lang->{Config_file}, " class=\"navbar\"");
 	}
@@ -509,7 +512,7 @@ EOF
     NavSectionTitle($Lang->{NavSectionTitle_});
     foreach my $l ( @adminLinks ) {
         if ( $PrivAdmin || !$l->{priv} ) {
-            my $txt = defined($l->{lname}) ? $Lang->{$l->{lname}} : $l->{name};
+            my $txt = $l->{lname} ne "" ? $Lang->{$l->{lname}} : $l->{name};
             NavLink($l->{link}, $txt);
         }
     }

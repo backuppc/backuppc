@@ -51,7 +51,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 2.1.2, released 5 Sep 2005.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,7 +59,7 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "/usr/local/BackupPC2.1.0/lib";
 use File::Path;
 use Getopt::Std;
 use BackupPC::Lib;
@@ -227,9 +227,14 @@ sub archiveWrite
 #
 sub archiveWriteHardLinks
 {
-    my $fh = @_;
+    my($fh) = @_;
     foreach my $hdr ( @HardLinks ) {
         $hdr->{size} = 0;
+	my $name = $hdr->{linkname};
+	$name =~ s{^\./}{/};
+	if ( defined($HardLinkExtraFiles{$name}) ) {
+            $hdr->{linkname} = $HardLinkExtraFiles{$name};
+        }
         if ( defined($PathRemove)
               && substr($hdr->{linkname}, 0, length($PathRemove)+1)
                         eq ".$PathRemove" ) {
@@ -474,10 +479,11 @@ sub TarWriteFile
 	my $done = 0;
 	my $name = $hdr->{linkname};
 	$name =~ s{^\./}{/};
-	if ( $HardLinkExtraFiles{$name} ) {
+	if ( defined($HardLinkExtraFiles{$name}) ) {
 	    $done = 1;
 	} else {
 	    foreach my $arg ( @ARGV ) {
+		$arg = "/" if ( $arg eq "." );
 		$arg =~ s{^\./+}{/};
 		$arg =~ s{/+$}{};
 		$done = 1 if ( $name eq $arg || $name =~ /^\Q$arg\// );
@@ -496,8 +502,10 @@ sub TarWriteFile
 	    # routine, so that we save the hassle of dealing with
 	    # mangling, merging and attributes.
 	    #
-	    $HardLinkExtraFiles{$hdr->{linkname}} = 1;
-	    archiveWrite($fh, $hdr->{linkname}, $hdr->{name});
+            my $name = $hdr->{linkname};
+            $name =~ s{^\./}{/};
+	    $HardLinkExtraFiles{$name} = $hdr->{name};
+	    archiveWrite($fh, $name, $hdr->{name});
 	}
     } elsif ( $hdr->{type} == BPC_FTYPE_SYMLINK ) {
         #

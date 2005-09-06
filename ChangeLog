@@ -20,6 +20,78 @@
 #------------------------------------------------------------------------
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
+
+* Fixed simple but serious bug in bin/BackupPC_tarCreate that prevented
+  hardlinks being saved correctly.  Debugged by Michael (mna.news)
+  with several other people.
+
+* Fixed serious bug in bin/BackupPC_dump reported/debugged by Dan Niles
+  that can happen when multiple full backups are deleted after
+  $Conf{FullKeepCnt} is changed.
+
+* Changed lib/BackupPC/CGI/Lib.pm so that link to "$TopDir/conf/$host.pl"
+  is displayed if it exists.  Patch from Andreas Vögele.
+
+* Applied daemonize patch to bin/BackupPC from:
+        http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=301057
+
+* It's now a fatal error if $Conf{CompressLevel} is set, but
+  Compress::Zlib is not found.  Before $Conf{CompressLevel} was
+  silently set to 0, which made all the backups uncompressed.
+  That meant the user never knew if they forget to install
+  Compress::Zlib but were expecting compression to be on.
+
+* Finally increased $Conf{ClientTimeout} to 72000 (20 hours).
+
+* Added sleep 1 in restart() function in init.d/src/gentoo-backuppc,
+  suggested by Jon Hood.
+
+* Added $DestDir to the path of the CGI image directory in configure.pl.
+  Patch submitted by Andreas Vögele.
+
+* Applied extensive patch to French translation from Frederic Lehobey.
+
+* Minor change to Dutch language $Lang{Pool_Stat} from Wander Winkelhorst.
+
+* Minor change to French language $Lang{EMailOutlookBackupMesg} and
+  $Lang{EMailOutlookBackupSubj} from Ludovic Gasc.
+
+#------------------------------------------------------------------------
+# Version 2.1.1, 13 Mar 2005
+#------------------------------------------------------------------------
+
+ * Fixed bug in top-level restore using rsync XferMethod.
+   BackupPC::View was leaving an extra leading "/" at the start
+   of top-level directories, messing up the FileList sort order.
+   Reported and debugged by Gail Edwards.
+
+ * Added pathCreate() to BackupPC_tarExtract so that new directories
+   are created.  Required for xtar on MacOSX since the virtual resource
+   fork directories (.rsrc) are not explicitly included in the tar
+   archive - just the files below .rsrc are.
+
+ * Changed $host.$bkupNum.tar$fileExt.* to $host.$bkupNum.tar$fileExt*
+   in $parCmd in bin/BackupPC_archiveHost.
+
+ * Fixed HostSortCompare() in BackupPC to correctly sort hosts so
+   those with the oldest backups get queued first.
+
+ * Changed test in BackupPC_sendEmail so that directories/files
+   starting with "." in $TopDir/pc are ignored, rather than
+   just "." and "..".
+
+ * Changed BackupPC_sendEmail to include NT_STATUS_FILE_LOCK_CONFLICT
+   in check for bad outlook files.
+
+ * Ensure that %Status and %StatusHost are empty if requesting
+   status on hosts in lib/BackupPC/CGI/Lib.pm GetStatusInfo().
+   Fixes problem with new hosts under mod_perl.
+
+ * Added images/icon-hardlink.gif so that hardlinks show file type icon.
+
+#------------------------------------------------------------------------
+# Version 2.1.0pl1, 15 Aug 2004
+#------------------------------------------------------------------------
  
 * Added fix to lib/BackupPC/Lang/nl.pm from Lieven Bridts.
 

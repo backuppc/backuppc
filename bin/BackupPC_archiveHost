@@ -38,7 +38,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 2.1.2, released 5 Sep 2005.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -46,7 +46,7 @@
 
 use strict;
 use File::Path;
-use lib "/usr/local/BackupPC/lib";
+use lib "/usr/local/BackupPC2.1.0/lib";
 use BackupPC::Lib;
 
 #
@@ -129,7 +129,7 @@ if ( $ret ) {
 if ( -d $outLoc && -x $parPath ) {
     if ( $parfile != 0 ) {
         print("Running $parPath to create parity files\n");
-	my $parCmd = "$parPath c -r$parfile $outLoc/$host.$bkupNum.tar$fileExt.par2 $outLoc/$host.$bkupNum.tar$fileExt.*";
+	my $parCmd = "$parPath c -r$parfile $outLoc/$host.$bkupNum.tar$fileExt.par2 $outLoc/$host.$bkupNum.tar$fileExt*";
         $ret = system($parCmd);
         if ( $ret ) {
 	    print("Executing: $parCmd\n");

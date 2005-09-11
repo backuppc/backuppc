@@ -192,13 +192,14 @@ sub dirCache
                     }
                 }
             }
-            $m->{files}{$fileUM}{relPath}    = "$dir/$fileUM";
-            $m->{files}{$fileUM}{sharePathM} = "$sharePathM/$file";
-            $m->{files}{$fileUM}{fullPath}   = "$path/$file";
-            $m->{files}{$fileUM}{backupNum}  = $backupNum;
-            $m->{files}{$fileUM}{compress}   = $compress;
-	    $m->{files}{$fileUM}{nlink}      = $s[3];
-	    $m->{files}{$fileUM}{inode}      = $s[1];
+            ($m->{files}{$fileUM}{relPath}    = "$dir/$fileUM") =~ s{//+}{/}g;
+            ($m->{files}{$fileUM}{sharePathM} = "$sharePathM/$file")
+                                                               =~ s{//+}{/}g;
+            ($m->{files}{$fileUM}{fullPath}   = "$path/$file") =~ s{//+}{/}g;
+            $m->{files}{$fileUM}{backupNum}   = $backupNum;
+            $m->{files}{$fileUM}{compress}    = $compress;
+	    $m->{files}{$fileUM}{nlink}       = $s[3];
+	    $m->{files}{$fileUM}{inode}       = $s[1];
         }
 	#
 	# Also include deleted files
@@ -444,13 +445,14 @@ sub dirHistory
                     }
                 }
             }
-            $files->{$fileUM}[$i]{relPath}    = "$dir/$fileUM";
-            $files->{$fileUM}[$i]{sharePathM} = "$sharePathM/$file";
-            $files->{$fileUM}[$i]{fullPath}   = "$path/$file";
-            $files->{$fileUM}[$i]{backupNum}  = $backupNum;
-            $files->{$fileUM}[$i]{compress}   = $compress;
-	    $files->{$fileUM}[$i]{nlink}      = $s[3];
-	    $files->{$fileUM}[$i]{inode}      = $s[1];
+            ($files->{$fileUM}[$i]{relPath}    = "$dir/$fileUM") =~ s{//+}{/}g;
+            ($files->{$fileUM}[$i]{sharePathM} = "$sharePathM/$file")
+                                                                =~ s{//+}{/}g;
+            ($files->{$fileUM}[$i]{fullPath}   = "$path/$file") =~ s{//+}{/}g;
+            $files->{$fileUM}[$i]{backupNum}   = $backupNum;
+            $files->{$fileUM}[$i]{compress}    = $compress;
+	    $files->{$fileUM}[$i]{nlink}       = $s[3];
+	    $files->{$fileUM}[$i]{inode}       = $s[1];
         }
 
 	#

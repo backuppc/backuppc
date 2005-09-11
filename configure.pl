@@ -467,7 +467,7 @@ foreach my $dir ( qw(bin doc
 # Create CGI image directory
 #
 foreach my $dir ( ($Conf{CgiImageDir}) ) {
-    next if ( $dir eq "" || -d $dir );
+    next if ( $dir eq "" || -d "$DestDir$dir" );
     mkpath("$DestDir$dir", 0, 0775);
     if ( !-d "$DestDir$dir" || !chown($Uid, $Gid, "$DestDir$dir") ) {
         die("Failed to create or chown $DestDir$dir");

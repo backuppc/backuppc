@@ -120,7 +120,7 @@ if ( $i >= @Backups ) {
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
 my $PathAdd    = $1 if ( $opts{p} =~ /(.+)/ );
-if ( $opts{s} !~ /^([\w\s\.\/\$-]+)$/ ) {
+if ( $opts{s} !~ /^([\w\s.\/$(){}[\]-]+)$/ ) {
     print(STDERR "$0: bad share name '$opts{s}'\n");
     exit(1);
 }

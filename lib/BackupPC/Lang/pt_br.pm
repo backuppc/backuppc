@@ -1219,7 +1219,7 @@ $Lang{EMailNoBackupEverMesg} = <<'EOF';
 To: $user$domain
 cc:
 Subject: $subj
-
+$headers
 Caro $userName,
 
 Em seu PC ($host) nenhum backup foi completado por nosso programa de backup.
@@ -1247,7 +1247,7 @@ $Lang{EMailNoBackupRecentMesg} = <<'EOF';
 To: $user$domain
 cc:
 Subject: $subj
-
+$headers
 Caro $userName,
 
 Não foi completado nenhum backup completo de seu PC ($host) durante
@@ -1278,7 +1278,7 @@ $Lang{EMailOutlookBackupMesg} = <<'EOF';
 To: $user$domain
 cc:
 Subject: $subj
-
+$headers
 Caro $userName,
 
 Os arquivos de Outlook de seu PC tem $howLong.

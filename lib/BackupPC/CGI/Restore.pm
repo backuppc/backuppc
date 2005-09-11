@@ -112,35 +112,30 @@ EOF
         #
 	$content .= eval("qq{$Lang->{Restore_Options_for__host2}}");
 
-        #
-        # If there is a single host, make sure direct restore is enabled
-        #
         if ( @hosts == 1 ) {
             #
             # Pick up the host's config file
             #
             $bpc->ConfigRead($hosts[0]);
             %Conf = $bpc->Conf();
+	}
 
-            #
-            # Decide if option 1 (direct restore) is available based
-            # on whether the restore command is set.
-            #
-            my $cmd = $Conf{XferMethod} eq "smb" ? $Conf{SmbClientRestoreCmd}
-                    : $Conf{XferMethod} eq "tar" ? $Conf{TarClientRestoreCmd}
-                    : $Conf{XferMethod} eq "archive" ? undef
-                    : $Conf{RsyncRestoreArgs};
-            if ( defined($cmd) ) {
-                $content .= eval(
-                    "qq{$Lang->{Restore_Options_for__host_Option1}}");
-            } else {
-                my $hostDest = $hosts[0];
-                $content .= eval(
-                    "qq{$Lang->{Restore_Options_for__host_Option1_disabled}}");
-            }
-        } else {
-            $content .= eval("qq{$Lang->{Restore_Options_for__host_Option1}}");
-        }
+	#
+	# Decide if option 1 (direct restore) is available based
+	# on whether the restore command is set.
+	#
+	my $cmd = $Conf{XferMethod} eq "smb" ? $Conf{SmbClientRestoreCmd}
+		: $Conf{XferMethod} eq "tar" ? $Conf{TarClientRestoreCmd}
+		: $Conf{XferMethod} eq "archive" ? undef
+		: $Conf{RsyncRestoreArgs};
+	if ( defined($cmd) ) {
+	    $content .= eval(
+		"qq{$Lang->{Restore_Options_for__host_Option1}}");
+	} else {
+	    my $hostDest = $hosts[0];
+	    $content .= eval(
+		"qq{$Lang->{Restore_Options_for__host_Option1_disabled}}");
+	}
 
 	#
 	# Verify that Archive::Zip is available before showing the

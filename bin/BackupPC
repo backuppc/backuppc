@@ -66,6 +66,7 @@ use Getopt::Std;
 use Socket;
 use Carp;
 use Digest::MD5;
+use POSIX qw(setsid);
 
 ###########################################################################
 # Handle command line options
@@ -260,10 +261,22 @@ sub Main_Initialize
 
     if ( $opts{d} ) {
         #
-        # daemonize by forking
+        # daemonize by forking; more robust method per:
+        #       http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=301057
         #
-        defined(my $pid = fork) or die "Can't fork: $!";
+        my $pid;
+        defined($pid = fork) or die("Can't fork: $!");
+        exit if( $pid );   # parent exits
+
+        POSIX::setsid();
+        defined($pid = fork) or die("Can't fork: $!");
         exit if $pid;   # parent exits
+
+        chdir ("/") or die("Cannot chdir to /: $!\n");
+        close(STDIN);
+        open(STDIN , ">/dev/null") or die("Cannot open /dev/null as stdin\n");
+        # STDOUT and STDERR are handled in LogFileOpen() right below,
+        # otherwise we would have to reopen them too.
     }
 
     #

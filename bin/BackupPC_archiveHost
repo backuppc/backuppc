@@ -88,6 +88,22 @@ my $mesg = "Writing tar archive for host $host, backup #$bkupNum";
 #
 $share  = $bpc->shellEscape($share);
 $host   = $bpc->shellEscape($host);
+
+#
+# We prefer to use /bin/csh because the exit status of a pipeline
+# is non-zero if any command is non zero.  In contrast, /bin/sh
+# and /bin/bash use the convention that the exit status is just
+# the exit status of the last command of the pipeline.
+#
+my @shell;
+if ( -x "/bin/csh" ) {
+    @shell = ("/bin/csh", "-cf");
+} elsif ( -x "/bin/sh" ) {
+    @shell = ("/bin/sh", "-c");
+} else {
+    print("Error: Can't find executable /bin/csh or /bin/sh\n");
+    exit(1);
+}
 my $cmd = "$tarCreate -t -h $host -n $bkupNum -s $share . ";
 $cmd   .= "| $compPath " if ( $compPath ne "cat" && $compPath ne "" );
 if ( -b $outLoc || -c $outLoc || -f $outLoc ) {
@@ -115,9 +131,9 @@ print("$mesg\n");
 #
 # Run the command
 #
-my $ret = system($cmd);
+my $ret = system(@shell, $cmd);
 if ( $ret ) {
-    print("Executing: $cmd\n");
+    print("Executing: @shell -cf $cmd\n");
     print("Error: $tarCreate, compress or split failed\n");
     exit(1);
 }
@@ -129,7 +145,7 @@ if ( $ret ) {
 if ( -d $outLoc && -x $parPath ) {
     if ( $parfile != 0 ) {
         print("Running $parPath to create parity files\n");
-	my $parCmd = "$parPath c -r$parfile $outLoc/$host.$bkupNum.tar$fileExt.par2 $outLoc/$host.$bkupNum.tar$fileExt.*";
+	my $parCmd = "$parPath c -r$parfile $outLoc/$host.$bkupNum.tar$fileExt.par2 $outLoc/$host.$bkupNum.tar$fileExt*";
         $ret = system($parCmd);
         if ( $ret ) {
 	    print("Executing: $parCmd\n");

@@ -711,10 +711,12 @@ sub CheckHostAlive
 			if ( $bpc->{verbose} );
 	return -1;
     }
-    if ( $s =~ /time=([\d\.]+)\s*ms/i ) {
+    if ( $s =~ /rtt\s*min\/avg\/max\/mdev\s*=\s*[\d.]+\/([\d.]+)\/[\d.]+\/[\d.]+\s*(ms|usec)/i ) {
+        $ret = $1;
+        $ret /= 1000 if ( lc($2) eq "usec" );
+    } elsif ( $s =~ /time=([\d.]+)\s*(ms|usec)/i ) {
 	$ret = $1;
-    } elsif ( $s =~ /time=([\d\.]+)\s*usec/i ) {
-	$ret =  $1/1000;
+        $ret /= 1000 if ( lc($2) eq "usec" );
     } else {
 	print(STDERR "CheckHostAlive: can't extract round-trip time"
 	           . " (not fatal)\n") if ( $bpc->{verbose} );

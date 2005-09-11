@@ -140,10 +140,12 @@ EOF
 }
 
 if ( $mesg ne "" && $Conf{EMailAdminUserName} ne "" ) {
+    my $headers = $Conf{EMailHeaders};
+    $headers .= "\n" if ( $headers !~ /\n$/ );
     $mesg = <<EOF;
 To: $Conf{EMailAdminUserName}
 Subject: BackupPC administrative attention needed
-
+$headers
 ${mesg}Regards,
 PC Backup Genie
 EOF
@@ -303,10 +305,12 @@ sub user2name
 sub sendUserEmail
 {
     my($user, $host, $mesg, $subj, $vars) = @_;
-    $vars->{user}   = $user;
-    $vars->{host}   = $host;
-    $vars->{domain} = $Conf{EMailUserDestDomain};
-    $vars->{CgiURL} = $Conf{CgiURL};
+    $vars->{user}     = $user;
+    $vars->{host}     = $host;
+    $vars->{headers}  = $Conf{EMailHeaders};
+    $vars->{headers} .= "\n" if ( $vars->{headers} !~ /\n$/ );
+    $vars->{domain}   = $Conf{EMailUserDestDomain};
+    $vars->{CgiURL}   = $Conf{CgiURL};
     $subj =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
     $vars->{subj}   = $subj;
     $mesg =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;

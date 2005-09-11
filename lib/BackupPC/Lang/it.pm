@@ -1227,7 +1227,7 @@ $Lang{EMailNoBackupEverSubj} = "BackupPC: nessun backup riuscito per \$host";
 $Lang{EMailNoBackupEverMesg} = <<'EOF';
 To: $user$domain
 Subject: $subj
-
+$headers
 Ciao $userName,
 
 Il nostro software di backup non e` ancora riuscito ad effettuare un
@@ -1256,7 +1256,7 @@ $Lang{EMailNoBackupRecentSubj} = "BackupPC: non ci sono backup recenti per \$hos
 $Lang{EMailNoBackupRecentMesg} = <<'EOF';
 To: $user$domain
 Subject: $subj
-
+$headers
 Ciao $userName,
 
 non e` stato effettuato correttamente il backup del tuo PC ($host) per
@@ -1285,7 +1285,7 @@ $Lang{EMailOutlookBackupSubj} = "BackupPC: i file di Outlook su \$host richiedon
 $Lang{EMailOutlookBackupMesg} = <<'EOF';
 To: $user$domain
 Subject: $subj
-
+$headers
 Ciao $userName,
 
 Il backup dei file di Outlook presenti sul tuo PC $howLong.

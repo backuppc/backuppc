@@ -139,7 +139,10 @@ if ( $Conf{ClientNameAlias} ne "" ) {
 #
 # Setup file extension for compression and open ArchiveLOG output file
 #
-$Conf{CompressLevel} = 0 if ( !BackupPC::FileZIO->compOk );
+if ( $Conf{CompressLevel} && !BackupPC::FileZIO->compOk ) {
+    $stat{hostError} = "Compress::Zlib not found";
+    exit(ArchiveCleanup($client));
+}
 my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
 my $ArchiveLOG = BackupPC::FileZIO->open("$Dir/ArchiveLOG$fileExt", 1,
                                      $Conf{CompressLevel});

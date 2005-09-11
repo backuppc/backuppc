@@ -186,7 +186,10 @@ if ( (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
 #
 # Setup file extension for compression and open RestoreLOG output file
 #
-$Conf{CompressLevel} = 0 if ( !BackupPC::FileZIO->compOk );
+if ( $Conf{CompressLevel} && !BackupPC::FileZIO->compOk ) {
+    $stat{hostError} = "Compress:Zlib not found";
+    exit(RestoreCleanup($client));
+}
 my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
 my $RestoreLOG = BackupPC::FileZIO->open("$Dir/RestoreLOG$fileExt", 1,
                                      $Conf{CompressLevel});

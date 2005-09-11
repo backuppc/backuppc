@@ -1217,7 +1217,7 @@ $Lang{EMailNoBackupEverMesg} = <<'EOF';
 To: $user$domain
 cc:
 Subject: $subj
-
+$headers
 Hallo $userName,
 
 Ihr Computer ($host) wurde durch den Backup Server noch nie erfolgreich gesichert.
@@ -1247,7 +1247,7 @@ $Lang{EMailNoBackupRecentMesg} = <<'EOF';
 To: $user$domain
 cc:
 Subject: $subj
-
+$headers
 Hallo $userName,
 
 Ihr Computer ($host) wurde seit $days Tagen nicht mehr erfolgreich gesichert.
@@ -1279,7 +1279,7 @@ $Lang{EMailOutlookBackupMesg} = <<'EOF';
 To: $user$domain
 cc:
 Subject: $subj
-
+$headers
 Hallo $userName,
 
 die Outlook Dateien auf Ihrem Computer wurden $howLong Tage nicht gesichert.

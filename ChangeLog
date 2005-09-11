@@ -46,7 +46,60 @@
 * Add NT_STATUS_FILE_LOCK_CONFLICT to pst read error check in
   BackupPC_sendEmail to fix bug reported by Dale Renton.
 
-* Fixed minor typo in documentation from Richard Ames
+* Fixed simple but serious bug in bin/BackupPC_tarCreate that prevented
+  hardlinks being saved correctly.  Debugged by Michael (mna.news) with
+  several other people.
+
+* Fixed serious bug in bin/BackupPC_dump reported/debugged by Dan
+  Niles that can happen when multiple full backups are deleted after
+  $Conf{FullKeepCnt} is changed.
+
+* Added fixup of $ENV{REMOTE_USER} to lib/BackupPC/CGI/Lib.pm in the
+  case of using mod_authz_ldap; patch submitted by Alain Perrier.
+
+* Added env LC_ALL=C to $Conf{TarClientCmd} and $Conf{TarClientRestoreCmd}
+  to avoid locale problems, suggested by Ludovic Drolez.
+
+* Changed ping output parsing to pick out average rtt time, based
+  on patch from Ron Bickers.
+
+* Changed lib/BackupPC/CGI/Lib.pm so that link to "$TopDir/conf/$host.pl"
+  is displayed if it exists.  Patch from Andreas Vögele.
+
+* Applied daemonize patch to bin/BackupPC from:
+        http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=301057
+
+* It's now a fatal error if $Conf{CompressLevel} is set, but
+  Compress::Zlib is not found.  Before $Conf{CompressLevel} was
+  silently set to 0, which made all the backups uncompressed.
+  That meant the user never knew if they forget to install
+  Compress::Zlib but were expecting compression to be on.
+
+* Finally increased $Conf{ClientTimeout} to 72000 (20 hours).
+
+* Fixed minor documentation typos from Richard Ames, JP Vossen.
+
+* Changed bin/BackupPC_archiveHost to use /bin/csh instead of
+  /bin/sh.  That way any errors in the pipeline are reported
+  via the exit status, instead of just the last.
+
+* Added sleep 1 in restart() function in init.d/src/gentoo-backuppc,
+  suggested by Jon Hood.
+
+* Added $DestDir to the path of the CGI image directory in configure.pl.
+  Patch submitted by Andreas Vögele.
+
+* Added $Conf{EMailHeaders} for additional email headers, requested
+  by Ludovic Gasc.
+
+* Made shareName argument regexp checking more general to allow parens.
+
+* Applied extensive patch to French translation from Frederic Lehobey.
+
+* Minor change to Dutch language $Lang{Pool_Stat} from Wander Winkelhorst.
+
+* Minor change to French language $Lang{EMailOutlookBackupMesg} and
+  $Lang{EMailOutlookBackupSubj} from Ludovic Gasc.
 
 #------------------------------------------------------------------------
 # Version 2.1.0pl1, 15 Aug 2004

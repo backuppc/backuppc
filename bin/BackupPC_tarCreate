@@ -227,7 +227,7 @@ sub archiveWrite
 #
 sub archiveWriteHardLinks
 {
-    my $fh = @_;
+    my($fh) = @_;
     foreach my $hdr ( @HardLinks ) {
         $hdr->{size} = 0;
 	my $name = $hdr->{linkname};
@@ -483,6 +483,7 @@ sub TarWriteFile
 	    $done = 1;
 	} else {
 	    foreach my $arg ( @ARGV ) {
+		$arg = "/" if ( $arg eq "." );
 		$arg =~ s{^\./+}{/};
 		$arg =~ s{/+$}{};
 		$done = 1 if ( $name eq $arg || $name =~ /^\Q$arg\// );
@@ -504,7 +505,7 @@ sub TarWriteFile
             my $name = $hdr->{linkname};
             $name =~ s{^\./}{/};
 	    $HardLinkExtraFiles{$name} = $hdr->{name};
-	    archiveWrite($fh, $hdr->{linkname}, $hdr->{name});
+	    archiveWrite($fh, $name, $hdr->{name});
 	}
     } elsif ( $hdr->{type} == BPC_FTYPE_SYMLINK ) {
         #

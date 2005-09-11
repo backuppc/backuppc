@@ -239,7 +239,9 @@ sub start
 	$rsyncClientCmd = $conf->{RsyncClientCmd};
         $argList = ['--server', '--sender', @$rsyncArgs,
                               '.', $t->{shareNameSlash}];
-	$argList = File::RsyncP->excludeStrip($argList);
+	eval {
+	    $argList = File::RsyncP->excludeStrip($argList);
+	};
 	$fioArgs = {
 	    client     => $t->{client},
 	    share      => $t->{shareName},

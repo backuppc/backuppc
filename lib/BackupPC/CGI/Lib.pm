@@ -122,6 +122,10 @@ sub NewRequest
     #
     $MyURL  = $ENV{SCRIPT_NAME};
     $User   = $ENV{REMOTE_USER};
+    #
+    # Handle LDAP uid=user when using mod_authz_ldap
+    #
+    $User   = $1 if ( $User =~ /uid=([^,]+)/i );        
 
     #
     # Clean up %ENV for taint checking
@@ -465,7 +469,8 @@ EOF
 		    $Lang->{Last_bad_XferLOG_errors_only},
 		    " class=\"navbar\"");
 	}
-	if ( -f "$TopDir/pc/$host/config.pl" ) {
+        if ( -f "$TopDir/pc/$host/config.pl"
+                    || ($host ne "config" && -f "$TopDir/conf/$host.pl") ) {
 	    NavLink("?action=editConfig&host=${EscURI($host)}",
 		    "Edit Config", " class=\"navbar\"");
 	}

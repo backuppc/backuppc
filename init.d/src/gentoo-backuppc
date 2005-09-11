@@ -34,6 +34,7 @@ stop() {
 restart() {
 	ebegin "Restarting BackupPC"
 	svc_stop
+        sleep 1
 	svc_start
 	eend $? "Failed to restart BackupPC"
 }

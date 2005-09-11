@@ -705,7 +705,7 @@ $Conf{BackupZeroFilesIsFatal} = 1;
 #   - 'rsync':   backup and restore via rsync (via rsh or ssh).
 #                Best choice for linux/unix.  Good choice also for WinXX.
 #
-#   - 'rsyncd':  backup and restre via rsync daemon on the client.
+#   - 'rsyncd':  backup and restore via rsync daemon on the client.
 #                Best choice for linux/unix if you have rsyncd running on
 #                the client.  Good choice also for WinXX.
 #
@@ -880,7 +880,7 @@ $Conf{TarShareName} = '/';
 # This setting only matters if $Conf{XferMethod} = 'tar'.
 #
 $Conf{TarClientCmd} = '$sshPath -q -x -n -l root $host'
-                    . ' $tarPath -c -v -f - -C $shareName+'
+                    . ' env LC_ALL=C $tarPath -c -v -f - -C $shareName+'
                     . ' --totals';
 
 #
@@ -937,7 +937,7 @@ $Conf{TarIncrArgs} = '--newer=$incrDate+ $fileList+';
 # restore option will be removed.
 #
 $Conf{TarClientRestoreCmd} = '$sshPath -q -x -l root $host'
-		   . ' $tarPath -x -p --numeric-owner --same-owner'
+		   . ' env LC_ALL=C $tarPath -x -p --numeric-owner --same-owner'
 		   . ' -v -f - -C $shareName+';
 
 #
@@ -1344,7 +1344,7 @@ $Conf{CompressLevel} = 0;
 # Despite the name, this parameter sets the timeout for all transport
 # methods (tar, smb etc).
 #
-$Conf{ClientTimeout} = 7200;
+$Conf{ClientTimeout} = 72000;
 
 #
 # Maximum number of log files we keep around in each PC's directory
@@ -1583,6 +1583,14 @@ $Conf{EMailNotifyOldOutlookDays} = 5.0;
 $Conf{EMailOutlookBackupSubj} = undef;
 $Conf{EMailOutlookBackupMesg} = undef;
 
+#
+# Additional email headers
+#
+$Conf{EMailHeaders} = <<EOF;
+MIME-Version: 1.0
+Content-Type: text/plain; charset="iso-8859-1"
+EOF
+
 ###########################################################################
 # CGI user interface configuration settings
 # (can be overridden in the per-PC config.pl)
@@ -1811,4 +1819,5 @@ $Conf{CgiUserConfigEdit} = {
         EMailNotifyOldOutlookDays => 1,
         EMailOutlookBackupSubj    => 1,
         EMailOutlookBackupMesg    => 1,
+        EMailHeaders              => 1,
 };

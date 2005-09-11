@@ -322,8 +322,7 @@ sub action
     my $userHost = 1 if ( $Privileged && !$PrivAdmin && defined($host) );
 
     if ( !$Privileged ) {
-        #ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_edit_config_files}}"));
-        ErrorExit("Only_privileged_users_can_edit_config_files");
+        ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_edit_config_files}}"));
     }
 
     if ( defined($In{menu}) || $In{editAction} eq "Save" ) {

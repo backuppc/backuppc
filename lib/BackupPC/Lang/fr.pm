@@ -664,7 +664,7 @@ Les fichiers existants sont ceux qui sont déjà sur le serveur;
 Les nouveaux fichiers sont ceux qui ont été ajoutés au serveur.
 Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés dans les fichiers nouveaux ou réutilisés.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table glass="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totaux </td>
     <td align="center" colspan="2"> Fichiers existants </td>
@@ -1215,7 +1215,7 @@ $Lang{EMailNoBackupEverMesg} = <<'EOF';
 To: $user$domain
 cc:
 Subject: $subj
-
+$headers
 $userName,
 
 Notre logiciel de copies de sécurité n'a jamais réussi à
@@ -1245,7 +1245,7 @@ $Lang{EMailNoBackupRecentMesg} = <<'EOF';
 To: $user$domain
 cc:
 Subject: $subj
-
+$headers
 $userName,
 
 Aucune sauvegarde de votre ordinateur n'a été effectuée depuis $days
@@ -1270,12 +1270,12 @@ http://backuppc.sourceforge.net
 EOF
 
 # Old Outlook files
-$Lang{EMailOutlookBackupSubj} = "BackupPC: Les fichiers de Outlook sur \$host doivent êtes sauvegardés";
+$Lang{EMailOutlookBackupSubj} = "BackupPC: Les fichiers de Outlook sur \$host doivent être sauvegardés";
 $Lang{EMailOutlookBackupMesg} = <<'EOF';
 To: $user$domain
 cc:
 Subject: $subj
-
+$headers
 $userName,
 
 Les fichiers Outlook sur votre ordinateur n'ont $howLong. Ces fichiers

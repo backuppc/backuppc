@@ -1235,7 +1235,7 @@ sub fileListEltSend
             && ($type == BPC_FTYPE_HARDLINK || $type == BPC_FTYPE_FILE)
             && ($type == BPC_FTYPE_HARDLINK
                     || $fio->{protocol_version} < 27
-                    || $a->{mode} & S_HLINK_TARGET ) ) {
+                    || ($a->{mode} & S_HLINK_TARGET) ) ) {
         #
         # Fill in fake inode information so that the remote rsync
         # can correctly create hardlinks.

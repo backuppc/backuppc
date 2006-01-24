@@ -95,7 +95,7 @@ sub NewRequest
 
     if ( !defined($bpc) ) {
 	ErrorExit($Lang->{BackupPC__Lib__new_failed__check_apache_error_log})
-	    if ( !($bpc = BackupPC::Lib->new(undef, undef, 1)) );
+	    if ( !($bpc = BackupPC::Lib->new(undef, undef, undef, 1)) );
 	$TopDir = $bpc->TopDir();
 	$BinDir = $bpc->BinDir();
 	%Conf   = $bpc->Conf();
@@ -220,7 +220,7 @@ sub EscHTML
     $s =~ s/\"/&quot;/g;
     $s =~ s/>/&gt;/g;
     $s =~ s/</&lt;/g;
-    $s =~ s{([^[:print:]])}{sprintf("&\#x%02X;", ord($1));}eg;
+    ### $s =~ s{([^[:print:]])}{sprintf("&\#x%02X;", ord($1));}eg;
     return \$s;
 }
 
@@ -409,31 +409,28 @@ sub Header
 {
     my($title, $content, $noBrowse, $contentSub, $contentPost) = @_;
     my @adminLinks = (
-        { link => "",                         name => $Lang->{Status}},
-        { link => "?action=adminOpts",        name => $Lang->{Admin_Options},
-                                              priv => 1},
-        { link => "?action=editConfig",       name => "Edit Config",
-                                              priv => 1},
-        { link => "?action=editHosts",        name => "Edit Hosts",
-                                              priv => 1},
-        { link => "?action=summary",          name => $Lang->{PC_Summary}},
-        { link => "?action=view&type=LOG",    name => $Lang->{LOG_file},
-                                              priv => 1},
-        { link => "?action=LOGlist",          name => $Lang->{Old_LOGs},
-                                              priv => 1},
-        { link => "?action=emailSummary",     name => $Lang->{Email_summary},
-                                              priv => 1},
-        { link => "?action=view&type=config", name => $Lang->{Config_file},
-                                              priv => 1},
-        { link => "?action=view&type=hosts",  name => $Lang->{Hosts_file},
-                                              priv => 1},
-        { link => "?action=queue",            name => $Lang->{Current_queues},
-                                              priv => 1},
+        { link => "",                      name => $Lang->{Status}},
+        { link => "?action=adminOpts",     name => $Lang->{Admin_Options},
+                                           priv => 1},
+        { link => "?action=editConfig",    name => $Lang->{CfgEdit_Edit_Config},
+                                           priv => 1},
+        { link => "?action=editConfig&newMenu=hosts",
+                                           name => $Lang->{CfgEdit_Edit_Hosts},
+                                           priv => 1},
+        { link => "?action=summary",       name => $Lang->{PC_Summary}},
+        { link => "?action=view&type=LOG", name => $Lang->{LOG_file},
+                                           priv => 1},
+        { link => "?action=LOGlist",       name => $Lang->{Old_LOGs},
+                                           priv => 1},
+        { link => "?action=emailSummary",  name => $Lang->{Email_summary},
+                                           priv => 1},
+        { link => "?action=queue",         name => $Lang->{Current_queues},
+                                           priv => 1},
         @{$Conf{CgiNavBarLinks} || []},
     );
     my $host = $In{host};
 
-    print $Cgi->header();
+    print $Cgi->header(-charset => "utf-8");
     print <<EOF;
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
@@ -469,11 +466,14 @@ EOF
 		    $Lang->{Last_bad_XferLOG_errors_only},
 		    " class=\"navbar\"");
 	}
-        if ( -f "$TopDir/pc/$host/config.pl"
+        if ( $Conf{CgiUserConfigEditEnable} || $PrivAdmin ) {
+            NavLink("?action=editConfig&host=${EscURI($host)}",
+                    $Lang->{CfgEdit_Edit_Config}, " class=\"navbar\"");
+        } elsif ( -f "$TopDir/pc/$host/config.pl"
                     || ($host ne "config" && -f "$TopDir/conf/$host.pl") ) {
-	    NavLink("?action=editConfig&host=${EscURI($host)}",
-		    "Edit Config", " class=\"navbar\"");
-	}
+            NavLink("?action=view&type=config&host=${EscURI($host)}",
+                    $Lang->{Config_file}, " class=\"navbar\"");
+        }
 	print "</div>\n";
     }
     print("<div id=\"Content\">\n$content\n");

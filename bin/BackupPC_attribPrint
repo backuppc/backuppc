@@ -1,0 +1,70 @@
+#!/bin/perl
+#============================================================= -*-perl-*-
+#
+# BackupPC_attribPrint: print the contents of attrib files.
+#
+# DESCRIPTION
+#  
+#   Usage: BackupPC_attribPrint attribPath
+#
+#   Compression status of attrib path is based on $Conf{CompressLevel}.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2005  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 2.1.0, released 20 Jun 2004.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+no  utf8;
+use lib "/usr/local/BackupPC/lib";
+
+use BackupPC::Lib;
+use BackupPC::Attrib qw(:all);
+use BackupPC::FileZIO;
+use Data::Dumper;
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+
+if ( @ARGV != 1 ) {
+    print STDERR "Usage: $0 attribPath\n";
+    exit(1);
+}
+if ( !-f $ARGV[0] ) {
+    print STDERR "$ARGV[0] does not exist\n";
+    exit(1);
+}
+
+my $attrib = BackupPC::Attrib->new({ compress => $Conf{CompressLevel} });
+if ( !$attrib->read(".", $ARGV[0]) ) {
+    print STDERR "Cannot read attrib file $ARGV[0]\n";
+    exit(1);
+}
+my $info = $attrib->get();
+$Data::Dumper::Indent = 1;
+print Dumper($info);

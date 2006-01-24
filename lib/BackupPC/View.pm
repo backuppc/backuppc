@@ -150,6 +150,7 @@ sub dirCache
             next if ( defined($m->{files}{$fileUM})
 		    || $file eq ".."
 		    || $file eq "."
+		    || $file eq "backupInfo"
 		    || $mangle && $file eq "attrib" );
 	    #
 	    # skip directories in earlier backups (each backup always

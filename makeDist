@@ -42,15 +42,17 @@ use Getopt::Std;
 
 umask(0022);
 
-my $Version     = "2.2.0alpha";
-my $ReleaseDate = "15 Aug 2004";
+my $Version     = "3.0.0alpha";
+my $ReleaseDate = "23 Jan 2006";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
     bin/BackupPC
     bin/BackupPC_archive
     bin/BackupPC_archiveHost
+    bin/BackupPC_attribPrint
     bin/BackupPC_dump
+    bin/BackupPC_fixupBackupSummary
     bin/BackupPC_link
     bin/BackupPC_nightly
     bin/BackupPC_restore
@@ -59,6 +61,7 @@ my @PerlSrc = qw(
     bin/BackupPC_trashClean
     bin/BackupPC_tarExtract
     bin/BackupPC_tarCreate
+    bin/BackupPC_tarPCCopy
     bin/BackupPC_compressPool
     bin/BackupPC_zipCreate
     bin/BackupPC_zcat

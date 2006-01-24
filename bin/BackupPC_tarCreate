@@ -23,6 +23,8 @@
 #       -p pathAdd      new path prefix
 #       -b BLOCKS       BLOCKS x 512 bytes per record (default 20; same as tar)
 #       -w writeBufSz   write buffer size (default 1MB)
+#       -e charset      charset for encoding file names (default: value of
+#                       $Conf{ClientCharset} when backup was done)
 #
 #     The -h, -n and -s options specify which dump is used to generate
 #     the tar archive.  The -r and -p options can be used to relocate
@@ -62,19 +64,17 @@ no  utf8;
 use lib "/usr/local/BackupPC/lib";
 use File::Path;
 use Getopt::Std;
+use Encode qw/from_to/;
 use BackupPC::Lib;
 use BackupPC::Attrib qw(:all);
 use BackupPC::FileZIO;
 use BackupPC::View;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
-my $TopDir = $bpc->TopDir();
-my $BinDir = $bpc->BinDir();
-my %Conf   = $bpc->Conf();
 
 my %opts;
 
-if ( !getopts("th:n:p:r:s:b:w:", \%opts) || @ARGV < 1 ) {
+if ( !getopts("te:h:n:p:r:s:b:w:", \%opts) || @ARGV < 1 ) {
     print STDERR <<EOF;
 usage: $0 [options] files/directories...
   Required options:
@@ -90,6 +90,8 @@ usage: $0 [options] files/directories...
      -p pathAdd      new path prefix
      -b BLOCKS       BLOCKS x 512 bytes per record (default 20; same as tar)
      -w writeBufSz   write buffer size (default 1048576 = 1MB)
+     -e charset      charset for encoding file names (default: value of
+                     \$Conf{ClientCharset} when backup was done)
 EOF
     exit(1);
 }
@@ -123,12 +125,16 @@ if ( $i >= @Backups ) {
     exit(1);
 }
 
+my $Charset = $Backups[$i]{charset};
+$Charset = $opts{e} if ( $opts{e} ne "" );
+
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
 my $PathAdd    = $1 if ( $opts{p} =~ /(.+)/ );
-if ( $opts{s} !~ /^([\w\s\.\/\$-]+)$/ && $opts{s} ne "*" ) {
+if ( $opts{s} !~ /^([\w\s.\/$(){}[\]-]+)$/ && $opts{s} ne "*" ) {
     print(STDERR "$0: bad share name '$opts{s}'\n");
     exit(1);
 }
+
 our $ShareName = $opts{s};
 our $view = BackupPC::View->new($bpc, $Host, \@Backups);
 
@@ -361,6 +367,14 @@ sub TarWriteFileInfo
     my($fh, $hdr) = @_;
 
     #
+    # Convert path names to requested (eg: client) charset
+    #
+    if ( $Charset ne "" ) {
+        from_to($hdr->{name},     "utf8", $Charset);
+        from_to($hdr->{linkname}, "utf8", $Charset);
+    }
+
+    #
     # Handle long link names (symbolic links)
     #
     if ( length($hdr->{linkname}) > 99 ) {
@@ -373,6 +387,7 @@ sub TarWriteFileInfo
         TarWrite($fh, \$data);
         TarWritePad($fh, length($data));
     }
+
     #
     # Handle long file names
     #

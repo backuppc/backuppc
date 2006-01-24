@@ -51,6 +51,7 @@ use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::Attrib;
 use BackupPC::PoolWrite;
+use BackupPC::Storage;
 
 use File::Find;
 use File::Path;
@@ -156,6 +157,16 @@ while ( 1 ) {
     $Backups[$num]{sizeNewComp}   += $sizeNewComp;
     $Backups[$num]{noFill}         = $noFill;
     $Backups[$num]{fillFromNum}    = $fillFromNum;
+    #
+    # Save just this backup's info in case the main backups file
+    # gets corrupted
+    #
+    BackupPC::Storage->backupInfoWrite($Dir,
+                                       $Backups[$num]{num},
+                                       $Backups[$num], 1);
+    #
+    # Save the main backups file
+    #
     $bpc->BackupInfoWrite($host, @Backups);
 }
 
@@ -211,7 +222,21 @@ sub FillIncr
         #
         # Exists in the older filled backup, and not in the new, so link it
         #
-        link($name, $newName);
+        my($exists, $digest, $origSize, $outSize, $errs)
+                    = BackupPC::PoolWrite::LinkOrCopy(
+                                      $bpc,
+                                      $name, $Compress,
+                                      $newName, $Compress);
+        if ( $exists ) {
+            $nFilesExist++;
+            $sizeExist += $origSize;
+            $sizeExistComp += $outSize;
+        } elsif ( $outSize > 0 ) {
+            $nFilesNew++;
+            $sizeNew += $origSize;
+            $sizeNewComp += -s $outSize;
+            LinkNewFile($digest, $origSize, $newName);
+        }
     }
 }
 

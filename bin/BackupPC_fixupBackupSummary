@@ -1,0 +1,251 @@
+#!/bin/perl
+#============================================================= -*-perl-*-
+#
+# BackupPC_fixupBackupSummary: recreate backups file in case
+# it was lost.
+#
+# DESCRIPTION
+#  
+#   Usage: BackupPC_fixupBackupSummary [clients...]
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2005  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 2.1.0, released 20 Jun 2004.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+no  utf8;
+use lib "/usr/local/BackupPC/lib";
+use Getopt::Std;
+use Data::Dumper;
+use Time::ParseDate;
+
+use BackupPC::Lib;
+use BackupPC::Attrib qw(:all);
+use BackupPC::FileZIO;
+use BackupPC::Storage;
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+my $Hosts  = $bpc->HostInfoRead();
+my @hostList;
+
+our(%backupInfo);
+
+if ( !@ARGV ) {
+    @hostList = sort(keys(%$Hosts));
+} else {
+    @hostList = @ARGV;
+}
+
+foreach my $host ( @hostList ) {
+    my(@Backups, $BkupFromLOG, $BkupFromInfo, $BkupNums, @LogFiles);
+
+    $BkupFromInfo = {};
+    $BkupFromLOG  = {};
+    if ( !defined($Hosts->{$host}) ) {
+        print("$host doesn't exist in BackupPC's host file... skipping\n");
+        next;
+    }
+
+    my $dir = "$TopDir/pc/$host";
+    print("Doing host $host\n");
+
+    if ( !opendir(DIR, $dir) ) {
+        print("$host: Can't open $dir... skipping $host\n");
+        next;
+    }
+
+    #
+    # Read the backups file
+    #
+    @Backups = $bpc->BackupInfoRead($host);
+
+    #
+    # Temporary: create backupInfo files in each backup
+    # directory
+    #
+    foreach ( my $i = 0 ; $i < @Backups ; $i++ ) {
+        BackupPC::Storage->backupInfoWrite($dir, $Backups[$i]{num},
+                                           $Backups[$i]);
+        if ( 0 ) {
+            my $bkupNum = $Backups[$i]{num};
+            if ( !-f "$dir/$bkupNum/backupInfo" ) {
+                my($dump) = Data::Dumper->new(
+                         [   $Backups[$i]],
+                         [qw(*backupInfo)]);
+                $dump->Indent(1);
+                if ( open(BKUPINFO, ">", "$dir/$bkupNum/backupInfo") ) {
+                    print(BKUPINFO $dump->Dump);
+                    close(BKUPINFO);
+                }
+            }
+        }
+    }
+
+    #
+    # Look through the LOG files to get information about
+    # completed backups.  The data from the LOG file is
+    # incomplete, but enough to get some useful info.
+    #
+    # Also, try to pick up the new-style of information
+    # that is kept in each backup tree.  This info is
+    # complete.  This data is only saved after version
+    # 2.1.2.
+    #
+    my @files = readdir(DIR);
+    closedir(DIR);
+    foreach my $file ( @files ) {
+        if ( $file =~ /^LOG(.\d+\.z)?/ ) {
+            push(@LogFiles, $file);
+        } elsif ( $file =~ /^(\d+)$/ ) {
+            my $bkupNum = $1;
+            $BkupNums->{$bkupNum} = 1;
+
+            next if ( !-f "$dir/$bkupNum/backupInfo" );
+
+            #
+            # Read backup info
+            #
+            %backupInfo = ();
+            print("    Reading $dir/$bkupNum/backupInfo\n");
+            if ( !(my $ret = do "$dir/$bkupNum/backupInfo") ) {
+                print("    couldn't parse $dir/$bkupNum/backupInfo: $@\n") if $@;
+                print("    couldn't do $dir/$bkupNum/backupInfo: $!\n")
+                                                        unless defined $ret;
+                print("    couldn't run $dir/$bkupNum/backupInfo\n");
+                next;
+            }
+            if ( !keys(%backupInfo) || !defined($backupInfo{num}) ) {
+                print("    $dir/$bkupNum/backupInfo is empty\n");
+                next;
+            }
+            %{$BkupFromInfo->{$backupInfo{num}}} = %backupInfo;
+        }
+    }
+
+    #
+    # Read through LOG files from oldest to newest
+    #
+    @LogFiles = sort({-M "$dir/$a" <=> -M "$dir/$b"} @LogFiles);
+    my $startTime;
+    foreach my $file ( @LogFiles ) {
+        my $f = BackupPC::FileZIO->open("$dir/$file", 0, $file =~ /\.z/);
+
+        if ( !defined($f) ) {
+            print("$host: unable to open file $dir/$file\n");
+            next;
+        }
+        print("    Reading $file\n");
+        while ( (my $str = $f->readLine()) ne "" ) {
+            if ( $str =~ /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (full|incr|partial) backup started for directory / ) {
+                $startTime = $str;
+                next;
+            }
+            next if ( $str !~ /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (full|incr|partial) backup (\d+) complete, (\d+) files, (\d+) bytes, (\d+) xferErrs \((\d+) bad files, (\d+) bad shares, (\d+) other\)/ );
+
+            my $endTime     = $1;
+            my $type        = $2;
+            my $bkupNum     = $3;
+            my $nFilesTotal = $4;
+            my $sizeTotal   = $5;
+            my $xferErrs    = $6;
+            my $badFiles    = $7;
+            my $badShare    = $8;
+            print("    Got $type backup $bkupNum at $endTime\n");
+            next if ( !-d "$dir/$2" );
+            $BkupFromLOG->{$bkupNum} = {
+                num            => $bkupNum,
+                type           => $type,
+                startTime      => parsedate($startTime),
+                endTime        => parsedate($endTime),
+                size           => $sizeTotal,
+                nFiles         => $nFilesTotal,
+                xferErrs       => $xferErrs,
+                xferBadFile    => $badFiles,
+                xferBadShare   => $badShare,
+                nFilesExist    => 0,
+                sizeExist      => 0,
+                sizeExistComp  => 0,
+                tarErrs        => 0,
+                compress       => $Conf{CompressLevel},
+                noFill         => $type eq "incr" ? 1 : 0,
+                level          => $type eq "incr" ? 1 : 0,
+                mangle         => 1,
+                noFill         => $noFill;
+                fillFromNum    => $fillFromNum;
+            };
+        }
+    }
+
+    splice(@Backups, 2, 1);
+    
+    #
+    # Now merge any info from $BkupFromInfo and $BkupFromLOG
+    # that is missing from @Backups.
+    #
+    # First, anything in @Backups overrides the other data
+    #
+    #
+    foreach ( my $i = 0 ; $i < @Backups ; $i++ ) {
+        my $bkupNum = $Backups[$i]{num};
+        delete($BkupFromLOG->{$bkupNum});
+        delete($BkupFromInfo->{$bkupNum});
+        delete($BkupNums->{$bkupNum});
+    }
+
+    #
+    # Now merge in data from the LOG and backupInfo files.
+    # backupInfo files override LOG files.
+    #
+    my $changes;
+
+    foreach my $bkupNum ( keys(%$BkupFromLOG) ) {
+        next if ( defined($BkupFromInfo->{$bkupNum}) );
+        print("    Adding info for backup $bkupNum from LOG file\n");
+        push(@Backups, $BkupFromLOG->{$bkupNum});
+        delete($BkupNums->{$bkupNum});
+        $changes++;
+    }
+    foreach my $bkupNum ( keys(%$BkupFromInfo) ) {
+        print("    Adding info for backup $bkupNum from backupInfo file\n");
+        push(@Backups, $BkupFromInfo->{$bkupNum});
+        delete($BkupNums->{$bkupNum});
+        $changes++;
+    }
+    foreach my $bkupNum ( keys(%$BkupNums) ) {
+        print("    *** No info for backup number $bkupNum\n");
+    }
+
+    if ( $changes ) {
+        @Backups = sort({$a->{num} <=> $b->{num}} @Backups);
+        print Dumper \@Backups;
+    } else {
+        print("    No changes for host $host\n");
+    }
+}

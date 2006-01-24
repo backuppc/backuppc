@@ -494,4 +494,53 @@ sub filePartialCompare
     return 1;
 }
 
+#
+# LinkOrCopy() does a hardlink from oldFile to newFile.
+#
+# If that fails (because there are too many links on oldFile)
+# then oldFile is copied to newFile, and the pool stats are
+# returned to be added to the new file list.  That allows
+# BackupPC_link to try again, and to create a new pool file
+# if necessary.
+#
+sub LinkOrCopy
+{
+    my($bpc, $oldFile, $oldFileComp, $newFile, $newFileComp) = @_;
+    my($nRead, $data);
+
+    unlink($newFile)  if ( -f $newFile );
+    #
+    # Try to link if hardlink limit is ok, and compression types
+    # are the same
+    #
+    return (1, undef) if ( (stat($oldFile))[3] < $bpc->{Conf}{HardLinkMax}
+                            && !$oldFileComp == !$newFileComp
+                            && link($oldFile, $newFile) );
+    #
+    # There are too many links on oldFile, or compression
+    # type if different, so now we have to copy it.
+    #
+    # We need to compute the file size, which is expensive
+    # since we need to read the file twice.  That's probably
+    # ok since the hardlink limit is rarely hit.
+    #
+    my $readFd = BackupPC::FileZIO->open($oldFile, 0, $oldFileComp);
+    if ( !defined($readFd) ) {
+        return (0, undef, undef, undef, ["LinkOrCopy: can't open $oldFile"]);
+    }
+    while ( $readFd->read(\$data, $BufSize) > 0 ) {
+        $nRead += length($data);
+    }
+    $readFd->rewind();
+
+    my $poolWrite = BackupPC::PoolWrite->new($bpc, $newFile,
+                                             $nRead, $newFileComp);
+    while ( $readFd->read(\$data, $BufSize) > 0 ) {
+        $poolWrite->write(\$data);
+    }
+    my($exists, $digest, $outSize, $errs) = $poolWrite->close;
+
+    return ($exists, $digest, $nRead, $outSize, $errs);
+}
+
 1;

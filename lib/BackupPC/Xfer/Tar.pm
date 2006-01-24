@@ -221,8 +221,13 @@ sub readOutput
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 2 );
             $t->{fileCnt}++;
         } else {
-            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
-            $t->{xferErrCnt}++;
+            #
+            # Ignore annoying log message on incremental for tar 1.15.x
+            #
+            if ( !/: file is unchanged; not dumped$/ ) {
+                $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
+                $t->{xferErrCnt}++;
+            }
 	    #
 	    # If tar encounters a minor error, it will exit with a non-zero
 	    # status.  We still consider that ok.  Remember if tar prints

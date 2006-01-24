@@ -22,6 +22,7 @@ package BackupPC::Xfer::RsyncFileIO;
 
 use strict;
 use File::Path;
+use Encode qw/from_to/;
 use BackupPC::Attrib qw(:all);
 use BackupPC::View;
 use BackupPC::Xfer::RsyncDigest qw(:all);
@@ -1145,22 +1146,38 @@ sub fileDeltaRxDone
             #
             my $rxOutFile = $fio->{outDirSh}
                             . $fio->{bpc}->fileNameMangle($name);
-            if ( !link($attr->{fullPath}, $rxOutFile) ) {
-                $fio->log("Unable to link $attr->{fullPath} to $rxOutFile");
-		$fio->{stats}{errorCnt}++;
-		$ret = -1;
-            } else {
-		#
-		# Cumulate the stats
-		#
-		$fio->{stats}{TotalFileCnt}++;
-		$fio->{stats}{TotalFileSize} += $fio->{rxSize};
-		$fio->{stats}{ExistFileCnt}++;
-		$fio->{stats}{ExistFileSize} += $fio->{rxSize};
-		$fio->{stats}{ExistFileCompSize} += -s $rxOutFile;
-		$fio->{rxFile}{size} = $fio->{rxSize};
-		$ret = $fio->attribSet($fio->{rxFile});
-	    }
+            my($exists, $digest, $origSize, $outSize, $errs)
+                                = BackupPC::PoolWrite::LinkOrCopy(
+                                      $fio->{bpc},
+                                      $attr->{fullPath},
+                                      $attr->{compress},
+                                      $rxOutFile,
+                                      $fio->{xfer}{compress});
+            #
+            # Cumulate the stats
+            #
+            $fio->{stats}{TotalFileCnt}++;
+            $fio->{stats}{TotalFileSize} += $fio->{rxSize};
+            $fio->{stats}{ExistFileCnt}++;
+            $fio->{stats}{ExistFileSize} += $fio->{rxSize};
+            $fio->{stats}{ExistFileCompSize} += -s $rxOutFile;
+            $fio->{rxFile}{size} = $fio->{rxSize};
+            $ret = $fio->attribSet($fio->{rxFile});
+            $fio->log(@$errs) if ( defined($errs) && @$errs );
+
+            if ( !$exists && $outSize > 0 ) {
+                #
+                # the hard link failed, most likely because the target
+                # file has too many links.  We have copied the file
+                # instead, so add this to the new file list.
+                #
+                my $rxOutFileRel = "$fio->{shareM}/"
+                                 . $fio->{bpc}->fileNameMangle($name);
+                $rxOutFileRel =~ s{^/+}{};
+                my $fh = $fio->{newFilesFH};
+                print($fh "$digest $origSize $rxOutFileRel\n")
+                                                if ( defined($fh) );
+            }
         }
     } else {
 	my $exist = $fio->processClose($fio->{rxOutFd},
@@ -1285,10 +1302,16 @@ sub fileListEltSend
         size  => $a->{size},
         %$extraAttribs,
     };
+    my $logName = $f->{name};
+    from_to($f->{name}, "utf8", $fio->{clientCharset})
+                            if ( $fio->{clientCharset} ne "" );
     $fList->encode($f);
-    $f->{name} = "$fio->{xfer}{pathHdrDest}/$f->{name}";
-    $f->{name} =~ s{//+}{/}g;
+
+    $logName = "$fio->{xfer}{pathHdrDest}/$f->{name}";
+    $logName =~ s{//+}{/}g;
+    $f->{name} = $logName;
     $fio->logFileAction("restore", $f) if ( $fio->{logLevel} >= 1 );
+
     &$outputFunc($fList->encodeData);
     #
     # Cumulate stats

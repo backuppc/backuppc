@@ -39,6 +39,7 @@ package BackupPC::Storage;
 
 use strict;
 use BackupPC::Storage::Text;
+use Data::Dumper;
 
 sub new
 {
@@ -51,6 +52,7 @@ sub new
                     xferErrs xferBadFile xferBadShare tarErrs
                     compress sizeExistComp sizeNewComp
                     noFill fillFromNum mangle xferMethod level
+                    charset
                 )],
         RestoreFields => [qw(
                     num startTime endTime result errorMsg nFiles size
@@ -62,6 +64,26 @@ sub new
     };
 
     return BackupPC::Storage::Text->new($flds, $paths, @_);
+}
+
+#
+# Writes per-backup information into the pc/nnn/backupInfo
+# file to allow later recovery of the pc/backups file in
+# cases when it is corrupted.
+#
+sub backupInfoWrite
+{
+    my($class, $pcDir, $bkupNum, $bkupInfo, $force) = @_;
+
+    return if ( !$force && -f "$pcDir/$bkupNum/backupInfo" );
+    my($dump) = Data::Dumper->new(
+             [   $bkupInfo],
+             [qw(*backupInfo)]);
+    $dump->Indent(1);
+    if ( open(BKUPINFO, ">", "$pcDir/$bkupNum/backupInfo") ) {
+        print(BKUPINFO $dump->Dump);
+        close(BKUPINFO);
+    }
 }
 
 1;

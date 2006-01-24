@@ -78,21 +78,28 @@ EOF
 }
 
 my %opts;
+$opts{fhs} = 1;
+$opts{"set-perms"} = 1;
+$opts{"backuppc-user"} = "backuppc";
 if ( !GetOptions(
             \%opts,
             "batch",
+            "backuppc-user=s",
             "bin-path=s%",
-            "config-path=s",
             "cgi-dir=s",
+            "compress-level=i",
+            "config-path=s",
             "data-dir=s",
             "dest-dir=s",
+            "fhs!",
             "help|?",
             "hostname=s",
             "html-dir=s",
             "html-dir-url=s",
             "install-dir=s",
             "man",
-            "uid-ignore",
+            "set-perms!",
+            "uid-ignore!",
         ) || @ARGV ) {
     pod2usage(2);
 }
@@ -101,7 +108,7 @@ pod2usage(-exitstatus => 0, -verbose => 2) if $opts{man};
 
 my $DestDir = $opts{"dest-dir"};
 
-if ( $< != 0 ) {
+if ( !$opts{"uid-ignore"} && $< != 0 ) {
     print <<EOF;
 
 This configure script should be run as root, rather than uid $<.
@@ -115,11 +122,29 @@ EOF
     exit(1) if ( $opts{batch} && !$opts{"uid-ignore"} );
 }
 
-print <<EOF;
+#
+# Whether we use the file system hierarchy conventions or not.
+# Older versions did not.  BackupPC used to be installed in
+# two main directories (in addition to CGI and html pages)
+#
+#    TopDir       which includes subdirs conf, log, pc, pool, cpool
+#                
+#    InstallDir   which includes subdirs bin, lib, doc
+#
+# With FSH enabled (which is the default for new installations):
+#
+#    /etc/BackupPC/config.pl  main config file (was $TopDir/conf/config.pl)
+#    /etc/BackupPC/hosts      hosts file (was $TopDir/conf/hosts)
+#    /etc/BackupPC/pc/HOST.pl per-pc config file (was $TopDir/pc/HOST/config.pl)
+#    /var/log/BackupPC        log files (was $TopDir/log)
+#    /var/lib/BackupPC        Pid, status and email info (was $TopDir/log)
+#
+
+print <<EOF if ( !$opts{fhs} || !-f "/etc/BackupPC/config.pl" );
 
 Is this a new installation or upgrade for BackupPC?  If this is
 an upgrade please tell me the full path of the existing BackupPC
-configuration file (eg: /xxxx/conf/config.pl).  Otherwise, just
+configuration file (eg: /etc/BackupPC/config.pl).  Otherwise, just
 hit return.
 
 EOF
@@ -130,29 +155,38 @@ EOF
 #
 my $ConfigPath = "";
 while ( 1 ) {
-    $ConfigPath = prompt("--> Full path to existing conf/config.pl",
-                         $ConfigPath,
-                         "config-path");
+    if ( $opts{fhs} && -f "/etc/BackupPC/config.pl" ) {
+        $ConfigPath = "/etc/BackupPC/config.pl";
+    } else {
+        $ConfigPath = prompt("--> Full path to existing main config.pl",
+                             $ConfigPath,
+                             "config-path");
+    }
     last if ( $ConfigPath eq ""
             || ($ConfigPath =~ /^\// && -r $ConfigPath && -w $ConfigPath) );
     my $problem = "is not an absolute path";
-    $problem = "is not writable" if ( !-w $ConfigPath );
-    $problem = "is not readable" if ( !-r $ConfigPath );
-    $problem = "doesn't exist"   if ( !-f $ConfigPath );
+    $problem = "is not writable"        if ( !-w $ConfigPath );
+    $problem = "is not readable"        if ( !-r $ConfigPath );
+    $problem = "is not a regular file"  if ( !-f $ConfigPath );
+    $problem = "doesn't exist"          if ( !-e $ConfigPath );
     print("The file '$ConfigPath' $problem.\n");
     if ( $opts{batch} ) {
         print("Need to specify a valid --config-path for upgrade\n");
         exit(1);
     }
 }
+
 my $bpc;
 if ( $ConfigPath ne "" && -r $ConfigPath ) {
-    (my $topDir = $ConfigPath) =~ s{/[^/]+/[^/]+$}{};
+    (my $confDir = $ConfigPath) =~ s{/[^/]+$}{};
     die("BackupPC::Lib->new failed\n")
-            if ( !($bpc = BackupPC::Lib->new($topDir, ".", 1)) );
+            if ( !($bpc = BackupPC::Lib->new(".", ".", $confDir, 1)) );
     %Conf = $bpc->Conf();
     %OrigConf = %Conf;
-    $Conf{TopDir} = $topDir;
+    if ( !$opts{fhs} ) {
+        ($Conf{TopDir} = $ConfigPath) =~ s{/[^/]+/[^/]+$}{};
+    }
+    $Conf{ConfDir} = $confDir;
     my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}, 1);
     if ( $err eq "" ) {
         print <<EOF;
@@ -164,6 +198,17 @@ you could run "/etc/init.d/backuppc stop".
 EOF
         exit(1);
     }
+}
+
+#
+# Create defaults for FHS setup
+#
+if ( $opts{fhs} ) {
+    $Conf{TopDir}       ||= "/data/BackupPC";
+    $Conf{ConfDir}      ||= "/etc/BackupPC";
+    $Conf{InstallDir}   ||= "/usr/local/BackupPC";
+    $Conf{LogDir}       ||= "/var/log/BackupPC";
+    $Conf{StatusDir}    ||= "/var/lib/BackupPC";
 }
 
 #
@@ -255,16 +300,18 @@ my($name, $passwd, $Uid, $Gid);
 while ( 1 ) {
     $Conf{BackupPCUser} = prompt("--> BackupPC should run as user",
                                  $Conf{BackupPCUser} || "backuppc",
-                                 "username");
-    ($name, $passwd, $Uid, $Gid) = getpwnam($Conf{BackupPCUser});
-    last if ( $name ne "" );
-    print <<EOF;
+                                 "backuppc-user");
+    if ( $opts{"set-perms"} ) {
+        ($name, $passwd, $Uid, $Gid) = getpwnam($Conf{BackupPCUser});
+        last if ( $name ne "" );
+        print <<EOF;
 
-getpwnam() says that user $Conf{BackupPCUser} doesn't exist.  Please check the
-name and verify that this user is in the passwd file.
+getpwnam() says that user $Conf{BackupPCUser} doesn't exist.  Please
+check the name and verify that this user is in the passwd file.
 
 EOF
-    exit(1) if ( $opts{batch} );
+        exit(1) if ( $opts{batch} );
+    }
 }
 
 print <<EOF;
@@ -288,9 +335,9 @@ while ( 1 ) {
 print <<EOF;
 
 Please specify a data directory for BackupPC.  This is where the
-configuration files, LOG files and all the PC backups are stored.
-This file system needs to be big enough to accommodate all the
-PCs you expect to backup (eg: at least 1-2GB per machine).
+all the PC backup data is stored.  This file system needs to be
+big enough to accommodate all the PCs you expect to backup (eg:
+at least several GB per machine).
 
 EOF
 
@@ -304,6 +351,9 @@ while ( 1 ) {
         exit(1);
     }
 }
+
+$Conf{CompressLevel} = $opts{"compress-level"}
+                            if ( defined($opts{"compress-level"}) );
 
 if ( !defined($Conf{CompressLevel}) ) {
     $Conf{CompressLevel} = BackupPC::FileZIO->compOk ? 3 : 0;
@@ -435,7 +485,7 @@ Ok, we're about to:
 
   - install the binaries, lib and docs in $Conf{InstallDir},
   - create the data directory $Conf{TopDir},
-  - create/update the config.pl file $Conf{TopDir}/conf,
+  - create/update the config.pl file $Conf{ConfDir}/config.pl,
   - optionally install the cgi-bin interface.
 
 EOF
@@ -447,16 +497,14 @@ exit unless prompt("--> Do you want to continue?", "y") =~ /y/i;
 #
 foreach my $dir ( qw(bin doc
 		     lib/BackupPC/CGI
-		     lib/BackupPC/Config
 		     lib/BackupPC/Lang
-		     lib/BackupPC/Storage
 		     lib/BackupPC/Xfer
 		     lib/BackupPC/Zip
 		 ) ) {
     next if ( -d "$DestDir$Conf{InstallDir}/$dir" );
     mkpath("$DestDir$Conf{InstallDir}/$dir", 0, 0775);
     if ( !-d "$DestDir$Conf{InstallDir}/$dir"
-            || !chown($Uid, $Gid, "$DestDir$Conf{InstallDir}/$dir") ) {
+            || !my_chown($Uid, $Gid, "$DestDir$Conf{InstallDir}/$dir") ) {
         die("Failed to create or chown $DestDir$Conf{InstallDir}/$dir\n");
     } else {
         print("Created $DestDir$Conf{InstallDir}/$dir\n");
@@ -467,9 +515,9 @@ foreach my $dir ( qw(bin doc
 # Create CGI image directory
 #
 foreach my $dir ( ($Conf{CgiImageDir}) ) {
-    next if ( $dir eq "" || -d "$DestDir$dir" );
+    next if ( $dir eq "" || -d $dir );
     mkpath("$DestDir$dir", 0, 0775);
-    if ( !-d "$DestDir$dir" || !chown($Uid, $Gid, "$DestDir$dir") ) {
+    if ( !-d "$DestDir$dir" || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
         die("Failed to create or chown $DestDir$dir");
     } else {
         print("Created $DestDir$dir\n");
@@ -477,15 +525,24 @@ foreach my $dir ( ($Conf{CgiImageDir}) ) {
 }
 
 #
-# Create $TopDir's top-level directories
+# Create other directories
 #
-foreach my $dir ( qw(. conf pool cpool pc trash log) ) {
-    mkpath("$DestDir$Conf{TopDir}/$dir", 0, 0750) if ( !-d "$DestDir$Conf{TopDir}/$dir" );
-    if ( !-d "$DestDir$Conf{TopDir}/$dir"
-            || !chown($Uid, $Gid, "$DestDir$Conf{TopDir}/$dir") ) {
-        die("Failed to create or chown $DestDir$Conf{TopDir}/$dir\n");
+foreach my $dir ( (
+            "$Conf{TopDir}",
+            "$Conf{TopDir}/pool",
+            "$Conf{TopDir}/cpool",
+            "$Conf{TopDir}/pc",
+            "$Conf{TopDir}/trash",
+            "$Conf{ConfDir}",
+            "$Conf{LogDir}",
+            "$Conf{StatusDir}",
+        ) ) {
+    mkpath("$DestDir/$dir", 0, 0750) if ( !-d "$DestDir/$dir" );
+    if ( !-d "$DestDir/$dir"
+            || !my_chown($Uid, $Gid, "$DestDir/$dir") ) {
+        die("Failed to create or chown $DestDir/$dir\n");
     } else {
-        print("Created $DestDir$Conf{TopDir}/$dir\n");
+        print("Created $DestDir/$dir\n");
     }
 }
 
@@ -501,12 +558,23 @@ foreach my $prog ( qw(BackupPC BackupPC_dump BackupPC_link BackupPC_nightly
 printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(
 	BackupPC/Lib.pm
-	BackupPC/Attrib.pm
 	BackupPC/FileZIO.pm
-        BackupPC/Config.pm
+	BackupPC/Attrib.pm
         BackupPC/PoolWrite.pm
-        BackupPC/Storage.pm
 	BackupPC/View.pm
+	BackupPC/Xfer/Archive.pm
+	BackupPC/Xfer/Tar.pm
+        BackupPC/Xfer/Smb.pm
+	BackupPC/Xfer/Rsync.pm
+	BackupPC/Xfer/RsyncDigest.pm
+        BackupPC/Xfer/RsyncFileIO.pm
+	BackupPC/Zip/FileMember.pm
+        BackupPC/Lang/en.pm
+	BackupPC/Lang/fr.pm
+	BackupPC/Lang/es.pm
+        BackupPC/Lang/de.pm
+        BackupPC/Lang/it.pm
+        BackupPC/Lang/nl.pm
         BackupPC/CGI/AdminOptions.pm
 	BackupPC/CGI/Archive.pm
 	BackupPC/CGI/ArchiveInfo.pm
@@ -527,22 +595,6 @@ foreach my $lib ( qw(
         BackupPC/CGI/StopServer.pm
 	BackupPC/CGI/Summary.pm
 	BackupPC/CGI/View.pm
-	BackupPC/Config/Meta.pm
-        BackupPC/Lang/en.pm
-	BackupPC/Lang/fr.pm
-	BackupPC/Lang/es.pm
-        BackupPC/Lang/de.pm
-        BackupPC/Lang/it.pm
-        BackupPC/Lang/nl.pm
-	BackupPC/Lang/pt_br.pm
-	BackupPC/Storage/Text.pm
-	BackupPC/Xfer/Archive.pm
-	BackupPC/Xfer/Tar.pm
-        BackupPC/Xfer/Smb.pm
-	BackupPC/Xfer/Rsync.pm
-	BackupPC/Xfer/RsyncDigest.pm
-        BackupPC/Xfer/RsyncFileIO.pm
-	BackupPC/Zip/FileMember.pm
     ) ) {
     InstallFile("lib/$lib", "$DestDir$Conf{InstallDir}/lib/$lib", 0444);
 }
@@ -577,16 +629,16 @@ foreach my $doc ( qw(BackupPC.pod BackupPC.html) ) {
     InstallFile("doc/$doc", "$DestDir$Conf{InstallDir}/doc/$doc", 0444);
 }
 
-printf("Installing config.pl and hosts in $DestDir$Conf{TopDir}/conf\n");
-InstallFile("conf/hosts", "$DestDir$Conf{TopDir}/conf/hosts", 0644)
-                    if ( !-f "$DestDir$Conf{TopDir}/conf/hosts" );
+printf("Installing config.pl and hosts in $DestDir$Conf{ConfDir}\n");
+InstallFile("conf/hosts", "$DestDir$Conf{ConfDir}/hosts", 0644)
+                    if ( !-f "$DestDir$Conf{ConfDir}/hosts" );
 
 #
 # Now do the config file.  If there is an existing config file we
 # merge in the new config file, adding any new configuration
 # parameters and deleting ones that are no longer needed.
 #
-my $dest = "$DestDir$Conf{TopDir}/conf/config.pl";
+my $dest = "$DestDir$Conf{ConfDir}/config.pl";
 my ($newConf, $newVars) = ConfigParse("conf/config.pl");
 my ($oldConf, $oldVars);
 if ( -f $dest ) {
@@ -711,10 +763,12 @@ if ( -f $dest && !-f $confCopy ) {
     my $mode = $stat[2];
     my $uid  = $stat[4];
     my $gid  = $stat[5];
-    die("can't copy($dest, $confCopy)\n")  unless copy($dest, $confCopy);
+    die("can't copy($dest, $confCopy)\n")
+                                unless copy($dest, $confCopy);
     die("can't chown $uid, $gid $confCopy\n")
-                                           unless chown($uid, $gid, $confCopy);
-    die("can't chmod $mode $confCopy\n")   unless chmod($mode, $confCopy);
+                                unless my_chown($uid, $gid, $confCopy);
+    die("can't chmod $mode $confCopy\n")
+                                unless my_chmod($mode, $confCopy);
 }
 open(OUT, ">", $dest) || die("can't open $dest for writing\n");
 binmode(OUT);
@@ -735,8 +789,8 @@ foreach my $var ( @$newConf ) {
 }
 close(OUT);
 if ( !defined($oldConf) ) {
-    die("can't chmod 0640 mode $dest\n")  unless chmod(0640, $dest);
-    die("can't chown $Uid, $Gid $dest\n") unless chown($Uid, $Gid, $dest);
+    die("can't chmod 0640 mode $dest\n")  unless my_chmod(0640, $dest);
+    die("can't chown $Uid, $Gid $dest\n") unless my_chown($Uid, $Gid, $dest);
 }
 
 if ( $Conf{CgiDir} ne "" ) {
@@ -751,12 +805,12 @@ print <<EOF;
 Ok, it looks like we are finished.  There are several more things you
 will need to do:
 
-  - Browse through the config file, $Conf{TopDir}/conf/config.pl,
+  - Browse through the config file, $Conf{ConfDir}/config.pl,
     and make sure all the settings are correct.  In particular, you
     will need to set the smb share password and user name, backup
     policies and check the email message headers and bodies.
 
-  - Edit the list of hosts to backup in $Conf{TopDir}/conf/hosts.
+  - Edit the list of hosts to backup in $Conf{ConfDir}/hosts.
 
   - Read the documentation in $Conf{InstallDir}/doc/BackupPC.html.
     Please pay special attention to the security section.
@@ -789,9 +843,9 @@ EOF
 }
 
 eval "use File::RsyncP;";
-if ( !$@ && $File::RsyncP::VERSION < 0.51 ) {
+if ( !$@ && $File::RsyncP::VERSION < 0.52 ) {
     print("\nWarning: you need to upgrade File::RsyncP;"
-        . " I found $File::RsyncP::VERSION and BackupPC needs 0.51\n");
+        . " I found $File::RsyncP::VERSION and BackupPC needs 0.52\n");
 }
 
 exit(0);
@@ -825,6 +879,8 @@ sub InstallFile
 	binmode(OUT);
 	while ( <PROG> ) {
 	    s/__INSTALLDIR__/$Conf{InstallDir}/g;
+	    s/__LOGDIR__/$Conf{LogDir}/g;
+	    s/__CONFDIR__/$Conf{ConfDir}/g;
 	    s/__TOPDIR__/$Conf{TopDir}/g;
 	    s/__BACKUPPCUSER__/$Conf{BackupPCUser}/g;
 	    s/__CGIDIR__/$Conf{CgiDir}/g;
@@ -841,8 +897,8 @@ sub InstallFile
 	close(PROG);
 	close(OUT);
     }
-    die("can't chown $uid, $gid $dest") unless chown($uid, $gid, $dest);
-    die("can't chmod $mode $dest")      unless chmod($mode, $dest);
+    die("can't chown $uid, $gid $dest") unless my_chown($uid, $gid, $dest);
+    die("can't chmod $mode $dest")      unless my_chmod($mode, $dest);
 }
 
 sub FindProgram
@@ -954,6 +1010,22 @@ sub ConfigMerge
     return $res;
 }
 
+sub my_chown
+{
+    my($uid, $gid, $file) = @_;
+
+    return 1 if ( !$opts{"set-perms"} );
+    return chown($uid, $gid, $file);
+}
+
+sub my_chmod
+{
+    my ($mode, $file) = @_;
+
+    return 1 if ( !$opts{"set-perms"} );
+    return chmod($mode, $file);
+}
+
 sub prompt
 {
     my($question, $default, $option) = @_;
@@ -998,6 +1070,11 @@ Run configure.pl in batch mode.  configure.pl will run without
 prompting the user.  The other command-line options are used
 to specify the settings that the user is usually prompted for.
 
+=item B<--backuppc-user=USER>
+
+Specify the BackupPC user name that owns all the BackupPC
+files and runs the BackupPC programs.  Default is backuppc.
+
 =item B<--bin-path PROG=PATH>
 
 Specify the path for various external programs that BackupPC
@@ -1014,6 +1091,11 @@ PATH is that full path to that program.
 Examples
 
     --bin-path cat=/bin/cat --bin-path bzip2=/home/user/bzip2
+
+=item B<--compress-level=N>
+
+Set the configuration compression level to N.  Default is 3
+if Compress::Zlib is installed.
 
 =item B<--config-path CONFIG_PATH>
 
@@ -1049,6 +1131,12 @@ specify this option, BackupPC won't run correctly if you try
 to run it from below the --dest-dir directory, since all the
 paths are set assuming BackupPC is installed in the intended
 final locations.
+
+=item B<--fhs>
+
+Use locations specified by the Filesystem Hierarchy Standard
+for installing BackupPC.  This is enabled by default.  To
+use the pre-3.0 installation locations, specify --no-fhs.
 
 =item B<--help|?>
 
@@ -1093,6 +1181,13 @@ Example:
 =item B<--man>
 
 Prints the manual page and exits.
+
+=item B<--set-perms>
+
+When installing files and creating directories, chown them to
+the BackupPC user and chmod them too.  This is enabled by default.
+To disable (for example, if staging a destination directory)
+then specify --no-set-perms.
 
 =item B<--uid-ignore>
 

@@ -1,0 +1,550 @@
+#!/bin/perl
+#============================================================= -*-perl-*-
+#
+# BackupPC_tarPCCopy: create a tar archive of the PC directory
+# for copying the entire PC data directory.  The archive will
+# contain hardlinks to the pool directory, which should be copied
+# before BackupPC_tarPCCopy is run.
+#
+# DESCRIPTION
+#  
+#   Usage: BackupPC_tarPCCopy [options] files/directories...
+#
+#   Flags:
+#       -c      don't cache inode data (reduces memory usage at the
+#                                       expense of longer run time)
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2005  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 2.1.0, released 20 Jun 2004.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+no  utf8;
+use lib "/usr/local/BackupPC/lib";
+use File::Find;
+use File::Path;
+use Getopt::Std;
+
+use BackupPC::Lib;
+use BackupPC::Attrib qw(:all);
+use BackupPC::FileZIO;
+use BackupPC::View;
+
+use constant S_IFMT       => 0170000;   # type of file
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+
+my %opts;
+
+if ( !getopts("c", \%opts) || @ARGV < 1 ) {
+    print STDERR <<EOF;
+usage: $0 [options] files/directories...
+  Options:
+     -c      don't cache inode data (reduces memory usage at the
+                                     expense of longer run time)
+EOF
+    exit(1);
+}
+
+#
+# This constant and the line of code below that uses it are borrowed
+# from Archive::Tar.  Thanks to Calle Dybedahl and Stephen Zander.
+# See www.cpan.org.
+#
+# Archive::Tar is Copyright 1997 Calle Dybedahl. All rights reserved.
+#                 Copyright 1998 Stephen Zander. All rights reserved.
+#
+my $tar_pack_header
+    = 'a100 a8 a8 a8 a12 a12 A8 a1 a100 a6 a2 a32 a32 a8 a8 a155 x12';
+my $tar_header_length = 512;
+
+my $BufSize    = 1048576;               # 1MB or 2^20
+my $WriteBuf   = "";
+my $WriteBufSz = ($opts{b} || 20) * $tar_header_length;
+
+my(%UidCache, %GidCache);
+
+my($ClientName, $ClientBackups, $ClientBkupNum, $ClientDirAttr, $ClientDir);
+
+my $FileCnt    = 0;
+my $HLinkCnt   = 0;
+my $ByteCnt    = 0;        
+my $DirCnt     = 0;
+my $ErrorCnt   = 0;       
+my $ClientBkupCompress = 1;
+my $ClientBkupMangle   = 1;
+
+my %Inode2Path;
+
+#
+# Write out all the requested files/directories
+#
+binmode(STDOUT);
+my $fh = *STDOUT;
+
+my $argCnt = 1;
+my $argMax = @ARGV;
+
+while ( @ARGV ) {
+    my $path = shift(@ARGV);
+
+    if ( $path !~ m{^\Q$TopDir/\E} ) {
+        print STDERR "Argument $path must be an absolute path starting with $TopDir\n";
+        exit(1);
+    }
+    if ( !-d $path ) {
+        print STDERR "Argument $path does not exist\n";
+        exit(1);
+    }
+
+    find({wanted => sub { archiveFile($fh) } }, $path);
+
+    #
+    # To avoid using too much memory for the inode cache,
+    # remove it after each top-level directory is done.
+    #
+    %Inode2Path = ();
+
+    #
+    # Print some stats
+    #
+    print STDERR "Done $path ($argCnt of $argMax): $DirCnt dirs,"
+               . " $FileCnt files, $HLinkCnt hardlinks\n";
+
+    $FileCnt    = 0;
+    $HLinkCnt   = 0;
+    $ByteCnt    = 0;        
+    $DirCnt     = 0;
+
+    $argCnt++;
+}
+
+#
+# Finish with two null 512 byte headers, and then round out a full
+# block.
+# 
+my $data = "\0" x ($tar_header_length * 2);
+TarWrite($fh, \$data);
+TarWrite($fh, undef);
+
+if ( $ErrorCnt ) {
+    #
+    # Got errors so exit with a non-zero status
+    #
+    print STDERR "Got $ErrorCnt warnings/errors\n";
+    exit(1);
+}
+exit(0);
+
+###########################################################################
+# Subroutines
+###########################################################################
+
+sub archiveFile
+{
+    my($fh) = @_;
+    my($hdr);
+
+    my @s = stat($_);
+
+    #
+    # We just handle directories and files; no symlinks or
+    # char/block special files.
+    #
+    $hdr->{type}     = -d _ ? BPC_FTYPE_DIR
+                     : -f _ ? BPC_FTYPE_FILE
+                     : -1;
+    $hdr->{fullPath} = $File::Find::name;
+    $hdr->{inode}    = $s[1];
+    $hdr->{nlink}    = $s[3];
+    $hdr->{size}     = $s[7];
+    $hdr->{devmajor} = $s[6] >> 8;
+    $hdr->{devminor} = $s[6] & 0xff;
+    $hdr->{uid}      = $s[4];
+    $hdr->{gid}      = $s[5];
+    $hdr->{mode}     = $s[2];
+    $hdr->{mtime}    = $s[9];
+    $hdr->{compress} = 1;
+
+    if ( $hdr->{fullPath} !~ m{\Q$TopDir\E/pc/(.*)} ) {
+        print STDERR "Can't extract TopDir ($TopDir) from"
+                   . " $hdr->{fullPath}\n";
+        $ErrorCnt++;
+        return;
+    }
+    $hdr->{relPath}  = $1;
+    if ( $hdr->{relPath} =~ m{(.*)/(.*)} ) {
+        $hdr->{name} = $2;
+    } else {
+        $hdr->{name} = $hdr->{relPath};
+    }
+
+    if ( $hdr->{relPath} =~ m{(.*?)/} ) {
+        my $clientName = $1;
+        if ( $ClientName ne $clientName ) {
+            $ClientName    = $clientName;
+            $ClientBackups = [ $bpc->BackupInfoRead($ClientName) ];
+            #print STDERR "Setting Client to $ClientName\n";
+        }
+        if ( $hdr->{relPath} =~ m{(.*?)/(\d+)/}
+                 || $hdr->{relPath} =~ m{(.*?)/(\d+)$} ) {
+            my $backupNum = $2;
+            if ( $ClientBkupNum != $backupNum ) {
+                my $i;
+                $ClientBkupNum = $backupNum;
+                # print STDERR "Setting ClientBkupNum to $ClientBkupNum\n";
+                for ( $i = 0 ; $i < @$ClientBackups ; $i++ ) {
+                    if ( $ClientBackups->[$i]{num} == $ClientBkupNum ) {
+                        $ClientBkupCompress = $ClientBackups->[$i]{compress};
+                        $ClientBkupMangle   = $ClientBackups->[$i]{mangle};
+                        # print STDERR "Setting $ClientBkupNum compress to $ClientBkupCompress, mangle to $ClientBkupMangle\n";
+                        last;
+                    }
+                }
+            }
+            $hdr->{compress} = $ClientBkupCompress;
+            if ( $hdr->{type} == BPC_FTYPE_FILE && $hdr->{nlink} > 1
+                    && $hdr->{name} =~ /^f/ ) {
+                (my $dir = $hdr->{fullPath}) =~ s{(.*)/.*}{$1};
+                if ( $ClientDir ne $dir ) {
+                    $ClientDir = $dir;
+                    $ClientDirAttr = BackupPC::Attrib->new(
+                                          { compress => $ClientBkupCompress }
+                                     );
+                    if ( -f $ClientDirAttr->fileName($dir)
+                                && !$ClientDirAttr->read($dir) ) {
+                        print STDERR "Can't read attrib file in $dir\n";
+                        $ErrorCnt++;
+                    }
+                }
+                my $name = $hdr->{name};
+                $name = $bpc->fileNameUnmangle($name) if ( $ClientBkupMangle );
+                my $attr = $ClientDirAttr->get($name);
+                $hdr->{realSize} = $attr->{size} if ( defined($attr) );
+                #print STDERR "$hdr->{fullPath} has real size $hdr->{realSize}\n";
+            }
+        }
+    } else {
+        $hdr->{compress} = 0;
+        $hdr->{realSize} = $hdr->{size};
+    }
+
+    #print STDERR "$File::Find::name\n";
+
+    TarWriteFile($hdr, $fh);
+}
+
+sub UidLookup
+{
+    my($uid) = @_;
+
+    $UidCache{$uid} = (getpwuid($uid))[0] if ( !exists($UidCache{$uid}) );
+    return $UidCache{$uid};
+}
+
+sub GidLookup
+{
+    my($gid) = @_;
+
+    $GidCache{$gid} = (getgrgid($gid))[0] if ( !exists($GidCache{$gid}) );
+    return $GidCache{$gid};
+}
+
+sub TarWrite
+{
+    my($fh, $dataRef) = @_;
+
+    if ( !defined($dataRef) ) {
+        #
+        # do flush by padding to a full $WriteBufSz
+        #
+        my $data = "\0" x ($WriteBufSz - length($WriteBuf));
+        $dataRef = \$data;
+    }
+    if ( length($WriteBuf) + length($$dataRef) < $WriteBufSz ) {
+        #
+        # just buffer and return
+        #
+        $WriteBuf .= $$dataRef;
+        return;
+    }
+    my $done = $WriteBufSz - length($WriteBuf);
+    if ( (my $n = syswrite($fh, $WriteBuf . substr($$dataRef, 0, $done)))
+                                != $WriteBufSz ) {
+        print(STDERR "Unable to write to output file ($!) ($n vs $WriteBufSz)\n");
+        exit(1);
+    }
+    while ( $done + $WriteBufSz <= length($$dataRef) ) {
+        if ( (my $n = syswrite($fh, substr($$dataRef, $done, $WriteBufSz)))
+                            != $WriteBufSz ) {
+            print(STDERR "Unable to write to output file ($!) ($n v $WriteBufSz)\n");
+            exit(1);
+        }
+        $done += $WriteBufSz;
+    }
+    $WriteBuf = substr($$dataRef, $done);
+}
+
+sub TarWritePad
+{
+    my($fh, $size) = @_;
+
+    if ( $size % $tar_header_length ) {
+        my $data = "\0" x ($tar_header_length - ($size % $tar_header_length));
+        TarWrite($fh, \$data);
+    }
+}
+
+sub TarWriteHeader
+{
+    my($fh, $hdr) = @_;
+
+    $hdr->{uname} = UidLookup($hdr->{uid}) if ( !defined($hdr->{uname}) );
+    $hdr->{gname} = GidLookup($hdr->{gid}) if ( !defined($hdr->{gname}) );
+    my $devmajor = defined($hdr->{devmajor}) ? sprintf("%07o", $hdr->{devmajor})
+                                             : "";
+    my $devminor = defined($hdr->{devminor}) ? sprintf("%07o", $hdr->{devminor})
+                                             : "";
+    my $sizeStr;
+    if ( $hdr->{size} >= 2 * 65536 * 65536 ) {
+	#
+	# GNU extension for files >= 8GB: send size in big-endian binary
+	#
+	$sizeStr = pack("c4 N N", 0x80, 0, 0, 0,
+				  $hdr->{size} / (65536 * 65536),
+				  $hdr->{size} % (65536 * 65536));
+    } elsif ( $hdr->{size} >= 1 * 65536 * 65536 ) {
+	#
+	# sprintf octal only handles up to 2^32 - 1
+	#
+	$sizeStr = sprintf("%03o", $hdr->{size} / (1 << 24))
+		 . sprintf("%08o", $hdr->{size} % (1 << 24));
+    } else {
+	$sizeStr = sprintf("%011o", $hdr->{size});
+    }
+    my $data = pack($tar_pack_header,
+                     substr($hdr->{name}, 0, 99),
+                     sprintf("%07o", $hdr->{mode}),
+                     sprintf("%07o", $hdr->{uid}),
+                     sprintf("%07o", $hdr->{gid}),
+                     $sizeStr,
+                     sprintf("%011o", $hdr->{mtime}),
+                     "",        #checksum field - space padded by pack("A8")
+                     $hdr->{type},
+                     substr($hdr->{linkname}, 0, 99),
+                     $hdr->{magic} || 'ustar ',
+                     $hdr->{version} || ' ',
+                     $hdr->{uname},
+                     $hdr->{gname},
+                     $devmajor,
+                     $devminor,
+                     ""         # prefix is empty
+                 );
+    substr($data, 148, 7) = sprintf("%06o\0", unpack("%16C*",$data));
+    TarWrite($fh, \$data);
+}
+
+sub TarWriteFileInfo
+{
+    my($fh, $hdr) = @_;
+
+    #
+    # Handle long link names (symbolic links)
+    #
+    if ( length($hdr->{linkname}) > 99 ) {
+        my %h;
+        my $data = $hdr->{linkname} . "\0";
+        $h{name} = "././\@LongLink";
+        $h{type} = "K";
+        $h{size} = length($data);
+        TarWriteHeader($fh, \%h);
+        TarWrite($fh, \$data);
+        TarWritePad($fh, length($data));
+    }
+    #
+    # Handle long file names
+    #
+    if ( length($hdr->{name}) > 99 ) {
+        my %h;
+        my $data = $hdr->{name} . "\0";
+        $h{name} = "././\@LongLink";
+        $h{type} = "L";
+        $h{size} = length($data);
+        TarWriteHeader($fh, \%h);
+        TarWrite($fh, \$data);
+        TarWritePad($fh, length($data));
+    }
+    TarWriteHeader($fh, $hdr);
+}
+
+my $Attr;
+my $AttrDir;
+
+sub TarWriteFile
+{
+    my($hdr, $fh) = @_;
+
+    my $tarPath = $hdr->{relPath};
+
+    $tarPath =~ s{//+}{/}g;
+    $tarPath = "./" . $tarPath if ( $tarPath !~ /^\.\// );
+    $tarPath =~ s{//+}{/}g;
+    $hdr->{name} = $tarPath;
+
+    if ( $hdr->{type} == BPC_FTYPE_DIR ) {
+        #
+        # Directory: just write the header
+        #
+        $hdr->{name} .= "/" if ( $hdr->{name} !~ m{/$} );
+        TarWriteFileInfo($fh, $hdr);
+	$DirCnt++;
+    } elsif ( $hdr->{type} == BPC_FTYPE_FILE ) {
+        #
+        # Regular file: write the header and file
+        #
+        my($data, $dataMD5, $size, $linkName);
+
+        if ( $hdr->{type} == BPC_FTYPE_FILE && $hdr->{nlink} > 1 ) {
+            if ( defined($Inode2Path{$hdr->{inode}}) ) {
+                $linkName = $Inode2Path{$hdr->{inode}};
+                #print STDERR "Got cache hit for $linkName\n";
+            } else {
+                my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0,
+                                                $hdr->{compress});
+                if ( !defined($f) ) {
+                    print(STDERR "Unable to open file $hdr->{fullPath}\n");
+                    $ErrorCnt++;
+                    return;
+                }
+                #
+                # Try to find the hardlink it points to by computing
+                # the pool file digest.
+                #
+                $f->read(\$dataMD5, $BufSize);
+                if ( !defined($hdr->{realSize}) ) {
+                    #
+                    # Need to get the real size
+                    #
+                    $size = length($dataMD5);
+                    while ( $f->read(\$data, $BufSize) > 0 ) {
+                        $size += length($data);
+                    }
+                    $hdr->{realSize} = $size;
+                }
+                $f->close();
+                my $md5 = Digest::MD5->new;
+                if ( $hdr->{realSize} < 1048576
+                            && length($dataMD5) != $hdr->{realSize} ) {
+                    printf(STDERR "File $hdr->{fullPath} has bad size"
+                                . " (expect $hdr->{realSize}, got %d)\n",
+                                length($dataMD5));
+                } else {
+                    my $digest = $bpc->Buffer2MD5($md5, $hdr->{realSize},
+                                                  \$dataMD5);
+                    my $path = $bpc->MD52Path($digest, $hdr->{compress});
+                    my $i = -1;
+
+                    # print(STDERR "Looking up $hdr->{fullPath} at $path\n");
+                    while ( 1 ) {
+                        my $testPath = $path;
+                        $testPath .= "_$i" if ( $i >= 0 );
+                        last if ( !-f $testPath );
+                        my $inode = (stat(_))[1];
+                        if ( $inode == $hdr->{inode} ) {
+                            #
+                            # Found it!  Just emit a tar hardlink
+                            #
+                            $testPath =~ s{\Q$TopDir\E}{..};
+                            $linkName = $testPath;
+                            last;
+                        }
+                        $i++;
+                    }
+                }
+            }
+            if ( defined($linkName) ) {
+                $hdr->{type}     = BPC_FTYPE_HARDLINK;
+                $hdr->{linkname} = $linkName;
+                TarWriteFileInfo($fh, $hdr);
+                $HLinkCnt++;
+                #print STDERR "$hdr->{relPath} matches $testPath\n";
+                if ( !$opts{c} && $hdr->{nlink} > 2 ) {
+                    #
+                    # add it to the cache if there are more
+                    # than 2 links (pool + current file),
+                    # since there are more to go
+                    #
+                    $Inode2Path{$hdr->{inode}} = $linkName;
+                }
+                return;
+            }
+            $size = 0;
+            print STDERR "Can't find $hdr->{relPath} in pool, will copy file\n";
+            $ErrorCnt++;
+        }
+
+        my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0, 0);
+        if ( !defined($f) ) {
+            print(STDERR "Unable to open file $hdr->{fullPath}\n");
+            $ErrorCnt++;
+	    return;
+        }
+        TarWriteFileInfo($fh, $hdr);
+        while ( $f->read(\$data, $BufSize) > 0 ) {
+            if ( $size + length($data) > $hdr->{size} ) {
+                print(STDERR "Error: truncating $hdr->{fullPath} to"
+                           . " $hdr->{size} bytes\n");
+                $data = substr($data, 0, $hdr->{size} - $size);
+                $ErrorCnt++;
+            }
+            TarWrite($fh, \$data);
+            $size += length($data);
+        }
+        $f->close;
+        if ( $size != $hdr->{size} ) {
+            print(STDERR "Error: padding $hdr->{fullPath} to $hdr->{size}"
+                       . " bytes from $size bytes\n");
+            $ErrorCnt++;
+            while ( $size < $hdr->{size} ) {
+                my $len = $hdr->{size} - $size;
+                $len = $BufSize if ( $len > $BufSize );
+                $data = "\0" x $len;
+                TarWrite($fh, \$data);
+                $size += $len;
+            }
+        }
+        TarWritePad($fh, $size);
+	$FileCnt++;
+	$ByteCnt += $size;
+    } else {
+        print(STDERR "Got unknown type $hdr->{type} for $hdr->{name}\n");
+	$ErrorCnt++;
+    }
+}

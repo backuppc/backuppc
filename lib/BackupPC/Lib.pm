@@ -54,22 +54,46 @@ use Config;
 sub new
 {
     my $class = shift;
-    my($topDir, $installDir, $noUserCheck) = @_;
+    my($topDir, $installDir, $confDir, $noUserCheck) = @_;
 
-    my $paths = {
-        TopDir  => $topDir || '/data/BackupPC',
-        BinDir  => $installDir || '/usr/local/BackupPC',
-        LibDir  => $installDir || '/usr/local/BackupPC',
-    };
-    $paths->{BinDir} .= "/bin";
-    $paths->{LibDir} .= "/lib";
+    #
+    # Whether to use filesystem hierarchy standard for file layout.
+    # If set, text config files are below /etc/BackupPC.
+    #
+    my $useFSH = 0;
+    my $paths;
 
-    $paths->{storage} = BackupPC::Storage->new($paths);
+    #
+    # Pick some initial defaults.  For FHS the only critical
+    # path is the ConfDir, since we get everything else out
+    # of the main config file.
+    #
+    if ( $useFSH ) {
+        $paths = {
+            useFSH  => $useFSH,
+            TopDir  => $topDir || '/data/BackupPC',
+            BinDir  => $installDir ? "$installDir/bin" : '/usr/local/BackupPC/bin',
+            LibDir  => $installDir ? "$installDir/lib" : '/usr/local/BackupPC/lib',
+            ConfDir => $confDir || '/etc/BackupPC',
+            LogDir  => $topDir     ? "$topDir/log" : '/var/log/BackupPC',
+        };
+    } else {
+        $paths = {
+            useFSH  => $useFSH,
+            TopDir  => $topDir || '/data/BackupPC',
+            BinDir  => $installDir ? "$installDir/bin" : '/usr/local/BackupPC/bin',
+            LibDir  => $installDir ? "$installDir/lib" : '/usr/local/BackupPC/lib',
+            ConfDir => $topDir     ? "$topDir/conf" : '/data/BackupPC/conf',
+            LogDir  => $topDir     ? "$topDir/log" : '/data/BackupPC/log',
+        };
+    }
 
     my $bpc = bless {
 	%$paths,
         Version => '2.1.0',
     }, $class;
+
+    $bpc->{storage} = BackupPC::Storage->new($paths);
 
     #
     # Clean up %ENV and setup other variables.
@@ -81,6 +105,15 @@ sub new
         print(STDERR $error, "\n");
         return;
     }
+
+    #
+    # Update the paths based on the config file
+    #
+    foreach my $dir ( qw(TopDir BinDir LibDir ConfDir LogDir) ) {
+        next if ( !defined($bpc->{Conf}{$dir}) );
+        $paths->{$dir} = $bpc->{$dir} = $bpc->{Conf}{$dir};
+    }
+    $bpc->{storage}->setPaths($paths);
 
     #
     # Verify we are running as the correct user
@@ -105,6 +138,30 @@ sub BinDir
 {
     my($bpc) = @_;
     return $bpc->{BinDir};
+}
+
+sub LogDir
+{
+    my($bpc) = @_;
+    return $bpc->{LogDir};
+}
+
+sub ConfDir
+{
+    my($bpc) = @_;
+    return $bpc->{ConfDir};
+}
+
+sub LibDir
+{
+    my($bpc) = @_;
+    return $bpc->{LibDir};
+}
+
+sub useFHS
+{
+    my($bpc) = @_;
+    return $bpc->{useFHS};
 }
 
 sub Version
@@ -317,6 +374,13 @@ sub HostInfoRead
     my($bpc, $host) = @_;
 
     return $bpc->{storage}->HostInfoRead($host);
+}
+
+sub HostInfoWrite
+{
+    my($bpc, $host) = @_;
+
+    return $bpc->{storage}->HostInfoWrite($host);
 }
 
 #
@@ -1111,10 +1175,9 @@ sub cmdSystemOrEval
     return $bpc->cmdSystemOrEvalLong($cmd, $stdoutCB, 0, undef, @args);
 }
 
-
 #
 # Promotes $conf->{BackupFilesOnly}, $conf->{BackupFilesExclude}
-# to hashes and $conf->{$shareName} to an array
+# to hashes and $conf->{$shareName} to an array.
 #
 sub backupFileConfFix
 {
@@ -1123,10 +1186,25 @@ sub backupFileConfFix
     $conf->{$shareName} = [ $conf->{$shareName} ]
                     if ( ref($conf->{$shareName}) ne "ARRAY" );
     foreach my $param qw(BackupFilesOnly BackupFilesExclude) {
-        next if ( !defined($conf->{$param}) || ref($conf->{$param}) eq "HASH" );
-        $conf->{$param} = [ $conf->{$param} ]
-				if ( ref($conf->{$param}) ne "ARRAY" );
-        $conf->{$param} = { map { $_ => $conf->{$param} }                                                       @{$conf->{$shareName}} };
+        next if ( !defined($conf->{$param}) );
+        if ( ref($conf->{$param}) eq "HASH" ) {
+            #
+            # A "*" entry means wildcard - it is the default for
+            # all shares.  Replicate the "*" entry for all shares,
+            # but still allow override of specific entries.
+            #
+            next if ( !defined($conf->{$param}{"*"}) );
+            $conf->{$param} = {
+                                    map({ $_ => $conf->{$param}{"*"} }
+                                            @{$conf->{$shareName}}),
+                                    %{$conf->{$param}}
+                              };
+        } else {
+            $conf->{$param} = [ $conf->{$param} ]
+                                    if ( ref($conf->{$param}) ne "ARRAY" );
+            $conf->{$param} = { map { $_ => $conf->{$param} }
+                                    @{$conf->{$shareName}} };
+        }
     }
 }
 

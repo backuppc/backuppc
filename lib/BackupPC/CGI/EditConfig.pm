@@ -44,31 +44,31 @@ use Data::Dumper;
 
 our %ConfigMenu = (
     server => {
-        text  => "Server",
+        text  => "CfgEdit_Title_Server",
         param => [
-            {text => "General Parameters"},
+            {text => "CfgEdit_Title_General_Parameters"},
             {name => "ServerHost"},
             {name => "BackupPCUser"},
             {name => "BackupPCUserVerify"},
             {name => "MaxOldLogFiles"},
             {name => "TrashCleanSleepSec"},
 
-            {text => "Wakeup Schedule"},
+            {text => "CfgEdit_Title_Wakeup_Schedule"},
             {name => "WakeupSchedule"},
 
-            {text => "Concurrent Jobs"},
+            {text => "CfgEdit_Title_Concurrent_Jobs"},
             {name => "MaxBackups"},
             {name => "MaxUserBackups"},
             {name => "MaxPendingCmds"},
             {name => "MaxBackupPCNightlyJobs"},
             {name => "BackupPCNightlyPeriod"},
 
-            {text => "Pool Filesystem Limits"},
+            {text => "CfgEdit_Title_Pool_Filesystem_Limits"},
 	    {name => "DfCmd"},
 	    {name => "DfMaxUsagePct"},
 	    {name => "HardLinkMax"},
 
-            {text => "Other Parameters"},
+            {text => "CfgEdit_Title_Other_Parameters"},
 	    {name => "UmaskMode"},
 	    {name => "MyPath"},
             {name => "DHCPAddressRanges"},
@@ -76,11 +76,11 @@ our %ConfigMenu = (
             {name => "ServerInitdPath"},
             {name => "ServerInitdStartCmd"},
 
-            {text => "Remote Apache Settings"},
+            {text => "CfgEdit_Title_Remote_Apache_Settings"},
             {name => "ServerPort"},
             {name => "ServerMesgSecret"},
 
-            {text => "Program Paths"},
+            {text => "CfgEdit_Title_Program_Paths"},
 	    {name => "SshPath"},
 	    {name => "NmbLookupPath"},
 	    {name => "PingPath"},
@@ -91,22 +91,25 @@ our %ConfigMenu = (
 	    {name => "GzipPath"},
 	    {name => "Bzip2Path"},
 
-            {text => "Install Paths"},
+            {text => "CfgEdit_Title_Install_Paths"},
+            {name => "TopDir"},
+            {name => "ConfDir"},
+            {name => "LogDir"},
 	    {name => "CgiDir"},
 	    {name => "InstallDir"},
         ],
     },
     email => {
-        text  => "Email",
+        text  => "CfgEdit_Title_Email",
         param => [
-            {text => "Email settings"},
+            {text => "CfgEdit_Title_Email_settings"},
             {name => "SendmailPath"},
             {name => "EMailNotifyMinDays"},
             {name => "EMailFromUserName"},
             {name => "EMailAdminUserName"},
             {name => "EMailUserDestDomain"},
 
-            {text => "Email User Messages"},
+            {text => "CfgEdit_Title_Email_User_Messages"},
 	    {name => "EMailNoBackupEverSubj"},
 	    {name => "EMailNoBackupEverMesg"},
 	    {name => "EMailNotifyOldBackupDays"},
@@ -115,19 +118,17 @@ our %ConfigMenu = (
 	    {name => "EMailNotifyOldOutlookDays"},
 	    {name => "EMailOutlookBackupSubj"},
 	    {name => "EMailOutlookBackupMesg"},
+	    {name => "EMailHeaders"},
         ],
     },
     cgi => {
-        text => "CGI",
+        text => "CfgEdit_Title_CGI",
         param => [
-	    {text => "Admin Privileges"},
+	    {text => "CfgEdit_Title_Admin_Privileges"},
 	    {name => "CgiAdminUserGroup"},
 	    {name => "CgiAdminUsers"},
 
-	    {text => "Config Editing"},
-	    {name => "CgiUserConfigEdit"},
-
-	    {text => "Page Rendering"},
+	    {text => "CfgEdit_Title_Page_Rendering"},
 	    {name => "Language"},
 	    {name => "CgiNavBarAdminAllHosts"},
 	    {name => "CgiSearchBoxEnable"},
@@ -138,25 +139,29 @@ our %ConfigMenu = (
 	    {name => "CgiExt2ContentType"},
 	    {name => "CgiCSSFile"},
 
-	    {text => "Paths"},
+	    {text => "CfgEdit_Title_Paths"},
 	    {name => "CgiURL"},
 	    {name => "CgiImageDir"},
 	    {name => "CgiImageDirURL"},
 
-	    {text => "User URLs"},
+	    {text => "CfgEdit_Title_User_URLs"},
 	    {name => "CgiUserHomePageCheck"},
 	    {name => "CgiUserUrlCreate"},
 
+	    {text => "CfgEdit_Title_User_Config_Editing"},
+	    {name => "CgiUserConfigEditEnable"},
+	    {name => "CgiUserConfigEdit"},
         ],
     },
     xfer => {
-        text => "Xfer",
+        text => "CfgEdit_Title_Xfer",
         param => [
-            {text => "Xfer Settings"},
+            {text => "CfgEdit_Title_Xfer_Settings"},
             {name => "XferMethod", onchangeSubmit => 1},
             {name => "XferLogLevel"},
+            {name => "ClientCharset"},
 
-            {text => "Smb Settings",
+            {text => "CfgEdit_Title_Smb_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
             {name => "SmbShareName",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
@@ -165,14 +170,14 @@ our %ConfigMenu = (
             {name => "SmbSharePasswd",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
 
-            {text => "Tar Settings",
+            {text => "CfgEdit_Title_Tar_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
             {name => "TarShareName",
                 visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
 
-            {text => "Rsync Settings",
+            {text => "CfgEdit_Title_Rsync_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
-            {text => "Rsyncd Settings",
+            {text => "CfgEdit_Title_Rsyncd_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
             {name => "RsyncShareName",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
@@ -183,7 +188,7 @@ our %ConfigMenu = (
             {name => "RsyncCsumCacheVerifyProb",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
 
-            {text => "Archive Settings",
+            {text => "CfgEdit_Title_Archive_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
             {name => "ArchiveDest",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
@@ -194,14 +199,14 @@ our %ConfigMenu = (
             {name => "ArchiveSplit",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
 
-            {text => "Include/Exclude",
+            {text => "CfgEdit_Title_Include_Exclude",
                 visible => sub { return $_[0]->{XferMethod} ne "archive"; } },
             {name => "BackupFilesOnly",
                 visible => sub { return $_[0]->{XferMethod} ne "archive"; } },
             {name => "BackupFilesExclude",
                 visible => sub { return $_[0]->{XferMethod} ne "archive"; } },
 
-            {text => "Smb Paths/Commands",
+            {text => "CfgEdit_Title_Smb_Paths_Commands",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
             {name => "SmbClientPath",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
@@ -212,7 +217,7 @@ our %ConfigMenu = (
             {name => "SmbClientRestoreCmd",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
 
-            {text => "Tar Paths/Commands",
+            {text => "CfgEdit_Title_Tar_Paths_Commands",
                 visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
             {name => "TarClientPath",
                 visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
@@ -225,9 +230,9 @@ our %ConfigMenu = (
             {name => "TarClientRestoreCmd",
                 visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
 
-            {text => "Rsync Paths/Commands/Args",
+            {text => "CfgEdit_Title_Rsync_Paths_Commands_Args",
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
-            {text => "Rsyncd Port/Args",
+            {text => "CfgEdit_Title_Rsyncd_Port_Args",
                 visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
             {name => "RsyncClientPath",
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
@@ -242,7 +247,7 @@ our %ConfigMenu = (
             {name => "RsyncRestoreArgs",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
 
-            {text => "Archive Paths/Commands",
+            {text => "CfgEdit_Title_Archive_Paths_Commands",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
             {name => "ArchiveClientCmd",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
@@ -250,27 +255,27 @@ our %ConfigMenu = (
         ],
     },
     schedule => {
-        text => "Schedule",
+        text => "CfgEdit_Title_Schedule",
         param => [
-	    {text => "Full Backups"},
+	    {text => "CfgEdit_Title_Full_Backups"},
 	    {name => "FullPeriod"},
 	    {name => "FullKeepCnt"},
 	    {name => "FullKeepCntMin"},
 	    {name => "FullAgeMax"},
 
-	    {text => "Incremental Backups"},
+	    {text => "CfgEdit_Title_Incremental_Backups"},
 	    {name => "IncrPeriod"},
 	    {name => "IncrKeepCnt"},
 	    {name => "IncrKeepCntMin"},
 	    {name => "IncrAgeMax"},
 	    {name => "IncrFill"},
 
-	    {text => "Blackouts"},
+	    {text => "CfgEdit_Title_Blackouts"},
             {name => "BlackoutBadPingLimit"},
             {name => "BlackoutGoodCnt"},
             {name => "BlackoutPeriods"},
 
-	    {text => "Other"},
+	    {text => "CfgEdit_Title_Other"},
 	    {name => "PartialAgeMax"},
 	    {name => "RestoreInfoKeepCnt"},
 	    {name => "ArchiveInfoKeepCnt"},
@@ -278,9 +283,9 @@ our %ConfigMenu = (
 	],
     },
     backup => {
-        text => "Backup Settings",
+        text => "CfgEdit_Title_Backup_Settings",
         param => [
-	    {text => "Client Lookup"},
+	    {text => "CfgEdit_Title_Client_Lookup"},
 	    {name => "ClientNameAlias"},
 	    {name => "NmbLookupCmd"},
 	    {name => "NmbLookupFindHostCmd"},
@@ -288,12 +293,12 @@ our %ConfigMenu = (
 	    {name => "PingCmd"},
 	    {name => "PingMaxMsec"},
 	    
-	    {text => "Other"},
+	    {text => "CfgEdit_Title_Other"},
 	    {name => "ClientTimeout"},
 	    {name => "MaxOldPerPCLogFiles"},
 	    {name => "CompressLevel"},
 
-	    {text => "User Commands"},
+	    {text => "CfgEdit_Title_User_Commands"},
 	    {name => "DumpPreUserCmd"},
 	    {name => "DumpPostUserCmd"},
 	    {name => "DumpPreShareCmd"},
@@ -303,6 +308,14 @@ our %ConfigMenu = (
 	    {name => "ArchivePreUserCmd"},
 	    {name => "ArchivePostUserCmd"},
 	],
+    },
+    hosts => {
+        text => "CfgEdit_Title_Hosts",
+        param => [
+	    {text    => "CfgEdit_Title_Hosts"},
+	    {name    => "Hosts",
+             comment => "CfgEdit_Hosts_Comment"},
+        ],
     },
 );
 
@@ -318,14 +331,16 @@ sub action
     my $config_path = $host eq "" ? "$TopDir/conf/config.pl"
                                   : "$TopDir/pc/$host/config.pl";
 
-    my $Privileged = CheckPermission();
-    my $userHost = 1 if ( $Privileged && !$PrivAdmin && defined($host) );
+    my $Privileged = CheckPermission($host)
+                       && ($PrivAdmin || $Conf{CgiUserConfigEditEnable});
+    my $userHost = 1 if ( defined($host) );
+    my $debugText;
 
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_edit_config_files}}"));
     }
 
-    if ( defined($In{menu}) || $In{editAction} eq "Save" ) {
+    if ( defined($In{menu}) || $In{editAction} eq $Lang->{CfgEdit_Button_Save} ) {
 	$errors = errorCheck();
 	if ( %$errors ) {
 	    #
@@ -334,18 +349,22 @@ sub action
 	    $In{editAction} = "";
             $In{newMenu} = "";
 	}
+        if ( (my $var = $In{overrideUncheck}) ne "" ) {
+            #
+            # a compound variable was unchecked; delete extra
+            # variables to make the shape the same.
+            #
+            #print STDERR Dumper(\%In);
+            foreach my $v ( keys(%In) ) {
+                next if ( $v !~ /^v_z_(\Q$var\E(_z_.*|$))/ );
+                delete($In{$v}) if ( !defined($In{"orig_z_$1"}) );
+            }
+            delete($In{"vflds.$var"});
+        }
+
         ($newConf, $override) = inputParse($bpc, $userHost);
 	$override = undef if ( $host eq "" );
 
-	#
-	# Copy all the orig_ input parameters
-	#
-	foreach my $var ( keys(%In) ) {
-	    next if ( $var !~ /^orig_/ );
-	    $contentHidden .= <<EOF;
-<input type="hidden" name="$var" value="${EscHTML($In{$var})}">
-EOF
-	}
     } else {
 	#
 	# First time: pick up the current config settings
@@ -358,28 +377,14 @@ EOF
 		$override->{$param} = 1;
 	    }
 	} else {
+            my $hostInfo = $bpc->HostInfoRead();
 	    $hostConf = {};
+            $mainConf->{Hosts} = [map($hostInfo->{$_}, sort(keys(%$hostInfo)))];
 	}
 	$newConf = { %$mainConf, %$hostConf };
-
-	#
-	# Emit all the original config settings
-	#
-	my $doneParam = {};
-        foreach my $param ( keys(%ConfigMeta) ) {
-            next if ( $doneParam->{$param} );
-            next if ( $userHost && !$bpc->{Conf}{CgiUserConfigEdit}{$param} );
-            $contentHidden .= fieldHiddenBuild($ConfigMeta{$param},
-                                    $param,
-                                    $mainConf->{$param},
-                                    "orig",
-                                );
-            $doneParam->{$param} = 1;
-	}
-
     }
 
-    if ( $In{editAction} ne "Save" && $In{newMenu} ne ""
+    if ( $In{editAction} ne $Lang->{CfgEdit_Button_Save} && $In{newMenu} ne ""
 		    && defined($ConfigMenu{$In{newMenu}}) ) {
         $menu = $In{newMenu};
     }
@@ -389,7 +394,8 @@ EOF
         #
         # For a non-admin user editing the host config, we need to
         # figure out which subsets of the menu tree will be visible,
-        # based on what is enabled
+        # based on what is enabled.  Admin users can edit all the
+        # available per-host settings.
         #
         foreach my $m ( keys(%ConfigMenu) ) {
             my $enabled = 0;
@@ -403,10 +409,12 @@ EOF
                     $text = $n;
                     $mask[$text] = 1;
                 } else {
-                    if ( $bpc->{Conf}{CgiUserConfigEdit}{$param} ) {
+                    if ( $bpc->{Conf}{CgiUserConfigEdit}{$param}
+                          || (defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                                && $PrivAdmin) ) {
                         $mask[$text] = 0 if ( $text >= 0 );
                         $mask[$n] = 0;
-                        $enabled = 1;
+                        $enabled ||= 1;
                     } else {
                         $mask[$n] = 1;
                     }
@@ -432,47 +440,48 @@ EOF
     my $groupText;
     foreach my $m ( keys(%ConfigMenu) ) {
         next if ( $menuDisable{$m}{top} );
-	my $text = $ConfigMenu{$m}{text};
+	my $text = eval("qq($Lang->{$ConfigMenu{$m}{text}})");
         if ( $m eq $menu ) {
             $groupText .= <<EOF;
-<td bgcolor="grey"><a href="javascript:menuSubmit('$m')"><b>$text</b></a></td>
+<td class="editTabSel"><a href="javascript:menuSubmit('$m')"><b>$text</b></a></td>
 EOF
         } else {
             $groupText .= <<EOF;
-<td><a href="javascript:menuSubmit('$m')">$text</a></td>
+<td class="editTabNoSel"><a href="javascript:menuSubmit('$m')">$text</a></td>
 EOF
         }
     }
 
     if ( $host eq "" ) {
-	$content .= <<EOF;
-${h1("Main Configuration Editor")}
-EOF
+	$content .= eval("qq($Lang->{CfgEdit_Header_Main})");
     } else {
-	$content .= <<EOF;
-${h1("Host $host Configuration Editor")}
-<p>
-Note: Check Override if you want to modify a value specific to this host.
-EOF
+	$content .= eval("qq($Lang->{CfgEdit_Header_Host})");
     }
 
     my $saveDisplay = "block";
-    $saveDisplay = "none" if ( !$In{modified} );
+    $saveDisplay = "none" if ( !$In{modified}
+                          || $In{editAction} eq $Lang->{CfgEdit_Button_Save} );
+    #
+    # Add action and host to the URL so the nav bar link is
+    # highlighted
+    #
+    my $url = "$MyURL?action=editConfig";
+    $url .= "&host=$host" if ( $host ne "" );
     $content .= <<EOF;
 <table border="0" cellpadding="2">
 <tr>$groupText</tr>
 <tr>
-<form method="post" name="form1" action="$MyURL">
+<form method="post" name="form1" action="$url">
 <input type="hidden" name="host" value="$host">
 <input type="hidden" name="menu" value="$menu">
 <input type="hidden" name="newMenu" value="">
 <input type="hidden" name="modified" value="$In{modified}">
 <input type="hidden" name="deleteVar" value="">
 <input type="hidden" name="insertVar" value="">
+<input type="hidden" name="overrideUncheck" value="">
 <input type="hidden" name="addVar" value="">
 <input type="hidden" name="action" value="editConfig">
-<input type="submit" style="display: $saveDisplay" name="editAction" value="Save">
-$contentHidden
+<input type="submit" class="editSaveButton" style="display: $saveDisplay" name="editAction" value="${EscHTML($Lang->{CfgEdit_Button_Save})}">
 
 <script language="javascript" type="text/javascript">
 <!--
@@ -495,7 +504,8 @@ $contentHidden
 
     function addSubmit(varName, checkKey)
     {
-        if ( checkKey && document.form1.addVarKey.value == "" ) {
+        if ( checkKey
+            && eval("document.form1.addVarKey_" + varName + ".value") == "" ) {
             alert("New key must be non-empty");
             return;
         }
@@ -526,8 +536,8 @@ $contentHidden
 	    return false;
 	}
 	var allVars = {};
-	var varRE  = new RegExp("^v_(" + varName + ".*)");
-	var origRE = new RegExp("^orig_(" + varName + ".*)");
+	var varRE  = new RegExp("^v_z_(" + varName + ".*)");
+	var origRE = new RegExp("^orig_z_(" + varName + ".*)");
         for ( var i = 0 ; i < document.form1.elements.length ; i++ ) {
 	    var e = document.form1.elements[i];
 	    var re;
@@ -536,7 +546,7 @@ $contentHidden
 		    allVars[re[1]] = 0;
 		}
 		allVars[re[1]]++;
-		//debugMsg("found v_ match with " + re[1]);
+		//debugMsg("found v_z_ match with " + re[1]);
 		//debugMsg("allVars[" + re[1] + "] = " + allVars[re[1]]);
 	    } else if ( (re = origRE.exec(e.name)) != null ) {
 		if ( allVars[re[1]] == null ) {
@@ -551,15 +561,18 @@ $contentHidden
 	    if ( allVars[v] != 0 ) {
 		//debugMsg("Not the same shape because of " + v);
 		sameShape = 0;
-	    }
+	    } else {
+                // copy the original variable values
+		//debugMsg("setting " + v);
+		eval("document.form1.v_z_" + v + ".value = document.form1.orig_z_" + v + ".value");
+            }
 	}
 	if ( sameShape ) {
-	    for ( v in allVars ) {
-		//debugMsg("setting " + v);
-		eval("document.form1.v_" + v + ".value = document.form1.orig_" + v + ".value");
-	    }
 	    return true;
 	} else {
+            // need to rebuild the form since the compound variable
+            // has changed shape
+            document.form1.overrideUncheck.value = varName;
 	    document.form1.submit();
 	    return false;
 	}
@@ -593,7 +606,7 @@ $contentHidden
 //-->
 </script>
 
-<span id="debug"></span>
+<span id="debug">$debugText</span>
 
 EOF
 
@@ -611,7 +624,7 @@ EOF
     if ( $In{deleteVar} ne "" && %$errors > 0 ) {
         my $matchAll = 1;
         foreach my $v ( keys(%$errors) ) {
-            if ( $v ne $In{deleteVar} && $v !~ /^\Q$In{deleteVar}_/ ) {
+            if ( $v ne $In{deleteVar} && $v !~ /^\Q$In{deleteVar}_z_/ ) {
                 $matchAll = 0;
                 last;
             }
@@ -621,28 +634,81 @@ EOF
 
     my $isError = %$errors;
 
-    if ( !$isError && $In{editAction} eq "Save" ) {
-        my $mesg;
+    if ( !$isError && $In{editAction} eq $Lang->{CfgEdit_Button_Save} ) {
+        my($mesg, $err);
 	if ( $host ne "" ) {
 	    $hostConf = $bpc->ConfigDataRead($host) if ( !defined($hostConf) );
-            $mesg = configDiffMesg($host, $hostConf, $newConf);
-	    foreach my $param ( %$newConf ) {
-		$hostConf->{$param} = $newConf->{$param}
-				if ( $override->{param} );
+            my %hostConf2 = %$hostConf;
+	    foreach my $param ( keys(%$newConf) ) {
+                if ( $override->{$param} ) {
+                    $hostConf->{$param} = $newConf->{$param}
+                } else {
+                    delete($hostConf->{$param});
+                }
 	    }
-	    $bpc->ConfigDataWrite($host, $hostConf);
+            $mesg = configDiffMesg($host, \%hostConf2, $hostConf);
+	    $err .= $bpc->ConfigDataWrite($host, $hostConf);
 	} else {
 	    $mainConf = $bpc->ConfigDataRead() if ( !defined($mainConf) );
-            $mesg = configDiffMesg(undef, $mainConf, $newConf);
+
+            my $hostsSave = [];
+            my($hostsNew, $allHosts, $copyConf);
+            foreach my $entry ( @{$newConf->{Hosts}} ) {
+                next if ( $entry->{host} eq "" );
+                $allHosts->{$entry->{host}} = 1;
+                $allHosts->{$1} = 1 if ( $entry->{host} =~ /(.+?)\s*=/ );
+            }
+            foreach my $entry ( @{$newConf->{Hosts}} ) {
+                next if ( $entry->{host} eq ""
+                           || defined($hostsNew->{$entry->{host}}) );
+                if ( $entry->{host} =~ /(.+?)\s*=\s*(.+)/ ) {
+                    if ( defined($allHosts->{$2}) ) {
+                        $entry->{host} = $1;
+                        $copyConf->{$1} = $2;
+                    } else {
+                        my $fullHost = $entry->{host};
+                        my $copyHost = $2;
+                        $err .= eval("qq($Lang->{CfgEdit_Error_Copy_host_does_not_exist})");
+                    }
+                }
+                push(@$hostsSave, $entry);
+                $hostsNew->{$entry->{host}} = $entry;
+            }
+            ($mesg, my $hostChange) = hostsDiffMesg($hostsNew);
+            $bpc->HostInfoWrite($hostsNew) if ( $hostChange );
+            foreach my $host ( keys(%$copyConf) ) {
+                my $confData = $bpc->ConfigDataRead($copyConf->{$host});
+                my $fromHost = $copyConf->{$host};
+                $err  .= $bpc->ConfigDataWrite($host, $confData);
+                $mesg .= eval("qq($Lang->{CfgEdit_Log_Copy_host_config})");
+            }
+
+            delete($newConf->{Hosts});
+            $mesg .= configDiffMesg(undef, $mainConf, $newConf);
 	    $mainConf = { %$mainConf, %$newConf };
-	    $bpc->ConfigDataWrite(undef, $mainConf);
+	    $err .= $bpc->ConfigDataWrite(undef, $mainConf);
+            $newConf->{Hosts} = $hostsSave;
 	}
+        if ( defined($err) ) {
+            $content .= <<EOF;
+<tr><td colspan="2" class="border"><span class="editError">$err</span></td></tr>
+EOF
+        }
+        $bpc->ServerConnect();
         if ( $mesg ne "" ) {
-            $bpc->ServerConnect();
+            (my $mesgBR = $mesg) =~ s/\n/<br>\n/g;
+            $content .= <<EOF;
+<tr><td colspan="2" class="border"><span class="editComment">$mesgBR</span></td></tr>
+EOF
             foreach my $str ( split(/\n/, $mesg) ) {
-                $bpc->ServerMesg($str);
+                $bpc->ServerMesg("log $str") if ( $str ne "" );
             }
         }
+        #
+        # Tell the server to reload, unless we only changed
+        # a client config
+        #
+        $bpc->ServerMesg("server reload") if ( $host eq "" );
     }
 
     my @mask = @{$menuDisable{$menu}{mask} || []};
@@ -658,7 +724,8 @@ EOF
             next;
         }
 
-	if ( defined(my $text = $paramInfo->{text}) ) {
+	if ( defined($paramInfo->{text}) ) {
+            my $text = eval("qq($Lang->{$paramInfo->{text}})");
 	    $content .= <<EOF;
 <tr><td colspan="2" class="editHeader">$text</td></tr>
 EOF
@@ -669,23 +736,30 @@ EOF
 	# TODO: get parameter documentation
 	#
 	my $comment = "";
-	$comment =~ s/\'//g;
-	$comment =~ s/\"//g;
-        $comment =~ s/\n/ /g;
+	#$comment =~ s/\'//g;
+	#$comment =~ s/\"//g;
+        #$comment =~ s/\n/ /g;
 
         $doneParam->{$param} = 1;
 
         $content .= fieldEditBuild($ConfigMeta{$param},
-                                $param,
-                                $newConf->{$param},
-                                $errors,
-                                0,
-                                $comment,
-                                $isError,
-                                $paramInfo->{onchangeSubmit},
-				defined($override) ? $param : undef,
-				defined($override) ? $override->{$param} : undef
+                              $param,
+                              $newConf->{$param},
+                              $errors,
+                              0,
+                              $comment,
+                              $isError,
+                              $paramInfo->{onchangeSubmit},
+		              defined($override) ? $param : undef,
+			      defined($override) ? $override->{$param} : undef
                         );
+        if ( defined($paramInfo->{comment}) ) {
+            my $topDir = $bpc->TopDir;
+            my $text = eval("qq($Lang->{$paramInfo->{comment}})");
+	    $content .= <<EOF;
+<tr><td colspan="2" class="editComment">$text</td></tr>
+EOF
+        }
     }
 
     #
@@ -693,7 +767,7 @@ EOF
     #
     foreach my $param ( sort(keys(%$errors)) ) {
 	$content .= <<EOF;
-<tr><td colspan="2" class="border">$errors->{$param}</td></tr>
+<tr><td colspan="2" class="border"><span class="editError">$errors->{$param}</span></td></tr>
 EOF
 	delete($errors->{$param});
     }
@@ -707,7 +781,10 @@ EOF
     #
     foreach my $param ( keys(%ConfigMeta) ) {
         next if ( $doneParam->{$param} );
-        next if ( $userHost && !$bpc->{Conf}{CgiUserConfigEdit}{$param} );
+        next if ( $userHost
+                      && (!defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                         || (!$PrivAdmin
+                             && !$bpc->{Conf}{CgiUserConfigEdit}{$param})) );
         $content .= fieldHiddenBuild($ConfigMeta{$param},
                             $param,
                             $newConf->{$param},
@@ -721,7 +798,60 @@ EOF
         $doneParam->{$param} = 1;
     }
 
+    if ( defined($In{menu}) || $In{editAction} eq $Lang->{CfgEdit_Button_Save} ) {
+        if ( $In{editAction} eq $Lang->{CfgEdit_Button_Save}
+                && !$userHost ) {
+            #
+            # Emit the new settings as orig_z_ parameters
+            #
+            $doneParam = {};
+            foreach my $param ( keys(%ConfigMeta) ) {
+                next if ( $doneParam->{$param} );
+                next if ( $userHost
+                          && (!defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                             || (!$PrivAdmin
+                                && !$bpc->{Conf}{CgiUserConfigEdit}{$param})) );
+                $contentHidden .= fieldHiddenBuild($ConfigMeta{$param},
+                                        $param,
+                                        $newConf->{$param},
+                                        "orig",
+                                    );
+                $doneParam->{$param} = 1;
+                $In{modified} = 0;
+            }
+        } else {
+            #
+            # Just switching menus: copy all the orig_z_ input parameters
+            #
+            foreach my $var ( keys(%In) ) {
+                next if ( $var !~ /^orig_z_/ );
+                $contentHidden .= <<EOF;
+<input type="hidden" name="$var" value="${EscHTML($In{$var})}">
+EOF
+            }
+	}
+    } else {
+	#
+	# First time: emit all the original config settings
+	#
+	$doneParam = {};
+        foreach my $param ( keys(%ConfigMeta) ) {
+            next if ( $doneParam->{$param} );
+            next if ( $userHost
+                          && (!defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                             || (!$PrivAdmin
+                                && !$bpc->{Conf}{CgiUserConfigEdit}{$param})) );
+            $contentHidden .= fieldHiddenBuild($ConfigMeta{$param},
+                                    $param,
+                                    $mainConf->{$param},
+                                    "orig",
+                                );
+            $doneParam->{$param} = 1;
+	}
+    }
+
     $content .= <<EOF;
+$contentHidden
 </form>
 </tr>
 </table>
@@ -743,14 +873,16 @@ sub fieldHiddenBuild
         $varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
 
         for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
-            $content .= fieldHiddenBuild($type->{child}, "${varName}_$i",
+            $content .= fieldHiddenBuild($type->{child}, "${varName}_z_$i",
                                          $varValue->[$i], $prefix);
         }
-    } elsif ( $type->{type} eq "hash" ) {
+    } elsif ( $type->{type} eq "hash" || $type->{type} eq "horizHash" ) {
         $varValue = {} if ( ref($varValue) ne "HASH" );
         my(@order, $childType);
 
-        if ( defined($type->{child}) ) {
+        if ( defined($type->{order}) ) {
+            @order = @{$type->{order}};
+        } elsif ( defined($type->{child}) ) {
             @order = sort(keys(%{$type->{child}}));
         } else {
             @order = sort(keys(%$varValue));
@@ -769,18 +901,18 @@ sub fieldHiddenBuild
 <input type="hidden" name="vflds.$varName" value="${EscHTML($fld)}">
 EOF
             }
-            $content .= fieldHiddenBuild($childType, "${varName}_$fld",
+            $content .= fieldHiddenBuild($childType, "${varName}_z_$fld",
                                          $varValue->{$fld}, $prefix);
         }
     } elsif ( $type->{type} eq "shortlist" ) {
 	$varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
 	$varValue = join(", ", @$varValue);
         $content .= <<EOF;
-<input type="hidden" name="${prefix}_$varName" value="${EscHTML($varValue)}">
+<input type="hidden" name="${prefix}_z_$varName" value="${EscHTML($varValue)}">
 EOF
     } else {
         $content .= <<EOF;
-<input type="hidden" name="${prefix}_$varName" value="${EscHTML($varValue)}">
+<input type="hidden" name="${prefix}_z_$varName" value="${EscHTML($varValue)}">
 EOF
     }
     return $content;
@@ -795,33 +927,42 @@ sub fieldEditBuild
     my $size = 50 - 10 * $level;
     $type = { type => $type } if ( ref($type) ne "HASH" );
 
+    $size = $type->{size} if ( defined($type->{size}) );
+
+    #
+    # These fragments allow inline conent to be turned on and off
+    #
+    # <tr><td colspan="2"><span id="id_$varName" style="display: none" class="editComment">$comment</span></td></tr>
+    # <tr><td class="border"><a href="javascript: displayHelp('$varName')">$varName</a>
+    #
+
     if ( $level == 0 ) {
+        my $lcVarName = lc($varName);
 	$content .= <<EOF;
-<tr id="id_$varName" class="optionalComment"><td colspan="2">$comment</td></tr>
-<tr><td class="border"><a href="javascript: displayHelp('$varName')">$varName</a>
+<tr><td class="border"><a href="?action=view&type=docs#item_%24conf%7b$lcVarName%7d">$varName</a>
 EOF
 	if ( defined($overrideVar) ) {
 	    my $override_checked = "";
-	    if ( !$isError && $In{deleteVar}       =~ /^\Q${varName}_/
-		    || !$isError && $In{insertVar} =~ /^\Q${varName}\E(_|$)/
-		    || !$isError && $In{addVar}    =~ /^\Q${varName}\E(_|$)/ ) {
+	    if ( !$isError && $In{deleteVar}      =~ /^\Q${varName}_z_/
+		   || !$isError && $In{insertVar} =~ /^\Q${varName}\E(_z_|$)/
+		   || !$isError && $In{addVar}    =~ /^\Q${varName}\E(_z_|$)/ ) {
 		$overrideSet = 1;
 	    }
 	    if ( $overrideSet ) {
 		$override_checked = "checked";
 	    }
             $content .= <<EOF;
-<br><input type="checkbox" name="override_$varName" $override_checked value="1" onClick="checkboxChange('$varName')">\&nbsp;Override
+<br><input type="checkbox" name="override_$varName" $override_checked value="1" onClick="checkboxChange('$varName')">\&nbsp;${EscHTML($Lang->{CfgEdit_Button_Override})}
 EOF
 	}
 	$content .= "</td>\n";
     }
 
-    $content .= "<td class=\"border\">\n";
     if ( $type->{type} eq "list" ) {
+        $content .= "<td class=\"border\">\n";
         $varValue = [] if ( !defined($varValue) );
         $varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
-        if ( !$isError && $In{deleteVar} =~ /^\Q${varName}_\E(\d+)$/
+        if ( !$isError && $In{deleteVar} =~ /^\Q${varName}_z_\E(\d+)$/
                 && $1 < @$varValue ) {
             #
             # User deleted entry in this array
@@ -829,7 +970,7 @@ EOF
             splice(@$varValue, $1, 1) if ( @$varValue > 1 || $type->{emptyOk} );
             $In{deleteVar} = "";
         }
-        if ( !$isError && $In{insertVar} =~ /^\Q${varName}_\E(\d+)$/
+        if ( !$isError && $In{insertVar} =~ /^\Q${varName}_z_\E(\d+)$/
                 && $1 < @$varValue ) {
             #
             # User inserted entry in this array
@@ -847,36 +988,71 @@ EOF
         }
         $content .= "<table border=\"1\" cellspacing=\"0\">\n";
 
-        for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
-            $content .= "<tr><td class=\"border\">\n";
-	    if ( @$varValue > 1 || $type->{emptyOk} ) {
-		$content .= <<EOF;
-<input type="button" name="ins_${varName}_$i" value="Insert"
-    onClick="insertSubmit('${varName}_$i')">
-<input type="button" name="del_${varName}_$i" value="Delete"
-    onClick="deleteSubmit('${varName}_$i')">
-EOF
-	    }
-            $content .= "</td>\n";
-            $content .= fieldEditBuild($type->{child}, "${varName}_$i",
-                                $varValue->[$i], $errors, $level + 1, undef,
-				$isError, $onchangeSubmit,
-				$overrideVar, $overrideSet);
+        if ( ref($type) eq "HASH" && ref($type->{child}) eq "HASH"
+                    && $type->{child}{type} eq "horizHash" ) {
+            my @order;
+            if ( defined($type->{child}{order}) ) {
+                @order = @{$type->{child}{order}};
+            } else {
+                @order = sort(keys(%{$type->{child}{child}}));
+            }
+            $content .= "<tr><td class=\"border\"></td>\n";
+            for ( my $i = 0 ; $i < @order ; $i++ ) {
+                $content .= "<td>$order[$i]</td>\n";
+            }
             $content .= "</tr>\n";
+            for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
+                if ( @$varValue > 1 || $type->{emptyOk} ) {
+                    $content .= <<EOF;
+<td class="border">
+<input type="button" name="del_${varName}_z_$i" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
+    onClick="deleteSubmit('${varName}_z_$i')">
+</td>
+EOF
+                }
+                $content .= fieldEditBuild($type->{child}, "${varName}_z_$i",
+                                  $varValue->[$i], $errors, $level + 1, undef,
+                                  $isError, $onchangeSubmit,
+                                  $overrideVar, $overrideSet);
+                $content .= "</tr>\n";
+            }
+        } else {
+            for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
+                $content .= <<EOF;
+<tr><td class="border">
+<input type="button" name="ins_${varName}_z_$i" value="${EscHTML($Lang->{CfgEdit_Button_Insert})}"
+    onClick="insertSubmit('${varName}_z_$i')">
+EOF
+                if ( @$varValue > 1 || $type->{emptyOk} ) {
+                    $content .= <<EOF;
+<input type="button" name="del_${varName}_z_$i" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
+    onClick="deleteSubmit('${varName}_z_$i')">
+EOF
+                }
+                $content .= "</td>\n";
+                $content .= fieldEditBuild($type->{child}, "${varName}_z_$i",
+                                    $varValue->[$i], $errors, $level + 1, undef,
+                                    $isError, $onchangeSubmit,
+                                    $overrideVar, $overrideSet);
+                $content .= "</tr>\n";
+            }
         }
         $content .= <<EOF;
-<tr><td class="border"><input type="button" name="add_$varName" value="Add"
+<tr><td class="border"><input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}"
     onClick="addSubmit('$varName')"></td></tr>
 </table>
 EOF
+        $content .= "</td>\n";
     } elsif ( $type->{type} eq "hash" ) {
+        $content .= "<td class=\"border\">\n";
         $content .= "<table border=\"1\" cellspacing=\"0\">\n";
         $varValue = {} if ( ref($varValue) ne "HASH" );
 
         if ( !$isError && !$type->{noKeyEdit}
-                        && $In{deleteVar} =~ /^\Q${varName}_\E(\w+)$/ ) {
+                        && $In{deleteVar} !~ /^\Q${varName}_z_\E.*_z_/
+                        && $In{deleteVar} =~ /^\Q${varName}_z_\E(\w+)$/ ) {
             #
-            # User deleted entry in this array
+            # User deleted entry in this hash
             #
             delete($varValue->{$1}) if ( keys(%$varValue) > 1
 					    || $type->{emptyOk} );
@@ -887,13 +1063,15 @@ EOF
             #
             # User added entry to this array
             #
-            $varValue->{$In{addVarKey}} = ""
-                            if ( !defined($varValue->{$In{addVarKey}}) );
+            $varValue->{$In{"addVarKey_$varName"}} = ""
+                        if ( !defined($varValue->{$In{"addVarKey_$varName"}}) );
             $In{addVar} = "";
         }
         my(@order, $childType);
 
-        if ( defined($type->{child}) ) {
+        if ( defined($type->{order}) ) {
+            @order = @{$type->{order}};
+        } elsif ( defined($type->{child}) ) {
             @order = sort(keys(%{$type->{child}}));
         } else {
             @order = sort(keys(%$varValue));
@@ -906,8 +1084,8 @@ EOF
             if ( !$type->{noKeyEdit}
 		    && (keys(%$varValue) > 1 || $type->{emptyOk}) ) {
                 $content .= <<EOF;
-<input type="submit" name="del_${varName}_$fld" value="Delete"
-        onClick="deleteSubmit('${varName}_$fld')">
+<input type="submit" name="del_${varName}_z_$fld" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
+        onClick="deleteSubmit('${varName}_z_$fld')">
 EOF
             }
             if ( defined($type->{child}) ) {
@@ -923,7 +1101,7 @@ EOF
 EOF
             }
             $content .= "</td>\n";
-            $content .= fieldEditBuild($childType, "${varName}_$fld",
+            $content .= fieldEditBuild($childType, "${varName}_z_$fld",
                             $varValue->{$fld}, $errors, $level + 1, undef,
 			    $isError, $onchangeSubmit,
 			    $overrideVar, $overrideSet);
@@ -933,24 +1111,56 @@ EOF
         if ( !$type->{noKeyEdit} ) {
             $content .= <<EOF;
 <tr><td class="border" colspan="2">
-New key: <input type="text" name="addVarKey" size="20" maxlength="256" value="">
-<input type="button" name="add_$varName" value="Add" onClick="addSubmit('$varName', 1)">
+New key: <input type="text" name="addVarKey_$varName" size="20" maxlength="256" value="">
+<input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}" onClick="addSubmit('$varName', 1)">
 </td></tr>
 EOF
         }
         $content .= "</table>\n";
+        $content .= "</td>\n";
+    } elsif ( $type->{type} eq "horizHash" ) {
+        $varValue = {} if ( ref($varValue) ne "HASH" );
+        my(@order, $childType);
+
+        if ( defined($type->{order}) ) {
+            @order = @{$type->{order}};
+        } elsif ( defined($type->{child}) ) {
+            @order = sort(keys(%{$type->{child}}));
+        } else {
+            @order = sort(keys(%$varValue));
+        }
+
+        foreach my $fld ( @order ) {
+            if ( defined($type->{child}) ) {
+                $childType = $type->{child}{$fld};
+            } else {
+                $childType = $type->{childType};
+                #
+                # emit list of fields since they are user-defined
+                # rather than hard-coded
+                #
+                $content .= <<EOF;
+<input type="hidden" name="vflds.$varName" value="${EscHTML($fld)}">
+EOF
+            }
+            $content .= fieldEditBuild($childType, "${varName}_z_$fld",
+                            $varValue->{$fld}, $errors, $level + 1, undef,
+			    $isError, $onchangeSubmit,
+			    $overrideVar, $overrideSet);
+        }
     } else {
+        $content .= "<td class=\"border\">\n";
         if ( $isError ) {
             #
             # If there was an error, we use the original post values
             # in %In, rather than the parsed values in $varValue.
             # This is so that the user's erroneous input is preserved.
             #
-            $varValue = $In{"v_$varName"} if ( defined($In{"v_$varName"}) );
+            $varValue = $In{"v_z_$varName"} if ( defined($In{"v_z_$varName"}) );
         }
         if ( defined($errors->{$varName}) ) {
             $content .= <<EOF;
-$errors->{$varName}<br>
+<span class="editError">$errors->{$varName}</span><br>
 EOF
 	    delete($errors->{$varName});
         }
@@ -969,6 +1179,7 @@ EOF
         if ( $varValue !~ /\n/ &&
 		($type->{type} eq "integer"
 		    || $type->{type} eq "string"
+		    || $type->{type} eq "execPath"
 		    || $type->{type} eq "shortlist"
 		    || $type->{type} eq "float") ) {
             # simple input box
@@ -977,17 +1188,17 @@ EOF
 		$varValue = join(", ", @$varValue);
 	    }
             $content .= <<EOF;
-<input type="text" name="v_$varName" size="$size" maxlength="256" value="${EscHTML($varValue)}"$onChange>
+<input type="text" name="v_z_$varName" size="$size" maxlength="256" value="${EscHTML($varValue)}"$onChange>
 EOF
         } elsif ( $type->{type} eq "boolean" ) {
             # checkbox
             my $checked = "checked" if ( $varValue );
             $content .= <<EOF;
-<input type="checkbox" name="v_$varName" $checked value="1">
+<input type="checkbox" name="v_z_$varName" $checked value="1"$onChange>
 EOF
         } elsif ( $type->{type} eq "select" ) {
             $content .= <<EOF;
-<select name="v_$varName"$onChange>
+<select name="v_z_$varName"$onChange>
 EOF
             foreach my $option ( @{$type->{values}} ) {
                 my $sel = " selected" if ( $varValue eq $option );
@@ -999,11 +1210,11 @@ EOF
 	    my $rowCnt = $varValue =~ tr/\n//;
 	    $rowCnt = 1 if ( $rowCnt < 1 );
             $content .= <<EOF;
-<textarea name="v_$varName" cols="$size" rows="$rowCnt"$onChange>${EscHTML($varValue)}</textarea>
+<textarea name="v_z_$varName" cols="$size" rows="$rowCnt"$onChange>${EscHTML($varValue)}</textarea>
 EOF
         }
+        $content .= "</td>\n";
     }
-    $content .= "</td>\n";
     return $content;
 }
 
@@ -1025,13 +1236,15 @@ sub fieldErrorCheck
 
     if ( $type->{type} eq "list" ) {
         for ( my $i = 0 ; ; $i++ ) {
-            last if ( fieldErrorCheck($type->{child}, "${varName}_$i", $errors) );
+            last if ( fieldErrorCheck($type->{child}, "${varName}_z_$i", $errors) );
         }
-    } elsif ( $type->{type} eq "hash" ) {
+    } elsif ( $type->{type} eq "hash" || $type->{type} eq "horizHash" ) {
         my(@order, $childType);
         my $ret;
 
-        if ( defined($type->{child}) ) {
+        if ( defined($type->{order}) ) {
+            @order = @{$type->{order}};
+        } elsif ( defined($type->{child}) ) {
             @order = sort(keys(%{$type->{child}}));
         } else {
             @order = split(/\0/, $In{"vflds.$varName"});
@@ -1042,51 +1255,58 @@ sub fieldErrorCheck
             } else {
                 $childType = $type->{childType};
             }
-            $ret ||= fieldErrorCheck($childType, "${varName}_$fld", $errors);
+            $ret ||= fieldErrorCheck($childType, "${varName}_z_$fld", $errors);
         }
         return $ret;
     } else {
-        return 1 if ( !exists($In{"v_$varName"}) );
+        $In{"v_z_$varName"} = "0" if ( $type->{type} eq "boolean"
+                                        && $In{"v_z_$varName"} eq "" );
+
+        return 1 if ( !exists($In{"v_z_$varName"}) );
+
+        (my $var = $varName) =~ s/_z_/./g;
 
         if ( $type->{type} eq "integer"
                 || $type->{type} eq "boolean" ) {
-            if ( $In{"v_$varName"} !~ /^-?\d+\s*$/s
-			    && $In{"v_$varName"} ne "" ) {
-                $errors->{$varName} = "Error: $varName must be an integer";
+            if ( $In{"v_z_$varName"} !~ /^-?\d+\s*$/s
+			    && $In{"v_z_$varName"} ne "" ) {
+                $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_an_integer}}");
             }
         } elsif ( $type->{type} eq "float" ) {
-            if ( $In{"v_$varName"} !~ /^-?\d*(\.\d*)?\s*$/s
-			    && $In{"v_$varName"} ne "" ) {
+            if ( $In{"v_z_$varName"} !~ /^-?\d*(\.\d*)?\s*$/s
+			    && $In{"v_z_$varName"} ne "" ) {
                 $errors->{$varName}
-                        = "Error: $varName must be a real-valued number";
+                        = eval("qq{$Lang->{CfgEdit_Error__must_be_real_valued_number}}");
             }
         } elsif ( $type->{type} eq "shortlist" ) {
-	    my @vals = split(/[,\s]+/, $In{"v_$varName"});
+	    my @vals = split(/[,\s]+/, $In{"v_z_$varName"});
 	    for ( my $i = 0 ; $i < @vals ; $i++ ) {
 		if ( $type->{child} eq "integer"
 			&& $vals[$i] !~ /^-?\d+\s*$/s
 			&& $vals[$i] ne "" ) {
 		    my $k = $i + 1;
-		    $errors->{$varName} = "Error: $varName entry $k must"
-					. " be an integer";
+		    $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__entry__must_be_an_integer}}");
 		} elsif ( $type->{child} eq "float"
 			&& $vals[$i] !~ /^-?\d*(\.\d*)?\s*$/s
 			&& $vals[$i] ne "" ) {
 		    my $k = $i + 1;
-		    $errors->{$varName} = "Error: $varName entry $k must"
-					. " be a real-valued number";
+		    $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__entry__must_be_real_valued_number}}");
 		}
 	    }
         } elsif ( $type->{type} eq "select" ) {
             my $match = 0;
             foreach my $option ( @{$type->{values}} ) {
-                if ( $In{"v_$varName"} eq $option ) {
+                if ( $In{"v_z_$varName"} eq $option ) {
                     $match = 1;
                     last;
                 }
             }
-            $errors->{$varName} = "Error: $varName must be a valid option"
+            $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_valid_option}}")
                             if ( !$match );
+        } elsif ( $type->{type} eq "execPath" ) {
+            if ( $In{"v_z_$varName"} ne "" && !-x $In{"v_z_$varName"} ) {
+                $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_executable_program}}");
+            }
         } else {
             #
             # $type->{type} eq "string": no error checking
@@ -1104,11 +1324,14 @@ sub inputParse
 
     foreach my $param ( keys(%ConfigMeta) ) {
         my $value;
-        next if ( $userHost && !$bpc->{Conf}{CgiUserConfigEdit}{$param} );
+        next if ( $userHost
+                      && (!defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                         || (!$PrivAdmin
+                            && !$bpc->{Conf}{CgiUserConfigEdit}{$param})) );
         fieldInputParse($ConfigMeta{$param}, $param, \$value);
         $conf->{$param}     = $value;
         $override->{$param} = $In{"override_$param"};
-}
+    }
     return ($conf, $override);
 }
 
@@ -1122,16 +1345,18 @@ sub fieldInputParse
         $$value = [];
         for ( my $i = 0 ; ; $i++ ) {
             my $val;
-            last if ( fieldInputParse($type->{child}, "${varName}_$i", \$val) );
+            last if ( fieldInputParse($type->{child}, "${varName}_z_$i", \$val) );
             push(@$$value, $val);
         }
         $$value = undef if ( $type->{undefIfEmpty} && @$$value == 0 );
-    } elsif ( $type->{type} eq "hash" ) {
+    } elsif ( $type->{type} eq "hash" || $type->{type} eq "horizHash" ) {
         my(@order, $childType);
         my $ret;
         $$value = {};
 
-        if ( defined($type->{child}) ) {
+        if ( defined($type->{order}) ) {
+            @order = @{$type->{order}};
+        } elsif ( defined($type->{child}) ) {
             @order = sort(keys(%{$type->{child}}));
         } else {
             @order = split(/\0/, $In{"vflds.$varName"});
@@ -1144,24 +1369,24 @@ sub fieldInputParse
             } else {
                 $childType = $type->{childType};
             }
-            $ret ||= fieldInputParse($childType, "${varName}_$fld", \$val);
+            $ret ||= fieldInputParse($childType, "${varName}_z_$fld", \$val);
             last if ( $ret );
             $$value->{$fld} = $val;
         }
         return $ret;
     } else {
         if ( $type->{type} eq "boolean" ) {
-            $$value = 0 + $In{"v_$varName"};
-        } elsif ( !exists($In{"v_$varName"}) ) {
+            $$value = 0 + $In{"v_z_$varName"};
+        } elsif ( !exists($In{"v_z_$varName"}) ) {
             return 1;
         }
 
         if ( $type->{type} eq "integer" ) {
-            $$value = 0 + $In{"v_$varName"};
+            $$value = 0 + $In{"v_z_$varName"};
         } elsif ( $type->{type} eq "float" ) {
-            $$value = 0 + $In{"v_$varName"};
+            $$value = 0 + $In{"v_z_$varName"};
         } elsif ( $type->{type} eq "shortlist" ) {
-            $$value = [split(/[,\s]+/, $In{"v_$varName"})];
+            $$value = [split(/[,\s]+/, $In{"v_z_$varName"})];
             if ( $type->{child} eq "float"
                     || $type->{child} eq "integer"
                     || $type->{child} eq "boolean" ) {
@@ -1170,7 +1395,8 @@ sub fieldInputParse
                 }
             }
         } else {
-            $$value = $In{"v_$varName"};
+            $$value = $In{"v_z_$varName"};
+            $$value =~ s/\r\n/\n/g;
         }
         $$value = undef if ( $type->{undefIfEmpty} && $$value eq "" );
     }
@@ -1193,14 +1419,16 @@ sub configDiffMesg
         if ( !exists($oldConf->{$p}) && !exists($newConf->{$p}) ) {
             next;
         } elsif ( exists($oldConf->{$p}) && !exists($newConf->{$p}) ) {
-            $mesg .= "log Deleted $p from $conf\n";
+            $mesg .= eval("qq($Lang->{CfgEdit_Log_Delete_param})");
         } elsif ( !exists($oldConf->{$p}) && exists($newConf->{$p}) ) {
             my $dump = Data::Dumper->new([$newConf->{$p}]);
             $dump->Indent(0);
             $dump->Sortkeys(1);
             $dump->Terse(1);
             my $value = $dump->Dump;
-            $mesg .= "log Added $p to $conf, set to $value\n";
+            $value =~ s/\n/\\n/g;
+            $value =~ s/\r/\\r/g;
+            $mesg .= eval("qq($Lang->{CfgEdit_Log_Add_param_value})");
         } else {
             my $dump = Data::Dumper->new([$newConf->{$p}]);
             $dump->Indent(0);
@@ -1218,11 +1446,53 @@ sub configDiffMesg
             $dump->Terse(1);
             my $valueOld = $dump->Dump;
 
-            $mesg .= "log Changed $p in $conf to $valueNew from $valueOld\n"
-                                    if ( $valueOld ne $valueNew );
+            (my $valueNew2 = $valueNew) =~ s/['\n\r]//g;
+            (my $valueOld2 = $valueOld) =~ s/['\n\r]//g;
+            $valueNew =~ s/\n/\\n/g;
+            $valueOld =~ s/\n/\\n/g;
+            $valueNew =~ s/\r/\\r/g;
+            $valueOld =~ s/\r/\\r/g;
+            $mesg .= eval("qq($Lang->{CfgEdit_Log_Change_param_value})")
+                                    if ( $valueOld2 ne $valueNew2 );
         }
     }
     return $mesg;
+}
+
+sub hostsDiffMesg
+{
+    my($hostsNew) = @_;
+    my $hostsOld = $bpc->HostInfoRead();
+    my($mesg, $hostChange);
+
+    foreach my $host ( keys(%$hostsOld) ) {
+        if ( !defined($hostsNew->{$host}) ) {
+            $mesg .= eval("qq($Lang->{CfgEdit_Log_Host_Delete})");
+            $hostChange++;
+            next;
+        }
+        foreach my $key ( keys(%{$hostsNew->{$host}}) ) {
+            next if ( $hostsNew->{$host}{$key} eq $hostsOld->{$host}{$key} );
+            my $valueOld = $hostsOld->{$host}{$key};
+            my $valueNew = $hostsNew->{$host}{$key};
+            $mesg .= eval("qq($Lang->{CfgEdit_Log_Host_Change})");
+            $hostChange++;
+        }
+    }
+
+    foreach my $host ( keys(%$hostsNew) ) {
+        next if ( defined($hostsOld->{$host}) );
+        my $dump = Data::Dumper->new([$hostsNew->{$host}]);
+        $dump->Indent(0);
+        $dump->Sortkeys(1);
+        $dump->Terse(1);
+        my $value = $dump->Dump;
+        $value =~ s/\n/\\n/g;
+        $value =~ s/\r/\\r/g;
+        $mesg .= eval("qq($Lang->{CfgEdit_Log_Host_Add})");
+        $hostChange++;
+    }
+    return ($mesg, $hostChange);
 }
 
 1;

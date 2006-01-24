@@ -6,15 +6,14 @@
 #
 # DESCRIPTION
 #  
-#   Usage: BackupPC_zipCreate [-t] [-h host] [-n dumpNum] [-s shareName]
-#		    [-r pathRemove] [-p pathAdd] [-c compressionLevel]
-#                   files/directories...
+#   Usage: BackupPC_zipCreate [options] files/directories...
 #
 #   Flags:
 #     Required options:
-#
 #       -h host         host from which the zip archive is created
 #       -n dumpNum      dump number from which the zip archive is created
+#                       A negative number means relative to the end (eg -1
+#                       means the most recent dump, -2 2nd most recent etc).
 #       -s shareName    share name from which the zip archive is created
 #
 #     Other options:
@@ -22,6 +21,8 @@
 #       -r pathRemove   path prefix that will be replaced with pathAdd
 #       -p pathAdd      new path prefix
 #       -c level        compression level (default is 0, no compression)
+#       -e charset      charset for encoding file names (default: value of
+#                       $Conf{ClientCharset} when backup was done)
 #
 #     The -h, -n and -s options specify which dump is used to generate
 #     the zip archive.  The -r and -p options can be used to relocate
@@ -63,6 +64,7 @@ use lib "/usr/local/BackupPC/lib";
 use Archive::Zip qw(:ERROR_CODES);
 use File::Path;
 use Getopt::Std;
+use Encode qw/from_to/;
 use IO::Handle;
 use BackupPC::Lib;
 use BackupPC::Attrib qw(:all);
@@ -77,10 +79,24 @@ my %Conf   = $bpc->Conf();
 
 my %opts;
 
-if ( !getopts("th:n:p:r:s:c:", \%opts) || @ARGV < 1 ) {
-    print(STDERR "usage: $0 [-t] [-h host] [-n dumpNum] [-s shareName]"
-               . " [-r pathRemove] [-p pathAdd] [-c compressionLevel]"
-               . " files/directories...\n");
+if ( !getopts("te:h:n:p:r:s:c:", \%opts) || @ARGV < 1 ) {
+    print STDERR <<EOF;
+usage: $0 [options] files/directories...
+  Required options:
+     -h host         host from which the zip archive is created
+     -n dumpNum      dump number from which the tar archive is created
+                     A negative number means relative to the end (eg -1
+                     means the most recent dump, -2 2nd most recent etc).
+     -s shareName    share name from which the zip archive is created
+
+  Other options:
+     -t              print summary totals
+     -r pathRemove   path prefix that will be replaced with pathAdd
+     -p pathAdd      new path prefix
+     -c level        compression level (default is 0, no compression)
+     -e charset      charset for encoding file names (default: value of
+                     \$Conf{ClientCharset} when backup was done)
+EOF
     exit(1);
 }
 
@@ -90,11 +106,12 @@ if ( $opts{h} !~ /^([\w\.\s-]+)$/ ) {
 }
 my $Host = $opts{h};
 
-if ( $opts{n} !~ /^(\d+)$/ ) {
+if ( $opts{n} !~ /^(-?\d+)$/ ) {
     print(STDERR "$0: bad dump number '$opts{n}'\n");
     exit(1);
 }
 my $Num = $opts{n};
+
 $opts{c} = 0 if ( $opts{c} eq "" );
 if ( $opts{c} !~ /^(\d+)$/ ) {
     print(STDERR "$0: invalid compression level '$opts{c}'. 0=none, 9=max\n");
@@ -103,13 +120,14 @@ if ( $opts{c} !~ /^(\d+)$/ ) {
 my $compLevel = $opts{c};
 
 my @Backups = $bpc->BackupInfoRead($Host);
-my($i);
 my $FileCnt = 0;
 my $ByteCnt = 0;
 my $DirCnt = 0;
 my $SpecialCnt = 0;
 my $ErrorCnt = 0;
 
+my $i;
+$Num = $Backups[@Backups + $Num]{num} if ( -@Backups <= $Num && $Num < 0 );
 for ( $i = 0 ; $i < @Backups ; $i++ ) {
     last if ( $Backups[$i]{num} == $Num );
 }
@@ -117,6 +135,9 @@ if ( $i >= @Backups ) {
     print(STDERR "$0: bad backup number $Num for host $Host\n");
     exit(1);
 }
+
+my $Charset = $Backups[$i]{charset};
+$Charset = $opts{e} if ( $opts{e} ne "" );
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
 my $PathAdd    = $1 if ( $opts{p} =~ /(.+)/ );
@@ -200,9 +221,10 @@ sub ZipWriteFile
             && substr($tarPath, 0, length($PathRemove)) eq $PathRemove ) {
         substr($tarPath, 0, length($PathRemove)) = $PathAdd;
     }
-    $tarPath = "./" . $tarPath if ( $tarPath !~ /^\.\// );
+    $tarPath = $1 if ( $tarPath =~ m{^\.?/+(.*)} );
     $tarPath =~ s{//+}{/}g;
     $hdr->{name} = $tarPath;
+    return if ( $tarPath eq "." || $tarPath eq "./" || $tarPath eq "" );
 
     my $zipmember; # Container to hold the file/directory to zip.
 
@@ -211,12 +233,14 @@ sub ZipWriteFile
         # Directory: just write the header
         #
         $hdr->{name} .= "/" if ( $hdr->{name} !~ m{/$} );
+        from_to($hdr->{name}, "utf8", $Charset) if ( $Charset ne "" );
         $zipmember = Archive::Zip::Member->newDirectoryNamed($hdr->{name});
 	$DirCnt++;
     } elsif ( $hdr->{type} == BPC_FTYPE_FILE ) {
         #
         # Regular file: write the header and file
         #
+        from_to($hdr->{name}, "utf8", $Charset) if ( $Charset ne "" );
         $zipmember = BackupPC::Zip::FileMember->newFromFileNamed(
 					    $hdr->{fullPath},
 					    $hdr->{name},

@@ -81,16 +81,16 @@ use vars qw(%ConfigMeta);
     BackupPCNightlyPeriod  => "integer",
     MaxOldLogFiles      => "integer",
 
-    SshPath	 	=> {type => "string", undefIfEmpty => 1},
-    NmbLookupPath 	=> {type => "string", undefIfEmpty => 1},
-    PingPath	 	=> {type => "string", undefIfEmpty => 1},
-    DfPath	 	=> {type => "string", undefIfEmpty => 1},
+    SshPath	 	=> {type => "execPath", undefIfEmpty => 1},
+    NmbLookupPath 	=> {type => "execPath", undefIfEmpty => 1},
+    PingPath	 	=> {type => "execPath", undefIfEmpty => 1},
+    DfPath	 	=> {type => "execPath", undefIfEmpty => 1},
     DfCmd	 	=> "string",
-    SplitPath	 	=> {type => "string", undefIfEmpty => 1},
-    ParPath	 	=> {type => "string", undefIfEmpty => 1},
-    CatPath	 	=> {type => "string", undefIfEmpty => 1},
-    GzipPath	 	=> {type => "string", undefIfEmpty => 1},
-    Bzip2Path	 	=> {type => "string", undefIfEmpty => 1},
+    SplitPath	 	=> {type => "execPath", undefIfEmpty => 1},
+    ParPath	 	=> {type => "execPath", undefIfEmpty => 1},
+    CatPath	 	=> {type => "execPath", undefIfEmpty => 1},
+    GzipPath	 	=> {type => "execPath", undefIfEmpty => 1},
+    Bzip2Path	 	=> {type => "execPath", undefIfEmpty => 1},
     DfMaxUsagePct	=> "float",
     TrashCleanSleepSec	=> "integer",
     DHCPAddressRanges   => {
@@ -99,6 +99,7 @@ use vars qw(%ConfigMeta);
             child   => {
                 type      => "hash",
                 noKeyEdit => 1,
+                order     => [qw(ipAddrBase first last)],
                 child     => {
                     ipAddrBase => "string",
                     first      => "integer",
@@ -109,7 +110,10 @@ use vars qw(%ConfigMeta);
     BackupPCUser 	=> "string",
     CgiDir	 	=> "string",
     InstallDir	 	=> "string",
-    BackupPCUserVerify  => "integer",
+    TopDir              => "string",
+    ConfDir             => "string",
+    LogDir              => "string",
+    BackupPCUserVerify  => "boolean",
     HardLinkMax	 	=> "integer",
     PerlModuleLoad 	=> {
 	    type    => "list",
@@ -136,21 +140,27 @@ use vars qw(%ConfigMeta);
     IncrKeepCntMin	=> "integer",
     IncrAgeMax		=> "float",
     PartialAgeMax	=> "float",
-    IncrFill	 	=> "integer",
+    IncrFill	 	=> "boolean",
     RestoreInfoKeepCnt	=> "integer",
     ArchiveInfoKeepCnt	=> "integer",
 
     BackupFilesOnly	=> {
-	    type         => "list",
-	    emptyOk      => 1,
-	    undefIfEmpty => 1,
-	    child        => "string",
+            type      => "hash",
+            emptyOk   => 1,
+            childType => {
+                type      => "list",
+                emptyOk   => 1,
+                child     => "string",
+            },
     },
     BackupFilesExclude	=> {
-	    type         => "list",
-	    emptyOk      => 1,
-	    undefIfEmpty => 1,
-	    child        => "string",
+            type      => "hash",
+            emptyOk   => 1,
+            childType => {
+                type      => "list",
+                emptyOk   => 1,
+                child     => "string",
+            },
     },
 
     BlackoutBadPingLimit => "integer",
@@ -172,7 +182,7 @@ use vars qw(%ConfigMeta);
             },
         },
 
-    BackupZeroFilesIsFatal => "integer",
+    BackupZeroFilesIsFatal => "boolean",
 
     ######################################################################
     # How to backup a client
@@ -182,6 +192,8 @@ use vars qw(%ConfigMeta);
 	    values => [qw(archive rsync rsyncd smb tar)],
     },
     XferLogLevel	=> "integer",
+
+    ClientCharset       => "string",
 
     SmbShareName 	=> {
 	    type   => "list",
@@ -214,7 +226,7 @@ use vars qw(%ConfigMeta);
 
     RsyncdClientPort	=> "integer",
     RsyncdPasswd 	=> "string",
-    RsyncdAuthRequired	=> "integer",
+    RsyncdAuthRequired	=> "boolean",
 
     RsyncCsumCacheVerifyProb => "float",
     RsyncArgs	 	=> {
@@ -233,14 +245,14 @@ use vars qw(%ConfigMeta);
 	    type   => "select",
 	    values => [qw(none bzip2 gzip)],
     },
-    ArchivePar	 	=> "integer",
+    ArchivePar	 	=> "boolean",
     ArchiveSplit	=> "float",
     ArchiveClientCmd 	=> "string",
 
     NmbLookupCmd 	=> "string",
     NmbLookupFindHostCmd => "string",
 
-    FixedIPNetBiosNameCheck => "integer",
+    FixedIPNetBiosNameCheck => "boolean",
     PingCmd	 	=> "string",
     PingMaxMsec		=> "float",
 
@@ -265,7 +277,7 @@ use vars qw(%ConfigMeta);
     # Email reminders, status and messages
     # (can be overridden in the per-PC config.pl)
     ######################################################################
-    SendmailPath 	      => {type => "string", undefIfEmpty => 1},
+    SendmailPath 	      => {type => "execPath", undefIfEmpty => 1},
     EMailNotifyMinDays        => "float",
     EMailFromUserName         => "string",
     EMailAdminUserName        => "string",
@@ -278,6 +290,7 @@ use vars qw(%ConfigMeta);
     EMailNotifyOldOutlookDays => "float",
     EMailOutlookBackupSubj    => {type => "string",    undefIfEmpty => 1},
     EMailOutlookBackupMesg    => {type => "bigstring", undefIfEmpty => 1},
+    EMailHeaders              => {type => "bigstring", undefIfEmpty => 1},
 
     ######################################################################
     # CGI user interface configuration settings
@@ -285,12 +298,15 @@ use vars qw(%ConfigMeta);
     CgiAdminUserGroup 	=> "string",
     CgiAdminUsers	=> "string",
     CgiURL	 	=> "string",
-    Language	 	=> "string",
+    Language	 	=> {
+	    type   => "select",
+	    values => [qw(de en es fr it nl pt_br)],
+    },
     CgiUserHomePageCheck => "string",
     CgiUserUrlCreate    => "string",
-    CgiDateFormatMMDD	=> "integer",
-    CgiNavBarAdminAllHosts => "integer",
-    CgiSearchBoxEnable 	=> "integer",
+    CgiDateFormatMMDD	=> "boolean",
+    CgiNavBarAdminAllHosts => "boolean",
+    CgiSearchBoxEnable 	=> "boolean",
     CgiNavBarLinks	=> {
 	    type    => "list",
 	    emptyOk => 1,
@@ -324,6 +340,7 @@ use vars qw(%ConfigMeta);
         },
     CgiImageDirURL 	=> "string",
     CgiCSSFile	 	=> "string",
+    CgiUserConfigEditEnable => "boolean",
     CgiUserConfigEdit   => {
 	    type => "hash",
 	    noKeyEdit => 1,
@@ -348,6 +365,7 @@ use vars qw(%ConfigMeta);
                 BackupZeroFilesIsFatal    => "boolean",
                 XferMethod                => "boolean",
                 XferLogLevel              => "boolean",
+                ClientCharset             => "boolean",
                 SmbShareName              => "boolean",
                 SmbShareUserName          => "boolean",
                 SmbSharePasswd            => "boolean",
@@ -383,6 +401,25 @@ use vars qw(%ConfigMeta);
                 EMailNotifyOldOutlookDays => "boolean",
                 EMailOutlookBackupSubj    => "boolean",
                 EMailOutlookBackupMesg    => "boolean",
+	    },
+    },
+
+    ######################################################################
+    # Fake config setting for editing the hosts
+    ######################################################################
+    Hosts => {
+	    type    => "list",
+	    emptyOk => 1,
+	    child   => {
+		type  => "horizHash",
+                order => [qw(host dhcp user moreUsers)],
+                noKeyEdit => 1,
+		child => {
+		    host       => { type => "string", size => 20 },
+		    dhcp       => { type => "boolean"            },
+		    user       => { type => "string", size => 20 },
+		    moreUsers  => { type => "string", size => 30 },
+		},
 	    },
     },
 );

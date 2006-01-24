@@ -20,6 +20,9 @@
 #
 #     -m   Do monthly aging of per-PC log files and sending of email.
 #          Otherise, BackupPC_nightly just does pool pruning.
+#          Since several BackupPC_nightly processes might run
+#          concurrently, just the first one is given the -m flag
+#          by BackupPC.
 #
 #   The poolRangeStart and poolRangeEnd arguments are integers from 0 to 255.
 #   These specify which parts of the pool to process.  There are 256 2nd-level
@@ -208,11 +211,12 @@ for my $pool ( qw(pool cpool) ) {
 printf("BackupPC_nightly lock_off\n");
 
 ###########################################################################
-# Send email 
+# Send email and generation of backupInfo files for each backup
 ###########################################################################
 if ( $opts{m} ) {
     print("log BackupPC_nightly now running BackupPC_sendEmail\n");
-    system("$BinDir/BackupPC_sendEmail")
+    system("$BinDir/BackupPC_sendEmail");
+    doBackupInfoUpdate();
 }
 
 #
@@ -247,6 +251,31 @@ sub doPerPCLogFileAging
                                             "$TopDir/pc/$host/LOG.0",
                                             $Conf{CompressLevel}, 1);
             open(LOG, ">", "$TopDir/pc/$host/LOG") && close(LOG);
+        }
+    }
+}
+
+#
+# Update the backupInfo files based on the backups file.
+# We do this just once a week (on Sun) since it is only
+# needed for old backups with BackupPC <= 2.1.2.
+#
+sub doBackupInfoUpdate
+{
+    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    return if ( $wday != 0 );
+
+    foreach my $host ( sort(keys(%{$bpc->HostInfoRead()})) ) {
+        my @Backups = $bpc->BackupInfoRead($host);
+
+        for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+            #
+            # BackupPC::Storage->backupInfoWrite won't overwrite
+            # an existing file
+            #
+            BackupPC::Storage->backupInfoWrite("$TopDir/pc/$host",
+                                               $Backups[$i]{num},
+                                               $Backups[$i]);
         }
     }
 }

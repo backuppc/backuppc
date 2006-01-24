@@ -303,6 +303,7 @@ sub start
 	pidHandler   => sub {
 			    $t->{pidHandler}(@_);
 			},
+        clientCharset => $conf->{ClientCharset},
 	fio          => BackupPC::Xfer::RsyncFileIO->new({
 			    xfer       => $t,
 			    bpc        => $t->{bpc},
@@ -316,6 +317,7 @@ sub start
 					      $t->{XferLOG}->write(\$str);
 					  },
 			    cacheCheckProb => $conf->{RsyncCsumCacheVerifyProb},
+                            clientCharset  => $conf->{ClientCharset},
 			    %$fioArgs,
 		      }),
     });

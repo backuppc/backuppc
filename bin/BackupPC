@@ -416,9 +416,6 @@ sub Main_TryToRun_nightly
 
 	#
 	# Zero out the data we expect to get from BackupPC_nightly.
-	# In the future if we want to split BackupPC_nightly over
-	# more than one night we will only zero out the portion
-	# that we are running right now.
 	#
 	for my $p ( qw(pool cpool) ) {
 	    for ( my $i = $start ; $i < $end ; $i++ ) {
@@ -442,7 +439,7 @@ sub Main_TryToRun_nightly
 
 	#
 	# Now queue the $Conf{MaxBackupPCNightlyJobs} jobs.
-	# The granularity on start and end is now 0..256.
+	# The granularity on start and end is now 0..255.
 	#
 	$start *= 16;
 	$end   *= 16;
@@ -470,7 +467,6 @@ sub Main_TryToRun_nightly
             $CmdQueueOn{$job} = 1;
         }
         $RunNightlyWhenIdle = 2;
-
     }
 }
 

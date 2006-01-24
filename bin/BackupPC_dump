@@ -81,6 +81,7 @@ no  utf8;
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
+use BackupPC::Storage;
 use BackupPC::Xfer::Smb;
 use BackupPC::Xfer::Tar;
 use BackupPC::Xfer::Rsync;
@@ -1064,7 +1065,8 @@ sub BackupExpire
     my($client) = @_;
     my($Dir) = "$TopDir/pc/$client";
     my(@Backups) = $bpc->BackupInfoRead($client);
-    my($cntFull, $cntIncr, $firstFull, $firstIncr, $oldestIncr, $oldestFull);
+    my($cntFull, $cntIncr, $firstFull, $firstIncr, $oldestIncr,
+       $oldestFull, $changes);
 
     if ( $Conf{FullKeepCnt} <= 0 ) {
         print(LOG $bpc->timeStamp,
@@ -1106,6 +1108,7 @@ sub BackupExpire
 	    print(LOG $bpc->timeStamp,
                       "removing incr backup $Backups[$firstIncr]{num}\n");
             BackupRemove($client, \@Backups, $firstIncr);
+            $changes++;
             next;
         }
 
@@ -1145,6 +1148,7 @@ sub BackupExpire
 	    print(LOG $bpc->timeStamp,
                    "removing old full backup $Backups[$firstFull]{num}\n");
             BackupRemove($client, \@Backups, $firstFull);
+            $changes++;
             next;
         }
 
@@ -1154,7 +1158,7 @@ sub BackupExpire
         #
         last if ( !BackupFullExpire($client, \@Backups) );
     }
-    $bpc->BackupInfoWrite($client, @Backups);
+    $bpc->BackupInfoWrite($client, @Backups) if ( $changes );
 }
 
 #
@@ -1248,6 +1252,7 @@ sub BackupSave
 {
     my @Backups = $bpc->BackupInfoRead($client);
     my $num  = -1;
+    my $newFilesFH;
 
     #
     # Since we got a good backup we should remove any partial dumps
@@ -1290,7 +1295,18 @@ sub BackupSave
     $Backups[$i]{noFill}        = $type eq "incr" ? 1 : 0;
     $Backups[$i]{level}         = $type eq "incr" ? 1 : 0;
     $Backups[$i]{mangle}        = 1;        # name mangling always on for v1.04+
+    $Backups[$i]{xferMethod}    = $Conf{XferMethod};
+    $Backups[$i]{charset}       = $Conf{ClientCharset};
+    #
+    # Save the main backups file
+    #
     $bpc->BackupInfoWrite($client, @Backups);
+    #
+    # Save just this backup's info in case the main backups file
+    # gets corrupted
+    #
+    BackupPC::Storage->backupInfoWrite($Dir, $Backups[$i]{num},
+                                             $Backups[$i]);
 
     unlink("$Dir/timeStamp.level0") if ( -f "$Dir/timeStamp.level0" );
     foreach my $ext ( qw(bad bad.z) ) {
@@ -1316,11 +1332,34 @@ sub BackupSave
 		$file = "$f->{share}/$f->{file}";
 	    }
 	    next if ( !-f "$Dir/$Backups[$j]{num}/$file" );
-	    if ( !link("$Dir/$Backups[$j]{num}/$file",
-				"$Dir/$num/$shareM/$fileM") ) {
-		my $str = \"Unable to link $num/$f->{share}/$f->{file} to"
-                         . " $Backups[$j]{num}/$f->{share}/$f->{file}\n";
-		$XferLOG->write(\$str);
+
+            my($exists, $digest, $origSize, $outSize, $errs)
+                                = BackupPC::PoolWrite::LinkOrCopy(
+                                      $bpc,
+                                      "$Dir/$Backups[$j]{num}/$file",
+                                      $Backups[$j]{compress},
+                                      "$Dir/$num/$shareM/$fileM",
+                                      $Conf{CompressLevel});
+            if ( !$exists ) {
+                #
+                # the hard link failed, most likely because the target
+                # file has too many links.  We have copied the file
+                # instead, so add this to the new file list.
+                #
+                if ( !defined($newFilesFH) ) {
+                    my $str = "Appending to NewFileList for $shareM/$fileM\n";
+                    $XferLOG->write(\$str);
+                    open($newFilesFH, ">>", "$TopDir/pc/$client/NewFileList")
+                         || die("can't open $TopDir/pc/$client/NewFileList");
+                    binmode($newFilesFH);
+                }
+                if ( -f "$Dir/$num/$shareM/$fileM" ) {
+                    print($newFilesFH "$digest $origSize $shareM/$fileM\n");
+                } else {
+                    my $str = "Unable to link/copy $num/$f->{share}/$f->{file}"
+                            . " to $Backups[$j]{num}/$f->{share}/$f->{file}\n";
+                    $XferLOG->write(\$str);
+                }
 	    } else {
 		my $str = "Bad file $num/$f->{share}/$f->{file} replaced"
                         . " by link to"
@@ -1335,6 +1374,7 @@ sub BackupSave
 	    $XferLOG->write(\$str);
 	}
     }
+    close($newFilesFH) if ( defined($newFilesFH) );
     $XferLOG->close();
     rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.$num$fileExt");
     rename("$Dir/NewFileList", "$Dir/NewFileList.$num");

@@ -547,6 +547,9 @@ $Conf{ArchiveInfoKeepCnt} = 10;
 # array, and $Conf{SmbShareName} contains multiple share names, then
 # the setting is assumed to apply all shares.
 #
+# If a hash is used, a special key "*" means it applies to all
+# shares.
+#
 # Examples:
 #    $Conf{BackupFilesOnly} = '/myFiles';
 #    $Conf{BackupFilesOnly} = ['/myFiles'];     # same as first example
@@ -554,6 +557,10 @@ $Conf{ArchiveInfoKeepCnt} = 10;
 #    $Conf{BackupFilesOnly} = {
 #       'c' => ['/myFiles', '/important'],      # these are for 'c' share
 #       'd' => ['/moreFiles', '/archive'],      # these are for 'd' share
+#    };
+#    $Conf{BackupFilesOnly} = {
+#       'c' => ['/myFiles', '/important'],      # these are for 'c' share
+#       '*' => ['/myFiles', '/important'],      # these are other shares
 #    };
 #
 $Conf{BackupFilesOnly} = undef;
@@ -590,6 +597,9 @@ $Conf{BackupFilesOnly} = undef;
 # Users report that for smbclient you should specify a directory
 # followed by "/*", eg: "/proc/*", instead of just "/proc".
 #
+# If a hash is used, a special key "*" means it applies to all
+# shares.
+#
 # Examples:
 #    $Conf{BackupFilesExclude} = '/temp';
 #    $Conf{BackupFilesExclude} = ['/temp'];     # same as first example
@@ -597,6 +607,10 @@ $Conf{BackupFilesOnly} = undef;
 #    $Conf{BackupFilesExclude} = {
 #       'c' => ['/temp', '/winnt/tmp'],         # these are for 'c' share
 #       'd' => ['/junk', '/dont_back_this_up'], # these are for 'd' share
+#    };
+#    $Conf{BackupFilesExclude} = {
+#       'c' => ['/temp', '/winnt/tmp'],         # these are for 'c' share
+#       '*' => ['/junk', '/dont_back_this_up'], # these are for other shares
 #    };
 #
 $Conf{BackupFilesExclude} = undef;
@@ -1758,6 +1772,11 @@ $Conf{CgiImageDirURL} = '';
 # $Conf{CgiImageDirURL} URL.
 #
 $Conf{CgiCSSFile} = 'BackupPC_stnd.css';
+
+#
+# Whether the user is allowed to edit their per-PC config.
+#
+$Conf{CgiUserConfigEditEnable} = 1;
 
 #
 # Which per-host config variables a non-admin user is allowed

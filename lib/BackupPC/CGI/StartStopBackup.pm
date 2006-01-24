@@ -76,7 +76,13 @@ sub action
         Trailer();
     } else {
         if ( $start ) {
-	    my $ipAddr = ConfirmIPAddress($host);
+            $bpc->ConfigRead($host);
+            %Conf = $bpc->Conf();
+
+            my $checkHost = $host;
+            $checkHost = $Conf{ClientNameAlias}
+                                if ( $Conf{ClientNameAlias} ne "" );
+	    my $ipAddr = ConfirmIPAddress($checkHost);
 	    my $content = eval("qq{$Lang->{Are_you_sure_start}}");
             Header(eval("qq{$Lang->{BackupPC__Start_Backup_Confirm_on__host}}"),$content);
         } else {

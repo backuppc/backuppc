@@ -1,7 +1,7 @@
 /*
  * BackupPC standard CSS definitions
  *
- * Version 2.1.0, released 13 Jun 2004.
+ * Version 2.1.0, released 20 Jun 2004.
  *
  * See http://backuppc.sourceforge.net.
  *
@@ -89,6 +89,50 @@ a.navbar {
 }
 
 .border {
+    font-size:10pt;
+}
+
+.editHeader {
+    font-family:arial,sans-serif;
+    font-size:12pt;
+    color:#000000;
+    font-weight:bold;
+    background-color:#99cc33;
+}
+
+.editTabSel {
+    font-family:arial,sans-serif;
+    font-size:14pt;
+    color:#000000;
+    font-weight:bold;
+    background-color:#99cc33;
+    padding:3px;
+    padding-left:6px;
+    margin-bottom:5px;
+}
+
+.editTabNoSel {
+    font-family:arial,sans-serif;
+    font-size:14pt;
+    color:#000000;
+    font-weight:bold;
+    padding:3px;
+    padding-left:6px;
+    margin-bottom:5px;
+}
+
+.editSaveButton {
+    color:#ff0000;
+    font-size:14pt;
+    font-weight:bold;
+}
+
+.editError {
+    color:#ff0000;
+    font-weight:bold;
+}
+
+.editComment {
     font-size:10pt;
 }
 

@@ -27,8 +27,8 @@ Fetching CVS:
 
     cvs -z3 -d:pserver:anonymous@cvs.backuppc.sourceforge.net:/cvsroot/backuppc co -r v1_5_0 BackupPC
 
-Building an installable release from the source:
------------------------------------------------
+Building an installable release from the CVS source:
+---------------------------------------------------
 
 * Edit makeDist and set the version number and release date
 
@@ -38,6 +38,11 @@ Building an installable release from the source:
   all the library paths etc back into the symbolic form (eg: __INSTALLDIR__)
   so that configure.pl will do the right thing.
 
+  Often the language files are not up to date, and makeDist exits after
+  complaining about the lang files being inconsistent.  Use the -l option
+  to turn off that checking.
+
 * You should now have a sub-directory dist/BackupPC-version containing
-  the release and a tar ball dist/BackupPC-version.tar.gz.  The tar
-  ball can be copied, extracted and installed like any BackupPC release.
+  the release and a tar ball dist/BackupPC-VERSION.tar.gz.  The tar
+  ball can be copied, extracted and installed using configure.pl
+  like any BackupPC release.

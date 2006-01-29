@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.1, released 13 Mar 2005.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #

@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -260,7 +260,7 @@ sub TarReadFileInfo
             from_to($name, $Conf{ClientCharset}, "utf8");
             from_to($linkname, $Conf{ClientCharset}, "utf8");
         }
-        printf("File now $name (hex: %s)\n", unpack("H*", $name));
+        # printf("File now $name (hex: %s)\n", unpack("H*", $name));
 
         $name     =~ s{^\./+}{};
         $name     =~ s{/+\.?$}{};

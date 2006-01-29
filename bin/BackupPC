@@ -6,7 +6,7 @@
 # DESCRIPTION
 #
 #   BackupPC reads the configuration and status information from
-#   $TopDir/conf.  It then runs and manages all the backup activity.
+#   $ConfDir/conf.  It then runs and manages all the backup activity.
 #
 #   As specified by $Conf{WakeupSchedule}, BackupPC wakes up periodically
 #   to queue backups on all the PCs.  This is a four step process:
@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -87,6 +87,7 @@ if ( !getopts("d", \%opts) || @ARGV != 0 ) {
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
+my $LogDir = $bpc->LogDir();
 my %Conf   = $bpc->Conf();
 
 #
@@ -111,10 +112,10 @@ if ( $Conf{BackupPCUserVerify}
 #
 # Read old status
 #
-if ( -f "$TopDir/log/status.pl" && !(my $ret = do "$TopDir/log/status.pl") ) {
-   die "couldn't parse $TopDir/log/status.pl: $@" if $@;
-   die "couldn't do $TopDir/log/status.pl: $!"    unless defined $ret;
-   die "couldn't run $TopDir/log/status.pl";
+if ( -f "$LogDir/status.pl" && !(my $ret = do "$LogDir/status.pl") ) {
+   die "couldn't parse $LogDir/status.pl: $@" if $@;
+   die "couldn't do $LogDir/status.pl: $!"    unless defined $ret;
+   die "couldn't run $LogDir/status.pl";
 }
 
 #
@@ -344,7 +345,7 @@ sub Main_Initialize
     # Write out our initial status and save our PID
     #
     StatusWrite();
-    if ( open(PID, ">", "$TopDir/log/BackupPC.pid") ) {
+    if ( open(PID, ">", "$LogDir/BackupPC.pid") ) {
         print(PID $$);
         close(PID);
     }
@@ -803,15 +804,15 @@ sub Main_Check_Timeout
         $Info{DUDailySkipHostCntPrev} = $Info{DUDailySkipHostCnt};
         $Info{DUDailySkipHostCnt}     = 0;
         my $lastLog = $Conf{MaxOldLogFiles} - 1;
-        if ( -f "$TopDir/log/LOG.$lastLog" ) {
+        if ( -f "$LogDir/LOG.$lastLog" ) {
             print(LOG $bpc->timeStamp,
-                       "Removing $TopDir/log/LOG.$lastLog\n");
-            unlink("$TopDir/log/LOG.$lastLog");
+                       "Removing $LogDir/LOG.$lastLog\n");
+            unlink("$LogDir/LOG.$lastLog");
         }
-        if ( -f "$TopDir/log/LOG.$lastLog.z" ) {
+        if ( -f "$LogDir/LOG.$lastLog.z" ) {
             print(LOG $bpc->timeStamp,
-                       "Removing $TopDir/log/LOG.$lastLog.z\n");
-            unlink("$TopDir/log/LOG.$lastLog.z");
+                       "Removing $LogDir/LOG.$lastLog.z\n");
+            unlink("$LogDir/LOG.$lastLog.z");
         }
         print(LOG $bpc->timeStamp, "Aging LOG files, LOG -> LOG.0 -> "
                    . "LOG.1 -> ... -> LOG.$lastLog\n");
@@ -820,18 +821,18 @@ sub Main_Check_Timeout
         close(LOG);
         for ( my $i = $lastLog - 1 ; $i >= 0 ; $i-- ) {
             my $j = $i + 1;
-            rename("$TopDir/log/LOG.$i", "$TopDir/log/LOG.$j")
-                            if ( -f "$TopDir/log/LOG.$i" );
-            rename("$TopDir/log/LOG.$i.z", "$TopDir/log/LOG.$j.z")
-                            if ( -f "$TopDir/log/LOG.$i.z" );
+            rename("$LogDir/LOG.$i", "$LogDir/LOG.$j")
+                            if ( -f "$LogDir/LOG.$i" );
+            rename("$LogDir/LOG.$i.z", "$LogDir/LOG.$j.z")
+                            if ( -f "$LogDir/LOG.$i.z" );
         }
 	#
 	# Compress the log file LOG -> LOG.0.z (if enabled).
 	# Otherwise, just rename LOG -> LOG.0.
 	#
-	BackupPC::FileZIO->compressCopy("$TopDir/log/LOG",
-                                        "$TopDir/log/LOG.0.z",
-                                        "$TopDir/log/LOG.0",
+	BackupPC::FileZIO->compressCopy("$LogDir/LOG",
+                                        "$LogDir/LOG.0.z",
+                                        "$LogDir/LOG.0",
                                         $Conf{CompressLevel}, 1);
         LogFileOpen();
         #
@@ -1548,7 +1549,7 @@ sub Main_Check_Client_Messages
 ###########################################################################
 
 #
-# Write the current status to $TopDir/log/status.pl
+# Write the current status to $LogDir/status.pl
 #
 sub StatusWrite
 {
@@ -1556,7 +1557,7 @@ sub StatusWrite
              [  \%Info, \%Status],
              [qw(*Info   *Status)]);
     $dump->Indent(1);
-    if ( open(STATUS, ">", "$TopDir/log/status.pl") ) {
+    if ( open(STATUS, ">", "$LogDir/status.pl") ) {
         print(STATUS $dump->Dump);
         close(STATUS);
     }
@@ -1757,7 +1758,7 @@ sub catch_signal
         close(LOG);
         LogFileOpen();
         print(LOG "Fatal error: unhandled signal $SigName\n");
-        unlink("$TopDir/log/BackupPC.pid");
+        unlink("$LogDir/BackupPC.pid");
         confess("Got new signal $SigName... quitting\n");
     } else {
 	$SigName = shift;
@@ -1769,9 +1770,9 @@ sub catch_signal
 #
 sub LogFileOpen
 {
-    mkpath("$TopDir/log", 0, 0777) if ( !-d "$TopDir/log" );
-    open(LOG, ">>$TopDir/log/LOG")
-            || die("Can't create LOG file $TopDir/log/LOG");
+    mkpath($LogDir, 0, 0777) if ( !-d $LogDir );
+    open(LOG, ">>$LogDir/LOG")
+            || die("Can't create LOG file $LogDir/LOG");
     close(STDOUT);
     close(STDERR);
     open(STDOUT, ">&LOG");
@@ -1796,7 +1797,7 @@ sub ServerSocketInit
             print(LOG $bpc->timeStamp, "unix socket() failed: $!\n");
             exit(1);
         }
-        my $sockFile = "$TopDir/log/BackupPC.sock";
+        my $sockFile = "$LogDir/BackupPC.sock";
         unlink($sockFile);
         if ( !bind(SERVER_UNIX, sockaddr_un($sockFile)) ) {
             print(LOG $bpc->timeStamp, "unix bind() failed: $!\n");
@@ -1879,7 +1880,7 @@ sub ServerShutdown
     }
     delete($Info{pid});
     StatusWrite();
-    unlink("$TopDir/log/BackupPC.pid");
+    unlink("$LogDir/BackupPC.pid");
     exit(1);
 }
 

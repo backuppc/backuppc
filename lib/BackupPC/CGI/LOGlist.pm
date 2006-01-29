@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -53,7 +53,7 @@ sub action
         $url0 = "&host=${EscURI($host)}";
         $hdr = "for host $host";
     } else {
-        $root = "$TopDir/log/LOG";
+        $root = "$LogDir/LOG";
         $url0 = "";
         $hdr = "";
     }

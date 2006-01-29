@@ -12,11 +12,15 @@
 #
 #           dist/BackupPC-$Version.tar.gz.
 #
+#   Often the language files are not up to date, and makeDist
+#   exits after complaining about the lang files being inconsistent.
+#   Use the -l option to turn off that behavior.
+#
 # AUTHOR
 #   Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2004  Craig Barratt
+#   Copyright (C) 2001-2006  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -103,6 +107,7 @@ my @PerlSrc = qw(
     lib/BackupPC/Lang/pt_br.pm
     lib/BackupPC/Storage/Text.pm
     lib/BackupPC/Xfer/Archive.pm
+    lib/BackupPC/Xfer/BackupPCd.pm
     lib/BackupPC/Xfer/Smb.pm
     lib/BackupPC/Xfer/Tar.pm
     lib/BackupPC/Xfer/Rsync.pm
@@ -273,14 +278,14 @@ sub InstallFile
 	    } elsif ( /^use lib ".*BackupPC\/lib";/
 		    || /^use lib "\/home\/pcbackup\/install\/lib";/ ) {
 		print OUT "use lib \"__INSTALLDIR__/lib\";\n";
-	    } elsif ( $file =~ /Lib.pm/ && /(.*TopDir *=> .*)'.*',/ ) {
-		print OUT "$1'__TOPDIR__',\n";
+	    } elsif ( $file =~ /Lib.pm/ && /^(\s*\$topDir\s*=\s*)'.*'(\s*if\s.*)/ ) {
+		print OUT "$1'__TOPDIR__'$2\n";
+	    } elsif ( $file =~ /Lib.pm/ && /^(\s*\$installDir\s*=\s*)'.*'(\s*if\s.*)/ ) {
+		print OUT "$1'__INSTALLDIR__'$2\n";
+	    } elsif ( $file =~ /Lib.pm/ && /^(\s*my \$useFHS\s*=\s*)\d;/ ) {
+		print OUT "${1}__USEFHS__;\n";
 	    } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'[\w\d\.]+',/ ) {
 		print OUT "$1'$Version',\n";
-	    } elsif ( $file =~ /Lib.pm/ && /(.*BinDir *=> .*)'.*',/ ) {
-		print OUT "$1'__INSTALLDIR__',\n";
-	    } elsif ( $file =~ /Lib.pm/ && /(.*LibDir *=> .*)'.*',/ ) {
-		print OUT "$1'__INSTALLDIR__',\n";
 	    } elsif ( $file =~ /BackupPC_Admin/ && /(my *\$installDir *= *)'.*'/ ) {
 		print OUT "$1'__INSTALLDIR__/lib';\n";
 	    } else {

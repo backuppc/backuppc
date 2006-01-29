@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -44,7 +44,7 @@ require Exporter;
 
 use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
 
-use vars qw($Cgi %In $MyURL $User %Conf $TopDir $BinDir $bpc);
+use vars qw($Cgi %In $MyURL $User %Conf $TopDir $LogDir $BinDir $bpc);
 use vars qw(%Status %Info %Jobs @BgQueue @UserQueue @CmdQueue
             %QueueLen %StatusHost);
 use vars qw($Hosts $HostsMTime $ConfigMTime $PrivAdmin);
@@ -76,7 +76,7 @@ use vars qw($Lang);
 		    NavLink
 		    h1
 		    h2
-		    $Cgi %In $MyURL $User %Conf $TopDir $BinDir $bpc
+		    $Cgi %In $MyURL $User %Conf $TopDir $LogDir $BinDir $bpc
 		    %Status %Info %Jobs @BgQueue @UserQueue @CmdQueue
 		    %QueueLen %StatusHost
 		    $Hosts $HostsMTime $ConfigMTime $PrivAdmin
@@ -97,6 +97,7 @@ sub NewRequest
 	ErrorExit($Lang->{BackupPC__Lib__new_failed__check_apache_error_log})
 	    if ( !($bpc = BackupPC::Lib->new(undef, undef, undef, 1)) );
 	$TopDir = $bpc->TopDir();
+	$LogDir = $bpc->LogDir();
 	$BinDir = $bpc->BinDir();
 	%Conf   = $bpc->Conf();
 	$Lang   = $bpc->Lang();
@@ -309,9 +310,9 @@ sub GetStatusInfo
 
 sub ReadUserEmailInfo
 {
-    if ( (stat("$TopDir/log/UserEmailInfo.pl"))[9] != $UserEmailInfoMTime ) {
-        do "$TopDir/log/UserEmailInfo.pl";
-        $UserEmailInfoMTime = (stat("$TopDir/log/UserEmailInfo.pl"))[9];
+    if ( (stat("$LogDir/UserEmailInfo.pl"))[9] != $UserEmailInfoMTime ) {
+        do "$LogDir/UserEmailInfo.pl";
+        $UserEmailInfoMTime = (stat("$LogDir/UserEmailInfo.pl"))[9];
     }
 }
 

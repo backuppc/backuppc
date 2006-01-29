@@ -19,7 +19,7 @@
 #   Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2004  Craig Barratt
+#   Copyright (C) 2001-2006  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -78,9 +78,7 @@ EOF
 }
 
 my %opts;
-$opts{fhs} = 1;
 $opts{"set-perms"} = 1;
-$opts{"backuppc-user"} = "backuppc";
 if ( !GetOptions(
             \%opts,
             "batch",
@@ -131,7 +129,7 @@ EOF
 #                
 #    InstallDir   which includes subdirs bin, lib, doc
 #
-# With FSH enabled (which is the default for new installations):
+# With FHS enabled (which is the default for new installations):
 #
 #    /etc/BackupPC/config.pl  main config file (was $TopDir/conf/config.pl)
 #    /etc/BackupPC/hosts      hosts file (was $TopDir/conf/hosts)
@@ -155,15 +153,16 @@ EOF
 #
 my $ConfigPath = "";
 while ( 1 ) {
-    if ( $opts{fhs} && -f "/etc/BackupPC/config.pl" ) {
+    if ( -f "/etc/BackupPC/config.pl" ) {
         $ConfigPath = "/etc/BackupPC/config.pl";
+        $opts{fhs} = 1 if ( !defined($opts{fhs}) );
     } else {
         $ConfigPath = prompt("--> Full path to existing main config.pl",
                              $ConfigPath,
                              "config-path");
     }
     last if ( $ConfigPath eq ""
-            || ($ConfigPath =~ /^\// && -r $ConfigPath && -w $ConfigPath) );
+            || ($ConfigPath =~ /^\// && -f $ConfigPath && -w $ConfigPath) );
     my $problem = "is not an absolute path";
     $problem = "is not writable"        if ( !-w $ConfigPath );
     $problem = "is not readable"        if ( !-r $ConfigPath );
@@ -175,6 +174,8 @@ while ( 1 ) {
         exit(1);
     }
 }
+$opts{fhs} = 1 if ( !defined($opts{fhs}) && $ConfigPath eq "" );
+$opts{fhs} = 0 if ( !defined($opts{fhs}) );
 
 my $bpc;
 if ( $ConfigPath ne "" && -r $ConfigPath ) {
@@ -208,7 +209,6 @@ if ( $opts{fhs} ) {
     $Conf{ConfDir}      ||= "/etc/BackupPC";
     $Conf{InstallDir}   ||= "/usr/local/BackupPC";
     $Conf{LogDir}       ||= "/var/log/BackupPC";
-    $Conf{StatusDir}    ||= "/var/lib/BackupPC";
 }
 
 #
@@ -497,7 +497,9 @@ exit unless prompt("--> Do you want to continue?", "y") =~ /y/i;
 #
 foreach my $dir ( qw(bin doc
 		     lib/BackupPC/CGI
+		     lib/BackupPC/Config
 		     lib/BackupPC/Lang
+		     lib/BackupPC/Storage
 		     lib/BackupPC/Xfer
 		     lib/BackupPC/Zip
 		 ) ) {
@@ -535,7 +537,6 @@ foreach my $dir ( (
             "$Conf{TopDir}/trash",
             "$Conf{ConfDir}",
             "$Conf{LogDir}",
-            "$Conf{StatusDir}",
         ) ) {
     mkpath("$DestDir/$dir", 0, 0750) if ( !-d "$DestDir/$dir" );
     if ( !-d "$DestDir/$dir"
@@ -557,24 +558,12 @@ foreach my $prog ( qw(BackupPC BackupPC_dump BackupPC_link BackupPC_nightly
 
 printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(
-	BackupPC/Lib.pm
 	BackupPC/FileZIO.pm
 	BackupPC/Attrib.pm
         BackupPC/PoolWrite.pm
+	BackupPC/Lib.pm
+	BackupPC/Storage.pm
 	BackupPC/View.pm
-	BackupPC/Xfer/Archive.pm
-	BackupPC/Xfer/Tar.pm
-        BackupPC/Xfer/Smb.pm
-	BackupPC/Xfer/Rsync.pm
-	BackupPC/Xfer/RsyncDigest.pm
-        BackupPC/Xfer/RsyncFileIO.pm
-	BackupPC/Zip/FileMember.pm
-        BackupPC/Lang/en.pm
-	BackupPC/Lang/fr.pm
-	BackupPC/Lang/es.pm
-        BackupPC/Lang/de.pm
-        BackupPC/Lang/it.pm
-        BackupPC/Lang/nl.pm
         BackupPC/CGI/AdminOptions.pm
 	BackupPC/CGI/Archive.pm
 	BackupPC/CGI/ArchiveInfo.pm
@@ -595,6 +584,22 @@ foreach my $lib ( qw(
         BackupPC/CGI/StopServer.pm
 	BackupPC/CGI/Summary.pm
 	BackupPC/CGI/View.pm
+	BackupPC/Config/Meta.pm
+        BackupPC/Lang/en.pm
+	BackupPC/Lang/fr.pm
+	BackupPC/Lang/es.pm
+        BackupPC/Lang/de.pm
+        BackupPC/Lang/it.pm
+        BackupPC/Lang/nl.pm
+	BackupPC/Storage/Text.pm
+	BackupPC/Xfer/Archive.pm
+	BackupPC/Xfer/BackupPCd.pm
+	BackupPC/Xfer/Tar.pm
+        BackupPC/Xfer/Smb.pm
+	BackupPC/Xfer/Rsync.pm
+	BackupPC/Xfer/RsyncDigest.pm
+        BackupPC/Xfer/RsyncFileIO.pm
+	BackupPC/Zip/FileMember.pm
     ) ) {
     InstallFile("lib/$lib", "$DestDir$Conf{InstallDir}/lib/$lib", 0444);
 }
@@ -882,6 +887,7 @@ sub InstallFile
 	    s/__LOGDIR__/$Conf{LogDir}/g;
 	    s/__CONFDIR__/$Conf{ConfDir}/g;
 	    s/__TOPDIR__/$Conf{TopDir}/g;
+	    s/__USEFHS__/$opts{fhs}/g;
 	    s/__BACKUPPCUSER__/$Conf{BackupPCUser}/g;
 	    s/__CGIDIR__/$Conf{CgiDir}/g;
 	    if ( $first && /^#.*bin\/perl/ ) {
@@ -1135,8 +1141,9 @@ final locations.
 =item B<--fhs>
 
 Use locations specified by the Filesystem Hierarchy Standard
-for installing BackupPC.  This is enabled by default.  To
-use the pre-3.0 installation locations, specify --no-fhs.
+for installing BackupPC.  This is enabled by default for new
+installatios.  To use the pre-3.0 installation locations,
+specify --no-fhs.
 
 =item B<--help|?>
 

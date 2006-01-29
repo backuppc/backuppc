@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -46,10 +46,11 @@ use BackupPC::FileZIO;
 use Data::Dumper;
 use Getopt::Std;
 use DirHandle ();
-use vars qw($Lang $TopDir $BinDir %Conf);
+use vars qw($Lang $TopDir $BinDir $LogDir %Conf);
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 $TopDir = $bpc->TopDir();
+$LogDir = $bpc->LogDir();
 $BinDir = $bpc->BinDir();
 %Conf   = $bpc->Conf();
 $Lang   = $bpc->Lang();
@@ -57,7 +58,7 @@ $Lang   = $bpc->Lang();
 $bpc->ChildInit();
 
 use vars qw(%UserEmailInfo);
-do "$TopDir/log/UserEmailInfo.pl";
+do "$LogDir/UserEmailInfo.pl";
 
 my %opts;
 if ( !getopts("t", \%opts) || @ARGV != 0 ) {
@@ -286,7 +287,7 @@ if ( !$opts{t} ) {
     my $dumpStr = Data::Dumper->Dump(
              [\%UserEmailInfo],
              [qw(*UserEmailInfo)]);
-    if ( open(HOST, ">", "$TopDir/log/UserEmailInfo.pl") ) {
+    if ( open(HOST, ">", "$LogDir/UserEmailInfo.pl") ) {
 	binmode(HOST);
         print(HOST $dumpStr);
         close(HOST);

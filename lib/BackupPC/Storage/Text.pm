@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -103,7 +103,7 @@ sub BackupInfoWrite
     #
     # Write the file
     #
-    return $s->TextFileWrite("$s->{TopDir}/pc/$host", "backups", $contents);
+    return $s->TextFileWrite("$s->{TopDir}/pc/$host/backups", $contents);
 }
 
 sub RestoreInfoRead
@@ -144,7 +144,7 @@ sub RestoreInfoWrite
     #
     # Write the file
     #
-    return $s->TextFileWrite("$s->{TopDir}/pc/$host", "restores", $contents);
+    return $s->TextFileWrite("$s->{TopDir}/pc/$host/restores", $contents);
 }
 
 sub ArchiveInfoRead
@@ -185,7 +185,7 @@ sub ArchiveInfoWrite
     #
     # Write the file
     #
-    return $s->TextFileWrite("$s->{TopDir}/pc/$host", "archives", $contents);
+    return $s->TextFileWrite("$s->{TopDir}/pc/$host/archives", $contents);
 }
 
 #
@@ -196,22 +196,24 @@ sub ArchiveInfoWrite
 #
 sub TextFileWrite
 {
-    my($s, $dir, $file, $contents) = @_;
+    my($s, $file, $contents) = @_;
     local(*FD, *LOCK);
     my($fileOk);
 
+    (my $dir = $file) =~ s{(.+)/(.+)}{$1};
+
     mkpath($dir, 0, 0775) if ( !-d $dir );
-    if ( open(FD, ">", "$dir/$file.new") ) {
+    if ( open(FD, ">", "$file.new") ) {
 	binmode(FD);
         print FD $contents;
         close(FD);
         #
         # verify the file
         #
-        if ( open(FD, "<", "$dir/$file.new") ) {
+        if ( open(FD, "<", "$file.new") ) {
             binmode(FD);
             if ( join("", <FD>) ne $contents ) {
-                return "TextFileWrite: Failed to verify $dir/$file.new";
+                return "TextFileWrite: Failed to verify $file.new";
             } else {
                 $fileOk = 1;
             }
@@ -225,18 +227,32 @@ sub TextFileWrite
             $lock = 1;
             flock(LOCK, LOCK_EX);
         }
-        if ( -s "$dir/$file" ) {
-            unlink("$dir/$file.old")               if ( -f "$dir/$file.old" );
-            rename("$dir/$file", "$dir/$file.old") if ( -f "$dir/$file" );
+        if ( -s "$file" ) {
+            unlink("$file.old")           if ( -f "$file.old" );
+            rename("$file", "$file.old")  if ( -f "$file" );
         } else {
-            unlink("$dir/$file") if ( -f "$dir/$file" );
+            unlink("$file") if ( -f "$file" );
         }
-        rename("$dir/$file.new", "$dir/$file") if ( -f "$dir/$file.new" );
+        rename("$file.new", "$file") if ( -f "$file.new" );
         close(LOCK) if ( $lock );
     } else {
-        return "TextFileWrite: Failed to write $dir/$file.new";
+        return "TextFileWrite: Failed to write $file.new";
     }
     return;
+}
+
+sub ConfigPath
+{
+    my($s, $host) = @_;
+
+    return "$s->{ConfDir}/config.pl" if ( !defined($host) );
+    if ( $s->{useFHS} ) {
+        return "$s->{ConfDir}/host/$host.pl";
+    } else {
+        return "$s->{ConfDir}/$host.pl"
+            if ( $host ne "config" && -f "$s->{ConfDir}/$host.pl" );
+        return "$s->{TopDir}/pc/$host/config.pl";
+    }
 }
 
 sub ConfigDataRead
@@ -248,15 +264,9 @@ sub ConfigDataRead
     # TODO: add lock
     #
     my $conf = {};
+    my $configPath = $s->ConfigPath($host);
 
-    if ( defined($host) ) {
-	push(@configs, "$s->{TopDir}/conf/$host.pl")
-		if ( $host ne "config" && -f "$s->{TopDir}/conf/$host.pl" );
-	push(@configs, "$s->{TopDir}/pc/$host/config.pl")
-		if ( -f "$s->{TopDir}/pc/$host/config.pl" );
-    } else {
-	push(@configs, "$s->{TopDir}/conf/config.pl");
-    }
+    push(@configs, $configPath) if ( -f $configPath );
     foreach $config ( @configs ) {
         %Conf = ();
         if ( !defined($ret = do $config) && ($! || $@) ) {
@@ -284,17 +294,16 @@ sub ConfigDataWrite
 {
     my($s, $host, $newConf) = @_;
 
-    my($confDir) = $host eq "" ? "$s->{TopDir}/conf"
-			       : "$s->{TopDir}/pc/$host";
+    my $configPath = $s->ConfigPath($host);
 
-    my($err, $contents) = $s->ConfigFileMerge("$confDir/config.pl", $newConf);
+    my($err, $contents) = $s->ConfigFileMerge("$configPath", $newConf);
     if ( defined($err) ) {
         return $err;
     } else {
         #
         # Write the file
         #
-        return $s->TextFileWrite($confDir, "config.pl", $contents);
+        return $s->TextFileWrite($configPath, $contents);
     }
 }
 
@@ -376,11 +385,11 @@ sub ConfigFileMerge
 sub ConfigMTime
 {
     my($s) = @_;
-    return (stat("$s->{TopDir}/conf/config.pl"))[9];
+    return (stat($s->ConfigPath()))[9];
 }
 
 #
-# Returns information from the host file in $s->{TopDir}/conf/hosts.
+# Returns information from the host file in $s->{ConfDir}/hosts.
 # With no argument a ref to a hash of hosts is returned.  Each
 # hash contains fields as specified in the hosts file.  With an
 # argument a ref to a single hash is returned with information
@@ -392,9 +401,9 @@ sub HostInfoRead
     my(%hosts, @hdr, @fld);
     local(*HOST_INFO, *LOCK);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$s->{TopDir}/pc/$host/LOCK");
-    if ( !open(HOST_INFO, "$s->{TopDir}/conf/hosts") ) {
-        print(STDERR "Can't open $s->{TopDir}/conf/hosts\n");
+    flock(LOCK, LOCK_EX) if open(LOCK, "$s->{ConfDir}/LOCK");
+    if ( !open(HOST_INFO, "$s->{ConfDir}/hosts") ) {
+        print(STDERR "Can't open $s->{ConfDir}/hosts\n");
         close(LOCK);
         return {};
     }
@@ -436,7 +445,7 @@ sub HostInfoRead
 }
 
 #
-# Writes new hosts information to the hosts file in $s->{TopDir}/conf/hosts.
+# Writes new hosts information to the hosts file in $s->{ConfDir}/hosts.
 # With no argument a ref to a hash of hosts is returned.  Each
 # hash contains fields as specified in the hosts file.  With an
 # argument a ref to a single hash is returned with information
@@ -448,8 +457,8 @@ sub HostInfoWrite
     my($gotHdr, @fld, $hostText, $contents);
     local(*HOST_INFO);
 
-    if ( !open(HOST_INFO, "$s->{TopDir}/conf/hosts") ) {
-        return "Can't open $s->{TopDir}/conf/hosts";
+    if ( !open(HOST_INFO, "$s->{ConfDir}/hosts") ) {
+        return "Can't open $s->{ConfDir}/hosts";
     }
     foreach my $host ( keys(%$hosts) ) {
         my $name = "$hosts->{$host}{host}";
@@ -493,7 +502,7 @@ sub HostInfoWrite
     #
     # Write and verify the new host file
     #
-    return $s->TextFileWrite("$s->{TopDir}/conf", "hosts", $contents);
+    return $s->TextFileWrite("$s->{ConfDir}/hosts", $contents);
 }
 
 #
@@ -502,7 +511,7 @@ sub HostInfoWrite
 sub HostsMTime
 {
     my($s) = @_;
-    return (stat("$s->{TopDir}/conf/hosts"))[9];
+    return (stat("$s->{ConfDir}/hosts"))[9];
 }
 
 1;

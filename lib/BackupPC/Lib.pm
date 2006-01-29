@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -60,37 +60,43 @@ sub new
     # Whether to use filesystem hierarchy standard for file layout.
     # If set, text config files are below /etc/BackupPC.
     #
-    my $useFSH = 0;
+    my $useFHS = 0;
     my $paths;
+
+    #
+    # Set defaults for $topDir and $installDir.
+    #
+    $topDir     = '/tera0/backup/BackupPC' if ( $topDir eq "" );
+    $installDir = '/usr/local/BackupPC'    if ( $installDir eq "" );
 
     #
     # Pick some initial defaults.  For FHS the only critical
     # path is the ConfDir, since we get everything else out
     # of the main config file.
     #
-    if ( $useFSH ) {
+    if ( $useFHS ) {
         $paths = {
-            useFSH  => $useFSH,
-            TopDir  => $topDir || '/data/BackupPC',
-            BinDir  => $installDir ? "$installDir/bin" : '/usr/local/BackupPC/bin',
-            LibDir  => $installDir ? "$installDir/lib" : '/usr/local/BackupPC/lib',
-            ConfDir => $confDir || '/etc/BackupPC',
-            LogDir  => $topDir     ? "$topDir/log" : '/var/log/BackupPC',
+            useFHS  => $useFHS,
+            TopDir  => $topDir,
+            BinDir  => "$installDir/bin",
+            LibDir  => "$installDir/lib",
+            ConfDir => $confDir eq "" ? '/etc/BackupPC' : $confDir,
+            LogDir  => '/var/log/BackupPC',
         };
     } else {
         $paths = {
-            useFSH  => $useFSH,
-            TopDir  => $topDir || '/data/BackupPC',
-            BinDir  => $installDir ? "$installDir/bin" : '/usr/local/BackupPC/bin',
-            LibDir  => $installDir ? "$installDir/lib" : '/usr/local/BackupPC/lib',
-            ConfDir => $topDir     ? "$topDir/conf" : '/data/BackupPC/conf',
-            LogDir  => $topDir     ? "$topDir/log" : '/data/BackupPC/log',
+            useFHS  => $useFHS,
+            TopDir  => $topDir,
+            BinDir  => "$installDir/bin",
+            LibDir  => "$installDir/lib",
+            ConfDir => $confDir eq "" ? "$topDir/conf" : $confDir,
+            LogDir  => "$topDir/log",
         };
     }
 
     my $bpc = bless {
 	%$paths,
-        Version => '2.1.0',
+        Version => '3.0.0alpha',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -505,7 +511,7 @@ sub ServerConnect
     #
     # First try the unix-domain socket
     #
-    my $sockFile = "$bpc->{TopDir}/log/BackupPC.sock";
+    my $sockFile = "$bpc->{LogDir}/BackupPC.sock";
     socket(*FH, PF_UNIX, SOCK_STREAM, 0)     || return "unix socket: $!";
     if ( !connect(*FH, sockaddr_un($sockFile)) ) {
         my $err = "unix connect: $!";

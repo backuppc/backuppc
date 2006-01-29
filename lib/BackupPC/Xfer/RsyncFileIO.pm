@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -736,23 +736,23 @@ sub logFileAction
     my $owner = "$f->{uid}/$f->{gid}";
     my $type  = (("", "p", "c", "", "d", "", "b", "", "", "", "l", "", "s"))
 		    [($f->{mode} & S_IFMT) >> 12];
-    my $link;
+    my $name = $f->{name};
 
     if ( ($f->{mode} & S_IFMT) == S_IFLNK ) {
-        $link = " -> $f->{link}";
-    } if ( ($f->{mode} & S_IFMT) == S_IFREG
+        $name .= " -> $f->{link}";
+    } elsif ( ($f->{mode} & S_IFMT) == S_IFREG
             && defined($f->{hlink}) && !$f->{hlink_self} ) {
-        $link = " -> $f->{hlink}";
+        $name .= " -> $f->{hlink}";
     }
+    $name =~ s/\n/\\n/g;
 
-    $fio->log(sprintf("  %-6s %1s%4o %9s %11.0f %s%s",
+    $fio->log(sprintf("  %-6s %1s%4o %9s %11.0f %s",
 				$action,
 				$type,
 				$f->{mode} & 07777,
 				$owner,
 				$f->{size},
-				$f->{name},
-                                $link));
+                                $name));
 }
 
 #

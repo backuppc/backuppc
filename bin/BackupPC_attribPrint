@@ -61,7 +61,17 @@ if ( !-f $ARGV[0] ) {
 }
 
 my $attrib = BackupPC::Attrib->new({ compress => $Conf{CompressLevel} });
-if ( !$attrib->read(".", $ARGV[0]) ) {
+
+my($dir, $file);
+
+if ( $ARGV[0] =~ m{(.+)/(.+)} ) {
+    $dir  = $1;
+    $file = $2;
+} else {
+    $dir = $ARGV[0];
+}
+
+if ( !$attrib->read($dir, $file) ) {
     print STDERR "Cannot read attrib file $ARGV[0]\n";
     exit(1);
 }

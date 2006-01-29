@@ -741,6 +741,17 @@ $Conf{XferMethod} = 'smb';
 $Conf{XferLogLevel} = 1;
 
 #
+# Filename charset encoding on the client.  BackupPC uses utf8
+# on the server for filename encoding.  If this is empty, then
+# utf8 is assumed and client filenames will not be modified.  If set
+# to a different encoding then filenames will be re-encoded in utf8.
+# A typical WinXX encoding for latin1/western europe is 'cp1252'.
+# Do "perldoc Encode::Supported" to see the list of possible charset
+# values, and also see http://czyborra.com/charsets/iso8859.html.
+#   
+$Conf{ClientCharset} = '';
+
+#
 # Name of the host share that is backed up when using SMB.  This can be a
 # string or an array of strings if there are multiple shares per host.
 # Examples:
@@ -1145,6 +1156,63 @@ $Conf{RsyncRestoreArgs} = [
 	    # Add additional arguments here
 	    #
 ];
+
+#
+# Share name to backup.  For $Conf{XferMethod} = "backuppcd" this should
+# be a file system path, eg '/' or '/home'.
+#
+# This can also be a list of multiple file system paths or modules.
+# (Can it??)
+#
+#     $Conf{BackupPCdShareName} = ['/', '/var', '/data', '/boot'];
+#
+$Conf{BackupPCdShareName} = '/';
+
+#
+# Path to backuppcd executable on the server
+#
+$Conf{BackupPCdPath} = '/usr/bin/backuppcd';
+
+#
+# Full command to run backuppcd on the server to backup a given
+# client machine.  The following variables are substituted at
+# run-time (TODO: update this list)
+#
+#        $host           host name being backed up
+#        $hostIP         host's IP address
+#        $shareName      share name to backup (ie: top-level directory path)
+#        $backuppcdPath  same as $Conf{BackupPCdPath}
+#        $sshPath        same as $Conf{SshPath}
+#
+# This setting only matters if $Conf{XferMethod} = 'backuppcd'.
+#
+# Arguments to backupcpd are:
+#
+#   - the host name to backup
+#   - the share name to backup
+#   - the directory where the pool is
+#   - the directory where the last run was (NOT DONE YET)
+#   - a boolean value indicating whether or not the pool is
+#      compressed or not
+#   - the directory where the new run should occur (currently it assumes ".")
+#
+$Conf{BackupPCdCmd} = '$bpcdPath $host $shareName $poolDir XXXX $poolCompress $topDir/pc/$client/new';
+
+#
+# Full command to run backuppcd on the server for restore to a
+# client machine.  The following variables are substituted at
+# run-time (TODO: update this list)
+#
+#        $host           host name being backed up
+#        $hostIP         host's IP address
+#        $shareName      share name to backup (ie: top-level directory path)
+#        $backuppcdPath  same as $Conf{BackupPCdPath}
+#        $sshPath        same as $Conf{SshPath}
+#
+# This setting only matters if $Conf{XferMethod} = 'backuppcd'.
+#
+$Conf{BackupPCdRestoreCmd} = '$bpcdPath TODO';
+
 
 #
 # Archive Destination

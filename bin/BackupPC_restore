@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -43,6 +43,7 @@ use BackupPC::FileZIO;
 use BackupPC::Xfer::Smb;
 use BackupPC::Xfer::Tar;
 use BackupPC::Xfer::Rsync;
+use BackupPC::Xfer::BackupPCd;
 use Socket;
 
 use File::Path;
@@ -220,6 +221,16 @@ if ( $Conf{XferMethod} eq "tar" ) {
     #
     if ( !defined($xfer = BackupPC::Xfer::Rsync->new($bpc)) ) {
         my $errStr = BackupPC::Xfer::Rsync->errStr;
+	UserCommandRun("RestorePostUserCmd") if ( $NeedPostCmd );
+	$stat{hostError} = $errStr;
+	exit(RestoreCleanup($client));
+    }
+} elsif ( $Conf{XferMethod} eq "backuppcd" ) {
+    #
+    # Use backuppcd as the transport program.
+    #
+    if ( !defined($xfer = BackupPC::Xfer::BackupPCd->new($bpc)) ) {
+        my $errStr = BackupPC::Xfer::BackupPCd->errStr;
 	UserCommandRun("RestorePostUserCmd") if ( $NeedPostCmd );
 	$stat{hostError} = $errStr;
 	exit(RestoreCleanup($client));

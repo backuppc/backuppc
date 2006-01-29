@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -94,7 +94,7 @@ sub action
         $file = "$TopDir/pc/$host/LOG$ext";
         $linkHosts = 1;
     } else {
-        $file = "$TopDir/log/LOG$ext";
+        $file = "$LogDir/LOG$ext";
         $linkHosts = 1;
     }
     if ( $type ne "docs" && !$Privileged ) {

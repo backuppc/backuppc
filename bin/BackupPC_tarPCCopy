@@ -460,11 +460,12 @@ sub TarWriteFile
                 }
                 $f->close();
                 my $md5 = Digest::MD5->new;
+                my $len = length($dataMD5);
+                $hdr->{realSize} = $len if ( $hdr->{type} != BPC_FTYPE_FILE );
                 if ( $hdr->{realSize} < 1048576
                             && length($dataMD5) != $hdr->{realSize} ) {
-                    printf(STDERR "File $hdr->{fullPath} has bad size"
-                                . " (expect $hdr->{realSize}, got %d)\n",
-                                length($dataMD5));
+                    print(STDERR "File $hdr->{fullPath} has bad size"
+                                . " (expect $hdr->{realSize}, got $len)\n");
                 } else {
                     my $digest = $bpc->Buffer2MD5($md5, $hdr->{realSize},
                                                   \$dataMD5);

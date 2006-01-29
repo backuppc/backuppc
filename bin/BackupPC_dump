@@ -31,9 +31,9 @@
 #   full or incremental backup needs to be run.  If no backup is
 #   scheduled, or a ping to $client fails, then BackupPC_dump quits.
 #
-#   The backup is done using the selected XferMethod (smb, tar, rsync etc),
-#   extracting the dump into $TopDir/pc/$client/new.  The xfer output is
-#   put into $TopDir/pc/$client/XferLOG.
+#   The backup is done using the selected XferMethod (smb, tar, rsync,
+#   backuppcd etc), extracting the dump into $TopDir/pc/$client/new.
+#   The xfer output is put into $TopDir/pc/$client/XferLOG.
 #
 #   If the dump succeeds (based on parsing the output of the XferMethod):
 #     - $TopDir/pc/$client/new is renamed to $TopDir/pc/$client/nnn, where
@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0, released 20 Jun 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -85,6 +85,7 @@ use BackupPC::Storage;
 use BackupPC::Xfer::Smb;
 use BackupPC::Xfer::Tar;
 use BackupPC::Xfer::Rsync;
+use BackupPC::Xfer::BackupPCd;
 use Socket;
 use File::Path;
 use File::Find;
@@ -497,6 +498,8 @@ if ( $Conf{XferMethod} eq "tar" ) {
     $ShareNames = $Conf{TarShareName};
 } elsif ( $Conf{XferMethod} eq "rsync" || $Conf{XferMethod} eq "rsyncd" ) {
     $ShareNames = $Conf{RsyncShareName};
+} elsif ( $Conf{XferMethod} eq "backuppcd" ) {
+    $ShareNames = $Conf{BackupPCdShareName};
 } else {
     $ShareNames = $Conf{SmbShareName};
 }
@@ -536,6 +539,18 @@ for my $shareName ( @$ShareNames ) {
         #
         if ( !defined($xfer = BackupPC::Xfer::Rsync->new($bpc)) ) {
             my $errStr = BackupPC::Xfer::Rsync::errStr;
+            print(LOG $bpc->timeStamp, "dump failed: $errStr\n");
+            print("dump failed: $errStr\n");
+	    UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
+            UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
+            exit(1);
+        }
+    } elsif ( $Conf{XferMethod} eq "backuppcd" ) {
+        #
+        # Use backuppcd as the transport program.
+        #
+        if ( !defined($xfer = BackupPC::Xfer::BackupPCd->new($bpc)) ) {
+            my $errStr = BackupPC::Xfer::BackupPCd::errStr;
             print(LOG $bpc->timeStamp, "dump failed: $errStr\n");
             print("dump failed: $errStr\n");
 	    UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );

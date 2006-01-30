@@ -548,60 +548,17 @@ foreach my $dir ( (
 }
 
 printf("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
-foreach my $prog ( qw(BackupPC BackupPC_dump BackupPC_link BackupPC_nightly
-        BackupPC_sendEmail BackupPC_tarCreate BackupPC_trashClean
-        BackupPC_tarExtract BackupPC_compressPool BackupPC_zcat
-        BackupPC_archive BackupPC_archiveHost
-        BackupPC_restore BackupPC_serverMesg BackupPC_zipCreate ) ) {
-    InstallFile("bin/$prog", "$DestDir$Conf{InstallDir}/bin/$prog", 0555);
+foreach my $prog ( qw(
+        __CONFIGURE_BIN_LIST__
+    ) ) {
+    InstallFile($prog, "$DestDir$Conf{InstallDir}/$prog", 0555);
 }
 
 printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(
-	BackupPC/FileZIO.pm
-	BackupPC/Attrib.pm
-        BackupPC/PoolWrite.pm
-	BackupPC/Lib.pm
-	BackupPC/Storage.pm
-	BackupPC/View.pm
-        BackupPC/CGI/AdminOptions.pm
-	BackupPC/CGI/Archive.pm
-	BackupPC/CGI/ArchiveInfo.pm
-	BackupPC/CGI/Browse.pm
-	BackupPC/CGI/DirHistory.pm
-	BackupPC/CGI/EmailSummary.pm
-	BackupPC/CGI/GeneralInfo.pm
-	BackupPC/CGI/HostInfo.pm
-	BackupPC/CGI/Lib.pm
-	BackupPC/CGI/LOGlist.pm
-	BackupPC/CGI/Queue.pm
-        BackupPC/CGI/ReloadServer.pm
-	BackupPC/CGI/RestoreFile.pm
-	BackupPC/CGI/RestoreInfo.pm
-	BackupPC/CGI/Restore.pm
-        BackupPC/CGI/StartServer.pm
-	BackupPC/CGI/StartStopBackup.pm
-        BackupPC/CGI/StopServer.pm
-	BackupPC/CGI/Summary.pm
-	BackupPC/CGI/View.pm
-	BackupPC/Config/Meta.pm
-        BackupPC/Lang/en.pm
-	BackupPC/Lang/fr.pm
-	BackupPC/Lang/es.pm
-        BackupPC/Lang/de.pm
-        BackupPC/Lang/it.pm
-        BackupPC/Lang/nl.pm
-	BackupPC/Storage/Text.pm
-	BackupPC/Xfer/Archive.pm
-	BackupPC/Xfer/BackupPCd.pm
-	BackupPC/Xfer/Tar.pm
-        BackupPC/Xfer/Smb.pm
-	BackupPC/Xfer/Rsync.pm
-	BackupPC/Xfer/RsyncDigest.pm
-        BackupPC/Xfer/RsyncFileIO.pm
-	BackupPC/Zip/FileMember.pm
+        __CONFIGURE_LIB_LIST__
     ) ) {
-    InstallFile("lib/$lib", "$DestDir$Conf{InstallDir}/lib/$lib", 0444);
+    InstallFile($lib, "$DestDir$Conf{InstallDir}/$lib", 0444);
 }
 
 if ( $Conf{CgiImageDir} ne "" ) {
@@ -887,7 +844,8 @@ sub InstallFile
 	    s/__LOGDIR__/$Conf{LogDir}/g;
 	    s/__CONFDIR__/$Conf{ConfDir}/g;
 	    s/__TOPDIR__/$Conf{TopDir}/g;
-	    s/__USEFHS__/$opts{fhs}/g;
+            s/^(\s*my \$useFHS\s*=\s*)\d;/${1}$opts{fhs};/
+                                    if ( $prog =~ /Lib.pm/ );
 	    s/__BACKUPPCUSER__/$Conf{BackupPCUser}/g;
 	    s/__CGIDIR__/$Conf{CgiDir}/g;
 	    if ( $first && /^#.*bin\/perl/ ) {

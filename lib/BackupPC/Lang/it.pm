@@ -1,7 +1,5 @@
 #!/bin/perl
 #
-# $Id: it.pm,v 1.9 2004/06/20 02:21:02 cbarratt Exp $
-#
 # Italian i18n file
 #
 # (C)  Lorenzo Cappelletti <lorenzo.cappelletti@email.it>  2004

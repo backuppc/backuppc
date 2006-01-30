@@ -282,10 +282,12 @@ sub InstallFile
 		print OUT "$1'__TOPDIR__'$2\n";
 	    } elsif ( $file =~ /Lib.pm/ && /^(\s*\$installDir\s*=\s*)'.*'(\s*if\s.*)/ ) {
 		print OUT "$1'__INSTALLDIR__'$2\n";
-	    } elsif ( $file =~ /Lib.pm/ && /^(\s*my \$useFHS\s*=\s*)\d;/ ) {
-		print OUT "${1}__USEFHS__;\n";
-	    } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'[\w\d\.]+',/ ) {
-		print OUT "$1'$Version',\n";
+            } elsif ( $file =~ /Lib.pm/ && /^(\s*my \$useFHS\s*=\s*)\d;/ ) {
+                print OUT "${1}0;\n";
+	    } elsif ( $file =~ /configure.pl/ && /__CONFIGURE_BIN_LIST__/ ) {
+		print OUT "        ", join("\n        ", grep(/^bin\//, @PerlSrc)), "\n";
+	    } elsif ( $file =~ /configure.pl/ && /__CONFIGURE_LIB_LIST__/ ) {
+		print OUT "        ", join("\n        ", grep(/^lib\//, @PerlSrc)), "\n";
 	    } elsif ( $file =~ /BackupPC_Admin/ && /(my *\$installDir *= *)'.*'/ ) {
 		print OUT "$1'__INSTALLDIR__/lib';\n";
 	    } else {

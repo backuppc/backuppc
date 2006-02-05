@@ -1012,7 +1012,7 @@ $Lang{LOG_files} = "LOG-bestanden";
 $Lang{Old_LOGs} = "Oude LOGs";
 $Lang{Email_summary} = "E-mailoverzicht";
 $Lang{Config_file} = "Configuratiebest.";
-$Lang{Hosts_file} = "Hosts-bestand";
+# $Lang{Hosts_file} = "Hosts-bestand";
 $Lang{Current_queues} = "Huidige wachtrij";
 $Lang{Documentation} = "Documentatie";
 
@@ -1317,6 +1317,113 @@ EOF
 $Lang{howLong_not_been_backed_up} = "(nog) niet succesvol gebackupt";
 $Lang{howLong_not_been_backed_up_for_days_days} = "reeds sedert \$days dagen niet gebackupt";
 
+#######################################################################
+# Configuration editor strings (all ENGLISH currently)
+#######################################################################
+
+$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuation settings.";
+$Lang{CfgEdit_Edit_Config} = "Edit Config";
+$Lang{CfgEdit_Edit_Hosts}  = "Edit Hosts";
+
+$Lang{CfgEdit_Title_Server} = "Server";
+$Lang{CfgEdit_Title_General_Parameters} = "General Parameters";
+$Lang{CfgEdit_Title_Wakeup_Schedule} = "Wakeup Schedule";
+$Lang{CfgEdit_Title_Concurrent_Jobs} = "Concurrent Jobs";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Pool Filesystem Limits";
+$Lang{CfgEdit_Title_Other_Parameters} = "Other Parameters";
+$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Remote Apache Settings";
+$Lang{CfgEdit_Title_Program_Paths} = "Program Paths";
+$Lang{CfgEdit_Title_Install_Paths} = "Install Paths";
+$Lang{CfgEdit_Title_Email} = "Email";
+$Lang{CfgEdit_Title_Email_settings} = "Email settings";
+$Lang{CfgEdit_Title_Email_User_Messages} = "Email User Messages";
+$Lang{CfgEdit_Title_CGI} = "CGI";
+$Lang{CfgEdit_Title_Admin_Privileges} = "Admin Privileges";
+$Lang{CfgEdit_Title_Page_Rendering} = "Page Rendering";
+$Lang{CfgEdit_Title_Paths} = "Paths";
+$Lang{CfgEdit_Title_User_URLs} = "User URLs";
+$Lang{CfgEdit_Title_User_Config_Editing} = "User Config Editing";
+$Lang{CfgEdit_Title_Xfer} = "Xfer";
+$Lang{CfgEdit_Title_Xfer_Settings} = "Xfer Settings";
+$Lang{CfgEdit_Title_Smb_Settings} = "Smb Settings";
+$Lang{CfgEdit_Title_Tar_Settings} = "Tar Settings";
+$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Settings";
+$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Settings";
+$Lang{CfgEdit_Title_Archive_Settings} = "Archive Settings";
+$Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
+$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Paths/Commands";
+$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Paths/Commands";
+$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Paths/Commands/Args";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Port/Args";
+$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archive Paths/Commands";
+$Lang{CfgEdit_Title_Schedule} = "Schedule";
+$Lang{CfgEdit_Title_Full_Backups} = "Full Backups";
+$Lang{CfgEdit_Title_Incremental_Backups} = "Incremental Backups";
+$Lang{CfgEdit_Title_Blackouts} = "Blackouts";
+$Lang{CfgEdit_Title_Other} = "Other";
+$Lang{CfgEdit_Title_Backup_Settings} = "Backup Settings";
+$Lang{CfgEdit_Title_Client_Lookup} = "Client Lookup";
+$Lang{CfgEdit_Title_Other} = "Other";
+$Lang{CfgEdit_Title_User_Commands} = "User Commands";
+$Lang{CfgEdit_Title_Hosts} = "Hosts";
+
+$Lang{CfgEdit_Hosts_Comment} = <<EOF;
+To add a new host, select Add and then enter the name.  To start with
+the per-host configuration from another host, enter the host name
+as NEWHOST=COPYHOST.  This will overwrite any existing per-host
+configuration for NEWHOST.  You can also do this for an existing
+host.  To delete a host, hit the Delete button.  For Add, Delete,
+and configuration copy, changes don't take effect until you select
+Save.  None of the deleted host's backups will be removed,
+so if you accidently delete a host, simply re-add it.  To completely
+remove a host's backups, you need to manually remove the files
+below \$topDir/pc/HOST
+EOF
+
+$Lang{CfgEdit_Header_Main} = <<EOF;
+\${h1("Main Configuration Editor")}
+EOF
+
+$Lang{CfgEdit_Header_Host} = <<EOF;
+\${h1("Host \$host Configuration Editor")}
+<p>
+Note: Check Override if you want to modify a value specific to this host.
+EOF
+
+$Lang{CfgEdit_Button_Save}     = "Save";
+$Lang{CfgEdit_Button_Insert}   = "Insert";
+$Lang{CfgEdit_Button_Delete}   = "Delete";
+$Lang{CfgEdit_Button_Add}      = "Add";
+$Lang{CfgEdit_Button_Override} = "Override";
+
+$Lang{CfgEdit_Error__must_be_an_integer}
+            = "Error: \$var must be an integer";
+$Lang{CfgEdit_Error__must_be_real_valued_number}
+            = "Error: \$var must be a real-valued number";
+$Lang{CfgEdit_Error__entry__must_be_an_integer}
+            = "Error: \$var entry \$k must be an integer";
+$Lang{CfgEdit_Error__entry__must_be_real_valued_number}
+            = "Error: \$var entry \$k must be a real-valued number";
+$Lang{CfgEdit_Error__must_be_executable_program}
+            = "Error: \$var must be a valid executable path";
+$Lang{CfgEdit_Error__must_be_valid_option}
+            = "Error: \$var must be a valid option";
+$Lang{CfgEdit_Error_Copy_host_does_not_exist}
+            = "Copy host \$copyHost doesn't exist; creating full host name \$fullHost.  Delete this host if that is not what you wanted.";
+
+$Lang{CfgEdit_Log_Copy_host_config}
+            = "\$User copied config from host \$fromHost to \$host\n";
+$Lang{CfgEdit_Log_Delete_param}
+            = "\$User deleted \$p from \$conf\n";
+$Lang{CfgEdit_Log_Add_param_value}
+            = "\$User added \$p to \$conf, set to \$value\n";
+$Lang{CfgEdit_Log_Change_param_value}
+            = "\$User changed \$p in \$conf to \$valueNew from \$valueOld\n";
+$Lang{CfgEdit_Log_Host_Delete}
+            = "\$User deleted host \$host\n";
+$Lang{CfgEdit_Log_Host_Change}
+            = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
+$Lang{CfgEdit_Log_Host_Add}
+            = "\$User added host \$host: \$value\n";
+  
 #end of lang_nl.pm
-
-

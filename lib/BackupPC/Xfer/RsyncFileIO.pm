@@ -61,7 +61,7 @@ sub new
     my $fio = bless {
         blockSize    => 700,
         logLevel     => 0,
-        digest       => File::RsyncP::Digest->new($options->{protocol_version}),
+        digest       => File::RsyncP::Digest->new(),
         checksumSeed => 0,
 	attrib	     => {},
 	logHandler   => \&logHandler,
@@ -76,6 +76,7 @@ sub new
 	%$options,
     }, $class;
 
+    $fio->{digest}->protocol($fio->{protocol_version});
     $fio->{shareM}   = $fio->{bpc}->fileNameEltMangle($fio->{share});
     $fio->{outDir}   = "$fio->{xfer}{outDir}/new/";
     $fio->{outDirSh} = "$fio->{outDir}/$fio->{shareM}/";
@@ -474,6 +475,11 @@ sub attribWrite
     my($fio, $d) = @_;
     my($poolWrite);
 
+    #
+    # Don't write attributes on 2nd phase - they're already
+    # taken care of during the first phase.
+    #
+    return if ( $fio->{phase} > 0 );
     if ( !defined($d) ) {
         #
         # flush all entries (in reverse order)
@@ -517,7 +523,8 @@ sub attribWrite
 			$fio->logFileAction("skip", {
 				    %{$fio->{viewCache}{$d}{$f}},
 				    name => $name,
-				}) if ( $fio->{logLevel} >= 2 );
+				}) if ( $fio->{logLevel} >= 2
+                                      && $a->{type} == BPC_FTYPE_FILE );
 		    }
 		} elsif ( !$fio->{full} ) {
 		    ##print("Delete file $f\n");
@@ -883,7 +890,8 @@ sub fileDeltaRxNext
                         if ( $fio->{logLevel} >= 9 );
         $fio->{rxOutFile} = $rxOutFile;
         $fio->{rxOutFileRel} = $rxOutFileRel;
-        $fio->{rxDigest} = File::RsyncP::Digest->new($fio->{protocol_version});
+        $fio->{rxDigest} = File::RsyncP::Digest->new();
+        $fio->{rxDigest}->protocol($fio->{protocol_version});
         $fio->{rxDigest}->add(pack("V", $fio->{checksumSeed}));
     }
     if ( defined($fio->{rxMatchBlk})
@@ -1041,6 +1049,7 @@ sub fileDeltaRxDone
 
     close($fio->{rxInFd})  if ( defined($fio->{rxInFd}) );
     unlink("$fio->{outDirSh}RStmp") if  ( -f "$fio->{outDirSh}RStmp" );
+    $fio->{phase} = $phase;
 
     #
     # Check the final md4 digest
@@ -1080,7 +1089,8 @@ sub fileDeltaRxDone
 		#
 		# Empty file; just create an empty file digest
 		#
-		$fio->{rxDigest} = File::RsyncP::Digest->new($fio->{protocol_version});
+		$fio->{rxDigest} = File::RsyncP::Digest->new();
+                $fio->{rxDigest}->protocol($fio->{protocol_version});
 		$fio->{rxDigest}->add(pack("V", $fio->{checksumSeed}));
 		$newDigest = $fio->{rxDigest}->digest;
 	    }

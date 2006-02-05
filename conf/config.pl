@@ -270,14 +270,27 @@ $Conf{TrashCleanSleepSec} = 300;
 $Conf{DHCPAddressRanges} = [];
 
 #
-# These configuration settings aren't used by BackupPC, but simply
-# remember a few settings used by configure.pl during installation.
-# These are used by configure.pl when upgrading to new versions of
-# BackupPC.
+# The BackupPC user.
 #
 $Conf{BackupPCUser} = '';
-$Conf{CgiDir}       = '';
-$Conf{InstallDir}   = '';
+
+#
+# Important installation directories:
+#
+#   TopDir     - where all the backup data is stored
+#   ConfDir    - where the main config and hosts files resides
+#   LogDir     - where log files and other transient information
+#   InstallDir - where the bin, lib and doc installation dirs reside.
+#                Note: you cannot change this value since all the
+#                perl scripts include this path.  You must reinstall
+#                with configure.pl to change InstallDir.
+#   CgiDir     - Apache CGI directory for BackupPC_Admin
+#
+$Conf{TopDir}      = '';
+$Conf{ConfDir}     = '';
+$Conf{LogDir}      = '';
+$Conf{InstallDir}  = '';
+$Conf{CgiDir}      = '';
 
 #
 # Whether BackupPC and the CGI script BackupPC_Admin verify that they
@@ -1848,7 +1861,14 @@ $Conf{CgiUserConfigEditEnable} = 1;
 
 #
 # Which per-host config variables a non-admin user is allowed
-# to edit.
+# to edit.  Admin users can edit all per-host config variables,
+# even if disabled in this list.
+#
+# SECURITY WARNING: Do not let users edit any of the Cmd
+# config variables!  That's because a user could set a
+# Cmd to a shell script of their choice and it will be
+# run as the BackupPC user.  That script could do all
+# sorts of bad things.
 #
 $Conf{CgiUserConfigEdit} = {
         FullPeriod                => 1,
@@ -1869,14 +1889,20 @@ $Conf{CgiUserConfigEdit} = {
         BlackoutGoodCnt           => 1,
         BlackoutPeriods           => 1,
         BackupZeroFilesIsFatal    => 1,
+        ClientCharset             => 1,
         XferMethod                => 1,
         XferLogLevel              => 1,
         SmbShareName              => 1,
         SmbShareUserName          => 1,
         SmbSharePasswd            => 1,
+        SmbClientFullCmd          => 0,
+        SmbClientIncrCmd          => 0,
+        SmbClientRestoreCmd       => 0,
         TarShareName              => 1,
         TarFullArgs               => 1,
         TarIncrArgs               => 1,
+        TarClientCmd              => 0,
+        TarClientRestoreCmd       => 0,
         RsyncShareName            => 1,
         RsyncdClientPort          => 1,
         RsyncdPasswd              => 1,
@@ -1884,16 +1910,30 @@ $Conf{CgiUserConfigEdit} = {
         RsyncCsumCacheVerifyProb  => 1,
         RsyncArgs                 => 1,
         RsyncRestoreArgs          => 1,
+        RsyncClientCmd            => 0,
+        RsyncClientRestoreCmd     => 0,
         ArchiveDest               => 1,
         ArchiveComp               => 1,
         ArchivePar                => 1,
         ArchiveSplit              => 1,
+        ArchiveClientCmd          => 0,
         FixedIPNetBiosNameCheck   => 1,
+        NmbLookupCmd              => 0,
+        NmbLookupFindHostCmd      => 0,
         PingMaxMsec               => 1,
+        PingCmd                   => 0,
         ClientTimeout             => 1,
         MaxOldPerPCLogFiles       => 1,
         CompressLevel             => 1,
         ClientNameAlias           => 1,
+        DumpPreUserCmd            => 0,
+        DumpPostUserCmd           => 0,
+        RestorePreUserCmd         => 0,
+        RestorePostUserCmd        => 0,
+        ArchivePreUserCmd         => 0,
+        ArchivePostUserCmd        => 0,
+        DumpPostShareCmd          => 0,
+        DumpPreShareCmd           => 0,
         EMailNotifyMinDays        => 1,
         EMailFromUserName         => 1,
         EMailAdminUserName        => 1,

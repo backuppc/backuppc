@@ -1011,7 +1011,7 @@ $Lang{LOG_files} = "LOG files";
 $Lang{Old_LOGs} = "Old LOGs";
 $Lang{Email_summary} = "Email summary";
 $Lang{Config_file} = "Config file";
-$Lang{Hosts_file} = "Hosts file";
+# $Lang{Hosts_file} = "Hosts file";
 $Lang{Current_queues} = "Current queues";
 $Lang{Documentation} = "Documentation";
 

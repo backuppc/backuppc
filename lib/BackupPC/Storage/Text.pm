@@ -340,15 +340,19 @@ sub ConfigFileMerge
                     $contents .= "\$Conf{$var} = " . $value;
                     $done->{$var} = 1;
                 }
-                $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<(.*);/ );
-                $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<'(.*)';/ );
+                if ( /^\s*\$Conf\{[^}]*} *= *<<(.*);/
+                        || /^\s*\$Conf\{[^}]*} *= *<<'(.*)';/ ) {
+                    $endLine = $1;
+                    $skipVar = 1;
+                } else {
+                    $endLine = undef;
+                    $skipVar = /^[^#]*;/ ? 0 : 1;
+                }
                 $out = "";
-                $skipVar = 1;
             } elsif ( $skipVar ) {
-                if ( !defined($endLine) && (/^\s*[\r\n]*$/ || /^\s*#/) ) {
+                if ( !defined($endLine) && /^[^#]*;/ ) {
                     $skipVar = 0;
                     $comment = 1;
-                    $out .= $_;
                 }
                 if ( defined($endLine) && /^\Q$endLine\E[\n\r]*$/ ) {
                     $endLine = undef;

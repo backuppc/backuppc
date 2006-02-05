@@ -76,21 +76,19 @@ sub new
     #
     if ( $useFHS ) {
         $paths = {
-            useFHS  => $useFHS,
-            TopDir  => $topDir,
-            BinDir  => "$installDir/bin",
-            LibDir  => "$installDir/lib",
-            ConfDir => $confDir eq "" ? '/etc/BackupPC' : $confDir,
-            LogDir  => '/var/log/BackupPC',
+            useFHS     => $useFHS,
+            TopDir     => $topDir,
+            InstallDir => $installDir,
+            ConfDir    => $confDir eq "" ? '/etc/BackupPC' : $confDir,
+            LogDir     => '/var/log/BackupPC',
         };
     } else {
         $paths = {
-            useFHS  => $useFHS,
-            TopDir  => $topDir,
-            BinDir  => "$installDir/bin",
-            LibDir  => "$installDir/lib",
-            ConfDir => $confDir eq "" ? "$topDir/conf" : $confDir,
-            LogDir  => "$topDir/log",
+            useFHS     => $useFHS,
+            TopDir     => $topDir,
+            InstallDir => $installDir,
+            ConfDir    => $confDir eq "" ? "$topDir/conf" : $confDir,
+            LogDir     => "$topDir/log",
         };
     }
 
@@ -115,8 +113,8 @@ sub new
     #
     # Update the paths based on the config file
     #
-    foreach my $dir ( qw(TopDir BinDir LibDir ConfDir LogDir) ) {
-        next if ( !defined($bpc->{Conf}{$dir}) );
+    foreach my $dir ( qw(TopDir ConfDir InstallDir LogDir) ) {
+        next if ( $bpc->{Conf}{$dir} eq "" );
         $paths->{$dir} = $bpc->{$dir} = $bpc->{Conf}{$dir};
     }
     $bpc->{storage}->setPaths($paths);
@@ -143,7 +141,7 @@ sub TopDir
 sub BinDir
 {
     my($bpc) = @_;
-    return $bpc->{BinDir};
+    return "$bpc->{InstallDir}/bin";
 }
 
 sub LogDir
@@ -161,7 +159,13 @@ sub ConfDir
 sub LibDir
 {
     my($bpc) = @_;
-    return $bpc->{LibDir};
+    return "$bpc->{InstallDir}/lib";
+}
+
+sub InstallDir
+{
+    my($bpc) = @_;
+    return $bpc->{InstallDir};
 }
 
 sub useFHS
@@ -347,7 +351,7 @@ sub ConfigRead
     # Load language file
     #
     return "No language setting" if ( !defined($bpc->{Conf}{Language}) );
-    my $langFile = "$bpc->{LibDir}/BackupPC/Lang/$bpc->{Conf}{Language}.pm";
+    my $langFile = "$bpc->{InstallDir}/lib/BackupPC/Lang/$bpc->{Conf}{Language}.pm";
     if ( !defined($ret = do $langFile) && ($! || $@) ) {
 	$mesg = "Couldn't open language file $langFile: $!" if ( $! );
 	$mesg = "Couldn't execute language file $langFile: $@" if ( $@ );

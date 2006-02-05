@@ -37,7 +37,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta1, released 9 Apr 2004.
+# Version 3.0.0alpha, released 23 Jan 2006
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -129,13 +129,14 @@ EOF
 #                
 #    InstallDir   which includes subdirs bin, lib, doc
 #
-# With FHS enabled (which is the default for new installations):
+# With FHS enabled (which is the default for new installations)
+# the config files move to /etc/BackupPC and log files to /var/log:
 #
 #    /etc/BackupPC/config.pl  main config file (was $TopDir/conf/config.pl)
 #    /etc/BackupPC/hosts      hosts file (was $TopDir/conf/hosts)
 #    /etc/BackupPC/pc/HOST.pl per-pc config file (was $TopDir/pc/HOST/config.pl)
 #    /var/log/BackupPC        log files (was $TopDir/log)
-#    /var/lib/BackupPC        Pid, status and email info (was $TopDir/log)
+#    /var/log/BackupPC        Pid, status and email info (was $TopDir/log)
 #
 
 print <<EOF if ( !$opts{fhs} || !-f "/etc/BackupPC/config.pl" );
@@ -185,9 +186,12 @@ if ( $ConfigPath ne "" && -r $ConfigPath ) {
     %Conf = $bpc->Conf();
     %OrigConf = %Conf;
     if ( !$opts{fhs} ) {
-        ($Conf{TopDir} = $ConfigPath) =~ s{/[^/]+/[^/]+$}{};
+        ($Conf{TopDir} = $ConfigPath) =~ s{/[^/]+/[^/]+$}{}
+                    if ( $Conf{TopDir} eq '' );
+        $bpc->{LogDir} = $Conf{LogDir}  = "$Conf{TopDir}/log"
+                    if ( $Conf{LogDir} eq '' );
     }
-    $Conf{ConfDir} = $confDir;
+    $bpc->{ConfDir} = $Conf{ConfDir} = $confDir;
     my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}, 1);
     if ( $err eq "" ) {
         print <<EOF;

@@ -333,10 +333,10 @@ sub CheckPermission
 	       || $host ne "" && !defined($Hosts->{$host}) );
     if ( $Conf{CgiAdminUserGroup} ne "" ) {
         my($n,$p,$gid,$mem) = getgrnam($Conf{CgiAdminUserGroup});
-        $Privileged ||= ($mem =~ /\b$User\b/);
+        $Privileged ||= ($mem =~ /\b\Q$User\E\b/);
     }
     if ( $Conf{CgiAdminUsers} ne "" ) {
-        $Privileged ||= ($Conf{CgiAdminUsers} =~ /\b$User\b/);
+        $Privileged ||= ($Conf{CgiAdminUsers} =~ /\b\Q$User\E\b/);
         $Privileged ||= $Conf{CgiAdminUsers} eq "*";
     }
     $PrivAdmin = $Privileged;

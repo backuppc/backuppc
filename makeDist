@@ -138,6 +138,9 @@ $errCnt += CheckConfigParams("doc-src/BackupPC.pod", $ConfVars, 1);
 #
 $ConfVars->{BackupPCUser} = 2;
 $ConfVars->{CgiDir}       = 2;
+$ConfVars->{TopDir}       = 2;
+$ConfVars->{LogDir}       = 2;
+$ConfVars->{ConfDir}      = 2;
 $ConfVars->{InstallDir}   = 2;
 $ConfVars->{CgiImageDir}  = 2;
 
@@ -418,6 +421,7 @@ sub CheckLangUsage
 	while ( <F> ) {
 	    next if ( /^\s*#/ );
 	    s/\$Lang->{([^}]*)}/$vars->{$1} = 1;/eg;
+	    s/(text|comment)\s*=>\s*"(CfgEdit_.*)"/$vars->{$2} = 1;/eg;
 	}
 	close(F);
     }
@@ -474,7 +478,11 @@ sub CheckLangTags
 	    my $t1 = LangTextStrip($v1->{val});
 	    my $t2 = LangTextStrip($v2->{val});
 	    if ( $t1 ne $t2 ) {
-		print("$v1->{var}: got en.pm $t1\nvs $lang $t2\n\n");
+                my $i;
+                for ( $i = 0 ; $i < length($t1) ; $i++ ) {
+                    last if ( substr($t1, 0, $i) ne substr($t2, 0, $i) );
+                }
+		print("$v1->{var}: ($i) got en.pm $t1\nvs $lang $t2\n\n");
 		$errors++;
 	    }
 	}

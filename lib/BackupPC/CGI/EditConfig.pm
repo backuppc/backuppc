@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.0beta2pl1, released 30 May 2004.
+# Version 3.0.0alpha, released 23 Jan 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1187,8 +1187,9 @@ EOF
 		$varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
 		$varValue = join(", ", @$varValue);
 	    }
+            my $textType = ($varName =~ /Passwd/) ? "password" : "text";
             $content .= <<EOF;
-<input type="text" name="v_z_$varName" size="$size" maxlength="256" value="${EscHTML($varValue)}"$onChange>
+<input type="$textType" name="v_z_$varName" size="$size" maxlength="256" value="${EscHTML($varValue)}"$onChange>
 EOF
         } elsif ( $type->{type} eq "boolean" ) {
             # checkbox

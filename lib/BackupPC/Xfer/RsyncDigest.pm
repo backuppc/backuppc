@@ -42,6 +42,7 @@ use BackupPC::FileZIO;
 
 use vars qw( $RsyncLibOK );
 use Carp;
+use Fcntl;
 require Exporter;
 use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
 
@@ -100,7 +101,7 @@ sub fileDigestIsCached
     my($class, $file) = @_;
     my $data;
 
-    open(my $fh, "<", $file) || return -1;
+    sysopen(my $fh, $file, O_RDONLY) || return -1;
     binmode($fh);
     return -2 if ( sysread($fh, $data, 1) != 1 );
     close($fh);
@@ -113,6 +114,7 @@ sub fileDigestIsCached
 # Empty files don't get cached checksums.
 #
 # If verify is set then existing cached checksums are checked.
+# If verify == 2 then only a verify is done; no fixes are applied.
 # 
 # Returns 0 on success.  Returns 1 on good verify and 2 on bad verify.
 # Returns a variety of negative values on error.
@@ -142,8 +144,10 @@ sub digestAdd
 
     return -102 if ( !defined(my $fh = BackupPC::FileZIO->open($file, 0, 1)) );
 
+    my $fileSize;
     while ( 1 ) {
         $fh->read(\$data, $nBlks * $blockSize);
+        $fileSize += length($data);
         last if ( $data eq "" );
         $blockDigest .= $digest->blockDigest($data, $blockSize, 16,
                                              $checksumSeed);
@@ -164,7 +168,7 @@ sub digestAdd
 #                                            length($metaData),
 #                                            $file,
 #                                            $eofPosn);
-    open(my $fh2, "+<", $file) || return -103;
+    sysopen(my $fh2, $file, O_RDWR) || return -103;
     binmode($fh2);
     return -104 if ( sysread($fh2, $data, 1) != 1 );
     if ( $data ne chr(0x78) && $data ne chr(0xd6) ) {
@@ -187,9 +191,13 @@ sub digestAdd
         #
         # Checksums don't agree - fall through so we rewrite the data
         #
-        &$Log("digestAdd: $file verify failed; redoing checksums");
+        &$Log(sprintf("digestAdd: %s verify failed; redoing checksums; len = %d,%d; eofPosn = %d, fileSize = %d",
+                $file, length($data2), length($data3), $eofPosn, $fileSize));
+        #&$Log(sprintf("dataNew  = %s", unpack("H*", $data2)));
+        #&$Log(sprintf("dataFile = %s", unpack("H*", $data3)));
         return -109 if ( sysseek($fh2, $eofPosn, 0) != $eofPosn );
         $retValue = 2;
+        return $retValue if ( $verify == 2 );
     }
     return -110 if ( syswrite($fh2, $data2) != length($data2) );
     if ( $verify ) {
@@ -205,7 +213,8 @@ sub digestAdd
                                 sysseek($fh2, 0, 1), $eofPosn + length($data2)));
                 return -112;
             } else {
-                &$Log(sprintf("digestAdd: $file truncated from %d to %d",
+                &$Log(sprintf("digestAdd: %s truncated from %d to %d",
+                                $file,
                                 sysseek($fh2, 0, 1), $eofPosn + length($data2)));
             }
         }

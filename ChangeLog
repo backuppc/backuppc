@@ -21,7 +21,9 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Add config file editing.
+* Added config file editing.
+
+* Added rsync hardlink support.
 
 * Added Portuguese Brazillian pt_br.pm from Reginaldo Ferreira.
 
@@ -35,6 +37,8 @@
 * Apply patch from Pete Wenzel to add smbClientPath => $Conf{SmbClientPath}
   to DumpPreUserCmd etc.
 
+* Jean-Michel Beuken reported several bugs in CVS 3.0.0.
+
 * Applied Lorenzo Cappelletti's it.pm patch.
 
 * Applied patch to bin/BackupPC_sendEmail from Marc Prewitt that
@@ -46,14 +50,6 @@
 * Add NT_STATUS_FILE_LOCK_CONFLICT to pst read error check in
   BackupPC_sendEmail to fix bug reported by Dale Renton.
 
-* Fixed simple but serious bug in bin/BackupPC_tarCreate that prevented
-  hardlinks being saved correctly.  Debugged by Michael (mna.news) with
-  several other people.
-
-* Fixed serious bug in bin/BackupPC_dump reported/debugged by Dan
-  Niles that can happen when multiple full backups are deleted after
-  $Conf{FullKeepCnt} is changed.
-
 * Added fixup of $ENV{REMOTE_USER} to lib/BackupPC/CGI/Lib.pm in the
   case of using mod_authz_ldap; patch submitted by Alain Perrier.
 
@@ -62,6 +58,49 @@
 
 * Changed ping output parsing to pick out average rtt time, based
   on patch from Ron Bickers.
+
+* Fixed minor documentation typos from Richard Ames, JP Vossen.
+
+* Changed bin/BackupPC_archiveHost to use /bin/csh instead of
+  /bin/sh.  That way any errors in the pipeline are reported
+  via the exit status, instead of just the last.
+
+* Added $Conf{EMailHeaders} for additional email headers, requested
+  by Ludovic Gasc.
+
+* Made shareName argument regexp checking more general to allow parens.
+
+#------------------------------------------------------------------------
+# Version 2.1.2pl1, __RELEASEDATE__
+#------------------------------------------------------------------------
+
+* Added patch from Michael (mna.news) to ignore "file is unchanged"
+  message from tar 1.15.x during incremental backups.
+
+* Fixed creation of .rsrc directories in bin/BackupPC_tarExtract
+  when used with xtar on MacOS.  Reported by Samuel Bancal and
+  Matthew Radey, who helped with debugging.
+
+* Fixed bug in BackupPC_tarExtract for files >8GB in size whose
+  lengths are multiples of 256.  Reported by Jamie Myers and
+  Marko Tukiainen, who both helped debugging the problem.
+
+* Fixed bug in lib/BackupPC/Xfer/RsyncFileIO.pm that caused
+  incorrected deleted attributes to be set in directories
+  where one of the files had an rsync phase 1 retry during
+  an incremental.  Reported by Tony Nelson.
+
+#------------------------------------------------------------------------
+# Version 2.1.2, 5 Sep 2005
+#------------------------------------------------------------------------
+
+* Fixed simple but serious bug in bin/BackupPC_tarCreate that prevented
+  hardlinks being saved correctly.  Debugged by Michael (mna.news)
+  with several other people.
+
+* Fixed serious bug in bin/BackupPC_dump reported/debugged by Dan Niles
+  that can happen when multiple full backups are deleted after
+  $Conf{FullKeepCnt} is changed.
 
 * Changed lib/BackupPC/CGI/Lib.pm so that link to "$TopDir/conf/$host.pl"
   is displayed if it exists.  Patch from Andreas Vögele.
@@ -77,22 +116,11 @@
 
 * Finally increased $Conf{ClientTimeout} to 72000 (20 hours).
 
-* Fixed minor documentation typos from Richard Ames, JP Vossen.
-
-* Changed bin/BackupPC_archiveHost to use /bin/csh instead of
-  /bin/sh.  That way any errors in the pipeline are reported
-  via the exit status, instead of just the last.
-
 * Added sleep 1 in restart() function in init.d/src/gentoo-backuppc,
   suggested by Jon Hood.
 
 * Added $DestDir to the path of the CGI image directory in configure.pl.
   Patch submitted by Andreas Vögele.
-
-* Added $Conf{EMailHeaders} for additional email headers, requested
-  by Ludovic Gasc.
-
-* Made shareName argument regexp checking more general to allow parens.
 
 * Applied extensive patch to French translation from Frederic Lehobey.
 
@@ -100,6 +128,39 @@
 
 * Minor change to French language $Lang{EMailOutlookBackupMesg} and
   $Lang{EMailOutlookBackupSubj} from Ludovic Gasc.
+
+#------------------------------------------------------------------------
+# Version 2.1.1, 13 Mar 2005
+#------------------------------------------------------------------------
+
+ * Fixed bug in top-level restore using rsync XferMethod.
+   BackupPC::View was leaving an extra leading "/" at the start
+   of top-level directories, messing up the FileList sort order.
+   Reported and debugged by Gail Edwards.
+
+ * Added pathCreate() to BackupPC_tarExtract so that new directories
+   are created.  Required for xtar on MacOSX since the virtual resource
+   fork directories (.rsrc) are not explicitly included in the tar
+   archive - just the files below .rsrc are.
+
+ * Changed $host.$bkupNum.tar$fileExt.* to $host.$bkupNum.tar$fileExt*
+   in $parCmd in bin/BackupPC_archiveHost.
+
+ * Fixed HostSortCompare() in BackupPC to correctly sort hosts so
+   those with the oldest backups get queued first.
+
+ * Changed test in BackupPC_sendEmail so that directories/files
+   starting with "." in $TopDir/pc are ignored, rather than
+   just "." and "..".
+
+ * Changed BackupPC_sendEmail to include NT_STATUS_FILE_LOCK_CONFLICT
+   in check for bad outlook files.
+
+ * Ensure that %Status and %StatusHost are empty if requesting
+   status on hosts in lib/BackupPC/CGI/Lib.pm GetStatusInfo().
+   Fixes problem with new hosts under mod_perl.
+
+ * Added images/icon-hardlink.gif so that hardlinks show file type icon.
 
 #------------------------------------------------------------------------
 # Version 2.1.0pl1, 15 Aug 2004

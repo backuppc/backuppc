@@ -745,12 +745,25 @@ L<http://backuppc.sourceforge.net>.  This patch adds the --checksum-seed
 option for checksum caching, and also sends all errors to the client,
 which is important so BackupPC can log all file access errors.
 
-Otherwise, to use SMB, you need to create shares for the data you want
-to backup. Open "My Computer", right click on the drive (eg: C), and
+
+Otherwise, to use SMB, you can either create shares for the data you want
+to backup or your can use the existing C$ share.  To create a new 
+share, open "My Computer", right click on the drive (eg: C), and
 select "Sharing..." (or select "Properties" and select the "Sharing"
 tab). In this dialog box you can enable sharing, select the share name
-and permissions.  Many machines will be configured by default to share
-the entire C drive as C$ using the administrator password.
+and permissions.
+
+All Windows NT based OS (NT, 2000, XP Pro), are configured by default 
+to share the entire C drive as C$.  This is a special share used for 
+various administration functions, one of which is to grant access to backup 
+operators. All you need to do is create a new domain user, specifically 
+for backup. Then add the new backup user to the built in "Backup 
+Operators" group. You now have backup capability for any directory on 
+any computer in the domain in one easy step. This avoids using 
+administrator accounts and only grants permission to do exactly what you 
+want for the given user, i.e.: backup.
+Also, for additional security, you may wish to deny the ability for this 
+user to logon to computers in the default domain policy.
 
 If this machine uses DHCP you will also need to make sure the
 NetBios name is set.  Go to Control Panel|System|Network Identification

@@ -40,6 +40,7 @@ use strict;
 use BackupPC::CGI::Lib qw(:all);
 use Data::Dumper;
 use File::Path;
+use Encode;
 
 sub action
 {
@@ -73,6 +74,7 @@ sub action
         $hiddenStr .= <<EOF;
 <input type="hidden" name="fcb$i" value="$In{'fcb' . $i}">
 EOF
+        $name = decode_utf8($name);
         $fileListStr .= <<EOF;
 <li> ${EscHTML($name)}
 EOF
@@ -261,6 +263,10 @@ EOF
 	    (my $strippedShareDest = $In{shareDest}) =~ s/^\///;
             substr($targetFile, 0, length($pathHdr)) = "/$In{pathHdr}/";
 	    $targetFile =~ s{//+}{/}g;
+            $strippedShareDest = decode_utf8($strippedShareDest);
+            $targetFile = decode_utf8($targetFile);
+            $strippedShare = decode_utf8($strippedShare);
+            $f = decode_utf8($f);
             $fileListStr .= <<EOF;
 <tr><td>$host:/$strippedShare$f</td><td>$In{hostDest}:/$strippedShareDest$targetFile</td></tr>
 EOF

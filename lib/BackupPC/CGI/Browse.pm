@@ -37,6 +37,7 @@
 package BackupPC::CGI::Browse;
 
 use strict;
+use Encode;
 use BackupPC::CGI::Lib qw(:all);
 use BackupPC::View;
 use BackupPC::Attrib qw(:all);
@@ -156,6 +157,7 @@ sub action
 		}
 		my $dirName = $f;
 		$dirName =~ s/ /&nbsp;/g;
+                $dirName = decode_utf8($dirName);
 		push(@DirStr, {needTick => 1,
                                tdArgs   => " class=\"$tdStyle\"",
 			       link     => <<EOF});
@@ -215,6 +217,7 @@ EOF
                     $attrStr .= "<td colspan=\"5\" align=\"center\" class=\"fviewborder\"> </td>\n";
                 }
 		(my $fDisp = "${EscHTML($f)}") =~ s/ /&nbsp;/g;
+                $fDisp = decode_utf8($fDisp);
                 if ( $gotDir ) {
                     $fileStr .= <<EOF;
 <tr><td class="fviewborder">
@@ -255,6 +258,7 @@ EOF
     $dirDisplay =~ s{//+}{/}g;
     $dirDisplay =~ s{/+$}{}g;
     $dirDisplay = "/" if ( $dirDisplay eq "" );
+    $dirDisplay = decode_utf8($dirDisplay);
     my $filledBackup;
 
     if ( (my @mergeNums = @{$view->mergeNums}) > 1 ) {

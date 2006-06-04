@@ -8,7 +8,7 @@ use strict;
 use File::Find;
 use File::Path;
 
-my $BaseVersion  = "2.1.0beta2";
+my $BaseVersion  = "2.1.2";
 my $PatchLevel   = "pl1";
 my $PatchVersion = "$BaseVersion$PatchLevel";
 
@@ -74,7 +74,7 @@ sub CopyFile
     open(OUT, ">", "$TmpDir/$file")
                     || die("Can't open $TmpDir/$file for output\n");
     while ( <IN> ) {
-        if ( /^use lib ".*BackupPC\/lib";/
+        if ( /^use lib ".*BackupPC[\d.]*\/lib";/
                 || /^use lib "\/home\/pcbackup\/install\/lib";/ ) {
             print OUT "use lib \"__INSTALLDIR__/lib\";\n";
         } elsif ( $file =~ /Lib.pm/ && /(.*TopDir *=> .*)'.*',/ ) {

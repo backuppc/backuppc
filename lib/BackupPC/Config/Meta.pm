@@ -225,6 +225,7 @@ use vars qw(%ConfigMeta);
     RsyncClientRestoreCmd => "string",
 
     RsyncdClientPort	=> "integer",
+    RsyncdUserName 	=> "string",
     RsyncdPasswd 	=> "string",
     RsyncdAuthRequired	=> "boolean",
 
@@ -239,6 +240,11 @@ use vars qw(%ConfigMeta);
 	    emptyOk => 1,
 	    child  => "string",
     },
+
+    BackupPCdCmd        => "string",
+    BackupPCdPath       => "string",
+    BackupPCdShareName  => "string",
+    BackupPCdRestoreCmd => "string",
 
     ArchiveDest 	=> "string",
     ArchiveComp		=> {

@@ -43,6 +43,7 @@ use vars qw( $CompZlibOK );
 use Carp;
 use File::Path;
 use File::Copy;
+use Encode;
 
 #
 # For compressed files we have a to careful about running out of memory
@@ -124,6 +125,16 @@ sub open
 sub compOk
 {
     return $CompZlibOK;
+}
+
+#
+# Request utf8 strings with readLine interface
+#
+sub utf8
+{
+    my($self, $mode) = @_;
+
+    $self->{utf8} = $mode;
 }
 
 sub myDeflateInit
@@ -226,6 +237,7 @@ sub readLine
         if ( $str eq "" ) {
             $str = $self->{readLineFrag};
             $self->{readLineFrag} = "";
+            $str = decode_utf8($str) if ( $self->{utf8} );
             return $str;
         }
         @{$self->{readLineBuf}} = split(/\n/, $self->{readLineFrag} . $str);
@@ -235,7 +247,9 @@ sub readLine
             $self->{readLineFrag} = "";
         }
     }
-    return shift(@{$self->{readLineBuf}}) . "\n";
+    $str = shift(@{$self->{readLineBuf}}) . "\n";
+    $str = decode_utf8($str) if ( $self->{utf8} );
+    return $str;
 }
 
 sub rewind

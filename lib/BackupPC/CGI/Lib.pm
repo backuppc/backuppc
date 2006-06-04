@@ -431,6 +431,7 @@ sub Header
     );
     my $host = $In{host};
 
+    binmode(STDOUT, ":utf8");
     print $Cgi->header(-charset => "utf-8");
     print <<EOF;
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">

@@ -21,11 +21,12 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Added config file editing.
+* Added config and host CGI editor.
 
 * Added rsync hardlink support.
 
-* Added Portuguese Brazillian pt_br.pm from Reginaldo Ferreira.
+* Server file names are now in utf8 and optional conversion
+  to/from client name charsets is done.
 
 * Added Slackware init.d script from Tony Nelson.
 
@@ -37,9 +38,13 @@
 * Apply patch from Pete Wenzel to add smbClientPath => $Conf{SmbClientPath}
   to DumpPreUserCmd etc.
 
+* Added Portuguese Brazillian pt_br.pm from Reginaldo Ferreira.
+
 * Jean-Michel Beuken reported several bugs in CVS 3.0.0.
 
 * Applied Lorenzo Cappelletti's it.pm patch.
+
+* Applied Wander Winkelhorst's nl.pm patch.
 
 * Applied patch to bin/BackupPC_sendEmail from Marc Prewitt that
   ignores any file starting with "." in the pc directory when

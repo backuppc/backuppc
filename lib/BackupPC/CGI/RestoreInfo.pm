@@ -38,6 +38,7 @@ package BackupPC::CGI::RestoreInfo;
 
 use strict;
 use BackupPC::CGI::Lib qw(:all);
+use Encode;
 
 sub action
 {
@@ -80,6 +81,10 @@ sub action
 	substr($targetFile, 0, length($RestoreReq{pathHdrSrc}))
 					= $RestoreReq{pathHdrDest};
 	$targetFile =~ s{//+}{/}g;
+        $strippedShareDest = decode_utf8($strippedShareDest);
+        $targetFile = decode_utf8($targetFile);
+        $strippedShareSrc = decode_utf8($strippedShareSrc);
+        $f = decode_utf8($f);
 	$fileListStr .= <<EOF;
 <tr><td>$RestoreReq{hostSrc}:/$strippedShareSrc$f</td><td>$RestoreReq{hostDest}:/$strippedShareDest$targetFile</td></tr>
 EOF

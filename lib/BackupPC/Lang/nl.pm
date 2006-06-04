@@ -1253,8 +1253,8 @@ $headers
 Beste $userName,
 
 Er is reeds gedurende $days dagen geen backup meer gemaakt van uw pc ($host).
-Er zijn ondertussen van uw pc $numbackups gemaakt sinds $firstTime.
-De laatste backup dateert van $days geleden.
+Er zijn ondertussen van uw pc $numBackups backups gemaakt sinds $firstTime dagen geleden.
+De laatste backup dateert van $days dagen geleden.
 PC backups zouden automatisch moeten gebeuren als uw pc verbonden
 is met het netwerk. 
 
@@ -1264,8 +1264,8 @@ contact opnemen van uw systeembeheerder. Vraag hem of haar om uit te
 zoeken waarom er geen backups meer genomen worden van uw pc.
 
 Anderzijds, als deze pc of notebook zich momenteel niet in het netwerk
-bevindt dan kan u hieraan weinig doen behalve van belangrijke bestanden
-handmatig een copy nemen op een ander medium (CD,diskette, tape,andere pc,...)
+bevindt dan kan u hieraan weinig anders doen behalve van belangrijke bestanden
+handmatig een kopie te maken op een ander medium (CD, diskette, tape, andere pc,...)
 U dient te weten dat *geen enkel bestand* dat u aanmaakte of wijzigde in de
 laatste $days dagen teruggeplaatst zal kunnen worden in geval de harde schijf
 van uw pc zou crashen. Hierin zijn nieuwe e-mail en bijlagen inbegrepen.
@@ -1349,6 +1349,7 @@ $Lang{CfgEdit_Title_Smb_Settings} = "Smb Settings";
 $Lang{CfgEdit_Title_Tar_Settings} = "Tar Settings";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Settings";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Settings";
+$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd Settings";
 $Lang{CfgEdit_Title_Archive_Settings} = "Archive Settings";
 $Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Paths/Commands";

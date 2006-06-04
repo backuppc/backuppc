@@ -133,6 +133,10 @@ $errCnt += CheckConfigParams("conf/config.pl", $ConfVars, 0);
 
 $errCnt += CheckConfigParams("doc-src/BackupPC.pod", $ConfVars, 1);
 
+$errCnt += CheckMetaDataVsConfig($ConfVars, "lib/BackupPC/Config/Meta.pm");
+
+$errCnt += CheckEditorVsConfig($ConfVars, "lib/BackupPC/CGI/EditConfig.pm");
+
 #
 # These config parameters are not used in the code, so ignore them.
 #
@@ -399,6 +403,68 @@ sub CheckConfigParams
         }
     }
     close(F);
+    return $errors;
+}
+
+sub CheckMetaDataVsConfig
+{
+    my($confVars, $file) = @_;
+    my $done = {};
+    my $errors;
+
+    #
+    # Check that the meta file mentions all the config
+    # parameters
+    #
+    open(F, $file) || die("can't open $file");
+
+    while ( <F> ) {
+        next if ( !/^\s{4}(\w+)\s+=>/ );
+        if ( $confVars->{$1} ) {
+            $done->{$1} = 1;
+            next;
+        }
+        next if ( $1 eq "Hosts" );
+        print("$file has $1 but missing from conf/config.pl\n");
+        $errors++;
+    }
+    close(F);
+    foreach my $v ( keys(%$confVars) ) {
+        next if ( $done->{$v} );
+        print("$file missing $v from conf/config.pl\n");
+        $errors++;
+    }
+    return $errors;
+}
+
+sub CheckEditorVsConfig
+{
+    my($confVars, $file) = @_;
+    my $done = {};
+    my $errors;
+
+    #
+    # Check that the config editor file mentions all the config
+    # parameters
+    #
+    open(F, $file) || die("can't open $file");
+
+    while ( <F> ) {
+        next if ( !/name\s*=>\s*"(\w+)"/ );
+        if ( $confVars->{$1} ) {
+            $done->{$1} = 1;
+            next;
+        }
+        next if ( $1 eq "Hosts" );
+        print("$file has $1 but missing from conf/config.pl\n");
+        $errors++;
+    }
+    close(F);
+    foreach my $v ( keys(%$confVars) ) {
+        next if ( $done->{$v} );
+        print("$file missing $v from conf/config.pl\n");
+        $errors++;
+    }
     return $errors;
 }
 

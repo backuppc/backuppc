@@ -664,7 +664,7 @@ Les fichiers existants sont ceux qui sont déjà sur le serveur;
 Les nouveaux fichiers sont ceux qui ont été ajoutés au serveur.
 Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés dans les fichiers nouveaux ou réutilisés.
 </p>
-<table glass="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totaux </td>
     <td align="center" colspan="2"> Fichiers existants </td>
@@ -1009,7 +1009,7 @@ $Lang{LOG_files} = "Fichiers journaux";
 $Lang{Old_LOGs} = "Vieux journaux";
 $Lang{Email_summary} = "Résumé des courriels";
 $Lang{Config_file} = "Fichier de configuration";
-$Lang{Hosts_file} = "Fichiers des hôtes";
+# $Lang{Hosts_file} = "Fichiers des hôtes";
 $Lang{Current_queues} = "Files actuelles";
 $Lang{Documentation} = "Documentation";
 
@@ -1336,6 +1336,7 @@ $Lang{CfgEdit_Title_Smb_Settings} = "Smb Settings";
 $Lang{CfgEdit_Title_Tar_Settings} = "Tar Settings";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Settings";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Settings";
+$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd Settings";
 $Lang{CfgEdit_Title_Archive_Settings} = "Archive Settings";
 $Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Paths/Commands";

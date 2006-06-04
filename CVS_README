@@ -21,11 +21,11 @@ Fetching CVS:
 
     mkdir somewhere/BackupPC
     cd somewhere/BackupPC
-    cvs -z3 -d:pserver:anonymous@cvs.backuppc.sourceforge.net:/cvsroot/backuppc co BackupPC
+    cvs -z3 -d:pserver:anonymous@backuppc.cvs.sourceforge.net:/cvsroot/backuppc co BackupPC
 
-* To fetch the CVS code tagged at a particular release (eg: v1.5.0):
+* To fetch the CVS code tagged at a particular release (eg: v2.1.2):
 
-    cvs -z3 -d:pserver:anonymous@cvs.backuppc.sourceforge.net:/cvsroot/backuppc co -r v1_5_0 BackupPC
+    cvs -z3 -d:pserver:anonymous@backuppc.cvs.sourceforge.net:/cvsroot/backuppc co -r v2_1_2 BackupPC
 
 Building an installable release from the CVS source:
 ---------------------------------------------------

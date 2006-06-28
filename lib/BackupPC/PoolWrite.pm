@@ -142,7 +142,19 @@ sub write
                 my $fileName = $a->{fileCnt} < 0 ? $a->{base}
                                         : "$a->{base}_$a->{fileCnt}";
                 last if ( !-f $fileName );
+                #
+                # Don't attempt to match pool files that already
+                # have too many hardlinks.  Also, don't match pool
+                # files with only one link since starting in
+                # BackupPC v3.0, BackupPC_nightly could be running
+                # in parallel (and removing those files).  This doesn't
+                # eliminate all possible race conditions, but just
+                # reduces the odds.  Other design steps eliminate
+                # the remaining race conditions of linking vs
+                # removing.
+                #
                 if ( (stat(_))[3] >= $a->{hardLinkMax}
+                    || (stat(_))[3] <= 1
 		    || !defined($fh = BackupPC::FileZIO->open($fileName, 0,
                                                      $a->{compress})) ) {
                     $a->{fileCnt}++;
@@ -352,13 +364,6 @@ sub write
 	}
     }
 
-    #
-    # Close the compare files
-    #
-    foreach my $f ( @{$a->{files}} ) {
-        $f->{fh}->close();
-    }
-
     if ( $a->{fileSize} == 0 ) {
         #
         # Simply create an empty file
@@ -370,9 +375,21 @@ sub write
         } else {
             close(OUT);
         }
+        #
+        # Close the compare files
+        #
+        foreach my $f ( @{$a->{files}} ) {
+            $f->{fh}->close();
+        }
         return (1, $a->{digest}, -s $a->{fileName}, $a->{errors});
     } elsif ( defined($a->{fhOut}) ) {
         $a->{fhOut}->close();
+        #
+        # Close the compare files
+        #
+        foreach my $f ( @{$a->{files}} ) {
+            $f->{fh}->close();
+        }
         return (0, $a->{digest}, -s $a->{fileName}, $a->{errors});
     } else {
         if ( @{$a->{files}} == 0 ) {
@@ -390,12 +407,50 @@ sub write
             #}
             #push(@{$a->{errors}}, $str);
         }
-        #print("   Linking $a->{fileName} to $a->{files}[0]->{name}\n");
-        if ( @{$a->{files}} && !link($a->{files}[0]->{name}, $a->{fileName}) ) {
-            push(@{$a->{errors}}, "Can't link $a->{fileName} to"
-                                . " $a->{files}[0]->{name}\n");
+        for ( my $i = 0 ; $i < @{$a->{files}} ; $i++ ) {
+            if ( link($a->{files}[$i]->{name}, $a->{fileName}) ) {
+                #print("  Linked $a->{fileName} to $a->{files}[$i]->{name}\n");
+                #
+                # Close the compare files
+                #
+                foreach my $f ( @{$a->{files}} ) {
+                    $f->{fh}->close();
+                }
+                return (1, $a->{digest}, -s $a->{fileName}, $a->{errors});
+            }
         }
-        return (1, $a->{digest}, -s $a->{fileName}, $a->{errors});
+        #
+        # We were unable to link to the pool.  Either we're at the
+        # hardlink max, or the pool file got deleted.  Recover by
+        # writing the matching file, since we still have an open
+        # handle.
+        #
+        for ( my $i = 0 ; $i < @{$a->{files}} ; $i++ ) {
+            if ( !$a->{files}[$i]->{fh}->rewind() ) {
+                push(@{$a->{errors}}, 
+                         "Unable to rewind $a->{files}[$i]->{name}"
+                       . " for copy after link fail\n");
+                next;
+            }
+            $a->{fhOut} = BackupPC::FileZIO->open($a->{fileName},
+                                            1, $a->{compress});
+            if ( !defined($a->{fhOut}) ) {
+                push(@{$a->{errors}},
+                        "Unable to open $a->{fileName}"
+                      . " for writing after link fail\n");
+            }
+            $a->filePartialCopy($a->{files}[$i]->{fh}, $a->{fhOut},
+                                $a->{nWrite});
+            $a->{fhOut}->close;
+            last;
+        }
+        #
+        # Close the compare files
+        #
+        foreach my $f ( @{$a->{files}} ) {
+            $f->{fh}->close();
+        }
+        return (0, $a->{digest}, -s $a->{fileName}, $a->{errors});
     }
 }
 

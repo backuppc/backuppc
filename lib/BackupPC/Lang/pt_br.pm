@@ -636,6 +636,7 @@ Clique no número do Backup para revisar e restaurar arquivos.
 <tr class="tableheader"><td align="center"> Cópia Nº </td>
     <td align="center"> Tipo </td>
     <td align="center"> Completo </td>
+    <td align="center"> ENG Level </td>
     <td align="center"> Data Início </td>
     <td align="center"> Duração/min </td>
     <td align="center"> Idade/dias </td>
@@ -1306,6 +1307,22 @@ EOF
 
 $Lang{howLong_not_been_backed_up} = "não foi realizado nenhum backup com êxito";
 $Lang{howLong_not_been_backed_up_for_days_days} = "não foi realizado nenhum backup durante \$days dias";
+
+#######################################################################
+# RSS strings
+#######################################################################
+$Lang{RSS_Doc_Title}       = "BackupPC Server";
+$Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
+$Lang{RSS_Host_Summary}    = <<EOF;
+#Completo: \$fullCnt;
+Completo Antig./Dias: \$fullAge;
+Completo Tamanho/GB: \$fullSize;
+Velocidade MB/sec: \$fullRate;
+#Incrementais: \$incrCnt;
+Incrementais Antig/Dias: \$incrAge;
+Estado: \$host_state;
+Última Tentativa: \$host_last_attempt;
+EOF
 
 #######################################################################
 # Configuration editor strings (all ENGLISH currently)

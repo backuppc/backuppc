@@ -130,11 +130,13 @@ sub start
         } else {
             $timeStampFile = "$t->{outDir}/timeStamp.level0";
             open(LEV0, ">", $timeStampFile) && close(LEV0);
-            utime($t->{lastFull} - 3600, $t->{lastFull} - 3600, $timeStampFile);
+            utime($t->{incrBaseTime} - 3600, $t->{incrBaseTime} - 3600,
+                  $timeStampFile);
 	    $smbClientCmd = $conf->{SmbClientIncrCmd};
             $logMsg = "incr backup started back to "
-                        . $bpc->timeStamp($t->{lastFull} - 3600, 0)
-                        . "for share $t->{shareName}";
+                    . $bpc->timeStamp($t->{incrBaseTime} - 3600, 0)
+                    . " (backup #$t->{incrBaseBkupNum}) for share"
+                    . " $t->{shareName}";
         }
     }
     my $args = {
@@ -261,6 +263,7 @@ sub readOutput
                     || /^\s*Call timed out: server did not respond/i
 		    || /^\s*tree connect failed: ERRDOS - ERRnoaccess \(Access denied\.\)/
 		    || /^\s*tree connect failed: NT_STATUS_BAD_NETWORK_NAME/
+		    || /^\s*NT_STATUS_INSUFF_SERVER_RESOURCES listing /
                  ) {
 	    if ( $t->{hostError} eq "" ) {
 		$t->{XferLOG}->write(\"This backup will fail because: $_\n");

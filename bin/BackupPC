@@ -388,7 +388,7 @@ sub Main_TryToRun_nightly
 	    });
 	$CmdQueueOn{$bpc->trashJob} = 1;
     }
-    if ( keys(%Jobs) == $trashCleanRunning && $RunNightlyWhenIdle == 1 ) {
+    if ( $RunNightlyWhenIdle == 1 ) {
 
         #
         # Queue multiple nightly jobs based on the configuration
@@ -606,7 +606,14 @@ sub Main_TryToRun_Bg_or_User_Queue
         }
     }
 
-    while ( $RunNightlyWhenIdle == 0 ) {
+    #
+    # Run background jobs anytime.  Previously they were locked out
+    # when BackupPC_nightly was running or pending with this
+    # condition on the while loop:
+    #
+    #    while ( $RunNightlyWhenIdle == 0 )
+    #
+    while ( 1 ) {
         local(*FH);
         my(@args, $progName, $type);
         my $nJobs = keys(%Jobs);
@@ -836,7 +843,8 @@ sub Main_Check_Timeout
                                         $Conf{CompressLevel}, 1);
         LogFileOpen();
         #
-        # Remember to run nightly script after current jobs are done
+        # Remember to run the nightly script when the next CmdQueue
+        # job is done.
         #
         $RunNightlyWhenIdle = 1;
     }
@@ -1067,7 +1075,8 @@ sub Main_Check_Job_Messages
                     #
                     # This means the last BackupPC_nightly is done with
 		    # the pool clean, so it's ok to start running regular
-		    # backups again.
+		    # backups again.  But starting in 3.0 regular jobs
+                    # are decoupled from BackupPC_nightly.
                     #
                     $RunNightlyWhenIdle = 0;
 		}
@@ -1097,6 +1106,9 @@ sub Main_Check_Job_Messages
 		    #print(LOG $bpc->timeStamp, "BackupPC_nightly done; now"
 		    #         . " have $BackupPCNightlyJobs running\n");
                     if ( $BackupPCNightlyJobs <= 0 ) {
+                        #
+                        # Last BackupPC_nightly has finished
+                        #
                         $BackupPCNightlyJobs = 0;
                         $RunNightlyWhenIdle = 0;
                         $CmdJob = "";

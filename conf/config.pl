@@ -353,18 +353,6 @@ $Conf{ServerInitdStartCmd} = '';
 # time taken for the backup, plus the granularity of $Conf{WakeupSchedule}
 # will make the actual backup interval a bit longer.
 #
-# There are two special values for $Conf{FullPeriod}:
-#
-#   -1   Don't do any regular backups on this machine.  Manually
-#        requested backups (via the CGI interface) will still occur.
-#
-#   -2   Don't do any backups on this machine.  Manually requested
-#        backups (via the CGI interface) will be ignored.
-#
-# These special settings are useful for a client that is no longer
-# being backed up (eg: a retired machine), but you wish to keep the
-# last backups available for browsing or restoring to other machines.
-#
 $Conf{FullPeriod} = 6.97;
 
 #
@@ -480,6 +468,105 @@ $Conf{IncrKeepCnt} = 6;
 #
 $Conf{IncrKeepCntMin} = 1;
 $Conf{IncrAgeMax}     = 30;
+
+#
+# Level of each incremental.  "Level" follows the terminology
+# of dump(1).  A full backup has level 0.  A new incremental
+# of level N will backup all files that have changed since
+# the most recent backup of a lower level.
+#
+# The entries of $Conf{IncrLevels} apply in order to each
+# incremental after each full backup.  It wraps around until
+# the next full backup.  For example, these two settings
+# have the same effect:
+#
+#       $Conf{IncrLevels} = [1, 2, 3];
+#       $Conf{IncrLevels} = [1, 2, 3, 1, 2, 3];
+#
+# This means the 1st and 4th incrementals (level 1) go all
+# the way back to the full.  The 2nd and 3rd (and 5th and
+# 6th) backups just go back to the immediate preceeding
+# incremental.
+#
+# Specifying a sequence of multi-level incrementals will
+# usually mean more than $Conf{IncrKeepCnt} incrementals will
+# need to be kept, since lower level incrementals are needed
+# to merge a complete view of a backup.  For example, with
+#
+#       $Conf{FullPeriod}  = 7;
+#       $Conf{IncrPeriod}  = 1;
+#       $Conf{IncrKeepCnt} = 6;
+#       $Conf{IncrLevels}  = [1, 2, 3, 4, 5, 6];
+#
+# there will be up to 11 incrementals in this case: 
+#
+#       backup #0  (full, level 0, oldest)
+#       backup #1  (incr, level 1)
+#       backup #2  (incr, level 2)
+#       backup #3  (incr, level 3)
+#       backup #4  (incr, level 4)
+#       backup #5  (incr, level 5)
+#       backup #6  (incr, level 6)
+#       backup #7  (full, level 0)
+#       backup #8  (incr, level 1)
+#       backup #9  (incr, level 2)
+#       backup #10 (incr, level 3)
+#       backup #11 (incr, level 4)
+#       backup #12 (incr, level 5, newest)
+#
+# Backup #1 (the oldest level 1 incremental) can't be deleted
+# since backups 2..6 depend on it.  Those 6 incrementals can't
+# all be deleted since that would only leave 5 (#8..12).
+# When the next incremental happens (level 6), the complete
+# set of 6 older incrementals (#1..6) will be deleted, since
+# that maintains the required number ($Conf{IncrKeepCnt})
+# of incrementals.  This situation is reduced if you set
+# shorter chains of multi-level incrementals, eg:
+#
+#       $Conf{IncrLevels}  = [1, 2, 3];
+#
+# would only have up to 2 extra incremenals before all 3
+# are deleted.
+#
+# BackupPC as usual merges the full and the sequence
+# of incrementals together so each incremental can be
+# browsed and restored as though it is a complete backup.
+# If you specify a long chain of incrementals then more
+# backups need to be merged when browsing, restoring,
+# or getting the starting point for rsync backups.
+# In the example above (levels 1..6), browing backup
+# #6 requires 7 different backups (#0..6) to be merged.
+#
+# Because of this merging and the additional incrementals
+# that need to be kept, it is recommended that some
+# level 1 incrementals be included in $Conf{IncrLevels}.
+#
+# Prior to version 3.0 incrementals were always level 1,
+# meaning each incremental backed up all the files that
+# changed since the last full.
+#
+$Conf{IncrLevels} = [1];
+
+#
+# Disable all full and incremental backups.  These settings are
+# useful for a client that is no longer being backed up
+# (eg: a retired machine), but you wish to keep the last
+# backups available for browsing or restoring to other machines.
+#
+# There are three values for $Conf{BackupsDisable}:
+#
+#   0    Backups are enabled.
+#
+#   1    Don't do any regular backups on this client.  Manually
+#        requested backups (via the CGI interface) will still occur.
+#
+#   2    Don't do any backups on this client.  Manually requested
+#        backups (via the CGI interface) will be ignored.
+#
+# In versions prior to 3.0 Backups were disabled by setting
+# $Conf{FullPeriod} to -1 or -2.
+#
+$Conf{BackupsDisable} = 0;
 
 #
 # A failed full backup is saved as a partial backup.  The rsync
@@ -1116,7 +1203,7 @@ $Conf{RsyncArgs} = [
             '--perms',
             '--owner',
             '--group',
-            '--devices',
+            '-D',
             '--links',
             '--times',
             '--block-size=2048',
@@ -1150,7 +1237,7 @@ $Conf{RsyncRestoreArgs} = [
 	    '--perms',
 	    '--owner',
 	    '--group',
-	    '--devices',
+	    '-D',
 	    '--links',
 	    '--times',
 	    '--block-size=2048',
@@ -1537,6 +1624,29 @@ $Conf{ArchivePreUserCmd}  = undef;
 $Conf{ArchivePostUserCmd} = undef;
 
 #
+# Whether the exit status of each PreUserCmd and
+# PostUserCmd is checked.
+#
+# If set and the Dump/Restore/Archive Pre/Post UserCmd
+# returns a non-zero exit status then the dump/restore/archive
+# is aborted.  To maintain backward compatibility (where
+# the exit status in early versions was always ignored),
+# this flag defaults to 0.
+#
+# If this flag is set and the Dump/Restore/Archive PreUserCmd
+# fails then the matching Dump/Restore/Archive PostUserCmd is
+# not executed.  If DumpPreShareCmd returns a non-exit status,
+# then DumpPostShareCmd is not executed, but the DumpPostUserCmd
+# is still run (since DumpPreUserCmd must have previously
+# succeeded).
+#
+# An example of a DumpPreUserCmd that might fail is a script
+# that snapshots or dumps a database which fails because
+# of some database error.
+#
+$Conf{UserCmdCheckStatus} = 0;
+
+#
 # Override the client's host name.  This allows multiple clients
 # to all refer to the same physical host.  This should only be
 # set in the per-PC config file and is only used by BackupPC at
@@ -1879,8 +1989,9 @@ $Conf{CgiUserConfigEdit} = {
         IncrKeepCnt               => 1,
         IncrKeepCntMin            => 1,
         IncrAgeMax                => 1,
-        PartialAgeMax             => 1,
+        IncrLevels                => 1,
         IncrFill                  => 1,
+        PartialAgeMax             => 1,
         RestoreInfoKeepCnt        => 1,
         ArchiveInfoKeepCnt        => 1,
         BackupFilesOnly           => 1,
@@ -1934,6 +2045,7 @@ $Conf{CgiUserConfigEdit} = {
         ArchivePostUserCmd        => 0,
         DumpPostShareCmd          => 0,
         DumpPreShareCmd           => 0,
+        UserCmdCheckStatus        => 0,
         EMailNotifyMinDays        => 1,
         EMailFromUserName         => 1,
         EMailAdminUserName        => 1,

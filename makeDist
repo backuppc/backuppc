@@ -92,6 +92,7 @@ my @PerlSrc = qw(
     lib/BackupPC/CGI/RestoreFile.pm
     lib/BackupPC/CGI/RestoreInfo.pm
     lib/BackupPC/CGI/Restore.pm
+    lib/BackupPC/CGI/RSS.pm
     lib/BackupPC/CGI/StartServer.pm
     lib/BackupPC/CGI/StartStopBackup.pm
     lib/BackupPC/CGI/StopServer.pm

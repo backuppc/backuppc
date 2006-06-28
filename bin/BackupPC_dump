@@ -193,7 +193,30 @@ mkpath($Dir, 0, 0777) if ( !-d $Dir );
 if ( !-f "$Dir/LOCK" ) {
     open(LOCK, ">", "$Dir/LOCK") && close(LOCK);
 }
-open(LOG, ">>", "$Dir/LOG");
+
+my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+my $logPath = sprintf("$Dir/LOG.%02d%04d", $mon + 1, $year + 1900);
+
+if ( !-f $logPath ) {
+    #
+    # Compress and prune old log files
+    #
+    my $lastLog = $Conf{MaxOldPerPCLogFiles} - 1;
+    foreach my $file ( $bpc->sortedPCLogFiles($client) ) {
+        if ( $lastLog <= 0 ) {
+            unlink($file);
+            next;
+        }
+        next if ( $file =~ /\.z$/ || !$Conf{CompressLevel} );
+        BackupPC::FileZIO->compressCopy($file,
+                                        "$file.z",
+                                        undef,
+                                        $Conf{CompressLevel}, 1);
+        $lastLog--;
+    }
+}
+
+open(LOG, ">>", $logPath);
 select(LOG); $| = 1; select(STDOUT);
 
 #
@@ -273,17 +296,25 @@ if ( $opts{d} ) {
     print("DHCP $hostIP $clientURI\n");
 }
 
-my($needLink, @Backups, $type, $lastBkupNum, $lastFullBkupNum);
-my $lastFull = 0;
-my $lastIncr = 0;
+my($needLink, @Backups, $type);
+my($incrBaseTime, $incrBaseBkupNum, $incrBaseLevel, $incrLevel);
+my $lastFullTime = 0;
+my $lastIncrTime = 0;
 my $partialIdx = -1;
 my $partialNum;
 my $lastPartial = 0;
 
-if ( $Conf{FullPeriod} == -1 && !$opts{f} && !$opts{i}
-        || $Conf{FullPeriod} == -2 ) {
+#
+# Maintain backward compatibility with $Conf{FullPeriod} == -1 or -2
+# meaning disable backups
+#
+$Conf{BackupsDisable} = -$Conf{FullPeriod}
+            if ( !$Conf{BackupsDisable} && $Conf{FullPeriod} < 0 );
+
+if ( $Conf{BackupsDisable} == 1 && !$opts{f} && !$opts{i}
+        || $Conf{BackupsDisable} == 2 ) {
     print(STDERR "Exiting because backups are disabled with"
-               . " \$Conf{FullPeriod} = $Conf{FullPeriod}\n") if ( $opts{v} );
+       . " \$Conf{BackupsDisable} = $Conf{BackupsDisable}\n") if ( $opts{v} );
     #
     # Tell BackupPC to ignore old failed backups on hosts that
     # have backups disabled.
@@ -360,23 +391,29 @@ if ( !$opts{i} && !$opts{f} && $StatusHost{backoffTime} > time ) {
 #
 BackupExpire($client);
 
+my(@lastIdxByLevel, $incrCntSinceFull);
+
 #
 # Read Backup information, and find times of the most recent full and
-# incremental backups
+# incremental backups.  Also figure out which backup we will use
+# as a starting point for an incremental.
 #
 @Backups = $bpc->BackupInfoRead($client);
+## @Backups = sort( { $a->{startTime} <=> $b->{startTime} }, @Backups);
 for ( my $i = 0 ; $i < @Backups ; $i++ ) {
     $needLink = 1 if ( $Backups[$i]{nFilesNew} eq ""
                         || -f "$Dir/NewFileList.$Backups[$i]{num}" );
-    $lastBkupNum = $Backups[$i]{num};
     if ( $Backups[$i]{type} eq "full" ) {
-	if ( $lastFull < $Backups[$i]{startTime} ) {
-	    $lastFull = $Backups[$i]{startTime};
-	    $lastFullBkupNum = $Backups[$i]{num};
+        $incrCntSinceFull = 0;
+        $lastIdxByLevel[0] = $i;
+	if ( $lastFullTime < $Backups[$i]{startTime} ) {
+	    $lastFullTime = $Backups[$i]{startTime};
 	}
     } elsif ( $Backups[$i]{type} eq "incr" ) {
-        $lastIncr = $Backups[$i]{startTime}
-                if ( $lastIncr < $Backups[$i]{startTime} );
+        $incrCntSinceFull++;
+        $lastIdxByLevel[$Backups[$i]{level}] = $i;
+        $lastIncrTime = $Backups[$i]{startTime}
+                if ( $lastIncrTime < $Backups[$i]{startTime} );
     } elsif ( $Backups[$i]{type} eq "partial" ) {
         $partialIdx  = $i;
         $lastPartial = $Backups[$i]{startTime};
@@ -389,12 +426,37 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
 #
 if ( @Backups == 0
         || $opts{f}
-        || (!$opts{i} && (time - $lastFull > $Conf{FullPeriod} * 24*3600
-            && time - $lastIncr > $Conf{IncrPeriod} * 24*3600)) ) {
+        || (!$opts{i} && (time - $lastFullTime > $Conf{FullPeriod} * 24*3600
+            && time - $lastIncrTime > $Conf{IncrPeriod} * 24*3600)) ) {
     $type = "full";
-} elsif ( $opts{i} || (time - $lastIncr > $Conf{IncrPeriod} * 24*3600
-        && time - $lastFull > $Conf{IncrPeriod} * 24*3600) ) {
+} elsif ( $opts{i} || (time - $lastIncrTime > $Conf{IncrPeriod} * 24*3600
+        && time - $lastFullTime > $Conf{IncrPeriod} * 24*3600) ) {
     $type = "incr";
+    #
+    # For an incremental backup, figure out which level we should
+    # do and the index of the reference backup, which is the most
+    # recent backup at any lower level.
+    #
+    @{$Conf{IncrLevels}} = [$Conf{IncrLevels}]
+                            unless ref($Conf{IncrLevels}) eq "ARRAY";
+    @{$Conf{IncrLevels}} = [1] if ( !@{$Conf{IncrLevels}} );
+    $incrCntSinceFull = $incrCntSinceFull % @{$Conf{IncrLevels}};
+    $incrLevel = $Conf{IncrLevels}[$incrCntSinceFull];
+    for ( my $i = 0 ; $i < $incrLevel ; $i++ ) {
+        my $idx = $lastIdxByLevel[$i];
+        next if ( !defined($idx) );
+        if ( !defined($incrBaseTime)
+                || $Backups[$idx]{startTime} < $incrBaseTime ) {
+            $incrBaseBkupNum = $Backups[$idx]{num};
+            $incrBaseLevel   = $Backups[$idx]{level};
+            $incrBaseTime    = $Backups[$idx]{startTime};
+        }
+    }
+    #
+    # Can't find any earlier lower-level backup!  Shouldn't
+    # happen - just do full instead
+    #
+    $type = "full" if ( !defined($incrBaseBkupNum) || $incrLevel < 1 );
 } else {
     NothingToDo($needLink);
 }
@@ -510,6 +572,12 @@ $ShareNames = [ $ShareNames ] unless ref($ShareNames) eq "ARRAY";
 # Run an optional pre-dump command
 #
 UserCommandRun("DumpPreUserCmd");
+if ( $? && $Conf{UserCmdCheckStatus} ) {
+    print(LOG $bpc->timeStamp,
+            "DumpPreUserCmd returned error status $?... exiting\n");
+    print("dump failed: DumpPreUserCmd returned error status $?\n");
+    exit(1);
+}
 $NeedPostCmd = 1;
 
 #
@@ -527,6 +595,13 @@ for my $shareName ( @$ShareNames ) {
     }
 
     UserCommandRun("DumpPreShareCmd", $shareName);
+    if ( $? && $Conf{UserCmdCheckStatus} ) {
+        print(LOG $bpc->timeStamp,
+                "DumpPreShareCmd returned error status $?... exiting\n");
+        print("dump failed: DumpPreShareCmd returned error status $?\n");
+        UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
+        exit(1);
+    }
 
     if ( $Conf{XferMethod} eq "tar" ) {
         #
@@ -635,25 +710,24 @@ for my $shareName ( @$ShareNames ) {
     # Run the transport program
     #
     $xfer->args({
-        host        => $host,
-        client      => $client,
-        hostIP      => $hostIP,
-        shareName   => $shareName,
-        pipeRH      => *RH,
-        pipeWH      => *WH,
-        XferLOG     => $XferLOG,
-	newFilesFH  => $newFilesFH,
-        outDir      => $Dir,
-        type        => $type,
-        lastFull    => $lastFull,
-	lastBkupNum => $lastBkupNum,
-	lastFullBkupNum => $lastFullBkupNum,
-	backups     => \@Backups,
-	compress    => $Conf{CompressLevel},
-	XferMethod  => $Conf{XferMethod},
-	logLevel    => $Conf{XferLogLevel},
-	pidHandler  => \&pidHandler,
-        partialNum  => $partialNum,
+        host         => $host,
+        client       => $client,
+        hostIP       => $hostIP,
+        shareName    => $shareName,
+        pipeRH       => *RH,
+        pipeWH       => *WH,
+        XferLOG      => $XferLOG,
+	newFilesFH   => $newFilesFH,
+        outDir       => $Dir,
+        type         => $type,
+        incrBaseTime => $incrBaseTime,
+        incrBaseBkupNum => $incrBaseBkupNum,
+	backups      => \@Backups,
+	compress     => $Conf{CompressLevel},
+	XferMethod   => $Conf{XferMethod},
+	logLevel     => $Conf{XferLogLevel},
+	pidHandler   => \&pidHandler,
+        partialNum   => $partialNum,
     });
 
     if ( !defined($logMsg = $xfer->start()) ) {
@@ -788,7 +862,14 @@ for my $shareName ( @$ShareNames ) {
         }
     }
 
-    UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
+    if ( $NeedPostCmd ) {
+        UserCommandRun("DumpPostShareCmd", $shareName);
+        if ( $? && $Conf{UserCmdCheckStatus} ) {
+            print(LOG $bpc->timeStamp,
+                    "DumpPostShareCmd returned error status $?... exiting\n");
+            $stat{hostError} = "DumpPostShareCmd returned error status $?";
+        }
+    }
 
     $stat{xferOK} = 0 if ( $stat{hostError} || $stat{hostAbort} );
     if ( !$stat{xferOK} ) {
@@ -835,6 +916,12 @@ if ( $stat{xferOK} && (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
 }
 
 UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
+if ( $? && $Conf{UserCmdCheckStatus} ) {
+    print(LOG $bpc->timeStamp,
+            "DumpPostUserCmd returned error status $?... exiting\n");
+    $stat{hostError} = "DumpPostUserCmd returned error status $?";
+    $stat{xferOK} = 0;
+}
 close($newFilesFH) if ( defined($newFilesFH) );
 
 my $endTime = time();
@@ -1098,7 +1185,7 @@ sub BackupExpire
 	    if ( $Backups[$i]{type} eq "full" ) {
 		$firstFull = $i if ( $cntFull == 0 );
 		$cntFull++;
-	    } else {
+	    } elsif ( $Backups[$i]{type} eq "incr" ) {
 		$firstIncr = $i if ( $cntIncr == 0 );
 		$cntIncr++;
 	    }
@@ -1107,23 +1194,39 @@ sub BackupExpire
                         if ( $cntIncr > 0 );
 	$oldestFull = (time - $Backups[$firstFull]{startTime}) / (24 * 3600)
                         if ( $cntFull > 0 );
-	if ( $cntIncr > $Conf{IncrKeepCnt}
-		|| ($cntIncr > $Conf{IncrKeepCntMin}
-		    && $oldestIncr > $Conf{IncrAgeMax})
-               && (@Backups <= $firstIncr + 1
-                        || $Backups[$firstIncr]{noFill}
-                        || !$Backups[$firstIncr + 1]{noFill}) ) {
+
+        #
+        # With multi-level incrementals, several of the following
+        # incrementals might depend upon this one, so we have to
+        # delete all of the them.  Figure out if that is possible
+        # by counting the number of consecutive incrementals that
+        # are unfilled and have a level higher than this one.
+        #
+        my $cntIncrDel = 1;
+        my $earliestIncr = $oldestIncr;
+
+	for ( my $i = $firstIncr + 1 ; $i < @Backups ; $i++ ) {
+            last if ( $Backups[$i]{level} <= $Backups[$firstIncr]{level}
+                   || !$Backups[$i]{noFill} );
+            $cntIncrDel++;
+            $earliestIncr = (time - $Backups[$i]{startTime}) / (24 * 3600);
+        }
+
+	if ( $cntIncr >= $Conf{IncrKeepCnt} + $cntIncrDel
+		|| ($cntIncr >= $Conf{IncrKeepCntMin} + $cntIncrDel
+		    && $earliestIncr > $Conf{IncrAgeMax}) ) {
             #
-            # Only delete an incr backup if the Conf settings are satisfied.
-            # We also must make sure that either this backup is the most
-            # recent one, or it is not filled, or the next backup is filled.
-            # (We can't deleted a filled incr if the next backup is not
-            # filled.)
+            # Only delete an incr backup if the Conf settings are satisfied
+            # for all $cntIncrDel incrementals.  Since BackupRemove() does
+            # a splice() we need to do the deletes in the reverse order.
             # 
-	    print(LOG $bpc->timeStamp,
-                      "removing incr backup $Backups[$firstIncr]{num}\n");
-            BackupRemove($client, \@Backups, $firstIncr);
-            $changes++;
+            for ( my $i = $firstIncr + $cntIncrDel - 1 ;
+                    $i >= $firstIncr ; $i-- ) {
+                print(LOG $bpc->timeStamp,
+                          "removing incr backup $Backups[$i]{num}\n");
+                BackupRemove($client, \@Backups, $i);
+                $changes++;
+            }
             next;
         }
 
@@ -1308,8 +1411,8 @@ sub BackupSave
     $Backups[$i]{tarErrs}       = $tarErrs;
     $Backups[$i]{compress}      = $Conf{CompressLevel};
     $Backups[$i]{noFill}        = $type eq "incr" ? 1 : 0;
-    $Backups[$i]{level}         = $type eq "incr" ? 1 : 0;
-    $Backups[$i]{mangle}        = 1;        # name mangling always on for v1.04+
+    $Backups[$i]{level}         = $incrLevel;
+    $Backups[$i]{mangle}        = 1;     # name mangling always on for v1.04+
     $Backups[$i]{xferMethod}    = $Conf{XferMethod};
     $Backups[$i]{charset}       = $Conf{ClientCharset};
     #

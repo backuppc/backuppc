@@ -148,6 +148,7 @@ EOF
         }
         my $age = sprintf("%.1f", (time - $Backups[$i]{startTime}) / (24*3600));
         my $browseURL = "$MyURL?action=browse&host=${EscURI($host)}&num=$Backups[$i]{num}";
+        my $level  = $Backups[$i]{level};
         my $filled = $Backups[$i]{noFill} ? $Lang->{No} : $Lang->{Yes};
         $filled .= " ($Backups[$i]{fillFromNum}) "
                             if ( $Backups[$i]{fillFromNum} ne "" );
@@ -156,6 +157,7 @@ EOF
 <tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center" class="border"> $ltype </td>
     <td align="center" class="border"> $filled </td>
+    <td align="center" class="border"> $level </td>
     <td align="right" class="border">  $startTime </td>
     <td align="right" class="border">  $duration </td>
     <td align="right" class="border">  $age </td>

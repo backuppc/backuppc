@@ -631,6 +631,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
     <td align="center"> Fusionnée </td> 
+    <td align="center"> ENG Level </td>
     <td align="center"> Date de démarrage </td>
     <td align="center"> Durée/min </td>
     <td align="center"> Âge/jours </td>
@@ -1303,6 +1304,22 @@ EOF
 
 $Lang{howLong_not_been_backed_up} = "jamais été sauvegardés";
 $Lang{howLong_not_been_backed_up_for_days_days} = "pas été sauvegardés depuis \$days jours";
+
+#######################################################################
+# RSS strings
+#######################################################################
+$Lang{RSS_Doc_Title}       = "BackupPC Server";
+$Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
+$Lang{RSS_Host_Summary}    = <<EOF;
+Nb complètes: \$fullCnt;
+Complètes Âge/Jours: \$fullAge;
+Complètes Taille/Go: \$fullSize;
+Vitesse Mo/s: \$fullRate;
+Nb incrémentielles: \$incrCnt;
+Incrémentielles Âge/Jours: \$incrAge;
+État actuel: \$host_state;
+Dernière tentative: \$host_last_attempt;
+EOF
 
 #######################################################################
 # Configuration editor strings (all ENGLISH currently)

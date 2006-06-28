@@ -633,6 +633,7 @@ Click on the backup number to browse and restore backup files.
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> Filled </td>
+    <td align="center"> Level </td>
     <td align="center"> Start Date </td>
     <td align="center"> Duration/mins </td>
     <td align="center"> Age/days </td>
@@ -1302,6 +1303,22 @@ EOF
 
 $Lang{howLong_not_been_backed_up} = "not been backed up successfully";
 $Lang{howLong_not_been_backed_up_for_days_days} = "not been backed up for \$days days";
+
+#######################################################################
+# RSS strings
+#######################################################################
+$Lang{RSS_Doc_Title}       = "BackupPC Server";
+$Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
+$Lang{RSS_Host_Summary}    = <<EOF;
+Full Count: \$fullCnt;
+Full Age/days: \$fullAge;
+Full Size/GB: \$fullSize;
+Speed MB/sec: \$fullRate;
+Incr Count: \$incrCnt;
+Incr Age/Days: \$incrAge;
+State: \$host_state;
+Last Attempt: \$host_last_attempt;
+EOF
 
 #######################################################################
 # Configuration editor strings

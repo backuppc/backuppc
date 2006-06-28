@@ -125,8 +125,9 @@ sub new
     if ( !$noUserCheck
 	    && $bpc->{Conf}{BackupPCUserVerify}
 	    && $> != (my $uid = (getpwnam($bpc->{Conf}{BackupPCUser}))[2]) ) {
-	print(STDERR "Wrong user: my userid is $>, instead of $uid"
+	print(STDERR "$0: Wrong user: my userid is $>, instead of $uid"
 	    . " ($bpc->{Conf}{BackupPCUser})\n");
+	print(STDERR "Please su $bpc->{Conf}{BackupPCUser} first\n");
 	return;
     }
     return $bpc;
@@ -1107,6 +1108,7 @@ sub cmdSystemOrEvalLong
     my($pid, $out, $allOut);
     local(*CHILD);
     
+    $? = 0;
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", $cmd) if ( ref($cmd) eq "ARRAY" );
 	print(STDERR "cmdSystemOrEval: about to eval perl code $cmd\n")
@@ -1216,6 +1218,64 @@ sub backupFileConfFix
                                     @{$conf->{$shareName}} };
         }
     }
+}
+
+#
+# This is sort() compare function, used below.
+#
+# New client LOG names are LOG.MMYYYY.  Old style names are
+# LOG, LOG.0, LOG.1 etc.  Sort them so new names are
+# first, and newest to oldest.
+#
+sub compareLOGName
+{
+    my $na = $1 if ( $a =~ /LOG\.(\d+)(\.z)?$/ );
+    my $nb = $1 if ( $b =~ /LOG\.(\d+)(\.z)?$/ );
+
+    $na = -1 if ( !defined($na) );
+    $nb = -1 if ( !defined($nb) );
+
+    if ( length($na) >= 5 && length($nb) >= 5 ) {
+        #
+        # Both new style.  Bigger numbers are more recent.
+        #
+        return $nb - $na;
+    } elsif ( length($na) >= 5 && length($nb) < 5 ) {
+        return -1;
+    } elsif ( length($na) < 5 && length($nb) >= 5 ) {
+        return 1;
+    } else {
+        #
+        # Both old style.  Smaller numbers are more recent.
+        #
+        return $na - $nb;
+    }
+}
+
+#
+# Returns list of paths to a clients's (or main) LOG files,
+# most recent first.
+#
+sub sortedPCLogFiles
+{
+    my($bpc, $host) = @_;
+
+    my(@files, $dir);
+
+    if ( $host ne "" ) {
+        $dir = "$bpc->{TopDir}/pc/$host";
+    } else {
+        $dir = "$bpc->{LogDir}";
+    }
+    if ( opendir(DIR, $dir) ) {
+        foreach my $file ( readdir(DIR) ) {
+            next if ( !-f "$dir/$file" );
+            next if ( $file ne "LOG" && $file !~ /^LOG\.\d/ );
+            push(@files, "$dir/$file");
+        }
+        closedir(DIR);
+    }
+    return sort(compareLOGName @files);
 }
 
 1;

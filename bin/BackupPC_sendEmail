@@ -194,6 +194,11 @@ foreach my $host ( sort(keys(%Status)) ) {
     my $numBadOutlook = 0;
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
         my $fh;
+        #
+        # ignore partials -> only fulls and incrs should be used
+        # in figuring out when the last good backup was
+        #
+        next if ( $Backups[$i]{type} eq "partial" );
         $lastNum = $Backups[$i]{num} if ( $lastNum < $Backups[$i]{num} );
         if ( $Backups[$i]{type} eq "full" ) {
             $lastFull = $Backups[$i]{startTime}

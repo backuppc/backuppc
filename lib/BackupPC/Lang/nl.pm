@@ -634,6 +634,7 @@ Klik op het backupnummer om de inhoud te bekijken of om bestanden terug te plaat
 <tr class="tableheader"><td align="center"> backup nr.</td>
     <td align="center"> Type </td>
     <td align="center"> Aangevuld </td>
+    <td align="center"> ENG Level </td>
     <td align="center"> Startdatum </td>
     <td align="center"> Duurtijd in min. </td>
     <td align="center"> Lftd. in dagen </td>
@@ -1316,6 +1317,22 @@ EOF
 
 $Lang{howLong_not_been_backed_up} = "(nog) niet succesvol gebackupt";
 $Lang{howLong_not_been_backed_up_for_days_days} = "reeds sedert \$days dagen niet gebackupt";
+
+#######################################################################
+# RSS strings
+#######################################################################
+$Lang{RSS_Doc_Title}       = "BackupPC Server";
+$Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
+$Lang{RSS_Host_Summary}    = <<EOF;
+Aantal Voll.: \$fullCnt;
+Voll.Lftd/dagen: \$fullAge;
+Voll.Grootte/GB: \$fullSize;
+Snelheid MB/sec: \$fullRate;
+Aantal Incr.: \$incrCnt;
+Incr.Lftd/dagen: \$incrAge;
+Status: \$host_state;
+Laatste poging: \$host_last_attempt;
+EOF
 
 #######################################################################
 # Configuration editor strings (all ENGLISH currently)

@@ -117,8 +117,9 @@ sub start
             #
             # TODO: fix this message - just refer to the backup, not time?
             #
-            $incrDate = $bpc->timeStamp($t->{lastFull} - 3600, 1);
-            $logMsg = "incr backup started back to $incrDate for directory"
+            $incrDate = $bpc->timeStamp($t->{incrBaseTime} - 3600, 1);
+            $logMsg = "incr backup started back to $incrDate"
+                    . " (backup #$t->{incrBaseBkupNum}) for directory"
                     . " $t->{shareName}";
             $incrFlag = 1;
         }

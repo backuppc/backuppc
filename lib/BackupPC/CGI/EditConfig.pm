@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004  Craig Barratt
+#   Copyright (C) 2005  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -281,9 +281,11 @@ our %ConfigMenu = (
 	    {name => "IncrKeepCnt"},
 	    {name => "IncrKeepCntMin"},
 	    {name => "IncrAgeMax"},
+	    {name => "IncrLevels"},
 	    {name => "IncrFill"},
 
 	    {text => "CfgEdit_Title_Blackouts"},
+            {name => "BackupsDisable"},
             {name => "BlackoutBadPingLimit"},
             {name => "BlackoutGoodCnt"},
             {name => "BlackoutPeriods"},
@@ -320,6 +322,7 @@ our %ConfigMenu = (
 	    {name => "RestorePostUserCmd"},
 	    {name => "ArchivePreUserCmd"},
 	    {name => "ArchivePostUserCmd"},
+	    {name => "UserCmdCheckStatus"},
 	],
     },
     hosts => {

@@ -122,9 +122,10 @@ sub start
 	    $args = $conf->{TarFullArgs};
             $logMsg = "full backup started for directory $t->{shareName}";
         } else {
-            $incrDate = $bpc->timeStamp($t->{lastFull} - 3600, 1);
+            $incrDate = $bpc->timeStamp($t->{incrBaseTime} - 3600, 1);
 	    $args = $conf->{TarIncrArgs};
-            $logMsg = "incr backup started back to $incrDate for directory"
+            $logMsg = "incr backup started back to $incrDate"
+                    . " (backup #$t->{incrBaseBkupNum}) for directory"
                     . " $t->{shareName}";
         }
 	push(@$tarClientCmd, split(/ +/, $args));

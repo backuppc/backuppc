@@ -208,6 +208,10 @@ local(*RH, *WH);
 # Run an optional pre-restore command
 #
 UserCommandRun("RestorePreUserCmd");
+if ( $? && $Conf{UserCmdCheckStatus} ) {
+    $stat{hostError} = "RestorePreUserCmd returned error status $?";
+    exit(RestoreCleanup($client));
+}
 $NeedPostCmd = 1;
 
 if ( $Conf{XferMethod} eq "tar" ) {
@@ -541,7 +545,13 @@ sub RestoreCleanup
     #
     # Run an optional post-restore command
     #
-    UserCommandRun("RestorePostUserCmd") if ( $NeedPostCmd );
+    if ( $NeedPostCmd ) {
+        UserCommandRun("RestorePostUserCmd");
+        if ( $? && $Conf{UserCmdCheckStatus} ) {
+            $stat{hostError} = "RestorePostUserCmd returned error status $?";
+            $stat{xferOK} = 0;
+        }
+    }
 
     rename("$Dir/RestoreLOG$fileExt", "$Dir/RestoreLOG.$lastNum$fileExt");
     rename("$Dir/$reqFileName", "$Dir/RestoreInfo.$lastNum");

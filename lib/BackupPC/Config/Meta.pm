@@ -139,7 +139,12 @@ use vars qw(%ConfigMeta);
     IncrKeepCnt	 	=> "integer",
     IncrKeepCntMin	=> "integer",
     IncrAgeMax		=> "float",
+    IncrLevels          => {
+	    type   => "shortlist",
+	    child  => "integer",
+    },
     PartialAgeMax	=> "float",
+    BackupsDisable      => "integer",
     IncrFill	 	=> "boolean",
     RestoreInfoKeepCnt	=> "integer",
     ArchiveInfoKeepCnt	=> "integer",
@@ -276,6 +281,7 @@ use vars qw(%ConfigMeta);
     RestorePostUserCmd	=> {type => "string", undefIfEmpty => 1},
     ArchivePreUserCmd	=> {type => "string", undefIfEmpty => 1},
     ArchivePostUserCmd	=> {type => "string", undefIfEmpty => 1},
+    UserCmdCheckStatus  => "integer",
 
     ClientNameAlias 	=> {type => "string", undefIfEmpty => 1},
 

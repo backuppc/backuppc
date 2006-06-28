@@ -220,8 +220,9 @@ sub start
 		$logMsg = "full backup started for directory $t->{shareName}";
 	    }
         } else {
-            $incrDate = $bpc->timeStamp($t->{lastFull} - 3600, 1);
-            $logMsg = "incr backup started back to $incrDate for directory"
+            $incrDate = $bpc->timeStamp($t->{incrBaseTime}, 1);
+            $logMsg = "incr backup started back to $incrDate"
+                    . " (backup #$t->{incrBaseBkupNum}) for directory"
                     . " $t->{shareName}";
         }
         
@@ -245,7 +246,7 @@ sub start
 	$fioArgs = {
 	    client     => $t->{client},
 	    share      => $t->{shareName},
-	    viewNum    => $t->{lastFullBkupNum},
+	    viewNum    => $t->{incrBaseBkupNum},
             partialNum => $t->{partialNum},
 	};
     }

@@ -81,7 +81,7 @@ my %ActionDispatch = (
     "Stop"                       => "StopServer",
     "adminOpts"                  => "AdminOptions",
     "editConfig"                 => "EditConfig",
-    #"editHosts"                  => "EditHosts",
+    "rss"                        => "RSS",
 );
 
 #

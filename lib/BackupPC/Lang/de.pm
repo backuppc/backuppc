@@ -640,6 +640,7 @@ Klicken Sie auf die Backupnummer um durch Dateien zu browsen und bei Bedarf wied
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Filled </td>
+    <td align="center"> ENG Level </td>
     <td align="center"> Start Zeitpunkt </td>
     <td align="center"> Dauer/min </td>
     <td align="center"> Alter/Tage </td>
@@ -1311,6 +1312,22 @@ EOF
 
 $Lang{howLong_not_been_backed_up} = "Backup nicht erfolgreich";
 $Lang{howLong_not_been_backed_up_for_days_days} = "kein Backup seit \$days Tagen";
+
+#######################################################################
+# RSS strings (all ENGLISH currently)
+#######################################################################
+$Lang{RSS_Doc_Title}       = "BackupPC Server";
+$Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
+$Lang{RSS_Host_Summary}    = <<EOF;
+#Voll: \$fullCnt;
+Alter/Tagen: \$fullAge;
+Größe/GB: \$fullSize;
+MB/sek: \$fullRate;
+#Inkr: \$incrCnt;
+Alter/Tage: \$incrAge;
+Status: \$host_state;
+Letzte Aktion: \$host_last_attempt;
+EOF
 
 #######################################################################
 # Configuration editor strings (all ENGLISH currently)

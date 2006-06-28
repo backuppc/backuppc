@@ -251,18 +251,19 @@ Do not send subscription requests to this address!
 =item Other Programs of Interest
 
 If you want to mirror linux or unix files or directories to a remote server
-you should consider rsync, L<http://rsync.samba.org>.  BackupPC now uses
+you should use rsync, L<http://rsync.samba.org>.  BackupPC now uses
 rsync as a transport mechanism; if you are already an rsync user you
 can think of BackupPC as adding efficient storage (compression and
 pooling) and a convenient user interface to rsync.
 
 Unison is a utility that can do two-way, interactive, synchronization.
-See L<http://www.cis.upenn.edu/~bcpierce/unison>.
+See L<http://freshmeat.net/projects/unison>.  An external wrapper around
+rsync that maintains transfer data to enable two-way synchronization is
+drsync; see L<http://freshmeat.net/projects/drsync>.
 
-Three popular open source packages that do tape backup are
-Amanda (L<http://www.amanda.org>),
-afbackup (L<http://sourceforge.net/projects/afbackup>), and
-Bacula (L<http://www.bacula.org>).
+Two popular open source packages that do tape backup are
+Amanda (L<http://www.amanda.org>)
+and Bacula (L<http://www.bacula.org>).
 Amanda can also backup WinXX machines to tape using samba.
 These packages can be used as back ends to BackupPC to backup the
 BackupPC server data to tape.
@@ -276,7 +277,8 @@ and John Bowman's rlbackup (L<http://www.math.ualberta.ca/imaging/rlbackup>).
 BackupPC provides many additional features, such as compressed storage,
 hardlinking any matching files (rather than just files with the same name),
 and storing special files without root privileges.  But these other scripts
-provide simple and effective solutions and are worthy of consideration.
+provide simple and effective solutions and are definitely worthy of
+consideration.
 
 =back
 
@@ -566,6 +568,17 @@ default settings leave group read permission on pool files, so make
 sure the BackupPC user's group is chosen restrictively.
 
 On this installation, this is __BACKUPPCUSER__.
+
+For security purposes you might choose to configre the BackupPC
+user with the shell set to /bin/false.  Since you might need to
+run some BackupPC programs as the BackupPC user for testing
+purposes, you can use the -s option to su to explicitly run
+a shell, eg:
+
+    su -s /bin/bash __BACKUPPCUSER__
+    
+Depending upon your configuration you might also need
+the -l option.
 
 =item Data Directory
 
@@ -1007,19 +1020,22 @@ it has started and all is ok.
 
 =head2 Step 7: Talking to BackupPC
 
-Note: as of version 1.5.0, BackupPC no longer supports telnet
-to its TCP port.  First off, a unix domain socket is used
-instead of a TCP port.  (The TCP port can still be re-enabled
-if your installation has apache and BackupPC running on different
-machines.)  Secondly, even if you still use the TCP port, the
-messages exchanged over this interface are now protected by
-an MD5 digest based on a shared secret (see $Conf{ServerMesgSecret})
-as well as sequence numbers and per-session unique keys, preventing
-forgery and replay attacks.
-
 You should verify that BackupPC is running by using BackupPC_serverMesg.
 This sends a message to BackupPC via the unix (or TCP) socket and prints
-the response.
+the response.  Like all BackupPC programs, BackupPC_serverMesg
+should be run as the BackupPC user (__BACKUPPCUSER__), so you
+should
+
+    su __BACKUPPCUSER__
+
+before running BackupPC_serverMesg.  If the BackupPC user is
+configured with /bin/false as the shell, you can use the -s
+option to su to explicitly run a shell, eg:
+
+    su -s /bin/bash __BACKUPPCUSER__
+    
+Depending upon your configuration you might also need
+the -l option.
 
 You can request status information and start and stop backups using this
 interface. This socket interface is mainly provided for the CGI interface

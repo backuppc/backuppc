@@ -78,6 +78,14 @@ my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
 my(%Status, %Info, %Jobs, @BgQueue, @UserQueue, @CmdQueue);
 
+#
+# We delete unused pool files (link count 1) in sorted inode
+# order by gathering batches.  We delete the first half of
+# each batch (ie: $PendingDeleteMax / 2 at a time).
+#
+my @PendingDelete;
+my $PendingDeleteMax = 10240;
+
 $bpc->ChildInit();
 
 my %opts;
@@ -106,13 +114,6 @@ if ( $opts{m} ) {
     $reply = $1 if ( $reply =~ /(.*)/s );
     eval($reply);
 }
-
-###########################################################################
-# When BackupPC_nightly starts, BackupPC will not run any simultaneous
-# BackupPC_dump commands.  We first do things that contend with
-# BackupPC_dump, eg: aging per-PC log files etc.
-###########################################################################
-doPerPCLogFileAging() if ( $opts{m} );
 
 ###########################################################################
 # Get statistics on the pool, and remove files that have only one link.
@@ -202,11 +203,15 @@ for my $pool ( qw(pool cpool) ) {
     }
 }
 
+sleep(10);
+processPendingDeletes(1);
+
 ###########################################################################
 # Tell BackupPC that it is now ok to start running BackupPC_dump
 # commands.  We are guaranteed that no BackupPC_link commands will
 # run since only a single CmdQueue command runs at a time, and
-# that means we are safe.
+# that means we are safe.  As of 3.x this is irrelevant since
+# BackupPC_dump runs independent of BackupPC_dump.
 ###########################################################################
 printf("BackupPC_nightly lock_off\n");
 
@@ -217,42 +222,6 @@ if ( $opts{m} ) {
     print("log BackupPC_nightly now running BackupPC_sendEmail\n");
     system("$BinDir/BackupPC_sendEmail");
     doBackupInfoUpdate();
-}
-
-#
-# Do per-PC log file aging
-#
-sub doPerPCLogFileAging
-{
-    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    if ( $mday == 1 ) {
-        foreach my $host ( keys(%Status) ) {
-            my $lastLog = $Conf{MaxOldPerPCLogFiles} - 1;
-            unlink("$TopDir/pc/$host/LOG.$lastLog")
-                    if ( -f "$TopDir/pc/$host/LOG.$lastLog" );
-            unlink("$TopDir/pc/$host/LOG.$lastLog.z")
-                    if ( -f "$TopDir/pc/$host/LOG.$lastLog.z" );
-            for ( my $i = $lastLog - 1 ; $i >= 0 ; $i-- ) {
-                my $j = $i + 1;
-                if ( -f "$TopDir/pc/$host/LOG.$i" ) {
-                    rename("$TopDir/pc/$host/LOG.$i",
-                           "$TopDir/pc/$host/LOG.$j");
-                } elsif ( -f "$TopDir/pc/$host/LOG.$i.z" ) {
-                    rename("$TopDir/pc/$host/LOG.$i.z",
-                           "$TopDir/pc/$host/LOG.$j.z");
-                }
-            }
-            #
-            # Compress the log file LOG -> LOG.0.z (if enabled).
-            # Otherwise, just rename LOG -> LOG.0.
-            #
-            BackupPC::FileZIO->compressCopy("$TopDir/pc/$host/LOG",
-                                            "$TopDir/pc/$host/LOG.0.z",
-                                            "$TopDir/pc/$host/LOG.0",
-                                            $Conf{CompressLevel}, 1);
-            open(LOG, ">", "$TopDir/pc/$host/LOG") && close(LOG);
-        }
-    }
 }
 
 #
@@ -282,7 +251,7 @@ sub doBackupInfoUpdate
 
 sub GetPoolStats
 {
-    my($nlinks, $nblocks) = (lstat($_))[3, 12];
+    my($inode, $nlinks, $nblocks) = (lstat($_))[1, 3, 12];
  
     if ( -d _ ) {
         $dirCnt++;
@@ -293,7 +262,23 @@ sub GetPoolStats
     if ( $nlinks == 1 ) {
         $blkCntRm += $nblocks;
         $fileCntRm++;
-        unlink($_);
+        #
+        # Save the files for later batch deletion.
+        #
+        # This is so we can remove them in inode order, and additionally
+        # reduce any remaining chance of race condition of linking to
+        # pool files vs removing pool files.  (Other aspects of the
+        # design should eliminate race conditions.)
+        #
+        my $fullPath = $File::Find::name;
+        push(@PendingDelete, {
+                    inode => $inode,
+                    path  => $fullPath
+                }
+        );
+        if ( @PendingDelete > $PendingDeleteMax ) {
+            processPendingDeletes(0);
+        }
         #
         # We must keep repeated files numbered sequential (ie: files
         # that have the same checksum are appended with _0, _1 etc).
@@ -301,9 +286,8 @@ sub GetPoolStats
         # exists, or we remove any file of the form xxxx_nnn.  We remember
         # the base name and fix it up later (not in the middle of find).
         #
-        my($baseName);
-        ($baseName = $File::Find::name) =~ s/_\d+$//;
-        $FixList{$baseName}++;
+        $fullPath =~ s/_\d+$//;
+        $FixList{$fullPath}++;
     } else {
         if ( /_(\d+)$/ ) {
             $fileRepMax = $1 + 1 if ( $fileRepMax <= $1 );
@@ -314,5 +298,25 @@ sub GetPoolStats
         $blkCnt2 += $nblocks if ( $nlinks == 2 );
         $fileLinkMax = $nlinks if ( $fileLinkMax < $nlinks );
         $fileLinkTotal += $nlinks - 1;
+    }
+}
+
+sub processPendingDeletes
+{
+    my($doAll) = @_;
+    my @delete;
+
+    if ( !$doAll ) {
+        @delete = splice(@PendingDelete, 0, $PendingDeleteMax / 2);
+    } else {
+        @delete = @PendingDelete;
+        @PendingDelete = ();
+    }
+    for my $f ( sort({ $a->{inode} <=> $b->{inode} } @delete) ) {
+        my($nlinks) = (lstat($f->{path}))[3];
+
+        next if ( $nlinks != 1 );
+        # print("Deleting $f->{path} ($f->{inode})\n");
+        unlink($f->{path});
     }
 }

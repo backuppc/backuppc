@@ -45,7 +45,7 @@ $Lang{Unable_to_connect_to_BackupPC_server} = "Impossibile connettersi al server
             "Questo script CGI (\$MyURL) non &egrave; in grado di connettersi al server"
           . " BackupPC su \$Conf{ServerHost} alla porta \$Conf{ServerPort}.  L'errore &egrave;:"
           . " \$err.",
-            "Forse il server BackupPC non &egrave; in esecuzioneor c'&egrave; un errore"
+            "Forse il server BackupPC non &egrave; in esecuzione o c'&egrave; un errore"
           . " nella configurazione.  Contattare l'amministratore di sistema.";
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
@@ -292,7 +292,7 @@ $Lang{BackupPC__Backup_Requested_on__host} = "BackupPC: richiesta di backup per 
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
 <p>
-La risposta del server &grave; stata: \$reply
+La risposta del server &egrave; stata: \$reply
 <p>
 Ritorna alla <a href="\$MyURL?host=\$host">homepage di \$host</a>.
 EOF
@@ -302,7 +302,7 @@ $Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: conferma avvio backu
 $Lang{Are_you_sure_start} = <<EOF;
 \${h1("Sicuro?")}
 <p>
-Si sta per avviare un bakcup \$type per \$host.
+Si sta per avviare un backup \$type per \$host.
 
 <form action="\$MyURL" method="get">
 <input type="hidden" name="host" value="\$host">
@@ -600,7 +600,7 @@ $Lang{Restore_Requested_on__hostDest} = "BackupPC: ripristino richiesto per \$ho
 $Lang{Reply_from_server_was___reply} = <<EOF;
 \${h1(\$str)}
 <p>
-La risposta del server &grave; stata: \$reply
+La risposta del server &egrave; stata: \$reply
 <p>
 Ritorna alla <a href="\$MyURL?host=\$hostDest">homepage di \$hostDest</a>.
 EOF
@@ -633,12 +633,13 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </form>
 \${h2("Prospetto backup")}
 <p>
-Cliccare sul numero di bakcup per sfogliare e ripristinare i file di backup.
+Cliccare sul numero di backup per sfogliare e ripristinare i file di backup.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
     <td align="center"> Completo </td>
+    <td align="center"> ENG Level </td>
     <td align="center"> Data avvio </td>
     <td align="center"> Durata (minuti) </td>
     <td align="center"> Et&agrave; (giorni) </td>
@@ -889,7 +890,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 <tr><td class="tableheader"> Durata </td><td class="border"> \$duration min </td></tr>
 <tr><td class="tableheader"> Numero file </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
 <tr><td class="tableheader"> Dimensione totale </td><td class="border"> \${MB}MB </td></tr>
-<tr><td class="tableheader"> Tasso trasferimento </td><td class="border"> \$MBperSecMB/s </td></tr>
+<tr><td class="tableheader"> Tasso trasferimento </td><td class="border"> \${MBperSec}MB/s </td></tr>
 <tr><td class="tableheader"> Errori creazione tar </td><td class="border"> \$Restores[\$i]{tarCreateErrs} </td></tr>
 <tr><td class="tableheader"> Errori trasferimento </td><td class="border"> \$Restores[\$i]{xferErrs} </td></tr>
 <tr><td class="tableheader"> File log trasferimento </td><td class="border">
@@ -1314,6 +1315,22 @@ EOF
 
 $Lang{howLong_not_been_backed_up} = "non e` riuscito";
 $Lang{howLong_not_been_backed_up_for_days_days} = "risale a \$days giorni fa";
+
+#######################################################################
+# RSS strings
+#######################################################################
+$Lang{RSS_Doc_Title}       = "BackupPC Server";
+$Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
+$Lang{RSS_Host_Summary}    = <<EOF;
+Completi: \$fullCnt;
+Et&agrave; completi (giorni): \$fullAge;
+Dimensione completi (GB): \$fullSize;
+Velocit&agrave (MB/s): \$fullRate;
+Incrementali: \$incrCnt;
+Et&agrave; incrementali (giorni): \$incrAge;
+Stato: \$host_state;
+Ultimo tentativo: \$host_last_attempt;
+EOF
 
 #######################################################################
 # Configuration editor strings (all ENGLISH currently)

@@ -78,20 +78,22 @@ sub action
     } elsif ( $type eq "ArchiveErr" ) {
         $file = "$TopDir/pc/$host/ArchiveLOG$ext";
         $comment = $Lang->{Extracting_only_Errors};
-    } elsif ( $host ne "" && $type eq "config" ) {
-        $file = "$TopDir/pc/$host/config.pl";
-        $file = "$TopDir/conf/$host.pl"
-                    if ( $host ne "config" && -f "$TopDir/conf/$host.pl"
-                                           && !-f $file );
+    } elsif ( $type eq "config" ) {
+        # Note: only works for Storage::Text
+        $file = $bpc->{storage}->ConfigPath($host);
+    } elsif ( $type eq "hosts" ) {
+        # Note: only works for Storage::Text
+        $file = $bpc->ConfDir() . "/hosts";
+        $linkHosts = 1;
     } elsif ( $type eq "docs" ) {
         $file = "$BinDir/../doc/BackupPC.html";
-    } elsif ( $type eq "config" ) {
-        $file = "$TopDir/conf/config.pl";
-    } elsif ( $type eq "hosts" ) {
-        $file = "$TopDir/conf/hosts";
-        $linkHosts = 1;
     } elsif ( $host ne "" ) {
-        $file = "$TopDir/pc/$host/LOG$ext";
+        if ( !defined($In{num}) ) {
+            # get the latest LOG file
+            $file = ($bpc->sortedPCLogFiles($host))[0];
+        } else {
+            $file = "$TopDir/pc/$host/LOG$ext";
+        }
         $linkHosts = 1;
     } else {
         $file = "$LogDir/LOG$ext";
@@ -106,7 +108,8 @@ sub action
     }
     my($contentPre, $contentSub, $contentPost);
     $contentPre .= eval("qq{$Lang->{Log_File__file__comment}}");
-    if ( defined($fh = BackupPC::FileZIO->open($file, 0, $compress)) ) {
+    if ( $file ne ""
+            && defined($fh = BackupPC::FileZIO->open($file, 0, $compress)) ) {
 
         $fh->utf8(1);
         my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);

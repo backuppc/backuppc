@@ -157,6 +157,10 @@ local(*RH, *WH);
 # Run an optional pre-archive command
 #
 UserCommandRun("ArchivePreUserCmd");
+if ( $? && $Conf{UserCmdCheckStatus} ) {
+    $stat{hostError} = "ArchivePreUserCmd returned error status $?";
+    exit(ArchiveCleanup($client));
+}
 $NeedPostCmd = 1;
 
 $xfer = BackupPC::Xfer::Archive->new($bpc);
@@ -271,7 +275,13 @@ sub ArchiveCleanup
     #
     # Run an optional post-archive command
     #
-    UserCommandRun("ArchivePostUserCmd") if ( $NeedPostCmd );
+    if ( $NeedPostCmd ) {
+        UserCommandRun("ArchivePostUserCmd");
+        if ( $? && $Conf{UserCmdCheckStatus} ) {
+            $stat{hostError} = "RestorePreUserCmd returned error status $?";
+            $stat{xferOK} = 0;
+        }
+    }
 
     rename("$Dir/ArchiveLOG$fileExt", "$Dir/ArchiveLOG.$lastNum$fileExt");
     rename("$Dir/$reqFileName", "$Dir/ArchiveInfo.$lastNum");

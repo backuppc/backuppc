@@ -96,7 +96,8 @@ EOF
     exit(1);
 }
 
-if ( $opts{h} !~ /^([\w\.\s-]+)$/ ) {
+if ( $opts{h} !~ /^([\w\.\s-]+)$/
+        || $opts{h} =~ m{(^|/)\.\.(/|$)} ) {
     print(STDERR "$0: bad host name '$opts{h}'\n");
     exit(1);
 }
@@ -130,7 +131,8 @@ $Charset = $opts{e} if ( $opts{e} ne "" );
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
 my $PathAdd    = $1 if ( $opts{p} =~ /(.+)/ );
-if ( $opts{s} !~ /^([\w\s.\/$(){}[\]-]+)$/ && $opts{s} ne "*" ) {
+if ( ($opts{s} !~ /^([\w\s.@\/$(){}[\]-]+)$/
+        || $opts{s} =~ m{(^|/)\.\.(/|$)}) && $opts{s} ne "*" ) {
     print(STDERR "$0: bad share name '$opts{s}'\n");
     exit(1);
 }

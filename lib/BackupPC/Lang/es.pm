@@ -633,6 +633,7 @@ Haga click en el número de copia de seguridad para revisar y restaurar archivos.
 <tr class="tableheader"><td align="center"> Copia Nº </td>
     <td align="center"> Tipo </td>
     <td align="center"> Completo </td>
+    <td align="center"> ENG Level </td>
     <td align="center"> Fecha Inicio </td>
     <td align="center"> Duracion/mn </td>
     <td align="center"> Antigüedad/dias </td>
@@ -1307,6 +1308,22 @@ EOF
 
 $Lang{howLong_not_been_backed_up} = "no se le ha realizado una copia de seguridad con éxito";
 $Lang{howLong_not_been_backed_up_for_days_days} = "no se le ha realizado una copia de seguridad durante \$days días";
+
+#######################################################################
+# RSS strings
+#######################################################################
+$Lang{RSS_Doc_Title}       = "BackupPC Server";
+$Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
+$Lang{RSS_Host_Summary}    = <<EOF;
+#Completo: \$fullCnt;
+Completo Antig./Días: \$fullAge;
+Completo Tamaño/GB: \$fullSize;
+Velocidad MB/sec: \$fullRate;
+#Incrementales: \$incrCnt;
+Incrementales Antig/Días: \$incrAge;
+Estado: \$host_state;
+Ultimo Intento: \$host_last_attempt;
+EOF
 
 #######################################################################
 # Configuration editor strings (all ENGLISH currently)

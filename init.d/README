@@ -34,7 +34,19 @@ Debian Linux:
 
 When configure.pl is run, the script debian-backuppc is created.
 
-(Can a Debian user add some instructions here??)
+Copy the debian startup script:
+
+    cp debian-backuppc /etc/init.d/backuppc
+
+Run the following command to install in rc.d:
+
+    update-rc.d backuppc defaults
+
+Set the correct init.d rights:
+
+    chmod 755 /etc/init.d/backuppc
+
+Usage: /etc/init.d/backuppc {start|stop|restart|reload}
 
 Suse Linux:
 ==========

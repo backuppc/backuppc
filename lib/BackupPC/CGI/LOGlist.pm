@@ -47,29 +47,24 @@ sub action
         ErrorExit($Lang->{Only_privileged_users_can_view_log_files});
     }
     my $host = $In{host};
-    my($url0, $hdr, $root, $str);
+    my($url0, $hdr, @files, $str);
     if ( $host ne "" ) {
-        $root = "$TopDir/pc/$host/LOG";
         $url0 = "&host=${EscURI($host)}";
         $hdr = "for host $host";
     } else {
-        $root = "$LogDir/LOG";
         $url0 = "";
         $hdr = "";
     }
-    for ( my $i = -1 ; ; $i++ ) {
-        my $url1 = "";
-        my $file = $root;
-        if ( $i >= 0 ) {
-            $file .= ".$i";
-            $url1 = "&num=$i";
-        }
-        $file .= ".z" if ( !-f $file && -f "$file.z" );
-        last if ( !-f $file );
+
+    foreach my $file ( $bpc->sortedPCLogFiles($host) ) {
+        my $url1 = "&num=$1" if ( $file =~ /LOG\.(\d+)(\.z)?$/ );
+        $url1    = "&num="   if ( $file =~ /LOG(\.z)?$/ );
+        next if ( !-f $file );
         my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
         my $size     = (stat($file))[7];
+        (my $fStr    = $file) =~ s{.*/}{};
         $str .= <<EOF;
-<tr><td> <a href="$MyURL?action=view&type=LOG$url0$url1"><tt>$file</tt></a> </td>
+<tr><td> <a href="$MyURL?action=view&type=LOG$url0$url1"><tt>$fStr</tt></a></td>
     <td align="right"> $size </td>
     <td> $mtimeStr </td></tr>
 EOF
@@ -79,5 +74,30 @@ EOF
                 $content, !-f "$TopDir/pc/$host/backups");
     Trailer();
 }
+
+sub compareLOGName
+{
+    #my($a, $b) = @_;
+
+    my $na = $1 if ( $a =~ /LOG\.(\d+)/ );
+    my $nb = $1 if ( $b =~ /LOG\.(\d+)/ );
+
+    if ( length($na) >= 5 && length($nb) >= 5 ) {
+        #
+        # Both new style.  Bigger numbers are more recent.
+        #
+        return $nb <=> $na;
+    } elsif ( length($na) >= 5 && length($nb) < 5 ) {
+        return -1;
+    } elsif ( length($na) < 5 && length($nb) >= 5 ) {
+        return 1;
+    } else {
+        #
+        # Both old style.  Smaller numbers are more recent.
+        #
+        return $na - $nb;
+    }
+}
+
 
 1;

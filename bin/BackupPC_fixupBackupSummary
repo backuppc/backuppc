@@ -56,6 +56,17 @@ my $Hosts  = $bpc->HostInfoRead();
 my @hostList;
 
 our(%backupInfo);
+my %opts;
+
+if ( !getopts("l", \%opts) ) {
+    print STDERR <<EOF;
+usage: $0 [-l]
+  Options:
+    -l    legacy mode: try to reconstruct backups from LOG
+          files for backups prior to BackupPC v3.0.
+EOF
+    exit(1);
+}
 
 if ( !@ARGV ) {
     @hostList = sort(keys(%$Hosts));
@@ -87,28 +98,6 @@ foreach my $host ( @hostList ) {
     @Backups = $bpc->BackupInfoRead($host);
 
     #
-    # Temporary: create backupInfo files in each backup
-    # directory
-    #
-    foreach ( my $i = 0 ; $i < @Backups ; $i++ ) {
-        BackupPC::Storage->backupInfoWrite($dir, $Backups[$i]{num},
-                                           $Backups[$i]);
-        if ( 0 ) {
-            my $bkupNum = $Backups[$i]{num};
-            if ( !-f "$dir/$bkupNum/backupInfo" ) {
-                my($dump) = Data::Dumper->new(
-                         [   $Backups[$i]],
-                         [qw(*backupInfo)]);
-                $dump->Indent(1);
-                if ( open(BKUPINFO, ">", "$dir/$bkupNum/backupInfo") ) {
-                    print(BKUPINFO $dump->Dump);
-                    close(BKUPINFO);
-                }
-            }
-        }
-    }
-
-    #
     # Look through the LOG files to get information about
     # completed backups.  The data from the LOG file is
     # incomplete, but enough to get some useful info.
@@ -121,7 +110,7 @@ foreach my $host ( @hostList ) {
     my @files = readdir(DIR);
     closedir(DIR);
     foreach my $file ( @files ) {
-        if ( $file =~ /^LOG(.\d+\.z)?/ ) {
+        if ( $opts{l} && $file =~ /^LOG(.\d+\.z)?/ ) {
             push(@LogFiles, $file);
         } elsif ( $file =~ /^(\d+)$/ ) {
             my $bkupNum = $1;
@@ -154,6 +143,7 @@ foreach my $host ( @hostList ) {
     #
     @LogFiles = sort({-M "$dir/$a" <=> -M "$dir/$b"} @LogFiles);
     my $startTime;
+    my $fillFromNum;
     foreach my $file ( @LogFiles ) {
         my $f = BackupPC::FileZIO->open("$dir/$file", 0, $file =~ /\.z/);
 
@@ -197,14 +187,12 @@ foreach my $host ( @hostList ) {
                 noFill         => $type eq "incr" ? 1 : 0,
                 level          => $type eq "incr" ? 1 : 0,
                 mangle         => 1,
-                noFill         => $noFill;
-                fillFromNum    => $fillFromNum;
+                fillFromNum    => $fillFromNum,
             };
+            $fillFromNum = $bkupNum if ( $type eq "full" );
         }
     }
 
-    splice(@Backups, 2, 1);
-    
     #
     # Now merge any info from $BkupFromInfo and $BkupFromLOG
     # that is missing from @Backups.

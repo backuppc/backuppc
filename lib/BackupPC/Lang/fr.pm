@@ -631,7 +631,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
     <td align="center"> Fusionnée </td> 
-    <td align="center"> ENG Level </td>
+    <td align="center"> Niveau </td>
     <td align="center"> Date de démarrage </td>
     <td align="center"> Durée/min </td>
     <td align="center"> Âge/jours </td>
@@ -1322,114 +1322,114 @@ Dernière tentative: \$host_last_attempt;
 EOF
 
 #######################################################################
-# Configuration editor strings (all ENGLISH currently)
+# Configuration editor strings
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuation settings.";
-$Lang{CfgEdit_Edit_Config} = "Edit Config";
-$Lang{CfgEdit_Edit_Hosts}  = "Edit Hosts";
+$Lang{Only_privileged_users_can_edit_config_files} = "Seuls les usagers privilégiés peuvent modifier les paramètres de configuration.";
+$Lang{CfgEdit_Edit_Config} = "Modifier la configuration";
+$Lang{CfgEdit_Edit_Hosts}  = "Modifier les machines";
 
-$Lang{CfgEdit_Title_Server} = "Server";
-$Lang{CfgEdit_Title_General_Parameters} = "General Parameters";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "Wakeup Schedule";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "Concurrent Jobs";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Pool Filesystem Limits";
-$Lang{CfgEdit_Title_Other_Parameters} = "Other Parameters";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Remote Apache Settings";
-$Lang{CfgEdit_Title_Program_Paths} = "Program Paths";
-$Lang{CfgEdit_Title_Install_Paths} = "Install Paths";
-$Lang{CfgEdit_Title_Email} = "Email";
-$Lang{CfgEdit_Title_Email_settings} = "Email settings";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Email User Messages";
+$Lang{CfgEdit_Title_Server} = "Serveur";
+$Lang{CfgEdit_Title_General_Parameters} = "Paramètres généraux";
+$Lang{CfgEdit_Title_Wakeup_Schedule} = "Horaire des réveils";
+$Lang{CfgEdit_Title_Concurrent_Jobs} = "Tâches concurrentes";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Limite du système de fichiers";
+$Lang{CfgEdit_Title_Other_Parameters} = "Autres paramètres";
+$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Options d'Apache à distance";
+$Lang{CfgEdit_Title_Program_Paths} = "Chemin des programmes";
+$Lang{CfgEdit_Title_Install_Paths} = "Chemin d'installation";
+$Lang{CfgEdit_Title_Email} = "Courriel";
+$Lang{CfgEdit_Title_Email_settings} = "Paramètres de courriel";
+$Lang{CfgEdit_Title_Email_User_Messages} = "Messages des usagers par Courriel";
 $Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "Admin Privileges";
-$Lang{CfgEdit_Title_Page_Rendering} = "Page Rendering";
-$Lang{CfgEdit_Title_Paths} = "Paths";
-$Lang{CfgEdit_Title_User_URLs} = "User URLs";
-$Lang{CfgEdit_Title_User_Config_Editing} = "User Config Editing";
+$Lang{CfgEdit_Title_Admin_Privileges} = "Privilèges administrateur";
+$Lang{CfgEdit_Title_Page_Rendering} = "Rendu des pages";
+$Lang{CfgEdit_Title_Paths} = "Chemins";
+$Lang{CfgEdit_Title_User_URLs} = "URL des usagers";
+$Lang{CfgEdit_Title_User_Config_Editing} = "Modifications des configuration des usagers";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
-$Lang{CfgEdit_Title_Xfer_Settings} = "Xfer Settings";
-$Lang{CfgEdit_Title_Smb_Settings} = "Smb Settings";
-$Lang{CfgEdit_Title_Tar_Settings} = "Tar Settings";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Settings";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Settings";
-$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd Settings";
-$Lang{CfgEdit_Title_Archive_Settings} = "Archive Settings";
-$Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Paths/Commands";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Paths/Commands";
-$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Paths/Commands/Args";
-$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Port/Args";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archive Paths/Commands";
-$Lang{CfgEdit_Title_Schedule} = "Schedule";
-$Lang{CfgEdit_Title_Full_Backups} = "Full Backups";
-$Lang{CfgEdit_Title_Incremental_Backups} = "Incremental Backups";
-$Lang{CfgEdit_Title_Blackouts} = "Blackouts";
-$Lang{CfgEdit_Title_Other} = "Other";
-$Lang{CfgEdit_Title_Backup_Settings} = "Backup Settings";
-$Lang{CfgEdit_Title_Client_Lookup} = "Client Lookup";
-$Lang{CfgEdit_Title_Other} = "Other";
-$Lang{CfgEdit_Title_User_Commands} = "User Commands";
-$Lang{CfgEdit_Title_Hosts} = "Hosts";
+$Lang{CfgEdit_Title_Xfer_Settings} = "Paramètres des transfers";
+$Lang{CfgEdit_Title_Smb_Settings} = "Paramètres de Smb";
+$Lang{CfgEdit_Title_Tar_Settings} = "Paramètres de Tar";
+$Lang{CfgEdit_Title_Rsync_Settings} = "Paramètres de Rsync";
+$Lang{CfgEdit_Title_Rsyncd_Settings} = "Paramètres de Rsyncd";
+$Lang{CfgEdit_Title_BackupPCd_Settings} = "Paramètres de BackupPCd";
+$Lang{CfgEdit_Title_Archive_Settings} = "Paramètres d'archivage";
+$Lang{CfgEdit_Title_Include_Exclude} = "Inclure/Exclure";
+$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Chemins/Commandes Smb";
+$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Chemins/Commandes Tar";
+$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Chemins/Commandes/Args Rsync";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Port/Args Rsyncd";
+$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Chemin/Commandes d'archivage";
+$Lang{CfgEdit_Title_Schedule} = "Horaire";
+$Lang{CfgEdit_Title_Full_Backups} = "Sauvegardes complètres";
+$Lang{CfgEdit_Title_Incremental_Backups} = "Sauvegardes incrémentielles";
+$Lang{CfgEdit_Title_Blackouts} = "Occultation";
+$Lang{CfgEdit_Title_Other} = "Divers";
+$Lang{CfgEdit_Title_Backup_Settings} = "Paramètres de sauvegarde";
+$Lang{CfgEdit_Title_Client_Lookup} = "Consultation des clients";
+$Lang{CfgEdit_Title_Other} = "Autre";
+$Lang{CfgEdit_Title_User_Commands} = "Commandes des usagers";
+$Lang{CfgEdit_Title_Hosts} = "Machines";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
-To add a new host, select Add and then enter the name.  To start with
-the per-host configuration from another host, enter the host name
-as NEWHOST=COPYHOST.  This will overwrite any existing per-host
-configuration for NEWHOST.  You can also do this for an existing
-host.  To delete a host, hit the Delete button.  For Add, Delete,
-and configuration copy, changes don't take effect until you select
-Save.  None of the deleted host's backups will be removed,
-so if you accidently delete a host, simply re-add it.  To completely
-remove a host's backups, you need to manually remove the files
-below \$topDir/pc/HOST
+Pour ajouter une machine, choisissez Ajouter et entrez le nom. Pour faire
+une copie d'une configuration d'une autre machine, entrer le nom de la machine
+comme NOUVEAU=ACOPIER.  Cela va écraser toute configuration par défaut pour
+cette machine.  Vous pouvez aussi faire cela pour une machine existante.
+Pour détruire une machine, cliquer sur le bouton Détruire.  Les ajouts, 
+destructions et modifications ne prennent pas effet tant que vous ne cliquez
+pas sur le bouton Sauvegarder.  Aucunes des sauvegardes des machines ne sera
+détruit, donc si vous éffacer une machine par erreur, créez la à nouveau. Pour
+détruire les sauvegardes d'une machine, vous devez détruire les fichiers 
+manuellement dans \$topDir/pc/HOST
 EOF
 
 $Lang{CfgEdit_Header_Main} = <<EOF;
-\${h1("Main Configuration Editor")}
+\${h1("Éditeur de configuration principale")}
 EOF
 
 $Lang{CfgEdit_Header_Host} = <<EOF;
-\${h1("Host \$host Configuration Editor")}
+\${h1("Éditeur de la configuration de \$host")}
 <p>
-Note: Check Override if you want to modify a value specific to this host.
+Note: Cochez Écraser si vous voulez modifier une valeur spécifique à cette machine.
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "Save";
-$Lang{CfgEdit_Button_Insert}   = "Insert";
-$Lang{CfgEdit_Button_Delete}   = "Delete";
-$Lang{CfgEdit_Button_Add}      = "Add";
-$Lang{CfgEdit_Button_Override} = "Override";
-$Lang{CfgEdit_Button_New_Key}  = "New Key";
+$Lang{CfgEdit_Button_Save}     = "Sauvegarder";
+$Lang{CfgEdit_Button_Insert}   = "Insérer";
+$Lang{CfgEdit_Button_Delete}   = "Détruire";
+$Lang{CfgEdit_Button_Add}      = "Ajouter";
+$Lang{CfgEdit_Button_Override} = "Écraser";
+$Lang{CfgEdit_Button_New_Key}  = "Nouvelle clé";
 
 $Lang{CfgEdit_Error__must_be_an_integer}
-            = "Error: \$var must be an integer";
+            = "Erreur: \$var doit être un nombre entier";
 $Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "Error: \$var must be a real-valued number";
+            = "Erreur: \$var doit être un nombre réel";
 $Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Error: \$var entry \$k must be an integer";
+            = "Erreur: l'entrée \$k de \$var doit être un nombre entier";
 $Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Error: \$var entry \$k must be a real-valued number";
+            = "Erreur: l'entrée \$k de \$var doit être un nombre réel";
 $Lang{CfgEdit_Error__must_be_executable_program}
-            = "Error: \$var must be a valid executable path";
+            = "Erreur: \$var doit être un chemin exécutable";
 $Lang{CfgEdit_Error__must_be_valid_option}
-            = "Error: \$var must be a valid option";
+            = "Erreur: \$var doit être une option valide";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "Copy host \$copyHost doesn't exist; creating full host name \$fullHost.  Delete this host if that is not what you wanted.";
+            = "La machine \$copyHost ne peut être copier, car elle n'existe pas; créations d'une machine nommée \$fullHost.  Détruisez cette machine si vous n'est pas ce que vous vouliez.";
 
 $Lang{CfgEdit_Log_Copy_host_config}
-            = "\$User copied config from host \$fromHost to \$host\n";
+            = "\$User a copié la config de \$fromHost à \$host\n";
 $Lang{CfgEdit_Log_Delete_param}
-            = "\$User deleted \$p from \$conf\n";
+            = "\$User a détruit \$p de \$conf\n";
 $Lang{CfgEdit_Log_Add_param_value}
-            = "\$User added \$p to \$conf, set to \$value\n";
+            = "\$User a ajouté \$p à \$conf en fixant sa valeur à \$value\n";
 $Lang{CfgEdit_Log_Change_param_value}
-            = "\$User changed \$p in \$conf to \$valueNew from \$valueOld\n";
+            = "\$User a changé \$p dans \$conf de \$valueOld à \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Delete}
-            = "\$User deleted host \$host\n";
+            = "\$User a détruit la machine \$host\n";
 $Lang{CfgEdit_Log_Host_Change}
-            = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
+            = "\$User a changé \$key de \$valueOld à \$valueNew sur \$host\n";
 $Lang{CfgEdit_Log_Host_Add}
-            = "\$User added host \$host: \$value\n";
+            = "\$User a jouté la machine \$host: \$value\n";
   
 #end of lang_fr.pm

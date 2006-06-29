@@ -1127,7 +1127,7 @@ EOF
         if ( !$type->{noKeyEdit} ) {
             $content .= <<EOF;
 <tr><td class="border" colspan="2">
-New key: <input type="text" name="addVarKey_$varName" size="20" maxlength="256" value="">
+$Lang->{CfgEdit_Button_New_Key}: <input type="text" name="addVarKey_$varName" size="20" maxlength="256" value="">
 <input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}" onClick="addSubmit('$varName', 1)">
 </td></tr>
 EOF

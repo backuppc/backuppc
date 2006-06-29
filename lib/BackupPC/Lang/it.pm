@@ -1411,6 +1411,7 @@ $Lang{CfgEdit_Button_Insert}   = "Insert";
 $Lang{CfgEdit_Button_Delete}   = "Delete";
 $Lang{CfgEdit_Button_Add}      = "Add";
 $Lang{CfgEdit_Button_Override} = "Override";
+$Lang{CfgEdit_Button_New_Key}  = "New Key";
 
 $Lang{CfgEdit_Error__must_be_an_integer}
             = "Error: \$var must be an integer";

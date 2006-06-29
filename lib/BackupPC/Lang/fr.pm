@@ -1333,20 +1333,20 @@ $Lang{CfgEdit_Title_Server} = "Serveur";
 $Lang{CfgEdit_Title_General_Parameters} = "Paramètres généraux";
 $Lang{CfgEdit_Title_Wakeup_Schedule} = "Horaire des réveils";
 $Lang{CfgEdit_Title_Concurrent_Jobs} = "Tâches concurrentes";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Limite du système de fichiers";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Limites du système de fichiers";
 $Lang{CfgEdit_Title_Other_Parameters} = "Autres paramètres";
 $Lang{CfgEdit_Title_Remote_Apache_Settings} = "Options d'Apache à distance";
-$Lang{CfgEdit_Title_Program_Paths} = "Chemin des programmes";
-$Lang{CfgEdit_Title_Install_Paths} = "Chemin d'installation";
+$Lang{CfgEdit_Title_Program_Paths} = "Chemins des programmes";
+$Lang{CfgEdit_Title_Install_Paths} = "Chemins d'installation";
 $Lang{CfgEdit_Title_Email} = "Courriel";
 $Lang{CfgEdit_Title_Email_settings} = "Paramètres de courriel";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Messages des usagers par Courriel";
+$Lang{CfgEdit_Title_Email_User_Messages} = "Messages des usagers par courriel";
 $Lang{CfgEdit_Title_CGI} = "CGI";
 $Lang{CfgEdit_Title_Admin_Privileges} = "Privilèges administrateur";
 $Lang{CfgEdit_Title_Page_Rendering} = "Rendu des pages";
 $Lang{CfgEdit_Title_Paths} = "Chemins";
 $Lang{CfgEdit_Title_User_URLs} = "URL des usagers";
-$Lang{CfgEdit_Title_User_Config_Editing} = "Modifications des configuration des usagers";
+$Lang{CfgEdit_Title_User_Config_Editing} = "Modifications des configurations des usagers";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
 $Lang{CfgEdit_Title_Xfer_Settings} = "Paramètres des transfers";
 $Lang{CfgEdit_Title_Smb_Settings} = "Paramètres de Smb";
@@ -1360,7 +1360,7 @@ $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Chemins/Commandes Smb";
 $Lang{CfgEdit_Title_Tar_Paths_Commands} = "Chemins/Commandes Tar";
 $Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Chemins/Commandes/Args Rsync";
 $Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Port/Args Rsyncd";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Chemin/Commandes d'archivage";
+$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Chemins/Commandes d'archivage";
 $Lang{CfgEdit_Title_Schedule} = "Horaire";
 $Lang{CfgEdit_Title_Full_Backups} = "Sauvegardes complètres";
 $Lang{CfgEdit_Title_Incremental_Backups} = "Sauvegardes incrémentielles";
@@ -1373,26 +1373,26 @@ $Lang{CfgEdit_Title_User_Commands} = "Commandes des usagers";
 $Lang{CfgEdit_Title_Hosts} = "Machines";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
-Pour ajouter une machine, choisissez Ajouter et entrez le nom. Pour faire
-une copie d'une configuration d'une autre machine, entrer le nom de la machine
+Pour ajouter une machine, choisissez Ajouter et entrez ensuite le nom. Pour faire
+une copie de la configuration d'une autre machine, entrer le nom de la machine
 comme NOUVEAU=ACOPIER.  Cela va écraser toute configuration par défaut pour
 cette machine.  Vous pouvez aussi faire cela pour une machine existante.
 Pour détruire une machine, cliquer sur le bouton Détruire.  Les ajouts, 
-destructions et modifications ne prennent pas effet tant que vous ne cliquez
-pas sur le bouton Sauvegarder.  Aucunes des sauvegardes des machines ne sera
-détruit, donc si vous éffacer une machine par erreur, créez la à nouveau. Pour
+destructions et modifications ne prennent effet que lorsque que vous cliquez 
+sur le bouton Sauvegarder.  Aucune des sauvegardes des machines ne sera
+détruite, donc si vous éffacer une machine par erreur, créez la à nouveau. Pour
 détruire les sauvegardes d'une machine, vous devez détruire les fichiers 
 manuellement dans \$topDir/pc/HOST
 EOF
 
 $Lang{CfgEdit_Header_Main} = <<EOF;
-\${h1("Éditeur de configuration principale")}
+\${h1("Éditeur de configuration")}
 EOF
 
 $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Éditeur de la configuration de \$host")}
 <p>
-Note: Cochez Écraser si vous voulez modifier une valeur spécifique à cette machine.
+Note: Cochez Écraser pour modifier une valeur spécifique à cette machine.
 EOF
 
 $Lang{CfgEdit_Button_Save}     = "Sauvegarder";
@@ -1415,7 +1415,7 @@ $Lang{CfgEdit_Error__must_be_executable_program}
 $Lang{CfgEdit_Error__must_be_valid_option}
             = "Erreur: \$var doit être une option valide";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "La machine \$copyHost ne peut être copier, car elle n'existe pas; créations d'une machine nommée \$fullHost.  Détruisez cette machine si vous n'est pas ce que vous vouliez.";
+            = "La machine \$copyHost ne peut être copiÃe, car elle n'existe pas; créations d'une machine nommée \$fullHost.  Détruisez cette machine si vous n'est pas ce que vous vouliez.";
 
 $Lang{CfgEdit_Log_Copy_host_config}
             = "\$User a copié la config de \$fromHost à \$host\n";

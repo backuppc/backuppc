@@ -68,6 +68,10 @@
 * Added optional checking of exit status of Dump/Restore/Archive Pre/Post
   UserCmd, requested by Kiko Jover, Matthias Bertschy and others.
 
+* For new installations configure.pl tries to comply with the file
+  system hierarchy standard, which means all the configuration files
+  below /etc/BackupPC and log files go below /var/log/BackupPC.
+
 * Added Slackware init.d script from Tony Nelson.
 
 * Fixed error reporting when restore/archive fail to write the

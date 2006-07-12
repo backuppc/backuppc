@@ -1205,6 +1205,7 @@ $Conf{RsyncArgs} = [
             '--group',
             '-D',
             '--links',
+            '--hard-links',
             '--times',
             '--block-size=2048',
             '--recursive',
@@ -1239,6 +1240,7 @@ $Conf{RsyncRestoreArgs} = [
 	    '--group',
 	    '-D',
 	    '--links',
+            '--hard-links',
 	    '--times',
 	    '--block-size=2048',
 	    '--relative',
@@ -1789,7 +1791,9 @@ $Conf{EMailOutlookBackupSubj} = undef;
 $Conf{EMailOutlookBackupMesg} = undef;
 
 #
-# Additional email headers
+# Additional email headers.  If you change the charset
+# to utf8 then BackupPC_sendEmail will use utf8 for
+# the email body.
 #
 $Conf{EMailHeaders} = <<EOF;
 MIME-Version: 1.0

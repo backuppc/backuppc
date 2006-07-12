@@ -43,11 +43,18 @@ use strict;
 use File::Path;
 use File::Copy;
 use Getopt::Std;
+use lib "./lib";
+use BackupPC::Lib;
+use BackupPC::Config::Meta qw(:all);
+
+my $bpc;
+die("BackupPC::Lib->new failed\n")
+        if ( !($bpc = BackupPC::Lib->new(".", ".", "./conf", 1)) );
 
 umask(0022);
 
-my $Version     = "3.0.0alpha";
-my $ReleaseDate = "23 Jan 2006";
+my $Version     = "3.0.0beta0";
+my $ReleaseDate = "11 Jul 2006";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -292,6 +299,8 @@ sub InstallFile
 		print OUT "$1'__INSTALLDIR__'$2\n";
             } elsif ( $file =~ /Lib.pm/ && /^(\s*my \$useFHS\s*=\s*)\d;/ ) {
                 print OUT "${1}0;\n";
+            } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'[\w\d\.]+',/ ) {
+                print OUT "$1'$Version',\n";
 	    } elsif ( $file =~ /configure.pl/ && /__CONFIGURE_BIN_LIST__/ ) {
 		print OUT "        ", join("\n        ", grep(/^bin\//, @PerlSrc)), "\n";
 	    } elsif ( $file =~ /configure.pl/ && /__CONFIGURE_LIB_LIST__/ ) {
@@ -435,6 +444,25 @@ sub CheckMetaDataVsConfig
         print("$file missing $v from conf/config.pl\n");
         $errors++;
     }
+
+    #
+    # Do extra checks that the CgiUserConfigEdit hash in the Meta
+    # file matches the config file
+    #
+    foreach my $p ( keys(%{$ConfigMeta{CgiUserConfigEdit}{child}}) ) {
+        if ( !defined($bpc->{Conf}{CgiUserConfigEdit}{$p}) ) {
+            print("lib/BackupPC/Config/Meta.pm has $p in CgiUserConfigEdit,"
+                . " but conf/config.pl CgiUserConfigEdit does not\n");
+            $errors++;
+        }
+    }
+    foreach my $p ( keys(%{$bpc->{Conf}{CgiUserConfigEdit}}) ) {
+        if ( !defined($ConfigMeta{CgiUserConfigEdit}{child}{$p}) ) {
+            print("conf/config.pl CgiUserConfigEdit has $p, but"
+                . " lib/BackupPC/Config/Meta.pm does not\n");
+            $errors++;
+        }
+    }
     return $errors;
 }
 
@@ -481,7 +509,8 @@ sub CheckLangUsage
 
     foreach my $file ( (
 		qw(cgi-bin/BackupPC_Admin bin/BackupPC_sendEmail),
-		<lib/BackupPC/CGI/*pm>
+		<lib/BackupPC/CGI/*pm>,
+		<lib/BackupPC/Lang/en.pm>,
 	    ) ) {
 	open(F, $file) || die("can't open $file");
 	binmode(F);

@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -321,8 +321,8 @@ sub viewCacheDir
 
 sub attribGetWhere
 {
-    my($fio, $f) = @_;
-    my($dir, $fname, $share, $shareM);
+    my($fio, $f, $noCache) = @_;
+    my($dir, $fname, $share, $shareM, $partial, $attr);
 
     $fname = $f->{name};
     $fname = "$fio->{xfer}{pathHdrSrc}/$fname"
@@ -341,15 +341,27 @@ sub attribGetWhere
 	$dir = "";
 	$fname = $fio->{share};
     }
-    $fio->viewCacheDir($share, $dir);
     $shareM .= "/$dir" if ( $dir ne "" );
-    if ( defined(my $attr = $fio->{viewCache}{$shareM}{$fname}) ) {
-        return ($attr, 0);
-    } elsif ( defined(my $attr = $fio->{partialCache}{$shareM}{$fname}) ) {
-        return ($attr, 1);
+
+    if ( $noCache ) {
+        $share  = $fio->{share} if ( !defined($share) );
+        my $dirAttr = $fio->{view}->dirAttrib($fio->{viewNum}, $share, $dir);
+        $attr = $dirAttr->{$fname};
     } else {
-        return;
+        $fio->viewCacheDir($share, $dir);
+        if ( defined($attr = $fio->{viewCache}{$shareM}{$fname}) ) {
+            $partial = 0;
+        } elsif ( defined($attr = $fio->{partialCache}{$shareM}{$fname}) ) {
+            $partial = 1;
+        } else {
+            return;
+        }
+        if ( $attr->{mode} & S_HLINK_TARGET ) {
+            $attr->{hlink_self} = 1;
+            $attr->{mode} &= ~S_HLINK_TARGET;
+        }
     }
+    return ($attr, $partial);
 }
 
 sub attribGet
@@ -377,8 +389,12 @@ sub attribGet
         $fio->log("$attr->{fullPath}: redirecting to $target (will trim "
                 . "$fio->{xfer}{pathHdrSrc})") if ( $fio->{logLevel} >= 4 );
         $target =~ s/^\Q$fio->{xfer}{pathHdrSrc}//;
+        $target =~ s{^/+}{};
+        #
+        # Note: overwrites name to point to real file
+        #
         $f->{name} = $target;
-        $attr = $fio->attribGet($f);
+        ($attr) = $fio->attribGetWhere($f, 1);
         $fio->log(" ... now got $attr->{fullPath}")
                             if ( $fio->{logLevel} >= 4 );
     }
@@ -663,12 +679,13 @@ sub makeSpecial
     my($fh, $fileData);
     if ( $fio->{full}
             || !defined($attr)
-            || $attr->{type}  != $type
-            || $attr->{mtime} != $f->{mtime}
-            || $attr->{size}  != $f->{size}
-            || $attr->{uid}   != $f->{uid}
-            || $attr->{gid}   != $f->{gid}
-            || $attr->{mode}  != $f->{mode}
+            || $attr->{type}       != $type
+            || $attr->{mtime}      != $f->{mtime}
+            || $attr->{size}       != $f->{size}
+            || $attr->{uid}        != $f->{uid}
+            || $attr->{gid}        != $f->{gid}
+            || $attr->{mode}       != $f->{mode}
+            || $attr->{hlink_self} != $f->{hlink_self}
             || !defined($fh = BackupPC::FileZIO->open($attr->{fullPath}, 0,
                                                       $attr->{compress}))
             || $fh->read(\$fileData, length($str) + 1) != length($str)
@@ -838,6 +855,21 @@ sub fileDeltaRxStart
               . " ($fio->{rxLocalAttr}{compress} vs $fio->{xfer}{compress})")
                     if ( $fio->{logLevel} >= 4 );
     }
+    #
+    # If the local file is a hardlink then no match
+    #
+    if ( defined($fio->{rxLocalAttr})
+	    && $fio->{rxLocalAttr}{type} == BPC_FTYPE_HARDLINK ) {
+        $fio->{rxMatchBlk} = undef;
+        $fio->log("$fio->{rxFile}{name}: no match on hardlinks")
+                                    if ( $fio->{logLevel} >= 4 );
+        my $fCopy;
+        # need to copy since hardlink attribGet overwrites the name
+        %{$fCopy} = %$f;
+        $fio->{rxHLinkAttr} = $fio->attribGet($fCopy, 1); # hardlink attributes
+    } else {
+        delete($fio->{rxHLinkAttr});
+    }
     delete($fio->{rxInFd});
     delete($fio->{rxOutFd});
     delete($fio->{rxDigest});
@@ -907,12 +939,15 @@ sub fileDeltaRxNext
         my $attr = $fio->{rxLocalAttr};
 	my $fh;
         if ( !defined($fio->{rxInFd}) && !defined($fio->{rxInData}) ) {
+            my $inPath = $attr->{fullPath};
+            $inPath = $fio->{rxHLinkAttr}{fullPath}
+                            if ( defined($fio->{rxHLinkAttr}) );
             if ( $attr->{compress} ) {
                 if ( !defined($fh = BackupPC::FileZIO->open(
-                                                   $attr->{fullPath},
+                                                   $inPath,
                                                    0,
                                                    $attr->{compress})) ) {
-                    $fio->log("Can't open $attr->{fullPath}");
+                    $fio->log("Can't open $inPath");
 		    $fio->{stats}{errorCnt}++;
                     return -1;
                 }
@@ -963,12 +998,12 @@ sub fileDeltaRxNext
                 }
                 $fh->close;
             } else {
-                if ( open(F, "<", $attr->{fullPath}) ) {
+                if ( open(F, "<", $inPath) ) {
 		    binmode(F);
                     $fio->{rxInFd} = *F;
                     $fio->{rxInName} = $attr->{fullPath};
                 } else {
-                    $fio->log("Unable to open $attr->{fullPath}");
+                    $fio->log("Unable to open $inPath");
 		    $fio->{stats}{errorCnt}++;
                     return -1;
                 }
@@ -981,7 +1016,7 @@ sub fileDeltaRxNext
         my $seekPosn = $fio->{rxMatchBlk} * $fio->{rxBlkSize};
         if ( defined($fio->{rxInFd})
 			&& !sysseek($fio->{rxInFd}, $seekPosn, 0) ) {
-            $fio->log("Unable to seek $attr->{rxInName} to $seekPosn");
+            $fio->log("Unable to seek $fio->{rxInName} to $seekPosn");
 	    $fio->{stats}{errorCnt}++;
             return -1;
         }
@@ -1144,11 +1179,13 @@ sub fileDeltaRxDone
         my $f = $fio->{rxFile};
 	$fio->logFileAction("same", $f) if ( $fio->{logLevel} >= 1 );
         if ( $fio->{full}
-                || $attr->{type}  != $f->{type}
-                || $attr->{mtime} != $f->{mtime}
-                || $attr->{size}  != $f->{size}
-                || $attr->{gid}   != $f->{gid}
-                || $attr->{mode}  != $f->{mode} ) {
+                || $attr->{type}       != $f->{type}
+                || $attr->{mtime}      != $f->{mtime}
+                || $attr->{size}       != $f->{size}
+                || $attr->{uid}        != $f->{uid}
+                || $attr->{gid}        != $f->{gid}
+                || $attr->{mode}       != $f->{mode}
+                || $attr->{hlink_self} != $f->{hlink_self} ) {
             #
             # In the full case, or if the attributes are different,
             # we need to make a link from the previous file and
@@ -1217,6 +1254,10 @@ sub fileListEltSend
     my $type = $a->{type};
     my $extraAttribs = {};
 
+    if ( $a->{mode} & S_HLINK_TARGET ) {
+        $a->{hlink_self} = 1;
+        $a->{mode} &= ~S_HLINK_TARGET;
+    }
     $n =~ s/^\Q$fio->{xfer}{pathHdrSrc}//;
     $fio->log("Sending $name (remote=$n) type = $type") if ( $fio->{logLevel} >= 1 );
     if ( $type == BPC_FTYPE_CHARDEV
@@ -1262,7 +1303,7 @@ sub fileListEltSend
             && ($type == BPC_FTYPE_HARDLINK || $type == BPC_FTYPE_FILE)
             && ($type == BPC_FTYPE_HARDLINK
                     || $fio->{protocol_version} < 27
-                    || ($a->{mode} & S_HLINK_TARGET) ) ) {
+                    || $a->{hlink_self}) ) {
         #
         # Fill in fake inode information so that the remote rsync
         # can correctly create hardlinks.
@@ -1287,7 +1328,7 @@ sub fileListEltSend
                 $fio->log("$a->{fullPath}: can't open for hardlink");
                 $fio->{stats}{errorCnt}++;
             }
-        } elsif ( $a->{mode} & S_HLINK_TARGET ) {
+        } elsif ( $a->{hlink_self} ) {
             if ( defined($fio->{hlinkFile2Num}{$name}) ) {
                 $inode = $fio->{hlinkFile2Num}{$name};
             } else {

@@ -8,9 +8,9 @@
 $Lang{Start_Archive} = "Start Archivering";
 $Lang{Stop_Dequeue_Archive} = "Stop/Annuleer Archivering";
 $Lang{Start_Full_Backup} = "Start volledige backup";
-$Lang{Start_Incr_Backup} = "Start stapsgewijze backup";
+$Lang{Start_Incr_Backup} = "Start incrementele backup";
 $Lang{Stop_Dequeue_Backup} = "Stop/Annuleer backup";
-$Lang{Restore} = "Terugplaatsen";
+$Lang{Restore} = "Herstellen";
 
 $Lang{Type_full} = "volledig";
 $Lang{Type_incr} = "incrementeel";
@@ -23,11 +23,13 @@ $Lang{Admin_Options} = "Admin Opties";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
-\${h2("Controle van de server")}
-<form action="\$MyURL" method="get">
+\${h2("Besturing van de server")}
+<form name="ReloadForm" action="\$MyURL" method="get">
+<input type="hidden" name="action" value="">
 <table class="tableStnd">
-  <!--<tr><td>Stop de server:<td><input type="submit" name="action" value="Stop">-->
-  <tr><td>Herlaad de configuratie van de server:<td><input type="submit" name="action" value="Herlaad">
+  <tr><td>Herlaad de configuratie van de server:<td><input type="button" value="Herlaad"
+     onClick="document.ReloadForm.action.value='Reload';
+              document.ReloadForm.submit();">
 </table>
 </form>
 <!--
@@ -38,8 +40,8 @@ $Lang{Admin_Options_Page} = <<EOF;
 </ul>
 -->
 EOF
-$Lang{Unable_to_connect_to_BackupPC_server} = "Verbinding met de BackupPC server niet mogelijk",
-            "Dit CGI script (\$MyURL) kan geen verbinding maken met de BackupPC-server"
+$Lang{Unable_to_connect_to_BackupPC_server} = "Verbinding met de BackupPC server is mislukt",
+            "Dit CGI script (\$MyURL) kon geen verbinding maken met de BackupPC-server"
           . " op \$Conf{ServerHost} poort \$Conf{ServerPort}."
           . " De foutmelding was: \$err.",
             "Mogelijk draait de BackupPC server niet of is er een "
@@ -70,11 +72,11 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
 <li> Volgende backupsessie start op \$nextWakeupTime.
 <li> Andere informatie:
     <ul>
-        <li>\$numBgQueue wachtende backupaanvragen sedert laatste geplande wakeup,
+        <li>\$numBgQueue wachtende backupaanvragen sinds laatste geplande wakeup,
         <li>\$numUserQueue wachtende backupaanvragen van gebruikers,
-        <li>\$numCmdQueue wachtende aanvragen op commando,
+        <li>\$numCmdQueue wachtende opdrachten,
         \$poolInfo
-        <li>De backupschijf werd het laatst aangevuld tot \$Info{DUlastValue}%
+        <li>Het backup filesystem werd recentelijk aangevuld voor \$Info{DUlastValue}%
             op (\$DUlastTime), het maximum van vandaag is \$Info{DUDailyMax}% (\$DUmaxTime)
             en het maximum van gisteren was \$Info{DUDailyMaxPrev}%.
     </ul>
@@ -102,7 +104,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 </table>
 <p>
 
-\${h2("Mislukkingen die aandacht vragen")}
+\${h2("Opgetreden fouten die aandacht vragen")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Machine </td>
@@ -111,7 +113,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td align="center"> Laatste poging </td>
     <td align="center"> Details </td>
     <td align="center"> Fouttijd </td>
-    <td> Laaste fout (verschillend van 'geen ping') </td></tr>
+    <td> Laatste fout (verschillend van 'geen ping') </td></tr>
 \$statusStr
 </table>
 EOF
@@ -131,9 +133,9 @@ Dit overzicht dateert van \$now.
 Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
 <ul>
 <li> \$fullTot volledige backups met een totale grootte van \${fullSizeTot}GB
-     (vóór definitief wegschrijven en compressie),
+     (voor samenvoegen),
 <li> \$incrTot oplopende backups met een totale grootte van \${incrSizeTot}GB
-     (vóór definitief wegschrijven en compressie).
+     (voor samenvoegen).
 </ul>
 </p>
 <table class="tableStnd" border cellpadding="3" cellspacing="1">
@@ -157,11 +159,11 @@ Er zijn \$hostCntNone hosts zonder backup.
 <table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Machine </td>
     <td align="center"> Gebruiker </td>
-    <td align="center"> tal Voll. </td>
+    <td align="center"> Aantal Voll. </td>
     <td align="center"> Voll.Lftd/dagen </td>
     <td align="center"> Voll.Grootte/GB </td>
     <td align="center"> Snelheid MB/sec </td>
-    <td align="center"> tal Incr. </td>
+    <td align="center"> Aantal Incr. </td>
     <td align="center"> Incr.Lftd/dagen </td>
     <td align="center"> Status </td>
     <td align="center"> Laatste poging </td></tr>
@@ -208,7 +210,7 @@ Er zijn \$hostCntGood machines gebackupt die een totale grootte vertegenwoordige
 <table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> Machine</td>
     <td align="center"> Gebruiker </td>
-    <td align="center"> grootte backup </td>
+    <td align="center"> Backupgrootte </td>
 \$strGood
 \$checkAllHosts
 </table>
@@ -219,7 +221,7 @@ EOF
 
 $Lang{BackupPC_Archive2} = <<EOF;
 \${h1(qq{$Lang{BackupPC__Archive}})}
-Klaar om volgende machines te archiveren
+Klaar om de volgende machines te archiveren
 <ul>
 \$HostListStr
 </ul>
@@ -232,7 +234,7 @@ Klaar om volgende machines te archiveren
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 \$paramStr
 <tr>
-    <td colspan=2><input type="submit" value="Start de archivering" name=""></td>
+    <td colspan=2><input type="submit" value="Start de archivering" name="ignore"></td>
 </tr>
 </form>
 </table>
@@ -299,13 +301,16 @@ $Lang{Are_you_sure_start} = <<EOF;
 <p>
 Met deze actie start u een \$type backup van machine \$host.
 
-<form action="\$MyURL" method="get">
+<form name="Confirm" action="\$MyURL" method="get">
 <input type="hidden" name="host" value="\$host">
 <input type="hidden" name="hostIP" value="\$ipAddr">
 <input type="hidden" name="doit" value="1">
+<input type="hidden" name="action" value="">
 Wilt u dat nu doen?
-<input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="Neen" name="">
+<input type="button" value="\$buttonText"
+  onClick="document.Confirm.action.value='\$In{action}';
+           document.Confirm.submit();">
+<input type="submit" value="Neen" name="ignore">
 </form>
 EOF
 # --------------------------------
@@ -313,27 +318,30 @@ $Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: Bevestiging de annule
 # --------------------------------
 $Lang{Are_you_sure_stop} = <<EOF;
 
-\${h1("Bent u zeker?")}
+\${h1("Weet u het zeker?")}
 
 <p>
 Met deze actie annuleert u de backup van pc \$host of haalt u de opdracht uit de wachtrij;
 
-<form action="\$MyURL" method="get">
-<input type="hidden" name="host" value="\$host">
-<input type="hidden" name="doit" value="1">
+<form name="Confirm" action="\$MyURL" method="get">
+<input type="hidden" name="host"   value="\$host">
+<input type="hidden" name="doit"   value="1">
+<input type="hidden" name="action" value="">
 Start bovendien geen andere backup gedurende
 <input type="text" name="backoff" size="10" value="\$backoff"> uur/uren.
 <p>
 Wilt u dit nu bevestigen?
-<input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="Neen" name="">
+<input type="button" value="\$buttonText"
+  onClick="document.Confirm.action.value='\$In{action}';
+           document.Confirm.submit();">
+<input type="submit" value="Neen" name="ignore">
 </form>
 
 EOF
 # --------------------------------
-$Lang{Only_privileged_users_can_view_queues_} = "Enkel bevoorrechte gebruikers kunnen de wachtrij bekijken.";
+$Lang{Only_privileged_users_can_view_queues_} = "Enkel gebruikers met bijzondere rechten kunnen de wachtrij bekijken.";
 # --------------------------------
-$Lang{Only_privileged_users_can_archive} = "Enkel bevoorechte gebruikers kunnen archiveren.";
+$Lang{Only_privileged_users_can_archive} = "Enkel gebruikers met bijzondere rechten kunnen archiveren.";
 # --------------------------------
 $Lang{BackupPC__Queue_Summary} = "BackupPC: overzicht wachtrij";
 # --------------------------------
@@ -388,7 +396,7 @@ Inhoud van bestand <tt>\$file</tt>, gewijzigd \$mtimeStr \$comment
 EOF
 
 # --------------------------------
-$Lang{skipped__skipped_lines} = "[  \$skipped lijnen overgeslagen ]\n";
+$Lang{skipped__skipped_lines} = "[  \$skipped regels overgeslagen ]\n";
 # --------------------------------
 $Lang{_pre___Can_t_open_log_file__file} = "<pre>\nKan het logbestand \$file niet openen \n";
 
@@ -423,9 +431,9 @@ EOF
 $Lang{Browse_backup__num_for__host} = "BackupPC: Overzicht backup nummer \$num van pc \$host";
 
 # ------------------------------
-$Lang{Restore_Options_for__host} = "BackupPC: Opties voor het terugplaatsen van bestanden van machine \$host";
+$Lang{Restore_Options_for__host} = "BackupPC: Opties voor het herstellen van bestanden van machine \$host";
 $Lang{Restore_Options_for__host2} = <<EOF;
-\${h1("Opties voor het terugplaatsen van bestanden van machine \$host")}
+\${h1("Opties voor het herstellen van bestanden van machine \$host")}
 <p>
 U hebt de volgende bestanden/mappen geselecteerd uit
  \$share, backup nummer #\$num:
@@ -433,15 +441,15 @@ U hebt de volgende bestanden/mappen geselecteerd uit
 \$fileListStr
 </ul>
 </p><p>
-Er zijn drie mogelijkheden om deze bestanden/mappen terug te plaatsen.
+Er zijn drie mogelijkheden om deze bestanden/mappen terug te herstellen.
 Gelieve een van de onderstaande mogelijkheden te kiezen.
 </p>
-\${h2("Optie 1: Rechtstreeks terugplaatsen")}
+\${h2("Optie 1: Rechtstreeks herstellen")}
 <p>
 EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
-U kan deze bestanden rechtstreeks terugplaatsen op pc
+U kan deze bestanden rechtstreeks herstellen naar pc
 \$host.
 </p><p>
 <b>Waarschuwing:</b> bestaande bestanden met dezelfde naam zullen 
@@ -476,14 +484,14 @@ overschreven worden!
     <td valign="top"><input type="text" size="40" maxlength="256"
 	value="\${EscHTML(\$pathHdr)}" name="pathHdr"></td>
 </tr><tr>
-    <td><input type="submit" value="Terugplaatsen starten" name=""></td>
+    <td><input type="submit" value="Herstellen starten" name="ignore"></td>
 </table>
 </form>
 EOF
 
 $Lang{Restore_Options_for__host_Option1_disabled} = <<EOF;
-Rechtstreeks terugplaatsen is gedeactiveerd voor machine \${EscHTML(\$hostDest)}.
-Gelieve een van de andere herstelopties te kiezen.
+Rechtstreeks herstellen is gedeactiveerd voor machine \${EscHTML(\$hostDest)}.
+Gelieve een van de andere opties voor het herstellen te kiezen.
 EOF
 
 # ------------------------------
@@ -513,7 +521,7 @@ aan \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 Compressie (0=uit, 1=snel,...,9=hoogst)
 <input type="text" size="6" value="5" name="compressLevel">
 <br>
-<input type="submit" value="Download Zip-bestand" name="">
+<input type="submit" value="Download Zip-bestand" name="ignore">
 </form>
 EOF
 
@@ -523,7 +531,7 @@ $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 <p>
 \${h2("Optie 2: Download Zip-bestand")}
 <p>
-Archive::Zip is niet geïnstalleerd op de backupPC-server en het is
+Archive::Zip is niet ge&iuml;nstalleerd op de backupPC-server en het is
 dus niet mogelijk om een Zip-bestand te downloaden.
 Gelieve aan uw systeembeheerder te vragen om Archive::Zip te downloaden van
 <a href="http://www.cpan.org">www.cpan.org</a> en te installeren.
@@ -554,43 +562,46 @@ schijfruimte te beschikken om het bestand op te slaan.
 aan \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (anders zal het tar-archief volledige padnamen bevatten).
 <br>
-<input type="submit" value="Download Tar-bestand" name="">
+<input type="submit" value="Download Tar-bestand" name="ignore">
 </form>
 EOF
 
 
 # ------------------------------
-$Lang{Restore_Confirm_on__host} = "BackupPC: Bevestig terugplaatsen voor machine \$host";
+$Lang{Restore_Confirm_on__host} = "BackupPC: Bevestig herstellen voor machine \$host";
 
 $Lang{Are_you_sure} = <<EOF;
-\${h1("Bent u zeker?")}
+\${h1("Weet u het zeker?")}
 <p>
 U hebt gevraagd om bestanden rechtstreeks terug te zetten op de machine \$In{hostDest}.
-De volgende bestanden zullen teruggeplaatst worden in share \$In{shareDest}, 
+De volgende bestanden zullen hersteld worden in share \$In{shareDest}, 
 uit backup nummer \$num:
 <p>
 <table border>
-<tr><td>Oorspronkelijk bestand/map</td><td>zal teruggeplaatst worden in</td></tr>
+<tr><td>Oorspronkelijk bestand/map</td><td>zal hersteld worden in</td></tr>
 \$fileListStr
 </table>
 
-<form action="\$MyURL" method="post">
+<form name="RestoreForm" action="\$MyURL" method="post">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
 <input type="hidden" name="hostDest" value="\${EscHTML(\$In{hostDest})}">
 <input type="hidden" name="shareDest" value="\${EscHTML(\$In{shareDest})}">
 <input type="hidden" name="pathHdr" value="\${EscHTML(\$In{pathHdr})}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="4">
+<input type="hidden" name="action" value="">
 \$hiddenStr
 Is dit wat u wilt doen? Gelieve te bevestigen.
-<input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="Neen" name="">
+<input type="button" value="\$Lang->{Restore}"
+ onClick="document.RestoreForm.action.value='Restore';
+          document.RestoreForm.submit();">
+<input type="submit" value="No" name="ignore">
 </form>
 EOF
 
 
 # --------------------------
-$Lang{Restore_Requested_on__hostDest} = "BackupPC: Terugplaatsen gevraagd van machine \$hostDest";
+$Lang{Restore_Requested_on__hostDest} = "BackupPC: Herstellen aangevraagd van machine \$hostDest";
 $Lang{Reply_from_server_was___reply} = <<EOF;
 \${h1(\$str)}
 <p>
@@ -610,7 +621,7 @@ EOF
 $Lang{Host__host_Backup_Summary} = "BackupPC: Overzicht backup van machine \$host";
 
 $Lang{Host__host_Backup_Summary2} = <<EOF;
-\${h1("Overzicht backup van machine \$host")}
+\${h1("Overzicht backups van machine \$host")}
 <p>
 \$warnStr
 <ul>
@@ -619,22 +630,27 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </p>
 \${h2("Acties door de gebruiker")}
 <p>
-<form action="\$MyURL" method="get">
-<input type="hidden" name="host" value="\$host">
+<form name="StartStopForm" action="\$MyURL" method="get">
+<input type="hidden" name="host"   value="\$host">
+<input type="hidden" name="action" value="">
 \$startIncrStr
-<input type="submit" value="$Lang{Start_Full_Backup}" name="action">
-<input type="submit" value="$Lang{Stop_Dequeue_Backup}" name="action">
+<input type="button" value="\$Lang->{Start_Full_Backup}"
+ onClick="document.StartStopForm.action.value='Start_Full_Backup';
+          document.StartStopForm.submit();">
+<input type="button" value="\$Lang->{Stop_Dequeue_Backup}"
+ onClick="document.StartStopForm.action.value='Stop_Dequeue_Backup';
+          document.StartStopForm.submit();">
 </form>
 </p>
-\${h2("Overzicht backup")}
+\${h2("Backup overzicht")}
 <p>
-Klik op het backupnummer om de inhoud te bekijken of om bestanden terug te plaatsen.
+Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> backup nr.</td>
     <td align="center"> Type </td>
     <td align="center"> Aangevuld </td>
-    <td align="center"> ENG Level </td>
+    <td align="center"> Niveau </td>
     <td align="center"> Startdatum </td>
     <td align="center"> Duurtijd in min. </td>
     <td align="center"> Lftd. in dagen </td>
@@ -675,7 +691,7 @@ Lege bestanden en SMB-fouten worden niet geteld in de aantallen \'hergebruik\' e
     <td align="center" colspan="2"> Nieuwe bestanden </td>
 </tr>
 <tr class="tableheader">
-    <td align="center"> backup nr. </td>
+    <td align="center"> Backup nr. </td>
     <td align="center"> Type </td>
     <td align="center"> Aantal best.</td>
     <td align="center"> Grootte in MB </td>
@@ -725,11 +741,16 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 
 \${h2("Acties van de gebruiker")}
 <p>
-<form action="\$MyURL" method="get">
+<form name="StartStopForm" action="\$MyURL" method="get">
 <input type="hidden" name="archivehost" value="\$host">
 <input type="hidden" name="host" value="\$host">
-<input type="submit" value="$Lang{Start_Archive}" name="action">
-<input type="submit" value="$Lang{Stop_Dequeue_Archive}" name="action">
+<input type="hidden" name="action" value="">
+<input type="button" value="\$Lang->{Start_Archive}"
+ onClick="document.StartStopForm.action.value='Start_Archive';
+          document.StartStopForm.submit();">
+<input type="button" value="\$Lang->{Stop_Dequeue_Archive}"
+ onClick="document.StartStopForm.action.value='Stop_Dequeue_Archive';
+          document.StartStopForm.submit();">
 </form>
 
 \$ArchiveStr
@@ -799,7 +820,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="host" value="\$host">
 <input type="hidden" name="share" value="\${EscHTML(\$share)}">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
-<input type="hidden" name="action" value="$Lang{Restore}">
+<input type="hidden" name="action" value="Restore">
 <br>
 <table width="100%">
 <tr><td valign="top">
@@ -884,7 +905,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 <tr><td class="tableheader"> Duur </td><td class="border"> \$duration min </td></tr>
 <tr><td class="tableheader"> Aantal bestanden </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
 <tr><td class="tableheader"> Totale grootte </td><td class="border"> \${MB} MB </td></tr>
-<tr><td class="tableheader"> Overdrachtsratio </td><td class="border"> \$MBperSec MB/sec </td></tr>
+<tr><td class="tableheader"> Overdrachtssnelheid </td><td class="border"> \$MBperSec MB/sec </td></tr>
 <tr><td class="tableheader"> TarCreate fouten </td><td class="border"> \$Restores[\$i]{tarCreateErrs} </td></tr>
 <tr><td class="tableheader"> Overdrachtsfouten </td><td class="border"> \$Restores[\$i]{xferErrs} </td></tr>
 <tr><td class="tableheader"> Logbestand overdracht </td><td class="border">
@@ -896,7 +917,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("Lijst bestanden/mappen")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="100%">
-<tr class="tableheader"><td>Oorspronkelijk bestand/map</td><td>Teruggeplaatst naar</td></tr>
+<tr class="tableheader"><td>Oorspronkelijk bestand/map</td><td>hersteld naar</td></tr>
 \$fileListStr
 </table>
 EOF
@@ -921,7 +942,7 @@ $Lang{Archive___num_details_for__host2 } = <<EOF;
 </tr></tr>
 </table>
 <p>
-\${h1("Lijst machines")}
+\${h1("Machinelijst")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td>Machine</td><td>backup nr.</td></tr>
@@ -955,20 +976,20 @@ $Lang{Directory___EscHTML} = "Map \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
 		    . " is leeg";
 $Lang{Can_t_browse_bad_directory_name2} = "Kan niet bladeren door foutieve mapnaam"
 	            . " \${EscHTML(\$relDir)}";
-$Lang{Only_privileged_users_can_restore_backup_files} = "Enkel gebruikers met bijzondere rechten kunnen backupbestanden"
-                . " van machine \${EscHTML(\$In{host})} terugplaatsen.";
+$Lang{Only_privileged_users_can_restore_backup_files} = "Enkel gebruikers met bijzondere rechten kunnen backups"
+                . " van machine \${EscHTML(\$In{host})} terugzetten.";
 $Lang{Bad_host_name} = "Foutieve of ongeldige machinenaam \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} = "U hebt geen enkel bestand geselecteerd. Gelieve terug te gaan en"
                 . " selecteer een of meerdere bestanden.";
 $Lang{You_haven_t_selected_any_hosts} = "U hebt geen machine geselecteerd. Gelieve terug te gaan om"
                 . " een machine te selecteren.";
-$Lang{Nice_try__but_you_can_t_put} = "Goed geprobeerd, maar u kan geen \'..\' in de bestandsnamen plaatsen";
+$Lang{Nice_try__but_you_can_t_put} = "Leuk geprobeerd, maar u kan geen \'..\' in de bestandsnamen plaatsen";
 $Lang{Host__doesn_t_exist} = "Machine \${EscHTML(\$In{hostDest})} bestaat niet.";
-$Lang{You_don_t_have_permission_to_restore_onto_host} = "U beschikt niet over de juiste rechten om bestanden terug te plaatsen naar machine "
+$Lang{You_don_t_have_permission_to_restore_onto_host} = "U beschikt niet over de juiste rechten om bestanden te herstellen naar machine "
 		    . " \${EscHTML(\$In{hostDest})}";
 $Lang{Can_t_open_create__openPath} = "Ik kan "
 		. "\${EscHTML(\"\$openPath\")} niet openen of aanmaken";
-$Lang{Only_privileged_users_can_restore_backup_files2} = "Alleen gebruikers met bijzondere rechten kunnen bestanden terugplaatsen"
+$Lang{Only_privileged_users_can_restore_backup_files2} = "Alleen gebruikers met bijzondere rechten kunnen bestanden herstellen"
                 . " naar machine \${EscHTML(\$host)}.";
 $Lang{Empty_host_name} = "Lege machinenaam";
 $Lang{Unknown_host_or_user} = "Onbekende machine of gebruiker \${EscHTML(\$host)}";
@@ -976,17 +997,17 @@ $Lang{Only_privileged_users_can_view_information_about} = "Enkel gebruikers met 
                 . " machine \${EscHTML(\$host)} bekijken." ;
 $Lang{Only_privileged_users_can_view_archive_information} = "Enkel gebruikers met bijzondere rechten kunnen archiveringsinformatie bekijken.";
 $Lang{Only_privileged_users_can_view_restore_information} = "Enkel gebruikers met bijzondere rechten kunnen herstelinformatie bekijken.";
-$Lang{Restore_number__num_for_host__does_not_exist} = "Terugplaatsing nr.\$num van machine \${EscHTML(\$host)}"
+$Lang{Restore_number__num_for_host__does_not_exist} = "Herstel nr.\$num van machine \${EscHTML(\$host)}"
 	        . " bestaat niet.";
 $Lang{Archive_number__num_for_host__does_not_exist} = "Archiveringsnr. \$num van machine \${EscHTML(\$host)}"
                 . " bestaat niet.";
-$Lang{Can_t_find_IP_address_for} = "Ik kan het IP-nummer van \${EscHTML(\$host)} niet vinden.";
+$Lang{Can_t_find_IP_address_for} = "Ik kan het IP-adres van \${EscHTML(\$host)} niet vinden.";
 $Lang{host_is_a_DHCP_host} = <<EOF;
-\$host is een DHCP-machine en ik ken zijn IP-nummer niet. Ik controleerde de
+\$host is een DHCP-machine en ik ken zijn IP-adres niet. Ik controleerde de
 netbios-naam van \$ENV{REMOTE_ADDR}\$tryIP, en ontdekte dat die machine
 niet dezelfde machine als \$host is.
 <p>
-In afwachting dat ik machine \$host op een welbepaald DHCP-adres terugvind, kan u
+In afwachting dat ik machine \$host op een bepaald DHCP-adres terugvind, kan u
 deze aanvraag enkel doen vanaf die machine zelf.
 EOF
 
@@ -998,7 +1019,7 @@ $Lang{Backup_requested_on_DHCP__host} = "backup aangevraagd van DHCP \$host (\$I
 		                      . " \$User vanaf \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User} = "backup aangevraagd van \$host door \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "backup geannuleerd van \$host door \$User";
-$Lang{Restore_requested_to_host__hostDest__backup___num} = "Terugplaatsing aangevraagd naar machine \$hostDest, backup nr.\$num,"
+$Lang{Restore_requested_to_host__hostDest__backup___num} = "Herstel aangevraagd voor machine \$hostDest, backup nr.\$num,"
 	     . " door \$User vanaf \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivering aangevraagd door \$User vanaf \$ENV{REMOTE_ADDR}";
 
@@ -1087,7 +1108,7 @@ $Lang{__time0_to__time1_on__days} = "\$t0 tot \$t1 op \$days.";
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
 <li>backups zijn \$hours uren uitgesteld
-(<a href=\"\$MyURL?action=\${EscURI(\$Lang->{Stop_Dequeue_Archive})}&host=\$host\">Wijzig dit aantal</a>).
+(<a href=\"\$MyURL?action=Stop_Dequeue_Backup&host=\$host\">Wijzig dit aantal</a>).
 EOF
 
 $Lang{tryIP} = " en \$StatusHost{dhcpHostIP}";
@@ -1134,11 +1155,11 @@ $Lang{Visit_this_directory_in_backup} = <<EOF;
 EOF
 
 $Lang{Restore_Summary} = <<EOF;
-\${h2("Overzicht terugplaatsingen")}
+\${h2("Overzicht herstellingen")}
 <p>
-Klik op het terugplaatsingsnummer voor meer details.
+Klik op het nummer voor meer details.
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td align="center"> Terugplaatsing nr.</td>
+<tr class="tableheader"><td align="center"> Herstel nr.</td>
     <td align="center"> Resultaat </td>
     <td align="right"> Startdatum</td>
     <td align="right"> Duur(min.)</td>
@@ -1190,24 +1211,24 @@ $Lang{and} = "en";
 
 # ------
 # Hosts states and reasons
-$Lang{Status_idle} = "in rust";
+$Lang{Status_idle} = "inactief";
 $Lang{Status_backup_starting} = "backup start";
 $Lang{Status_backup_in_progress} = "backup bezig";
-$Lang{Status_restore_starting} = "terugplaatsen start";
-$Lang{Status_restore_in_progress} = "terugplaatsen bezig";
+$Lang{Status_restore_starting} = "herstel start";
+$Lang{Status_restore_in_progress} = "herstel bezig";
 $Lang{Status_link_pending} = "wacht op linken";
 $Lang{Status_link_running} = "linken is bezig";
 
 $Lang{Reason_backup_done} = "backup voltooid";
-$Lang{Reason_restore_done} = "terugplaatsen voltooid";
+$Lang{Reason_restore_done} = "herstel voltooid";
 $Lang{Reason_archive_done}   = "archivering voltooid";
 $Lang{Reason_nothing_to_do} = "niets te doen";
 $Lang{Reason_backup_failed} = "backup mislukt";
-$Lang{Reason_restore_failed} = "terugplaatsen mislukt";
+$Lang{Reason_restore_failed} = "herstel mislukt";
 $Lang{Reason_archive_failed} = "archivering mislukt";
 $Lang{Reason_no_ping} = "geen ping";
 $Lang{Reason_backup_canceled_by_user} = "backup geannuleerd door gebruiker";
-$Lang{Reason_restore_canceled_by_user} = "terugplaatsen geannuleerd door gebruiker";
+$Lang{Reason_restore_canceled_by_user} = "herstellen geannuleerd door gebruiker";
 $Lang{Reason_archive_canceled_by_user} = "archivering geannuleerd door gebruiker";
 
 # ---------
@@ -1262,13 +1283,13 @@ is met het netwerk.
 Als uw pc gedurende geruime tijd (meer dan een paar uur) verbonden
 was met het netwerk gedurende de laatste $days dagen, kan u het beste
 contact opnemen van uw systeembeheerder. Vraag hem of haar om uit te
-zoeken waarom er geen backups meer genomen worden van uw pc.
+zoeken waarom er geen backups meer gemaakt worden van uw pc.
 
 Anderzijds, als deze pc of notebook zich momenteel niet in het netwerk
 bevindt dan kan u hieraan weinig anders doen behalve van belangrijke bestanden
 handmatig een kopie te maken op een ander medium (CD, diskette, tape, andere pc,...)
 U dient te weten dat *geen enkel bestand* dat u aanmaakte of wijzigde in de
-laatste $days dagen teruggeplaatst zal kunnen worden in geval de harde schijf
+laatste $days dagen hersteld zal kunnen worden in geval de harde schijf
 van uw pc zou crashen. Hierin zijn nieuwe e-mail en bijlagen inbegrepen.
 
 
@@ -1335,114 +1356,118 @@ Laatste poging: \$host_last_attempt;
 EOF
 
 #######################################################################
-# Configuration editor strings (all ENGLISH currently)
+# Configuration editor strings 
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuation settings.";
-$Lang{CfgEdit_Edit_Config} = "Edit Config";
-$Lang{CfgEdit_Edit_Hosts}  = "Edit Hosts";
+$Lang{Only_privileged_users_can_edit_config_files} = "Enkel gebruikers met bijzondere rechten kunnen de configuratie wijzigen.";
+$Lang{CfgEdit_Edit_Config} = "Wijzig Configuratie";
+$Lang{CfgEdit_Edit_Hosts}  = "Wijzig Machines";
 
 $Lang{CfgEdit_Title_Server} = "Server";
-$Lang{CfgEdit_Title_General_Parameters} = "General Parameters";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "Wakeup Schedule";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "Concurrent Jobs";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Pool Filesystem Limits";
-$Lang{CfgEdit_Title_Other_Parameters} = "Other Parameters";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Remote Apache Settings";
-$Lang{CfgEdit_Title_Program_Paths} = "Program Paths";
-$Lang{CfgEdit_Title_Install_Paths} = "Install Paths";
+$Lang{CfgEdit_Title_General_Parameters} = "Algemene Parameters";
+$Lang{CfgEdit_Title_Wakeup_Schedule} = "Wakeup planning";
+$Lang{CfgEdit_Title_Concurrent_Jobs} = "Parallelle Jobs";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Pool Bestandssysteem Limieten";
+$Lang{CfgEdit_Title_Other_Parameters} = "Andere Parameters";
+$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Remote Apache Instellingen";
+$Lang{CfgEdit_Title_Program_Paths} = "Programmapaden";
+$Lang{CfgEdit_Title_Install_Paths} = "Installatiepaden";
 $Lang{CfgEdit_Title_Email} = "Email";
-$Lang{CfgEdit_Title_Email_settings} = "Email settings";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Email User Messages";
+$Lang{CfgEdit_Title_Email_settings} = "Email instellingen";
+$Lang{CfgEdit_Title_Email_User_Messages} = "Emailberichten Gebruikers";
 $Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "Admin Privileges";
-$Lang{CfgEdit_Title_Page_Rendering} = "Page Rendering";
-$Lang{CfgEdit_Title_Paths} = "Paths";
-$Lang{CfgEdit_Title_User_URLs} = "User URLs";
-$Lang{CfgEdit_Title_User_Config_Editing} = "User Config Editing";
-$Lang{CfgEdit_Title_Xfer} = "Xfer";
-$Lang{CfgEdit_Title_Xfer_Settings} = "Xfer Settings";
-$Lang{CfgEdit_Title_Smb_Settings} = "Smb Settings";
-$Lang{CfgEdit_Title_Tar_Settings} = "Tar Settings";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Settings";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Settings";
-$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd Settings";
-$Lang{CfgEdit_Title_Archive_Settings} = "Archive Settings";
-$Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Paths/Commands";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Paths/Commands";
-$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Paths/Commands/Args";
-$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Port/Args";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archive Paths/Commands";
-$Lang{CfgEdit_Title_Schedule} = "Schedule";
-$Lang{CfgEdit_Title_Full_Backups} = "Full Backups";
-$Lang{CfgEdit_Title_Incremental_Backups} = "Incremental Backups";
+$Lang{CfgEdit_Title_Admin_Privileges} = "Admin rechten";
+$Lang{CfgEdit_Title_Page_Rendering} = "Pagina opbouw";
+$Lang{CfgEdit_Title_Paths} = "Paden";
+$Lang{CfgEdit_Title_User_URLs} = "Gebruiker URLs";
+$Lang{CfgEdit_Title_User_Config_Editing} = "Wijzigen gebruikersconfiguratie";
+$Lang{CfgEdit_Title_Xfer} = "Overdracht";
+$Lang{CfgEdit_Title_Xfer_Settings} = "Overdracht instellingen";
+$Lang{CfgEdit_Title_Smb_Settings} = "Smb instellingen";
+$Lang{CfgEdit_Title_Tar_Settings} = "Tar instellingen";
+$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync instellingen";
+$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd instellingen";
+$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd instellingen";
+$Lang{CfgEdit_Title_Archive_Settings} = "Archivering instellingen";
+$Lang{CfgEdit_Title_Include_Exclude} = "Inclusief/Exclusief";
+$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Pad/Opdrachten";
+$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Pad/Opdrachten";
+$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Pad/Opdrachten/Parameters";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Poort/Parameters";
+$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archivering Pad/Opdrachten";
+$Lang{CfgEdit_Title_Schedule} = "Planning";
+$Lang{CfgEdit_Title_Full_Backups} = "Volledige Backups";
+$Lang{CfgEdit_Title_Incremental_Backups} = "Incrementele Backups";
 $Lang{CfgEdit_Title_Blackouts} = "Blackouts";
-$Lang{CfgEdit_Title_Other} = "Other";
-$Lang{CfgEdit_Title_Backup_Settings} = "Backup Settings";
-$Lang{CfgEdit_Title_Client_Lookup} = "Client Lookup";
-$Lang{CfgEdit_Title_Other} = "Other";
-$Lang{CfgEdit_Title_User_Commands} = "User Commands";
-$Lang{CfgEdit_Title_Hosts} = "Hosts";
+$Lang{CfgEdit_Title_Other} = "Andere";
+$Lang{CfgEdit_Title_Backup_Settings} = "Backup instellingen";
+$Lang{CfgEdit_Title_Client_Lookup} = "Cli&euml;nt locatie";
+$Lang{CfgEdit_Title_Other} = "Andere";
+$Lang{CfgEdit_Title_User_Commands} = "Opdrachten van gebruiker";
+$Lang{CfgEdit_Title_Hosts} = "Machines";
 
-$Lang{CfgEdit_Hosts_Comment} = <<EOF;
-To add a new host, select Add and then enter the name.  To start with
-the per-host configuration from another host, enter the host name
-as NEWHOST=COPYHOST.  This will overwrite any existing per-host
-configuration for NEWHOST.  You can also do this for an existing
-host.  To delete a host, hit the Delete button.  For Add, Delete,
-and configuration copy, changes don't take effect until you select
-Save.  None of the deleted host's backups will be removed,
-so if you accidently delete a host, simply re-add it.  To completely
-remove a host's backups, you need to manually remove the files
-below \$topDir/pc/HOST
-EOF
+$Lang{CfgEdit_Hosts_Comment} = <<eof;
+Om een nieuwe machine toe te voegen: selecteer 'Toevoegen' en geef de naam op.
+Om met de machine-specifieke configuratie van een andere machine als basis te gebruiken: 
+Geef de naam van de machine als NIEUWE_MACHINE=TE_KOPIEREN_MACHINE.
+Dit zal de een reeds bestaande machine-specifieke configuratie voor 
+NIEUWE_MACHINE overschrijven. Je kan dit ook doen voor een reeds bestaande machine.
+Om een machine te verwijderen: klik op de de Verwijderen-knop.
+Bij 'Toevoegen', 'Verwijderen' en 'Kopi&euml;ren' van instellingen, worden de 
+wijzigingen pas effectief nadat je op 'Bewaren' hebt geklikt.
+Backups van gewiste machines worden niet verwijderd.
+Als je dus per vergissing een machine hebt verwijderd, kan je deze 
+eenvoudig opnieuw toevoegen. Om de backups van een machine volledig
+te verwijderen, moet je de bestanden verwijderen in de map
+\$topdir/pc/MACHINE
+eof
 
 $Lang{CfgEdit_Header_Main} = <<EOF;
-\${h1("Main Configuration Editor")}
+\${h1("Bewerken globale instellingen")}
 EOF
 
 $Lang{CfgEdit_Header_Host} = <<EOF;
-\${h1("Host \$host Configuration Editor")}
+\${h1("Bewerken specifieke configuratie van machine \$host ")}
 <p>
-Note: Check Override if you want to modify a value specific to this host.
+NB: Selecteer 'Overschrijven' als je een waarde wil wijzigen specifiek voor deze machine.
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "Save";
-$Lang{CfgEdit_Button_Insert}   = "Insert";
-$Lang{CfgEdit_Button_Delete}   = "Delete";
-$Lang{CfgEdit_Button_Add}      = "Add";
-$Lang{CfgEdit_Button_Override} = "Override";
-$Lang{CfgEdit_Button_New_Key}  = "New Key";
+$Lang{CfgEdit_Button_Save}     = "Bewaren";
+$Lang{CfgEdit_Button_Insert}   = "Invoegen";
+$Lang{CfgEdit_Button_Delete}   = "Verwijderen";
+$Lang{CfgEdit_Button_Add}      = "Toevoegen";
+$Lang{CfgEdit_Button_Override} = "Overschrijven";
+$Lang{CfgEdit_Button_New_Key}  = "Nieuwe sleutel";
 
 $Lang{CfgEdit_Error__must_be_an_integer}
-            = "Error: \$var must be an integer";
+            = "Fout: \$var moet een geheel getal zijn";
 $Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "Error: \$var must be a real-valued number";
+            = "Fout: \$var moet een re&euml;le waarde (nummer) zijn";
 $Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Error: \$var entry \$k must be an integer";
+            = "Fout: \$var ingang \$k moet een geheel getal zijn";
 $Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Error: \$var entry \$k must be a real-valued number";
+            = "Fout: \$var ingang \$k moet een re&euml;le waarde (nummer) zijn";
 $Lang{CfgEdit_Error__must_be_executable_program}
-            = "Error: \$var must be a valid executable path";
+            = "Fout: \$var moet een geldig uitvoerbaar pad zijn";
 $Lang{CfgEdit_Error__must_be_valid_option}
-            = "Error: \$var must be a valid option";
+            = "Fout: \$var is geen geldige optie";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "Copy host \$copyHost doesn't exist; creating full host name \$fullHost.  Delete this host if that is not what you wanted.";
-
+	    = "Te kopi&euml;ren machine \$copyHost bestaat niet; Machine \$fullHost wordt aangemaakt. Verwijder deze machine indien dit niet is wat je wil.";
+            
 $Lang{CfgEdit_Log_Copy_host_config}
-            = "\$User copied config from host \$fromHost to \$host\n";
+	    = "\$User kopieerde de instellingen van machine \$fromHost naar \$host\n";
 $Lang{CfgEdit_Log_Delete_param}
-            = "\$User deleted \$p from \$conf\n";
+            = "\$User verwijderde \$p van \$conf\n";
 $Lang{CfgEdit_Log_Add_param_value}
-            = "\$User added \$p to \$conf, set to \$value\n";
+            = "\$User voegde \$p toe aan \$conf, met waarde \$value\n";
 $Lang{CfgEdit_Log_Change_param_value}
-            = "\$User changed \$p in \$conf to \$valueNew from \$valueOld\n";
+            = "\$User wijzigde \$p in \$conf van \$valueOld naar \$valueNew \n";
 $Lang{CfgEdit_Log_Host_Delete}
-            = "\$User deleted host \$host\n";
+            = "\$User verwijderde machine \$host\n";
 $Lang{CfgEdit_Log_Host_Change}
-            = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
+            = "\$User machine \$host wijzigde \$key van \$valueOld naar \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
-            = "\$User added host \$host: \$value\n";
+            = "\$User voegde machine \$host toe: \$value\n";
   
 #end of lang_nl.pm
+

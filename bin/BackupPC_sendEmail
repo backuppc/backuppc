@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -61,20 +61,64 @@ use vars qw(%UserEmailInfo);
 do "$LogDir/UserEmailInfo.pl";
 
 my %opts;
-if ( !getopts("t", \%opts) || @ARGV != 0 ) {
-    print("usage: $0 [-t]\n");
+if ( !getopts("ctu:", \%opts) || @ARGV != 0 ) {
+    print <<EOF;
+usage: $0 [-t] [-c] [-u userEmail]
+options:
+
+  -t  display the emails that would be sent, without sending them
+
+  -c  check if BackupPC is alive and send an email if not
+
+  -u  send a test email to userEmail
+EOF
     exit(1);
 }
 
 my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
 if ( $err ) {
+    if ( $opts{c} && $Conf{EMailAdminUserName} ne "" ) {
+        my $headers = $Conf{EMailHeaders};
+        $headers .= "\n" if ( $headers !~ /\n$/ );
+        my $mesg = <<EOF;
+To: $Conf{EMailAdminUserName}
+Subject: BackupPC: can't connect to server
+$headers
+Error: cannot connect to BackupPC server.
+
+Regards,
+PC Backup Genie
+EOF
+        SendMail($mesg);
+        exit(1);
+    }
     print("Can't connect to server ($err)\n");
     exit(1);
 }
+exit(0) if ( $opts{c} );
 my $reply = $bpc->ServerMesg("status hosts");
 $reply = $1 if ( $reply =~ /(.*)/s );
 my(%Status, %Info, %Jobs, @BgQueue, @UserQueue, @CmdQueue);
 eval($reply);
+
+###########################################################################
+# Generate test message if required
+###########################################################################
+if ( $opts{u} ne "" ) {
+    my $headers = $Conf{EMailHeaders};
+    $headers .= "\n" if ( $headers !~ /\n$/ );
+    my $mesg = <<EOF;
+To: $opts{u}
+Subject: BackupPC test email
+$headers
+This is a test message from $0.
+
+Regards,
+PC Backup Genie
+EOF
+    SendMail($mesg);
+    exit(0);
+}
 
 ###########################################################################
 # Generate sysadmin warning messages
@@ -150,12 +194,7 @@ $headers
 ${mesg}Regards,
 PC Backup Genie
 EOF
-    if ( $opts{t} ) {
-        print("#" x 75, "\n");
-        print $mesg;
-    } else {
-	SendMail($mesg);
-    }
+    SendMail($mesg);
 }
 
 ###########################################################################
@@ -320,12 +359,7 @@ sub sendUserEmail
     $subj =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
     $vars->{subj}   = $subj;
     $mesg =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
-    if ( $opts{t} ) {
-        print("#" x 75, "\n");
-        print $mesg;
-    } else {
-    	SendMail($mesg);
-    }
+    SendMail($mesg);
     $UserEmailInfo{$user}{lastTime} = time;
     $UserEmailInfo{$user}{lastSubj} = $subj;
     $UserEmailInfo{$user}{lastHost} = $host;
@@ -334,14 +368,25 @@ sub sendUserEmail
 sub SendMail
 {
     my($mesg) = @_;
-    my($from) = $Conf{EMailFromUserName};
+    my $from = $Conf{EMailFromUserName};
+    my $utf8 = 1
+        if ( $Conf{EMailHeaders} =~ /Content-Type:.*charset="utf-?8"/i );
     local(*MAIL);
 
+    if ( $opts{t} ) {
+        binmode(STDOUT, ":utf8") if ( $utf8 );
+        print("#" x 75, "\n");
+        print $mesg;
+        return;
+    }
     $from = "-f $from" if ( $from ne "" );
+    print("Sending test email using $Conf{SendmailPath} -t $from\n")
+                if ( $opts{u} ne "" );
     if ( !open(MAIL, "|$Conf{SendmailPath} -t $from") ) {
     	printf("Can't run sendmail ($Conf{SendmailPath}): $!\n");
 	return;
     }
+    binmode(MAIL, ":utf8") if ( $utf8 );
     print MAIL $mesg;
     close(MAIL);
 }

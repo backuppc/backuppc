@@ -6,8 +6,8 @@ released on __RELEASEDATE__.
 =head2 Overview
 
 BackupPC is a high-performance, enterprise-grade system for backing up
-Unix, Linux and WinXX PCs, desktops and laptops to a server's disk.
-BackupPC is highly configurable and easy to install and maintain.
+Unix, Linux, WinXX, and MacOSX PCs, desktops and laptops to a server's
+disk.  BackupPC is highly configurable and easy to install and maintain.
 
 Given the ever decreasing cost of disks and raid systems, it is now
 practical and cost effective to backup a large number of machines onto
@@ -34,24 +34,24 @@ new files (those not already in the pool) need to be compressed.
 
 =item *
 
-A powerful http/cgi user interface allows administrators to view log
-files, configuration, current status and allows users to initiate and
-cancel backups and browse and restore files from backups.
+A powerful http/cgi user interface allows administrators to view
+the current status, edit configuration, add/delete hosts, view log
+files, and allows users to initiate and cancel backups and browse
+and restore files from backups.
 
 =item *
 
 The http/cgi user interface has internationalization (i18n) support,
-currently providing English, French, German, Spanish, Italian
-and Dutch.
+currently providing English, French, German, Spanish, Italian,
+Dutch and Portuguese-Brazilian.
 
 =item *
 
-No client-side software is needed. On WinXX the standard smb
-protocol is used to extract backup data. On linux or unix clients,
-rsync or tar (over ssh/rsh/nfs) is used to extract backup data.
-Alternatively, rsync can also be used on WinXX (using cygwin),
-and Samba could be installed on the linux or unix client to
-provide smb shares).
+No client-side software is needed. On WinXX the standard smb protocol is
+used to extract backup data. On linux, unix or MacOSX clients, rsync or
+tar (over ssh/rsh/nfs) is used to extract backup data. Alternatively,
+rsync can also be used on WinXX (using cygwin), and Samba could be
+installed on the linux or unix client to provide smb shares).
 
 =item *
 
@@ -107,25 +107,39 @@ number of older fulls that are 2, 4, 8, or 16 weeks apart).
 
 =item Incremental Backup
 
-An incremental backup is a backup of files that have changed (based on
-their modification time) since the last successful full backup.  For
-SMB and tar, BackupPC backups all files that have changed since one
-hour prior to the start of the last successful full backup.  Rsync is
-more clever: any files whose attributes have changed (ie: uid, gid,
-mtime, modes, size) since the last full are backed up.  Deleted, new
-files and renamed files are detected by Rsync incrementals.
-In constrast, SMB and tar incrementals are not able to detect deleted
-files, renamed files or new files whose modification time is prior to
-the last full dump.
+An incremental backup is a backup of files that have changed
+since the last successful full or incremental backup.  Starting
+in BackupPC 3.0 multi-level incrementals are supported.
+A full backup has level 0.  A new incremental of level N will
+backup all files that have changed since the most recent backup
+of a lower level.  $Conf{IncrLevels} is used to specify the
+level of each successive incremental.  The default value is
+all level 1, which makes the behavior the same as earlier
+versions of BackupPC: each incremental will back up all the
+files that changed since the last full (level 0).
+
+For SMB and tar, BackupPC uses the modification time (mtime) to
+determine which files have changed since the last lower-level
+backup.  That mean SMB and tar incrementals are not able to detect
+deleted files, renamed files or new files whose modification time
+is prior to the last lower-level backup.
+
+Rsync is more clever: any files whose attributes have changed (ie: uid,
+gid, mtime, modes, size) since the last full are backed up.  Deleted,
+new files and renamed files are detected by Rsync incrementals.
 
 BackupPC can also be configured to keep a certain number of incremental
 backups, and to keep a smaller number of very old incremental backups.
-(BackupPC does not support multi-level incremental backups, although it
-will in a future version.)
+If multi-level incrementals are specified then it is likely that
+more incrementals will need to be kept since lower-level incrementals
+(and the full backup) are needed to reconstruct a higher-level
+incremental.
 
-BackupPC's CGI interface "fills-in" incremental backups based on the 
-last full backup, giving every backup a "full" appearance.  This makes
-browsing and restoring backups easier.
+BackupPC "fills-in" incremental backups when browsing or restoring,
+based on the levels of each backup, giving every backup a "full"
+appearance.  This makes browsing and restoring backups much easier:
+you can restore from any one backup independent of whether it was
+an incremental or full.
 
 =item Partial Backup
 
@@ -251,15 +265,10 @@ Do not send subscription requests to this address!
 =item Other Programs of Interest
 
 If you want to mirror linux or unix files or directories to a remote server
-you should use rsync, L<http://rsync.samba.org>.  BackupPC now uses
+you should use rsync, L<http://rsync.samba.org>.  BackupPC uses
 rsync as a transport mechanism; if you are already an rsync user you
 can think of BackupPC as adding efficient storage (compression and
 pooling) and a convenient user interface to rsync.
-
-Unison is a utility that can do two-way, interactive, synchronization.
-See L<http://freshmeat.net/projects/unison>.  An external wrapper around
-rsync that maintains transfer data to enable two-way synchronization is
-drsync; see L<http://freshmeat.net/projects/drsync>.
 
 Two popular open source packages that do tape backup are
 Amanda (L<http://www.amanda.org>)
@@ -271,13 +280,18 @@ BackupPC server data to tape.
 Various programs and scripts use rsync to provide hardlinked backups.
 See, for example, Mike Rubel's site (L<http://www.mikerubel.org/computers/rsync_snapshots>),
 JW Schultz's dirvish (L<http://www.dirvish.org/>),
-Ben Escoto's rdiff-backup (L<http://rdiff-backup.stanford.edu>),
+Ben Escoto's rdiff-backup (L<http://www.nongnu.org/rdiff-backup>),
 and John Bowman's rlbackup (L<http://www.math.ualberta.ca/imaging/rlbackup>).
+
+Unison is a utility that can do two-way, interactive, synchronization.
+See L<http://freshmeat.net/projects/unison>.  An external wrapper around
+rsync that maintains transfer data to enable two-way synchronization is
+drsync; see L<http://freshmeat.net/projects/drsync>.
 
 BackupPC provides many additional features, such as compressed storage,
 hardlinking any matching files (rather than just files with the same name),
-and storing special files without root privileges.  But these other scripts
-provide simple and effective solutions and are definitely worthy of
+and storing special files without root privileges.  But these other programs
+provide simple, effective and fast solutions and are definitely worthy of
 consideration.
 
 =back
@@ -369,7 +383,6 @@ Rsync as a transport method.
 If you are using smb to backup WinXX machines you need smbclient and
 nmblookup from the samba package.  You will also need nmblookup if
 you are backing up linux/unix DHCP machines.  See L<http://www.samba.org>.
-Version 2.2.0 or later of Samba is required.
 Samba versions 3.x are stable and now recommended instead of 2.x.
 
 See L<http://www.samba.org> for source and binaries.  It's pretty easy to
@@ -383,18 +396,18 @@ If you are using tar to backup linux/unix machines you should have version
 1.13.7 at a minimum, with version 1.13.20 or higher recommended.  Use
 "tar --version" to check your version.  Various GNU mirrors have the newest
 versions of tar, see for example L<http://www.funet.fi/pub/gnu/alpha/gnu/tar>.
-As of June 2003 the latest version is 1.13.25.
+As of July 2006 the latest version is 1.15.1.
 
 =item *
 
 If you are using rsync to backup linux/unix machines you should have
-version 2.5.5 or higher on each client machine.  See
+version 2.6.3 or higher on each client machine.  See
 L<http://rsync.samba.org>. Use "rsync --version" to check your version.
 
 For BackupPC to use Rsync you will also need to install the perl
 File::RsyncP module, which is available from
 L<http://perlrsync.sourceforge.net>.
-Version 0.52 or later is required.
+Version 0.70 or later is required.
 
 =item *
 
@@ -468,7 +481,7 @@ be installed with the command:
 In the future there might be packages for Gentoo and other
 linux flavors.  If the packaged version is older than the
 released version then you will probably want to install the
-lastest version as described below.
+latest version as described below.
 
 Otherwise, manually fetching and installing BackupPC is easy.
 Start by downloading the latest version from
@@ -495,6 +508,13 @@ To support restore via Zip archives you will need to install
 Archive::Zip, also from L<http://www.cpan.org>.
 You can run "perldoc Archive::Zip" to see if this module is installed.
 
+=item XML::RSS
+
+To support the RSS feature you will need to install XML::RSS, also from
+L<http://www.cpan.org>.  There is not need to install this module if you
+don't plan on using RSS. You can run "perldoc XML::RSS" to see if this
+module is installed.
+
 =item File::RsyncP
 
 To use rsync and rsyncd with BackupPC you will need to install File::RsyncP.
@@ -507,8 +527,8 @@ Version 0.52 or later is required.
 To build and install these packages, fetch the tar.gz file and
 then run these commands:
 
-    tar zxvf Archive-Zip-1.01.tar.gz
-    cd Archive-Zip-1.01
+    tar zxvf Archive-Zip-1.16.tar.gz
+    cd Archive-Zip-1.16
     perl Makefile.PL
     make
     make test
@@ -529,17 +549,17 @@ the form
 
     BackupPC-__VERSION__plN.diff
 
-where N is the patch level, eg: pl5 is patch-level 5.  These
+where N is the patch level, eg: pl2 is patch-level 2.  These
 patch files are cumulative: you only need apply the last patch
 file, not all the earlier patch files.  If a patch file is
-available, eg: BackupPC-__VERSION__pl5.diff, you should apply
+available, eg: BackupPC-__VERSION__pl2.diff, you should apply
 the patch after extracting the tar file:
 
      # fetch BackupPC-__VERSION__.tar.gz
-     # fetch BackupPC-__VERSION__pl5.diff
+     # fetch BackupPC-__VERSION__pl2.diff
      tar zxf BackupPC-__VERSION__.tar.gz
      cd BackupPC-__VERSION__
-     patch -p0 < ../BackupPC-__VERSION__pl5.diff
+     patch -p0 < ../BackupPC-__VERSION__pl2.diff
      perl configure.pl
 
 A patch file includes comments that describe that bug fixes
@@ -552,9 +572,21 @@ read with perldoc:
 
     perldoc configure.pl
 
+Starting with BackupPC 3.0.0, the configure.pl script by default
+complies with the file system hierarchy conventions.  The major
+difference compared to earlier versions is that by default
+configuration files will be stored in /etc/BackupPC
+rather than below the data directory, __TOPDIR__/conf,
+and the log files will be stored in /var/log/BackupPC.
+rather than below the data directory, __TOPDIR__/log.
+
+If you are upgrading from an earlier version the configure.pl script
+will keep the configuration files and log files in their original
+location.
+
 When you run configure.pl you will be prompted for the full paths
 of various executables, and you will be prompted for the following
-information:
+information.
 
 =over 4
 
@@ -569,16 +601,15 @@ sure the BackupPC user's group is chosen restrictively.
 
 On this installation, this is __BACKUPPCUSER__.
 
-For security purposes you might choose to configre the BackupPC
+For security purposes you might choose to configure the BackupPC
 user with the shell set to /bin/false.  Since you might need to
 run some BackupPC programs as the BackupPC user for testing
 purposes, you can use the -s option to su to explicitly run
 a shell, eg:
 
     su -s /bin/bash __BACKUPPCUSER__
-    
-Depending upon your configuration you might also need
-the -l option.
+
+Depending upon your configuration you might also need the -l option.
 
 =item Data Directory
 
@@ -590,14 +621,14 @@ On this installation, this is __TOPDIR__.
 =item Install Directory
 
 You should decide where the BackupPC scripts, libraries and documentation
-should be installed, eg: /opt/local/BackupPC.
+should be installed, eg: /usr/local/BackupPC.
 
 On this installation, this is __INSTALLDIR__.
 
 =item CGI bin Directory
 
 You should decide where the BackupPC CGI script resides.  This will
-usually below Apache's cgi-bin directory.
+usually be below Apache's cgi-bin directory.
 
 On this installation, this is __CGIDIR__.
 
@@ -607,12 +638,25 @@ A directory where BackupPC's images are stored so that Apache can
 serve them.  This should be somewhere under Apache's DocumentRoot
 directory.
 
+=item Config and Log directories
+
+In this installation the configuration and log directories are
+located in the following locations:
+
+    __CONFDIR__/config.pl    main config file
+    __CONFDIR__/hosts        hosts file
+    __CONFDIR__/pc/HOST.pl   per-pc config file
+    __LOGDIR__/BackupPC      log files, pid, status
+
+The configure.pl script doesn't prompt for these locations but
+they can be set for new installations using command-line options.
+
 =back
 
 =head2 Step 3: Setting up config.pl
 
 After running configure.pl, browse through the config file,
-__TOPDIR__/conf/config.pl, and make sure all the default settings
+__CONFDIR__/config.pl, and make sure all the default settings
 are correct. In particular, you will need to decide whether to use
 smb, tar or rsync transport (or whether to set it on a per-PC basis)
 and set the relevant parameters for that transport method.
@@ -620,7 +664,7 @@ See the section L<Client Setup|step 5: client setup> for more details.
 
 =head2 Step 4: Setting up the hosts file
 
-The file __TOPDIR__/conf/hosts contains the list of clients to backup.
+The file __CONFDIR__/hosts contains the list of clients to backup.
 BackupPC reads this file in three cases:
 
 =over 4
@@ -720,9 +764,9 @@ Here's a simple example of a hosts file:
 
 =head2 Step 5: Client Setup
 
-Two methods for getting backup data from a client are supported: smb and
-tar. Smb or rsync are the preferred methods for WinXX clients and rsync or
-tar are the preferred methods for linux/unix clients.
+Three methods for getting backup data from a client are supported: smb,
+tar and rsync.  Smb or rsync are the preferred methods for WinXX clients
+and rsync or tar are the preferred methods for linux/unix/MacOSX clients.
 
 The transfer method is set using the $Conf{XferMethod} configuration
 setting. If you have a mixed environment (ie: you will use smb for some
@@ -815,16 +859,17 @@ is not world (other) readable.
 =item *
 
 As a configuration variable $Conf{SmbSharePasswd} in
-__TOPDIR__/conf/config.pl.  If you put the password
+__CONFDIR__/config.pl.  If you put the password
 here you must make sure this file is not world (other) readable.
 
 =item *
 
 As a configuration variable $Conf{SmbSharePasswd} in the per-PC
-configuration file, __TOPDIR__/pc/$host/config.pl. You will have to
-use this option if the smb share password is different for each host.
-If you put the password here you must make sure this file is not
-world (other) readable.
+configuration file (__CONFDIR__/pc/$host.pl or
+__TOPDIR__/pc/$host/config.pl in non-FHS versions of BackupPC).
+You will have to use this option if the smb share password is different
+for each host. If you put the password here you must make sure this file
+is not world (other) readable.
 
 =back
 
@@ -890,8 +935,8 @@ $Conf{TarIncrArgs}, and $Conf{TarClientRestoreCmd}.
 
 =item rsync
 
-You should have at least rsync 2.5.5, and the latest version 2.5.6
-is recommended.  Rsync is run on the remote client via rsh or ssh.
+You should have at least rsync 2.6.3, and the latest version is
+recommended.  Rsync is run on the remote client via rsh or ssh.
 
 The relevant configuration settings are $Conf{RsyncClientPath},
 $Conf{RsyncClientCmd}, $Conf{RsyncClientRestoreCmd}, $Conf{RsyncShareName},
@@ -899,8 +944,8 @@ $Conf{RsyncArgs}, and $Conf{RsyncRestoreArgs}.
 
 =item rsyncd
 
-You should have at least rsync 2.5.5, and the latest version 2.6.2
-is recommended.  In this case the rsync daemon should be running on
+You should have at least rsync 2.6.3, and the latest version is
+recommended.  In this case the rsync daemon should be running on
 the client machine and BackupPC connects directly to it.
 
 The relevant configuration settings are $Conf{RsyncdClientPort},
@@ -948,11 +993,14 @@ for a password. There are two common versions of ssh: v1 and v2. Here
 are some instructions for one way to setup ssh.  (Check which version
 of SSH you have by typing "ssh" or "man ssh".)
 
-=item Mac OS X
+=item MacOSX
 
 In general this should be similar to Linux/Unix machines.
-Mark Stosberg reports that you can also use hfstar.
-See L<http://fink.sourceforge.net/pdb/package.php/hfstar>.
+In versions 10.4 and later, the native MacOSX tar works,
+and also supports resource forks.  xtar is another option,
+and rsync works too (although the MacOSX-supplied rsync
+has an extension for extended attributes that is not
+compatible with standard rsync).
 
 =item SSH Setup
 
@@ -1015,7 +1063,7 @@ as user __BACKUPPCUSER__.  The -d option tells BackupPC to run as a daemon
 (ie: it does an additional fork).
 
 Any immediate errors will be printed to stderr and BackupPC will quit.
-Otherwise, look in __TOPDIR__/log/LOG and verify that BackupPC reports
+Otherwise, look in __LOGDIR__/LOG and verify that BackupPC reports
 it has started and all is ok.
 
 =head2 Step 7: Talking to BackupPC
@@ -1033,7 +1081,7 @@ configured with /bin/false as the shell, you can use the -s
 option to su to explicitly run a shell, eg:
 
     su -s /bin/bash __BACKUPPCUSER__
-    
+
 Depending upon your configuration you might also need
 the -l option.
 
@@ -1053,7 +1101,7 @@ then all is ok.
 
 The jobs status should initially show just BackupPC_trashClean.
 The hosts status should produce a list of every host you have listed
-in __TOPDIR__/conf/hosts as part of a big cryptic output line.
+in __CONFDIR__/hosts as part of a big cryptic output line.
 
 You can also request that all hosts be queued:
 
@@ -1063,7 +1111,30 @@ At this point you should make sure the CGI interface works since
 it will be much easier to see what is going on.  That's our
 next subject.
 
-=head2 Step 8: CGI interface
+=head2 Step 8: Checking email delivery
+
+The script BackupPC_sendEmail sends status and error emails to
+the administrator and users.  It is usually run each night
+by BackupPC_nightly.
+
+To verify that it can run sendmail and deliver email correctly
+you should ask it to send a test email to you:
+
+    su __BACKUPPCUSER__
+    __INSTALLDIR__/bin/BackupPC_sendEmail -u MYNAME@MYDOMAIN.COM
+
+BackupPC_sendEmail also takes a -c option that checks if BackupPC
+is running, and it sends an email to $Conf{EMailAdminUserName}
+if it is not.  That can be used as a keep-alive check by adding
+
+    __INSTALLDIR__/bin/BackupPC_sendEmail -c
+
+to __BACKUPPCUSER__'s cron.
+
+The -t option to BackupPC_sendEmail causes it to print the email
+message instead of invoking sendmail to deliver the message.
+
+=head2 Step 9: CGI interface
 
 The CGI interface script, BackupPC_Admin, is a powerful and flexible
 way to see and control what BackupPC is doing.  It is written for an
@@ -1385,122 +1456,12 @@ The backup data directories contain large numbers of hardlinks.  If
 you try to copy the pool the target directory will occupy a lot more
 space if the hardlinks aren't re-established.
 
-The GNU cp program with the -a option is aware of hardlinks and knows
-to re-establish them.  So GNU cp -a is the recommended way to copy
-the data directory and pool.  Don't forget to stop BackupPC while
-the copy runs.
-
-=item Compressing an existing pool
-
-If you are upgrading BackupPC and want to turn compression on you have
-two choices:
-
-=over 4
-
-=item *
-
-Simply turn on compression.  All new backups will be compressed. Both old
-(uncompressed) and new (compressed) backups can be browsed and viewed.
-Eventually, the old backups will expire and all the pool data will be
-compressed. However, until the old backups expire, this approach could
-require 60% or more additional pool storage space to store both
-uncompressed and compressed versions of the backup files.
-
-=item *
-
-Convert all the uncompressed pool files and backups to compressed.
-The script __INSTALLDIR__/bin/BackupPC_compressPool does this.
-BackupPC must not be running when you run BackupPC_compressPool.
-Also, there must be no existing compressed backups when you
-run BackupPC_compressPool.
-
-BackupPC_compressPool compresses all the files in the uncompressed pool
-(__TOPDIR__/pool) and moves them to the compressed pool
-(__TOPDIR__/cpool). It rewrites the files in place, so that the
-existing hardlinks are not disturbed.
-
-=back
-
-The rest of this section discusses how to run BackupPC_compressPool.
-
-BackupPC_compressPool takes three command line options:
-
-=over 4
-
-=item -t
-
-Test mode: do everything except actually replace the pool files.
-Useful for estimating total run time without making any real
-changes.
-
-=item -r
-
-Read check: re-read the compressed file and compare it against
-the original uncompressed file.  Can only be used in test mode.
-
-=item -c #
-
-Number of children to fork. BackupPC_compressPool can take a long time
-to run, so to speed things up it spawns four children, each working on a
-different part of the pool. You can change the number of children with
-the -c option.
-
-=back
-
-Here are the recommended steps for running BackupPC_compressPool:
-
-=over 4
-
-=item *
-
-Stop BackupPC (eg: "/etc/init.d/backuppc stop").
-
-=item *
-
-Set $Conf{CompressLevel} to a non-zero number (eg: 3).
-
-=item *
-
-Do a dry run of BackupPC_compressPool.  Make sure you run this as
-the BackupPC user (__BACKUPPCUSER__):
-
-    BackupPC_compressPool -t -r
-
-The -t option (test mode) makes BackupPC_compressPool do all the steps,
-but not actually change anything. The -r option re-reads the compressed
-file and compares it against the original.
-
-BackupPC_compressPool gives a status as it completes each 1% of the job.
-It also shows the cumulative compression ratio and estimated completion
-time.  Once you are comfortable that things look ok, you can kill
-BackupPC_compressPool or wait for it to finish.
-
-=item *
-
-Now you are ready to run BackupPC_compressPool for real.  Once again,
-as the BackupPC user (__BACKUPPCUSER__), run:
-
-    BackupPC_compressPool
-
-You should put the output into a file and tail this file.  (The running
-time could be twice as long as the test mode since the test mode file
-writes are immediately followed by an unlink, so in test mode it is
-likely the file writes never make it to disk.)
-
-It is B<critical> that BackupPC_compressPool runs to completion before
-re-starting BackupPC.  Before BackupPC_compressPool completes, none of
-the existing backups will be in a consistent state.  If you must stop
-BackupPC_compressPool for some reason, send it an INT or TERM signal
-and give it several seconds (or more) to clean up gracefully.
-After that, you can re-run BackupPC_compressPool and it will start
-again where it left off.  Once again, it is critical that it runs
-to 100% completion.
-
-=back
-
-After BackupPC_compressPool completes you should have a complete set
-of compressed backups (and your disk usage should be lower).  You
-can now re-start BackupPC.
+The best way to copy a pool file system, if possible, is by copying
+the raw device at the block level (eg: using dd).  Application level
+programs that understand hardlinks include the GNU cp program with
+the -a option and rsync -H.  However, the large number of hardlinks
+in the pool will make the memory usage large and the copy very slow.
+Don't forget to stop BackupPC while the copy runs.
 
 =back
 
@@ -1806,6 +1767,52 @@ The next screen allows you to adjust the parameters for this archive run.
 Press the "Start the Archive" to start archiving the selected hosts with the
 parameters displayed.
 
+=head1 Other CGI Functions
+
+=head2 Configuration and Host Editor
+
+The CGI interface has a complete configuration and host editor.
+Only the administrator can edit the main configuration settings
+and hosts.  The edit links are in the left navigation bar.
+
+When changes are made to any parameter a "Save" button appears
+at the top of the page.  If you are editing a text box you will
+need to click outside of the text box to make the Save button
+appear.  If you don't select Save then the changes won't be saved.
+
+The host-specific configuration can be edited from the host
+summary page using the link in the left navigation bar.
+The administrator can edit any of the host-specific
+configuration settings.
+
+When editing the host-specific configuration, each parameter has
+an "override" setting that denotes the value is host-specific,
+meaning that it overrides the setting in the main configuration.
+If you unselect "override" then the setting is removed from
+the host-specific configuration, and the main configuration
+file is displayed.
+
+User's can edit their host-specific configuration if enabled
+via $Conf{CgiUserConfigEditEnable}.  The specific subset
+of configuration settings that a user can edit is specified
+with $Conf{CgiUserConfigEdit}.  It is recommended to make this
+list short as possible (you probably don't want your users saving
+dozens of backups) and it is essential that they can't edit any
+of the Cmd configuration settings, otherwise they can specify
+an arbitrary command that will be executed as the BackupPC
+user.
+
+=head2 RSS
+
+BackupPC supports a very basic RSS feed.  Provided you have the
+XML::RSS perl module installed, a URL simular to this will
+provide RSS information:
+
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=rss
+
+This feature is experimental.  The information included will
+probably change.
+
 =head1 BackupPC Design
 
 =head2 Some design issues
@@ -1885,7 +1892,7 @@ a factor of 8 or more overall saving in backup storage.
 =head2 BackupPC operation
 
 BackupPC reads the configuration information from
-__TOPDIR__/conf/config.pl. It then runs and manages all the backup
+__CONFDIR__/config.pl. It then runs and manages all the backup
 activity. It maintains queues of pending backup requests, user backup
 requests and administrative commands. Based on the configuration various
 requests will be executed simultaneously.
@@ -2004,18 +2011,17 @@ BackupPC_trashClean is always run in the background to remove any
 expired backups. Every 5 minutes it wakes up and removes all the files
 in __TOPDIR__/trash.
 
-Also, once each night, BackupPC_nightly is run to complete some additional
-administrative tasks, such as cleaning the pool.  This involves removing
-any files in the pool that only have a single hard link (meaning no backups
-are using that file).  Again, to avoid race conditions, BackupPC_nightly
-is only run when there are no BackupPC_dump or BackupPC_link processes
-running.  Therefore, when it is time to run BackupPC_nightly, no new
-backups are started and BackupPC waits until all backups have finished.
-Then BackupPC_nightly is run, and until it finishes no new backups are
-started.  If BackupPC_nightly takes too long to run, the settings
-$Conf{MaxBackupPCNightlyJobs} and $Conf{BackupPCNightlyPeriod} can
-be used to run several BackupPC_nightly processes in parallel, and
-to split its job over several nights.
+Also, once each night, BackupPC_nightly is run to complete some
+additional administrative tasks, such as cleaning the pool.  This
+involves removing any files in the pool that only have a single
+hard link (meaning no backups are using that file).  Again, to
+avoid race conditions, BackupPC_nightly is only run when there
+are no BackupPC_link processes running.  When BackupPC_nightly is
+run no new BackupPC_link jobs are started.  If BackupPC_nightly
+takes too long to run, the settings $Conf{MaxBackupPCNightlyJobs}
+and $Conf{BackupPCNightlyPeriod} can be used to run several
+BackupPC_nightly processes in parallel, and to split its job over
+several nights.
 
 =back
 
@@ -2025,7 +2031,7 @@ user-initiated backup or backup cancel requests.
 
 =head2 Storage layout
 
-BackupPC resides in three directories:
+BackupPC resides in several directories:
 
 =over 4
 
@@ -2039,20 +2045,12 @@ is in __INSTALLDIR__/doc.
 
 The CGI script BackupPC_Admin resides in this cgi binary directory.
 
-=item __TOPDIR__
+=item __CONFDIR__
 
-All of BackupPC's data (PC backup images, logs, configuration information)
-is stored below this directory.
+All the configuration information resides below __CONFDIR__.
+This directory contains:
 
-=back
-
-Below __TOPDIR__ are several directories:
-
-=over 4
-
-=item __TOPDIR__/conf
-
-The directory __TOPDIR__/conf contains:
+The directory __CONFDIR__ contains:
 
 =over 4
 
@@ -2065,11 +2063,21 @@ below for more details.
 
 Hosts file, which lists all the PCs to backup.
 
+=item pc
+
+The directory __CONFDIR__/pc contains per-client configuration files
+that override settings in the main configuration file.  Each file
+is named __CONFDIR__/pc/HOST.pl, where HOST is the host name.
+
+In pre-FHS versions of BackupPC these files were located in
+__TOPDIR__/pc/HOST/config.pl.
+
 =back
 
-=item __TOPDIR__/log
+=item __LOGDIR__
 
-The directory __TOPDIR__/log contains:
+The directory __LOGDIR__ (__TOPDIR__/log on pre-FHS versions
+of BackupPC) contains:
 
 =over 4
 
@@ -2098,6 +2106,17 @@ A summary of what email was last sent to each user, and when the
 last email was sent.  Should not be edited.
 
 =back
+
+=item __TOPDIR__
+
+All of BackupPC's data (PC backup images, logs, configuration information)
+is stored below this directory.
+
+=back
+
+Below __TOPDIR__ are several directories:
+
+=over 4
 
 =item __TOPDIR__/trash
 
@@ -2177,10 +2196,12 @@ following files:
 
 Current log file for this PC from BackupPC_dump.
 
-=item LOG.0 or LOG.0.z
+=item LOG.DDMMYYYY or LOG.DDMMYYYY.z
 
 Last month's log file.  Log files are aged monthly and compressed
 (if compression is enabled), and old LOG files are deleted.
+In earlier versions of BackupPC these files used to have
+a suffix of 0, 1, ....
 
 =item XferERR or XferERR.z
 
@@ -2230,8 +2251,10 @@ to the backup or restore number.)
 
 =item config.pl
 
-Optional configuration settings specific to this host.  Settings in this
-file override the main configuration file.
+Old location of optional configuration settings specific to this host.
+Settings in this file override the main configuration file.
+In new versions of BackupPC the per-host configuration files are
+stored in __CONFDIR__/pc/HOST.pl.
 
 =item backups
 
@@ -2642,8 +2665,9 @@ discussion of some of various security issues.
 
 =head1 Configuration File
 
-The BackupPC configuration file resides in __TOPDIR__/conf/config.pl.
-Optional per-PC configuration files reside in __TOPDIR__/pc/$host/config.pl.
+The BackupPC configuration file resides in __CONFDIR__/config.pl.
+Optional per-PC configuration files reside in __CONFDIR__/pc/$host.pl
+(or __TOPDIR__/pc/$host/config.pl in non-FHS versions of BackupPC).
 This file can be used to override settings just for a particular PC.
 
 =head2 Modifying the main configuration file
@@ -2683,47 +2707,9 @@ LOG file, so you can tail it (or view it via the CGI interface) to make
 sure your kill -HUP worked. Errors in parsing the configuration file are
 also reported in the LOG file.
 
-The optional per-PC configuration file (__TOPDIR__/pc/$host/config.pl)
+The optional per-PC configuration file (__CONFDIR__/pc/$host.pl or
+__TOPDIR__/pc/$host/config.pl in non-FHS versions of BackupPC)
 is read whenever it is needed by BackupPC_dump, BackupPC_link and others.
-
-=head2 Configuration file includes
-
-If you have a heterogeneous set of clients (eg: a variety of WinXX and
-linux/unix machines) you will need to create host-specific config.pl files
-for some or all of these machines to customize the default settings from
-the master config.pl file (at a minimum to set $Conf{XferMethod}).
-
-Since the config.pl file is just regular perl code, you can include
-one config file from another.  For example, imagine you had three general
-classes of machines: WinXX desktops, linux machines in the DMZ and
-linux desktops.  You could create three config files in __TOPDIR__/conf:
-
-    __TOPDIR__/conf/ConfigWinDesktop.pl
-    __TOPDIR__/conf/ConfigLinuxDMZ.pl
-    __TOPDIR__/conf/ConfigLinuxDesktop.pl
-
-From each client's directory you can either add a symbolic link to
-the appropriate config file:
-
-    cd __TOPDIR__/pc/$host
-    ln -s ../../conf/ConfigWinDesktop.pl config.pl
-
-or, better yet, create a config.pl file in __TOPDIR__/pc/$host
-that includes the default config.pl file using perl's "do"
-command:
-
-    do "__TOPDIR__/conf/ConfigWinDesktop.pl";
-
-This alternative allows you to set other configuration options
-specific to each host after the "do" command (perhaps even
-overriding the settings in the included file).
-
-Note that you could also include snippets of configuration settings
-from the main configuration file.  However, be aware that the
-modification-time checking that BackupPC does only applies to the
-main configuration file: if you change one of the included files,
-BackupPC won't notice.  You will need to either touch the main
-configuration file too, or send BackupPC a HUP (-1) signal.
 
 =head1 Configuration Parameters
 
@@ -2760,7 +2746,7 @@ See L<http://backuppc.sourceforge.net>.
 
 =head1 Copyright
 
-Copyright (C) 2001-2005 Craig Barratt
+Copyright (C) 2001-2006 Craig Barratt
 
 =head1 Credits
 
@@ -2795,6 +2781,8 @@ with some tweaks from Guus Houtzager.
 
 Reginaldo Ferreira provided the Portuguese Brazillian translation
 pt_br.pm for v2.2.0.
+
+Rich Duzenbury provided the RSS feed option to the CGI interface.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.

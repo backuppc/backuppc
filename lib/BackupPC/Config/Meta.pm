@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -281,7 +281,7 @@ use vars qw(%ConfigMeta);
     RestorePostUserCmd	=> {type => "string", undefIfEmpty => 1},
     ArchivePreUserCmd	=> {type => "string", undefIfEmpty => 1},
     ArchivePostUserCmd	=> {type => "string", undefIfEmpty => 1},
-    UserCmdCheckStatus  => "integer",
+    UserCmdCheckStatus  => "boolean",
 
     ClientNameAlias 	=> {type => "string", undefIfEmpty => 1},
 
@@ -365,6 +365,7 @@ use vars qw(%ConfigMeta);
                 IncrKeepCnt               => "boolean",
                 IncrKeepCntMin            => "boolean",
                 IncrAgeMax                => "boolean",
+                IncrLevels                => "boolean",
                 PartialAgeMax             => "boolean",
                 IncrFill                  => "boolean",
                 RestoreInfoKeepCnt        => "boolean",
@@ -420,6 +421,7 @@ use vars qw(%ConfigMeta);
                 ArchivePostUserCmd        => "boolean",
                 DumpPostShareCmd          => "boolean",
                 DumpPreShareCmd           => "boolean",
+                UserCmdCheckStatus        => "boolean",
                 EMailNotifyMinDays        => "boolean",
                 EMailFromUserName         => "boolean",
                 EMailAdminUserName        => "boolean",
@@ -432,6 +434,7 @@ use vars qw(%ConfigMeta);
                 EMailNotifyOldOutlookDays => "boolean",
                 EMailOutlookBackupSubj    => "boolean",
                 EMailOutlookBackupMesg    => "boolean",
+                EMailHeaders              => "boolean",
 	    },
     },
 

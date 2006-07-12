@@ -1,7 +1,7 @@
 /*
  * BackupPC standard CSS definitions
  *
- * Version 2.1.0, released 20 Jun 2004.
+ * Version 3.0.0beta0, released 11 Jul 2006.
  *
  * See http://backuppc.sourceforge.net.
  *
@@ -134,6 +134,10 @@ a.navbar {
 
 .editComment {
     font-size:10pt;
+}
+
+.editTextInput {
+    font-family:courier;
 }
 
 .fviewheader {

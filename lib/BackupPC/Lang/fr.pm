@@ -24,10 +24,12 @@ $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
 \${h2("Contrôle du serveur")}
-<form action="\$MyURL" method="get">
+<form name="ReloadForm" action="\$MyURL" method="get">
+<input type="hidden" name="action" value="">
 <table class="tableStnd">
-<!--<tr><td>Arrêter le serveur:<td><input type="submit" name="action" value="Arrêter">-->
-  <tr><td>Recharger la configuration:<td><input type="submit" name="action" value="Recharger">
+  <tr><td>Recharger la configuration:<td><input type="button" value="Recharger"
+     onClick="document.ReloadForm.action.value='Reload';
+              document.ReloadForm.submit();">
 </table>
 </form>
 <!--
@@ -232,7 +234,7 @@ Prêt à démarrer l'archivage des hôtes suivants
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 \$paramStr
 <tr>
-    <td colspan=2><input type="submit" value="Démarrer l'archivage" name=""></td>
+    <td colspan=2><input type="submit" value="Démarrer l'archivage" name="ignore"></td>
 </tr>
 </form>
 </table>
@@ -298,13 +300,16 @@ $Lang{Are_you_sure_start} = <<EOF;
 <p>
 Vous allez bientôt démarrer une sauvegarde \$type depuis \$host.
 
-<form action="\$MyURL" method="get">
+<form name="Confirm" action="\$MyURL" method="get">
 <input type="hidden" name="host" value="\$host">
 <input type="hidden" name="hostIP" value="\$ipAddr">
 <input type="hidden" name="doit" value="1">
+<input type="hidden" name="action" value="">
 Voulez-vous vraiment le faire ?
-<input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="Non" name="">
+<input type="button" value="\$buttonText"
+  onClick="document.Confirm.action.value='\$In{action}';
+           document.Confirm.submit();">
+<input type="submit" value="Non" name="ignore">
 </form>
 EOF
 # --------------------------------
@@ -317,15 +322,18 @@ $Lang{Are_you_sure_stop} = <<EOF;
 <p>
 Vous êtes sur le point d\'arrêter/supprimer de la file les sauvegardes de \$host;
 
-<form action="\$MyURL" method="get">
-<input type="hidden" name="host" value="\$host">
-<input type="hidden" name="doit" value="1">
+<form name="Confirm" action="\$MyURL" method="get">
+<input type="hidden" name="host"   value="\$host">
+<input type="hidden" name="doit"   value="1">
+<input type="hidden" name="action" value="">
 En outre, prière de ne pas démarrer d\'autres sauvegarde pour
 <input type="text" name="backoff" size="10" value="\$backoff"> heures.
 <p>
 Voulez-vous vraiment le faire ?
-<input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="Non" name="">
+<input type="button" value="\$buttonText"
+  onClick="document.Confirm.action.value='\$In{action}';
+           document.Confirm.submit();">
+<input type="submit" value="Non" name="ignore">
 </form>
 
 EOF
@@ -475,7 +483,7 @@ tous les fichiers correspondant à ceux que vous avez sélectionnés vont être effa
     <td valign="top"><input type="text" size="40" maxlength="256"
 	value="\${EscHTML(\$pathHdr)}" name="pathHdr"></td>
 </tr><tr>
-    <td><input type="submit" value="Démarrer la restauration" name=""></td>
+    <td><input type="submit" value="Démarrer la restauration" name="ignore"></td>
 </table>
 </form>
 EOF
@@ -510,7 +518,7 @@ et transférer cette archive, et vous aurez besoin d\'assez d\'espace disque pour
 Compression (0=désactivée, 1=rapide,...,9=meilleure)
 <input type="text" size="6" value="5" name="compressLevel">
 <br>
-<input type="submit" value="Télécharger le fichier Zip" name="">
+<input type="submit" value="Télécharger le fichier Zip" name="ignore">
 </form>
 EOF
 
@@ -552,7 +560,7 @@ d\'espace disque local pour la stocker.
 \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (Autrement l\'archive contiendra des chemins absolus).
 <br>
-<input type="submit" value="Télécharger le fichier Tar" name="">
+<input type="submit" value="Télécharger le fichier Tar" name="ignore">
 </form>
 EOF
 
@@ -572,17 +580,20 @@ dans le partage \$In{shareDest}, depuis la sauvegarde numéro \$num:
 \$fileListStr
 </table>
 
-<form action="\$MyURL" method="post">
+<form name="RestoreForm" action="\$MyURL" method="post">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
 <input type="hidden" name="hostDest" value="\${EscHTML(\$In{hostDest})}">
 <input type="hidden" name="shareDest" value="\${EscHTML(\$In{shareDest})}">
 <input type="hidden" name="pathHdr" value="\${EscHTML(\$In{pathHdr})}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="4">
+<input type="hidden" name="action" value="">
 \$hiddenStr
 Voulez-vous vraiment le faire ?
-<input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="Non" name="">
+<input type="button" value="\$Lang->{Restore}"
+ onClick="document.RestoreForm.action.value='Restore';
+          document.RestoreForm.submit();">
+<input type="submit" value="No" name="ignore">
 </form>
 EOF
 
@@ -616,11 +627,16 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </p>
 \${h2("Actions de l\'utilisateur")}
 <p>
-<form action="\$MyURL" method="get">
-<input type="hidden" name="host" value="\$host">
+<form name="StartStopForm" action="\$MyURL" method="get">
+<input type="hidden" name="host"   value="\$host">
+<input type="hidden" name="action" value="">
 \$startIncrStr
-<input type="submit" value="$Lang{Start_Full_Backup}" name="action">
-<input type="submit" value="$Lang{Stop_Dequeue_Backup}" name="action">
+<input type="button" value="\$Lang->{Start_Full_Backup}"
+ onClick="document.StartStopForm.action.value='Start_Full_Backup';
+          document.StartStopForm.submit();">
+<input type="button" value="\$Lang->{Stop_Dequeue_Backup}"
+ onClick="document.StartStopForm.action.value='Stop_Dequeue_Backup';
+          document.StartStopForm.submit();">
 </form>
 </p>
 \${h2("Résumé de la sauvegarde")}
@@ -722,11 +738,16 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 
 \${h2("User Actions")}
 <p>
-<form action="\$MyURL" method="get">
+<form name="StartStopForm" action="\$MyURL" method="get">
 <input type="hidden" name="archivehost" value="\$host">
 <input type="hidden" name="host" value="\$host">
-<input type="submit" value="$Lang{Start_Archive}" name="action">
-<input type="submit" value="$Lang{Stop_Dequeue_Archive}" name="action">
+<input type="hidden" name="action" value="">
+<input type="button" value="\$Lang->{Start_Archive}"
+ onClick="document.StartStopForm.action.value='Start_Archive';
+          document.StartStopForm.submit();">
+<input type="button" value="\$Lang->{Stop_Dequeue_Archive}"
+ onClick="document.StartStopForm.action.value='Stop_Dequeue_Archive';
+          document.StartStopForm.submit();">
 </form>
 
 
@@ -797,7 +818,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="host" value="\$host">
 <input type="hidden" name="share" value="\${EscHTML(\$share)}">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
-<input type="hidden" name="action" value="$Lang{Restore}">
+<input type="hidden" name="action" value="Restore">
 <br>
 <table width="100%">
 <tr><td valign="top">
@@ -1084,7 +1105,7 @@ $Lang{__time0_to__time1_on__days} = "\$t0 à \$t1 pendant \$days";
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
 <li>Les sauvegardes sont reportées pour \$hours heures
-(<a href=\"\$MyURL?action=\${EscURI(\$Lang->{Stop_Dequeue_Archive})}&host=\$host\">changer ce nombre</a>).
+(<a href=\"\$MyURL?action=Stop_Dequeue_Backup&host=\$host\">changer ce nombre</a>).
 EOF
 
 $Lang{tryIP} = " et \$StatusHost{dhcpHostIP}";

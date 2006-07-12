@@ -37,7 +37,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006
+# Version 3.0.0alpha, released 8 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -139,7 +139,25 @@ EOF
 #    /var/log/BackupPC        Pid, status and email info (was $TopDir/log)
 #
 
-print <<EOF if ( !$opts{fhs} || !-f "/etc/BackupPC/config.pl" );
+#
+# Check if this is an upgrade, in which case read the existing
+# config file to get all the defaults.
+#
+my $ConfigPath = "";
+my $ConfigFileOK = 1;
+while ( 1 ) {
+    if ( $ConfigFileOK && -f "/etc/BackupPC/config.pl" ) {
+        $ConfigPath = "/etc/BackupPC/config.pl";
+        $opts{fhs} = 1 if ( !defined($opts{fhs}) );
+        print <<EOF;
+
+Found /etc/BackupPC/config.pl, so this is an upgrade of an
+existing BackupPC installation.  We will verify some existing
+information, but you will probably not need to make any
+changes - just hit ENTER to each question.
+EOF
+    } else {
+        print <<EOF;
 
 Is this a new installation or upgrade for BackupPC?  If this is
 an upgrade please tell me the full path of the existing BackupPC
@@ -147,17 +165,6 @@ configuration file (eg: /etc/BackupPC/config.pl).  Otherwise, just
 hit return.
 
 EOF
-
-#
-# Check if this is an upgrade, in which case read the existing
-# config file to get all the defaults.
-#
-my $ConfigPath = "";
-while ( 1 ) {
-    if ( -f "/etc/BackupPC/config.pl" ) {
-        $ConfigPath = "/etc/BackupPC/config.pl";
-        $opts{fhs} = 1 if ( !defined($opts{fhs}) );
-    } else {
         $ConfigPath = prompt("--> Full path to existing main config.pl",
                              $ConfigPath,
                              "config-path");
@@ -174,6 +181,7 @@ while ( 1 ) {
         print("Need to specify a valid --config-path for upgrade\n");
         exit(1);
     }
+    $ConfigFileOK = 0;
 }
 $opts{fhs} = 1 if ( !defined($opts{fhs}) && $ConfigPath eq "" );
 $opts{fhs} = 0 if ( !defined($opts{fhs}) );
@@ -210,9 +218,9 @@ EOF
 #
 if ( $opts{fhs} ) {
     $Conf{TopDir}       ||= "/data/BackupPC";
-    $Conf{ConfDir}      ||= "/etc/BackupPC";
+    $Conf{ConfDir}      ||= $opts{"config-dir"} || "/etc/BackupPC";
     $Conf{InstallDir}   ||= "/usr/local/BackupPC";
-    $Conf{LogDir}       ||= "/var/log/BackupPC";
+    $Conf{LogDir}       ||= $opts{"log-dir"} || "/var/log/BackupPC";
 }
 
 #
@@ -295,9 +303,8 @@ the main data directory and read/execute permission on the install
 directory (these directories will be setup shortly).
 
 The primary group for this user should also be chosen carefully.
-By default the install directories will have group write permission.
-The data directories and files will have group read permission but
-no other permission.
+The data directories and files will have group read permission,
+so group members can access backup files.
 
 EOF
 my($name, $passwd, $Uid, $Gid);
@@ -508,7 +515,7 @@ foreach my $dir ( qw(bin doc
 		     lib/BackupPC/Zip
 		 ) ) {
     next if ( -d "$DestDir$Conf{InstallDir}/$dir" );
-    mkpath("$DestDir$Conf{InstallDir}/$dir", 0, 0775);
+    mkpath("$DestDir$Conf{InstallDir}/$dir", 0, 0755);
     if ( !-d "$DestDir$Conf{InstallDir}/$dir"
             || !my_chown($Uid, $Gid, "$DestDir$Conf{InstallDir}/$dir") ) {
         die("Failed to create or chown $DestDir$Conf{InstallDir}/$dir\n");
@@ -522,7 +529,7 @@ foreach my $dir ( qw(bin doc
 #
 foreach my $dir ( ($Conf{CgiImageDir}) ) {
     next if ( $dir eq "" || -d $dir );
-    mkpath("$DestDir$dir", 0, 0775);
+    mkpath("$DestDir$dir", 0, 0755);
     if ( !-d "$DestDir$dir" || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
         die("Failed to create or chown $DestDir$dir");
     } else {
@@ -605,18 +612,20 @@ InstallFile("conf/hosts", "$DestDir$Conf{ConfDir}/hosts", 0644)
 # parameters and deleting ones that are no longer needed.
 #
 my $dest = "$DestDir$Conf{ConfDir}/config.pl";
-my ($newConf, $newVars) = ConfigParse("conf/config.pl");
+my ($distConf, $distVars) = ConfigParse("conf/config.pl");
 my ($oldConf, $oldVars);
+my ($newConf, $newVars) = ($distConf, $distVars);
 if ( -f $dest ) {
     ($oldConf, $oldVars) = ConfigParse($dest);
-    $newConf = ConfigMerge($oldConf, $oldVars, $newConf, $newVars);
+    ($newConf, $newVars) = ConfigMerge($oldConf, $oldVars, $distConf, $distVars);
 }
-$Conf{EMailFromUserName}  ||= $Conf{BackupPCUser};
-$Conf{EMailAdminUserName} ||= $Conf{BackupPCUser};
 
 #
-# Update various config parameters
+# Update various config parameters.  The old config is in Conf{}
+# and the new config is an array in text form in $newConf->[].
 #
+$Conf{EMailFromUserName}  ||= $Conf{BackupPCUser};
+$Conf{EMailAdminUserName} ||= $Conf{BackupPCUser};
 
 #
 # Guess $Conf{CgiURL}
@@ -719,6 +728,47 @@ if ( defined($Conf{SmbClientTimeout}) ) {
     delete($Conf{SmbClientTimeout});
 }
 
+#
+# Replace --devices with -D in RsyncArgs and RsyncRestoreArgs
+#
+foreach my $param ( qw(RsyncArgs RsyncRestoreArgs) ) {
+    next if ( !defined($newVars->{$param}) );
+    $newConf->[$newVars->{$param}]{text} =~ s/--devices/-D/g;
+}
+
+#
+# Merge any new user-editable parameters into CgiUserConfigEdit
+# by copying the old settings forward.
+#
+if ( defined($Conf{CgiUserConfigEdit}) ) {
+    #
+    # This is a real hack.  The config file merging is done in text
+    # form without actually instantiating the new conf structure.
+    # So we need to extract the new hash of settings, update it,
+    # and merge the text.  Ugh...
+    #
+    my $new;
+    my $str = $distConf->[$distVars->{CgiUserConfigEdit}]{text};
+
+    $str =~ s/^\s*\$Conf\{.*?\}\s*=\s*/\$new = /m;
+    eval($str);
+    foreach my $p ( keys(%$new) ) {
+        $new->{$p} = $Conf{CgiUserConfigEdit}{$p}
+                if ( defined($Conf{CgiUserConfigEdit}{$p}) );
+    }
+    $Conf{CgiUserConfigEdit} = $new;
+    my $d = Data::Dumper->new([$new], [*value]);
+    $d->Indent(1);
+    $d->Terse(1);
+    my $value = $d->Dump;
+    $value =~ s/(.*)\n/$1;\n/s;
+    $newConf->[$newVars->{CgiUserConfigEdit}]{text}
+            =~ s/(\s*\$Conf\{.*?\}\s*=\s*).*/$1$value/s;
+}
+
+#
+# Now backup and write the config file
+#
 my $confCopy = "$dest.pre-__VERSION__";
 if ( -f $dest && !-f $confCopy ) {
     #
@@ -772,9 +822,9 @@ Ok, it looks like we are finished.  There are several more things you
 will need to do:
 
   - Browse through the config file, $Conf{ConfDir}/config.pl,
-    and make sure all the settings are correct.  In particular, you
-    will need to set the smb share password and user name, backup
-    policies and check the email message headers and bodies.
+    and make sure all the settings are correct.  In particular,
+    you will need to set \$Conf{CgiAdminUsers} so you have
+    administration privileges in the CGI interface.
 
   - Edit the list of hosts to backup in $Conf{ConfDir}/hosts.
 
@@ -943,7 +993,7 @@ sub ConfigMerge
 {
     my($old, $oldVars, $new, $newVars) = @_;
     my $posn = 0;
-    my $res;
+    my($res, $resVars);
 
     #
     # Find which config parameters are not needed any longer
@@ -975,7 +1025,10 @@ sub ConfigMerge
             push(@$res, $new);
         }
     }
-    return $res;
+    for ( my $i = 0 ; $i < @$res ; $i++ ) {
+        $resVars->{$res->[$i]{var}} = $i;
+    }
+    return ($res, $resVars);
 }
 
 sub my_chown
@@ -1065,6 +1118,12 @@ Examples
 Set the configuration compression level to N.  Default is 3
 if Compress::Zlib is installed.
 
+=item B<--config-dir CONFIG_DIR>
+
+Configuration directory for new installations.  Defaults
+to /etc/BackupPC with FHS.  Automatically extracted
+from --config-path for existing installations.
+
 =item B<--config-path CONFIG_PATH>
 
 Path to the existing config.pl configuration file for BackupPC.
@@ -1146,6 +1205,10 @@ batch new install.
 Example:
 
     --install-dir /usr/local/BackupPC
+
+=item B<--log-dir LOG_DIR>
+
+Log directory.  Defaults to /var/log/BackupPC with FHS.
 
 =item B<--man>
 

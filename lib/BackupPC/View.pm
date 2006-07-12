@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -252,7 +252,9 @@ sub shareList
         $file = $1 if ( $file =~ /(.*)/ );
         next if ( $file eq "attrib" && $mangle
                || $file eq "."
-               || $file eq ".." );
+               || $file eq ".."
+               || $file eq "backupInfo"
+            );
         my $fileUM = $file;
         $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
         push(@shareList, $fileUM);
@@ -457,6 +459,17 @@ sub dirHistory
         }
 
 	#
+	# Flag deleted files
+	#
+	if ( defined($attr) ) {
+	    my $a = $attr->get;
+	    foreach my $fileUM ( keys(%$a) ) {
+		next if ( $a->{$fileUM}{type} != BPC_FTYPE_DELETED );
+		$files->{$fileUM}[$i]{type} = BPC_FTYPE_DELETED;
+	    }
+	}
+
+	#
 	# Merge old backups.  Don't merge directories from old
 	# backups because every backup has an accurate directory
 	# tree.
@@ -471,18 +484,19 @@ sub dirHistory
 		$files->{$fileUM}[$i] = $files->{$fileUM}[$k];
 	    }
 	}
-
-	#
-	# Finally, remove deleted files
-	#
-	if ( defined($attr) ) {
-	    my $a = $attr->get;
-	    foreach my $fileUM ( keys(%$a) ) {
-		next if ( $a->{$fileUM}{type} != BPC_FTYPE_DELETED );
-		$files->{$fileUM}[$i] = undef if ( defined($files->{$fileUM}) );
-	    }
-	}
     }
+
+    #
+    # Remove deleted files
+    #
+    for ( $i = 0 ; $i < @{$m->{backups}} ; $i++ ) {
+        foreach my $fileUM ( keys(%$files) ) {
+            next if ( !defined($files->{$fileUM}[$i])
+                    || $files->{$fileUM}[$i]{type} != BPC_FTYPE_DELETED );
+            $files->{$fileUM}[$i] = undef;
+        }
+    }
+
     #print STDERR "Returning:\n", Dumper($files);
     return $files;
 }

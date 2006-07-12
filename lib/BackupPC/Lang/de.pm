@@ -1,5 +1,6 @@
 #!/bin/perl
 #
+# by Ralph Passgang <ralph@debianbase.de> (30.06.2006 for V3.0.0)
 # by Ralph Passgang <ralph@debianbase.de> (07.06.2004 for V2.1.0beta3)
 # by Ralph Passgang <ralph@debianbase.de> (06.05.2004 for V2.1.0beta2)
 # by Manfred Herrmann (11.03.2004 for V2.1.0beta0)
@@ -31,26 +32,28 @@ $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
 \${h2("Server Steuerung")}
-<form action="\$MyURL" method="get">
+<form name="ReloadForm" action="\$MyURL" method="get">
+<input type="hidden" name="action" value="">
 <table class="tableStnd">
-  <!--<tr><td>Server stoppen:<td><input type="submit" name="action" value="Stop">-->
-  <tr><td>Server Konfiguration neu laden:<td><input type="submit" name="action" value="Reload">
+  <tr><td>Server Konfiguration neu laden:<td><input type="button" value="Reload"
+     onClick="document.ReloadForm.action.value='Reload';
+              document.ReloadForm.submit();">
 </table>
 </form>
 <!--
 \${h2("Server Konfiguration")}
 <ul>
-  <li><i>Andere Optionen sind hier möglich ... z.B.,</i>
+  <li><i>Andere Optionen sind hier möglich ... z.B.</i>
   <li>Server Konfiguration editieren
 </ul>
 -->
 EOF
 $Lang{Unable_to_connect_to_BackupPC_server} = "Kann keine Verbindung zu dem BackupPC Server herstellen!",
             "Dieses CGI Script (\$MyURL) kann keine Verbindung zu dem BackupPC"
-          . " Server auf \$Conf{ServerHost} Port \$Conf{ServerPort} herstellen.  Der Fehler"
+          . " Server auf \$Conf{ServerHost} Port \$Conf{ServerPort} herstellen. Der Fehler"
           . " war: \$err.",
             "Möglicherweise ist der BackupPC Server Prozess nicht gestartet oder es besteht ein"
-          . " Konfigurationsfehler.  Bitte teilen Sie diese Fehlermeldung dem Systemadministrator mit.";
+          . " Konfigurationsfehler. Bitte teilen Sie diese Fehlermeldung dem Systemadministrator mit.";
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">
@@ -97,7 +100,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \$generalInfo
 
-\${h2("Aktuell laufende Aufträge")}
+\${h2("Zur Zeit aktive Aufträge")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Computer </td>
@@ -241,7 +244,7 @@ Archivierung der folgenden Computer
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 \$paramStr
 <tr>
-    <td colspan=2><input type="submit" value="Archivierung starten" name=""></td>
+    <td colspan=2><input type="submit" value="Archivierung starten" name="ignore"></td>
 </tr>
 </form>
 </table>
@@ -306,13 +309,16 @@ $Lang{Are_you_sure_start} = <<EOF;
 <p>
 Sie starten ein \$type Backup für \$host.
 
-<form action="\$MyURL" method="get">
+<form name="Confirm" action="\$MyURL" method="get">
 <input type="hidden" name="host" value="\$host">
 <input type="hidden" name="hostIP" value="\$ipAddr">
 <input type="hidden" name="doit" value="1">
+<input type="hidden" name="action" value="">
 Möchten Sie das wirklich tun?
-<input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="Nein" name="">
+<input type="button" value="\$buttonText"
+  onClick="document.Confirm.action.value='\$In{action}';
+           document.Confirm.submit();">
+<input type="submit" value="Nein" name="ignore">
 </form>
 EOF
 # --------------------------------
@@ -325,15 +331,18 @@ $Lang{Are_you_sure_stop} = <<EOF;
 <p>
 Sie werden Backups abbrechen bzw. Aufträge löschen für Computer \$host;
 
-<form action="\$MyURL" method="get">
-<input type="hidden" name="host" value="\$host">
-<input type="hidden" name="doit" value="1">
+<form name="Confirm" action="\$MyURL" method="get">
+<input type="hidden" name="host"   value="\$host">
+<input type="hidden" name="doit"   value="1">
+<input type="hidden" name="action" value="">
 Zusätzlich bitte keine Backups starten für die Dauer von 
 <input type="text" name="backoff" size="10" value="\$backoff"> Stunden.
 <p>
 Möchten Sie das wirklich tun?
-<input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="Nein" name="">
+<input type="button" value="\$buttonText"
+  onClick="document.Confirm.action.value='\$In{action}';
+           document.Confirm.submit();">
+<input type="submit" value="Nein" name="ignore">
 </form>
 
 EOF
@@ -347,9 +356,9 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Warteschlangen Übersicht";
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Backup Warteschlangen Übersicht")}
 <br><br>
-\${h2("Übersicht Benutzer Aufträge in der Warteschlange")}
+\${h2("Übersicht Benutzeraufträge in der Warteschlange")}
 <p>
-Die folgenden Benutzer Aufträge sind eingereiht:
+Die folgenden Benutzeraufträge sind eingereiht:
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
@@ -361,7 +370,7 @@ Die folgenden Benutzer Aufträge sind eingereiht:
 
 \${h2("Übersicht Hintergrund Aufträge in der Warteschlange")}
 <p>
-Die folgenden Hintergrund Aufträge sind eingereiht:
+Die folgenden Hintergrundaufträge sind eingereiht:
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
@@ -372,7 +381,7 @@ Die folgenden Hintergrund Aufträge sind eingereiht:
 <br><br>
 \${h2("Übersicht Kommando Aufträge in der Warteschlange")}
 <p>
-Die folgenden Kommando Aufträge sind eingereiht:
+Die folgenden Kommandoaufträge sind eingereiht:
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
@@ -427,14 +436,14 @@ EOF
  
 
 # ------------------------------
-$Lang{Browse_backup__num_for__host} = "BackupPC: Browsen des Backups \$num für Computer \$host";
+$Lang{Browse_backup__num_for__host} = "BackupPC: Durchsuchen des Backups \$num für Computer \$host";
 
 # ------------------------------
-$Lang{Restore_Options_for__host} = "BackupPC: Restore Optionen für \$host";
+$Lang{Restore_Options_for__host} = "BackupPC: Wiederherstellungsoptionen für \$host";
 $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("Restore Optionen für \$host")}
 <p>
-Sie haben die folgenden Dateien/Verzeichnisse von der Freigabe \$share aus dem Backup mit der Nnummer #\$num selektiert:
+Sie haben die folgenden Dateien/Verzeichnisse von der Freigabe \$share aus dem Backup mit der Nummer #\$num selektiert:
 <ul>
 \$fileListStr
 </ul>
@@ -450,8 +459,8 @@ $Lang{Restore_Options_for__host_Option1} = <<EOF;
 Sie können diese Wiederherstellung starten um die Dateien/Verzeichnisse direkt auf den Computer  
 \$host wiederherzustellen. Alternativ können Sie einen anderen Computer und/oder Freigabe als Ziel angeben.
 </p><p>
-<b>Warnung:</b> alle aktuell existierenden Dateien/Verzeichnisse die bereits vorhanden sind
-werden überschrieben! (Tip: alternativ eine spezielle Freigabe erstellen mit Schreibrecht für den
+<b>Warnung:</b> alle aktuell existierenden Dateien/Verzeichnisse, die bereits vorhanden sind,
+werden überschrieben! (Tip: Alternativ eine spezielle Freigabe erstellen mit Schreibrecht für den
 Backup-Benutzer und die wiederhergestellten Dateien/Verzeichnisse durch Stichproben prüfen, ob die beabsichtigte
 Wiederherstellung korrekt ist.) 
 </p>
@@ -484,7 +493,7 @@ Wiederherstellung korrekt ist.)
     <td valign="top"><input type="text" size="40" maxlength="256"
 	value="\${EscHTML(\$pathHdr)}" name="pathHdr"></td>
 </tr><tr>
-    <td><input type="submit" value="Wiederherstellung starten" name=""></td>
+    <td><input type="submit" value="Wiederherstellung starten" name="ignore"></td>
 </table>
 </form>
 EOF
@@ -521,7 +530,7 @@ evtl. die Dateien/Verzeichnisse erneut und lassen sehr große und unnötige Dateie
 Kompression (0=aus, 1=schnelle,...,9=höchste)
 <input type="text" size="6" value="5" name="compressLevel">
 <br>
-<input type="submit" value="Zip Datei downloaden" name="">
+<input type="submit" value="Zip Datei downloaden" name="ignore">
 </form>
 EOF
 
@@ -547,7 +556,7 @@ enthält. Mit einer lokalen Anwendung (z.B. tar, WinZIP...) können Sie dann
 beliebige Dateien entpacken.
 </p><p>
 <b>Warnung:</b> Abhängig von der Anzahl und Größe der selektierten
-Dateien/Verzeichnisse kann die Tar Archiv Datei extrem groß bzw. zu groß werden. Der Download kann
+Dateien/Verzeichnisse kann die Tar-Archiv Datei extrem groß bzw. zu groß werden. Der Download kann
 sehr lange dauern und der Speicherplatz auf Ihrem PC muß ausreichen. Selektieren Sie
 evtl. die Dateien/Verzeichnisse erneut und lassen sehr große und unnötige Dateien weg.  
 </p>
@@ -561,13 +570,13 @@ evtl. die Dateien/Verzeichnisse erneut und lassen sehr große und unnötige Dateie
  \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (andernfalls enthält die Archiv Datei vollständige Pfade).
 <br>
-<input type="submit" value="Tar Datei downloaden" name="">
+<input type="submit" value="Tar Datei downloaden" name="ignore">
 </form>
 EOF
 
 
 # ------------------------------
-$Lang{Restore_Confirm_on__host} = "BackupPC: Restore Confirm on \$host";
+$Lang{Restore_Confirm_on__host} = "BackupPC: Bestätigung für die Wiederherstellung auf \$host";
 
 $Lang{Are_you_sure} = <<EOF;
 \${h1("Sind Sie sicher?")}
@@ -581,17 +590,20 @@ dem Backup mit der Nummer \$num:
 \$fileListStr
 </table>
 
-<form action="\$MyURL" method="post">
+<form name="RestoreForm" action="\$MyURL" method="post">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
 <input type="hidden" name="hostDest" value="\${EscHTML(\$In{hostDest})}">
 <input type="hidden" name="shareDest" value="\${EscHTML(\$In{shareDest})}">
 <input type="hidden" name="pathHdr" value="\${EscHTML(\$In{pathHdr})}">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="type" value="4">
+<input type="hidden" name="action" value="">
 \$hiddenStr
 Wollen Sie das wirklich tun?
-<input type="submit" value="\$In{action}" name="action">
-<input type="submit" value="Nein" name="">
+<input type="button" value="\$Lang->{Restore}"
+ onClick="document.RestoreForm.action.value='Restore';
+          document.RestoreForm.submit();">
+<input type="submit" value="No" name="ignore">
 </form>
 EOF
 
@@ -625,22 +637,27 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </p>
 \${h2("Benutzer Aktionen")}
 <p>
-<form action="\$MyURL" method="get">
-<input type="hidden" name="host" value="\$host">
+<form name="StartStopForm" action="\$MyURL" method="get">
+<input type="hidden" name="host"   value="\$host">
+<input type="hidden" name="action" value="">
 \$startIncrStr
-<input type="submit" value="$Lang{Start_Full_Backup}" name="action">
-<input type="submit" value="$Lang{Stop_Dequeue_Backup}" name="action">
+<input type="button" value="\$Lang->{Start_Full_Backup}"
+ onClick="document.StartStopForm.action.value='Start_Full_Backup';
+          document.StartStopForm.submit();">
+<input type="button" value="\$Lang->{Stop_Dequeue_Backup}"
+ onClick="document.StartStopForm.action.value='Stop_Dequeue_Backup';
+          document.StartStopForm.submit();">
 </form>
 </p>
 \${h2("Backup Übersicht")}
 <p>
-Klicken Sie auf die Backupnummer um durch Dateien zu browsen und bei Bedarf wiederherzustellen.
+Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wiederherzustellen.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Filled </td>
-    <td align="center"> ENG Level </td>
+    <td align="center"> Level </td>
     <td align="center"> Start Zeitpunkt </td>
     <td align="center"> Dauer/min </td>
     <td align="center"> Alter/Tage </td>
@@ -719,7 +736,7 @@ Kompressionsergebnisse für bereits im Backup-Pool vorhandene und für neu komprim
 <br><br>
 EOF
 
-$Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";
+$Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archiv Übersicht";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
 \${h1("Host \$host Archiv Übersicht")}
 <p>
@@ -730,11 +747,16 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 
 \${h2("Benutzer Aktionen")}
 <p>
-<form action="\$MyURL" method="get">
+<form name="StartStopForm" action="\$MyURL" method="get">
 <input type="hidden" name="archivehost" value="\$host">
 <input type="hidden" name="host" value="\$host">
-<input type="submit" value="$Lang{Start_Archive}" name="action">
-<input type="submit" value="$Lang{Stop_Dequeue_Archive}" name="action">
+<input type="hidden" name="action" value="">
+<input type="button" value="\$Lang->{Start_Archive}"
+ onClick="document.StartStopForm.action.value='Start_Archive';
+          document.StartStopForm.submit();">
+<input type="button" value="\$Lang->{Stop_Dequeue_Archive}"
+ onClick="document.StartStopForm.action.value='Stop_Dequeue_Archive';
+          document.StartStopForm.submit();">
 </form>
 
 \$ArchiveStr
@@ -804,7 +826,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="host" value="\$host">
 <input type="hidden" name="share" value="\${EscHTML(\$share)}">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
-<input type="hidden" name="action" value="$Lang{Restore}">
+<input type="hidden" name="action" value="Restore">
 <br>
 <table width="100%">
 <tr><td valign="top">
@@ -935,7 +957,7 @@ $Lang{Email_Summary} = "BackupPC: eMail Übersicht";
 # -----------------------------------
 #  !! ERROR messages !!
 # -----------------------------------
-$Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: Überprüfen Sie die Apache error_log\n";
+$Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: Überprüfen Sie das Apache error_log\n";
 $Lang{Wrong_user__my_userid_is___} =  
               "Falscher Benutzer: Meine userid ist \$>, anstelle \$uid"
             . "(\$Conf{BackupPCUser})\n";
@@ -948,7 +970,7 @@ $Lang{Unable_to_open__file__configuration_problem} = "kann Datei nicht öffnen \$
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Nur berechtigte Benutzer können Log oder Config Dateien einsehen.";
 $Lang{Only_privileged_users_can_view_log_files} = "Nur berechtigte Benutzer können LOG Dateien einsehen.";
 $Lang{Only_privileged_users_can_view_email_summaries} = "Nur berechtigte Benutzer können die Email Übersicht einsehen.";
-$Lang{Only_privileged_users_can_browse_backup_files} = "Nur berechtigte Benutzer können Backup Dateien browsen"
+$Lang{Only_privileged_users_can_browse_backup_files} = "Nur berechtigte Benutzer können Backup Dateien durchsuchen"
                 . " für computer \${EscHTML(\$In{host})}.";
 $Lang{Empty_host_name} = "Kein Hostname.";
 $Lang{Directory___EscHTML} = "Verzeichnis \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
@@ -1086,7 +1108,7 @@ $Lang{__time0_to__time1_on__days} = "\$t0 bis \$t1 am \$days";
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
 <li>Backups sind für die nächsten \$hours Stunden deaktiviert.
-(<a href=\"\$MyURL?action=\${EscURI(\$Lang->{Stop_Dequeue_Archive})}&host=\$host\">diese Zeit ändern</a>).
+(<a href=\"\$MyURL?action=Stop_Dequeue_Backup&host=\$host\">diese Zeit ändern</a>).
 EOF
 
 $Lang{tryIP} = " und \$StatusHost{dhcpHostIP}";
@@ -1176,7 +1198,7 @@ $Lang{The_directory_is_empty} = <<EOF;
 </td></tr>
 EOF
 
-#$Lang{on} = "on";
+#$Lang{on} = "an";
 $Lang{off} = "aus";
 
 $Lang{backupType_full}    = "voll";
@@ -1237,9 +1259,8 @@ Andernfalls sollten Sie sicherstellen, daß Ihr Computer regelmäßig korrekt am Ne
 angeschlossen wird.
 
 Mit freundlichen Grüßen,
-Ihr BackupServer
+Ihr BackupPC Server
 http://backuppc.sourceforge.net
-http://www.zipptec.de
 EOF
 
 # No recent backup
@@ -1269,9 +1290,8 @@ Festplatte einen crash erleidet oder Dateien durch versehentliches Löschen oder
 Virenbefall unbrauchbar werden.
 
 Mit freundlichen Grüßen,
-Ihr BackupServer
+Ihr BackupPC Server
 http://backuppc.sourceforge.net
-http://www.zipptec.de
 EOF
 
 # Old Outlook files
@@ -1298,16 +1318,15 @@ Es wird folgendes Vorgehen empfohlen:
     $CgiURL?host=$host               
 
     Name und Passwort eingeben und dann 2 mal nacheinander
-    auf "Starte Backup incrementell" klicken
+    auf "Starte Backup inkrementell" klicken
     Klicken Sie auf "Gehe zurück zur ...home page" und beobachten Sie
     den Status des Backup-Vorgangs (Browser von Zeit zu Zeit aktualisieren).
     Das sollte je nach Dateigröße nur eine kurze Zeit dauern.
     
 
 Mit freundlichen Grüßen,
-Ihr BackupServer
+Ihr BackupPC Server
 http://backuppc.sourceforge.net
-http://www.zipptec.de
 EOF
 
 $Lang{howLong_not_been_backed_up} = "Backup nicht erfolgreich";
@@ -1317,7 +1336,7 @@ $Lang{howLong_not_been_backed_up_for_days_days} = "kein Backup seit \$days Tagen
 # RSS strings (all ENGLISH currently)
 #######################################################################
 $Lang{RSS_Doc_Title}       = "BackupPC Server";
-$Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
+$Lang{RSS_Doc_Description} = "RSS Feed für BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 #Voll: \$fullCnt;
 Alter/Tagen: \$fullAge;
@@ -1333,111 +1352,114 @@ EOF
 # Configuration editor strings (all ENGLISH currently)
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuation settings.";
-$Lang{CfgEdit_Edit_Config} = "Edit Config";
-$Lang{CfgEdit_Edit_Hosts}  = "Edit Hosts";
+$Lang{Only_privileged_users_can_edit_config_files} = "Nur privilegierte Nutzer können die Administrationsoptionen ändern.";
+$Lang{CfgEdit_Edit_Config} = "Konfig ändern";
+$Lang{CfgEdit_Edit_Hosts}  = "Hosts ändern";
 
 $Lang{CfgEdit_Title_Server} = "Server";
-$Lang{CfgEdit_Title_General_Parameters} = "General Parameters";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "Wakeup Schedule";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "Concurrent Jobs";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Pool Filesystem Limits";
-$Lang{CfgEdit_Title_Other_Parameters} = "Other Parameters";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Remote Apache Settings";
-$Lang{CfgEdit_Title_Program_Paths} = "Program Paths";
-$Lang{CfgEdit_Title_Install_Paths} = "Install Paths";
+$Lang{CfgEdit_Title_General_Parameters} = "Allgemeine Einstellungen";
+$Lang{CfgEdit_Title_Wakeup_Schedule} = "Aktivierungsplan";
+$Lang{CfgEdit_Title_Concurrent_Jobs} = "gleichzeitige Aufträge";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Pooldateisystem Begrenzungen";
+$Lang{CfgEdit_Title_Other_Parameters} = "Andere Einstellungen";
+$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Apache Remote Einstellungen";
+$Lang{CfgEdit_Title_Program_Paths} = "Programpfade";
+$Lang{CfgEdit_Title_Install_Paths} = "Installationspfade";
 $Lang{CfgEdit_Title_Email} = "Email";
-$Lang{CfgEdit_Title_Email_settings} = "Email settings";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Email User Messages";
+$Lang{CfgEdit_Title_Email_settings} = "Email Einstellungen";
+$Lang{CfgEdit_Title_Email_User_Messages} = "Email Benutzernachrichten";
 $Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "Admin Privileges";
-$Lang{CfgEdit_Title_Page_Rendering} = "Page Rendering";
-$Lang{CfgEdit_Title_Paths} = "Paths";
-$Lang{CfgEdit_Title_User_URLs} = "User URLs";
-$Lang{CfgEdit_Title_User_Config_Editing} = "User Config Editing";
+$Lang{CfgEdit_Title_Admin_Privileges} = "Admininistrationsprivilegien";
+$Lang{CfgEdit_Title_Page_Rendering} = "Seitenrendering";
+$Lang{CfgEdit_Title_Paths} = "Pfade";
+$Lang{CfgEdit_Title_User_URLs} = "Benutzer URLs";
+$Lang{CfgEdit_Title_User_Config_Editing} = "Benutzer Konfig ändern";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
-$Lang{CfgEdit_Title_Xfer_Settings} = "Xfer Settings";
-$Lang{CfgEdit_Title_Smb_Settings} = "Smb Settings";
-$Lang{CfgEdit_Title_Tar_Settings} = "Tar Settings";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Settings";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Settings";
-$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd Settings";
-$Lang{CfgEdit_Title_Archive_Settings} = "Archive Settings";
+$Lang{CfgEdit_Title_Xfer_Settings} = "Xfer Einstellungen";
+$Lang{CfgEdit_Title_Smb_Settings} = "Smb Einstellungen";
+$Lang{CfgEdit_Title_Tar_Settings} = "Tar Einstellungen";
+$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Einstellungen";
+$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Einstellungen";
+$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd Einstellungen";
+$Lang{CfgEdit_Title_Archive_Settings} = "Archive Einstellungen";
 $Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Paths/Commands";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Paths/Commands";
-$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Paths/Commands/Args";
-$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Port/Args";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archive Paths/Commands";
-$Lang{CfgEdit_Title_Schedule} = "Schedule";
-$Lang{CfgEdit_Title_Full_Backups} = "Full Backups";
-$Lang{CfgEdit_Title_Incremental_Backups} = "Incremental Backups";
+$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Pfade/Kommandos";
+$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Pfade/Kommandos";
+$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Pfade/Kommandos/Argumente";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Port/Argumente";
+$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archive Pfade/Kommandos";
+$Lang{CfgEdit_Title_Schedule} = "Backupplan";
+$Lang{CfgEdit_Title_Full_Backups} = "volle Backups";
+$Lang{CfgEdit_Title_Incremental_Backups} = "inkrementelle Backups";
 $Lang{CfgEdit_Title_Blackouts} = "Blackouts";
-$Lang{CfgEdit_Title_Other} = "Other";
-$Lang{CfgEdit_Title_Backup_Settings} = "Backup Settings";
-$Lang{CfgEdit_Title_Client_Lookup} = "Client Lookup";
-$Lang{CfgEdit_Title_Other} = "Other";
-$Lang{CfgEdit_Title_User_Commands} = "User Commands";
+$Lang{CfgEdit_Title_Other} = "Andere";
+$Lang{CfgEdit_Title_Backup_Settings} = "Backup Einstellungen";
+$Lang{CfgEdit_Title_Client_Lookup} = "Auflösen des Clients";
+$Lang{CfgEdit_Title_Other} = "Andere Werte";
+$Lang{CfgEdit_Title_User_Commands} = "Benutzer Kommandos";
 $Lang{CfgEdit_Title_Hosts} = "Hosts";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
-To add a new host, select Add and then enter the name.  To start with
-the per-host configuration from another host, enter the host name
-as NEWHOST=COPYHOST.  This will overwrite any existing per-host
-configuration for NEWHOST.  You can also do this for an existing
-host.  To delete a host, hit the Delete button.  For Add, Delete,
-and configuration copy, changes don't take effect until you select
-Save.  None of the deleted host's backups will be removed,
-so if you accidently delete a host, simply re-add it.  To completely
-remove a host's backups, you need to manually remove the files
-below \$topDir/pc/HOST
+Um einen neuen Hosts hinzuzufügen, wähle Hinzufügen und gib 
+dann den Namen ein. Um mit der Konfigurationvorlage eines anderen Hosts
+zu beginnen, gib als Namen NEWHOST=COPYHOST ein. Dies wird alle
+bereits bestehenden hostspezifischen Einstellungen für NEWHOST
+mit den Werten von COPYHOST überschreiben. Du kannst dies auch für einen bereits 
+bestehenden Hosts machen. Um einen Host zu löschen, wähle den Löschen Knopf.
+Das Hinzufügen, Löschen und Kopieren von Konfigurationen pro Host
+wird erst durch wählen von Speichern aktiviert. Bereits bestehende
+Backups werden beim Löschen eines Hosts nicht mitgelöscht. Nach einem
+erneuten Anlegen des selben Hosts sind alle alten Backups wieder verfügbar.
+Um Backups vollständig zu entfernen müssen die Dateien unter \$topDir/pc/HOST
+gelöscht werden.
 EOF
 
 $Lang{CfgEdit_Header_Main} = <<EOF;
-\${h1("Main Configuration Editor")}
+\${h1("Allgemeiner Konfigurationseditor")}
 EOF
 
 $Lang{CfgEdit_Header_Host} = <<EOF;
-\${h1("Host \$host Configuration Editor")}
+\${h1("Host \$host Konfigurationseditor")}
 <p>
-Note: Check Override if you want to modify a value specific to this host.
+Beachte: Wähle Überschreiben, wenn du einen host spezifischen Wert verändern willst 
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "Save";
-$Lang{CfgEdit_Button_Insert}   = "Insert";
-$Lang{CfgEdit_Button_Delete}   = "Delete";
-$Lang{CfgEdit_Button_Add}      = "Add";
-$Lang{CfgEdit_Button_Override} = "Override";
-$Lang{CfgEdit_Button_New_Key}  = "New Key";
+$Lang{CfgEdit_Button_Save}     = "Speichern";
+$Lang{CfgEdit_Button_Insert}   = "Einfügen";
+$Lang{CfgEdit_Button_Delete}   = "Löschen";
+$Lang{CfgEdit_Button_Add}      = "Hinzufügen";
+$Lang{CfgEdit_Button_Override} = "Überschreiben";
+$Lang{CfgEdit_Button_New_Key}  = "Neuer Schlüssel";
 
 $Lang{CfgEdit_Error__must_be_an_integer}
-            = "Error: \$var must be an integer";
+            = "Error: \$var muss eine Zahl sein";
 $Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "Error: \$var must be a real-valued number";
+            = "Error: \$var muss eine ganze Zahl sein";
 $Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Error: \$var entry \$k must be an integer";
+            = "Error: \$var Eintrag \$k muss eine Zahl sein";
 $Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Error: \$var entry \$k must be a real-valued number";
+            = "Error: \$var Eintrag \$k muss eine ganze Zahl sein";
 $Lang{CfgEdit_Error__must_be_executable_program}
-            = "Error: \$var must be a valid executable path";
+            = "Error: \$var muss ein gültiger ausführbarer Pfad sein";
 $Lang{CfgEdit_Error__must_be_valid_option}
-            = "Error: \$var must be a valid option";
+            = "Error: \$var muss eine gültige Option sein";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "Copy host \$copyHost doesn't exist; creating full host name \$fullHost.  Delete this host if that is not what you wanted.";
+            = "Ursprungs Host \$copyHost existiert nicht; Erstelle den vollen Hostnamen \$fullHost.  Lösche den Host wenn das nicht war, was du wolltest.";
 
 $Lang{CfgEdit_Log_Copy_host_config}
-            = "\$User copied config from host \$fromHost to \$host\n";
+            = "\$User hat die Konfig von host \$fromHost zu \$host kopiert\n";
 $Lang{CfgEdit_Log_Delete_param}
-            = "\$User deleted \$p from \$conf\n";
+            = "\$User hat \$p von \$conf gelöscht\n";
 $Lang{CfgEdit_Log_Add_param_value}
-            = "\$User added \$p to \$conf, set to \$value\n";
+            = "\$User hat \$p zu \$conf hinzugefügt und den Wert \$value gegeben\n";
 $Lang{CfgEdit_Log_Change_param_value}
-            = "\$User changed \$p in \$conf to \$valueNew from \$valueOld\n";
+            = "\$User änderte \$p in \$conf zu \$valueNew von \$valueOld\n";
 $Lang{CfgEdit_Log_Host_Delete}
-            = "\$User deleted host \$host\n";
+            = "\$User hat den Host \$host gelöscht\n";
 $Lang{CfgEdit_Log_Host_Change}
-            = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
+            = "\$User Host \$host hat den Schlüssel \$key von \$valueOld zu \$valueNew geändert\n";
 $Lang{CfgEdit_Log_Host_Add}
-            = "\$User added host \$host: \$value\n";
+            = "\$User hat den Host \$host: \$value hinzugefügt\n";
   
 #end of lang_de.pm
+

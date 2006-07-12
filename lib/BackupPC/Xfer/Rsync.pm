@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -55,10 +55,10 @@ BEGIN {
 	#
 	# Note: also update configure.pl when this version number is changed!
 	#
-        if ( $File::RsyncP::VERSION < 0.52 ) {
+        if ( $File::RsyncP::VERSION < 0.62 ) {
             $RsyncLibOK = 0;
             $RsyncLibErr = "File::RsyncP module version"
-                         . " ($File::RsyncP::VERSION) too old: need 0.52";
+                         . " ($File::RsyncP::VERSION) too old: need 0.62";
         } else {
             $RsyncLibOK = 1;
         }
@@ -215,9 +215,12 @@ sub start
         if ( $t->{type} eq "full" ) {
 	    if ( $t->{partialNum} ) {
 		$logMsg = "full backup started for directory $t->{shareName};"
-		        . " updating partial $t->{partialNum}";
+		        . " updating partial #$t->{partialNum}";
 	    } else {
 		$logMsg = "full backup started for directory $t->{shareName}";
+                if ( $t->{incrBaseBkupNum} ne "" ) {
+                    $logMsg .= " (baseline backup #$t->{incrBaseBkupNum})";
+                }
 	    }
         } else {
             $incrDate = $bpc->timeStamp($t->{incrBaseTime}, 1);

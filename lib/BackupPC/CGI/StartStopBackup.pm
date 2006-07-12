@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -43,9 +43,9 @@ sub action
 {
     my($str, $reply);
 
-    my $start = 1 if ( $In{action} eq $Lang->{Start_Incr_Backup}
-                       || $In{action} eq $Lang->{Start_Full_Backup} );
-    my $doFull = $In{action} eq $Lang->{Start_Full_Backup} ? 1 : 0;
+    my $start = 1 if ( $In{action} eq "Start_Incr_Backup"
+                       || $In{action} eq "Start_Full_Backup" );
+    my $doFull = $In{action} eq "Start_Full_Backup" ? 1 : 0;
     my $type = $doFull ? $Lang->{Type_full} : $Lang->{Type_incr};
     my $host = $In{host};
     my $Privileged = CheckPermission($host);
@@ -82,7 +82,8 @@ sub action
             my $checkHost = $host;
             $checkHost = $Conf{ClientNameAlias}
                                 if ( $Conf{ClientNameAlias} ne "" );
-	    my $ipAddr = ConfirmIPAddress($checkHost);
+	    my $ipAddr     = ConfirmIPAddress($checkHost);
+            my $buttonText = $Lang->{$In{action}};
 	    my $content = eval("qq{$Lang->{Are_you_sure_start}}");
             Header(eval("qq{$Lang->{BackupPC__Start_Backup_Confirm_on__host}}"),$content);
         } else {
@@ -92,6 +93,7 @@ sub action
                 $backoff = sprintf("%.1f",
                                   ($StatusHost{backoffTime} - time) / 3600);
             }
+            my $buttonText = $Lang->{$In{action}};
             my $content = eval ("qq{$Lang->{Are_you_sure_stop}}");
             Header(eval("qq{$Lang->{BackupPC__Stop_Backup_Confirm_on__host}}"),
                         $content);

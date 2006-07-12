@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -207,12 +207,12 @@ if ( !-f $logPath ) {
             unlink($file);
             next;
         }
+        $lastLog--;
         next if ( $file =~ /\.z$/ || !$Conf{CompressLevel} );
         BackupPC::FileZIO->compressCopy($file,
                                         "$file.z",
                                         undef,
                                         $Conf{CompressLevel}, 1);
-        $lastLog--;
     }
 }
 
@@ -302,6 +302,7 @@ my $lastFullTime = 0;
 my $lastIncrTime = 0;
 my $partialIdx = -1;
 my $partialNum;
+my $lastBkupNum;
 my $lastPartial = 0;
 
 #
@@ -332,23 +333,10 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
     my($currHours) = $hour + $min / 60 + $sec / 3600;
     my $blackout;
 
-    #
-    # Handle backward compatibility with original separate scalar
-    # parameters.
-    #
-    if ( defined($Conf{BlackoutHourBegin}) ) {
-        push(@{$Conf{BlackoutPeriods}},
-             {
-                 hourBegin => $Conf{BlackoutHourBegin},
-                 hourEnd   => $Conf{BlackoutHourEnd},
-                 weekDays  => $Conf{BlackoutWeekDays},
-             }
-        );
-    }
     foreach my $p ( @{$Conf{BlackoutPeriods}} ) {
         #
-        # Allow blackout to span midnight (specified by BlackoutHourBegin
-        # being greater than BlackoutHourEnd)
+        # Allow blackout to span midnight (specified by hourBegin
+        # being greater than hourEnd)
         #
         next if ( ref($p->{weekDays}) ne "ARRAY" 
                     || !defined($p->{hourBegin})
@@ -405,12 +393,14 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
                         || -f "$Dir/NewFileList.$Backups[$i]{num}" );
     if ( $Backups[$i]{type} eq "full" ) {
         $incrCntSinceFull = 0;
+        $lastBkupNum = $Backups[$i]{num};
         $lastIdxByLevel[0] = $i;
 	if ( $lastFullTime < $Backups[$i]{startTime} ) {
 	    $lastFullTime = $Backups[$i]{startTime};
 	}
     } elsif ( $Backups[$i]{type} eq "incr" ) {
         $incrCntSinceFull++;
+        $lastBkupNum = $Backups[$i]{num};
         $lastIdxByLevel[$Backups[$i]{level}] = $i;
         $lastIncrTime = $Backups[$i]{startTime}
                 if ( $lastIncrTime < $Backups[$i]{startTime} );
@@ -429,6 +419,8 @@ if ( @Backups == 0
         || (!$opts{i} && (time - $lastFullTime > $Conf{FullPeriod} * 24*3600
             && time - $lastIncrTime > $Conf{IncrPeriod} * 24*3600)) ) {
     $type = "full";
+    $incrLevel = 0;
+    $incrBaseBkupNum = $lastBkupNum;
 } elsif ( $opts{i} || (time - $lastIncrTime > $Conf{IncrPeriod} * 24*3600
         && time - $lastFullTime > $Conf{IncrPeriod} * 24*3600) ) {
     $type = "incr";
@@ -446,7 +438,7 @@ if ( @Backups == 0
         my $idx = $lastIdxByLevel[$i];
         next if ( !defined($idx) );
         if ( !defined($incrBaseTime)
-                || $Backups[$idx]{startTime} < $incrBaseTime ) {
+                || $Backups[$idx]{startTime} > $incrBaseTime ) {
             $incrBaseBkupNum = $Backups[$idx]{num};
             $incrBaseLevel   = $Backups[$idx]{level};
             $incrBaseTime    = $Backups[$idx]{startTime};
@@ -456,7 +448,10 @@ if ( @Backups == 0
     # Can't find any earlier lower-level backup!  Shouldn't
     # happen - just do full instead
     #
-    $type = "full" if ( !defined($incrBaseBkupNum) || $incrLevel < 1 );
+    if ( !defined($incrBaseBkupNum) || $incrLevel < 1 ) {
+        $type = "full";
+        $incrBaseBkupNum = $lastBkupNum;
+    }
 } else {
     NothingToDo($needLink);
 }
@@ -763,6 +758,7 @@ for my $shareName ( @$ShareNames ) {
 	close(WH);
     }
     print(LOG $bpc->timeStamp, $logMsg, "\n");
+    $XferLOG->write(\"$logMsg\n");
     print("started $type dump, share=$shareName\n");
 
     pidHandler(@xferPid);
@@ -1275,6 +1271,7 @@ sub BackupExpire
 	# where $Conf{FullKeepCnt} is an array.
         #
         last if ( !BackupFullExpire($client, \@Backups) );
+        $changes++;
     }
     $bpc->BackupInfoWrite($client, @Backups) if ( $changes );
 }

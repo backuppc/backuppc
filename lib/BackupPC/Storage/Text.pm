@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -247,11 +247,13 @@ sub ConfigPath
 
     return "$s->{ConfDir}/config.pl" if ( !defined($host) );
     if ( $s->{useFHS} ) {
-        return "$s->{ConfDir}/host/$host.pl";
+        return "$s->{ConfDir}/pc/$host.pl";
     } else {
+        return "$s->{TopDir}/pc/$host/config.pl"
+            if ( -f "$s->{TopDir}/pc/$host/config.pl" );
         return "$s->{ConfDir}/$host.pl"
             if ( $host ne "config" && -f "$s->{ConfDir}/$host.pl" );
-        return "$s->{TopDir}/pc/$host/config.pl";
+        return "$s->{ConfDir}/pc/$host.pl";
     }
 }
 
@@ -285,6 +287,23 @@ sub ConfigDataRead
         $conf->{$param} = [ $conf->{$param} ]
                                 if ( ref($conf->{$param}) ne "ARRAY" );
         $conf->{$param} = { "*" => $conf->{$param} };
+    }
+
+    #
+    # Handle backward compatibility with defunct BlackoutHourBegin,
+    # BlackoutHourEnd, and BlackoutWeekDays parameters.
+    #
+    if ( defined($conf->{BlackoutHourBegin}) ) {
+        push(@{$conf->{BlackoutPeriods}},
+             {
+                 hourBegin => $conf->{BlackoutHourBegin},
+                 hourEnd   => $conf->{BlackoutHourEnd},
+                 weekDays  => $conf->{BlackoutWeekDays},
+             }
+        );
+        delete($conf->{BlackoutHourBegin});
+        delete($conf->{BlackoutHourEnd});
+        delete($conf->{BlackoutWeekDays});
     }
 
     return (undef, $conf);

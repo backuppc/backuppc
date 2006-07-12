@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -41,6 +41,7 @@ use BackupPC::CGI::Lib qw(:all);
 use BackupPC::Config::Meta qw(:all);
 use BackupPC::Storage;
 use Data::Dumper;
+use Encode;
 
 our %ConfigMenu = (
     server => {
@@ -713,9 +714,10 @@ EOF
         $bpc->ServerConnect();
         if ( $mesg ne "" ) {
             (my $mesgBR = $mesg) =~ s/\n/<br>\n/g;
-            $content .= <<EOF;
-<tr><td colspan="2" class="border"><span class="editComment">$mesgBR</span></td></tr>
-EOF
+             # uncomment this if you want the changes to be displayed
+#            $content .= <<EOF;
+#<tr><td colspan="2" class="border"><span class="editComment">$mesgBR</span></td></tr>
+#EOF
             foreach my $str ( split(/\n/, $mesg) ) {
                 $bpc->ServerMesg("log $str") if ( $str ne "" );
             }
@@ -841,8 +843,9 @@ EOF
             #
             foreach my $var ( keys(%In) ) {
                 next if ( $var !~ /^orig_z_/ );
+                my $val = decode_utf8($In{$var});
                 $contentHidden .= <<EOF;
-<input type="hidden" name="$var" value="${EscHTML($In{$var})}">
+<input type="hidden" name="$var" value="${EscHTML($val)}">
 EOF
             }
 	}
@@ -946,7 +949,7 @@ sub fieldEditBuild
     $size = $type->{size} if ( defined($type->{size}) );
 
     #
-    # These fragments allow inline conent to be turned on and off
+    # These fragments allow inline content to be turned on and off
     #
     # <tr><td colspan="2"><span id="id_$varName" style="display: none" class="editComment">$comment</span></td></tr>
     # <tr><td class="border"><a href="javascript: displayHelp('$varName')">$varName</a>
@@ -1205,7 +1208,7 @@ EOF
 	    }
             my $textType = ($varName =~ /Passwd/) ? "password" : "text";
             $content .= <<EOF;
-<input type="$textType" name="v_z_$varName" size="$size" maxlength="256" value="${EscHTML($varValue)}"$onChange>
+<input type="$textType" class="editTextInput" name="v_z_$varName" size="$size" maxlength="256" value="${EscHTML($varValue)}"$onChange>
 EOF
         } elsif ( $type->{type} eq "boolean" ) {
             # checkbox
@@ -1227,7 +1230,7 @@ EOF
 	    my $rowCnt = $varValue =~ tr/\n//;
 	    $rowCnt = 1 if ( $rowCnt < 1 );
             $content .= <<EOF;
-<textarea name="v_z_$varName" cols="$size" rows="$rowCnt"$onChange>${EscHTML($varValue)}</textarea>
+<textarea name="v_z_$varName" class="editTextArea" cols="$size" rows="$rowCnt"$onChange>${EscHTML($varValue)}</textarea>
 EOF
         }
         $content .= "</td>\n";
@@ -1412,7 +1415,7 @@ sub fieldInputParse
                 }
             }
         } else {
-            $$value = $In{"v_z_$varName"};
+            $$value = decode_utf8($In{"v_z_$varName"});
             $$value =~ s/\r\n/\n/g;
         }
         $$value = undef if ( $type->{undefIfEmpty} && $$value eq "" );
@@ -1465,12 +1468,15 @@ sub configDiffMesg
 
             (my $valueNew2 = $valueNew) =~ s/['\n\r]//g;
             (my $valueOld2 = $valueOld) =~ s/['\n\r]//g;
+
+            next if ( $valueOld2 eq $valueNew2 );
+
             $valueNew =~ s/\n/\\n/g;
             $valueOld =~ s/\n/\\n/g;
             $valueNew =~ s/\r/\\r/g;
             $valueOld =~ s/\r/\\r/g;
-            $mesg .= eval("qq($Lang->{CfgEdit_Log_Change_param_value})")
-                                    if ( $valueOld2 ne $valueNew2 );
+
+            $mesg .= eval("qq($Lang->{CfgEdit_Log_Change_param_value})");
         }
     }
     return $mesg;

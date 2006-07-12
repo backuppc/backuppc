@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -123,10 +123,11 @@ sub NewRequest
     #
     $MyURL  = $ENV{SCRIPT_NAME};
     $User   = $ENV{REMOTE_USER};
+
     #
-    # Handle LDAP uid=user when using mod_authz_ldap
+    # Handle LDAP uid=user when using mod_authz_ldap and otherwise untaint
     #
-    $User   = $1 if ( $User =~ /uid=([^,]+)/i );        
+    $User   = $1 if ( $User =~ /uid=([^,]+)/i || $User =~ /(.*)/ );
 
     #
     # Clean up %ENV for taint checking
@@ -492,8 +493,8 @@ EOF
 EOF
     my $hostSelectbox = "<option value=\"#\">$Lang->{Select_a_host}</option>";
     my @hosts = GetUserHosts($Conf{CgiNavBarAdminAllHosts});
+    NavSectionTitle($Lang->{Hosts});
     if ( defined($Hosts) && %$Hosts > 0 && @hosts ) {
-	NavSectionTitle($Lang->{Hosts});
         foreach my $host ( @hosts ) {
 	    NavLink("?host=${EscURI($host)}", $host)
 		    if ( @hosts < $Conf{CgiNavBarAdminAllHosts} );

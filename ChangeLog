@@ -24,7 +24,7 @@
 * Added configuration and host CGI editor.
 
 * Added rsync hardlink support.  Requires latest version of
-  File::RsyncP.
+  File::RsyncP (0.62).
 
 * Decoupled BackupPC_dump from BackupPC_nightly by making
   asynchronous file linking/delete robust to race conditions.
@@ -40,19 +40,14 @@
   (level 0).  Default configuration is all incrementals are level 1.
 
 * Server file names are now in utf8 and optional conversion
-  to/from client name charsets is done.
+  to/from client name charsets can be configured.  All CGI pages
+  now use the utf8 charset.
 
 * Backup metadata is now additionally saved to pc/HOST/nnn/backupInfo,
   in addition to pc/HOST/backups.  In case pc/HOST/backups gets trashed,
   then a new script BackupPC_fixupBackupSummary can read the per-backup
   metadata from pc/HOST/nnn/backupInfo and reconstruct the backups file.
   Roberto Moreno also pointed out an early error in the CVS version.
-
-* In conf/config.pl, changed --devices to -D in $Conf{RsyncArgs}
-  and $Conf{RsyncRestoreArgs} to fix "fileListReceive failed" and
-  "Can't open .../f%2f for empty output" errors with rsync 2.6.7+.
-  Fix proposed by Justin Pessa and Vincent Ho, and confirmed by
-  Dan Niles.
 
 * Added Storage module and Storage::Text which localizes all the
   text data file reading/writing (eg: backups, restores, archives
@@ -64,15 +59,21 @@
 * Added Config module, and Config::Meta that contains meta data
   about configuration parameters.
 
+* Added RSS support from Rich Duzenbury.
+
+* Translations of new 3.0 language strings from Guillaume Filion,
+  Reginaldo Ferreira, Ralph Passgang, Lieven Bridts, Guus Houtzager,
+  Rodrigo Real.
+
+* Added optional checking of exit status of Dump/Restore/Archive Pre/Post
+  UserCmd, requested by Kiko Jover, Matthias Bertschy and others.
+
 * Added Slackware init.d script from Tony Nelson.
 
 * Fixed error reporting when restore/archive fail to write the
   request file to the client directory.
 
 * Applied patch from Marc Prewitt for DumpPreShareCmd and DumpPostShareCmd.
-
-* Added checking of exit status of Dump/Restore/Archive Pre/Post UserCmd,
-  requested by Kiko Jover, Matthias Bertschy and others.
 
 * Apply patch from Pete Wenzel to add smbClientPath => $Conf{SmbClientPath}
   to DumpPreUserCmd etc.
@@ -122,7 +123,8 @@
   via the exit status, instead of just the last.
 
 * Added $Conf{EMailHeaders} for additional email headers, requested
-  by Ludovic Gasc.
+  by Ludovic Gasc.  If the Content-Type charset is set to utf8 then
+  the body of the email is sent in utf8 coding.
 
 * Made shareName argument regexp checking more general to allow parens.
 
@@ -132,8 +134,14 @@
 * Documentation updates from Richard Ames, JP Vossen, Torsten Finke.
 
 #------------------------------------------------------------------------
-# Version 2.1.2pl1, __RELEASEDATE__
+# Version 2.1.2pl2, 18 Jun 2006
 #------------------------------------------------------------------------
+
+* In conf/config.pl, changed --devices to -D in $Conf{RsyncArgs}
+  and $Conf{RsyncRestoreArgs} to fix "fileListReceive failed" and
+  "Can't open .../f%2f for empty output" errors with rsync 2.6.7+.
+  Fix proposed by Justin Pessa and Vincent Ho, and confirmed by
+  Dan Niles.
 
 * Added patch from Michael (mna.news) to ignore "file is unchanged"
   message from tar 1.15.x during incremental backups.

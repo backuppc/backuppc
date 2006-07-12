@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -347,11 +347,13 @@ EOF
     if ( @Backups ) {
         # only allow incremental if there are already some backups
         $startIncrStr = <<EOF;
-<input type="submit" value="\$Lang->{Start_Incr_Backup}" name="action">
+<input type="button" value="$Lang->{Start_Incr_Backup}"
+ onClick="document.StartStopForm.action.value='Start_Incr_Backup';
+          document.StartStopForm.submit();">
 EOF
     }
 
-    $startIncrStr = eval ("qq{$startIncrStr}");
+    $startIncrStr = eval("qq{$startIncrStr}");
     my $content = eval("qq{$Lang->{Host__host_Backup_Summary2}}");
     Header(eval("qq{$Lang->{Host__host_Backup_Summary}}"), $content);
     Trailer();

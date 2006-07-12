@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 23 Jan 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -58,23 +58,23 @@ BackupPC::CGI::Lib::NewRequest;
 
 my %ActionDispatch = (
     "summary"             	 => "Summary",
-    $Lang->{Start_Incr_Backup}   => "StartStopBackup",
-    $Lang->{Start_Full_Backup}   => "StartStopBackup",
-    $Lang->{Stop_Dequeue_Backup} => "StartStopBackup",
-    $Lang->{Stop_Dequeue_Archive} => "StartStopBackup",
+    "Start_Incr_Backup"          => "StartStopBackup",
+    "Start_Full_Backup"          => "StartStopBackup",
+    "Stop_Dequeue_Backup"        => "StartStopBackup",
+    "Stop_Dequeue_Archive"       => "StartStopBackup",
     "queue"               	 => "Queue",
     "view"                	 => "View",
     "LOGlist"             	 => "LOGlist",
     "emailSummary"        	 => "EmailSummary",
     "browse"              	 => "Browse",
     "dirHistory"              	 => "DirHistory",
-    $Lang->{Restore}        	 => "Restore",
+    "Restore"           	 => "Restore",
     "RestoreFile"         	 => "RestoreFile",
     "hostInfo"		       	 => "HostInfo",
     "generalInfo"         	 => "GeneralInfo",
     "restoreInfo"         	 => "RestoreInfo",
     "archiveInfo"         	 => "ArchiveInfo",
-    $Lang->{Start_Archive}       => "Archive",
+    "Start_Archive"              => "Archive",
     "Archive"                    => "Archive",
     "Reload"                     => "ReloadServer",
     "startServer"                => "StartServer",
@@ -87,9 +87,10 @@ my %ActionDispatch = (
 #
 # Set default actions, then call sub handler
 #
-$In{action} ||= "hostInfo"    if ( defined($In{host}) );
-$In{action}   = "generalInfo" if ( !defined($ActionDispatch{$In{action}}) );
-my $action    = $ActionDispatch{$In{action}};
+if ( !defined($ActionDispatch{$In{action}}) ) {
+    $In{action} = defined($In{host}) ? "hostInfo" : "generalInfo";
+}
+my $action = $ActionDispatch{$In{action}};
 
 #
 # For some reason under mod_perl, the use lib above is unreliable,

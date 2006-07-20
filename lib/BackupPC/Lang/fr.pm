@@ -1124,7 +1124,7 @@ $Lang{checkAllHosts} = <<EOF;
 <tr><td class="fviewborder">
 <input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Tout sélectionner
 </td><td colspan="2" align="center" class="fviewborder">
-<input type="submit" name="Submit" value="Archiver les machines sŽlectionnŽes">
+<input type="submit" name="Submit" value="Archiver les machines sŽélectionnées">
 </td></tr>
 EOF
 

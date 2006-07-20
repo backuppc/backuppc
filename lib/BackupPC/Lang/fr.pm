@@ -142,11 +142,11 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
 <tr class="tableheader"><td> Hôte </td>
     <td align="center"> Utilisateur </td>
     <td align="center"> Nb complètes </td>
-    <td align="center"> Complètes Âge/Jours </td>
-    <td align="center"> Complètes Taille/Go </td>
-    <td align="center"> Vitesse Mo/s </td>
+    <td align="center"> Complètes Âge (jours) </td>
+    <td align="center"> Complètes Taille (Go) </td>
+    <td align="center"> Vitesse (Mo/s) </td>
     <td align="center"> Nb incrémentielles </td>
-    <td align="center"> Incrémentielles Âge/Jours </td>
+    <td align="center"> Incrémentielles Âge (jours) </td>
     <td align="center"> État actuel </td>
     <td align="center"> Dernière tentative </td></tr>
 \$strGood
@@ -160,11 +160,11 @@ Il y a \$hostCntNone hôtes sans sauvegardes.
 <tr class="tableheader"><td> Hôte </td>
     <td align="center"> Utilisateur </td>
     <td align="center"> Nb complètes </td>
-    <td align="center"> Complètes Âge/jour </td>
-    <td align="center"> Complètes Taille/Go </td>
-    <td align="center"> Vitesse Mo/s </td>
+    <td align="center"> Complètes Âge (jours) </td>
+    <td align="center"> Complètes Taille (Go) </td>
+    <td align="center"> Vitesse (Mo/s) </td>
     <td align="center"> Nb incrémentielles </td>
-    <td align="center"> Incrémentielles Âge/jours </td>
+    <td align="center"> Incrémentielles Âge (jours) </td>
     <td align="center"> État actuel </td>
     <td align="center"> Dernière tentative </td></tr>
 \$strNone
@@ -200,7 +200,7 @@ $Lang{BackupPC_Archive}=<<EOF;
 //-->
 </script>
 
-Il y a \$hostCntGood hôtes qui ont été sauvegardés représentant \${fullSizeTot} Go
+Il y a \$hostCntGood hôtes qui ont été sauvegardés, représentant \${fullSizeTot} Go
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -268,7 +268,7 @@ EOF
 $Lang{BackupPC_Archive2_split} = <<EOF;
 <tr>
     <td>Scinder le fichier en fichiers de</td>
-    <td><input type="numeric" value="\$ArchiveSplit" name="splitsize">Mega octets</td>
+    <td><input type="numeric" value="\$ArchiveSplit" name="splitsize"> Mo</td>
 </tr>
 EOF
 
@@ -326,7 +326,7 @@ Vous êtes sur le point d\'arrêter/supprimer de la file les sauvegardes de \$host
 <input type="hidden" name="host"   value="\$host">
 <input type="hidden" name="doit"   value="1">
 <input type="hidden" name="action" value="">
-En outre, prière de ne pas démarrer d\'autres sauvegarde pour
+En outre, prière de ne pas démarrer d\'autres sauvegarde pendant
 <input type="text" name="backoff" size="10" value="\$backoff"> heures.
 <p>
 Voulez-vous vraiment le faire ?
@@ -452,7 +452,7 @@ Vous pouvez démarrer une restauration de ces fichiers
 directement sur \$host.
 </p><p>
 <b>Attention:</b>
-tous les fichiers correspondant à ceux que vous avez sélectionnés vont être effacés !
+tous les fichiers correspondant à ceux que vous avez sélectionnés vont être écrasés !
 </p>
 <form action="\$MyURL" method="post" name="direct">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
@@ -649,8 +649,8 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
     <td align="center"> Fusionnée </td> 
     <td align="center"> Niveau </td>
     <td align="center"> Date de démarrage </td>
-    <td align="center"> Durée/min </td>
-    <td align="center"> Âge/jours </td>
+    <td align="center"> Durée (min) </td>
+    <td align="center"> Âge (jours) </td>
     <td align="center"> Chemin d\'accès de la sauvegarde sur le serveur </td>
 </tr>
 \$str
@@ -691,12 +691,12 @@ Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés dans les fich
     <td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
     <td align="center"> Nb de Fichiers </td>
-    <td align="center"> Taille/Mo </td>
+    <td align="center"> Taille (Mo) </td>
     <td align="center"> Mo/s </td>
     <td align="center"> Nb de Fichiers </td>
-    <td align="center"> Taille/Mo </td>
+    <td align="center"> Taille (Mo) </td>
     <td align="center"> Nb de Fichiers </td>
-    <td align="center"> Taille/Mo </td>
+    <td align="center"> Taille (Mo) </td>
 </tr>
 \$sizeStr
 </table>
@@ -715,11 +715,11 @@ récemment compressés.
 <tr class="tableheader"><td align="center"> Nb de sauvegardes </td>
     <td align="center"> Type </td>
     <td align="center"> Niveau de Compression </td>
-    <td align="center"> Taille/Mo </td>
-    <td align="center"> Taille compressée/Mo </td>
+    <td align="center"> Taille (Mo) </td>
+    <td align="center"> Taille compressée (Mo) </td>
     <td align="center"> Compression </td>
-    <td align="center"> Taille/Mo </td>
-    <td align="center"> Taille compressée/Mo </td>
+    <td align="center"> Taille (Mo) </td>
+    <td align="center"> Taille compressée (Mo) </td>
     <td align="center"> Compression </td>
 </tr>
 \$compStr
@@ -866,7 +866,7 @@ Cette page montre toutes les version disponibles des fichiers sauvegardés pour l
 <li> Les fichiers avec des contenus identiques pour plusieurs sauvegardes ont 
      le même numéro de version.
 <li> Les fichiers qui ne sont pas présents sur une sauvegarde en particulier 
-     sont représentés par une boite vide.
+     sont représentés par une boîte vide.
 <li> Les fichiers montrés avec la même version peuvent avoir des attributs différents. 
      Choisissez le numéro de sauvegarde pour voir les attributs de fichiers.
 </ul>
@@ -900,7 +900,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 <tr><td class="tableheader"> Partition de destination </td><td class="border"> \$RestoreReq{shareDest} </td></tr>
 <tr><td class="tableheader"> Début </td><td class="border"> \$startTime </td></tr>
 <tr><td class="tableheader"> Durée </td><td class="border"> \$duration min </td></tr>
-<tr><td class="tableheader"> Nombre de fichier </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
+<tr><td class="tableheader"> Nombre de fichiers </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
 <tr><td class="tableheader"> Taille totale </td><td class="border"> \${MB} Mo </td></tr>
 <tr><td class="tableheader"> Taux de transfert </td><td class="border"> \$MBperSec Mo/s </td></tr>
 <tr><td class="tableheader"> Erreurs de TarCreate </td><td class="border"> \$Restores[\$i]{tarCreateErrs} </td></tr>
@@ -962,17 +962,17 @@ $Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Seuls les utilisateurs privilégiés peuvent arrêter ou démarrer des sauvegardes sur "
                   . " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Numéro invalide \$num";
-$Lang{Unable_to_open__file__configuration_problem} = "Impossible d\'ouvrir \$file: problème de configuration ?";
+$Lang{Unable_to_open__file__configuration_problem} = "Impossible d\'ouvrir \$file : problème de configuration ?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Seuls les utilisateurs privilégiés peuvent voir les fichiers de journal ou les fichiers de configuration.";
 $Lang{Only_privileged_users_can_view_log_files} = "Seuls les utilisateurs privilégiés peuvent voir les fichiers de journal.";
-$Lang{Only_privileged_users_can_view_email_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les compte-rendu des courriels.";
+$Lang{Only_privileged_users_can_view_email_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les compte-rendus des courriels.";
 $Lang{Only_privileged_users_can_browse_backup_files} = "Seuls les utilisateurs privilégiés peuvent parcourir les fichiers de sauvegarde"
                  . " pour l'hôte \${EscHTML(\$In{host})}.";
 $Lang{Empty_host_name} = "Nom d\'hôte vide.";
 $Lang{Directory___EscHTML} = "Le répertoire \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
 		    . " est vide";
 $Lang{Can_t_browse_bad_directory_name2} = "Ne peut pas parcourir "
-	            . " \${EscHTML(\$relDir)}: mauvais nom de répertoire";
+	            . " \${EscHTML(\$relDir)} : mauvais nom de répertoire";
 $Lang{Only_privileged_users_can_restore_backup_files} = "Seuls les utilisateurs privilégiés peuvent restaurer "
                 . " des fichiers de sauvegarde pour l\'hôte \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Mauvais nom d\'hôte \${EscHTML(\$host)}";
@@ -980,7 +980,7 @@ $Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Vous n\'avez sélecti
     . "vous pouvez revenir en arrière pour sélectionner des fichiers.";
 $Lang{You_haven_t_selected_any_hosts} = "Vous n\'avez sélectionné aucun hôte ; veuillez retourner à la page précédente pour"
                 . " faire la sélection d\'un hôte.";
-$Lang{Nice_try__but_you_can_t_put} = "Bien tenté, mais vous ne pouvez pas mettre \'..\' dans n\'importe quel nom de fichier.";
+$Lang{Nice_try__but_you_can_t_put} = "Bien tenté, mais vous ne pouvez pas mettre \'..\' dans un nom de fichier.";
 $Lang{Host__doesn_t_exist} = "L'hôte \${EscHTML(\$In{hostDest})} n\'existe pas.";
 $Lang{You_don_t_have_permission_to_restore_onto_host} = "Vous n\'avez pas la permission de restaurer sur l\'hôte"
 		    . " \${EscHTML(\$In{hostDest})}";
@@ -1015,7 +1015,7 @@ EOF
 $Lang{Backup_requested_on_DHCP__host} = "Demande de sauvegarde sur l\'hôte \$host (\$In{hostIP}) par"
 		                      . " \$User depuis \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User} = "Sauvegarde demandée sur \$host par \$User";
-$Lang{Backup_stopped_dequeued_on__host_by__User} = "Sauvegarde Arrêtée/déprogrammée pour \$host par \$User";
+$Lang{Backup_stopped_dequeued_on__host_by__User} = "Sauvegarde arrêtée/déprogrammée pour \$host par \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restauration demandée pour l\'hôte \$hostDest, "
              . "sauvegarde n°\$num, par \$User depuis \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivage demandé par \$User de \$ENV{REMOTE_ADDR}";
@@ -1059,12 +1059,12 @@ EOF
 
 # -----------
 $Lang{Host_host_is_queued_on_the_background_queue_will_be_backed_up_soon} = <<EOF;
-<li>L\'hôte \$host se trouve dans la liste d\'attente d\'arrière plan (sera sauvegardé bientôt).
+<li>L\'hôte \$host se trouve dans la liste d\'attente d\'arrière plan (il sera sauvegardé bientôt).
 EOF
 
 # ----------
 $Lang{Host_host_is_queued_on_the_user_queue__will_be_backed_up_soon} = <<EOF;
-<li>L\'hôte \$host se trouve dans la liste d\'attente utilisateur (sera sauvegardé bientôt).
+<li>L\'hôte \$host se trouve dans la liste d\'attente utilisateur (il sera sauvegardé bientôt).
 EOF
 
 # ---------
@@ -1088,7 +1088,7 @@ $Lang{Pings_to_host_have_failed_StatusHost_deadCnt__consecutive_times} = <<EOF;
 EOF
 
 # -----
-$Lang{Prior_to_that__pings} = "Avant cela, pings";
+$Lang{Prior_to_that__pings} = "Avant cela, les pings";
 
 # -----
 $Lang{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times} = <<EOF;
@@ -1124,7 +1124,7 @@ $Lang{checkAllHosts} = <<EOF;
 <tr><td class="fviewborder">
 <input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Tout sélectionner
 </td><td colspan="2" align="center" class="fviewborder">
-<input type="submit" name="Submit" value="Archive selected hosts">
+<input type="submit" name="Submit" value="Archiver les machines sŽlectionnŽes">
 </td></tr>
 EOF
 
@@ -1141,7 +1141,7 @@ EOF
 $Lang{Home} = "Accueil";
 $Lang{Browse} = "Explorer les sauvegardes";
 $Lang{Last_bad_XferLOG} = "Bilan des derniers transferts échoués";
-$Lang{Last_bad_XferLOG_errors_only} = "Bilan des derniers transferts échoués (erreurs&nbsp;seulement)";
+$Lang{Last_bad_XferLOG_errors_only} = "Bilan des derniers transferts échoués (erreurs seulement)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
 <li> Cet affichage est fusionné avec la sauvegarde n°\$numF, la plus récente copie intégrale.
@@ -1159,9 +1159,9 @@ Cliquer sur le numéro de restauration pour plus de détails.
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Résultat </td>
     <td align="right"> Date de départ</td>
-    <td align="right"> Durée/min</td>
+    <td align="right"> Durée (min)</td>
     <td align="right"> Nb fichiers </td>
-    <td align="right"> Taille/Mo </td>
+    <td align="right"> Taille (Mo) </td>
     <td align="right"> Nb errs tar </td>
     <td align="right"> Nb errs trans </td>
 </tr>
@@ -1243,18 +1243,18 @@ $userName,
 Notre logiciel de copies de sécurité n'a jamais réussi à
 effectuer la sauvegarde de votre ordinateur ($host). Les sauvegardes
 devraient normalement survenir lorsque votre ordinateur est connecté
-au réseau. Vous devriez contacter le support informatique si :
+au réseau. Vous devriez contacter le responsable informatique si :
 
   - Votre ordinateur est régulièrement connecté au réseau, ce qui
     signifie qu'il y aurait un problème de configuration
     empêchant les sauvegardes de s'effectuer.
 
-  - Vous ne voulez pas qu'il y ait de copies de sécurité de
+  - Vous ne voulez pas qu'il y ait de sauvegardes de
     votre ordinateur ni ne voulez recevoir d'autres messages
     comme celui-ci.
 
-Dans le cas contraire, veuillez vous assurer que votre ordinateur est 
-connecté au réseau lorsque ce sera possible.
+Dans le cas contraire, veuillez vous assurer dès que possible que votre 
+ordinateur est correctement connecté au réseau.
 
 Merci de votre attention,
 BackupPC Génie
@@ -1275,12 +1275,13 @@ jours. $numBackups sauvegardes ont étés effectuées du $firstTime
 jusqu'à il y a $days jours. Les sauvegardes devraient normalement
 survenir lorsque votre ordinateur est connecté au réseau.
 
-Si votre ordinateur a été connecté au réseau plus de quelques heures
-durant les derniers $days jours, vous devriez contacter votre support
-informatique pour savoir pourquoi les sauvegardes ne s'effectuent pas.
+Si votre ordinateur a effectivement été connecté au réseau plus de 
+quelques heures durant les derniers $days jours, vous devriez 
+contacter votre responsable informatique pour savoir pourquoi les 
+sauvegardes ne s'effectuent pas correctement.
 
-Autrement, si vous êtes en dehors du bureau, il n'y a pas d'autres
-choses que vous pouvez faire, à part faire des copies de vos fichiers
+Autrement, si vous êtes en dehors du bureau, il n'y a pas d'autre
+chose que vous pouvez faire, à part faire des copies de vos fichiers
 importants sur d'autres medias. Vous devez réaliser que tout fichier crée
 ou modifié durant les $days derniers jours (incluant les courriels et
 les fichiers attachés) ne pourra pas être restauré si un problème survient
@@ -1332,21 +1333,21 @@ $Lang{howLong_not_been_backed_up_for_days_days} = "pas été sauvegardés depuis \$
 $Lang{RSS_Doc_Title}       = "BackupPC Server";
 $Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
-Nb complètes: \$fullCnt;
-Complètes Âge/Jours: \$fullAge;
-Complètes Taille/Go: \$fullSize;
-Vitesse Mo/s: \$fullRate;
-Nb incrémentielles: \$incrCnt;
-Incrémentielles Âge/Jours: \$incrAge;
-État actuel: \$host_state;
-Dernière tentative: \$host_last_attempt;
+Nb complètes : \$fullCnt;
+Complètes Âge (jours) : \$fullAge;
+Complètes Taille (Go) : \$fullSize;
+Vitesse (Mo/s) : \$fullRate;
+Nb incrémentielles : \$incrCnt;
+Incrémentielles Âge (jours) : \$incrAge;
+État actuel : \$host_state;
+Dernière tentative : \$host_last_attempt;
 EOF
 
 #######################################################################
 # Configuration editor strings
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Seuls les usagers privilégiés peuvent modifier les paramètres de configuration.";
+$Lang{Only_privileged_users_can_edit_config_files} = "Seuls les utilisateurs privilégiés peuvent modifier les paramètres de configuration.";
 $Lang{CfgEdit_Edit_Config} = "Modifier la configuration";
 $Lang{CfgEdit_Edit_Hosts}  = "Modifier les machines";
 
@@ -1383,9 +1384,9 @@ $Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Chemins/Commandes/Args Rsync";
 $Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Port/Args Rsyncd";
 $Lang{CfgEdit_Title_Archive_Paths_Commands} = "Chemins/Commandes d'archivage";
 $Lang{CfgEdit_Title_Schedule} = "Horaire";
-$Lang{CfgEdit_Title_Full_Backups} = "Sauvegardes complètres";
+$Lang{CfgEdit_Title_Full_Backups} = "Sauvegardes complètes";
 $Lang{CfgEdit_Title_Incremental_Backups} = "Sauvegardes incrémentielles";
-$Lang{CfgEdit_Title_Blackouts} = "Occultation";
+$Lang{CfgEdit_Title_Blackouts} = "Suspension";
 $Lang{CfgEdit_Title_Other} = "Divers";
 $Lang{CfgEdit_Title_Backup_Settings} = "Paramètres de sauvegarde";
 $Lang{CfgEdit_Title_Client_Lookup} = "Consultation des clients";
@@ -1396,13 +1397,13 @@ $Lang{CfgEdit_Title_Hosts} = "Machines";
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 Pour ajouter une machine, choisissez Ajouter et entrez ensuite le nom. Pour faire
 une copie de la configuration d'une autre machine, entrer le nom de la machine
-comme NOUVEAU=ACOPIER.  Cela va écraser toute configuration par défaut pour
-cette machine.  Vous pouvez aussi faire cela pour une machine existante.
-Pour détruire une machine, cliquer sur le bouton Détruire.  Les ajouts, 
+comme NOUVEAU=ACOPIER. Cela va écraser toute configuration par défaut pour
+cette machine. Vous pouvez aussi faire cela pour une machine existante.
+Pour détruire une machine, cliquer sur le bouton Détruire. Les ajouts, 
 destructions et modifications ne prennent effet que lorsque que vous cliquez 
-sur le bouton Sauvegarder.  Aucune des sauvegardes des machines ne sera
-détruite, donc si vous éffacer une machine par erreur, créez la à nouveau. Pour
-détruire les sauvegardes d'une machine, vous devez détruire les fichiers 
+sur le bouton Sauvegarder. Aucune des sauvegardes des machines ne sera
+détruite, donc si vous effacez une machine par erreur, créez-la à nouveau. Pour
+détruire les sauvegardes d'une machine, vous devez effacer les fichiers 
 manuellement dans \$topDir/pc/HOST
 EOF
 
@@ -1436,7 +1437,7 @@ $Lang{CfgEdit_Error__must_be_executable_program}
 $Lang{CfgEdit_Error__must_be_valid_option}
             = "Erreur: \$var doit être une option valide";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "La machine \$copyHost ne peut être copiÃe, car elle n'existe pas; créations d'une machine nommée \$fullHost.  Détruisez cette machine si vous n'est pas ce que vous vouliez.";
+            = "La machine \$copyHost ne peut être copiée, car elle n'existe pas ; créations d'une machine nommée \$fullHost.  Détruisez cette machine si ce n'est pas ce que vous vouliez.";
 
 $Lang{CfgEdit_Log_Copy_host_config}
             = "\$User a copié la config de \$fromHost à \$host\n";

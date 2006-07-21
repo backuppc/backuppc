@@ -326,7 +326,7 @@ Vous êtes sur le point d\'arrêter/supprimer de la file les sauvegardes de \$host
 <input type="hidden" name="host"   value="\$host">
 <input type="hidden" name="doit"   value="1">
 <input type="hidden" name="action" value="">
-En outre, prière de ne pas démarrer d\'autres sauvegarde pendant
+En outre, prière de ne pas démarrer d\'autre sauvegarde pendant
 <input type="text" name="backoff" size="10" value="\$backoff"> heures.
 <p>
 Voulez-vous vraiment le faire ?
@@ -1124,7 +1124,7 @@ $Lang{checkAllHosts} = <<EOF;
 <tr><td class="fviewborder">
 <input type="checkbox" name="allFiles" onClick="return checkAll('allFiles');">&nbsp;Tout sélectionner
 </td><td colspan="2" align="center" class="fviewborder">
-<input type="submit" name="Submit" value="Archiver les machines sŽélectionnées">
+<input type="submit" name="Submit" value="Archiver les machines sélectionnées">
 </td></tr>
 EOF
 
@@ -1437,7 +1437,7 @@ $Lang{CfgEdit_Error__must_be_executable_program}
 $Lang{CfgEdit_Error__must_be_valid_option}
             = "Erreur: \$var doit être une option valide";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "La machine \$copyHost ne peut être copiée, car elle n'existe pas ; créations d'une machine nommée \$fullHost.  Détruisez cette machine si ce n'est pas ce que vous vouliez.";
+            = "La machine \$copyHost ne peut être copiée, car elle n'existe pas ; création d'une machine nommée \$fullHost.  Détruisez cette machine si ce n'est pas ce que vous vouliez.";
 
 $Lang{CfgEdit_Log_Copy_host_config}
             = "\$User a copié la config de \$fromHost à \$host\n";

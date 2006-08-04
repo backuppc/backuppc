@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -248,7 +248,11 @@ sub readLine
         }
     }
     $str = shift(@{$self->{readLineBuf}}) . "\n";
-    $str = decode_utf8($str) if ( $self->{utf8} );
+    if ( $self->{utf8} ) {
+        my $strUtf8 = decode_utf8($str, 0);
+        $strUtf8 = $str if ( length($strUtf8) == 0 );
+        return $strUtf8;
+    }
     return $str;
 }
 

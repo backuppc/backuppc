@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -37,10 +37,12 @@
 package BackupPC::CGI::RestoreFile;
 
 use strict;
+use Encode;
 use BackupPC::CGI::Lib qw(:all);
 use BackupPC::FileZIO;
 use BackupPC::Attrib qw(:all);
 use BackupPC::View;
+
 
 sub action
 {
@@ -150,7 +152,8 @@ sub restoreFile
     my $view = BackupPC::View->new($bpc, $host, \@Backups);
     my $a = $view->fileAttrib($num, $share, $dir);
     if ( $dir =~ m{(^|/)\.\.(/|$)} || !defined($a) ) {
-        ErrorExit("Can't restore bad file ${EscHTML($dir)} ($num, $share, $dir)");
+        $dir = decode_utf8($dir);
+        ErrorExit("Can't restore bad file ${EscHTML($dir)} ($num, $share)");
     }
     my $f = BackupPC::FileZIO->open($a->{fullPath}, 0, $a->{compress});
     my $data;

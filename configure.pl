@@ -87,6 +87,7 @@ if ( !GetOptions(
             "cgi-dir=s",
             "compress-level=i",
             "config-path=s",
+            "config-dir=s",
             "data-dir=s",
             "dest-dir=s",
             "fhs!",
@@ -95,6 +96,7 @@ if ( !GetOptions(
             "html-dir=s",
             "html-dir-url=s",
             "install-dir=s",
+            "log-dir=s",
             "man",
             "set-perms!",
             "uid-ignore!",
@@ -105,6 +107,7 @@ pod2usage(1) if ( $opts{help} );
 pod2usage(-exitstatus => 0, -verbose => 2) if $opts{man};
 
 my $DestDir = $opts{"dest-dir"};
+$DestDir = "" if ( $DestDir eq "/" );
 
 if ( !$opts{"uid-ignore"} && $< != 0 ) {
     print <<EOF;
@@ -549,12 +552,12 @@ foreach my $dir ( (
             "$Conf{ConfDir}",
             "$Conf{LogDir}",
         ) ) {
-    mkpath("$DestDir/$dir", 0, 0750) if ( !-d "$DestDir/$dir" );
-    if ( !-d "$DestDir/$dir"
-            || !my_chown($Uid, $Gid, "$DestDir/$dir") ) {
-        die("Failed to create or chown $DestDir/$dir\n");
+    mkpath("$DestDir$dir", 0, 0750) if ( !-d "$DestDir$dir" );
+    if ( !-d "$DestDir$dir"
+            || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
+        die("Failed to create or chown $DestDir$dir\n");
     } else {
-        print("Created $DestDir/$dir\n");
+        print("Created $DestDir$dir\n");
     }
 }
 
@@ -859,9 +862,9 @@ EOF
 }
 
 eval "use File::RsyncP;";
-if ( !$@ && $File::RsyncP::VERSION < 0.52 ) {
+if ( !$@ && $File::RsyncP::VERSION < 0.64 ) {
     print("\nWarning: you need to upgrade File::RsyncP;"
-        . " I found $File::RsyncP::VERSION and BackupPC needs 0.52\n");
+        . " I found $File::RsyncP::VERSION and BackupPC needs 0.64\n");
 }
 
 exit(0);

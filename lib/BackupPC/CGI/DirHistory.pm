@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -40,6 +40,7 @@ use strict;
 use BackupPC::CGI::Lib qw(:all);
 use BackupPC::View;
 use BackupPC::Attrib qw(:all);
+use Encode;
 
 sub action
 {
@@ -85,6 +86,7 @@ sub action
 	my %inode2name;
 	my $nameCnt = 0;
 	(my $fDisp  = "${EscHTML($f)}") =~ s/ /&nbsp;/g;
+        $fDisp      = decode_utf8($fDisp);
 	$fileStr   .= "<tr><td align=\"left\"  class=\"histView\">$fDisp</td>";
 	my($colSpan, $url, $inode, $type);
 	my $tdClass = ' class="histView"';
@@ -162,7 +164,7 @@ EOF
 	$fileStr .= "</tr>\n";
     }
 
-    my $dirDisplay = "$share/$dir";
+    my $dirDisplay = decode_utf8("$share/$dir");
     $dirDisplay =~ s{//+}{/}g;
     $dirDisplay =~ s{/+$}{}g;
     $dirDisplay = "/" if ( $dirDisplay eq "" );

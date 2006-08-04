@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -40,6 +40,7 @@ package BackupPC::Xfer::Rsync;
 use strict;
 use BackupPC::View;
 use BackupPC::Xfer::RsyncFileIO;
+use Encode qw/from_to encode/;
 
 use vars qw( $RsyncLibOK $RsyncLibErr );
 
@@ -55,10 +56,10 @@ BEGIN {
 	#
 	# Note: also update configure.pl when this version number is changed!
 	#
-        if ( $File::RsyncP::VERSION < 0.62 ) {
+        if ( $File::RsyncP::VERSION < 0.64 ) {
             $RsyncLibOK = 0;
             $RsyncLibErr = "File::RsyncP module version"
-                         . " ($File::RsyncP::VERSION) too old: need 0.62";
+                         . " ($File::RsyncP::VERSION) too old: need 0.64";
         } else {
             $RsyncLibOK = 1;
         }
@@ -130,6 +131,8 @@ sub start
 	$rsyncArgs = $conf->{RsyncRestoreArgs};
 	my $remoteDir = "$t->{shareName}/$t->{pathHdrDest}";
 	$remoteDir    =~ s{//+}{/}g;
+        from_to($remoteDir, "utf8", $conf->{ClientCharset})
+                                    if ( $conf->{ClientCharset} ne "" );
         $argList = ['--server', @$rsyncArgs, '.', $remoteDir];
 	$fioArgs = {
 	    client   => $t->{bkupSrcHost},
@@ -197,9 +200,13 @@ sub start
                 }
             }
             foreach my $file ( @inc ) {
+                $file = encode($conf->{ClientCharset}, $file)
+                            if ( $conf->{ClientCharset} ne "" );
                 push(@fileList, "--include=$file");
             }
             foreach my $file ( @exc ) {
+                $file = encode($conf->{ClientCharset}, $file)
+                            if ( $conf->{ClientCharset} ne "" );
                 push(@fileList, "--exclude=$file");
             }
         }
@@ -209,6 +216,8 @@ sub start
                 #
                 # just append additional exclude lists onto the end
                 #
+                $file = encode($conf->{ClientCharset}, $file)
+                            if ( $conf->{ClientCharset} ne "" );
                 push(@fileList, "--exclude=$file");
             }
         }
@@ -241,8 +250,11 @@ sub start
         $rsyncArgs = [@$rsyncArgs, "--ignore-times"]
                                     if ( $t->{type} eq "full" );
 	$rsyncClientCmd = $conf->{RsyncClientCmd};
+        my $shareNameSlash = $t->{shareNameSlash};
+        from_to($shareNameSlash, "utf8", $conf->{ClientCharset})
+                            if ( $conf->{ClientCharset} ne "" );
         $argList = ['--server', '--sender', @$rsyncArgs,
-                              '.', $t->{shareNameSlash}];
+                              '.', $shareNameSlash];
 	eval {
 	    $argList = File::RsyncP->excludeStrip($argList);
 	};
@@ -267,6 +279,10 @@ sub start
 	sshPath   => $conf->{SshPath},
 	argList   => $argList,
     };
+    from_to($args->{shareName}, "utf8", $conf->{ClientCharset})
+                            if ( $conf->{ClientCharset} ne "" );
+    from_to($args->{shareNameSlash}, "utf8", $conf->{ClientCharset})
+                            if ( $conf->{ClientCharset} ne "" );
     $rsyncClientCmd = $bpc->cmdVarSubstitute($rsyncClientCmd, $args);
 
     #
@@ -351,6 +367,11 @@ sub run
 	$remoteDir       = $t->{shareNameSlash};
 	$remoteDirDaemon = ".";
     }
+    from_to($remoteDir, "utf8", $conf->{ClientCharset})
+                                if ( $conf->{ClientCharset} ne "" );
+    from_to($remoteDirDaemon, "utf8", $conf->{ClientCharset})
+                                if ( $conf->{ClientCharset} ne "" );
+
     if ( $t->{XferMethod} eq "rsync" ) {
 	#
 	# Run rsync command
@@ -358,6 +379,8 @@ sub run
 	my $str = "Running: "
 	        . $t->{bpc}->execCmd2ShellCmd(@{$t->{rsyncClientCmd}})
 		. "\n";
+        from_to($str, $conf->{ClientCharset}, "utf8")
+                                if ( $conf->{ClientCharset} ne "" );
 	$t->{XferLOG}->write(\$str);
 	$rs->remoteStart($remoteSend, $remoteDir);
     } else {
@@ -378,6 +401,8 @@ sub run
 	#
 	my $module = $t->{shareName};
 	$module = $t->{shareNameSlash} if ( $module =~ /\// );
+        from_to($module, "utf8", $conf->{ClientCharset})
+                                    if ( $conf->{ClientCharset} ne "" );
 	if ( defined(my $err = $rs->serverService($module,
                                              $conf->{RsyncdUserName},
                                              $conf->{RsyncdPasswd},
@@ -390,7 +415,10 @@ sub run
 	}
 	$rs->serverStart($remoteSend, $remoteDirDaemon);
     }
-    my $error = $rs->go($t->{shareNameSlash});
+    my $shareNameSlash = $t->{shareNameSlash};
+    from_to($shareNameSlash, "utf8", $conf->{ClientCharset})
+                                if ( $conf->{ClientCharset} ne "" );
+    my $error = $rs->go($shareNameSlash);
     $rs->serverClose();
 
     #

@@ -843,12 +843,32 @@ $Conf{XferLogLevel} = 1;
 #
 # Filename charset encoding on the client.  BackupPC uses utf8
 # on the server for filename encoding.  If this is empty, then
-# utf8 is assumed and client filenames will not be modified.  If set
-# to a different encoding then filenames will be re-encoded in utf8.
-# A typical WinXX encoding for latin1/western europe is 'cp1252'.
+# utf8 is assumed and client filenames will not be modified.
+# If set to a different encoding then filenames will converted
+# to/from utf8 automatically during backup and restore.
+#
+# If the file names displayed in the browser (eg: accents or special
+# characters) don't look right then it is likely you haven't set
+# $Conf{ClientCharset} correctly.
+#
+# If you are using smbclient on a WinXX machine, smbclient will convert
+# to the "unix charset" setting in smb.conf.  The default is utf8,
+# in which case leave $Conf{ClientCharset} empty since smbclient does
+# the right conversion.
+#
+# If you are using rsync on a WinXX machine then it does no conversion.
+# A typical WinXX encoding for latin1/western europe is 'cp1252',
+# so in this case set $Conf{ClientCharset} to 'cp1252'.
+#
+# On a linux or unix client, run "locale charmap" to see the client's
+# charset.  Set $Conf{ClientCharset} to this value.  A typical value
+# for english/US is 'ISO-8859-1'.
+#
 # Do "perldoc Encode::Supported" to see the list of possible charset
-# values, and also see http://czyborra.com/charsets/iso8859.html.
-#   
+# values.  The FAQ at http://www.cl.cam.ac.uk/~mgk25/unicode.html
+# is excellent, and http://czyborra.com/charsets/iso8859.html
+# provides more information on the iso-8859 charsets.
+#
 $Conf{ClientCharset} = '';
 
 #

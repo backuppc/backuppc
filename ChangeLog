@@ -21,6 +21,31 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fixed several Xfer charset conversions.
+
+* Added some CGI utf8 conversions from Rodrigo Real and Vincent
+  Fleuranceau.
+
+* Host name is forced to lower case, to match 2.x.
+
+* Fixed LOG file naming in BackupPC_restore and BackupPC_archive.
+
+* GFK applied fr.pm corrections from Nicolas Stransky.
+
+* Updated init.d/src scripts for FHS (ie: replaced __TOPDIR__/log
+  with __LOGDIR__ and __TOPDIR__/conf with __CONFDIR__).  Patch
+  provided by Rodrigo Real.
+
+* Added --log-dir and --conf-dir options to configure.pl.
+  Reported by Vincent Fleuranceau.
+
+* Updated File::RsyncP version check in configure.pl, reported
+  by Vincent Fleuranceau.  Changed File::RsyncP version to 0.64.
+
+#------------------------------------------------------------------------
+# Version 3.0.0beta0, 11 Jul 2006
+#------------------------------------------------------------------------
+
 * Added configuration and host CGI editor.
 
 * Added rsync hardlink support.  Requires latest version of

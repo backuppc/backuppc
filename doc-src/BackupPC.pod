@@ -784,24 +784,19 @@ Here are some brief client setup notes:
 
 =item WinXX
 
-The preferred setup for WinXX clients is to set $Conf{XferMethod} to "smb".
-(Actually, for v2.0.0, rsyncd is the better method for WinXX if you are
-prepared to run rsync/cygwin on your WinXX client.  More information
-about this will be provided via the FAQ.)
+One setup for WinXX clients is to set $Conf{XferMethod} to "smb".
+Actually, rsyncd is the better method for WinXX if you are prepared to
+run rsync/cygwin on your WinXX client.
 
 If you want to use rsyncd for WinXX clients you can find a pre-packaged
 zip file on L<http://backuppc.sourceforge.net>. The package is called
 cygwin-rsync. It contains rsync.exe, template setup files and the
 minimal set of cygwin libraries for everything to run.  The README file
 contains instructions for running rsync as a service, so it starts
-automatically everytime you boot your machine.
-
-If you build your own rsync, for rsync 2.6.2 it is strongly
-recommended you apply the patch in the cygwin-rsync package on
-L<http://backuppc.sourceforge.net>.  This patch adds the --checksum-seed
-option for checksum caching, and also sends all errors to the client,
-which is important so BackupPC can log all file access errors.
-
+automatically everytime you boot your machine.  If you use rsync
+to backup WinXX machines, be sure to set $Conf{ClientCharset}
+correctly (eg: 'cp1252') so that the WinXX file name encoding is
+correctly converted to utf8.
 
 Otherwise, to use SMB, you can either create shares for the data you want
 to backup or your can use the existing C$ share.  To create a new 
@@ -885,23 +880,16 @@ ksmbfs or similar) on your linux/unix server to mount the share,
 and then set $Conf{XferMethod} to "tar" (use tar on the network
 mounted file system).
 
-Also, to make sure that file names with 8-bit characters are correctly
-transferred by smbclient you should add this to samba's smb.conf file
-for samba 2.x:
+Also, to make sure that file names with special characters are correctly
+transferred by smbclient you should make sure that the smb.conf file
+has (for samba 3.x):
 
     [global]
-	# Accept the windows charset
-	client code page = 850
-	character set = ISO8859-1
+	unix charset = UTF8
 
-For samba 3.x this should instead be:
-
-    [global]
-	unix charset = ISO8859-1
-
-This setting should work for western europe.  
-See L<http://www.oreilly.com/catalog/samba/chapter/book/ch08_03.html>
-for more information about settings for other languages.
+UTF8 is the default setting, so if the parameter is missing then it
+is ok.  With this setting $Conf{ClientCharset} should be emtpy,
+since smbclient has already converted the file names to utf8.
 
 =item Linux/Unix
 
@@ -960,6 +948,10 @@ symbolic links if you specify "use chroot = no" in the rsynd.conf file.
 See the rsyncd.conf manual page for more information.
 
 =back
+
+You need to set $Conf{ClientCharset} to the client's charset so that
+file names are correctly converted to utf8.  Use "locale charmap"
+on the client to see its charset.
 
 For linux/unix machines you should not backup "/proc".  This directory
 contains a variety of files that look like regular files but they are

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -107,6 +107,7 @@ sub action
 
 	$attr = $view->dirAttrib($num, $share, $relDir);
         if ( !defined($attr) ) {
+            $relDir = decode_utf8($relDir);
             ErrorExit(eval("qq{$Lang->{Can_t_browse_bad_directory_name2}}"));
         }
 
@@ -254,11 +255,10 @@ EOF
 	}
     }
     $share = $currDir;
-    my $dirDisplay = "$share/$dir";
+    my $dirDisplay = decode_utf8("$share/$dir");
     $dirDisplay =~ s{//+}{/}g;
     $dirDisplay =~ s{/+$}{}g;
     $dirDisplay = "/" if ( $dirDisplay eq "" );
-    $dirDisplay = decode_utf8($dirDisplay);
     my $filledBackup;
 
     if ( (my @mergeNums = @{$view->mergeNums}) > 1 ) {
@@ -301,6 +301,7 @@ EOF
         }
         $filledBackup .= eval("qq{$Lang->{Visit_this_directory_in_backup}}");
     }
+    $dir = decode_utf8($dir);
     my $content = eval("qq{$Lang->{Backup_browse_for__host}}");
     Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"), $content);
     Trailer();

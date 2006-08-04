@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -86,6 +86,7 @@ use BackupPC::Xfer::Smb;
 use BackupPC::Xfer::Tar;
 use BackupPC::Xfer::Rsync;
 use BackupPC::Xfer::BackupPCd;
+use Encode;
 use Socket;
 use File::Path;
 use File::Find;
@@ -581,6 +582,10 @@ $NeedPostCmd = 1;
 for my $shareName ( @$ShareNames ) {
     local(*RH, *WH);
 
+    #
+    # Convert $shareName to utf8 octets
+    #
+    $shareName = encode("utf8", $shareName);
     $stat{xferOK} = $stat{hostAbort} = undef;
     $stat{hostError} = $stat{lastOutputLine} = undef;
     if ( -d "$Dir/new/$shareName" ) {

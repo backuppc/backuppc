@@ -53,7 +53,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -131,8 +131,7 @@ $Charset = $opts{e} if ( $opts{e} ne "" );
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
 my $PathAdd    = $1 if ( $opts{p} =~ /(.+)/ );
-if ( ($opts{s} !~ /^([\w\s.@\/$(){}[\]-]+)$/
-        || $opts{s} =~ m{(^|/)\.\.(/|$)}) && $opts{s} ne "*" ) {
+if ( $opts{s} =~ m{(^|/)\.\.(/|$)} ) {
     print(STDERR "$0: bad share name '$opts{s}'\n");
     exit(1);
 }

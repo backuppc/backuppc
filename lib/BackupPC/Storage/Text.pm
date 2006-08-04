@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -451,12 +451,12 @@ sub HostInfoRead
         if ( @hdr ) {
             if ( defined($host) ) {
                 next if ( lc($fld[0]) ne lc($host) );
-                @{$hosts{$fld[0]}}{@hdr} = @fld;
+                @{$hosts{lc($fld[0])}}{@hdr} = @fld;
 		close(HOST_INFO);
                 close(LOCK);
                 return \%hosts;
             } else {
-                @{$hosts{$fld[0]}}{@hdr} = @fld;
+                @{$hosts{lc($fld[0])}}{@hdr} = @fld;
             }
         } else {
             @hdr = @fld;

@@ -5,7 +5,7 @@
 
                             __RELEASEDATE__
 
-         Copyright (C) 2001-2003 Craig Barratt.  All rights reserved.
+         Copyright (C) 2001-2006 Craig Barratt.  All rights reserved.
 
       This program is free software; you can redistribute it and/or
       modify it under the terms of the GNU General Public License.
@@ -33,13 +33,14 @@ To install BackupPC run these commands as root:
     perl configure.pl
 
 This will automatically determine some system information and prompt you
-for install paths.
+for install paths.  Do "perldoc configure.pl" to see the various options
+that configure.pl provides.
 
 INTRODUCTION:
 ------------
 
-BackupPC is a high-performance, enterprise-grade system for
-backing up Linux and WinXX PCs and laptops to a server's disk.
+BackupPC is a high-performance, enterprise-grade system for backing
+up Linux, WinXX, and MacOS PCs and laptops to a server's disk.
 BackupPC is highly configurable and easy to install and maintain.
 
 Given the ever decreasing cost of disks and raid systems, it is now

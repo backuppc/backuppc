@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -112,6 +112,7 @@ EOF
         #
         # Tell the user what options they have
         #
+        $pathHdr = decode_utf8($pathHdr);
 	$content .= eval("qq{$Lang->{Restore_Options_for__host2}}");
 
         if ( @hosts == 1 ) {
@@ -271,6 +272,8 @@ EOF
 <tr><td>$host:/$strippedShare$f</td><td>$In{hostDest}:/$strippedShareDest$targetFile</td></tr>
 EOF
         }
+        $In{shareDest} = decode_utf8($In{shareDest});
+        $In{pathHdr}   = decode_utf8($In{pathHdr});
         my $content = eval("qq{$Lang->{Are_you_sure}}");
         Header(eval("qq{$Lang->{Restore_Confirm_on__host}}"), $content);
         Trailer();

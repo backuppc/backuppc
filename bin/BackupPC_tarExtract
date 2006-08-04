@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,11 +59,11 @@ if ( $ARGV[0] !~ /^([\w\.\s-]+)$/ ) {
     exit(1);
 }
 my $client = $1;
-if ( $ARGV[1] !~ /^([\w\s.\/$(){}[\]-]+)$/ ) {
+if ( $ARGV[1] =~ m{(^|/)\.\.(/|$)} ) {
     print("$0: bad share name '$ARGV[1]'\n");
     exit(1);
 }
-my $ShareNameUM = $1;
+my $ShareNameUM = $1 if ( $ARGV[1] =~ /(.*)/ );
 my $ShareName = $bpc->fileNameEltMangle($ShareNameUM);
 if ( $ARGV[2] !~ /^(\d+)$/ ) {
     print("$0: bad compress level '$ARGV[2]'\n");

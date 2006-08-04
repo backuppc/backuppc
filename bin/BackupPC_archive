@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -91,9 +91,30 @@ mkpath($Dir, 0, 0777) if ( !-d $Dir );
 if ( !-f "$Dir/LOCK" ) {
     open(LOCK, ">", "$Dir/LOCK") && close(LOCK);
 }
-open(LOG, ">>", "$Dir/LOG");
-select(LOG); $| = 1; select(STDOUT);
 
+my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+my $logPath = sprintf("$Dir/LOG.%02d%04d", $mon + 1, $year + 1900);
+
+if ( !-f $logPath ) {
+    #
+    # Compress and prune old log files
+    #
+    my $lastLog = $Conf{MaxOldPerPCLogFiles} - 1;
+    foreach my $file ( $bpc->sortedPCLogFiles($client) ) {
+        if ( $lastLog <= 0 ) {
+            unlink($file);
+            next;
+        }
+        $lastLog--;
+        next if ( $file =~ /\.z$/ || !$Conf{CompressLevel} );
+        BackupPC::FileZIO->compressCopy($file,
+                                        "$file.z",
+                                        undef,
+                                        $Conf{CompressLevel}, 1);
+    }
+}
+open(LOG, ">>", $logPath);
+select(LOG); $| = 1; select(STDOUT);
 
 #
 # Read the request file

@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,6 +38,7 @@
 package BackupPC::Xfer::Tar;
 
 use strict;
+use Encode qw/from_to encode/;
 
 sub new
 {
@@ -100,13 +101,19 @@ sub start
         if ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
             {
-		$file = ".$file" if ( $file =~ /^\// );
+                $file = $2 if ( $file =~ m{^(\./+|/+)(.*)}s );
+		$file = "./$file";
+                $file = encode($conf->{ClientCharset}, $file)
+                            if ( $conf->{ClientCharset} ne "" );
                 push(@fileList, "--exclude=$file");
             }
         }
         if ( defined($conf->{BackupFilesOnly}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
-		$file = ".$file" if ( $file =~ /^\// );
+                $file = $2 if ( $file =~ m{^(\./+|/+)(.*)}s );
+		$file = "./$file";
+                $file = encode($conf->{ClientCharset}, $file)
+                            if ( $conf->{ClientCharset} ne "" );
                 push(@fileList, $file);
             }
         } else {
@@ -143,6 +150,8 @@ sub start
         tarPath   => $conf->{TarClientPath},
         sshPath   => $conf->{SshPath},
     };
+    from_to($args->{shareName}, "utf8", $conf->{ClientCharset})
+                            if ( $conf->{ClientCharset} ne "" );
     $tarClientCmd = $bpc->cmdVarSubstitute($tarClientCmd, $args);
     if ( !defined($t->{xferPid} = open(TAR, "-|")) ) {
         $t->{_errStr} = "Can't fork to run tar";
@@ -184,6 +193,8 @@ sub start
         return;
     }
     my $str = "Running: " . $bpc->execCmd2ShellCmd(@$tarClientCmd) . "\n";
+    from_to($str, $conf->{ClientCharset}, "utf8")
+                            if ( $conf->{ClientCharset} ne "" );
     $t->{XferLOG}->write(\"Running: @$tarClientCmd\n");
     alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
@@ -207,9 +218,12 @@ sub readOutput
             $t->{tarOut} .= $mesg;
         }
     }
+    my $logFileThres = $t->{type} eq "restore" ? 1 : 2;
     while ( $t->{tarOut} =~ /(.*?)[\n\r]+(.*)/s ) {
         $_ = $1;
         $t->{tarOut} = $2;
+        from_to($_, $conf->{ClientCharset}, "utf8")
+                            if ( $conf->{ClientCharset} ne "" );
         #
         # refresh our inactivity alarm
         #
@@ -219,7 +233,7 @@ sub readOutput
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
             $t->{xferOK} = 1;
         } elsif ( /^\./ ) {
-            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 2 );
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= $logFileThres );
             $t->{fileCnt}++;
         } else {
             #

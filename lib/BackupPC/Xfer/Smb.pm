@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,6 +38,7 @@
 package BackupPC::Xfer::Smb;
 
 use strict;
+use Encode qw/from_to encode/;
 
 sub new
 {
@@ -111,12 +112,16 @@ sub start
 	$t->{fileIncludeHash} = {};
         if ( defined($conf->{BackupFilesOnly}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
+                $file = encode($conf->{ClientCharset}, $file)
+                            if ( $conf->{ClientCharset} ne "" );
 		push(@fileList, $file);
 		$t->{fileIncludeHash}{$file} = 1;
             }
         } elsif ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
             {
+                $file = encode($conf->{ClientCharset}, $file)
+                            if ( $conf->{ClientCharset} ne "" );
 		push(@fileList, $file);
             }
 	    #
@@ -151,6 +156,8 @@ sub start
 	X_option      => $X_option,
 	timeStampFile => $timeStampFile,
     };
+    from_to($args->{shareName}, "utf8", $conf->{ClientCharset})
+                            if ( $conf->{ClientCharset} ne "" );
     $smbClientCmd = $bpc->cmdVarSubstitute($smbClientCmd, $args);
 
     if ( !defined($t->{xferPid} = open(SMB, "-|")) ) {
@@ -193,6 +200,8 @@ sub start
         return;
     }
     my $str = "Running: " . $bpc->execCmd2ShellCmd(@$smbClientCmd) . "\n";
+    from_to($str, $conf->{ClientCharset}, "utf8")
+                            if ( $conf->{ClientCharset} ne "" );
     $t->{XferLOG}->write(\$str);
     alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
@@ -229,6 +238,9 @@ sub readOutput
         #
         alarm($conf->{ClientTimeout}) if ( !$t->{abort} );
         $t->{lastOutputLine} = $_ if ( !/^$/ );
+
+        from_to($_, $conf->{ClientCharset}, "utf8")
+                            if ( $conf->{ClientCharset} ne "" );
         #
         # This section is highly dependent on the version of smbclient.
         # If you upgrade Samba, make sure that these regexp are still valid.

@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -140,7 +140,7 @@ sub dirCache
 	    }
 	}
         foreach my $file ( @dir ) {
-            $file = $1 if ( $file =~ /(.*)/ );
+            $file = $1 if ( $file =~ /(.*)/s );
             my $fileUM = $file;
             $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
             #print(STDERR "Doing $fileUM\n");
@@ -249,7 +249,7 @@ sub shareList
     my @dir = readdir(DIR);
     closedir(DIR);
     foreach my $file ( @dir ) {
-        $file = $1 if ( $file =~ /(.*)/ );
+        $file = $1 if ( $file =~ /(.*)/s );
         next if ( $file eq "attrib" && $mangle
                || $file eq "."
                || $file eq ".."
@@ -289,7 +289,7 @@ sub fileAttrib
     my($m, $backupNum, $share, $path) = @_;
 
     #print(STDERR "fileAttrib($backupNum, $share, $path)\n");
-    if ( $path =~ s{(.*)/+(.+)}{$1} ) {
+    if ( $path =~ s{(.*)/+(.+)}{$1}s ) {
         my $file = $2;
         $m->dirCache($backupNum, $share, $path);
         return $m->{files}{$file};
@@ -401,7 +401,7 @@ sub dirHistory
 	    }
 	}
         foreach my $file ( @dir ) {
-            $file = $1 if ( $file =~ /(.*)/ );
+            $file = $1 if ( $file =~ /(.*)/s );
             my $fileUM = $file;
             $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
             #print(STDERR "Doing $fileUM\n");

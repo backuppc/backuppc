@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta0, released 11 Jul 2006.
+# Version 3.0.0beta1, released 30 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -328,7 +328,7 @@ sub attribGetWhere
     $fname = "$fio->{xfer}{pathHdrSrc}/$fname"
 		       if ( defined($fio->{xfer}{pathHdrSrc}) );
     $fname =~ s{//+}{/}g;
-    if ( $fname =~ m{(.*)/(.*)} ) {
+    if ( $fname =~ m{(.*)/(.*)}s ) {
 	$shareM = $fio->{shareM};
 	$dir = $1;
 	$fname = $2;
@@ -437,7 +437,7 @@ sub attribSet
     my($fio, $f, $placeHolder) = @_;
     my($dir, $file);
 
-    if ( $f->{name} =~ m{(.*)/(.*)} ) {
+    if ( $f->{name} =~ m{(.*)/(.*)}s ) {
 	$file = $2;
 	$dir  = "$fio->{shareM}/" . $1;
     } elsif ( $f->{name} eq "." ) {
@@ -517,7 +517,7 @@ sub attribWrite
 	my $dir;
 	my $share;
 
-	$dir = $1 if ( $d =~ m{.+?/(.*)} );
+	$dir = $1 if ( $d =~ m{.+?/(.*)}s );
 	$fio->viewCacheDir(undef, $dir);
 	##print("attribWrite $d,$dir\n");
 	##$Data::Dumper::Indent = 1;
@@ -529,7 +529,7 @@ sub attribWrite
 	if ( defined($fio->{viewCache}{$d}) ) {
 	    foreach my $f ( keys(%{$fio->{viewCache}{$d}}) ) {
 		my $name = $f;
-		$name = "$1/$name" if ( $d =~ m{.*?/(.*)} );
+		$name = "$1/$name" if ( $d =~ m{.*?/(.*)}s );
 		if ( defined(my $a = $fio->{attrib}{$d}->get($f)) ) {
 		    #
 		    # delete temporary attributes (skipped files)
@@ -565,7 +565,7 @@ sub attribWrite
 	my $dirM = $d;
 
 	$dirM = $1 . "/" . $fio->{bpc}->fileNameMangle($2)
-			if ( $dirM =~ m{(.*?)/(.*)} );
+			if ( $dirM =~ m{(.*?)/(.*)}s );
         my $fileName = $fio->{attrib}{$d}->fileName("$fio->{outDir}$dirM");
 	$fio->log("attribWrite(dir=$d) -> $fileName")
 				if ( $fio->{logLevel} >= 4 );
@@ -615,7 +615,7 @@ sub statsGet
 sub makePath
 {
     my($fio, $f) = @_;
-    my $name = $1 if ( $f->{name} =~ /(.*)/ );
+    my $name = $1 if ( $f->{name} =~ /(.*)/s );
     my $path;
 
     if ( $name eq "." ) {
@@ -625,7 +625,7 @@ sub makePath
     }
     $fio->logFileAction("create", $f) if ( $fio->{logLevel} >= 1 );
     $fio->log("makePath($path, 0777)") if ( $fio->{logLevel} >= 5 );
-    $path = $1 if ( $path =~ /(.*)/ );
+    $path = $1 if ( $path =~ /(.*)/s );
     File::Path::mkpath($path, 0, 0777) if ( !-d $path );
     return $fio->attribSet($f) if ( -d $path );
     $fio->log("Can't create directory $path");
@@ -639,7 +639,7 @@ sub makePath
 sub makeSpecial
 {
     my($fio, $f) = @_;
-    my $name = $1 if ( $f->{name} =~ /(.*)/ );
+    my $name = $1 if ( $f->{name} =~ /(.*)/s );
     my $fNameM = $fio->{bpc}->fileNameMangle($name);
     my $path = $fio->{outDirSh} . $fNameM;
     my $attr = $fio->attribGet($f);
@@ -912,7 +912,7 @@ sub fileDeltaRxNext
         # need to open an output file where we will build the
         # new version.
         #
-        $fio->{rxFile}{name} =~ /(.*)/;
+        $fio->{rxFile}{name} =~ /(.*)/s;
 	my $rxOutFileRel = "$fio->{shareM}/" . $fio->{bpc}->fileNameMangle($1);
         my $rxOutFile    = $fio->{outDir} . $rxOutFileRel;
         $fio->{rxOutFd}  = BackupPC::PoolWrite->new($fio->{bpc},
@@ -1079,7 +1079,7 @@ sub fileDeltaRxNext
 sub fileDeltaRxDone
 {
     my($fio, $md4, $phase) = @_;
-    my $name = $1 if ( $fio->{rxFile}{name} =~ /(.*)/ );
+    my $name = $1 if ( $fio->{rxFile}{name} =~ /(.*)/s );
     my $ret;
 
     close($fio->{rxInFd})  if ( defined($fio->{rxInFd}) );
@@ -1358,7 +1358,7 @@ sub fileListEltSend
                             if ( $fio->{clientCharset} ne "" );
     $fList->encode($f);
 
-    $logName = "$fio->{xfer}{pathHdrDest}/$f->{name}";
+    $logName = "$fio->{xfer}{pathHdrDest}/$logName";
     $logName =~ s{//+}{/}g;
     $f->{name} = $logName;
     $fio->logFileAction("restore", $f) if ( $fio->{logLevel} >= 1 );

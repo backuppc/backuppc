@@ -1017,7 +1017,7 @@ EOF
             }
             $content .= "<tr><td class=\"border\"></td>\n";
             for ( my $i = 0 ; $i < @order ; $i++ ) {
-                $content .= "<td>$order[$i]</td>\n";
+                $content .= "<td class=\"border\">$order[$i]</td>\n";
             }
             $content .= "</tr>\n";
             for ( my $i = 0 ; $i < @$varValue ; $i++ ) {

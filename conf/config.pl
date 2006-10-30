@@ -1943,6 +1943,8 @@ $Conf{CgiStatusHilightColor} = {
     Reason_no_ping                 => '#ffff99',
     Reason_backup_canceled_by_user => '#ff9900',
     Status_backup_in_progress      => '#66cc99',
+    Disabled_OnlyManualBackups     => '#d1d1d1',   
+    Disabled_AllBackupsDisabled    => '#d1d1d1',          
 };
 
 #
@@ -1982,9 +1984,13 @@ $Conf{CgiExt2ContentType} = { };
 $Conf{CgiImageDirURL} = '';
 
 #
-# CSS stylesheet for the CGI interface.  It is stored in the
-# $Conf{CgiImageDir} directory and accessed via the
+# CSS stylesheet "skin" for the CGI interface.  It is stored
+# in the $Conf{CgiImageDir} directory and accessed via the
 # $Conf{CgiImageDirURL} URL.
+#
+# For BackupPC v3.x several color, layout and font changes were made.
+# The previous v2.x version is available as BackupPC_stnd_orig.css, so
+# if you prefer the old skin, change this to BackupPC_stnd_orig.css.
 #
 $Conf{CgiCSSFile} = 'BackupPC_stnd.css';
 
@@ -2020,6 +2026,7 @@ $Conf{CgiUserConfigEdit} = {
         ArchiveInfoKeepCnt        => 1,
         BackupFilesOnly           => 1,
         BackupFilesExclude        => 1,
+        BackupsDisable            => 1,
         BlackoutBadPingLimit      => 1,
         BlackoutGoodCnt           => 1,
         BlackoutPeriods           => 1,

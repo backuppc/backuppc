@@ -53,8 +53,8 @@ die("BackupPC::Lib->new failed\n")
 
 umask(0022);
 
-my $Version     = "3.0.0beta1";
-my $ReleaseDate = "30 Jul 2006";
+my $Version     = "3.0.0beta2";
+my $ReleaseDate = "31 Oct 2006";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -221,6 +221,7 @@ foreach my $file ( (@PerlSrc,
 		conf/config.pl
 		conf/hosts
 		conf/BackupPC_stnd.css
+		conf/BackupPC_stnd_orig.css
 		init.d/README
 		init.d/src/debian-backuppc
 		init.d/src/gentoo-backuppc
@@ -530,7 +531,7 @@ sub CheckLangUsage
             s/#.*//g;
             s/\$Lang{([^}]*)}/
 		    my $var = $1;
-		    next if ( $var =~ m{^(Reason_|Status_|backupType_)} );
+		    next if ( $var =~ m{^(Reason_|Status_|backupType_|Disabled_)} );
 		    next if ( $var eq "Documentation" );
                     if ( !defined($vars->{$var}) ) {
                         print("Unexpected Lang var $var in $f\n");

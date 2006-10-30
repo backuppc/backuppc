@@ -143,11 +143,12 @@ Il y a \$hostCntGood hosts tienen copia de seguridad, de un total de :
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Usuario </td>
     <td align="center"> #Completo </td>
-    <td align="center"> Completo Antig./Días </td>
-    <td align="center"> Completo Tamaño/GB </td>
+    <td align="center"> Completo Antig. (Días) </td>
+    <td align="center"> Completo Tamaño (GB) </td>
     <td align="center"> Velocidad MB/sec </td>
     <td align="center"> #Incrementales </td>
-    <td align="center"> Incrementales Antig/Días </td>
+    <td align="center"> Incrementales Antig (Días) </td>
+    <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Estado </td>
     <td align="center"> Ultimo Intento </td></tr>
 \$strGood
@@ -161,11 +162,12 @@ Hay \$hostCntNone hosts sin copias de seguridad.
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Usuario </td>
     <td align="center"> #Completo </td>
-    <td align="center"> Completo Antig./Días </td>
-    <td align="center"> Completo Tamaño/GB </td>
+    <td align="center"> Completo Antig. (Días) </td>
+    <td align="center"> Completo Tamaño (GB) </td>
     <td align="center"> Velocidad MB/sec </td>
     <td align="center"> #Incrementales </td>
-    <td align="center"> Incrementales Antig/Días </td>
+    <td align="center"> Incrementales Antig (Días) </td>
+    <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Estado </td>
     <td align="center"> Ultimo Intento </td></tr>
 \$strNone
@@ -823,8 +825,8 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="action" value="Restore">
 <br>
 <table width="100%">
-<tr><td valign="top">
-    <br><table align="center" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+<tr><td valign="top" width="30%">
+    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
@@ -1230,6 +1232,8 @@ $Lang{Reason_no_ping} = "no hay ping";
 $Lang{Reason_backup_canceled_by_user} = "copia cancelada por el usuario";
 $Lang{Reason_restore_canceled_by_user} = "restauración cancelada por el usuario";
 $Lang{Reason_archive_canceled_by_user} = "archivado cancelado por el usuario";
+$Lang{Disabled_OnlyManualBackups}  = "ENG auto disabled";  
+$Lang{Disabled_AllBackupsDisabled} = "ENG disabled";                  
 
 # ---------
 # Email messages

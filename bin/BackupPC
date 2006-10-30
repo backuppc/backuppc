@@ -345,9 +345,11 @@ sub Main_Initialize
     # Write out our initial status and save our PID
     #
     StatusWrite();
+    unlink("$LogDir/BackupPC.pid");
     if ( open(PID, ">", "$LogDir/BackupPC.pid") ) {
         print(PID $$);
         close(PID);
+        chmod(0444, "$LogDir/BackupPC.pid");
     }
 
     #

@@ -21,6 +21,25 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* configure.pl checks version of Encode.pm.  Reported by Chris Stone.
+
+* Several fixes to bin/BackupPC_fixupBackupSummary from Stian Jordet.
+
+* Fixed table width in backup browsing to avoid Firefox layout anomoly,
+  provided by Jono Woodhouse.
+
+* CSS file updates from Jono Woodhouse.  Priod (v2) version is included
+  as BackupPC_stnd_orig.css in case people prefer the old skin.
+
+* More compact host summary, including disabled host indication,
+  from Jono Woodhouse.
+
+* BackupPC.pid is now world readable, suggested by Casper Thomsen.
+
+#------------------------------------------------------------------------
+# Version 3.0.0beta1, 30 Jul 2006
+#------------------------------------------------------------------------
+
 * Fixed several Xfer charset conversions.
 
 * Added some CGI utf8 conversions from Rodrigo Real and Vincent

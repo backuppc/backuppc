@@ -142,11 +142,12 @@ There are \$hostCntGood hosts that have been backed up, for a total of:
 <tr class="tableheader"><td> Host </td>
     <td align="center"> User </td>
     <td align="center"> #Full </td>
-    <td align="center"> Full Age/days </td>
-    <td align="center"> Full Size/GB </td>
-    <td align="center"> Speed MB/sec </td>
+    <td align="center"> Full Age (days) </td>
+    <td align="center"> Full Size (GB) </td>
+    <td align="center"> Speed (MB/s) </td>
     <td align="center"> #Incr </td>
-    <td align="center"> Incr Age/days </td>
+    <td align="center"> Incr Age (days) </td>
+    <td align="center"> Last Backup (days) </td>
     <td align="center"> State </td>
     <td align="center"> Last attempt </td></tr>
 \$strGood
@@ -160,13 +161,14 @@ There are \$hostCntNone hosts with no backups.
 <tr class="tableheader"><td> Host </td>
     <td align="center"> User </td>
     <td align="center"> #Full </td>
-    <td align="center"> Full Age/days </td>
-    <td align="center"> Full Size/GB </td>
-    <td align="center"> Speed MB/sec </td>
+    <td align="center"> Full Age (days) </td>
+    <td align="center"> Full Size (GB) </td>
+    <td align="center"> Speed (MB/s) </td>
     <td align="center"> #Incr </td>
     <td align="center"> Incr Age/days </td>
-    <td align="center"> Current State </td>
-    <td align="center"> Last backup attempt </td></tr>
+    <td align="center"> Last Backup (days) </td>
+    <td align="center"> State </td>
+    <td align="center"> Last attempt </td></tr>
 \$strNone
 </table>
 EOF
@@ -822,8 +824,8 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="action" value="Restore">
 <br>
 <table width="100%">
-<tr><td valign="top">
-    <br><table align="center" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+<tr><td valign="top" width="30%">
+    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
@@ -1218,10 +1220,10 @@ $Lang{Status_restore_in_progress} = "restore in progress";
 $Lang{Status_link_pending} = "link pending";
 $Lang{Status_link_running} = "link running";
 
-$Lang{Reason_backup_done}    = "backup done";
+$Lang{Reason_backup_done}    = "done";
 $Lang{Reason_restore_done}   = "restore done";
 $Lang{Reason_archive_done}   = "archive done";
-$Lang{Reason_nothing_to_do}  = "nothing to do";
+$Lang{Reason_nothing_to_do}  = "idle";
 $Lang{Reason_backup_failed}  = "backup failed";
 $Lang{Reason_restore_failed} = "restore failed";
 $Lang{Reason_archive_failed} = "archive failed";
@@ -1229,6 +1231,9 @@ $Lang{Reason_no_ping}        = "no ping";
 $Lang{Reason_backup_canceled_by_user}  = "backup canceled by user";
 $Lang{Reason_restore_canceled_by_user} = "restore canceled by user";
 $Lang{Reason_archive_canceled_by_user} = "archive canceled by user";
+$Lang{Disabled_OnlyManualBackups}  = "auto disabled";  
+$Lang{Disabled_AllBackupsDisabled} = "disabled";                  
+
 
 # ---------
 # Email messages

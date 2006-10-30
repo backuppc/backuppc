@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta1, released 30 Jul 2006.
+# Version 3.0.0beta0, released 11 Jul 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -153,13 +153,12 @@ foreach my $host ( @hostList ) {
         }
         print("    Reading $file\n");
         while ( (my $str = $f->readLine()) ne "" ) {
-            if ( $str =~ /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (full|incr|partial) backup started for directory / ) {
-                $startTime = $str;
+            if ( $str =~ /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (full|incr|partial) backup started / ) {
+                $startTime = parsedate($1);
                 next;
             }
             next if ( $str !~ /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (full|incr|partial) backup (\d+) complete, (\d+) files, (\d+) bytes, (\d+) xferErrs \((\d+) bad files, (\d+) bad shares, (\d+) other\)/ );
 
-            my $endTime     = $1;
             my $type        = $2;
             my $bkupNum     = $3;
             my $nFilesTotal = $4;
@@ -167,13 +166,14 @@ foreach my $host ( @hostList ) {
             my $xferErrs    = $6;
             my $badFiles    = $7;
             my $badShare    = $8;
+            my $endTime     = parsedate($1);
             print("    Got $type backup $bkupNum at $endTime\n");
-            next if ( !-d "$dir/$2" );
+            next if ( !-d "$dir/$bkupNum" );
             $BkupFromLOG->{$bkupNum} = {
                 num            => $bkupNum,
                 type           => $type,
-                startTime      => parsedate($startTime),
-                endTime        => parsedate($endTime),
+                startTime      => $startTime,
+                endTime        => $endTime,
                 size           => $sizeTotal,
                 nFiles         => $nFilesTotal,
                 xferErrs       => $xferErrs,
@@ -232,7 +232,8 @@ foreach my $host ( @hostList ) {
 
     if ( $changes ) {
         @Backups = sort({$a->{num} <=> $b->{num}} @Backups);
-        print Dumper \@Backups;
+        # print Dumper \@Backups;
+        $bpc->BackupInfoWrite($host, @Backups);
     } else {
         print("    No changes for host $host\n");
     }

@@ -49,7 +49,7 @@ use vars qw(%Conf %OrigConf);
 use lib "./lib";
 
 my @Packages = qw(File::Path File::Spec File::Copy DirHandle Digest::MD5
-                  Data::Dumper Getopt::Std Getopt::Long Pod::Usage
+                  Data::Dumper Getopt::Std Getopt::Long Encode Pod::Usage
                   BackupPC::Lib BackupPC::FileZIO);
 
 foreach my $pkg ( @Packages ) {
@@ -58,7 +58,8 @@ foreach my $pkg ( @Packages ) {
     if ( $pkg =~ /BackupPC/ ) {
         die <<EOF;
 
-BackupPC cannot find the package $pkg, which is included in the
+Error loading $pkg: $@
+BackupPC cannot load the package $pkg, which is included in the
 BackupPC distribution.  This probably means you did not cd to the
 unpacked BackupPC distribution before running configure.pl, eg:
 
@@ -75,6 +76,13 @@ BackupPC needs the package $pkg.  Please install $pkg
 before installing BackupPC.
 
 EOF
+}
+
+my $EncodeVersion = eval($Encode::VERSION);
+if ( $EncodeVersion < 1.99 ) {
+    print("\nError: you need to upgrade the Encode package;"
+        . " I found $EncodeVersion and BackupPC needs >= 1.99\n\n");
+    exit(1);
 }
 
 my %opts;
@@ -273,13 +281,13 @@ EOF
     }
 }
 
-my $Perl56 = system($Conf{PerlPath}
-                        . q{ -e 'exit($^V && $^V ge v5.6.0 ? 1 : 0);'});
+my $Perl58 = system($Conf{PerlPath}
+                        . q{ -e 'exit($^V && $^V ge v5.8.0 ? 1 : 0);'});
 
-if ( !$Perl56 ) {
+if ( !$Perl58 ) {
     print <<EOF;
 
-BackupPC needs perl version 5.6.0 or later.  $Conf{PerlPath} appears
+BackupPC needs perl version 5.8.0 or later.  $Conf{PerlPath} appears
 to be an older version.  Please upgrade to a newer version of perl
 and re-run this configure script.
 
@@ -591,6 +599,8 @@ if ( $Conf{CgiImageDir} ne "" ) {
     }
     InstallFile("conf/BackupPC_stnd.css",
 	        "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", 0444, 0);
+    InstallFile("conf/BackupPC_stnd_orig.css",
+	        "$DestDir$Conf{CgiImageDir}/BackupPC_stnd_orig.css", 0444, 0);
 }
 
 printf("Making init.d scripts\n");

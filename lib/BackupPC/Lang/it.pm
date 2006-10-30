@@ -152,6 +152,7 @@ Ci sono \$hostCntGood host sottoposti a backup per un totale di:
     <td align="center"> Velocit&agrave (MB/s) </td>
     <td align="center"> Incrementali </td>
     <td align="center"> Et&agrave; incrementali (giorni) </td>
+    <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Stato </td>
     <td align="center"> Ultimo tentativo </td></tr>
 \$strGood
@@ -170,6 +171,7 @@ Ci sono \$hostCntNone host senza alcun backup.
     <td align="center"> Velocit&agrave (MB/s) </td>
     <td align="center"> Incrementali </td>
     <td align="center"> Et&agrave; incrementali (giorni) </td>
+    <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Stato </td>
     <td align="center"> Ultimo tentativo </td></tr>
 \$strNone
@@ -829,8 +831,8 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="action" value="Restore">
 <br>
 <table width="100%">
-<tr><td valign="top">
-    <br><table align="center" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+<tr><td valign="top" width="30%">
+    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
@@ -1238,6 +1240,8 @@ $Lang{Reason_no_ping}        = "no ping";
 $Lang{Reason_backup_canceled_by_user}  = "backup annullato dall\'utente";
 $Lang{Reason_restore_canceled_by_user} = "ripristino annullato dall\'utente";
 $Lang{Reason_archive_canceled_by_user} = "archivio annullato dall\'utente";
+$Lang{Disabled_OnlyManualBackups}  = "ENG auto disabled";  
+$Lang{Disabled_AllBackupsDisabled} = "ENG disabled";                  
 
 # ---------
 # Email messages

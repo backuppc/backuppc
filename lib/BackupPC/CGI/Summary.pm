@@ -49,11 +49,12 @@ sub action
     my $Privileged = CheckPermission();
 
     foreach my $host ( GetUserHosts(1) ) {
-        my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite);
+        my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite,
+           $lastAge, $tempState, $tempReason);
 	my($shortErr);
         my @Backups = $bpc->BackupInfoRead($host);
         my $fullCnt = $incrCnt = 0;
-        my $fullAge = $incrAge = -1;
+        my $fullAge = $incrAge = $lastAge = -1;
 
         $bpc->ConfigRead($host);
         %Conf = $bpc->Conf();
@@ -78,6 +79,16 @@ sub action
                 $incrSizeTot += $Backups[$i]{size} / (1024 * 1024);
             }
         }
+        if ( $fullAge > $incrAge && $fullAge >= 0 )  {
+            $lastAge = $fullAge;
+        } else {
+            $lastAge = $incrAge;
+        }
+        if ( $lastAge < 0 ) {
+            $lastAge = "";
+        } else {
+            $lastAge = sprintf("%.1f", (time - $lastAge) / (24 * 3600));
+        }
         if ( $fullAge < 0 ) {
             $fullAge = "";
             $fullRate = "";
@@ -97,9 +108,22 @@ sub action
 	$incrAge = "&nbsp;" if ( $incrAge eq "" );
 	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
 		      || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
+	if ( $Conf{BackupsDisable} == 1 ) {
+	    $reasonHilite = $Conf{CgiStatusHilightColor}{Disabled_OnlyManualBackups};
+	    $tempState = "Disabled_OnlyManualBackups";
+	    $tempReason = "";
+	} elsif ($Conf{BackupsDisable} == 2 ) {
+	    $reasonHilite = $Conf{CgiStatusHilightColor}{Disabled_AllBackupsDisabled};
+	    $tempState = "Disabled_AllBackupsDisabled";
+	    $tempReason = "";
+	} else {
+	    $tempState = $Status{$host}{state};
+	    $tempReason = $Status{$host}{reason};
+	}
 	$reasonHilite = " bgcolor=\"$reasonHilite\"" if ( $reasonHilite ne "" );
-        if ( $Status{$host}{state} ne "Status_backup_in_progress"
-		&& $Status{$host}{state} ne "Status_restore_in_progress"
+        if ( $tempState ne "Status_backup_in_progress"
+		&& $tempState ne "Status_restore_in_progress"
+		&& $Conf{BackupsDisable} == 0
 		&& $Status{$host}{error} ne "" ) {
 	    ($shortErr = $Status{$host}{error}) =~ s/(.{48}).*/$1.../;
 	    $shortErr = " ($shortErr)";
@@ -115,8 +139,9 @@ sub action
     <td align="center" class="border"> $fullRate </td>
     <td align="center" class="border"> $incrCnt </td>
     <td align="center" class="border"> $incrAge </td>
-    <td align="center" class="border"> $Lang->{$Status{$host}{state}} </td>
-    <td class="border"> $Lang->{$Status{$host}{reason}}$shortErr </td></tr>
+    <td align="center" class="border"> $lastAge </td> 
+    <td align="center" class="border"> $Lang->{$tempState} </td>
+    <td class="border"> $Lang->{$tempReason}$shortErr </td></tr>
 EOF
         if ( @Backups == 0 ) {
             $hostCntNone++;

@@ -153,11 +153,12 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
 <tr class="tableheader"><td> Computer </td>
     <td align="center"> Benutzer </td>
     <td align="center"> #Voll </td>
-    <td align="center"> Alter/Tagen </td>
-    <td align="center"> Größe/GB </td>
+    <td align="center"> Alter (Tagen) </td>
+    <td align="center"> Größe (GB) </td>
     <td align="center"> MB/sek </td>
     <td align="center"> #Inkr </td>
-    <td align="center"> Alter/Tage </td>
+    <td align="center"> Alter (Tage) </td>
+    <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Status </td>
     <td align="center"> Letzte Aktion </td></tr>
 \$strGood
@@ -171,11 +172,12 @@ Es gibt \$hostCntNone Computer ohne Backups !!!
 <tr class="tableheader"><td> Computer </td>
     <td align="center"> Benutzer </td>
     <td align="center"> #Voll </td>
-    <td align="center"> Alter/Tage </td>
-    <td align="center"> Größe/GB </td>
-    <td align="center"> MB/sec </td>
+    <td align="center"> Alter (Tage) </td>
+    <td align="center"> Größe (GB) </td>
+    <td align="center"> MB/sek </td>
     <td align="center"> #Inkr </td>
-    <td align="center"> Alter/Tage </td>
+    <td align="center"> Alter (Tage) </td>
+    <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Status </td>
     <td align="center"> Letzter Versuch </td></tr>
 \$strNone
@@ -829,8 +831,8 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="action" value="Restore">
 <br>
 <table width="100%">
-<tr><td valign="top">
-    <br><table align="center" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+<tr><td valign="top" width="30%">
+    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
@@ -1230,6 +1232,8 @@ $Lang{Reason_no_ping} = "nicht erreichbar";
 $Lang{Reason_backup_canceled_by_user} = "Abbruch durch Benutzer";
 $Lang{Reason_restore_canceled_by_user} = "Abbruch durch Benutzer";
 $Lang{Reason_archive_canceled_by_user} = "Archivierung abgebrochen durch Benutzer";
+$Lang{Disabled_OnlyManualBackups}  = "ENG auto disabled";  
+$Lang{Disabled_AllBackupsDisabled} = "ENG disabled";                  
 
 # ---------
 # Email messages

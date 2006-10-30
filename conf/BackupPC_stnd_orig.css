@@ -13,34 +13,27 @@
  */
 
 body {
-    font-family:tahoma,arial,sans-serif,helvetica;
-    font-size:10pt;
+    font-family:arial,sans-serif;
+    font-size:11pt;
     background-color:#ffffff;
     margin:2px 5px 0px 2px;
     height:100%
 }
 
-
-table {
-    border-collapse: collapse;
-    color: #000000;
-    padding:0px;
-}
-
 h1 {
-    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    font-family:arial,sans-serif;
     font-size:16pt;
     color:#000000
 }
 
 h2 {
-    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    font-family:arial,sans-serif;
     font-size:12pt;
     color:#000000
 }
 
 a {
-    font-family:tahoma,arial,sans-serif,helvetica;
+    font-family:arial,sans-serif;
     color:#3333ff
 }
 
@@ -63,22 +56,22 @@ a.navbar {
 }
 
 .h1 {
-    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    font-family:arial,sans-serif;
     font-size:16pt;
     color:#000000;
     font-weight:bold;
-    background-color:#95B8DB;
+    background-color:#99cc33;
     padding:3px;
     padding-left:6px;
     margin-bottom:5px;
 }
 
 .h2 {
-    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    font-family:arial,sans-serif;
     font-size:12pt;
     color:#000000;
     font-weight:bold;
-    background-color:#eeeeee;
+    background-color:#ddeeee;
     padding:3px;
     padding-left:6px;
     margin-top:3px;
@@ -86,13 +79,13 @@ a.navbar {
 }
 
 .tableStnd {
-    font-size:10pt;
+    font-size:11pt;
 }
 
 .tableheader {
-    font-size:10pt;
+    font-size:9pt;
     font-weight:bold;
-    background-color:#eeeeee;
+    background-color:#cccccc;
 }
 
 .border {
@@ -104,7 +97,7 @@ a.navbar {
     font-size:12pt;
     color:#000000;
     font-weight:bold;
-    background-color:#95B8DB;
+    background-color:#99cc33;
 }
 
 .editTabSel {
@@ -112,7 +105,7 @@ a.navbar {
     font-size:14pt;
     color:#000000;
     font-weight:bold;
-    background-color:#95B8DB;
+    background-color:#99cc33;
     padding:3px;
     padding-left:6px;
     margin-bottom:5px;
@@ -145,12 +138,11 @@ a.navbar {
 
 .editTextInput {
     font-family:courier;
-    font-size:10pt;
 }
 
 .fviewheader {
     font-weight:bold;
-    font-size:9pt;
+    font-size:10pt;
     color:#ffffff;
     background-color:#999999;
 }
@@ -158,8 +150,8 @@ a.navbar {
 .fviewborder {
     border-bottom:1px solid #000000;
     border-left:1px dotted #666666;
-    background-color:#eeeeee;
-    font-size:9pt;
+    background-color:#dddddd;
+    font-size:11pt;
 }
 
 .fviewon {
@@ -172,14 +164,14 @@ a.navbar {
 
 .fview {
     font-size:9pt;
-    font-family:tahoma,arial,sans-serif,helvetica;
+    font-family:arial,sans-serif;
     text-decoration:none;
     line-height:15px;
 }
 
 .fviewbold {
-    font-size:9pt;
-    font-family:tahoma,arial,sans-serif,helvetica;
+    font-size:10pt;
+    font-family:arial,sans-serif;
     text-decoration:none;
     line-height:15px;
     font-weight:bold;
@@ -188,7 +180,7 @@ a.navbar {
 .histView {
     border-bottom:1px solid #000000;
     border-left:2px solid #ffffff;
-    background-color:#eeeeee;
+    background-color:#dddddd;
     font-size:10pt;
 }
 
@@ -200,23 +192,20 @@ a.navbar {
 div.NavMenu {
     width:18%;
     margin:0px;
-    font-size:9pt;
-    background-color:#eeeeee;
+    background-color:#ddeeee;
 }
 
 div.NavMenu a {
-    font-size:9pt;
-    font-family:arial,sans-serif;
+    font-size:10pt;
     display:block;
     margin-left:8px;
     padding:2px;
 }
 
 div.NavTitle {
-    font-size:12pt;
     padding-left:10px;
-    background-color:#95B8DB;
-    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    background-color:#99cc33;
+    font-family:arial,sans-serif;
     color:#000000;
     font-weight:bold;
     margin-bottom:2px;

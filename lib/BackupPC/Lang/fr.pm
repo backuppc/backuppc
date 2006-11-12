@@ -147,7 +147,7 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
     <td align="center"> Vitesse (Mo/s) </td>
     <td align="center"> Nb incrémentielles </td>
     <td align="center"> Incrémentielles Âge (jours) </td>
-    <td align="center"> ENG Last Backup (days) </td>
+    <td align="center"> Dernière sauvegarde (jours) </td>
     <td align="center"> État actuel </td>
     <td align="center"> Dernière tentative </td></tr>
 \$strGood
@@ -166,7 +166,7 @@ Il y a \$hostCntNone hôtes sans sauvegardes.
     <td align="center"> Vitesse (Mo/s) </td>
     <td align="center"> Nb incrémentielles </td>
     <td align="center"> Incrémentielles Âge (jours) </td>
-    <td align="center"> ENG Last Backup (days) </td>
+    <td align="center"> Dernière sauvegarde (jours) </td>
     <td align="center"> État actuel </td>
     <td align="center"> Dernière tentative </td></tr>
 \$strNone
@@ -1229,8 +1229,8 @@ $Lang{Reason_no_ping}        = "pas de ping";
 $Lang{Reason_backup_canceled_by_user}  = "sauvegarde annulée par l'utilisateur";
 $Lang{Reason_restore_canceled_by_user} = "restauration annulée par l'utilisateur";
 $Lang{Reason_archive_canceled_by_user} = "archivage annulé par l'utilisateur";
-$Lang{Disabled_OnlyManualBackups}  = "ENG auto disabled";  
-$Lang{Disabled_AllBackupsDisabled} = "ENG disabled";                  
+$Lang{Disabled_OnlyManualBackups}  = "auto désactivé";  
+$Lang{Disabled_AllBackupsDisabled} = "désactivé";                  
 
 # ---------
 # Email messages
@@ -1430,7 +1430,7 @@ $Lang{CfgEdit_Button_Override} = "Écraser";
 $Lang{CfgEdit_Button_New_Key}  = "Nouvelle clé";
 
 $Lang{CfgEdit_Error_No_Save}
-            = "ENG Error: No save due to errors";
+            = "Erreur: Pas de sauvegarde à cause d'erreurs.";
 $Lang{CfgEdit_Error__must_be_an_integer}
             = "Erreur: \$var doit être un nombre entier";
 $Lang{CfgEdit_Error__must_be_real_valued_number}

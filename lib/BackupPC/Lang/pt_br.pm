@@ -467,7 +467,7 @@ selecionado será sobrescrito!
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table border="0">
+<table class="tableStnd" border="0">
 <tr>
     <td>Restaurar os arquivos no host</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -583,8 +583,8 @@ Está prestes a començar uma restauração diretamente na máquina \$In{hostDest}.
 Os seguintes arquivos serão restaurados na unidade \$In{shareDest}, a partir
 do Backup número \$num:
 <p>
-<table border>
-<tr><td>Arquivo/Dir Original </td><td>Será restaurado em</td></tr>
+<table class="tableStnd" border>
+<tr class="tableheader"><td>Arquivo/Dir Original </td><td>Será restaurado em</td></tr>
 \$fileListStr
 </table>
 
@@ -836,7 +836,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border="0" width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -882,7 +882,7 @@ Este quadro mostra cada versão única disponível nos diversos backups:
 \${h2("Histórico de \${EscHTML(\$dirDisplay)}")}
 
 <br>
-<table cellspacing="2" cellpadding="3">
+<table border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>Backup numero</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>Backup time</td>\$backupTimeStr</tr>
 \$fileStr
@@ -1351,7 +1351,7 @@ Estado: \$host_state;
 EOF
 
 #######################################################################
-# Configuration editor strings (all ENGLISH currently)
+# Configuration editor strings
 #######################################################################
 
 $Lang{Only_privileged_users_can_edit_config_files} = "Somente usuários privilegiados podem editar as configurações.";
@@ -1425,6 +1425,7 @@ $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Editor de configurações do Host \$host")}
 <p>
 Note: Marque Override se você quiser modificar um valor especificamente neste host.
+<p>
 EOF
 
 $Lang{CfgEdit_Button_Save}     = "Salvar";
@@ -1434,6 +1435,8 @@ $Lang{CfgEdit_Button_Add}      = "Adicionar";
 $Lang{CfgEdit_Button_Override} = "Sobrepor";
 $Lang{CfgEdit_Button_New_Key}  = "New Key";
 
+$Lang{CfgEdit_Error_No_Save}
+            = "ENG Error: No save due to errors";
 $Lang{CfgEdit_Error__must_be_an_integer}
             = "Erro: \$var precisa ser um inteiro";
 $Lang{CfgEdit_Error__must_be_real_valued_number}

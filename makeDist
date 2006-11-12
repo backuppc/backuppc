@@ -54,7 +54,7 @@ die("BackupPC::Lib->new failed\n")
 umask(0022);
 
 my $Version     = "3.0.0beta2";
-my $ReleaseDate = "31 Oct 2006";
+my $ReleaseDate = "11 Nov 2006";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -216,7 +216,8 @@ pod2html("doc/BackupPC.pod",
         "--outfile=doc/BackupPC.html");
 
 foreach my $file ( (@PerlSrc,
-	    <images/*>,
+	    <images/*.gif>,
+	    <images/*.png>,
 	    qw(
 		conf/config.pl
 		conf/hosts
@@ -256,7 +257,7 @@ sub InstallFile
     my($file, $dest) = @_;
 
     unlink($dest) if ( -d $dest );
-    if ( $file =~ /\.gif/ ) {
+    if ( $file =~ /\.gif/ || $file =~ /\.png/ ) {
         die("can't copy($file, $dest)\n") unless copy($file, $dest);
     } else {
 	open(FILE, $file)   || die("can't open $file for reading\n");

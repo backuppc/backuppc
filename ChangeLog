@@ -21,20 +21,43 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Config Editor "Save" button is now always visible, but greyed out
+  until there are changes to save.
+
+* Config editor allows other tabs to be selected when there is an
+  error, which allows you to fix an error (eg: missing binary) in
+  an exiting config file.  Errors are now displayed at the top of
+  the page in addition to next to the erroneous setting.
+
 * configure.pl checks version of Encode.pm.  Reported by Chris Stone.
 
 * Several fixes to bin/BackupPC_fixupBackupSummary from Stian Jordet.
 
+* Fixed config.pl editor writing to solve bug with multi-line text
+  strings ending in newline.  Reported and root caused by Les Stott
+  and Jerry Groendyke.
+
+* Fixed error recovery case in BackupPC::PoolWrite, reported by
+  Samuel Bancal.
+
 * Fixed table width in backup browsing to avoid Firefox layout anomoly,
   provided by Jono Woodhouse.
 
-* CSS file updates from Jono Woodhouse.  Priod (v2) version is included
+* CSS file updates from Jono Woodhouse.  Prior (v2) version is included
   as BackupPC_stnd_orig.css in case people prefer the old skin.
 
 * More compact host summary, including disabled host indication,
   from Jono Woodhouse.
 
+* New directory/file/hardlink and symlink image icons from Jono
+  Woodhouse, making directory browse more compact.
+
 * BackupPC.pid is now world readable, suggested by Casper Thomsen.
+
+* Reordered the Server navigation bar links, suggested by David Relson.
+
+* Fixed typos in init.d/src/gentoo-backuppc, configure.pl and config.pl
+  reported by David Relson.
 
 #------------------------------------------------------------------------
 # Version 3.0.0beta1, 30 Jul 2006
@@ -44,6 +67,8 @@
 
 * Added some CGI utf8 conversions from Rodrigo Real and Vincent
   Fleuranceau.
+
+* Rsync transfers now correctly handle file names with \n or \r.
 
 * Host name is forced to lower case, to match 2.x.
 

@@ -468,7 +468,7 @@ sar&agrave; sovrascritto!
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table border="0">
+<table class="tableStnd" border="0">
 <tr>
     <td>Ripristino dei file sull\'host</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -585,8 +585,8 @@ Si sta per avviare il ripristino diretto sulla macchina \$In{hostDest}.
 I file seguenti saranno ripristinati sulla condivisione \$In{shareDest}
 dal backup numero \$num:
 <p>
-<table border>
-<tr><td>File/directory originale</td><td>Ripristinato su</td></tr>
+<table class="tableStnd" border>
+<tr class="tableheader"><td>File/directory originale</td><td>Ripristinato su</td></tr>
 \$fileListStr
 </table>
 
@@ -838,7 +838,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border="0" width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -885,7 +885,7 @@ Questa videata mostra tutte le versioni uniche disponibili nei diversi backup:
 \${h2("Cronologia di \${EscHTML(\$dirDisplay)}")}
 
 <br>
-<table cellspacing="2" cellpadding="3">
+<table border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>Numero backup</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>Data backup</td>\$backupTimeStr</tr>
 \$fileStr
@@ -1429,6 +1429,7 @@ $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Host \$host Configuration Editor")}
 <p>
 Note: Check Override if you want to modify a value specific to this host.
+<p>
 EOF
 
 $Lang{CfgEdit_Button_Save}     = "Save";
@@ -1438,6 +1439,8 @@ $Lang{CfgEdit_Button_Add}      = "Add";
 $Lang{CfgEdit_Button_Override} = "Override";
 $Lang{CfgEdit_Button_New_Key}  = "New Key";
 
+$Lang{CfgEdit_Error_No_Save}
+            = "ENG Error: No save due to errors";
 $Lang{CfgEdit_Error__must_be_an_integer}
             = "Error: \$var must be an integer";
 $Lang{CfgEdit_Error__must_be_real_valued_number}

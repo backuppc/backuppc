@@ -1,7 +1,7 @@
 /*
  * BackupPC standard CSS definitions
  *
- * Version 3.0.0beta1, released 30 Jul 2006.
+ * Version 3.0.0beta2, released 31 Oct 2006.
  *
  * See http://backuppc.sourceforge.net.
  *
@@ -24,7 +24,7 @@ body {
 table {
     border-collapse: collapse;
     color: #000000;
-    padding:0px;
+    padding: 2px;
 }
 
 h1 {
@@ -129,7 +129,7 @@ a.navbar {
 }
 
 .editSaveButton {
-    color:#ff0000;
+    color:#c0c0c0;
     font-size:14pt;
     font-weight:bold;
 }
@@ -156,8 +156,9 @@ a.navbar {
 }
 
 .fviewborder {
+    border-left:1px solid #666666;
     border-bottom:1px solid #000000;
-    border-left:1px dotted #666666;
+    border-right:1px solid #666666;
     background-color:#eeeeee;
     font-size:9pt;
 }
@@ -187,13 +188,14 @@ a.navbar {
 
 .histView {
     border-bottom:1px solid #000000;
-    border-left:2px solid #ffffff;
+    border-left:1px solid #000000;
     background-color:#eeeeee;
     font-size:10pt;
 }
 
 .histViewMis {
     border-bottom:1px solid #000000;
+    border-left:1px solid #000000;
     background-color:#ffdddd;
 }
 
@@ -224,8 +226,9 @@ div.NavTitle {
 
 #Content {
     float:right;
-    width:80%;
+    width:79%;
     left:20%;
     top:10px;
+    right:10px;
     position:absolute;
 }

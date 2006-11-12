@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta1, released 30 Jul 2006.
+# Version 3.0.0beta2, released 11 Nov 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -412,14 +412,14 @@ sub Header
     my($title, $content, $noBrowse, $contentSub, $contentPost) = @_;
     my @adminLinks = (
         { link => "",                      name => $Lang->{Status}},
-        { link => "?action=adminOpts",     name => $Lang->{Admin_Options},
-                                           priv => 1},
+        { link => "?action=summary",       name => $Lang->{PC_Summary}},
         { link => "?action=editConfig",    name => $Lang->{CfgEdit_Edit_Config},
                                            priv => 1},
         { link => "?action=editConfig&newMenu=hosts",
                                            name => $Lang->{CfgEdit_Edit_Hosts},
                                            priv => 1},
-        { link => "?action=summary",       name => $Lang->{PC_Summary}},
+        { link => "?action=adminOpts",     name => $Lang->{Admin_Options},
+                                           priv => 1},
         { link => "?action=view&type=LOG", name => $Lang->{LOG_file},
                                            priv => 1},
         { link => "?action=LOGlist",       name => $Lang->{Old_LOGs},

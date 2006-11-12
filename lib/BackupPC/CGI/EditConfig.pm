@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta1, released 30 Jul 2006.
+# Version 3.0.0beta2, released 11 Nov 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -357,14 +357,14 @@ sub action
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_edit_config_files}}"));
     }
 
-    if ( defined($In{menu}) || $In{editAction} eq $Lang->{CfgEdit_Button_Save} ) {
+    if ( defined($In{menu}) || $In{saveAction} eq "Save" ) {
 	$errors = errorCheck();
 	if ( %$errors ) {
 	    #
 	    # If there are errors, then go back to the same menu
 	    #
-	    $In{editAction} = "";
-            $In{newMenu} = "";
+	    $In{saveAction} = "";
+            #$In{newMenu} = "";
 	}
         if ( (my $var = $In{overrideUncheck}) ne "" ) {
             #
@@ -401,7 +401,7 @@ sub action
 	$newConf = { %$mainConf, %$hostConf };
     }
 
-    if ( $In{editAction} ne $Lang->{CfgEdit_Button_Save} && $In{newMenu} ne ""
+    if ( $In{saveAction} ne "Save" && $In{newMenu} ne ""
 		    && defined($ConfigMenu{$In{newMenu}}) ) {
         $menu = $In{newMenu};
     }
@@ -475,9 +475,15 @@ EOF
 	$content .= eval("qq($Lang->{CfgEdit_Header_Host})");
     }
 
-    my $saveDisplay = "block";
-    $saveDisplay = "none" if ( !$In{modified}
-                          || $In{editAction} eq $Lang->{CfgEdit_Button_Save} );
+    my $saveStyle = "";
+    my $saveColor = "#ff0000";
+    
+    if ( $In{modified} && $In{saveAction} ne "Save" && !%$errors ) {
+        $saveStyle = "style=\"color:$saveColor\"";
+    } else {
+        $In{modified} = 0;
+    }
+
     #
     # Add action and host to the URL so the nav bar link is
     # highlighted
@@ -488,7 +494,7 @@ EOF
 <table border="0" cellpadding="2">
 <tr>$groupText</tr>
 <tr>
-<form method="post" name="form1" action="$url">
+<form method="post" name="editForm" action="$url">
 <input type="hidden" name="host" value="$host">
 <input type="hidden" name="menu" value="$menu">
 <input type="hidden" name="newMenu" value="">
@@ -498,65 +504,78 @@ EOF
 <input type="hidden" name="overrideUncheck" value="">
 <input type="hidden" name="addVar" value="">
 <input type="hidden" name="action" value="editConfig">
-<input type="submit" class="editSaveButton" style="display: $saveDisplay" name="editAction" value="${EscHTML($Lang->{CfgEdit_Button_Save})}">
+<input type="hidden" name="saveAction" value="">
+<input type="button" class="editSaveButton" name="editAction"
+    value="${EscHTML($Lang->{CfgEdit_Button_Save})}" $saveStyle
+    onClick="saveSubmit();">
+<p>
 
 <script language="javascript" type="text/javascript">
 <!--
 
+    function saveSubmit()
+    {
+        if ( document.editForm.modified.value != 0 ) {
+            document.editForm.saveAction.value = 'Save';
+            document.editForm.submit();
+        }
+        return false;
+    }
+
     function deleteSubmit(varName)
     {
-        document.form1.deleteVar.value = varName;
-	document.form1.modified.value = 1;
-        document.form1.submit();
+        document.editForm.deleteVar.value = varName;
+	document.editForm.modified.value = 1;
+        document.editForm.submit();
         return;
     }
 
     function insertSubmit(varName)
     {
-        document.form1.insertVar.value = varName;
-	document.form1.modified.value = 1;
-        document.form1.submit();
+        document.editForm.insertVar.value = varName;
+	document.editForm.modified.value = 1;
+        document.editForm.submit();
         return;
     }
 
     function addSubmit(varName, checkKey)
     {
         if ( checkKey
-            && eval("document.form1.addVarKey_" + varName + ".value") == "" ) {
+            && eval("document.editForm.addVarKey_" + varName + ".value") == "" ) {
             alert("New key must be non-empty");
             return;
         }
-        document.form1.addVar.value = varName;
-	document.form1.modified.value = 1;
-        document.form1.submit();
+        document.editForm.addVar.value = varName;
+	document.editForm.modified.value = 1;
+        document.editForm.submit();
         return;
     }
 
     function menuSubmit(menuName)
     {
-        document.form1.newMenu.value = menuName;
-        document.form1.submit();
+        document.editForm.newMenu.value = menuName;
+        document.editForm.submit();
     }
 
     function varChange(varName)
     {
-	document.form1.editAction.style.display = "block";
-	document.form1.modified.value = 1;
+	document.editForm.modified.value = 1;
+        document.editForm.editAction.style.color = '$saveColor';
     }
 
     function checkboxChange(varName)
     {
-	document.form1.editAction.style.display = "block";
-	document.form1.modified.value = 1;
+	document.editForm.modified.value = 1;
+        document.editForm.editAction.style.color = '$saveColor';
 	// Do nothing if the checkbox is now set
-        if ( eval("document.form1.override_" + varName + ".checked") ) {
+        if ( eval("document.editForm.override_" + varName + ".checked") ) {
 	    return false;
 	}
 	var allVars = {};
 	var varRE  = new RegExp("^v_z_(" + varName + ".*)");
 	var origRE = new RegExp("^orig_z_(" + varName + ".*)");
-        for ( var i = 0 ; i < document.form1.elements.length ; i++ ) {
-	    var e = document.form1.elements[i];
+        for ( var i = 0 ; i < document.editForm.elements.length ; i++ ) {
+	    var e = document.editForm.elements[i];
 	    var re;
 	    if ( (re = varRE.exec(e.name)) != null ) {
 		if ( allVars[re[1]] == null ) {
@@ -581,7 +600,7 @@ EOF
 	    } else {
                 // copy the original variable values
 		//debugMsg("setting " + v);
-		eval("document.form1.v_z_" + v + ".value = document.form1.orig_z_" + v + ".value");
+		eval("document.editForm.v_z_" + v + ".value = document.editForm.orig_z_" + v + ".value");
             }
 	}
 	if ( sameShape ) {
@@ -589,17 +608,17 @@ EOF
 	} else {
             // need to rebuild the form since the compound variable
             // has changed shape
-            document.form1.overrideUncheck.value = varName;
-	    document.form1.submit();
+            document.editForm.overrideUncheck.value = varName;
+	    document.editForm.submit();
 	    return false;
 	}
     }
 
     function checkboxSet(varName)
     {
-	document.form1.editAction.style.display = "block";
-	document.form1.modified.value = 1;
-        eval("document.form1.override_" + varName + ".checked = 1;");
+	document.editForm.modified.value = 1;
+        document.editForm.editAction.style.color = '$saveColor';
+        eval("document.editForm.override_" + varName + ".checked = 1;");
         return false;
     }
 
@@ -632,6 +651,7 @@ EOF
 EOF
 
     my $doneParam = {};
+    my $tblContent;
 
     #
     # There is a special case of the user deleting just the field
@@ -651,7 +671,7 @@ EOF
 
     my $isError = %$errors;
 
-    if ( !$isError && $In{editAction} eq $Lang->{CfgEdit_Button_Save} ) {
+    if ( !$isError && $In{saveAction} eq "Save" ) {
         my($mesg, $err);
 	if ( $host ne "" ) {
 	    $hostConf = $bpc->ConfigDataRead($host) if ( !defined($hostConf) );
@@ -707,7 +727,7 @@ EOF
             $newConf->{Hosts} = $hostsSave;
 	}
         if ( defined($err) ) {
-            $content .= <<EOF;
+            $tblContent .= <<EOF;
 <tr><td colspan="2" class="border"><span class="editError">$err</span></td></tr>
 EOF
         }
@@ -715,7 +735,7 @@ EOF
         if ( $mesg ne "" ) {
             (my $mesgBR = $mesg) =~ s/\n/<br>\n/g;
              # uncomment this if you want the changes to be displayed
-#            $content .= <<EOF;
+#            $tblContent .= <<EOF;
 #<tr><td colspan="2" class="border"><span class="editComment">$mesgBR</span></td></tr>
 #EOF
             foreach my $str ( split(/\n/, $mesg) ) {
@@ -744,7 +764,7 @@ EOF
 
 	if ( defined($paramInfo->{text}) ) {
             my $text = eval("qq($Lang->{$paramInfo->{text}})");
-	    $content .= <<EOF;
+	    $tblContent .= <<EOF;
 <tr><td colspan="2" class="editHeader">$text</td></tr>
 EOF
 	    next;
@@ -760,7 +780,7 @@ EOF
 
         $doneParam->{$param} = 1;
 
-        $content .= fieldEditBuild($ConfigMeta{$param},
+        $tblContent .= fieldEditBuild($ConfigMeta{$param},
                               $param,
                               $newConf->{$param},
                               $errors,
@@ -774,23 +794,32 @@ EOF
         if ( defined($paramInfo->{comment}) ) {
             my $topDir = $bpc->TopDir;
             my $text = eval("qq($Lang->{$paramInfo->{comment}})");
-	    $content .= <<EOF;
+	    $tblContent .= <<EOF;
 <tr><td colspan="2" class="editComment">$text</td></tr>
 EOF
         }
     }
 
     #
-    # Emit any remaining errors - should not happen
+    # Emit a summary of all the errors
     #
+    my $errorTxt;
+
+    if ( %$errors ) {
+	$errorTxt .= <<EOF;
+<tr><td colspan="2" class="border"><span class="editError">$Lang->{CfgEdit_Error_No_Save}</span></td></tr>
+EOF
+    }
+
     foreach my $param ( sort(keys(%$errors)) ) {
-	$content .= <<EOF;
+	$errorTxt .= <<EOF;
 <tr><td colspan="2" class="border"><span class="editError">$errors->{$param}</span></td></tr>
 EOF
-	delete($errors->{$param});
     }
 
     $content .= <<EOF;
+$errorTxt
+$tblContent
 </table>
 EOF
 
@@ -816,9 +845,8 @@ EOF
         $doneParam->{$param} = 1;
     }
 
-    if ( defined($In{menu}) || $In{editAction} eq $Lang->{CfgEdit_Button_Save} ) {
-        if ( $In{editAction} eq $Lang->{CfgEdit_Button_Save}
-                && !$userHost ) {
+    if ( defined($In{menu}) || $In{saveAction} eq "Save" ) {
+        if ( $In{saveAction} eq "Save" && !$userHost ) {
             #
             # Emit the new settings as orig_z_ parameters
             #
@@ -1006,6 +1034,7 @@ EOF
             $In{addVar} = "";
         }
         $content .= "<table border=\"1\" cellspacing=\"0\">\n";
+        my $colspan;
 
         if ( ref($type) eq "HASH" && ref($type->{child}) eq "HASH"
                     && $type->{child}{type} eq "horizHash" ) {
@@ -1017,8 +1046,9 @@ EOF
             }
             $content .= "<tr><td class=\"border\"></td>\n";
             for ( my $i = 0 ; $i < @order ; $i++ ) {
-                $content .= "<td class=\"border\">$order[$i]</td>\n";
+                $content .= "<td class=\"tableheader\">$order[$i]</td>\n";
             }
+            $colspan = @order + 1;
             $content .= "</tr>\n";
             for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
                 if ( @$varValue > 1 || $type->{emptyOk} ) {
@@ -1055,9 +1085,10 @@ EOF
                                     $overrideVar, $overrideSet);
                 $content .= "</tr>\n";
             }
+            $colspan = 2;
         }
         $content .= <<EOF;
-<tr><td class="border"><input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}"
+<tr><td class="border" colspan="$colspan"><input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}"
     onClick="addSubmit('$varName')"></td></tr>
 </table>
 EOF
@@ -1181,7 +1212,6 @@ EOF
             $content .= <<EOF;
 <span class="editError">$errors->{$varName}</span><br>
 EOF
-	    delete($errors->{$varName});
         }
         my $onChange;
 	if ( defined($overrideVar) ) {
@@ -1190,7 +1220,7 @@ EOF
             $onChange .= "varChange('$overrideVar');";
 	}
         if ( $onchangeSubmit ) {
-            $onChange .= "document.form1.submit();";
+            $onChange .= "document.editForm.submit();";
         }
 	if ( $onChange ne "" ) {
             $onChange = " onChange=\"$onChange\"";
@@ -1401,17 +1431,36 @@ sub fieldInputParse
             return 1;
         }
 
+        my $v = $In{"v_z_$varName"};
+
         if ( $type->{type} eq "integer" ) {
-            $$value = 0 + $In{"v_z_$varName"};
+            if ( $v =~ /^-?\d+\s*$/s || $v eq "" ) {
+                $$value = 0 + $v;
+            } else {
+                # error value - keep in string form
+                $$value = $v;
+            }
         } elsif ( $type->{type} eq "float" ) {
-            $$value = 0 + $In{"v_z_$varName"};
+            if ( $v =~ /^-?\d*(\.\d*)?\s*$/s || $v eq "" ) {
+                $$value = 0 + $v;
+            } else {
+                # error value - keep in string form
+                $$value = $v;
+            }
         } elsif ( $type->{type} eq "shortlist" ) {
-            $$value = [split(/[,\s]+/, $In{"v_z_$varName"})];
-            if ( $type->{child} eq "float"
-                    || $type->{child} eq "integer"
-                    || $type->{child} eq "boolean" ) {
+            $$value = [split(/[,\s]+/, $v)];
+            if ( $type->{child} eq "float" ) {
                 foreach ( @$$value ) {
-                    $_ += 0;
+                    if ( /^-?\d*(\.\d*)?\s*$/s || $v eq "" ) {
+                        $_ += 0;
+                    }
+                }
+            } elsif ( $type->{child} eq "integer"
+                        || $type->{child} eq "boolean" ) {
+                foreach ( @$$value ) {
+                    if ( /^-?\d+\s*$/s || $v eq "" ) {
+                        $_ += 0;
+                    }
                 }
             }
         } else {

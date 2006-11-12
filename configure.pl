@@ -356,10 +356,10 @@ while ( 1 ) {
 
 print <<EOF;
 
-Please specify a data directory for BackupPC.  This is where the
-all the PC backup data is stored.  This file system needs to be
-big enough to accommodate all the PCs you expect to backup (eg:
-at least several GB per machine).
+Please specify a data directory for BackupPC.  This is where all the
+PC backup data is stored.  This file system needs to be big enough to
+accommodate all the PCs you expect to backup (eg: at least several GB
+per machine).
 
 EOF
 

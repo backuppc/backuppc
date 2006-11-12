@@ -966,10 +966,9 @@ Alternatively, rather than backup all the file systems as a single
 share ("/"), it is easier to restore a single file system if you backup
 each file system separately.  To do this you should list each file system
 mount point in $Conf{TarShareName} or $Conf{RsyncShareName}, and add the
---one-file-system option to $Conf{TarClientCmd} or add --one-file-system
-(note the different punctuation) to $Conf{RsyncArgs}.  In this case there
-is no need to exclude /proc explicitly since it looks like a different
-file system.
+--one-file-system option to $Conf{TarClientCmd} or $Conf{RsyncArgs}.
+In this case there is no need to exclude /proc explicitly since it looks
+like a different file system.
 
 Next you should decide whether to run tar over ssh, rsh or nfs. Ssh is
 the preferred method. Rsh is not secure and therefore not recommended.
@@ -2724,7 +2723,7 @@ instead of X.0Y. The first digit is for major new releases, the middle
 digit is for significant feature releases and improvements (most of
 the releases have been in this category), and the last digit is for
 bug fixes. You should think of the old 1.00, 1.01, 1.02 and 1.03 as
-1..0, 1.1.0, 1.2.0 and 1.3.0.
+1.0.0, 1.1.0, 1.2.0 and 1.3.0.
 
 Additionally, patches might be made available.  A patched version
 number is of the form X.Y.ZplN (eg: 2.1.0pl2), where N is the

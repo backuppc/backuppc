@@ -463,7 +463,7 @@ overschreven worden!
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table border="0">
+<table class="tableStnd" border="0">
 <tr>
     <td>Zet de bestanden terug naar de pc</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -579,8 +579,8 @@ U hebt gevraagd om bestanden rechtstreeks terug te zetten op de machine \$In{hos
 De volgende bestanden zullen hersteld worden in share \$In{shareDest}, 
 uit backup nummer \$num:
 <p>
-<table border>
-<tr><td>Oorspronkelijk bestand/map</td><td>zal hersteld worden in</td></tr>
+<table class="tableStnd" border>
+<tr class="tableheader"><td>Oorspronkelijk bestand/map</td><td>zal hersteld worden in</td></tr>
 \$fileListStr
 </table>
 
@@ -832,7 +832,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border="0" width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -880,7 +880,7 @@ alle backups heen:
 \${h2("Geschiedenis van \${EscHTML(\$dirDisplay)}")}
 
 <br>
-<table cellspacing="2" cellpadding="3">
+<table border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>backup nummer</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>backup moment</td>\$backupTimeStr</tr>
 \$fileStr
@@ -1434,6 +1434,7 @@ $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Bewerken specifieke configuratie van machine \$host ")}
 <p>
 NB: Selecteer 'Overschrijven' als je een waarde wil wijzigen specifiek voor deze machine.
+<p>
 EOF
 
 $Lang{CfgEdit_Button_Save}     = "Bewaren";
@@ -1443,6 +1444,8 @@ $Lang{CfgEdit_Button_Add}      = "Toevoegen";
 $Lang{CfgEdit_Button_Override} = "Overschrijven";
 $Lang{CfgEdit_Button_New_Key}  = "Nieuwe sleutel";
 
+$Lang{CfgEdit_Error_No_Save}
+            = "ENG Error: No save due to errors";
 $Lang{CfgEdit_Error__must_be_an_integer}
             = "Fout: \$var moet een geheel getal zijn";
 $Lang{CfgEdit_Error__must_be_real_valued_number}

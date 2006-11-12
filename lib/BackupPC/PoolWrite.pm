@@ -56,7 +56,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta1, released 30 Jul 2006.
+# Version 3.0.0beta2, released 11 Nov 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -438,10 +438,11 @@ sub write
                 push(@{$a->{errors}},
                         "Unable to open $a->{fileName}"
                       . " for writing after link fail\n");
+            } else {
+                $a->filePartialCopy($a->{files}[$i]->{fh}, $a->{fhOut},
+                                    $a->{nWrite});
+                $a->{fhOut}->close;
             }
-            $a->filePartialCopy($a->{files}[$i]->{fh}, $a->{fhOut},
-                                $a->{nWrite});
-            $a->{fhOut}->close;
             last;
         }
         #

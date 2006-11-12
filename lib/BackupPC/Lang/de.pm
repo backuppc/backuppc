@@ -472,7 +472,7 @@ Wiederherstellung korrekt ist.)
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table border="0">
+<table class="tableStnd" border="0">
 <tr>
     <td>Restore auf Computer</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -587,8 +587,8 @@ Sie starten eine direkte Wiederherstellung auf den Computer \$In{hostDest}.
 Die folgenden Dateien werden auf die Freigabe \$In{shareDest} wiederhergestellt, von
 dem Backup mit der Nummer \$num:
 <p>
-<table border>
-<tr><td>Original Datei/Verzeichnis:</td><td>Wird wiederhergestellt nach:</td></tr>
+<table class="tableStnd" border>
+<tr class="tableheader"><td>Original Datei/Verzeichnis:</td><td>Wird wiederhergestellt nach:</td></tr>
 \$fileListStr
 </table>
 
@@ -838,7 +838,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border="0" width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -880,7 +880,7 @@ Diese Ansicht zeigt alle unterschiedlichen Versionen der Dateien in den Datensic
 \${h2("Historie von \${EscHTML(\$dirDisplay)}")}
 
 <br>
-<table cellspacing="2" cellpadding="3">
+<table border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>Datensicherungnummer</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>Sicherungszeitpunkt</td>\$backupTimeStr</tr>
 \$fileStr
@@ -1337,7 +1337,7 @@ $Lang{howLong_not_been_backed_up} = "Backup nicht erfolgreich";
 $Lang{howLong_not_been_backed_up_for_days_days} = "kein Backup seit \$days Tagen";
 
 #######################################################################
-# RSS strings (all ENGLISH currently)
+# RSS strings
 #######################################################################
 $Lang{RSS_Doc_Title}       = "BackupPC Server";
 $Lang{RSS_Doc_Description} = "RSS Feed für BackupPC";
@@ -1353,7 +1353,7 @@ Letzte Aktion: \$host_last_attempt;
 EOF
 
 #######################################################################
-# Configuration editor strings (all ENGLISH currently)
+# Configuration editor strings
 #######################################################################
 
 $Lang{Only_privileged_users_can_edit_config_files} = "Nur privilegierte Nutzer können die Administrationsoptionen ändern.";
@@ -1426,6 +1426,7 @@ $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Host \$host Konfigurationseditor")}
 <p>
 Beachte: Wähle Überschreiben, wenn du einen host spezifischen Wert verändern willst 
+<p>
 EOF
 
 $Lang{CfgEdit_Button_Save}     = "Speichern";
@@ -1435,6 +1436,8 @@ $Lang{CfgEdit_Button_Add}      = "Hinzufügen";
 $Lang{CfgEdit_Button_Override} = "Überschreiben";
 $Lang{CfgEdit_Button_New_Key}  = "Neuer Schlüssel";
 
+$Lang{CfgEdit_Error_No_Save}
+            = "ENG Error: No save due to errors";
 $Lang{CfgEdit_Error__must_be_an_integer}
             = "Error: \$var muss eine Zahl sein";
 $Lang{CfgEdit_Error__must_be_real_valued_number}

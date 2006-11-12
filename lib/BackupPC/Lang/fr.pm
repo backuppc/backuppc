@@ -462,7 +462,7 @@ tous les fichiers correspondant à ceux que vous avez sélectionnés vont être écra
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table border="0">
+<table class="tableStnd" border="0">
 <tr>
     <td>Restaure les fichiers vers l'hôte</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -577,8 +577,8 @@ Vous êtes sur le point de démarrer une restauration directement sur
 la machine \$In{hostDest}. Les fichiers suivants vont être restaurés 
 dans le partage \$In{shareDest}, depuis la sauvegarde numéro \$num:
 <p>
-<table border>
-<tr><td>Fichier/Répertoire original</td><td>Va être restauré à</td></tr>
+<table class="tableStnd" border>
+<tr class="tableheader"><td>Fichier/Répertoire original</td><td>Va être restauré à</td></tr>
 \$fileListStr
 </table>
 
@@ -830,7 +830,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border="0" width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -876,7 +876,7 @@ Cette page montre toutes les version disponibles des fichiers sauvegardés pour l
 \${h2("Historique de \${EscHTML(\$dirDisplay)}")}
 
 <br>
-<table cellspacing="2" cellpadding="3">
+<table border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>Numéro de sauvegarde</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>Date</td>\$backupTimeStr</tr>
 \$fileStr
@@ -1419,6 +1419,7 @@ $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Éditeur de la configuration de \$host")}
 <p>
 Note: Cochez Écraser pour modifier une valeur spécifique à cette machine.
+<p>
 EOF
 
 $Lang{CfgEdit_Button_Save}     = "Sauvegarder";
@@ -1428,6 +1429,8 @@ $Lang{CfgEdit_Button_Add}      = "Ajouter";
 $Lang{CfgEdit_Button_Override} = "Écraser";
 $Lang{CfgEdit_Button_New_Key}  = "Nouvelle clé";
 
+$Lang{CfgEdit_Error_No_Save}
+            = "ENG Error: No save due to errors";
 $Lang{CfgEdit_Error__must_be_an_integer}
             = "Erreur: \$var doit être un nombre entier";
 $Lang{CfgEdit_Error__must_be_real_valued_number}

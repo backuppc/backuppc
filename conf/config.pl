@@ -1181,7 +1181,7 @@ $Conf{RsyncdAuthRequired} = 1;
 #
 # When rsync checksum caching is enabled (by adding the
 # --checksum-seed=32761 option to $Conf{RsyncArgs}), the cached
-# checksums can be occaisonally verified to make sure the file
+# checksums can be occasionally verified to make sure the file
 # contents matches the cached checksums.  This is to avoid the
 # risk that disk problems might cause the pool file contents to
 # get corrupted, but the cached checksums would make BackupPC
@@ -1231,9 +1231,11 @@ $Conf{RsyncArgs} = [
             '--recursive',
 
 	    #
-	    # If you are using a patched client rsync that supports the
-	    # --checksum-seed option (see http://backuppc.sourceforge.net),
-	    # then uncomment this to enabled rsync checksum cachcing
+	    # Rsync >= 2.6.3 supports the --checksum-seed option
+            # which allows rsync checksum caching on the server.
+	    # Uncomment this to enable rsync checksum caching if
+            # you have a recent client rsync version and you want
+            # to enable checksum caching.
 	    #
 	    #'--checksum-seed=32761',
 
@@ -1268,9 +1270,11 @@ $Conf{RsyncRestoreArgs} = [
 	    '--recursive',
 
 	    #
-	    # If you are using a patched client rsync that supports the
-	    # --checksum-seed option (see http://backuppc.sourceforge.net),
-	    # then uncomment this to enabled rsync checksum cachcing
+	    # Rsync >= 2.6.3 supports the --checksum-seed option
+            # which allows rsync checksum caching on the server.
+	    # Uncomment this to enable rsync checksum caching if
+            # you have a recent client rsync version and you want
+            # to enable checksum caching.
 	    #
 	    #'--checksum-seed=32761',
 

@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta1, released 30 Jul 2006.
+# Version 3.0.0beta2, released 11 Nov 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -330,10 +330,7 @@ sub ConfigFileMerge
 {
     my($s, $inFile, $newConf) = @_;
     local(*C);
-    my($contents, $out);
-    my $comment = 1;
-    my $skipVar = 0;
-    my $endLine = undef;
+    my($contents, $skipExpr, $fakeVar);
     my $done = {};
 
     if ( -f $inFile ) {
@@ -345,12 +342,10 @@ sub ConfigFileMerge
         binmode(C);
 
         while ( <C> ) {
-            if ( $comment && /^\s*#/ ) {
-                $out .= $_;
-            } elsif ( /^\s*\$Conf\{([^}]*)\}\s*=/ ) {
+            if ( /^\s*\$Conf\{([^}]*)\}\s*=(.*)/ ) {
                 my $var = $1;
-                if ( exists($newConf->{$var}) ) { 
-                    $contents .= $out;
+                if ( exists($newConf->{$var}) ) {
+                    $skipExpr = "\$fakeVar = $2\n";
                     my $d = Data::Dumper->new([$newConf->{$var}], [*value]);
                     $d->Indent(1);
                     $d->Terse(1);
@@ -359,31 +354,21 @@ sub ConfigFileMerge
                     $contents .= "\$Conf{$var} = " . $value;
                     $done->{$var} = 1;
                 }
-                if ( /^\s*\$Conf\{[^}]*} *= *<<(.*);/
-                        || /^\s*\$Conf\{[^}]*} *= *<<'(.*)';/ ) {
-                    $endLine = $1;
-                    $skipVar = 1;
-                } else {
-                    $endLine = undef;
-                    $skipVar = /^[^#]*;/ ? 0 : 1;
-                }
-                $out = "";
-            } elsif ( $skipVar ) {
-                if ( !defined($endLine) && /^[^#]*;/ ) {
-                    $skipVar = 0;
-                    $comment = 1;
-                }
-                if ( defined($endLine) && /^\Q$endLine\E[\n\r]*$/ ) {
-                    $endLine = undef;
-                    $skipVar = 0;
-                    $comment = 1;
-                }
+            } elsif ( defined($skipExpr) ) {
+                $skipExpr .= $_;
             } else {
-                $out .= $_;
+                $contents .= $_;
+            }
+            if ( defined($skipExpr) ) {
+                #
+                # if we have a complete expression, then we are done
+                # skipping text from the original config file.
+                #
+                eval($skipExpr);
+                $skipExpr = undef if ( $@ eq "" );
             }
         }
         close(C);
-        $contents .= $out;
     }
 
     #

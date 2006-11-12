@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta1, released 30 Jul 2006.
+# Version 3.0.0beta2, released 11 Nov 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -204,7 +204,7 @@ EOF
 								   $a->{type});
                     my $modeStr  = sprintf("0%o", $a->{mode} & 07777);
                     $iconStr = <<EOF;
-<img src="$Conf{CgiImageDirURL}/icon-$typeStr.gif" align="center">
+<img src="$Conf{CgiImageDirURL}/icon-$typeStr.png" valign="top">
 EOF
                     $attrStr .= <<EOF;
     <td align="center" class="fviewborder">$typeStr</td>

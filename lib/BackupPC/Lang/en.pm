@@ -462,7 +462,7 @@ selected will be overwritten!
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table border="0">
+<table class="tableStnd" border="0">
 <tr>
     <td>Restore the files to host</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -578,8 +578,8 @@ You are about to start a restore directly to the machine \$In{hostDest}.
 The following files will be restored to share \$In{shareDest}, from
 backup number \$num:
 <p>
-<table border>
-<tr><td>Original file/dir</td><td>Will be restored to</td></tr>
+<table class="tableStnd" border>
+<tr class="tableheader"><td>Original file/dir</td><td>Will be restored to</td></tr>
 \$fileListStr
 </table>
 
@@ -831,7 +831,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border="0" width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -878,7 +878,7 @@ the backups:
 \${h2("History of \${EscHTML(\$dirDisplay)}")}
 
 <br>
-<table cellspacing="2" cellpadding="3">
+<table border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>Backup number</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>Backup time</td>\$backupTimeStr</tr>
 \$fileStr
@@ -1418,6 +1418,7 @@ $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Host \$host Configuration Editor")}
 <p>
 Note: Check Override if you want to modify a value specific to this host.
+<p>
 EOF
 
 $Lang{CfgEdit_Button_Save}     = "Save";
@@ -1427,6 +1428,8 @@ $Lang{CfgEdit_Button_Add}      = "Add";
 $Lang{CfgEdit_Button_Override} = "Override";
 $Lang{CfgEdit_Button_New_Key}  = "New Key";
 
+$Lang{CfgEdit_Error_No_Save}
+            = "Error: No save due to errors";
 $Lang{CfgEdit_Error__must_be_an_integer}
             = "Error: \$var must be an integer";
 $Lang{CfgEdit_Error__must_be_real_valued_number}

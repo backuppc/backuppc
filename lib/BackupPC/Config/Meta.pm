@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta1, released 30 Jul 2006.
+# Version 3.0.0beta2, released 11 Nov 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -206,7 +206,7 @@ use vars qw(%ConfigMeta);
     },
     SmbShareUserName 	=> "string",
     SmbSharePasswd 	=> "string",
-    SmbClientPath 	=> {type => "string", undefIfEmpty => 1},
+    SmbClientPath 	=> {type => "execPath", undefIfEmpty => 1},
     SmbClientFullCmd 	=> "string",
     SmbClientIncrCmd 	=> "string",
     SmbClientRestoreCmd => "string",

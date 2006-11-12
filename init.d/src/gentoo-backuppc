@@ -14,7 +14,7 @@ source /etc/conf.d/backuppc
 
 checkconfig() {
 	if [ ! -f ${CONF_FILE} ] ; then
-		eeror "No ${CONF_FILE} exists!"
+		eerror "No ${CONF_FILE} exists!"
 	fi
 }
 

@@ -147,7 +147,7 @@ Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
     <td align="center"> Snelheid (MB/sec) </td>
     <td align="center"> Aantal Incr. </td>
     <td align="center"> Incr.Lftd (dagen) </td>
-    <td align="center"> ENG Last Backup (days) </td>
+    <td align="center"> Vorige Backup (dagen) </td>
     <td align="center"> Status </td>
     <td align="center"> Laatste poging</td></tr>
 \$strGood
@@ -166,7 +166,7 @@ Er zijn \$hostCntNone hosts zonder backup.
     <td align="center"> Snelheid (MB/sec) </td>
     <td align="center"> Aantal Incr. </td>
     <td align="center"> Incr.Lftd (dagen) </td>
-    <td align="center"> ENG Last Backup (days) </td>
+    <td align="center"> Vorige Backup (dagen) </td>
     <td align="center"> Status </td>
     <td align="center"> Laatste poging </td></tr>
 \$strNone
@@ -1232,8 +1232,8 @@ $Lang{Reason_no_ping} = "geen ping";
 $Lang{Reason_backup_canceled_by_user} = "backup geannuleerd door gebruiker";
 $Lang{Reason_restore_canceled_by_user} = "herstellen geannuleerd door gebruiker";
 $Lang{Reason_archive_canceled_by_user} = "archivering geannuleerd door gebruiker";
-$Lang{Disabled_OnlyManualBackups}  = "ENG auto disabled";  
-$Lang{Disabled_AllBackupsDisabled} = "ENG disabled";                  
+$Lang{Disabled_OnlyManualBackups}  = "auto uitgeschakeld";  
+$Lang{Disabled_AllBackupsDisabled} = "uitgeschakeld";                  
 
 # ---------
 # Email messages
@@ -1445,15 +1445,15 @@ $Lang{CfgEdit_Button_Override} = "Overschrijven";
 $Lang{CfgEdit_Button_New_Key}  = "Nieuwe sleutel";
 
 $Lang{CfgEdit_Error_No_Save}
-            = "ENG Error: No save due to errors";
+            = "Fout: niet bewaard ten gevolge van fouten";
 $Lang{CfgEdit_Error__must_be_an_integer}
             = "Fout: \$var moet een geheel getal zijn";
 $Lang{CfgEdit_Error__must_be_real_valued_number}
             = "Fout: \$var moet een re&euml;le waarde (nummer) zijn";
 $Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Fout: \$var ingang \$k moet een geheel getal zijn";
+            = "Fout: \$var ingave \$k moet een geheel getal zijn";
 $Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Fout: \$var ingang \$k moet een re&euml;le waarde (nummer) zijn";
+            = "Fout: \$var ingave \$k moet een re&euml;le waarde (nummer) zijn";
 $Lang{CfgEdit_Error__must_be_executable_program}
             = "Fout: \$var moet een geldig uitvoerbaar pad zijn";
 $Lang{CfgEdit_Error__must_be_valid_option}

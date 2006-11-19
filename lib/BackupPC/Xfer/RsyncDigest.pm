@@ -244,7 +244,7 @@ sub digestAdd
 sub digestStart
 {
     my($class, $fileName, $fileSize, $blockSize, $defBlkSize,
-       $checksumSeed, $needMD4, $compress, $doCache) = @_;
+       $checksumSeed, $needMD4, $compress, $doCache, $protocol_version) = @_;
 
     return -1 if ( !$RsyncLibOK );
 
@@ -255,6 +255,8 @@ sub digestStart
         needMD4  => $needMD4,
         digest   => File::RsyncP::Digest->new,
     }, $class;
+
+    $dg->{digest}->protocol($protocol_version);
 
     if ( $fileSize > 0 && $compress && $doCache >= 0 ) {
         open(my $fh, "<", $fileName) || return -2;

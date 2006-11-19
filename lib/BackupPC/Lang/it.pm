@@ -3,6 +3,9 @@
 # Italian i18n file
 #
 # (C)  Lorenzo Cappelletti <lorenzo.cappelletti@email.it>  2004
+#  Added translations and corrections:
+#  Giuseppe Iuculano 2006
+#  Vittorio Macchi 2006
 #
 
 
@@ -38,7 +41,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 <!--
 \${h2("Configurazione server")}
 <ul>
-  <li><i>Other options can go here... e.g.,</i>
+  <li><i>Altre opzioni possono andare qui... e.g.,</i>
   <li>Modifica configurazione server
 </ul>
 -->
@@ -133,11 +136,11 @@ $Lang{BackupPC_Summary} = <<EOF;
 Questo rapporto di stato &egrave; stato generato il \$now.
 </p>
 
-\${h2("Host con backup buoni")}
+\${h2("Host con backup validi")}
 <p>
 Ci sono \$hostCntGood host sottoposti a backup per un totale di:
 <ul>
-<li> \$fullTot backup completi per una dimensione toatle di \${fullSizeTot}GB
+<li> \$fullTot backup completi per una dimensione totale di \${fullSizeTot}GB
      (prima del processo di pooling e compressione),
 <li> \$incrTot backup incrementali per una dimensione totale di \${incrSizeTot}GB
      (prima del processo di pooling e compressione).
@@ -149,10 +152,10 @@ Ci sono \$hostCntGood host sottoposti a backup per un totale di:
     <td align="center"> Completi </td>
     <td align="center"> Et&agrave; completi (giorni) </td>
     <td align="center"> Dimensione completi (GB) </td>
-    <td align="center"> Velocit&agrave (MB/s) </td>
+    <td align="center"> Velocit&agrave; (MB/s) </td>
     <td align="center"> Incrementali </td>
     <td align="center"> Et&agrave; incrementali (giorni) </td>
-    <td align="center"> ENG Last Backup (days) </td>
+    <td align="center"> Ultimo Backup (giorni) </td>
     <td align="center"> Stato </td>
     <td align="center"> Ultimo tentativo </td></tr>
 \$strGood
@@ -168,10 +171,10 @@ Ci sono \$hostCntNone host senza alcun backup.
     <td align="center"> Completi </td>
     <td align="center"> Et&agrave; completi (giorni) </td>
     <td align="center"> Dimensione completi (GB) </td>
-    <td align="center"> Velocit&agrave (MB/s) </td>
+    <td align="center"> Velocit&agrave; (MB/s) </td>
     <td align="center"> Incrementali </td>
     <td align="center"> Et&agrave; incrementali (giorni) </td>
-    <td align="center"> ENG Last Backup (days) </td>
+    <td align="center"> Ultimo Backup (giorni) </td>
     <td align="center"> Stato </td>
     <td align="center"> Ultimo tentativo </td></tr>
 \$strNone
@@ -481,7 +484,7 @@ sar&agrave; sovrascritto!
                window.open(URL,'','width=500,height=400');
         }
         </script>
-        <!--<a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Search for available shares (NOT IMPLEMENTED)</a>--></td>
+        <!--<a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Cerca condivisioni disponibili (NON IMPLEMENTATO)</a>--></td>
 </tr><tr>
     <td>Ripristino dei file sulla condivisione</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"
@@ -498,8 +501,8 @@ sar&agrave; sovrascritto!
 EOF
 
 $Lang{Restore_Options_for__host_Option1_disabled} = <<EOF;
-Direct restore has been disabled for host \${EscHTML(\$hostDest)}.
-Please select one of the other restore options.
+Il ripristino diretto &egrave; stato disabilitato per l\'host host \${EscHTML(\$hostDest)}.
+Per favore, seleziona uno degli altri metodi di ripristino.
 EOF
   
 # ------------------------------
@@ -541,7 +544,7 @@ $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 <p>
 Archive::Zip non &egrave; installato e non &egrave; quindi possibile
 scaricare un archivio zip.
-Contattare l\'amministratore di sistemaper installare Archive::Zip da
+Contattare l\'amministratore di sistema per installare Archive::Zip da
 <a href="http://www.cpan.org">www.cpan.org</a>.
 </p>
 EOF
@@ -657,7 +660,7 @@ Cliccare sul numero di backup per sfogliare e ripristinare i file di backup.
 <tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
     <td align="center"> Completo </td>
-    <td align="center"> ENG Level </td>
+    <td align="center"> Livello </td>
     <td align="center"> Data avvio </td>
     <td align="center"> Durata (minuti) </td>
     <td align="center"> Et&agrave; (giorni) </td>
@@ -703,7 +706,7 @@ riutilizzo e file nuovi.
     <td align="center"> Tipo </td>
     <td align="center"> Numero file </td>
     <td align="center"> Dimensione (MB) </td>
-    <td align="center"> Velocit&agrave (MB/s) </td>
+    <td align="center"> Velocit&agrave; (MB/s) </td>
     <td align="center"> Numero file </td>
     <td align="center"> Dimensione (MB) </td>
     <td align="center"> Numero file </td>
@@ -937,13 +940,13 @@ $Lang{Archive___num_details_for__host2 } = <<EOF;
 \${h1("Dettagli archivio n. \$num per \$host")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr><td class="tableheader"> Number </td><td class="border"> \$Archives[\$i]{num} </td></tr>
-<tr><td class="tableheader"> Requested by </td><td class="border"> \$ArchiveReq{user} </td></tr>
-<tr><td class="tableheader"> Request time </td><td class="border"> \$reqTime </td></tr>
-<tr><td class="tableheader"> Result </td><td class="border"> \$Archives[\$i]{result} </td></tr>
-<tr><td class="tableheader"> Error Message </td><td class="border"> \$Archives[\$i]{errorMsg} </td></tr>
-<tr><td class="tableheader"> Start time </td><td class="border"> \$startTime </td></tr>
-<tr><td class="tableheader"> Duration </td><td class="border"> \$duration\' </td></tr>
+<tr><td class="tableheader"> Numero </td><td class="border"> \$Archives[\$i]{num} </td></tr>
+<tr><td class="tableheader"> Richiesto da </td><td class="border"> \$ArchiveReq{user} </td></tr>
+<tr><td class="tableheader"> Data richiesta </td><td class="border"> \$reqTime </td></tr>
+<tr><td class="tableheader"> Risultato </td><td class="border"> \$Archives[\$i]{result} </td></tr>
+<tr><td class="tableheader"> Messaggio d\'errore </td><td class="border"> \$Archives[\$i]{errorMsg} </td></tr>
+<tr><td class="tableheader"> Data inizio </td><td class="border"> \$startTime </td></tr>
+<tr><td class="tableheader"> Durata </td><td class="border"> \$duration\' </td></tr>
 <tr><td class="tableheader"> Xfer log file </td><td class="border">
 <a href="\$MyURL?action=view&type=ArchiveLOG&num=\$Archives[\$i]{num}&host=\$host">Visualizza</a>,
 <a href="\$MyURL?action=view&type=ArchiveErr&num=\$Archives[\$i]{num}&host=\$host">Errori</a>
@@ -1082,7 +1085,7 @@ EOF
 
 # ---------
 $Lang{A_command_for_host_is_on_the_command_queue_will_run_soon} = <<EOF;
-<li>&Egrave gi&agrave; presente un comando per \$host nella coda dei comandi (sar&agrave; eseguito a breve).
+<li>&Egrave; gi&agrave; presente un comando per \$host nella coda dei comandi (sar&agrave; eseguito a breve).
 EOF
 
 # --------
@@ -1240,8 +1243,8 @@ $Lang{Reason_no_ping}        = "no ping";
 $Lang{Reason_backup_canceled_by_user}  = "backup annullato dall\'utente";
 $Lang{Reason_restore_canceled_by_user} = "ripristino annullato dall\'utente";
 $Lang{Reason_archive_canceled_by_user} = "archivio annullato dall\'utente";
-$Lang{Disabled_OnlyManualBackups}  = "ENG auto disabled";  
-$Lang{Disabled_AllBackupsDisabled} = "ENG disabled";                  
+$Lang{Disabled_OnlyManualBackups}  = "auto disabilitato";  
+$Lang{Disabled_AllBackupsDisabled} = "disabilitato";                  
 
 # ---------
 # Email messages
@@ -1350,7 +1353,7 @@ $Lang{RSS_Host_Summary}    = <<EOF;
 Completi: \$fullCnt;
 Et&agrave; completi (giorni): \$fullAge;
 Dimensione completi (GB): \$fullSize;
-Velocit&agrave (MB/s): \$fullRate;
+Velocit&agrave; (MB/s): \$fullRate;
 Incrementali: \$incrCnt;
 Et&agrave; incrementali (giorni): \$incrAge;
 Stato: \$host_state;
@@ -1358,116 +1361,118 @@ Ultimo tentativo: \$host_last_attempt;
 EOF
 
 #######################################################################
-# Configuration editor strings (all ENGLISH currently)
+# Configuration editor strings
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuation settings.";
-$Lang{CfgEdit_Edit_Config} = "Edit Config";
-$Lang{CfgEdit_Edit_Hosts}  = "Edit Hosts";
+$Lang{Only_privileged_users_can_edit_config_files} = "Solo gli utenti privilegiati possono modificare la configurazione.";
+$Lang{CfgEdit_Edit_Config} = "Modifica Configurazione";
+$Lang{CfgEdit_Edit_Hosts}  = "Modifica Hosts";
 
 $Lang{CfgEdit_Title_Server} = "Server";
-$Lang{CfgEdit_Title_General_Parameters} = "General Parameters";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "Wakeup Schedule";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "Concurrent Jobs";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Pool Filesystem Limits";
-$Lang{CfgEdit_Title_Other_Parameters} = "Other Parameters";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Remote Apache Settings";
-$Lang{CfgEdit_Title_Program_Paths} = "Program Paths";
-$Lang{CfgEdit_Title_Install_Paths} = "Install Paths";
+$Lang{CfgEdit_Title_General_Parameters} = "Parametri Generali";
+$Lang{CfgEdit_Title_Wakeup_Schedule} = "Pianificazione Esecuzioni";
+$Lang{CfgEdit_Title_Concurrent_Jobs} = "Lavori Contemporanei";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Limiti del Pool Filesystem";
+$Lang{CfgEdit_Title_Other_Parameters} = "Altri parametri";
+$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Configurazione Apache Remota";
+$Lang{CfgEdit_Title_Program_Paths} = "Percorsi Dei programmi";
+$Lang{CfgEdit_Title_Install_Paths} = "Percorsi Di Installazione";
 $Lang{CfgEdit_Title_Email} = "Email";
-$Lang{CfgEdit_Title_Email_settings} = "Email settings";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Email User Messages";
+$Lang{CfgEdit_Title_Email_settings} = "Configurazione Email";
+$Lang{CfgEdit_Title_Email_User_Messages} = "Messaggi Email Utente";
 $Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "Admin Privileges";
-$Lang{CfgEdit_Title_Page_Rendering} = "Page Rendering";
-$Lang{CfgEdit_Title_Paths} = "Paths";
-$Lang{CfgEdit_Title_User_URLs} = "User URLs";
-$Lang{CfgEdit_Title_User_Config_Editing} = "User Config Editing";
+$Lang{CfgEdit_Title_Admin_Privileges} = "Privilegi Admin";
+$Lang{CfgEdit_Title_Page_Rendering} = "Visualizzazione Pagina";
+$Lang{CfgEdit_Title_Paths} = "Percorsi";
+$Lang{CfgEdit_Title_User_URLs} = "URL Utenti";
+$Lang{CfgEdit_Title_User_Config_Editing} = "Modifica Configurazione Utenti";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
-$Lang{CfgEdit_Title_Xfer_Settings} = "Xfer Settings";
-$Lang{CfgEdit_Title_Smb_Settings} = "Smb Settings";
-$Lang{CfgEdit_Title_Tar_Settings} = "Tar Settings";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Settings";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Settings";
-$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd Settings";
-$Lang{CfgEdit_Title_Archive_Settings} = "Archive Settings";
-$Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Paths/Commands";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Paths/Commands";
-$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Paths/Commands/Args";
-$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Port/Args";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archive Paths/Commands";
-$Lang{CfgEdit_Title_Schedule} = "Schedule";
-$Lang{CfgEdit_Title_Full_Backups} = "Full Backups";
-$Lang{CfgEdit_Title_Incremental_Backups} = "Incremental Backups";
+$Lang{CfgEdit_Title_Xfer_Settings} = "Configurazione Xfer";
+$Lang{CfgEdit_Title_Smb_Settings} = "Configurazione Smb";
+$Lang{CfgEdit_Title_Tar_Settings} = "Configurazione Tar";
+$Lang{CfgEdit_Title_Rsync_Settings} = "Configurazione Rsync";
+$Lang{CfgEdit_Title_Rsyncd_Settings} = "Configurazione Rsyncd";
+$Lang{CfgEdit_Title_BackupPCd_Settings} = "Configurazione BackupPCd";
+$Lang{CfgEdit_Title_Archive_Settings} = "Configurazione Archivi";
+$Lang{CfgEdit_Title_Include_Exclude} = "Includi/Escludi";
+$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Percorsi/Comandi";
+$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Percorsi/Comandi";
+$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Percorsi/Comandi/Argomenti";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Porta/Argomenti";
+$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archivi Percorsi/Comandi";
+$Lang{CfgEdit_Title_Schedule} = "Pianificazione";
+$Lang{CfgEdit_Title_Full_Backups} = "Backup Completi";
+$Lang{CfgEdit_Title_Incremental_Backups} = "Backup Incrementali";
 $Lang{CfgEdit_Title_Blackouts} = "Blackouts";
-$Lang{CfgEdit_Title_Other} = "Other";
-$Lang{CfgEdit_Title_Backup_Settings} = "Backup Settings";
+$Lang{CfgEdit_Title_Other} = "Altro";
+$Lang{CfgEdit_Title_Backup_Settings} = "Configurazione Backup";
 $Lang{CfgEdit_Title_Client_Lookup} = "Client Lookup";
-$Lang{CfgEdit_Title_Other} = "Other";
-$Lang{CfgEdit_Title_User_Commands} = "User Commands";
+$Lang{CfgEdit_Title_Other} = "Altro";
+$Lang{CfgEdit_Title_User_Commands} = "Comandi Utente";
 $Lang{CfgEdit_Title_Hosts} = "Hosts";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
-To add a new host, select Add and then enter the name.  To start with
-the per-host configuration from another host, enter the host name
-as NEWHOST=COPYHOST.  This will overwrite any existing per-host
-configuration for NEWHOST.  You can also do this for an existing
-host.  To delete a host, hit the Delete button.  For Add, Delete,
-and configuration copy, changes don't take effect until you select
-Save.  None of the deleted host's backups will be removed,
-so if you accidently delete a host, simply re-add it.  To completely
-remove a host's backups, you need to manually remove the files
-below \$topDir/pc/HOST
+Per aggiungere un nuovo host, seleziona Aggiungi e inserisci il nome. 
+Per aggiungere un nuovo host partendo dalla configurazione di un altro
+host, inserisci il nome dell\'host con il formato NUOVOHOST=HOSTDACOPIARE.
+Questo sovrascriver&aacute; qualsiasi eventuale configurazione per il
+NUOVOHOST. Puoi dunque fare ci&oacute; anche per un host esistente.
+Per cancellare un host, clicca su Cancella. Quando Aggiungi, Cancelli,
+o copi la configurazione di un host, i cambiamenti vengono salvati
+solo dopo aver cliccato su Salva. I backup degli host cancellati
+non saranno rimossi, quindi se accidentalmente cancelli un host
+puoi semplicemente riaggiungerlo. Per cancellare definitivamente i
+backup di un host, dovrai quindi cancellare manualmente i file in
+\$topDir/pc/HOST
 EOF
 
 $Lang{CfgEdit_Header_Main} = <<EOF;
-\${h1("Main Configuration Editor")}
+\${h1("Editor Configurazione Principale")}
 EOF
 
 $Lang{CfgEdit_Header_Host} = <<EOF;
-\${h1("Host \$host Configuration Editor")}
+\${h1("Editor Configurazione Host \$host")}
 <p>
-Note: Check Override if you want to modify a value specific to this host.
+Nota: Se vuoi modificare un valore specifico per questo host, seleziona Sovrascrivi.
 <p>
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "Save";
-$Lang{CfgEdit_Button_Insert}   = "Insert";
-$Lang{CfgEdit_Button_Delete}   = "Delete";
-$Lang{CfgEdit_Button_Add}      = "Add";
-$Lang{CfgEdit_Button_Override} = "Override";
-$Lang{CfgEdit_Button_New_Key}  = "New Key";
+$Lang{CfgEdit_Button_Save}     = "Salva";
+$Lang{CfgEdit_Button_Insert}   = "Inserisci";
+$Lang{CfgEdit_Button_Delete}   = "Cancella";
+$Lang{CfgEdit_Button_Add}      = "Aggiungi";
+$Lang{CfgEdit_Button_Override} = "Sovrascrivi";
+$Lang{CfgEdit_Button_New_Key}  = "Nuova chiave";
 
 $Lang{CfgEdit_Error_No_Save}
-            = "ENG Error: No save due to errors";
+            = "Errore: Non salvo poich&eacute; sono presenti errori";
 $Lang{CfgEdit_Error__must_be_an_integer}
-            = "Error: \$var must be an integer";
+            = "Errore: \$var deve essere un numero intero";
 $Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "Error: \$var must be a real-valued number";
+            = "Errore: \$var deve esser un numero con un valore reale";
 $Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Error: \$var entry \$k must be an integer";
+            = "Errore: \$var entry \$k deve essere un numero intero";
 $Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Error: \$var entry \$k must be a real-valued number";
+            = "Errore: \$var entry \$k deve esser un numero con un valore reale";
 $Lang{CfgEdit_Error__must_be_executable_program}
-            = "Error: \$var must be a valid executable path";
+            = "Errore: \$var deve essere un percorso valido";
 $Lang{CfgEdit_Error__must_be_valid_option}
-            = "Error: \$var must be a valid option";
+            = "Errore: \$var deve essere una opzione valida";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "Copy host \$copyHost doesn't exist; creating full host name \$fullHost.  Delete this host if that is not what you wanted.";
+            = "L\'host da copiare \$copyHost non esiste; creo dunque l\'host \$fullHost da zero.  Se non &egrave; quello che desideravi, cancella questo host.";
 
 $Lang{CfgEdit_Log_Copy_host_config}
-            = "\$User copied config from host \$fromHost to \$host\n";
+            = "\$User ha copiato la configurazione di \$fromHost su \$host\n";
 $Lang{CfgEdit_Log_Delete_param}
-            = "\$User deleted \$p from \$conf\n";
+            = "\$User ha cancellato  \$p da \$conf\n";
 $Lang{CfgEdit_Log_Add_param_value}
-            = "\$User added \$p to \$conf, set to \$value\n";
+            = "\$User ha aggiunto \$p a \$conf, settandolo a \$value\n";
 $Lang{CfgEdit_Log_Change_param_value}
-            = "\$User changed \$p in \$conf to \$valueNew from \$valueOld\n";
+            = "\$User ha cambiato \$p su \$conf in \$valueNew da \$valueOld\n";
 $Lang{CfgEdit_Log_Host_Delete}
-            = "\$User deleted host \$host\n";
+            = "\$User ha cancellato l\'host \$host\n";
 $Lang{CfgEdit_Log_Host_Change}
-            = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
+            = "\$User host \$host ha cambiato \$key da \$valueOld in \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
-            = "\$User added host \$host: \$value\n";
+            = "\$User ha aggiunto l\'host \$host: \$value\n";
 

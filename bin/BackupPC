@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta2, released 18 Nov 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -113,9 +113,13 @@ if ( $Conf{BackupPCUserVerify}
 # Read old status
 #
 if ( -f "$LogDir/status.pl" && !(my $ret = do "$LogDir/status.pl") ) {
-   die "couldn't parse $LogDir/status.pl: $@" if $@;
-   die "couldn't do $LogDir/status.pl: $!"    unless defined $ret;
-   die "couldn't run $LogDir/status.pl";
+    if ( $@ ) {
+        print STDERR "couldn't parse $LogDir/status.pl: $@";
+    } elsif ( !defined($ret) ) {
+        print STDERR "couldn't do $LogDir/status.pl: $!";
+    } else {
+        print STDERR "couldn't run $LogDir/status.pl";
+    }
 }
 
 #

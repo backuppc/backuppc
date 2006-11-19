@@ -872,9 +872,9 @@ EOF
 }
 
 eval "use File::RsyncP;";
-if ( !$@ && $File::RsyncP::VERSION < 0.64 ) {
+if ( !$@ && $File::RsyncP::VERSION < 0.68 ) {
     print("\nWarning: you need to upgrade File::RsyncP;"
-        . " I found $File::RsyncP::VERSION and BackupPC needs 0.64\n");
+        . " I found $File::RsyncP::VERSION and BackupPC needs 0.68\n");
 }
 
 exit(0);

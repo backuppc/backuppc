@@ -56,10 +56,10 @@ BEGIN {
 	#
 	# Note: also update configure.pl when this version number is changed!
 	#
-        if ( $File::RsyncP::VERSION < 0.64 ) {
+        if ( $File::RsyncP::VERSION < 0.68 ) {
             $RsyncLibOK = 0;
             $RsyncLibErr = "File::RsyncP module version"
-                         . " ($File::RsyncP::VERSION) too old: need 0.64";
+                         . " ($File::RsyncP::VERSION) too old: need 0.68";
         } else {
             $RsyncLibOK = 1;
         }

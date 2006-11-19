@@ -160,7 +160,8 @@ sub csumStart
         my($err, $d, $blkSize) = BackupPC::Xfer::RsyncDigest->digestStart(
                                      $attr->{fullPath}, $attr->{size}, 0,
                                      $defBlkSize, $fio->{checksumSeed},
-                                     0, $attr->{compress}, 0);
+                                     0, $attr->{compress}, 0,
+                                     $fio->{protocol_version});
         my($isCached, $isInvalid) = $d->isCached;
         if ( $fio->{logLevel} >= 5 ) {
             $fio->log("$attr->{fullPath} verify; cached = $isCached,"
@@ -185,7 +186,8 @@ sub csumStart
     (my $err, $fio->{csum}, my $blkSize)
          = BackupPC::Xfer::RsyncDigest->digestStart($attr->{fullPath},
 			 $attr->{size}, 0, $defBlkSize, $fio->{checksumSeed},
-			 $needMD4, $attr->{compress}, 1);
+			 $needMD4, $attr->{compress}, 1,
+                         $fio->{protocol_version});
     if ( $fio->{logLevel} >= 5 ) {
         my($isCached, $invalid) = $fio->{csum}->isCached;
         $fio->log("$attr->{fullPath} cache = $isCached,"
@@ -1106,7 +1108,8 @@ sub fileDeltaRxDone
                          = BackupPC::Xfer::RsyncDigest->digestStart(
                                  $attr->{fullPath}, $attr->{size},
                                  0, 2048, $fio->{checksumSeed}, 1,
-                                 $attr->{compress}, 1);
+                                 $attr->{compress}, 1,
+                                 $fio->{protocol_version});
                 if ( $err ) {
                     $fio->log("Can't open $attr->{fullPath} for MD4"
                             . " check (err=$err, $name)");

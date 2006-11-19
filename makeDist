@@ -54,7 +54,7 @@ die("BackupPC::Lib->new failed\n")
 umask(0022);
 
 my $Version     = "3.0.0beta2";
-my $ReleaseDate = "11 Nov 2006";
+my $ReleaseDate = "18 Nov 2006";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(

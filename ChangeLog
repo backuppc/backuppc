@@ -21,6 +21,10 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fix for final md4 digest check on rsync transfers >= 512MB when protocol
+  version >= 27 and checksums are not cached.  Reported by Garith Dugmore
+  and Dale Renton.
+
 * Config Editor "Save" button is now always visible, but greyed out
   until there are changes to save.
 
@@ -49,8 +53,8 @@
 * More compact host summary, including disabled host indication,
   from Jono Woodhouse.
 
-* New directory/file/hardlink and symlink image icons from Jono
-  Woodhouse, making directory browse more compact.
+* New directory/file/hardlink and symlink image icons from Sean Cameron
+  and Jono Woodhouse, making directory browse more compact.
 
 * BackupPC.pid is now world readable, suggested by Casper Thomsen.
 

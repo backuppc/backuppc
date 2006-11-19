@@ -364,6 +364,7 @@ sub ConfigFileMerge
                 # if we have a complete expression, then we are done
                 # skipping text from the original config file.
                 #
+                $skipExpr = $1 if ( $skipExpr =~ /(.*)/s );
                 eval($skipExpr);
                 $skipExpr = undef if ( $@ eq "" );
             }

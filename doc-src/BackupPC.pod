@@ -363,8 +363,7 @@ compression is on.
 
 =item *
 
-Perl version 5.6.0 or later. BackupPC has been tested with
-version 5.6.x, and 5.8.x. If you don't have perl, please
+Perl version 5.8.0 or later.  If you don't have perl, please
 see L<http://www.cpan.org>.
 
 =item *
@@ -1179,7 +1178,7 @@ This is because setuid scripts are disabled by the kernel in most
 flavors of unix and linux.
 
 To see if your perl has setuid emulation, see if there is a program
-called sperl5.6.0 (or sperl5.8.2 etc, based on your perl version)
+called sperl5.8.0 (or sperl5.8.2 etc, based on your perl version)
 in the place where perl is installed. If you can't find this program,
 then you have two options: rebuild and reinstall perl with the setuid
 emulation turned on (answer "y" to the question "Do you want to do
@@ -2763,17 +2762,22 @@ Javier Gonzalez provided the Spanish translation, es.pm for v2.0.0.
 
 Manfred Herrmann provided the German translation, de.pm for v2.0.0.
 Manfred continues to support de.pm updates for each new version,
-together with some help frmo Ralph Paﬂgang.
+together with some help from Ralph Paﬂgang.
 
 Lorenzo Cappelletti provided the Italian translation, it.pm for v2.1.0.
+Giuseppe Iuculano and Vittorio Macchi updated it for 3.0.0.
 
 Lieven Bridts provided the Dutch translation, nl.pm, for v2.1.0,
-with some tweaks from Guus Houtzager.
+with some tweaks from Guus Houtzager, and updates for 3.0.0.
 
 Reginaldo Ferreira provided the Portuguese Brazillian translation
 pt_br.pm for v2.2.0.
 
 Rich Duzenbury provided the RSS feed option to the CGI interface.
+
+Jono Woodhouse from CapeSoft Software (www.capesoft.com) provided a
+new CSS skin for 3.0.0 with several layout improvements.  Sean Cameron
+(also from CapeSoft) designed new and more compact file icons for 3.0.0.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.

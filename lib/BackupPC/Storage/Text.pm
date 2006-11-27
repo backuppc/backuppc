@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta2, released 18 Nov 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -344,8 +344,8 @@ sub ConfigFileMerge
         while ( <C> ) {
             if ( /^\s*\$Conf\{([^}]*)\}\s*=(.*)/ ) {
                 my $var = $1;
+                $skipExpr = "\$fakeVar = $2\n";
                 if ( exists($newConf->{$var}) ) {
-                    $skipExpr = "\$fakeVar = $2\n";
                     my $d = Data::Dumper->new([$newConf->{$var}], [*value]);
                     $d->Indent(1);
                     $d->Terse(1);
@@ -359,7 +359,9 @@ sub ConfigFileMerge
             } else {
                 $contents .= $_;
             }
-            if ( defined($skipExpr) ) {
+            if ( defined($skipExpr)
+                    && ($skipExpr =~ /^\$fakeVar = *<</
+                        || $skipExpr =~ /;[\n\r]*$/) ) {
                 #
                 # if we have a complete expression, then we are done
                 # skipping text from the original config file.

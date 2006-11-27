@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta2, released 18 Nov 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1100,7 +1100,7 @@ EOF
 
         if ( !$isError && !$type->{noKeyEdit}
                         && $In{deleteVar} !~ /^\Q${varName}_z_\E.*_z_/
-                        && $In{deleteVar} =~ /^\Q${varName}_z_\E(\w+)$/ ) {
+                        && $In{deleteVar} =~ /^\Q${varName}_z_\E(.*)$/ ) {
             #
             # User deleted entry in this hash
             #

@@ -98,7 +98,7 @@ $Conf{UmaskMode} = 027;
 # you might have only one or two wakeups each night.  This will keep
 # the backup activity after hours.  On the other hand, if you are backing
 # up laptops that are only intermittently connected to the network you
-# will want to have frequent wakeups (eg: hourly) to maximized the chance
+# will want to have frequent wakeups (eg: hourly) to maximize the chance
 # that each laptop is backed up.
 #
 # Examples:

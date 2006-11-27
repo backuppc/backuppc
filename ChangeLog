@@ -21,6 +21,16 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fix for config.pl writing code to handle multi-line expressions.
+  Reported by David Relson and others.
+
+* Fix for CGI editor when deleting hash entries whose keys are
+  non alphanumeric.  Report by David Relson.
+
+#------------------------------------------------------------------------
+# Version 3.0.0beta2, 18 Nov 2006
+#------------------------------------------------------------------------
+
 * Fix for final md4 digest check on rsync transfers >= 512MB when protocol
   version >= 27 and checksums are not cached.  Reported by Garith Dugmore
   and Dale Renton.

@@ -105,7 +105,7 @@ sub fileDigestIsCached
     binmode($fh);
     return -2 if ( sysread($fh, $data, 1) != 1 );
     close($fh);
-    return $data eq chr(0xd6) ? 1 : 0;
+    return $data eq chr(0xd7) ? 1 : 0;
 }
 
 #
@@ -121,7 +121,8 @@ sub fileDigestIsCached
 #
 sub digestAdd
 {
-    my($class, $file, $blockSize, $checksumSeed, $verify) = @_;
+    my($class, $file, $blockSize, $checksumSeed, $verify,
+                $protocol_version) = @_;
     my $retValue = 0;
 
     #
@@ -140,6 +141,8 @@ sub digestAdd
     return -101 if ( !$RsyncLibOK );
 
     my $digest = File::RsyncP::Digest->new;
+    $digest->protocol($protocol_version)
+                        if ( defined($protocol_version) );
     $digest->add(pack("V", $checksumSeed)) if ( $checksumSeed );
 
     return -102 if ( !defined(my $fh = BackupPC::FileZIO->open($file, 0, 1)) );
@@ -171,7 +174,7 @@ sub digestAdd
     sysopen(my $fh2, $file, O_RDWR) || return -103;
     binmode($fh2);
     return -104 if ( sysread($fh2, $data, 1) != 1 );
-    if ( $data ne chr(0x78) && $data ne chr(0xd6) ) {
+    if ( $data ne chr(0x78) && $data ne chr(0xd6) && $data ne chr(0xd7) ) {
         &$Log(sprintf("digestAdd: $file has unexpected first char 0x%x",
                              ord($data)));
         return -105;
@@ -183,7 +186,7 @@ sub digestAdd
         #
         # Verify the cached checksums
         #
-        return -107 if ( $data ne chr(0xd6) );
+        return -107 if ( $data ne chr(0xd7) );
         return -108 if ( sysread($fh2, $data3, length($data2) + 1) < 0 );
         if ( $data2 eq $data3 ) {
             return 1;
@@ -220,7 +223,7 @@ sub digestAdd
         }
     }
     return -113 if ( !defined(sysseek($fh2, 0, 0)) );
-    return -114 if ( syswrite($fh2, chr(0xd6)) != 1 );
+    return -114 if ( syswrite($fh2, chr(0xd7)) != 1 );
     close($fh2);
     return $retValue;
 }
@@ -254,9 +257,11 @@ sub digestStart
         name     => $fileName,
         needMD4  => $needMD4,
         digest   => File::RsyncP::Digest->new,
+        protocol_version => $protocol_version,
     }, $class;
 
-    $dg->{digest}->protocol($protocol_version);
+    $dg->{digest}->protocol($dg->{protocol_version})
+                        if ( defined($dg->{protocol_version}) );
 
     if ( $fileSize > 0 && $compress && $doCache >= 0 ) {
         open(my $fh, "<", $fileName) || return -2;
@@ -282,7 +287,7 @@ sub digestStart
                             $blockSize
                                 || BackupPC::Xfer::RsyncDigest->blockSize(
                                                     $fileSize, $defBlkSize),
-                                $checksumSeed);
+                                $checksumSeed, $dg->{protocol_version});
             if ( $ret < 0 ) {
                 &$Log("digestAdd($fileName) failed ($ret)");
             }
@@ -293,7 +298,7 @@ sub digestStart
             binmode($fh);
             return -5 if ( read($fh, $data, 1) != 1 );
         }
-        if ( $ret >= 0 && $data eq chr(0xd6) ) {
+        if ( $ret >= 0 && $data eq chr(0xd7) ) {
             #
             # Looks like this file has cached checksums
             # Read the last 48 bytes: that's 2 file MD4s (32 bytes)
@@ -343,6 +348,8 @@ sub digestStart
         return -9 if ( !defined($dg->{fh}) );
         if ( $needMD4) {
             $dg->{csumDigest} = File::RsyncP::Digest->new;
+            $dg->{csumDigest}->protocol($dg->{protocol_version})
+                                if ( defined($dg->{protocol_version}) );
             $dg->{csumDigest}->add(pack("V", $dg->{checksumSeed}));
         }
     }
@@ -387,7 +394,13 @@ sub digestEnd
 
     if ( $dg->{cached} ) {
         close($dg->{fh});
-        return $dg->{md4DigestOld} if ( $dg->{needMD4} );
+        if ( $dg->{needMD4} ) {
+            if ( $dg->{protocol_version} <= 26 ) {
+                return $dg->{md4DigestOld};
+            } else {
+                return $dg->{md4Digest};
+            }
+        }
     } else {
         #
         # make sure we read the entire file for the file MD4 digest

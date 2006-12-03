@@ -170,7 +170,8 @@ sub csumStart
         if ( $isCached || $isInvalid ) {
             my $ret = BackupPC::Xfer::RsyncDigest->digestAdd(
                             $attr->{fullPath}, $blkSize,
-                            $fio->{checksumSeed}, 1        # verify
+                            $fio->{checksumSeed}, 1,        # verify
+                            $fio->{protocol_version}
                         );
             if ( $ret != 1 ) {
                 $fio->log("Bad cached digest for $attr->{fullPath} ($ret);"
@@ -186,18 +187,17 @@ sub csumStart
     (my $err, $fio->{csum}, my $blkSize)
          = BackupPC::Xfer::RsyncDigest->digestStart($attr->{fullPath},
 			 $attr->{size}, 0, $defBlkSize, $fio->{checksumSeed},
-			 $needMD4, $attr->{compress}, 1,
-                         $fio->{protocol_version});
-    if ( $fio->{logLevel} >= 5 ) {
-        my($isCached, $invalid) = $fio->{csum}->isCached;
-        $fio->log("$attr->{fullPath} cache = $isCached,"
-                . " invalid = $invalid, phase = $phase");
-    }
+			 $needMD4, $attr->{compress}, 1, $fio->{protocol_version});
     if ( $err ) {
         $fio->log("Can't get rsync digests from $attr->{fullPath}"
                 . " (err=$err, name=$f->{name})");
 	$fio->{stats}{errorCnt}++;
         return -1;
+    }
+    if ( $fio->{logLevel} >= 5 ) {
+        my($isCached, $invalid) = $fio->{csum}->isCached;
+        $fio->log("$attr->{fullPath} cache = $isCached,"
+                . " invalid = $invalid, phase = $phase");
     }
     return $blkSize;
 }
@@ -323,12 +323,14 @@ sub viewCacheDir
 
 sub attribGetWhere
 {
-    my($fio, $f, $noCache) = @_;
-    my($dir, $fname, $share, $shareM, $partial, $attr);
+    my($fio, $f, $noCache, $fname) = @_;
+    my($dir, $share, $shareM, $partial, $attr);
 
-    $fname = $f->{name};
-    $fname = "$fio->{xfer}{pathHdrSrc}/$fname"
+    if ( !defined($fname) ) {
+        $fname = $f->{name};
+        $fname = "$fio->{xfer}{pathHdrSrc}/$fname"
 		       if ( defined($fio->{xfer}{pathHdrSrc}) );
+    }
     $fname =~ s{//+}{/}g;
     if ( $fname =~ m{(.*)/(.*)}s ) {
 	$shareM = $fio->{shareM};
@@ -388,15 +390,10 @@ sub attribGet
             return $attr;
         }
         $target = "/$target" if ( $target !~ /^\// );
-        $fio->log("$attr->{fullPath}: redirecting to $target (will trim "
-                . "$fio->{xfer}{pathHdrSrc})") if ( $fio->{logLevel} >= 4 );
-        $target =~ s/^\Q$fio->{xfer}{pathHdrSrc}//;
+        $fio->log("$attr->{fullPath}: redirecting to $target")
+                                    if ( $fio->{logLevel} >= 4 );
         $target =~ s{^/+}{};
-        #
-        # Note: overwrites name to point to real file
-        #
-        $f->{name} = $target;
-        ($attr) = $fio->attribGetWhere($f, 1);
+        ($attr) = $fio->attribGetWhere($f, 1, $target);
         $fio->log(" ... now got $attr->{fullPath}")
                             if ( $fio->{logLevel} >= 4 );
     }

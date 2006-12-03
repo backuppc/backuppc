@@ -201,7 +201,7 @@ $Conf{MaxOldLogFiles} = 14;
 # Full path to the df command.  Security caution: normal users
 # should not allowed to write to this file or directory.
 #
-$Conf{DfPath} = '/bin/df';
+$Conf{DfPath} = '';
 
 #
 # Command to run df.  The following variables are substituted at run-time:
@@ -214,12 +214,11 @@ $Conf{DfCmd} = '$dfPath $topDir';
 #
 # Full path to various commands for archiving
 #
-
-$Conf{SplitPath} = '/usr/bin/split';
-$Conf{ParPath}   = '/usr/bin/par2';
-$Conf{CatPath}   = '/bin/cat';
-$Conf{GzipPath}  = '/bin/gzip';
-$Conf{Bzip2Path} = '/usr/bin/bzip2';
+$Conf{SplitPath} = '';
+$Conf{ParPath}   = '';
+$Conf{CatPath}   = '';
+$Conf{GzipPath}  = '';
+$Conf{Bzip2Path} = '';
 
 #
 # Maximum threshold for disk utilization on the __TOPDIR__ filesystem.
@@ -912,7 +911,7 @@ $Conf{SmbSharePasswd} = '';
 #
 # This setting only matters if $Conf{XferMethod} = 'smb'.
 #
-$Conf{SmbClientPath} = '/usr/bin/smbclient';
+$Conf{SmbClientPath} = '';
 
 #
 # Command to run smbclient for a full dump.
@@ -1091,12 +1090,12 @@ $Conf{TarClientRestoreCmd} = '$sshPath -q -x -l root $host'
 #
 # This setting only matters if $Conf{XferMethod} = 'tar'.
 #
-$Conf{TarClientPath} = '/bin/tar';
+$Conf{TarClientPath} = '';
 
 #
 # Path to rsync executable on the client
 #
-$Conf{RsyncClientPath} = '/bin/rsync';
+$Conf{RsyncClientPath} = '';
 
 #
 # Full command to run rsync on the client machine.  The following variables
@@ -1297,7 +1296,7 @@ $Conf{BackupPCdShareName} = '/';
 #
 # Path to backuppcd executable on the server
 #
-$Conf{BackupPCdPath} = '/usr/bin/backuppcd';
+$Conf{BackupPCdPath} = '';
 
 #
 # Full command to run backuppcd on the server to backup a given
@@ -1413,7 +1412,7 @@ $Conf{ArchiveClientCmd} = '$Installdir/bin/BackupPC_archiveHost'
 # Full path for ssh. Security caution: normal users should not
 # allowed to write to this file or directory.
 #
-$Conf{SshPath} = '/usr/bin/ssh';
+$Conf{SshPath} = '';
 
 #
 # Full path for nmblookup. Security caution: normal users should not
@@ -1422,7 +1421,7 @@ $Conf{SshPath} = '/usr/bin/ssh';
 # nmblookup is from the Samba distribution. nmblookup is used to get the
 # netbios name, necessary for DHCP hosts.
 #
-$Conf{NmbLookupPath} = '/usr/bin/nmblookup';
+$Conf{NmbLookupPath} = '';
 
 #
 # NmbLookup command.  Given an IP address, does an nmblookup on that
@@ -1482,7 +1481,7 @@ $Conf{FixedIPNetBiosNameCheck} = 0;
 #
 #     $Conf{PingPath} = '/bin/echo';
 #
-$Conf{PingPath} = '/bin/ping';
+$Conf{PingPath} = '';
 
 #
 # Ping command.  The following variables are substituted at run-time:
@@ -1699,7 +1698,7 @@ $Conf{ClientNameAlias} = undef;
 # Full path to the sendmail command.  Security caution: normal users
 # should not allowed to write to this file or directory.
 #
-$Conf{SendmailPath} = '/usr/sbin/sendmail';
+$Conf{SendmailPath} = '';
 
 #
 # Minimum period between consecutive emails to a single user.

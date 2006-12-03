@@ -333,6 +333,8 @@ check the name and verify that this user is in the passwd file.
 
 EOF
         exit(1) if ( $opts{batch} );
+    } else {
+        last;
     }
 }
 
@@ -539,7 +541,7 @@ foreach my $dir ( qw(bin doc
 # Create CGI image directory
 #
 foreach my $dir ( ($Conf{CgiImageDir}) ) {
-    next if ( $dir eq "" || -d $dir );
+    next if ( $dir eq "" || -d "$DestDir$dir" );
     mkpath("$DestDir$dir", 0, 0755);
     if ( !-d "$DestDir$dir" || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
         die("Failed to create or chown $DestDir$dir");
@@ -846,6 +848,8 @@ will need to do:
 
   - Verify that the CGI script BackupPC_Admin runs correctly.  You might
     need to change the permissions or group ownership of BackupPC_Admin.
+    If this is an upgrade and you are using mod_perl, you will need
+    to restart Apache.  Otherwise it will have stale code.
 
   - BackupPC should be ready to start.  Don't forget to run it
     as user $Conf{BackupPCUser}!  The installation also contains an

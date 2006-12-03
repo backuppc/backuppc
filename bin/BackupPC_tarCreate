@@ -502,7 +502,7 @@ sub TarWriteFile
 		$arg = "/" if ( $arg eq "." );
 		$arg =~ s{^\./+}{/};
 		$arg =~ s{/+$}{};
-		$done = 1 if ( $name eq $arg || $name =~ /^\Q$arg\// );
+		$done = 1 if ( $name eq $arg || $name =~ /^\Q$arg\// || $arg eq "" );
 	    }
 	}
 	if ( $done ) {

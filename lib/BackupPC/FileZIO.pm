@@ -173,13 +173,13 @@ sub read
             my $chr = substr($self->{dataIn}, 0, 1);
 
             $self->{inflateStart} = 0;
-            if ( $chr eq chr(0xd6) ) {
+            if ( $chr eq chr(0xd6) || $chr eq chr(0xd7) ) {
                 #
-                # Flag 0xd6 means this is a compressed file with
+                # Flag 0xd6 or 0xd7 means this is a compressed file with
                 # appended md4 block checksums for rsync.  Change
                 # the first byte back to 0x78 and proceed.
                 #
-                ##print("Got 0xd6 block: normal\n");
+                ##print("Got 0xd6/0xd7 block: normal\n");
                 substr($self->{dataIn}, 0, 1) = chr(0x78);
             } elsif ( $chr eq chr(0xb3) ) {
                 #

@@ -175,8 +175,7 @@ sub archiveFile
     my @s = stat($_);
 
     #
-    # We just handle directories and files; no symlinks or
-    # char/block special files.
+    # Default type - we'll update later if it is a symlink, hardlink etc
     #
     $hdr->{type}     = -d _ ? BPC_FTYPE_DIR
                      : -f _ ? BPC_FTYPE_FILE
@@ -230,8 +229,7 @@ sub archiveFile
                 }
             }
             $hdr->{compress} = $ClientBkupCompress;
-            if ( $hdr->{type} == BPC_FTYPE_FILE && $hdr->{nlink} > 1
-                    && $hdr->{name} =~ /^f/ ) {
+            if ( $hdr->{type} == BPC_FTYPE_FILE && $hdr->{name} =~ /^f/ ) {
                 (my $dir = $hdr->{fullPath}) =~ s{(.*)/.*}{$1};
                 if ( $ClientDir ne $dir ) {
                     $ClientDir = $dir;
@@ -247,8 +245,12 @@ sub archiveFile
                 my $name = $hdr->{name};
                 $name = $bpc->fileNameUnmangle($name) if ( $ClientBkupMangle );
                 my $attr = $ClientDirAttr->get($name);
-                $hdr->{realSize} = $attr->{size} if ( defined($attr) );
-                #print STDERR "$hdr->{fullPath} has real size $hdr->{realSize}\n";
+                if ( defined($attr) ) {
+                    $hdr->{type}     = $attr->{type};
+                    $hdr->{realSize} = $attr->{size}
+                                if ( $attr->{type} == BPC_FTYPE_FILE );
+                }
+                #print STDERR "$hdr->{fullPath} has type $hdr->{type} and real size $hdr->{realSize}\n";
             }
         }
     } else {
@@ -425,91 +427,97 @@ sub TarWriteFile
         $hdr->{name} .= "/" if ( $hdr->{name} !~ m{/$} );
         TarWriteFileInfo($fh, $hdr);
 	$DirCnt++;
-    } elsif ( $hdr->{type} == BPC_FTYPE_FILE ) {
+    } elsif ( $hdr->{type} == BPC_FTYPE_FILE
+            || $hdr->{type} == BPC_FTYPE_HARDLINK
+            || $hdr->{type} == BPC_FTYPE_SYMLINK
+            || $hdr->{type} == BPC_FTYPE_CHARDEV
+            || $hdr->{type} == BPC_FTYPE_BLOCKDEV
+            || $hdr->{type} == BPC_FTYPE_FIFO
+            || $hdr->{type} == BPC_FTYPE_SOCKET ) {
         #
-        # Regular file: write the header and file
+        # Underlying file is a regular file: write the header and file
         #
         my($data, $dataMD5, $size, $linkName);
 
-        if ( $hdr->{type} == BPC_FTYPE_FILE && $hdr->{nlink} > 1 ) {
-            if ( defined($Inode2Path{$hdr->{inode}}) ) {
-                $linkName = $Inode2Path{$hdr->{inode}};
-                #print STDERR "Got cache hit for $linkName\n";
-            } else {
-                my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0,
-                                                $hdr->{compress});
-                if ( !defined($f) ) {
-                    print(STDERR "Unable to open file $hdr->{fullPath}\n");
-                    $ErrorCnt++;
-                    return;
-                }
-                #
-                # Try to find the hardlink it points to by computing
-                # the pool file digest.
-                #
-                $f->read(\$dataMD5, $BufSize);
-                if ( !defined($hdr->{realSize}) ) {
-                    #
-                    # Need to get the real size
-                    #
-                    $size = length($dataMD5);
-                    while ( $f->read(\$data, $BufSize) > 0 ) {
-                        $size += length($data);
-                    }
-                    $hdr->{realSize} = $size;
-                }
-                $f->close();
-                my $md5 = Digest::MD5->new;
-                my $len = length($dataMD5);
-                $hdr->{realSize} = $len if ( $hdr->{type} != BPC_FTYPE_FILE );
-                if ( $hdr->{realSize} < 1048576
-                            && length($dataMD5) != $hdr->{realSize} ) {
-                    print(STDERR "File $hdr->{fullPath} has bad size"
-                                . " (expect $hdr->{realSize}, got $len)\n");
-                } else {
-                    my $digest = $bpc->Buffer2MD5($md5, $hdr->{realSize},
-                                                  \$dataMD5);
-                    my $path = $bpc->MD52Path($digest, $hdr->{compress});
-                    my $i = -1;
-
-                    # print(STDERR "Looking up $hdr->{fullPath} at $path\n");
-                    while ( 1 ) {
-                        my $testPath = $path;
-                        $testPath .= "_$i" if ( $i >= 0 );
-                        last if ( !-f $testPath );
-                        my $inode = (stat(_))[1];
-                        if ( $inode == $hdr->{inode} ) {
-                            #
-                            # Found it!  Just emit a tar hardlink
-                            #
-                            $testPath =~ s{\Q$TopDir\E}{..};
-                            $linkName = $testPath;
-                            last;
-                        }
-                        $i++;
-                    }
-                }
-            }
-            if ( defined($linkName) ) {
-                $hdr->{type}     = BPC_FTYPE_HARDLINK;
-                $hdr->{linkname} = $linkName;
-                TarWriteFileInfo($fh, $hdr);
-                $HLinkCnt++;
-                #print STDERR "$hdr->{relPath} matches $testPath\n";
-                if ( !$opts{c} && $hdr->{nlink} > 2 ) {
-                    #
-                    # add it to the cache if there are more
-                    # than 2 links (pool + current file),
-                    # since there are more to go
-                    #
-                    $Inode2Path{$hdr->{inode}} = $linkName;
-                }
+        if ( defined($Inode2Path{$hdr->{inode}}) ) {
+            $linkName = $Inode2Path{$hdr->{inode}};
+            #print STDERR "Got cache hit for $linkName\n";
+        } else {
+            my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0,
+                                            $hdr->{compress});
+            if ( !defined($f) ) {
+                print(STDERR "Unable to open file $hdr->{fullPath}\n");
+                $ErrorCnt++;
                 return;
             }
-            $size = 0;
+            #
+            # Try to find the hardlink it points to by computing
+            # the pool file digest.
+            #
+            $f->read(\$dataMD5, $BufSize);
+            if ( !defined($hdr->{realSize}) ) {
+                #
+                # Need to get the real size
+                #
+                $size = length($dataMD5);
+                while ( $f->read(\$data, $BufSize) > 0 ) {
+                    $size += length($data);
+                }
+                $hdr->{realSize} = $size;
+            }
+            $f->close();
+            my $md5 = Digest::MD5->new;
+            my $len = length($dataMD5);
+            if ( $hdr->{realSize} < 1048576
+                        && length($dataMD5) != $hdr->{realSize} ) {
+                print(STDERR "File $hdr->{fullPath} has bad size"
+                            . " (expect $hdr->{realSize}, got $len)\n");
+            } else {
+                my $digest = $bpc->Buffer2MD5($md5, $hdr->{realSize},
+                                              \$dataMD5);
+                my $path = $bpc->MD52Path($digest, $hdr->{compress});
+                my $i = -1;
+
+                # print(STDERR "Looking up $hdr->{fullPath} at $path\n");
+                while ( 1 ) {
+                    my $testPath = $path;
+                    $testPath .= "_$i" if ( $i >= 0 );
+                    last if ( !-f $testPath );
+                    my $inode = (stat(_))[1];
+                    if ( $inode == $hdr->{inode} ) {
+                        #
+                        # Found it!  Just emit a tar hardlink
+                        #
+                        $testPath =~ s{\Q$TopDir\E}{..};
+                        $linkName = $testPath;
+                        last;
+                    }
+                    $i++;
+                }
+            }
+        }
+        if ( defined($linkName) ) {
+            $hdr->{type}     = BPC_FTYPE_HARDLINK;
+            $hdr->{linkname} = $linkName;
+            TarWriteFileInfo($fh, $hdr);
+            $HLinkCnt++;
+            #print STDERR "$hdr->{relPath} matches $testPath\n";
+            if ( !$opts{c} && $hdr->{nlink} > 2 ) {
+                #
+                # add it to the cache if there are more
+                # than 2 links (pool + current file),
+                # since there are more to go
+                #
+                $Inode2Path{$hdr->{inode}} = $linkName;
+            }
+            return;
+        }
+        $size = 0;
+        if ( $hdr->{nlink} > 1 ) {
             print STDERR "Can't find $hdr->{relPath} in pool, will copy file\n";
             $ErrorCnt++;
         }
+        $hdr->{type} = BPC_FTYPE_FILE;
 
         my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0, 0);
         if ( !defined($f) ) {

@@ -373,8 +373,8 @@ sub action
             #
             #print STDERR Dumper(\%In);
             foreach my $v ( keys(%In) ) {
-                next if ( $v !~ /^v_z_(\Q$var\E(_z_.*|$))/ );
-                delete($In{$v}) if ( !defined($In{"orig_z_$1"}) );
+                next if ( $v !~ /^v_zZ_(\Q$var\E(_zZ_.*|$))/ );
+                delete($In{$v}) if ( !defined($In{"orig_zZ_$1"}) );
             }
             delete($In{"vflds.$var"});
         }
@@ -572,8 +572,8 @@ EOF
 	    return false;
 	}
 	var allVars = {};
-	var varRE  = new RegExp("^v_z_(" + varName + ".*)");
-	var origRE = new RegExp("^orig_z_(" + varName + ".*)");
+	var varRE  = new RegExp("^v_zZ_(" + varName + ".*)");
+	var origRE = new RegExp("^orig_zZ_(" + varName + ".*)");
         for ( var i = 0 ; i < document.editForm.elements.length ; i++ ) {
 	    var e = document.editForm.elements[i];
 	    var re;
@@ -582,7 +582,7 @@ EOF
 		    allVars[re[1]] = 0;
 		}
 		allVars[re[1]]++;
-		//debugMsg("found v_z_ match with " + re[1]);
+		//debugMsg("found v_zZ_ match with " + re[1]);
 		//debugMsg("allVars[" + re[1] + "] = " + allVars[re[1]]);
 	    } else if ( (re = origRE.exec(e.name)) != null ) {
 		if ( allVars[re[1]] == null ) {
@@ -600,7 +600,7 @@ EOF
 	    } else {
                 // copy the original variable values
 		//debugMsg("setting " + v);
-		eval("document.editForm.v_z_" + v + ".value = document.editForm.orig_z_" + v + ".value");
+		eval("document.editForm.v_zZ_" + v + ".value = document.editForm.orig_zZ_" + v + ".value");
             }
 	}
 	if ( sameShape ) {
@@ -661,7 +661,7 @@ EOF
     if ( $In{deleteVar} ne "" && %$errors > 0 ) {
         my $matchAll = 1;
         foreach my $v ( keys(%$errors) ) {
-            if ( $v ne $In{deleteVar} && $v !~ /^\Q$In{deleteVar}_z_/ ) {
+            if ( $v ne $In{deleteVar} && $v !~ /^\Q$In{deleteVar}_zZ_/ ) {
                 $matchAll = 0;
                 last;
             }
@@ -848,7 +848,7 @@ EOF
     if ( defined($In{menu}) || $In{saveAction} eq "Save" ) {
         if ( $In{saveAction} eq "Save" && !$userHost ) {
             #
-            # Emit the new settings as orig_z_ parameters
+            # Emit the new settings as orig_zZ_ parameters
             #
             $doneParam = {};
             foreach my $param ( keys(%ConfigMeta) ) {
@@ -867,10 +867,10 @@ EOF
             }
         } else {
             #
-            # Just switching menus: copy all the orig_z_ input parameters
+            # Just switching menus: copy all the orig_zZ_ input parameters
             #
             foreach my $var ( keys(%In) ) {
-                next if ( $var !~ /^orig_z_/ );
+                next if ( $var !~ /^orig_zZ_/ );
                 my $val = decode_utf8($In{$var});
                 $contentHidden .= <<EOF;
 <input type="hidden" name="$var" value="${EscHTML($val)}">
@@ -920,7 +920,7 @@ sub fieldHiddenBuild
         $varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
 
         for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
-            $content .= fieldHiddenBuild($type->{child}, "${varName}_z_$i",
+            $content .= fieldHiddenBuild($type->{child}, "${varName}_zZ_$i",
                                          $varValue->[$i], $prefix);
         }
     } elsif ( $type->{type} eq "hash" || $type->{type} eq "horizHash" ) {
@@ -948,18 +948,18 @@ sub fieldHiddenBuild
 <input type="hidden" name="vflds.$varName" value="${EscHTML($fld)}">
 EOF
             }
-            $content .= fieldHiddenBuild($childType, "${varName}_z_$fld",
+            $content .= fieldHiddenBuild($childType, "${varName}_zZ_$fld",
                                          $varValue->{$fld}, $prefix);
         }
     } elsif ( $type->{type} eq "shortlist" ) {
 	$varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
 	$varValue = join(", ", @$varValue);
         $content .= <<EOF;
-<input type="hidden" name="${prefix}_z_$varName" value="${EscHTML($varValue)}">
+<input type="hidden" name="${prefix}_zZ_$varName" value="${EscHTML($varValue)}">
 EOF
     } else {
         $content .= <<EOF;
-<input type="hidden" name="${prefix}_z_$varName" value="${EscHTML($varValue)}">
+<input type="hidden" name="${prefix}_zZ_$varName" value="${EscHTML($varValue)}">
 EOF
     }
     return $content;
@@ -990,9 +990,9 @@ sub fieldEditBuild
 EOF
 	if ( defined($overrideVar) ) {
 	    my $override_checked = "";
-	    if ( !$isError && $In{deleteVar}      =~ /^\Q${varName}_z_/
-		   || !$isError && $In{insertVar} =~ /^\Q${varName}\E(_z_|$)/
-		   || !$isError && $In{addVar}    =~ /^\Q${varName}\E(_z_|$)/ ) {
+	    if ( !$isError && $In{deleteVar}      =~ /^\Q${varName}_zZ_/
+		   || !$isError && $In{insertVar} =~ /^\Q${varName}\E(_zZ_|$)/
+		   || !$isError && $In{addVar}    =~ /^\Q${varName}\E(_zZ_|$)/ ) {
 		$overrideSet = 1;
 	    }
 	    if ( $overrideSet ) {
@@ -1009,7 +1009,7 @@ EOF
         $content .= "<td class=\"border\">\n";
         $varValue = [] if ( !defined($varValue) );
         $varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
-        if ( !$isError && $In{deleteVar} =~ /^\Q${varName}_z_\E(\d+)$/
+        if ( !$isError && $In{deleteVar} =~ /^\Q${varName}_zZ_\E(\d+)$/
                 && $1 < @$varValue ) {
             #
             # User deleted entry in this array
@@ -1017,7 +1017,7 @@ EOF
             splice(@$varValue, $1, 1) if ( @$varValue > 1 || $type->{emptyOk} );
             $In{deleteVar} = "";
         }
-        if ( !$isError && $In{insertVar} =~ /^\Q${varName}_z_\E(\d+)$/
+        if ( !$isError && $In{insertVar} =~ /^\Q${varName}_zZ_\E(\d+)$/
                 && $1 < @$varValue ) {
             #
             # User inserted entry in this array
@@ -1054,12 +1054,12 @@ EOF
                 if ( @$varValue > 1 || $type->{emptyOk} ) {
                     $content .= <<EOF;
 <td class="border">
-<input type="button" name="del_${varName}_z_$i" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
-    onClick="deleteSubmit('${varName}_z_$i')">
+<input type="button" name="del_${varName}_zZ_$i" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
+    onClick="deleteSubmit('${varName}_zZ_$i')">
 </td>
 EOF
                 }
-                $content .= fieldEditBuild($type->{child}, "${varName}_z_$i",
+                $content .= fieldEditBuild($type->{child}, "${varName}_zZ_$i",
                                   $varValue->[$i], $errors, $level + 1, undef,
                                   $isError, $onchangeSubmit,
                                   $overrideVar, $overrideSet);
@@ -1069,17 +1069,17 @@ EOF
             for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
                 $content .= <<EOF;
 <tr><td class="border">
-<input type="button" name="ins_${varName}_z_$i" value="${EscHTML($Lang->{CfgEdit_Button_Insert})}"
-    onClick="insertSubmit('${varName}_z_$i')">
+<input type="button" name="ins_${varName}_zZ_$i" value="${EscHTML($Lang->{CfgEdit_Button_Insert})}"
+    onClick="insertSubmit('${varName}_zZ_$i')">
 EOF
                 if ( @$varValue > 1 || $type->{emptyOk} ) {
                     $content .= <<EOF;
-<input type="button" name="del_${varName}_z_$i" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
-    onClick="deleteSubmit('${varName}_z_$i')">
+<input type="button" name="del_${varName}_zZ_$i" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
+    onClick="deleteSubmit('${varName}_zZ_$i')">
 EOF
                 }
                 $content .= "</td>\n";
-                $content .= fieldEditBuild($type->{child}, "${varName}_z_$i",
+                $content .= fieldEditBuild($type->{child}, "${varName}_zZ_$i",
                                     $varValue->[$i], $errors, $level + 1, undef,
                                     $isError, $onchangeSubmit,
                                     $overrideVar, $overrideSet);
@@ -1099,8 +1099,8 @@ EOF
         $varValue = {} if ( ref($varValue) ne "HASH" );
 
         if ( !$isError && !$type->{noKeyEdit}
-                        && $In{deleteVar} !~ /^\Q${varName}_z_\E.*_z_/
-                        && $In{deleteVar} =~ /^\Q${varName}_z_\E(.*)$/ ) {
+                        && $In{deleteVar} !~ /^\Q${varName}_zZ_\E.*_zZ_/
+                        && $In{deleteVar} =~ /^\Q${varName}_zZ_\E(.*)$/ ) {
             #
             # User deleted entry in this hash
             #
@@ -1134,8 +1134,8 @@ EOF
             if ( !$type->{noKeyEdit}
 		    && (keys(%$varValue) > 1 || $type->{emptyOk}) ) {
                 $content .= <<EOF;
-<input type="submit" name="del_${varName}_z_$fld" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
-        onClick="deleteSubmit('${varName}_z_$fld')">
+<input type="submit" name="del_${varName}_zZ_$fld" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
+        onClick="deleteSubmit('${varName}_zZ_$fld')">
 EOF
             }
             if ( defined($type->{child}) ) {
@@ -1151,7 +1151,7 @@ EOF
 EOF
             }
             $content .= "</td>\n";
-            $content .= fieldEditBuild($childType, "${varName}_z_$fld",
+            $content .= fieldEditBuild($childType, "${varName}_zZ_$fld",
                             $varValue->{$fld}, $errors, $level + 1, undef,
 			    $isError, $onchangeSubmit,
 			    $overrideVar, $overrideSet);
@@ -1193,7 +1193,7 @@ EOF
 <input type="hidden" name="vflds.$varName" value="${EscHTML($fld)}">
 EOF
             }
-            $content .= fieldEditBuild($childType, "${varName}_z_$fld",
+            $content .= fieldEditBuild($childType, "${varName}_zZ_$fld",
                             $varValue->{$fld}, $errors, $level + 1, undef,
 			    $isError, $onchangeSubmit,
 			    $overrideVar, $overrideSet);
@@ -1206,7 +1206,7 @@ EOF
             # in %In, rather than the parsed values in $varValue.
             # This is so that the user's erroneous input is preserved.
             #
-            $varValue = $In{"v_z_$varName"} if ( defined($In{"v_z_$varName"}) );
+            $varValue = $In{"v_zZ_$varName"} if ( defined($In{"v_zZ_$varName"}) );
         }
         if ( defined($errors->{$varName}) ) {
             $content .= <<EOF;
@@ -1217,7 +1217,7 @@ EOF
 	if ( defined($overrideVar) ) {
             $onChange .= "checkboxSet('$overrideVar');";
 	} else {
-            $onChange .= "varChange('$overrideVar');";
+            $onChange .= "varChange('$varName');";
 	}
         if ( $onchangeSubmit ) {
             $onChange .= "document.editForm.submit();";
@@ -1238,17 +1238,17 @@ EOF
 	    }
             my $textType = ($varName =~ /Passwd/) ? "password" : "text";
             $content .= <<EOF;
-<input type="$textType" class="editTextInput" name="v_z_$varName" size="$size" maxlength="256" value="${EscHTML($varValue)}"$onChange>
+<input type="$textType" class="editTextInput" name="v_zZ_$varName" size="$size" maxlength="256" value="${EscHTML($varValue)}"$onChange>
 EOF
         } elsif ( $type->{type} eq "boolean" ) {
             # checkbox
             my $checked = "checked" if ( $varValue );
             $content .= <<EOF;
-<input type="checkbox" name="v_z_$varName" $checked value="1"$onChange>
+<input type="checkbox" name="v_zZ_$varName" $checked value="1"$onChange>
 EOF
         } elsif ( $type->{type} eq "select" ) {
             $content .= <<EOF;
-<select name="v_z_$varName"$onChange>
+<select name="v_zZ_$varName"$onChange>
 EOF
             foreach my $option ( @{$type->{values}} ) {
                 my $sel = " selected" if ( $varValue eq $option );
@@ -1260,7 +1260,7 @@ EOF
 	    my $rowCnt = $varValue =~ tr/\n//;
 	    $rowCnt = 1 if ( $rowCnt < 1 );
             $content .= <<EOF;
-<textarea name="v_z_$varName" class="editTextArea" cols="$size" rows="$rowCnt"$onChange>${EscHTML($varValue)}</textarea>
+<textarea name="v_zZ_$varName" class="editTextArea" cols="$size" rows="$rowCnt"$onChange>${EscHTML($varValue)}</textarea>
 EOF
         }
         $content .= "</td>\n";
@@ -1286,7 +1286,7 @@ sub fieldErrorCheck
 
     if ( $type->{type} eq "list" ) {
         for ( my $i = 0 ; ; $i++ ) {
-            last if ( fieldErrorCheck($type->{child}, "${varName}_z_$i", $errors) );
+            last if ( fieldErrorCheck($type->{child}, "${varName}_zZ_$i", $errors) );
         }
     } elsif ( $type->{type} eq "hash" || $type->{type} eq "horizHash" ) {
         my(@order, $childType);
@@ -1305,31 +1305,31 @@ sub fieldErrorCheck
             } else {
                 $childType = $type->{childType};
             }
-            $ret ||= fieldErrorCheck($childType, "${varName}_z_$fld", $errors);
+            $ret ||= fieldErrorCheck($childType, "${varName}_zZ_$fld", $errors);
         }
         return $ret;
     } else {
-        $In{"v_z_$varName"} = "0" if ( $type->{type} eq "boolean"
-                                        && $In{"v_z_$varName"} eq "" );
+        $In{"v_zZ_$varName"} = "0" if ( $type->{type} eq "boolean"
+                                        && $In{"v_zZ_$varName"} eq "" );
 
-        return 1 if ( !exists($In{"v_z_$varName"}) );
+        return 1 if ( !exists($In{"v_zZ_$varName"}) );
 
-        (my $var = $varName) =~ s/_z_/./g;
+        (my $var = $varName) =~ s/_zZ_/./g;
 
         if ( $type->{type} eq "integer"
                 || $type->{type} eq "boolean" ) {
-            if ( $In{"v_z_$varName"} !~ /^-?\d+\s*$/s
-			    && $In{"v_z_$varName"} ne "" ) {
+            if ( $In{"v_zZ_$varName"} !~ /^-?\d+\s*$/s
+			    && $In{"v_zZ_$varName"} ne "" ) {
                 $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_an_integer}}");
             }
         } elsif ( $type->{type} eq "float" ) {
-            if ( $In{"v_z_$varName"} !~ /^-?\d*(\.\d*)?\s*$/s
-			    && $In{"v_z_$varName"} ne "" ) {
+            if ( $In{"v_zZ_$varName"} !~ /^-?\d*(\.\d*)?\s*$/s
+			    && $In{"v_zZ_$varName"} ne "" ) {
                 $errors->{$varName}
                         = eval("qq{$Lang->{CfgEdit_Error__must_be_real_valued_number}}");
             }
         } elsif ( $type->{type} eq "shortlist" ) {
-	    my @vals = split(/[,\s]+/, $In{"v_z_$varName"});
+	    my @vals = split(/[,\s]+/, $In{"v_zZ_$varName"});
 	    for ( my $i = 0 ; $i < @vals ; $i++ ) {
 		if ( $type->{child} eq "integer"
 			&& $vals[$i] !~ /^-?\d+\s*$/s
@@ -1346,7 +1346,7 @@ sub fieldErrorCheck
         } elsif ( $type->{type} eq "select" ) {
             my $match = 0;
             foreach my $option ( @{$type->{values}} ) {
-                if ( $In{"v_z_$varName"} eq $option ) {
+                if ( $In{"v_zZ_$varName"} eq $option ) {
                     $match = 1;
                     last;
                 }
@@ -1354,7 +1354,7 @@ sub fieldErrorCheck
             $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_valid_option}}")
                             if ( !$match );
         } elsif ( $type->{type} eq "execPath" ) {
-            if ( $In{"v_z_$varName"} ne "" && !-x $In{"v_z_$varName"} ) {
+            if ( $In{"v_zZ_$varName"} ne "" && !-x $In{"v_zZ_$varName"} ) {
                 $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_executable_program}}");
             }
         } else {
@@ -1395,7 +1395,7 @@ sub fieldInputParse
         $$value = [];
         for ( my $i = 0 ; ; $i++ ) {
             my $val;
-            last if ( fieldInputParse($type->{child}, "${varName}_z_$i", \$val) );
+            last if ( fieldInputParse($type->{child}, "${varName}_zZ_$i", \$val) );
             push(@$$value, $val);
         }
         $$value = undef if ( $type->{undefIfEmpty} && @$$value == 0 );
@@ -1419,19 +1419,19 @@ sub fieldInputParse
             } else {
                 $childType = $type->{childType};
             }
-            $ret ||= fieldInputParse($childType, "${varName}_z_$fld", \$val);
+            $ret ||= fieldInputParse($childType, "${varName}_zZ_$fld", \$val);
             last if ( $ret );
             $$value->{$fld} = $val;
         }
         return $ret;
     } else {
         if ( $type->{type} eq "boolean" ) {
-            $$value = 0 + $In{"v_z_$varName"};
-        } elsif ( !exists($In{"v_z_$varName"}) ) {
+            $$value = 0 + $In{"v_zZ_$varName"};
+        } elsif ( !exists($In{"v_zZ_$varName"}) ) {
             return 1;
         }
 
-        my $v = $In{"v_z_$varName"};
+        my $v = $In{"v_zZ_$varName"};
 
         if ( $type->{type} eq "integer" ) {
             if ( $v =~ /^-?\d+\s*$/s || $v eq "" ) {
@@ -1464,7 +1464,7 @@ sub fieldInputParse
                 }
             }
         } else {
-            $$value = decode_utf8($In{"v_z_$varName"});
+            $$value = decode_utf8($In{"v_zZ_$varName"});
             $$value =~ s/\r\n/\n/g;
         }
         $$value = undef if ( $type->{undefIfEmpty} && $$value eq "" );

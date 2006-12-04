@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta3, released 3 Dec 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -269,7 +269,7 @@ sub digestStart
         return -3 if ( read($fh, $data, 1) != 1 );
         my $ret;
 
-        if ( $data eq chr(0x78) && $doCache > 0
+        if ( ($data eq chr(0x78) || $data eq chr(0xd6)) && $doCache > 0
                      && $checksumSeed == RSYNC_CSUMSEED_CACHE ) {
             #
             # RSYNC_CSUMSEED_CACHE (32761) is the magic number that
@@ -287,7 +287,7 @@ sub digestStart
                             $blockSize
                                 || BackupPC::Xfer::RsyncDigest->blockSize(
                                                     $fileSize, $defBlkSize),
-                                $checksumSeed, $dg->{protocol_version});
+                                $checksumSeed, 0, $dg->{protocol_version});
             if ( $ret < 0 ) {
                 &$Log("digestAdd($fileName) failed ($ret)");
             }
@@ -445,7 +445,7 @@ sub logHandler
 #
 sub logHandlerSet
 {
-    my($sub) = @_;
+    my($dg, $sub) = @_;
 
     $Log = $sub;
 }

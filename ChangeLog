@@ -30,10 +30,13 @@
   to 0xd7 to allow correct protocol_version >= 27 md4 checksums to be
   written.  Old cached checksum files have a first byte 0xd6 and are
   now considered to be uncached.  They will be automatically updated
-  as needed.
+  as needed.  This avoids the cached checksum warnings in beta2.
 
 * BackupPC_tarPCCopy now handles all file types correctly.  Reported
   by George Avrunin.
+
+* Fixed BackupPC_nightly to finish pending deletes before renaming
+  pool chains.
 
 * Fixes for rsync restore where hardlink is to file outside of the
   top-level restore directory.  Reported by George Avrunin, who helped

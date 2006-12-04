@@ -55,7 +55,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta3, released 3 Dec 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -171,6 +171,15 @@ for my $pool ( qw(pool cpool) ) {
 		       && -d "$TopDir/$pool/$hexChars[int($i / 16)]" );
 
         #
+        # We need to process all pending deletes before we do the
+        # renames
+        #
+        if ( @PendingDelete ) {
+            sleep(1);
+            processPendingDeletes(1);
+        }
+
+        #
         # Now make sure that files with repeated checksums are still
         # sequentially numbered
         #
@@ -203,7 +212,7 @@ for my $pool ( qw(pool cpool) ) {
     }
 }
 
-sleep(10);
+sleep(1);
 processPendingDeletes(1);
 
 ###########################################################################

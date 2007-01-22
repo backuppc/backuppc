@@ -21,6 +21,43 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fixes to lib/BackupPC/Xfer/Tar.pm for tar 1.16: allow 1
+  (ie: 256) as a successful exit status and match "Total
+  bytes read" message for restores.  First reported by
+  Torsten Sadowski and debugged by Ralf Gross and Holger
+  Parplies.
+
+* Fix to bin/BackupPC to correctly re-queue multiple restore
+  requests directed at the same host.
+
+* Added pt_br.pm language file provided by Reginaldo Ferreira.
+
+* In conf/config.pl, changed --devices to -D in $Conf{RsyncArgs}
+  and $Conf{RsyncRestoreArgs} to fix "fileListReceive failed" and
+  "Can't open .../f%2f for empty output" errors with rsync 2.6.7+.
+  Fix proposed by Justin Pessa and Vincent Ho, and confirmed by
+  Dan Niles.
+
+* Added patch from Michael (mna.news) to ignore "file is unchanged"
+  message from tar 1.15.x during incremental backups.
+
+* Fixed creation of .rsrc directories in bin/BackupPC_tarExtract
+  when used with xtar on MacOS.  Reported by Samuel Bancal and
+  Matthew Radey, who helped with debugging.
+
+* Fixed bug in BackupPC_tarExtract for files >8GB in size whose
+  lengths are multiples of 256.  Reported by Jamie Myers and
+  Marko Tukiainen, who both helped debugging the problem.
+
+* Fixed bug in lib/BackupPC/Xfer/RsyncFileIO.pm that caused
+  incorrected deleted attributes to be set in directories
+  where one of the files had an rsync phase 1 retry during
+  an incremental.  Reported by Tony Nelson.
+
+#------------------------------------------------------------------------
+# Version 2.1.2, 5 Sep 2005
+#------------------------------------------------------------------------
+
 * Fixed simple but serious bug in bin/BackupPC_tarCreate that prevented
   hardlinks being saved correctly.  Debugged by Michael (mna.news)
   with several other people.

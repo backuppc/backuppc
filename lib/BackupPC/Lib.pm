@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.2, released 5 Sep 2005.
+# Version 2.1.3, released 21 Jan 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,7 +59,7 @@ sub new
         TopDir  => $topDir || '/data/BackupPC2.1.0',
         BinDir  => $installDir || '/usr/local/BackupPC2.1.0',
         LibDir  => $installDir || '/usr/local/BackupPC2.1.0',
-        Version => '2.1.2',
+        Version => '2.1.3',
         BackupFields => [qw(
                     num type startTime endTime
                     nFiles size nFilesExist sizeExist nFilesNew sizeNew

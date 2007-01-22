@@ -8,8 +8,8 @@ use strict;
 use File::Find;
 use File::Path;
 
-my $BaseVersion  = "2.1.1";
-my $PatchLevel   = "pl1";
+my $BaseVersion  = "2.1.3";
+my $PatchLevel   = "pl0";
 my $PatchVersion = "$BaseVersion$PatchLevel";
 
 my $Base         = "/home/craig/admin/packages/BackupPC-$BaseVersion";
@@ -48,7 +48,7 @@ print OUT <<EOF;
 #
 EOF
 
-foreach my $dir ( qw(bin lib cgi-bin) ) {
+foreach my $dir ( qw(bin lib cgi-bin conf) ) {
     open(DIFF, "diff -ur -I '^# Version .*, released ' $Base/$dir $TmpDir/$dir|")
 	    || die("can't run diff\n");
     while ( <DIFF> ) {

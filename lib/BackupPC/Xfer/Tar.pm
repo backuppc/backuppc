@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 2.1.2, released 5 Sep 2005.
+# Version 2.1.3, released 21 Jan 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -198,7 +198,12 @@ sub readOutput
         my $mesg;
         if ( sysread($t->{pipeTar}, $mesg, 8192) <= 0 ) {
             vec($$FDreadRef, fileno($t->{pipeTar}), 1) = 0;
-	    if ( !close($t->{pipeTar}) ) {
+	    if ( !close($t->{pipeTar}) && $? != 256 ) {
+                #
+                # Tar 1.16 uses exit status 1 (256) when some files
+                # changed during archive creation.  We allow this
+                # as a benign error and consider the archive ok
+                #
 		$t->{tarOut} .= "Tar exited with error $? ($!) status\n";
 		$t->{xferOK} = 0 if ( !$t->{tarBadExitOk} );
 	    }
@@ -214,15 +219,20 @@ sub readOutput
         #
         alarm($conf->{ClientTimeout}) if ( !$t->{abort} );
         $t->{lastOutputLine} = $_ if ( !/^$/ );
-        if ( /^Total bytes written: / ) {
+        if ( /^Total bytes (written|read): / ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
             $t->{xferOK} = 1;
         } elsif ( /^\./ ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 2 );
             $t->{fileCnt}++;
         } else {
-            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
-            $t->{xferErrCnt}++;
+            #
+            # Ignore annoying log message on incremental for tar 1.15.x
+            #
+            if ( !/: file is unchanged; not dumped$/ ) {
+                $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
+                $t->{xferErrCnt}++;
+            }
 	    #
 	    # If tar encounters a minor error, it will exit with a non-zero
 	    # status.  We still consider that ok.  Remember if tar prints

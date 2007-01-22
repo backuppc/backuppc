@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 2.1.2, released 5 Sep 2005.
+# Version 2.1.3, released 21 Jan 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -405,6 +405,11 @@ sub attribWrite
     my($fio, $d) = @_;
     my($poolWrite);
 
+    #
+    # Don't write attributes on 2nd phase - they're already
+    # taken care of during the first phase.
+    #
+    return if ( $fio->{phase} > 0 );
     if ( !defined($d) ) {
         #
         # flush all entries (in reverse order)
@@ -932,6 +937,7 @@ sub fileDeltaRxDone
 
     close($fio->{rxInFd})  if ( defined($fio->{rxInFd}) );
     unlink("$fio->{outDirSh}RStmp") if  ( -f "$fio->{outDirSh}RStmp" );
+    $fio->{phase} = $phase;
 
     #
     # Check the final md4 digest

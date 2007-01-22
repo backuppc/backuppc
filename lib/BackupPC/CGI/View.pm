@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 2.1.2, released 5 Sep 2005.
+# Version 2.1.3, released 21 Jan 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -168,7 +168,7 @@ sub action
 		    last if ( $s eq "" );
 		    $s =~ s/[\n\r]+//g;
 		    $s = ${EscHTML($s)};
-		    $s =~ s/\b([\w-]+)\b/defined($Hosts->{$1})
+		    $s =~ s/\b([\w.-]+)\b/defined($Hosts->{$1})
 					    ? ${HostLink($1)} : $1/eg;
 		    $c .= $s . "\n";
 		}
@@ -194,7 +194,7 @@ sub action
 		    $s =~ s[(\$Conf\{.*?\})][
 			my $c = $1;
 			my $s = lc($c);
-			$s =~ s{(\W)}{sprintf("%%%02x", ord($1) )}gxe;
+			$s =~ s{(\W)}{_}g;
 			"<a href=\"?action=view&type=docs#item_$s\"><tt>$c</tt></a>"
 		    ]eg;
 		    $c .= $s . "\n";

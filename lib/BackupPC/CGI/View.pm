@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta3, released 3 Dec 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -91,6 +91,7 @@ sub action
         if ( !defined($In{num}) ) {
             # get the latest LOG file
             $file = ($bpc->sortedPCLogFiles($host))[0];
+            $file =~ s/\.z$//;
         } else {
             $file = "$TopDir/pc/$host/LOG$ext";
         }
@@ -173,7 +174,7 @@ sub action
 		    last if ( $s eq "" );
 		    $s =~ s/[\n\r]+//g;
 		    $s = ${EscHTML($s)};
-		    $s =~ s/\b([\w-]+)\b/defined($Hosts->{$1})
+		    $s =~ s/\b([\w-.]+)\b/defined($Hosts->{$1})
 					    ? ${HostLink($1)} : $1/eg;
 		    $c .= $s . "\n";
 		}
@@ -199,7 +200,7 @@ sub action
 		    $s =~ s[(\$Conf\{.*?\})][
 			my $c = $1;
 			my $s = lc($c);
-			$s =~ s{(\W)}{sprintf("%%%02x", ord($1) )}gxe;
+			$s =~ s{(\W)}{_}g;
 			"<a href=\"?action=view&type=docs#item_$s\"><tt>$c</tt></a>"
 		    ]eg;
 		    $c .= $s . "\n";

@@ -647,7 +647,7 @@ $Conf{ArchiveInfoKeepCnt} = 10;
 # the setting is assumed to apply all shares.
 #
 # If a hash is used, a special key "*" means it applies to all
-# shares.
+# shares that don't have a specific entry.
 #
 # Examples:
 #    $Conf{BackupFilesOnly} = '/myFiles';
@@ -697,7 +697,7 @@ $Conf{BackupFilesOnly} = undef;
 # followed by "/*", eg: "/proc/*", instead of just "/proc".
 #
 # If a hash is used, a special key "*" means it applies to all
-# shares.
+# shares that don't have a specific entry.
 #
 # Examples:
 #    $Conf{BackupFilesExclude} = '/temp';
@@ -2048,6 +2048,7 @@ $Conf{CgiUserConfigEdit} = {
         TarIncrArgs               => 1,
         TarClientCmd              => 0,
         TarClientRestoreCmd       => 0,
+        TarClientPath             => 0,
         RsyncShareName            => 1,
         RsyncdClientPort          => 1,
         RsyncdPasswd              => 1,
@@ -2057,6 +2058,7 @@ $Conf{CgiUserConfigEdit} = {
         RsyncRestoreArgs          => 1,
         RsyncClientCmd            => 0,
         RsyncClientRestoreCmd     => 0,
+        RsyncClientPath           => 0,
         ArchiveDest               => 1,
         ArchiveComp               => 1,
         ArchivePar                => 1,

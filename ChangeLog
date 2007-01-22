@@ -21,6 +21,35 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* BackupPC_Admin now uses $Conf{UmaskMode}, so config.pl files
+  written by the editor have more restrictive permissions.
+  Reported by Tim Massey.
+
+* Host summary now shows active backups on disabled hosts,
+  from Jono Woodhouse.
+
+* Fixed host LOG link and LOG list order, reported by Tim Massey.
+
+* Moved Encode.pm version check to start of configure.pl so it
+  produces a useful error message if Encode.pm is too old.
+
+* Fixed hrefs to configuration documentation to handle changes
+  in the way perl generates the anchors.  Reported by Philip
+  Gleghorn.
+
+* Host name links in LOG files now allow "." in the host name.
+  Reported by Jean-Michel Beuken.
+
+* Fixes to lib/BackupPC/Xfer/Tar.pm for tar 1.16: allow 1
+  (ie: 256) as a successful exit status and match "Total
+  bytes read" message for restores.  First reported by
+  Torsten Sadowski and debugged by Ralf Gross and Holger
+  Parplies.
+
+#------------------------------------------------------------------------
+# Version 3.0.0beta3, 3 Dec 2006
+#------------------------------------------------------------------------
+
 * Removed default paths from conf/config.pl so configure.pl will
   determine the correct ones at install time.  Avoids problem of
   the config editor complaining about bad executable paths the

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta3, released 3 Dec 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -109,9 +109,15 @@ sub action
 	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
 		      || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
 	if ( $Conf{BackupsDisable} == 1 ) {
-	    $reasonHilite = $Conf{CgiStatusHilightColor}{Disabled_OnlyManualBackups};
-	    $tempState = "Disabled_OnlyManualBackups";
-	    $tempReason = "";
+            if ( $Status{$host}{state} ne "Status_backup_in_progress"
+                    && $Status{$host}{state} ne "Status_restore_in_progress" ) {
+                $reasonHilite = $Conf{CgiStatusHilightColor}{Disabled_OnlyManualBackups};
+                $tempState = "Disabled_OnlyManualBackups";
+                $tempReason = "";
+            } else {
+                $tempState = $Status{$host}{state};
+                $tempReason = $Status{$host}{reason};
+            }
 	} elsif ($Conf{BackupsDisable} == 2 ) {
 	    $reasonHilite = $Conf{CgiStatusHilightColor}{Disabled_AllBackupsDisabled};
 	    $tempState = "Disabled_AllBackupsDisabled";

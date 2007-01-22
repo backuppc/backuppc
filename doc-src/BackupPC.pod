@@ -406,7 +406,7 @@ L<http://rsync.samba.org>. Use "rsync --version" to check your version.
 For BackupPC to use Rsync you will also need to install the perl
 File::RsyncP module, which is available from
 L<http://perlrsync.sourceforge.net>.
-Version 0.70 or later is required.
+Version 0.68 or later is required.
 
 =item *
 

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 18 Nov 2006.
+# Version 3.0.0beta3, released 3 Dec 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -986,7 +986,7 @@ sub fieldEditBuild
     if ( $level == 0 ) {
         my $lcVarName = lc($varName);
 	$content .= <<EOF;
-<tr><td class="border"><a href="?action=view&type=docs#item_%24conf%7b$lcVarName%7d">$varName</a>
+<tr><td class="border"><a href="?action=view&type=docs#item__conf_${lcVarName}_">$varName</a>
 EOF
 	if ( defined($overrideVar) ) {
 	    my $override_checked = "";

@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta3, released 3 Dec 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -102,11 +102,13 @@ sub NewRequest
 	%Conf   = $bpc->Conf();
 	$Lang   = $bpc->Lang();
 	$ConfigMTime = $bpc->ConfigMTime();
+        umask($Conf{UmaskMode});
     } elsif ( $bpc->ConfigMTime() != $ConfigMTime ) {
         $bpc->ConfigRead();
         %Conf   = $bpc->Conf();
         $Lang   = $bpc->Lang();
         $ConfigMTime = $bpc->ConfigMTime();
+        umask($Conf{UmaskMode});
     }
 
     #

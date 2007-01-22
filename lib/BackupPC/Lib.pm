@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta3, released 3 Dec 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -94,7 +94,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '3.0.0beta2',
+        Version => '3.0.0beta3',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -1237,9 +1237,12 @@ sub compareLOGName
 
     if ( length($na) >= 5 && length($nb) >= 5 ) {
         #
-        # Both new style.  Bigger numbers are more recent.
+        # Both new style: format is MMYYYY.  Bigger dates are
+        # more recent.
         #
-        return $nb - $na;
+        my $ma = $2 * 12 + $1 if ( $na =~ /(\d+)(\d{4})/ );
+        my $mb = $2 * 12 + $1 if ( $nb =~ /(\d+)(\d{4})/ );
+        return $mb - $ma;
     } elsif ( length($na) >= 5 && length($nb) < 5 ) {
         return -1;
     } elsif ( length($na) < 5 && length($nb) >= 5 ) {

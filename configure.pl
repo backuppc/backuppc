@@ -47,9 +47,18 @@ use strict;
 no  utf8;
 use vars qw(%Conf %OrigConf);
 use lib "./lib";
+use Encode;
+
+my $EncodeVersion = eval($Encode::VERSION);
+if ( $EncodeVersion < 1.99 ) {
+    print("Error: you need to upgrade perl's Encode package.\n"
+        . "I found $EncodeVersion and BackupPC needs >= 1.99\n"
+        . "Please go to www.cpan.org or use the cpan command.\n");
+    exit(1);
+}
 
 my @Packages = qw(File::Path File::Spec File::Copy DirHandle Digest::MD5
-                  Data::Dumper Getopt::Std Getopt::Long Encode Pod::Usage
+                  Data::Dumper Getopt::Std Getopt::Long Pod::Usage
                   BackupPC::Lib BackupPC::FileZIO);
 
 foreach my $pkg ( @Packages ) {
@@ -76,13 +85,6 @@ BackupPC needs the package $pkg.  Please install $pkg
 before installing BackupPC.
 
 EOF
-}
-
-my $EncodeVersion = eval($Encode::VERSION);
-if ( $EncodeVersion < 1.99 ) {
-    print("\nError: you need to upgrade the Encode package;"
-        . " I found $EncodeVersion and BackupPC needs >= 1.99\n\n");
-    exit(1);
 }
 
 my %opts;
@@ -1180,7 +1182,7 @@ final locations.
 
 Use locations specified by the Filesystem Hierarchy Standard
 for installing BackupPC.  This is enabled by default for new
-installatios.  To use the pre-3.0 installation locations,
+installations.  To use the pre-3.0 installation locations,
 specify --no-fhs.
 
 =item B<--help|?>

@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0beta2, released 11 Nov 2006.
+# Version 3.0.0beta3, released 3 Dec 2006.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -210,7 +210,12 @@ sub readOutput
         my $mesg;
         if ( sysread($t->{pipeTar}, $mesg, 8192) <= 0 ) {
             vec($$FDreadRef, fileno($t->{pipeTar}), 1) = 0;
-	    if ( !close($t->{pipeTar}) ) {
+            if ( !close($t->{pipeTar}) && $? != 256 ) {
+                #
+                # Tar 1.16 uses exit status 1 (256) when some files
+                # changed during archive creation.  We allow this
+                # as a benign error and consider the archive ok
+                #
 		$t->{tarOut} .= "Tar exited with error $? ($!) status\n";
 		$t->{xferOK} = 0 if ( !$t->{tarBadExitOk} );
 	    }
@@ -229,7 +234,7 @@ sub readOutput
         #
         alarm($conf->{ClientTimeout}) if ( !$t->{abort} );
         $t->{lastOutputLine} = $_ if ( !/^$/ );
-        if ( /^Total bytes written: / ) {
+        if ( /^Total bytes (written|read): / ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
             $t->{xferOK} = 1;
         } elsif ( /^\./ ) {

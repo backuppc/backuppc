@@ -21,6 +21,10 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* BackupPC_sendEmail now correctly sends admin email if backups
+  were skipped because the disk was too full, reported by Dan
+  Pritts.
+
 * BackupPC_Admin now uses $Conf{UmaskMode}, so config.pl files
   written by the editor have more restrictive permissions.
   Reported by Tim Massey.

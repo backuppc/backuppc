@@ -54,7 +54,7 @@ die("BackupPC::Lib->new failed\n")
 umask(0022);
 
 my $Version     = "3.0.0";
-my $ReleaseDate = "21 Jan 2007";
+my $ReleaseDate = "28 Jan 2007";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -554,7 +554,7 @@ sub CheckLangTags
     my($en, $enVars) = LangParse("lib/BackupPC/Lang/en.pm");
     my($errors);
 
-    foreach my $lang ( qw(fr.pm de.pm es.pm it.pm nl.pm) ) {
+    foreach my $lang ( qw(fr.pm de.pm es.pm it.pm nl.pm pt_br.pm) ) {
 	my($d, $dVars) = LangParse("lib/BackupPC/Lang/$lang");
 	foreach my $v1 ( @$en ) {
 	    my $v2 = shift(@$d);

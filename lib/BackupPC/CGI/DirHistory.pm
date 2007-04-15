@@ -62,7 +62,7 @@ sub action
     ErrorExit($Lang->{Empty_host_name}) if ( $host eq "" );
 
     my @Backups = $bpc->BackupInfoRead($host);
-    my $view = BackupPC::View->new($bpc, $host, \@Backups);
+    my $view = BackupPC::View->new($bpc, $host, \@Backups, {inode => 1});
     my $hist = $view->dirHistory($share, $dir);
     my($backupNumStr, $backupTimeStr, $fileStr);
 

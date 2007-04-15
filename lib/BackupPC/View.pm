@@ -49,16 +49,20 @@ use Data::Dumper;
 
 sub new
 {
-    my($class, $bpc, $host, $backups) = @_;
+    my($class, $bpc, $host, $backups, $options) = @_;
     my $m = bless {
-        bpc       => $bpc,		# BackupPC::Lib object
-        host      => $host,		# host name
-        backups   => $backups,		# all backups for this host
-	num       => -1,		# backup number
-        idx       => -1,		# index into backups for backup
-					#   we are viewing
-        dirPath   => undef,		# path to current directory
-        dirAttr   => undef,		# attributes of current directory
+        bpc       => $bpc,	# BackupPC::Lib object
+        host      => $host,	# host name
+        backups   => $backups,	# all backups for this host
+	num       => -1,	# backup number
+        idx       => -1,	# index into backups for backup
+				#   we are viewing
+        dirPath   => undef,	# path to current directory
+        dirAttr   => undef,	# attributes of current directory
+        dirOpts   => $options,  # $options is a hash of file attributes we need:
+                                # type, inode, or nlink.  If set, these parameters
+                                # are added to the returned hash.
+                                # See BackupPC::Lib::dirRead().
     }, $class;
     for ( my $i = 0 ; $i < @{$m->{backups}} ; $i++ ) {
 	next if ( defined($m->{backups}[$i]{level}) );
@@ -119,7 +123,9 @@ sub dirCache
         }
         $path .= $sharePathM;
 	#print(STDERR "Opening $path (share=$share)\n");
-	if ( !opendir(DIR, $path) ) {
+
+        my $dirInfo = $m->{bpc}->dirRead($path, $m->{dirOpts});
+	if ( !defined($dirInfo) ) {
             if ( $i == $m->{idx} ) {
                 #
                 # Oops, directory doesn't exist.
@@ -129,8 +135,6 @@ sub dirCache
             }
             next;
         }
-        my @dir = readdir(DIR);
-        closedir(DIR);
         my $attr;
 	if ( $mangle ) {
 	    $attr = BackupPC::Attrib->new({ compress => $compress });
@@ -139,8 +143,8 @@ sub dirCache
 		$attr = undef;
 	    }
 	}
-        foreach my $file ( @dir ) {
-            $file = $1 if ( $file =~ /(.*)/s );
+        foreach my $entry ( @$dirInfo ) {
+            my $file = $1 if ( $entry->{name} =~ /(.*)/s );
             my $fileUM = $file;
             $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
             #print(STDERR "Doing $fileUM\n");
@@ -152,14 +156,13 @@ sub dirCache
 		    || $file eq "."
 		    || $file eq "backupInfo"
 		    || $mangle && $file eq "attrib" );
-	    #
-	    # skip directories in earlier backups (each backup always
-	    # has the complete directory tree).
-	    #
-	    my @s = stat("$path/$file");
-	    next if ( $i < $m->{idx} && -d _ );
             if ( defined($attr) && defined(my $a = $attr->get($fileUM)) ) {
                 $m->{files}{$fileUM} = $a;
+                #
+                # skip directories in earlier backups (each backup always
+                # has the complete directory tree).
+                #
+                next if ( $i < $m->{idx} && $a->{type} == BPC_FTYPE_DIR );
 		$attr->set($fileUM, undef);
             } else {
                 #
@@ -167,6 +170,8 @@ sub dirCache
                 # is on.  We have to stat the file and read compressed files
                 # to determine their size.
                 #
+                my @s = stat("$path/$file");
+                next if ( $i < $m->{idx} && -d _ );
                 $m->{files}{$fileUM} = {
                     type  => -d _ ? BPC_FTYPE_DIR : BPC_FTYPE_FILE,
                     mode  => $s[2],
@@ -199,8 +204,10 @@ sub dirCache
             ($m->{files}{$fileUM}{fullPath}   = "$path/$file") =~ s{//+}{/}g;
             $m->{files}{$fileUM}{backupNum}   = $backupNum;
             $m->{files}{$fileUM}{compress}    = $compress;
-	    $m->{files}{$fileUM}{nlink}       = $s[3];
-	    $m->{files}{$fileUM}{inode}       = $s[1];
+	    $m->{files}{$fileUM}{nlink}       = $entry->{nlink}
+                                                    if ( $m->{dirOpts}{nlink} );
+	    $m->{files}{$fileUM}{inode}       = $entry->{inode}
+                                                    if ( $m->{dirOpts}{inode} );
         }
 	#
 	# Also include deleted files
@@ -384,14 +391,14 @@ sub dirHistory
         }
         $path .= $sharePathM;
 	#print(STDERR "Opening $path (share=$share)\n");
-	if ( !opendir(DIR, $path) ) {
+
+        my $dirInfo = $m->{bpc}->dirRead($path, $m->{dirOpts});
+	if ( !defined($dirInfo) ) {
 	    #
 	    # Oops, directory doesn't exist.
 	    #
 	    next;
         }
-        my @dir = readdir(DIR);
-        closedir(DIR);
         my $attr;
 	if ( $mangle ) {
 	    $attr = BackupPC::Attrib->new({ compress => $compress });
@@ -400,8 +407,8 @@ sub dirHistory
 		$attr = undef;
 	    }
 	}
-        foreach my $file ( @dir ) {
-            $file = $1 if ( $file =~ /(.*)/s );
+        foreach my $entry ( @$dirInfo ) {
+            my $file = $1 if ( $entry->{name} =~ /(.*)/s );
             my $fileUM = $file;
             $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
             #print(STDERR "Doing $fileUM\n");
@@ -454,8 +461,10 @@ sub dirHistory
             ($files->{$fileUM}[$i]{fullPath}   = "$path/$file") =~ s{//+}{/}g;
             $files->{$fileUM}[$i]{backupNum}   = $backupNum;
             $files->{$fileUM}[$i]{compress}    = $compress;
-	    $files->{$fileUM}[$i]{nlink}       = $s[3];
-	    $files->{$fileUM}[$i]{inode}       = $s[1];
+	    $files->{$fileUM}[$i]{nlink}       = $entry->{nlink}
+                                                    if ( $m->{dirOpts}{nlink} );
+	    $files->{$fileUM}[$i]{inode}       = $entry->{inode}
+                                                    if ( $m->{dirOpts}{inode} );
         }
 
 	#

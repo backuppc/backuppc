@@ -1,7 +1,7 @@
 /*
  * BackupPC standard CSS definitions
  *
- * Version 3.0.0beta2, released 31 Oct 2006.
+ * Version 3.0.0, released 28 Jan 2007.
  *
  * See http://backuppc.sourceforge.net.
  *
@@ -93,6 +93,13 @@ a.navbar {
     font-size:10pt;
     font-weight:bold;
     background-color:#eeeeee;
+}
+
+table.sortable a.sortheader {
+    background-color:#eeeeee;
+    font-weight: bold;
+    text-decoration: none;
+    display: block;
 }
 
 .border {

@@ -64,11 +64,10 @@
 use strict;
 no  utf8;
 use lib "/usr/local/BackupPC/lib";
-use BackupPC::Lib;
+use BackupPC::Lib qw( :BPC_DT_ALL );
 use BackupPC::FileZIO;
 use Getopt::Std;
 
-use File::Find;
 use File::Path;
 use Data::Dumper;
 
@@ -153,7 +152,7 @@ for my $pool ( qw(pool cpool) ) {
         $fileLinkMax   = 0;
         $fileCntRename = 0;
         %FixList       = ();
-        find({wanted => \&GetPoolStats}, "$TopDir/$pool/$dir")
+        $bpc->find({wanted => \&GetPoolStats}, "$TopDir/$pool/$dir")
 					    if ( -d "$TopDir/$pool/$dir" );
         my $kb   = $blkCnt / 2;
         my $kbRm = $blkCntRm / 2;
@@ -260,7 +259,8 @@ sub doBackupInfoUpdate
 
 sub GetPoolStats
 {
-    my($inode, $nlinks, $nblocks) = (lstat($_))[1, 3, 12];
+    my($file, $fullPath) = @_;
+    my($inode, $nlinks, $nblocks) = (lstat($file))[1, 3, 12];
  
     if ( -d _ ) {
         $dirCnt++;
@@ -279,7 +279,6 @@ sub GetPoolStats
         # pool files vs removing pool files.  (Other aspects of the
         # design should eliminate race conditions.)
         #
-        my $fullPath = $File::Find::name;
         push(@PendingDelete, {
                     inode => $inode,
                     path  => $fullPath

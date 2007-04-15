@@ -130,7 +130,12 @@ $Lang{BackupPC_Summary}=<<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
-Este status foi generado em \$now.
+<ul>
+<li>Este status foi generado em \$now.
+<li>O sistema de arquivos estava recentemente em \$Info{DUlastValue}%
+    (\$DUlastTime), o m?ximo de hoje ? \$Info{DUDailyMax}% (\$DUmaxTime)
+    e o m?ximo de ontem foi \$Info{DUDailyMaxPrev}%.
+</ul>
 </p>
 
 \${h2("Hosts com Backups Completos")}
@@ -143,7 +148,7 @@ Existem \$hostCntGood hosts com backup, de um total de :
      (antes de agrupar e comprimir).
 </ul>
 </p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Usuario </td>
     <td align="center"> #Completo </td>
@@ -162,7 +167,7 @@ Existem \$hostCntGood hosts com backup, de um total de :
 <p>
 Existem \$hostCntNone hosts sem backups.
 <p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Usuario </td>
     <td align="center"> #Completo </td>

@@ -20,7 +20,7 @@
 #   Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2006  Craig Barratt
+#   Copyright (C) 2001-2007  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -53,8 +53,8 @@ die("BackupPC::Lib->new failed\n")
 
 umask(0022);
 
-my $Version     = "3.0.0";
-my $ReleaseDate = "28 Jan 2007";
+my $Version     = "3.1.0";
+my $ReleaseDate = "15 Apr 2007";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -223,8 +223,10 @@ foreach my $file ( (@PerlSrc,
 		conf/hosts
 		conf/BackupPC_stnd.css
 		conf/BackupPC_stnd_orig.css
+                conf/sorttable.js
 		init.d/README
 		init.d/src/debian-backuppc
+		init.d/src/freebsd-backuppc
 		init.d/src/gentoo-backuppc
 		init.d/src/gentoo-backuppc.conf
 		init.d/src/linux-backuppc

@@ -1,0 +1,75 @@
+#!/bin/sh
+
+# PROVIDE: backuppc
+# REQUIRE: DAEMON
+# BEFORE:  LOGIN
+# KEYWORD: shutdown
+
+#
+# Copy to /usr/local/etc/rc.d/backuppc and make execuatble
+#
+# Add the following line to /etc/rc.conf to enable BackupPC:
+# backuppc_enable=(bool):   Set to "NO" by default.
+#			    Set it to "YES" to enable BackupPC.
+#
+# Example:
+#
+#       backuppc_enable="YES"
+#
+# It accepts : start, stop, restart, reload, status
+#
+# Provided by : Gabriel Rossetti
+#
+
+. /etc/rc.subr
+
+name="backuppc"
+rcvar=`set_rcvar`
+start_cmd="backuppc_start"
+restart_cmd="backuppc_restart"
+stop_cmd="backuppc_stop"
+status_cmd="backuppc_status"
+reload_cmd="backuppc_reload"
+
+load_rc_config $name
+eval "${rcvar}=\${${rcvar}:-'NO'}"
+
+: ${backuppc_enable="NO"}
+#backuppc_enable=${backuppc_enable:-"NO"}
+
+backuppc_start()
+{
+    su backuppc -c '__INSTALLDIR__/bin/BackupPC -d'
+    echo "${name} started"
+}
+
+backuppc_restart()
+{
+    backuppc_stop
+    sleep 1
+    backuppc_start
+}
+
+backuppc_stop()
+{
+    /usr/bin/pkill -f "__INSTALLDIR__/bin/BackupPC -d"
+    echo "${name} stopped"
+}
+
+backuppc_status()
+{
+    if [ "`ps ax | grep "BackupPC -d" | grep perl`" = "" ] ; then
+        echo "${name} not running"
+    else
+        echo "${name} running"
+    fi
+}    
+
+backuppc_reload()
+{
+    /usr/bin/pkill -1 -f "__INSTALLDIR__/bin/BackupPC -d"
+    echo "${name} reloaded"
+}
+
+extra_commands="reload status"
+run_rc_command "$1"

@@ -137,7 +137,13 @@ $Lang{BackupPC_Summary}=<<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
-Dieser Status wurde am \$now generiert.
+<ul>
+<li>Dieser Status wurde am \$now generiert.
+<li>Das Pool Filesystem (Backup-Speicherplatz) ist zu \$Info{DUlastValue}%
+    (\$DUlastTime) voll, das Maximum heute ist \$Info{DUDailyMax}% (\$DUmaxTime)
+    und das Maximum gestern war \$Info{DUDailyMaxPrev}%. (Hinweis: Sollten ca. 70% ?berschritten werden, so
+    ist evtl. bald eine Erweiterung des Backupspeichers erforderlich. Ist weitere Planung n?tig?)
+</ul>
 </p>
 
 \${h2("Computer mit erfolgreichen Backups")}
@@ -150,7 +156,7 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
      (vor Pooling und Komprimierung).
 </ul>
 </p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Computer </td>
     <td align="center"> Benutzer </td>
     <td align="center"> #Voll </td>
@@ -169,7 +175,7 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
 <p>
 Es gibt \$hostCntNone Computer ohne Backups !!!
 <p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Computer </td>
     <td align="center"> Benutzer </td>
     <td align="center"> #Voll </td>

@@ -79,6 +79,24 @@ start automatically at boot (at the default run level):
 
     rc-update add backuppc default
 
+FreeBSD:
+=======
+
+When configure.pl is run, the script freebsd-backuppc is created.
+
+Copy this script to /usr/local/etc/rc.d/backuppc and make execuatble.
+
+Add the following line to /etc/rc.conf to enable BackupPC:
+
+backuppc_enable=(bool):   Set to "NO" by default.
+                          Set it to "YES" to enable BackupPC.
+
+Example:
+
+    backuppc_enable="YES"
+
+The script accepts: start, stop, restart, reload, status
+
 Slackware:
 =========
 

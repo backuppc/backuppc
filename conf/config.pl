@@ -29,7 +29,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2003  Craig Barratt
+#   Copyright (C) 2001-2007  Craig Barratt
 #
 #   See http://backuppc.sourceforge.net.
 #
@@ -103,19 +103,17 @@ $Conf{UmaskMode} = 027;
 #
 # Examples:
 #     $Conf{WakeupSchedule} = [22.5];         # once per day at 10:30 pm.
-#     $Conf{WakeupSchedule} = [1..23];        # every hour except midnight
 #     $Conf{WakeupSchedule} = [2,4,6,8,10,12,14,16,18,20,22];  # every 2 hours
 #
 # The default value is every hour except midnight.
 #
-# The first entry of $Conf{WakeupSchedule} is when BackupPC_nightly
-# is run.  No other backups can run while BackupPC_nightly is
-# running.  You might want to re-arrange the entries in
-# $Conf{WakeupSchedule} (they don't have to be ascending) so that
-# the first entry is when you want BackupPC_nightly to run
-# (eg: when you don't expect a lot of regular backups to run).
+# The first entry of $Conf{WakeupSchedule} is when BackupPC_nightly is run.
+# You might want to re-arrange the entries in $Conf{WakeupSchedule}
+# (they don't have to be ascending) so that the first entry is when
+# you want BackupPC_nightly to run (eg: when you don't expect a lot
+# of regular backups to run).
 #
-$Conf{WakeupSchedule} = [1..23];
+$Conf{WakeupSchedule} = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
 
 #
 # Maximum number of simultaneous backups to run.  If there
@@ -1897,8 +1895,9 @@ $Conf{CgiUserHomePageCheck} = '';
 $Conf{CgiUserUrlCreate}     = 'mailto:%s';
 
 #
-# Date display format for CGI interface.  True for US-style dates (MM/DD)
-# and zero for international dates (DD/MM).
+# Date display format for CGI interface.  A value of 1 uses US-style
+# dates (MM/DD), a value of 2 uses full YYYY-MM-DD format, and zero
+# for international dates (DD/MM).
 #
 $Conf{CgiDateFormatMMDD} = 1;
 
@@ -2052,6 +2051,7 @@ $Conf{CgiUserConfigEdit} = {
         RsyncShareName            => 1,
         RsyncdClientPort          => 1,
         RsyncdPasswd              => 1,
+        RsyncdUserName            => 1,
         RsyncdAuthRequired        => 1,
         RsyncCsumCacheVerifyProb  => 1,
         RsyncArgs                 => 1,

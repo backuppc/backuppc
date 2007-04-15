@@ -80,7 +80,7 @@ sub action
     my $backupTime = timeStamp2($Backups[$i]{startTime});
     my $backupAge = sprintf("%.1f", (time - $Backups[$i]{startTime})
                                     / (24 * 3600));
-    my $view = BackupPC::View->new($bpc, $host, \@Backups);
+    my $view = BackupPC::View->new($bpc, $host, \@Backups, {nlink => 1});
 
     if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
 	$attr = $view->dirAttrib($num, "", "");

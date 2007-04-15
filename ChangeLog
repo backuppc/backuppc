@@ -21,6 +21,46 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Added some performance improvements to BackupPC::Xfer::RsyncFileIO
+  for the case of small files with cached checksums.
+
+* Added optional support for IO::Dirent which allows inode information
+  to be extracted from the dirent directory structure.  This allows
+  BackupPC to order some directory operations by inode, which on
+  some file systems (eg: ext3) can results in a 20-30% performance
+  gain.  On other file systems there is no real improvement.  This
+  optimization is turned on automatically if IO::Dirent is installed.
+
+* Added sorting by column feature to host summary table in CGI
+  interface.  Implemented by Jeremy Tietsort.
+
+* Added FreeBSD init.d file provided by Gabriel Rossetti.
+
+* Applied small patch from Sergey to lib/BackupPC/Xfer/Tar.pm that makes
+  it ignore "socket ignored" error on incrementals.
+
+* Applied small patch from Sergey to bin/BackupPC_archiveHost.
+
+* Added RsyncdUserName to the config editor.  Reported by Vicent Roca Daniel.
+
+* configure.pl clears $Conf{ParPath} if it doesn't point to a valid
+  executable.
+
+* Added freebsd-backuppc init.d script from Gabriel Rossetti.
+
+* Added documentation for BackupPC_tarPCCopy, including use of -P option
+  to tar suggested by Daniel Berteaud.
+
+* Config editor now removes white space at start of exec path.
+  Reported by Christoph Iwasjuta.
+
+* CgiDateFormatMMDD == 2 gives a YYYY-MM-DD format for CGI dates,
+  suggested by Imre.
+
+#------------------------------------------------------------------------
+# Version 3.0.0, 28 Jan 2007
+#------------------------------------------------------------------------
+
 * BackupPC_sendEmail now correctly sends admin email if backups
   were skipped because the disk was too full, reported by Dan
   Pritts.

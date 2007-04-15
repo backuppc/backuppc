@@ -125,7 +125,12 @@ $Lang{BackupPC_Summary} = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
-This status was generated at \$now.
+<ul>
+<li>This status was generated at \$now.
+<li>Pool file system was recently at \$Info{DUlastValue}%
+    (\$DUlastTime), today\'s max is \$Info{DUDailyMax}% (\$DUmaxTime)
+        and yesterday\'s max was \$Info{DUDailyMaxPrev}%.
+</ul>
 </p>
 
 \${h2("Hosts with good Backups")}
@@ -138,7 +143,7 @@ There are \$hostCntGood hosts that have been backed up, for a total of:
      (prior to pooling and compression).
 </ul>
 </p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> User </td>
     <td align="center"> #Full </td>
@@ -157,7 +162,7 @@ There are \$hostCntGood hosts that have been backed up, for a total of:
 <p>
 There are \$hostCntNone hosts with no backups.
 <p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> User </td>
     <td align="center"> #Full </td>

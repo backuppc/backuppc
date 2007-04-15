@@ -875,7 +875,7 @@ for my $shareName ( @$ShareNames ) {
     $stat{xferOK} = 0 if ( $stat{hostError} || $stat{hostAbort} );
     if ( !$stat{xferOK} ) {
         #
-        # kill off the tranfer program, first nicely then forcefully
+        # kill off the transfer program, first nicely then forcefully
         #
 	if ( @xferPid ) {
 	    kill($bpc->sigName2num("INT"), @xferPid);

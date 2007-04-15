@@ -605,12 +605,14 @@ if ( $Conf{CgiImageDir} ne "" ) {
 	        "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", 0444, 0);
     InstallFile("conf/BackupPC_stnd_orig.css",
 	        "$DestDir$Conf{CgiImageDir}/BackupPC_stnd_orig.css", 0444, 0);
+    InstallFile("conf/sorttable.js",
+                "$DestDir$Conf{CgiImageDir}/sorttable.js", 0444, 0);
 }
 
 printf("Making init.d scripts\n");
 foreach my $init ( qw(gentoo-backuppc gentoo-backuppc.conf linux-backuppc
-		      solaris-backuppc debian-backuppc suse-backuppc
-		      slackware-backuppc ) ) {
+		      solaris-backuppc debian-backuppc freebsd-backuppc
+                      suse-backuppc slackware-backuppc ) ) {
     InstallFile("init.d/src/$init", "init.d/$init", 0444);
 }
 
@@ -710,6 +712,13 @@ $Conf{CgiNavBarAdminAllHosts} = 1;
 # IncrFill should now be off
 #
 $Conf{IncrFill} = 0;
+
+#
+# Empty $Conf{ParPath} if it isn't a valid executable
+# (pre-3.0.0 configure.pl incorrectly set it to a
+# hardcoded value).
+#
+$Conf{ParPath} = '' if ( $Conf{ParPath} ne '' && !-x $Conf{ParPath} );
 
 #
 # Figure out sensible arguments for the ping command

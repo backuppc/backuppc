@@ -266,10 +266,10 @@ sub digestStart
     if ( $fileSize > 0 && $compress && $doCache >= 0 ) {
         open(my $fh, "<", $fileName) || return -2;
         binmode($fh);
-        return -3 if ( read($fh, $data, 1) != 1 );
+        return -3 if ( sysread($fh, $data, 4096) < 1 );
         my $ret;
 
-        if ( ($data eq chr(0x78) || $data eq chr(0xd6)) && $doCache > 0
+        if ( (vec($data, 0, 8) == 0x78 || vec($data, 0, 8) == 0xd6) && $doCache > 0
                      && $checksumSeed == RSYNC_CSUMSEED_CACHE ) {
             #
             # RSYNC_CSUMSEED_CACHE (32761) is the magic number that
@@ -298,31 +298,44 @@ sub digestStart
             binmode($fh);
             return -5 if ( read($fh, $data, 1) != 1 );
         }
-        if ( $ret >= 0 && $data eq chr(0xd7) ) {
+        if ( $ret >= 0 && vec($data, 0, 8) == 0xd7 ) {
             #
             # Looks like this file has cached checksums
             # Read the last 48 bytes: that's 2 file MD4s (32 bytes)
             # plus 4 words of meta data
             #
-            return -6 if ( !defined(seek($fh, -48, 2)) ); 
-            return -7 if ( read($fh, $data, 48) != 48 );
+            my $cacheInfo;
+            if ( length($data) >= 4096 ) {
+                return -6 if ( !defined(sysseek($fh, -4096, 2)) ); 
+                return -7 if ( sysread($fh, $data, 4096) != 4096 );
+            }
+            $cacheInfo = substr($data, -48);
             ($dg->{md4DigestOld},
              $dg->{md4Digest},
              $dg->{blockSize},
              $dg->{checksumSeed},
              $dg->{nBlocks},
-             $dg->{magic}) = unpack("a16 a16 V V V V", $data);
+             $dg->{magic}) = unpack("a16 a16 V V V V", $cacheInfo);
             if ( $dg->{magic} == 0x5fe3c289
                     && $dg->{checksumSeed} == $checksumSeed
                     && ($blockSize == 0 || $dg->{blockSize} == $blockSize) ) {
                 $dg->{fh}     = $fh;
                 $dg->{cached} = 1;
-                #
-                # position the file at the start of the rsync block checksums
-                # (4 (adler) + 16 (md4) bytes each)
-                #
-                return -8
-                    if ( !defined(seek($fh, -$dg->{nBlocks}*20 - 48, 2)) );
+                if ( length($data) >= $dg->{nBlocks} * 20 + 48 ) {
+                    #
+                    # We have all the data already - just remember it
+                    #
+                    $dg->{digestData} = substr($data,
+                                               length($data) - $dg->{nBlocks} * 20 - 48,
+                                               $dg->{nBlocks} * 20);
+                } else {
+                    #
+                    # position the file at the start of the rsync block checksums
+                    # (4 (adler) + 16 (md4) bytes each)
+                    #
+                    return -8
+                        if ( !defined(sysseek($fh, -$dg->{nBlocks} * 20 - 48, 2)) );
+                }
             } else {
                 #
                 # cached checksums are not valid, so we close the
@@ -365,7 +378,12 @@ sub digestGet
     if ( $dg->{cached} ) {
         my $thisNum = $num;
         $thisNum = $dg->{nBlocks} if ( $thisNum > $dg->{nBlocks} );
-        read($dg->{fh}, $fileData, 20 * $thisNum);
+        if ( defined($dg->{digestData}) ) {
+            $fileData = substr($dg->{digestData}, 0, 20 * $thisNum);
+            $dg->{digestData} = substr($dg->{digestData}, 20 * $thisNum);
+        } else {
+            sysread($dg->{fh}, $fileData, 20 * $thisNum);
+        }
         $dg->{nBlocks} -= $thisNum;
         if ( $thisNum < $num && !$noPad) {
             #

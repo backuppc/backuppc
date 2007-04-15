@@ -244,7 +244,7 @@ sub readOutput
             #
             # Ignore annoying log message on incremental for tar 1.15.x
             #
-            if ( !/: file is unchanged; not dumped$/ ) {
+            if ( !/: file is unchanged; not dumped$/ && !/: socket ignored$/ ) {
                 $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
                 $t->{xferErrCnt}++;
             }

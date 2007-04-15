@@ -180,7 +180,10 @@ sub timeStamp2
     my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)
               = localtime($_[0] == 0 ? time : $_[0] );
     $mon++;
-    if ( $Conf{CgiDateFormatMMDD} ) {
+    if ( $Conf{CgiDateFormatMMDD} == 2 ) {
+        $year += 1900;
+        return sprintf("%04d-%02d-%02d %02d:%02d", $year, $mon, $mday, $hour, $min);
+    } elsif ( $Conf{CgiDateFormatMMDD} ) {
         return sprintf("$mon/$mday %02d:%02d", $hour, $min);
     } else {
         return sprintf("$mday/$mon %02d:%02d", $hour, $min);
@@ -442,6 +445,7 @@ sub Header
 <title>$title</title>
 <link rel=stylesheet type="text/css" href="$Conf{CgiImageDirURL}/$Conf{CgiCSSFile}" title="CSSFile">
 $Conf{CgiHeaders}
+<script src="$Conf{CgiImageDirURL}/sorttable.js"></script>
 </head><body onLoad="document.getElementById('NavMenu').style.height=document.body.scrollHeight">
 <a href="http://backuppc.sourceforge.net"><img src="$Conf{CgiImageDirURL}/logo.gif" hspace="5" vspace="7" border="0"></a><br>
 EOF

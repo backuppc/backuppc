@@ -125,7 +125,12 @@ $Lang{BackupPC_Summary}=<<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
-Ce statut a été généré le \$now.
+<ul>
+<li>Ce statut a été généré le \$now.
+<li>L\'espace de stockage a ?t? r?cemment rempli ? \$Info{DUlastValue}%
+    (\$DUlastTime), le maximum aujourd\'hui a ?t? de \$Info{DUDailyMax}% (\$DUmaxTime)
+    et hier le maximum ?tait \$Info{DUDailyMaxPrev}%.
+</ul>
 </p>
 
 \${h2("Hôtes avec de bonnes sauvegardes")}
@@ -138,7 +143,7 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
      (précédant la mise en commun et la compression).
 </ul>
 </p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Hôte </td>
     <td align="center"> Utilisateur </td>
     <td align="center"> Nb complètes </td>
@@ -157,7 +162,7 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
 <p>
 Il y a \$hostCntNone hôtes sans sauvegardes.
 <p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Hôte </td>
     <td align="center"> Utilisateur </td>
     <td align="center"> Nb complètes </td>

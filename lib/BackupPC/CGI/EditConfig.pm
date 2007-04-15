@@ -1466,6 +1466,8 @@ sub fieldInputParse
         } else {
             $$value = decode_utf8($In{"v_zZ_$varName"});
             $$value =~ s/\r\n/\n/g;
+            # remove leading space from exec paths
+            $$value =~ s/^\s+// if ( $type->{type} eq "execPath" );
         }
         $$value = undef if ( $type->{undefIfEmpty} && $$value eq "" );
     }

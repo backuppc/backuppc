@@ -316,7 +316,7 @@ use vars qw(%ConfigMeta);
     },
     CgiUserHomePageCheck => "string",
     CgiUserUrlCreate    => "string",
-    CgiDateFormatMMDD	=> "boolean",
+    CgiDateFormatMMDD	=> "integer",
     CgiNavBarAdminAllHosts => "boolean",
     CgiSearchBoxEnable 	=> "boolean",
     CgiNavBarLinks	=> {
@@ -396,6 +396,7 @@ use vars qw(%ConfigMeta);
                 TarClientRestoreCmd       => "boolean",
                 RsyncShareName            => "boolean",
                 RsyncdClientPort          => "boolean",
+                RsyncdUserName            => "boolean",
                 RsyncdPasswd              => "boolean",
                 RsyncdAuthRequired        => "boolean",
                 RsyncCsumCacheVerifyProb  => "boolean",

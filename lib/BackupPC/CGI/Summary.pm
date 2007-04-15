@@ -45,7 +45,7 @@ sub action
        $strNone, $strGood, $hostCntGood, $hostCntNone);
 
     $hostCntGood = $hostCntNone = 0;
-    GetStatusInfo("hosts");
+    GetStatusInfo("hosts info");
     my $Privileged = CheckPermission();
 
     foreach my $host ( GetUserHosts(1) ) {
@@ -160,6 +160,8 @@ EOF
     $fullSizeTot = sprintf("%.2f", $fullSizeTot / 1000);
     $incrSizeTot = sprintf("%.2f", $incrSizeTot / 1000);
     my $now      = timeStamp2(time);
+    my $DUlastTime   = timeStamp2($Info{DUlastValueTime});
+    my $DUmaxTime    = timeStamp2($Info{DUDailyMaxTime});
 
     my $content = eval ("qq{$Lang->{BackupPC_Summary}}");
     Header($Lang->{BackupPC__Server_Summary}, $content);

@@ -6,6 +6,8 @@
 # contain hardlinks to the pool directory, which should be copied
 # before BackupPC_tarPCCopy is run.
 #
+# See the documentation for use.
+#
 # DESCRIPTION
 #  
 #   Usage: BackupPC_tarPCCopy [options] files/directories...

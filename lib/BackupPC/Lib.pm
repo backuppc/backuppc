@@ -41,15 +41,50 @@ use strict;
 
 use vars qw(%Conf %Lang);
 use BackupPC::Storage;
-use Fcntl qw/:flock/;
+use Fcntl ':mode';
 use Carp;
-use DirHandle ();
 use File::Path;
 use File::Compare;
 use Socket;
 use Cwd;
 use Digest::MD5;
 use Config;
+
+use vars qw( $IODirentOk );
+use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+
+require Exporter;
+require DynaLoader;
+
+@ISA = qw(Exporter DynaLoader);
+@EXPORT_OK = qw( BPC_DT_UNKNOWN
+                 BPC_DT_FIFO
+                 BPC_DT_CHR
+                 BPC_DT_DIR
+                 BPC_DT_BLK
+                 BPC_DT_REG
+                 BPC_DT_LNK
+                 BPC_DT_SOCK
+               );
+@EXPORT = qw( );
+%EXPORT_TAGS = ('BPC_DT_ALL' => [@EXPORT, @EXPORT_OK]);
+
+BEGIN {
+    eval "use IO::Dirent qw( readdirent DT_DIR );";
+    $IODirentOk = 1 if ( !$@ );
+};
+
+#
+# The need to match the constants in IO::Dirent
+#
+use constant BPC_DT_UNKNOWN =>   0;
+use constant BPC_DT_FIFO    =>   1;    ## named pipe (fifo)
+use constant BPC_DT_CHR     =>   2;    ## character special
+use constant BPC_DT_DIR     =>   4;    ## directory
+use constant BPC_DT_BLK     =>   6;    ## block special
+use constant BPC_DT_REG     =>   8;    ## regular
+use constant BPC_DT_LNK     =>  10;    ## symbolic link
+use constant BPC_DT_SOCK    =>  12;    ## socket
 
 sub new
 {
@@ -405,10 +440,100 @@ sub HostsMTime
 }
 
 #
+# Read a directory and return the entries in sorted inode order.
+# This relies on the IO::Dirent module being installed.  If not,
+# the inode data is empty and the default directory order is
+# returned.
+#
+# The returned data is a list of hashes with entries {name, type, inode, nlink}.
+# The returned data includes "." and "..".
+#
+# $need is a hash of file attributes we need: type, inode, or nlink.
+# If set, these parameters are added to the returned hash.
+#
+# If IO::Dirent is successful if will get type and inode for free.
+# Otherwise, a stat is done on each file, which is more expensive.
+#
+sub dirRead
+{
+    my($bpc, $path, $need) = @_;
+    my(@entries, $addInode);
+
+    return if ( !opendir(my $fh, $path) );
+    if ( $IODirentOk ) {
+        @entries = sort({ $a->{inode} <=> $b->{inode} } readdirent($fh));
+        map { $_->{type} = 0 + $_->{type} } @entries;   # make type numeric
+    } else {
+        @entries = map { { name => $_} } readdir($fh);
+    }
+    closedir($fh);
+    if ( defined($need) ) {
+        for ( my $i = 0 ; $i < @entries ; $i++ ) {
+            next if ( (!$need->{inode} || defined($entries[$i]{inode}))
+                   && (!$need->{type}  || defined($entries[$i]{type}))
+                   && (!$need->{nlink} || defined($entries[$i]{nlink})) );
+            my @s = stat("$path/$entries[$i]{name}");
+            $entries[$i]{nlink} = $s[3] if ( $need->{nlink} );
+            if ( $need->{inode} && !defined($entries[$i]{inode}) ) {
+                $addInode = 1;
+                $entries[$i]{inode} = $s[1];
+            }
+            if ( $need->{type} && !defined($entries[$i]{type}) ) {
+                my $mode = S_IFMT($s[2]);
+                $entries[$i]{type} = BPC_DT_FIFO if ( S_ISFIFO($mode) );
+                $entries[$i]{type} = BPC_DT_CHR  if ( S_ISCHR($mode) );
+                $entries[$i]{type} = BPC_DT_DIR  if ( S_ISDIR($mode) );
+                $entries[$i]{type} = BPC_DT_BLK  if ( S_ISBLK($mode) );
+                $entries[$i]{type} = BPC_DT_REG  if ( S_ISREG($mode) );
+                $entries[$i]{type} = BPC_DT_LNK  if ( S_ISLNK($mode) );
+                $entries[$i]{type} = BPC_DT_SOCK if ( S_ISSOCK($mode) );
+            }
+        }
+    }
+    #
+    # Sort the entries if inodes were added (the IO::Dirent case already
+    # sorted above)
+    #
+    @entries = sort({ $a->{inode} <=> $b->{inode} } @entries) if ( $addInode );
+    return \@entries;
+}
+
+#
+# Same as dirRead, but only returns the names (which will be sorted in
+# inode order if IO::Dirent is installed)
+#
+sub dirReadNames
+{
+    my($bpc, $path) = @_;
+
+    my $entries = $bpc->dirRead($path);
+    return if ( !defined($entries) );
+    my @names = map { $_->{name} } @$entries;
+    return \@names;
+}
+
+sub find
+{
+    my($bpc, $param, $dir, $dontDoCwd) = @_;
+
+    return if ( !chdir($dir) );
+    my $entries = $bpc->dirRead(".", {inode => 1, type => 1});
+    #print Dumper($entries);
+    foreach my $f ( @$entries ) {
+        next if ( $f->{name} eq ".." || $f->{name} eq "." && $dontDoCwd );
+        $param->{wanted}($f->{name}, "$dir/$f->{name}");
+        next if ( $f->{type} != BPC_DT_DIR || $f->{name} eq "." );
+        chdir($f->{name});
+        $bpc->find($param, "$dir/$f->{name}", 1);
+        return if ( !chdir("..") );
+    }
+}
+
+#
 # Stripped down from File::Path.  In particular we don't print
 # many warnings and we try three times to delete each directory
 # and file -- for some reason the original File::Path rmtree
-# didn't always completely remove a directory tree on the NetApp.
+# didn't always completely remove a directory tree on a NetApp.
 #
 # Warning: this routine changes the cwd.
 #
@@ -433,13 +558,11 @@ sub RmTreeQuiet
 	#
 	if ( !unlink($root) ) {
             if ( -d $root ) {
-                my $d = DirHandle->new($root);
+                my $d = $bpc->dirReadNames($root);
 		if ( !defined($d) ) {
 		    print(STDERR "Can't read $pwd/$root: $!\n");
 		} else {
-		    @files = $d->read;
-		    $d->close;
-		    @files = grep $_!~/^\.{1,2}$/, @files;
+		    @files = grep $_ !~ /^\.{1,2}$/, @$d;
 		    $bpc->RmTreeQuiet("$pwd/$root", \@files);
 		    chdir($pwd);
 		    rmdir($root) || rmdir($root);
@@ -490,10 +613,8 @@ sub RmTreeTrashEmpty
 
     $cwd = $1 if ( $cwd =~ /(.*)/ );
     return if ( !-d $trashDir );
-    my $d = DirHandle->new($trashDir) or carp "Can't read $trashDir: $!";
-    @files = $d->read;
-    $d->close;
-    @files = grep $_!~/^\.{1,2}$/, @files;
+    my $d = $bpc->dirReadNames($trashDir) or carp "Can't read $trashDir: $!";
+    @files = grep $_ !~ /^\.{1,2}$/, @$d;
     return 0 if ( !@files );
     $bpc->RmTreeQuiet($trashDir, \@files);
     foreach my $f ( @files ) {

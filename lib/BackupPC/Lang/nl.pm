@@ -125,7 +125,12 @@ $Lang{BackupPC_Summary}=<<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
-Dit overzicht dateert van \$now.
+<ul>
+<li>Dit overzicht dateert van \$now.
+<li>Het backup filesystem werd recentelijk aangevuld voor \$Info{DUlastValue}%
+     op (\$DUlastTime), het maximum van vandaag is \$Info{DUDailyMax}% (\$DUmaxTime)
+     en het maximum van gisteren was \$Info{DUDailyMaxPrev}%.
+</ul>
 </p>
 
 \${h2("Machine(s) met geslaagde backups")}
@@ -138,7 +143,7 @@ Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
      (voor samenvoegen).
 </ul>
 </p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Machine </td>
     <td align="center"> Gebruiker </td>
     <td align="center"> Aantal Voll. </td>
@@ -157,7 +162,7 @@ Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
 <p>
 Er zijn \$hostCntNone hosts zonder backup.
 <p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Machine </td>
     <td align="center"> Gebruiker </td>
     <td align="center"> Aantal Voll. </td>

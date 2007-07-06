@@ -84,6 +84,19 @@ sub BackupInfoRead
         close(BK_INFO);
     }
     close(LOCK);
+    #
+    # Default the level and version fields if not present
+    #
+    for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+        if ( defined($Backups[$i]{level}) ) {
+            if ( !defined($Backups[$i]{version}) ) {
+                $Backups[$i]{version} = "3.0.0";
+            }
+        } else {
+            $Backups[$i]{level} = $Backups[$i]{type} eq "incr" ? 1 : 0;
+            $Backups[$i]{version} = "2.1.2";
+        }
+    }
     return @Backups;
 }
 
@@ -279,6 +292,7 @@ sub ConfigDataRead
         }
         %$conf = ( %$conf, %Conf );
     }
+
     #
     # Promote BackupFilesOnly and BackupFilesExclude to hashes
     #
@@ -305,6 +319,11 @@ sub ConfigDataRead
         delete($conf->{BlackoutHourEnd});
         delete($conf->{BlackoutWeekDays});
     }
+
+    #
+    # Make sure IncrLevels is defined
+    #
+    $conf->{IncrLevels} = [1] if ( !defined($conf->{IncrLevels}) );
 
     return (undef, $conf);
 }

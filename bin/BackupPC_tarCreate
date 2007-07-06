@@ -25,6 +25,8 @@
 #       -w writeBufSz   write buffer size (default 1MB)
 #       -e charset      charset for encoding file names (default: value of
 #                       $Conf{ClientCharset} when backup was done)
+#       -l              just print a file listing; don't generate an archive
+#       -L              just print a detailed file listing; don't generate an archive
 #
 #     The -h, -n and -s options specify which dump is used to generate
 #     the tar archive.  The -r and -p options can be used to relocate
@@ -74,7 +76,7 @@ die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 
 my %opts;
 
-if ( !getopts("te:h:n:p:r:s:b:w:", \%opts) || @ARGV < 1 ) {
+if ( !getopts("Llte:h:n:p:r:s:b:w:", \%opts) || @ARGV < 1 ) {
     print STDERR <<EOF;
 usage: $0 [options] files/directories...
   Required options:
@@ -375,6 +377,28 @@ sub TarWriteFileInfo
         from_to($hdr->{linkname}, "utf8", $Charset);
     }
 
+    if ( $opts{l} ) {
+        print($hdr->{name} . "\n");
+        return;
+    } elsif ( $opts{L} ) {
+        my $owner = "$hdr->{uid}/$hdr->{gid}";
+
+        my $name = $hdr->{name};
+
+        if ( $hdr->{type} == BPC_FTYPE_SYMLINK
+                || $hdr->{type} == BPC_FTYPE_HARDLINK ) {
+            $name .= " -> $hdr->{linkname}";
+        }
+        $name =~ s/\n/\\n/g;
+
+        printf("%6o %9s %11.0f %s\n",
+                                    $hdr->{mode},
+                                    $owner,
+                                    $hdr->{size},
+                                    $name);
+        return;
+    }
+
     #
     # Handle long link names (symbolic links)
     #
@@ -432,6 +456,7 @@ sub TarWriteFile
         TarWriteFileInfo($fh, $hdr);
 	$DirCnt++;
     } elsif ( $hdr->{type} == BPC_FTYPE_FILE ) {
+        my($data, $size);
         #
         # Regular file: write the header and file
         #
@@ -442,31 +467,34 @@ sub TarWriteFile
 	    return;
         }
         TarWriteFileInfo($fh, $hdr);
-        my($data, $size);
-        while ( $f->read(\$data, $BufSize) > 0 ) {
-            if ( $size + length($data) > $hdr->{size} ) {
-                print(STDERR "Error: truncating $hdr->{fullPath} to"
-                           . " $hdr->{size} bytes\n");
-                $data = substr($data, 0, $hdr->{size} - $size);
-                $ErrorCnt++;
-            }
-            TarWrite($fh, \$data);
-            $size += length($data);
-        }
-        $f->close;
-        if ( $size != $hdr->{size} ) {
-            print(STDERR "Error: padding $hdr->{fullPath} to $hdr->{size}"
-                       . " bytes from $size bytes\n");
-            $ErrorCnt++;
-            while ( $size < $hdr->{size} ) {
-                my $len = $hdr->{size} - $size;
-                $len = $BufSize if ( $len > $BufSize );
-                $data = "\0" x $len;
+        if ( $opts{l} || $opts{L} ) {
+            $size = $hdr->{size};
+        } else {
+            while ( $f->read(\$data, $BufSize) > 0 ) {
+                if ( $size + length($data) > $hdr->{size} ) {
+                    print(STDERR "Error: truncating $hdr->{fullPath} to"
+                               . " $hdr->{size} bytes\n");
+                    $data = substr($data, 0, $hdr->{size} - $size);
+                    $ErrorCnt++;
+                }
                 TarWrite($fh, \$data);
-                $size += $len;
+                $size += length($data);
             }
+            $f->close;
+            if ( $size != $hdr->{size} ) {
+                print(STDERR "Error: padding $hdr->{fullPath} to $hdr->{size}"
+                           . " bytes from $size bytes\n");
+                $ErrorCnt++;
+                while ( $size < $hdr->{size} ) {
+                    my $len = $hdr->{size} - $size;
+                    $len = $BufSize if ( $len > $BufSize );
+                    $data = "\0" x $len;
+                    TarWrite($fh, \$data);
+                    $size += $len;
+                }
+            }
+            TarWritePad($fh, $size);
         }
-        TarWritePad($fh, $size);
 	$FileCnt++;
 	$ByteCnt += $size;
     } elsif ( $hdr->{type} == BPC_FTYPE_HARDLINK ) {

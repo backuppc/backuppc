@@ -34,14 +34,36 @@
 * Added sorting by column feature to host summary table in CGI
   interface.  Implemented by Jeremy Tietsort.
 
+* Added Simplified Chinese CGI translation from Youlin Feng.
+
 * Added FreeBSD init.d file provided by Gabriel Rossetti.
+
+* Added -l and -L options to BackupPC_tarCreate so that
+  provide a file list (without creating the archive).
+  Requested by Dirk.
+
+* Fixed single-restore file name charsets for IE, reported by
+  Francis Lessard.
+
+* Fixed makeDist so that the --config-dir option to configure.pl
+  works correctly.  Reported by Randy Barlow, Tony Shadwick and others.
+
+* Applied patch from Holger Parplies that fixes cleanup of early abort
+  in BackupPC_dump.
 
 * Applied small patch from Sergey to lib/BackupPC/Xfer/Tar.pm that makes
   it ignore "socket ignored" error on incrementals.
 
 * Applied small patch from Sergey to bin/BackupPC_archiveHost.
 
+* Changed BackupPC_sendEmail so that summary admin email doesn't
+  include errors from hosts that have $Conf{BackupsDisable} set.
+  Reported by James Kyle.  Also, per-user email is now disabled
+  when $Conf{BackupsDisable} is set.
+
 * Added RsyncdUserName to the config editor.  Reported by Vicent Roca Daniel.
+
+* $Conf{IncrLevels} is now defaulted if it is not defined.
 
 * configure.pl clears $Conf{ParPath} if it doesn't point to a valid
   executable.

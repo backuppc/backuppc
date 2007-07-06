@@ -292,6 +292,8 @@ sub InstallFile
 		print OUT "$1'__TOPDIR__'$2\n";
 	    } elsif ( $file =~ /Lib.pm/ && /^(\s*\$installDir\s*=\s*)'.*'(\s*if\s.*)/ ) {
 		print OUT "$1'__INSTALLDIR__'$2\n";
+	    } elsif ( $file =~ /Lib.pm/ && /^(\s*ConfDir\s*=\>\s*\$confDir eq.*)'.*'(.*)/ ) {
+		print OUT "$1'__CONFDIR__'$2\n";
             } elsif ( $file =~ /Lib.pm/ && /^(\s*my \$useFHS\s*=\s*)\d;/ ) {
                 print OUT "${1}0;\n";
             } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'[\w\d\.]+',/ ) {

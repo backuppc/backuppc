@@ -49,6 +49,7 @@ use Socket;
 use Cwd;
 use Digest::MD5;
 use Config;
+use Encode;
 
 use vars qw( $IODirentOk );
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -451,6 +452,10 @@ sub HostsMTime
 # $need is a hash of file attributes we need: type, inode, or nlink.
 # If set, these parameters are added to the returned hash.
 #
+# To support browsing pre-3.0.0 backups where the charset encoding
+# is typically iso-8859-1, the charsetLegacy option can be set in
+# $need to convert the path from utf8 and convert the names to utf8.
+#
 # If IO::Dirent is successful if will get type and inode for free.
 # Otherwise, a stat is done on each file, which is more expensive.
 #
@@ -459,6 +464,8 @@ sub dirRead
     my($bpc, $path, $need) = @_;
     my(@entries, $addInode);
 
+    from_to($path, "utf8", $need->{charsetLegacy})
+                        if ( $need->{charsetLegacy} ne "" );
     return if ( !opendir(my $fh, $path) );
     if ( $IODirentOk ) {
         @entries = sort({ $a->{inode} <=> $b->{inode} } readdirent($fh));
@@ -495,6 +502,14 @@ sub dirRead
     # sorted above)
     #
     @entries = sort({ $a->{inode} <=> $b->{inode} } @entries) if ( $addInode );
+    #
+    # for browing pre-3.0.0 backups, map iso-8859-1 to utf8 if requested
+    #
+    if ( $need->{charsetLegacy} ne "" ) {
+        for ( my $i = 0 ; $i < @entries ; $i++ ) {
+            from_to($entries[$i]{name}, $need->{charsetLegacy}, "utf8");
+        }
+    }
     return \@entries;
 }
 
@@ -504,9 +519,9 @@ sub dirRead
 #
 sub dirReadNames
 {
-    my($bpc, $path) = @_;
+    my($bpc, $path, $need) = @_;
 
-    my $entries = $bpc->dirRead($path);
+    my $entries = $bpc->dirRead($path, $need);
     return if ( !defined($entries) );
     my @names = map { $_->{name} } @$entries;
     return \@names;
@@ -711,7 +726,10 @@ sub ServerMesg
 {
     my($bpc, $mesg) = @_;
     return if ( !defined(my $fh = $bpc->{ServerFD}) );
+    $mesg =~ s/\n/\\n/g;
+    $mesg =~ s/\r/\\r/g;
     my $md5 = Digest::MD5->new;
+    $mesg = encode_utf8($mesg);
     $md5->add($bpc->{ServerSeed} . $bpc->{ServerMesgCnt}
             . $bpc->{Conf}{ServerMesgSecret} . $mesg);
     print($fh $md5->b64digest . " $mesg\n");

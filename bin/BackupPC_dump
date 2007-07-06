@@ -1012,9 +1012,9 @@ sub catch_signal
 		    "Aborting backup up after signal $sigName\n");
 
 	    #
-	    # Tell xfer to abort
+	    # Tell xfer to abort, but only if we actually started one
 	    #
-	    $xfer->abort($reason);
+	    $xfer->abort($reason) if ( defined($xfer) );
 
 	    #
 	    # Send ALRMs to BackupPC_tarExtract if we are using it
@@ -1417,6 +1417,7 @@ sub BackupSave
     $Backups[$i]{mangle}        = 1;     # name mangling always on for v1.04+
     $Backups[$i]{xferMethod}    = $Conf{XferMethod};
     $Backups[$i]{charset}       = $Conf{ClientCharset};
+    $Backups[$i]{version}       = $bpc->Version();
     #
     # Save the main backups file
     #

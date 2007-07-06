@@ -37,12 +37,11 @@
 package BackupPC::CGI::RestoreFile;
 
 use strict;
-use Encode;
 use BackupPC::CGI::Lib qw(:all);
 use BackupPC::FileZIO;
 use BackupPC::Attrib qw(:all);
 use BackupPC::View;
-
+use Encode qw/from_to/;
 
 sub action
 {
@@ -144,6 +143,8 @@ sub restoreFile
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_restore_backup_files2}}"));
     }
+    $bpc->ConfigRead($host);
+    %Conf = $bpc->Conf();
     ServerConnect();
     ErrorExit($Lang->{Empty_host_name}) if ( $host eq "" );
 
@@ -177,8 +178,19 @@ sub restoreFile
 				    || "application/octet-stream";
     my $fileName = $1 if ( $dir =~ /.*\/(.*)/ );
     $fileName =~ s/"/\\"/g;
+
     print "Content-Type: $contentType\n";
     print "Content-Transfer-Encoding: binary\n";
+
+    if ( $ENV{HTTP_USER_AGENT} =~ /\bmsie\b/i ) {
+        #
+        # Convert to cp1252 for MS IE.  TODO: find a way to get IE
+        # to accept UTF8 encoding.  Firefox accepts inline encoding
+        # using the "=?UTF-8?B?base64?=" format, but IE doesn't.
+        #
+        from_to($fileName, "utf8", "cp1252")
+                        if ( $Conf{ClientCharset} ne "" );
+    }
     print "Content-Disposition: attachment; filename=\"$fileName\"\n\n";
     while ( $f->read(\$data, 1024 * 1024) > 0 ) {
         print STDOUT $data;

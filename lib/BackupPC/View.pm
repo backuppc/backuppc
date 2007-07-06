@@ -64,10 +64,6 @@ sub new
                                 # are added to the returned hash.
                                 # See BackupPC::Lib::dirRead().
     }, $class;
-    for ( my $i = 0 ; $i < @{$m->{backups}} ; $i++ ) {
-	next if ( defined($m->{backups}[$i]{level}) );
-	$m->{backups}[$i]{level} = $m->{backups}[$i]{type} eq "incr" ? 1 : 0;
-    }
     $m->{topDir} = $m->{bpc}->TopDir();
     return $m;
 }
@@ -138,7 +134,7 @@ sub dirCache
         my $attr;
 	if ( $mangle ) {
 	    $attr = BackupPC::Attrib->new({ compress => $compress });
-	    if ( -f $attr->fileName($path) && !$attr->read($path) ) {
+	    if ( !$attr->read($path) ) {
                 $m->{error} = "Can't read attribute file in $path";
 		$attr = undef;
 	    }
@@ -402,7 +398,7 @@ sub dirHistory
         my $attr;
 	if ( $mangle ) {
 	    $attr = BackupPC::Attrib->new({ compress => $compress });
-	    if ( -f $attr->fileName($path) && !$attr->read($path) ) {
+	    if ( !$attr->read($path) ) {
                 $m->{error} = "Can't read attribute file in $path";
 		$attr = undef;
 	    }

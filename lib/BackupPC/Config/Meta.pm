@@ -312,7 +312,7 @@ use vars qw(%ConfigMeta);
     CgiURL	 	=> "string",
     Language	 	=> {
 	    type   => "select",
-	    values => [qw(de en es fr it nl pt_br)],
+	    values => [qw(de en es fr it nl pt_br zh_CN)],
     },
     CgiUserHomePageCheck => "string",
     CgiUserUrlCreate    => "string",

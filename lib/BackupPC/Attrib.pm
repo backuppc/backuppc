@@ -43,6 +43,7 @@ use strict;
 use Carp;
 use File::Path;
 use BackupPC::FileZIO;
+use Encode;
 require Exporter;
 
 use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
@@ -198,6 +199,8 @@ sub read
     my($data);
 
     $file = $a->fileName($dir, $file);
+    from_to($file, "utf8", $a->{charsetLegacy})
+                    if ( $a->{charsetLegacy} ne "" );
     my $fd = BackupPC::FileZIO->open($file, 0, $a->{compress});
     if ( !$fd ) {
 	$a->{_errStr} = "Can't open $file";
@@ -240,6 +243,8 @@ sub read
 	    }
 	}
 	(my $fileName, $data) = unpack("a$len a*", $data);
+        from_to($fileName, $a->{charsetLegacy}, "utf8")
+                        if ( $a->{charsetLegacy} ne "" );
 	my $nFldsW = @FldsUnixW;
 	my $nFldsN = @FldsUnixN;
 	if ( length($data) < 5 * $nFldsW + 4 * $nFldsN ) {

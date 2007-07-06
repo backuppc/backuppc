@@ -52,7 +52,7 @@ sub new
                     xferErrs xferBadFile xferBadShare tarErrs
                     compress sizeExistComp sizeNewComp
                     noFill fillFromNum mangle xferMethod level
-                    charset
+                    charset version
                 )],
         RestoreFields => [qw(
                     num startTime endTime result errorMsg nFiles size

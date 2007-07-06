@@ -121,98 +121,36 @@ EOF
 }
 
 ###########################################################################
-# Generate sysadmin warning messages
-###########################################################################
-my $mesg = "";
-
-my @badHosts = ();
-foreach my $host ( sort(keys(%Status)) ) {
-    next if ( ($Status{$host}{reason} ne "Reason_backup_failed"
-               && $Status{$host}{reason} ne "Reason_restore_failed")
-           || $Status{$host}{error} =~ /^lost network connection to host/ );
-    push(@badHosts, "$host ($Status{$host}{error})");
-}
-if ( @badHosts ) {
-    my $badHosts = join("\n  - ", sort(@badHosts));
-    $mesg .= <<EOF;
-The following hosts had an error that is probably caused by a
-misconfiguration.  Please fix these hosts:
-  - $badHosts
-
-EOF
-}
-
-#
-# Report if we skipped backups because the disk was too full
-#
-if ( $Info{DUDailySkipHostCntPrev} > 0 ) {
-    my $n = $Info{DUDailySkipHostCntPrev};
-    my $m = $Conf{DfMaxUsagePct};
-    $mesg .= <<EOF;
-Yesterday $n hosts were skipped because the file system containing
-$TopDir was too full.  The threshold in the
-configuration file is $m%, while yesterday the file system was
-up to $Info{DUDailyMaxPrev}% full.  Please find more space on the file system,
-or reduce the number of full or incremental backups that we keep.
-
-EOF
-}
-
-#
-# Check for bogus directories (probably PCs that are no longer
-# on the backup list)
-#
-my $d = DirHandle->new("$TopDir/pc") or die("Can't read $TopDir/pc: $!");
-my @oldDirs = ();
-my @files = $d->read;
-$d->close;
-foreach my $host ( @files ) {
-    next if ( $host =~ /^\./ || defined($Status{$host}) );
-    push(@oldDirs, "$TopDir/pc/$host");
-}
-if ( @oldDirs ) {
-    my $oldDirs = join("\n  - ", sort(@oldDirs));
-    $mesg .= <<EOF;
-The following directories are bogus and are not being used by
-BackupPC.  This typically happens when PCs are removed from the
-backup list.  If you don't need any old backups from these PCs you
-should remove these directories.  If there are machines on this
-list that should be backed up then there is a problem with the
-hosts file:
-  - $oldDirs
-
-EOF
-}
-
-if ( $mesg ne "" && $Conf{EMailAdminUserName} ne "" ) {
-    my $headers = $Conf{EMailHeaders};
-    $headers .= "\n" if ( $headers !~ /\n$/ );
-    $mesg = <<EOF;
-To: $Conf{EMailAdminUserName}
-Subject: BackupPC administrative attention needed
-$headers
-${mesg}Regards,
-PC Backup Genie
-EOF
-    SendMail($mesg);
-}
-
-###########################################################################
 # Generate per-host warning messages sent to each user
 ###########################################################################
 my $Hosts = $bpc->HostInfoRead();
+my @AdminBadHosts = ();
 
 foreach my $host ( sort(keys(%Status)) ) {
-    next if ( $Hosts->{$host}{user} eq "" );
     #
     # read any per-PC config settings (allowing per-PC email settings)
     #
     $bpc->ConfigRead($host);
     %Conf = $bpc->Conf();
     my $user = $Hosts->{$host}{user};
+
+    #
+    # Accumulate host errors for the admin email below
+    #
+    if ( ($Status{$host}{reason} eq "Reason_backup_failed"
+               || $Status{$host}{reason} eq "Reason_restore_failed")
+           && $Status{$host}{error} !~ /^lost network connection to host/
+           && !$Conf{BackupsDisable}
+       ) {
+        push(@AdminBadHosts, "$host ($Status{$host}{error})");
+    }
+
     next if ( time - $UserEmailInfo{$user}{lastTime}
-                        < $Conf{EMailNotifyMinDays} * 24*3600 );
-    next if ($Conf{XferMethod} eq "archive" );
+                        < $Conf{EMailNotifyMinDays} * 24*3600
+              || $Conf{XferMethod} eq "archive"
+              || $Conf{BackupsDisable}
+              || $Hosts->{$host}{user} eq ""
+          );
     my @Backups = $bpc->BackupInfoRead($host);
     my $numBackups = @Backups;
     if ( $numBackups == 0 ) {
@@ -326,6 +264,80 @@ foreach my $host ( sort(keys(%Status)) ) {
                         }) if ( !defined($Jobs{$host}) );
     }
 }
+
+###########################################################################
+# Generate sysadmin warning message
+###########################################################################
+my $adminMesg = "";
+
+if ( @AdminBadHosts ) {
+    my $badHosts = join("\n  - ", sort(@AdminBadHosts));
+    $adminMesg .= <<EOF;
+The following hosts had an error that is probably caused by a
+misconfiguration.  Please fix these hosts:
+  - $badHosts
+
+EOF
+}
+
+#
+# Report if we skipped backups because the disk was too full
+#
+if ( $Info{DUDailySkipHostCntPrev} > 0 ) {
+    my $n = $Info{DUDailySkipHostCntPrev};
+    my $m = $Conf{DfMaxUsagePct};
+    $adminMesg .= <<EOF;
+Yesterday $n hosts were skipped because the file system containing
+$TopDir was too full.  The threshold in the
+configuration file is $m%, while yesterday the file system was
+up to $Info{DUDailyMaxPrev}% full.  Please find more space on the file system,
+or reduce the number of full or incremental backups that we keep.
+
+EOF
+}
+
+#
+# Check for bogus directories (probably PCs that are no longer
+# on the backup list)
+#
+my $d = DirHandle->new("$TopDir/pc") or die("Can't read $TopDir/pc: $!");
+my @oldDirs = ();
+my @files = $d->read;
+$d->close;
+foreach my $host ( @files ) {
+    next if ( $host =~ /^\./ || defined($Status{$host}) );
+    push(@oldDirs, "$TopDir/pc/$host");
+}
+if ( @oldDirs ) {
+    my $oldDirs = join("\n  - ", sort(@oldDirs));
+    $adminMesg .= <<EOF;
+The following directories are bogus and are not being used by
+BackupPC.  This typically happens when PCs are removed from the
+backup list.  If you don't need any old backups from these PCs you
+should remove these directories.  If there are machines on this
+list that should be backed up then there is a problem with the
+hosts file:
+  - $oldDirs
+
+EOF
+}
+
+if ( $adminMesg ne "" && $Conf{EMailAdminUserName} ne "" ) {
+    my $headers = $Conf{EMailHeaders};
+    $headers .= "\n" if ( $headers !~ /\n$/ );
+    $adminMesg = <<EOF;
+To: $Conf{EMailAdminUserName}
+Subject: BackupPC administrative attention needed
+$headers
+${adminMesg}Regards,
+PC Backup Genie
+EOF
+    SendMail($adminMesg);
+}
+
+###########################################################################
+# Save email state and exit
+###########################################################################
 if ( !$opts{t} ) {
     $Data::Dumper::Indent = 1;
     my $dumpStr = Data::Dumper->Dump(
@@ -337,6 +349,7 @@ if ( !$opts{t} ) {
         close(HOST);
     }
 }
+exit(0);
 
 sub user2name
 {
@@ -386,7 +399,13 @@ sub SendMail
     	printf("Can't run sendmail ($Conf{SendmailPath}): $!\n");
 	return;
     }
-    binmode(MAIL, ":utf8") if ( $utf8 );
+    if ( $utf8 ) {
+	binmode(MAIL, ":utf8");
+	if ($mesg =~ /^Subject: (.*)$/m) {
+		my $new_subj = encode('MIME-Header', $1);
+		$mesg =~ s/^Subject: .*$/Subject: $new_subj/m;
+	}
+    }
     print MAIL $mesg;
     close(MAIL);
 }

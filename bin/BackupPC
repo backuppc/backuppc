@@ -59,6 +59,7 @@ use vars qw(%Status %Info $Hosts);
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
+use Encode;
 
 use File::Path;
 use Data::Dumper;
@@ -1266,7 +1267,7 @@ sub Main_Check_Client_Messages
                 last;
             }
             $Clients{$client}{mesgCnt}++;
-            $cmd = $2;
+            $cmd = decode_utf8($2);
             if ( $cmd =~ /^stop (\S+)\s+(\S+)\s+(\S*)/ ) {
                 $host = $1;
                 my $user = $2;

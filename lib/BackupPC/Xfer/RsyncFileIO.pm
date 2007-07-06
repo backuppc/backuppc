@@ -436,6 +436,8 @@ sub attribSet
     my($fio, $f, $placeHolder) = @_;
     my($dir, $file);
 
+    return if ( $placeHolder && $fio->{phase} > 0 );
+
     if ( $f->{name} =~ m{(.*)/(.*)}s ) {
 	$file = $2;
 	$dir  = "$fio->{shareM}/" . $1;
@@ -447,10 +449,13 @@ sub attribSet
 	$file = $f->{name};
     }
 
-    if ( !defined($fio->{attribLastDir}) || $fio->{attribLastDir} ne $dir ) {
+    if ( $dir ne ""
+            && (!defined($fio->{attribLastDir}) || $fio->{attribLastDir} ne $dir) ) {
         #
         # Flush any directories that don't match the first part
-        # of the new directory
+        # of the new directory.  Don't flush the top-level directory
+        # (ie: $dir eq "") since the "." might get sorted in the middle
+        # of other top-level directories or files.
         #
         foreach my $d ( keys(%{$fio->{attrib}}) ) {
             next if ( $d eq "" || "$dir/" =~ m{^\Q$d/} );
@@ -459,17 +464,29 @@ sub attribSet
 	$fio->{attribLastDir} = $dir;
     }
     if ( !exists($fio->{attrib}{$dir}) ) {
+        $fio->log("attribSet: dir=$dir not found") if ( $fio->{logLevel} >= 4 );
         $fio->{attrib}{$dir} = BackupPC::Attrib->new({
 				     compress => $fio->{xfer}{compress},
 				});
-	my $path = $fio->{outDir} . $dir;
-        if ( -f $fio->{attrib}{$dir}->fileName($path)
-                    && !$fio->{attrib}{$dir}->read($path) ) {
-            $fio->log(sprintf("Unable to read attribute file %s",
+        my $dirM = $dir;
+	$dirM = $1 . "/" . $fio->{bpc}->fileNameMangle($2)
+			if ( $dirM =~ m{(.*?)/(.*)}s );
+	my $path = $fio->{outDir} . $dirM;
+        if ( -f $fio->{attrib}{$dir}->fileName($path) ) {
+            if ( !$fio->{attrib}{$dir}->read($path) ) {
+                $fio->log(sprintf("Unable to read attribute file %s",
 			    $fio->{attrib}{$dir}->fileName($path)));
+            } else {
+                $fio->log(sprintf("attribRead file %s",
+			    $fio->{attrib}{$dir}->fileName($path)))
+                                     if ( $fio->{logLevel} >= 4 );
+            }
         }
+    } else {
+        $fio->log("attribSet: dir=$dir exists") if ( $fio->{logLevel} >= 4 );
     }
-    $fio->log("attribSet(dir=$dir, file=$file)") if ( $fio->{logLevel} >= 4 );
+    $fio->log("attribSet(dir=$dir, file=$file, size=$f->{size}, placeholder=$placeHolder)")
+                        if ( $fio->{logLevel} >= 4 );
 
     my $mode = $f->{mode};
 
@@ -490,11 +507,6 @@ sub attribWrite
     my($fio, $d) = @_;
     my($poolWrite);
 
-    #
-    # Don't write attributes on 2nd phase - they're already
-    # taken care of during the first phase.
-    #
-    return if ( $fio->{phase} > 0 );
     if ( !defined($d) ) {
         #
         # flush all entries (in reverse order)
@@ -505,6 +517,7 @@ sub attribWrite
         return;
     }
     return if ( !defined($fio->{attrib}{$d}) );
+
     #
     # Set deleted files in the attributes.  Any file in the view
     # that doesn't have attributes is flagged as deleted for
@@ -541,7 +554,7 @@ sub attribWrite
 				}) if ( $fio->{logLevel} >= 2
                                       && $a->{type} == BPC_FTYPE_FILE );
 		    }
-		} elsif ( !$fio->{full} ) {
+		} elsif ( $fio->{phase} == 0 && !$fio->{full} ) {
 		    ##print("Delete file $f\n");
 		    $fio->logFileAction("delete", {
 				%{$fio->{viewCache}{$d}{$f}},
@@ -559,7 +572,7 @@ sub attribWrite
 	    }
 	}
     }
-    if ( $fio->{attrib}{$d}->fileCount ) {
+    if ( $fio->{attrib}{$d}->fileCount || $fio->{phase} > 0 ) {
         my $data = $fio->{attrib}{$d}->writeData;
 	my $dirM = $d;
 

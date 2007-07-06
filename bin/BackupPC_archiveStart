@@ -1,0 +1,120 @@
+#!/bin/perl
+#============================================================= -*-perl-*-
+#
+# BackupPC_archiveStart: start an archive request from the
+# command line.
+#
+# DESCRIPTION
+#  
+#   Usage: BackupPC_archiveStart archiveHost userName hosts...
+#
+#   Initiates an archive request on archive host archiveHost
+#   for the listed hosts.  The latest backup for each host is
+#   archived.  The userName is name of the requesting user,
+#   which appears in the log files.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2007  Craig Barratt
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+#========================================================================
+#
+# Version 3.0.0, released 28 Jan 2007.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+no  utf8;
+use lib "/usr/local/BackupPC/lib";
+use Getopt::Std;
+use BackupPC::Lib;
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+
+my %opts;
+
+# no options currently
+if ( !getopts("", \%opts) || @ARGV < 3 ) {
+    print STDERR <<EOF;
+usage: $0 archiveHost userName hosts...
+EOF
+    exit(1);
+}
+
+my $Hosts       = $bpc->HostInfoRead();
+my $ArchiveHost = $ARGV[0];
+my $UserName    = $ARGV[1];
+my $TopDir      = $bpc->{Conf}{TopDir};
+
+if ( !defined($Hosts->{$ArchiveHost}) ) {
+    print(STDERR "$0: archive host $ArchiveHost doesn't exist... quitting\n");
+    exit(1);
+}
+$bpc->ConfigRead($ArchiveHost);
+
+my(@HostList, @BackupList);
+for ( my $i = 2 ; $i < @ARGV ; $i++ ) {
+    my $host = $ARGV[$i];
+    if ( !defined($Hosts->{$host}) ) {
+        print(STDERR "$0: host $host doesn't exist... quitting\n");
+        exit(1);
+    }
+    my @backups = $bpc->BackupInfoRead($host);
+    if ( !@backups ) {
+        print(STDERR "$0: host $host doesn't have any backups... quitting\n");
+        exit(1);
+    }
+    push(@HostList, $host);
+    push(@BackupList, $backups[$#backups]{num});
+}
+
+my $ReqFileName;
+for ( my $i = 0 ; ; $i++ ) {
+    $ReqFileName="archiveReq.$$.$i";
+    last if ( !-f "$TopDir/pc/$ArchiveHost/$ReqFileName" );
+}
+my %ArchiveReq = (
+    archiveloc  => $bpc->{Conf}{ArchiveDest},
+    archtype    => 0,
+    compression => $bpc->{Conf}{CatPath},
+    compext     => '.raw',
+    parfile     => $bpc->{Conf}{ArchivePar},
+    splitsize   => '0000000',
+    host        => $ArchiveHost,
+    HostList    => \@HostList,
+    BackupList  => \@BackupList,
+    user        => $UserName,
+    reqTime     => time,
+);
+my $archive = Data::Dumper->new([\%ArchiveReq], [qw(*ArchiveReq)]);
+$archive->Indent(1);
+if ( !open(REQ, ">", "$TopDir/pc/$ArchiveHost/$ReqFileName") ) {
+    print(STDERR "$0: can't open/write request file $TopDir/pc/$ArchiveHost/$ReqFileName... quitting\n");
+    exit(1);
+}
+binmode(REQ);
+print REQ $archive->Dump;
+close(REQ);
+$bpc->ServerConnect($bpc->{Conf}{ServerHost}, $bpc->{Conf}{ServerPort});
+my $reply = $bpc->ServerMesg("archive $UserName $ArchiveHost $ReqFileName");
+$bpc->ServerDisconnect();
+print("Sent archive request, reply: $reply\n");
+exit(0);

@@ -123,7 +123,12 @@ $Lang{BackupPC_Summary} = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
-此状态报告生成于 \$now。
+<ul>
+<li>此状态报告生成于 \$now。
+<li>备份池文件系统磁盘空间占用率是 \$Info{DUlastValue}%
+    （统计于 \$DUlastTime），今天的最大占用率是 \$Info{DUDailyMax}%（统计于 \$DUmaxTime），
+    昨天的最大占用率是 \$Info{DUDailyMaxPrev}%。
+</ul>
 </p>
 
 \${h2("已成功完成备份的客户机")}
@@ -136,7 +141,7 @@ $Lang{BackupPC_Summary} = <<EOF;
      （被压缩前值）。
 </ul>
 </p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> 客户机 </td>
     <td align="center"> 用户 </td>
     <td align="center"> 完全备份个数 </td>
@@ -155,7 +160,7 @@ $Lang{BackupPC_Summary} = <<EOF;
 <p>
 有 \$hostCntNone 台客户机从未被备份过。
 <p>
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> 客户机 </td>
     <td align="center"> 用户 </td>
     <td align="center"> 完全备份个数 </td>

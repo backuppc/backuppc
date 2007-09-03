@@ -19,7 +19,7 @@
 #   Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2006  Craig Barratt
+#   Copyright (C) 2001-2007  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0alpha, released 8 Jul 2006.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1286,7 +1286,7 @@ Craig Barratt <cbarratt@users.sourceforge.net>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2006  Craig Barratt.
+Copyright (C) 2001-2007  Craig Barratt.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

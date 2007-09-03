@@ -15,7 +15,7 @@
 #   Based on Archive::Zip::FileMember, Copyright (c) 2000 Ned Konz.
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2003  Craig Barratt
+#   Copyright (C) 2002-2007  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by

@@ -10,7 +10,7 @@
 #   Rich Duzenbury (rduz at theduz dot com)
 #
 # COPYRIGHT
-#   Copyright (C) 2005  Rich Duzenbury and Craig Barratt
+#   Copyright (C) 2005-2007  Rich Duzenbury and Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by

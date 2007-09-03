@@ -8,7 +8,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2003  Craig Barratt
+#   Copyright (C) 2002-2007  Craig Barratt
 #
 #========================================================================
 #

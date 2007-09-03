@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -93,11 +93,21 @@ our %ConfigMenu = (
 	    {name => "Bzip2Path"},
 
             {text => "CfgEdit_Title_Install_Paths"},
-            {name => "TopDir"},
-            {name => "ConfDir"},
-            {name => "LogDir"},
+            #
+            # Can only edit TopDir and LogDir if we are in FHS mode.
+            # Otherwise they are hardcoded in lib/BackupPC/Lib.pm.
+            #
+            {name => "TopDir",
+                    visible => sub { return $_[1]->useFHS(); } },
+            {name => "LogDir",
+                    visible => sub { return $_[1]->useFHS(); } },
 	    {name => "CgiDir"},
-	    {name => "InstallDir"},
+            #
+            # Cannot edit ConfDir or InstallDir, since the real value is hardcoded in
+            # lib/BackupPC/Lib.pm.
+            # {name => "ConfDir"},
+	    # {name => "InstallDir"},
+            #
         ],
     },
     email => {
@@ -161,6 +171,7 @@ our %ConfigMenu = (
             {name => "XferMethod", onchangeSubmit => 1},
             {name => "XferLogLevel"},
             {name => "ClientCharset"},
+            {name => "ClientCharsetLegacy"},
 
             {text => "CfgEdit_Title_Smb_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
@@ -758,7 +769,7 @@ EOF
 
         next if ( $disabled || $menuDisable{$menu}{top} );
         if ( ref($paramInfo->{visible}) eq "CODE"
-                        && !&{$paramInfo->{visible}}($newConf) ) {
+                        && !&{$paramInfo->{visible}}($newConf, $bpc) ) {
             next;
         }
 

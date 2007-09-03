@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/bin/perl
 
 #my %lang;
 #use strict;

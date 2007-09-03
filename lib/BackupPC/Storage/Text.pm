@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -85,16 +85,15 @@ sub BackupInfoRead
     }
     close(LOCK);
     #
-    # Default the level and version fields if not present
+    # Default the version field.  Prior to 3.0.0 the xferMethod
+    # field is empty, so we use that to figure out the version.
     #
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-        if ( defined($Backups[$i]{level}) ) {
-            if ( !defined($Backups[$i]{version}) ) {
-                $Backups[$i]{version} = "3.0.0";
-            }
-        } else {
-            $Backups[$i]{level} = $Backups[$i]{type} eq "incr" ? 1 : 0;
+        next if ( $Backups[$i]{version} ne "" );
+        if ( $Backups[$i]{xferMethod} eq "" ) {
             $Backups[$i]{version} = "2.1.2";
+        } else {
+            $Backups[$i]{version} = "3.0.0";
         }
     }
     return @Backups;

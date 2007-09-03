@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,7 +38,7 @@ package BackupPC::CGI::RestoreInfo;
 
 use strict;
 use BackupPC::CGI::Lib qw(:all);
-use Encode;
+use Encode qw/decode_utf8/;
 
 sub action
 {
@@ -89,6 +89,8 @@ sub action
 <tr><td>$RestoreReq{hostSrc}:/$strippedShareSrc$f</td><td>$RestoreReq{hostDest}:/$strippedShareDest$targetFile</td></tr>
 EOF
     }
+    $RestoreReq{shareSrc}  = decode_utf8($RestoreReq{shareSrc});
+    $RestoreReq{shareDest} = decode_utf8($RestoreReq{shareDest});
     my $content = eval("qq{$Lang->{Restore___num_details_for__host2}}");
     Header(eval("qq{$Lang->{Restore___num_details_for__host}}"),$content);
     Trailer();

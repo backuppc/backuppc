@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -43,7 +43,7 @@ use strict;
 use Carp;
 use File::Path;
 use BackupPC::FileZIO;
-use Encode;
+use Encode qw/from_to/;
 require Exporter;
 
 use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
@@ -243,6 +243,7 @@ sub read
 	    }
 	}
 	(my $fileName, $data) = unpack("a$len a*", $data);
+
         from_to($fileName, $a->{charsetLegacy}, "utf8")
                         if ( $a->{charsetLegacy} ne "" );
 	my $nFldsW = @FldsUnixW;

@@ -415,6 +415,28 @@ with mod_perl support.
 
 =back
 
+=head2 What type of storage space do I need?
+
+BackupPC uses hardlinks to pool files common to different backups.
+Therefore BackupPC's data store (__TOPDIR__) must point to a single
+file system that supports hardlinks.  You cannot split this file
+system with multiple mount points or using symbolic links to point a
+sub-directory to a different file system (it is ok to use a single
+symbolic link at the top-level directory (__TOPDIR__) to point the
+entire data store somewhere else).  You can of course use any kind of
+RAID system or logical volume manager that combines the capacity of
+multiple disks into a single, larger, file system. Such approaches
+have the advantage that the file system can be expanded without having
+to copy it.
+
+Any standard linux or unix file system supports hardlinks.  NFS mounted
+file systems work too (provided the underlying file system supports
+hardlinks).  But windows based FAT and NTFS file systems will not work.
+
+Starting with BackupPC 3.1.0, run-time checks are done at startup and
+at the start of each backup to ensure that the file system can support
+hardlinks, since this is a common area of configuration problems.
+
 =head2 How much disk space do I need?
 
 Here's one real example for an environment that is backing up 65 laptops
@@ -1618,58 +1640,27 @@ incremental or full backup.
 
 The usage is:
 
-   BackupPC_tarCreate [-t] [-h host] [-n dumpNum] [-s shareName]
-		    [-r pathRemove] [-p pathAdd] [-b BLOCKS] [-w writeBufSz]
-                    files/directories...
+    BackupPC_tarCreate [options] files/directories...
+    Required options:
+       -h host         host from which the tar archive is created
+       -n dumpNum      dump number from which the tar archive is created
+                       A negative number means relative to the end (eg -1
+                       means the most recent dump, -2 2nd most recent etc).
+       -s shareName    share name from which the tar archive is created
+  
+    Other options:
+       -t              print summary totals
+       -r pathRemove   path prefix that will be replaced with pathAdd
+       -p pathAdd      new path prefix
+       -b BLOCKS       BLOCKS x 512 bytes per record (default 20; same as tar)
+       -w writeBufSz   write buffer size (default 1048576 = 1MB)
+       -e charset      charset for encoding file names (default: value of
+                       $Conf{ClientCharset} when backup was done)
+       -l              just print a file listing; don't generate an archive
+       -L              just print a detailed file listing; don't generate an archive
 
 The command-line files and directories are relative to the specified
 shareName.  The tar file is written to stdout.
-
-The required options are:
-
-=over 4
-
-=item -h host
-
-host from which the tar archive is created
-
-=item -n dumpNum
-
-dump number from which the tar archive is created
-
-=item -s shareName
-
-share name from which the tar archive is created
-
-=back
-
-Other options are:
-
-=over 4
-
-=item -t
-
-print summary totals
-
-=item -r pathRemove
-
-path prefix that will be replaced with pathAdd
-
-=item -p pathAdd
-
-new path prefix
-
-=item -b BLOCKS
-
-the tar block size, default is 20, meaning tar writes data in 20 * 512
-bytes chunks.
-
-=item -w writeBufSz
-
-write buffer size, default 1048576 (1MB).  You can increase this if
-you are trying to stream to a fast tape device.
-
-=back
 
 The -h, -n and -s options specify which dump is used to generate
 the tar archive.  The -r and -p options can be used to relocate
@@ -1685,57 +1676,27 @@ incremental or full backup.
 
 The usage is:
 
-   BackupPC_zipCreate [-t] [-h host] [-n dumpNum] [-s shareName]
-		    [-r pathRemove] [-p pathAdd] [-c compressionLevel]
-                   files/directories...
+    BackupPC_zipCreate [options] files/directories...
+    Required options:
+       -h host         host from which the zip archive is created
+       -n dumpNum      dump number from which the tar archive is created
+                       A negative number means relative to the end (eg -1
+                       means the most recent dump, -2 2nd most recent etc).
+       -s shareName    share name from which the zip archive is created
+  
+    Other options:
+       -t              print summary totals
+       -r pathRemove   path prefix that will be replaced with pathAdd
+       -p pathAdd      new path prefix
+       -c level        compression level (default is 0, no compression)
+       -e charset      charset for encoding file names (default: cp1252)
 
 The command-line files and directories are relative to the specified
-shareName.  The zip file is written to stdout.
-
-The required options are:
-
-=over 4
-
-=item -h host
-
-host from which the zip archive is created
-
-=item -n dumpNum
-
-dump number from which the zip archive is created
-
-=item -s shareName
-
-share name from which the zip archive is created
-
-=back
-
-Other options are:
-
-=over 4
-
-=item -t
-
-print summary totals
-
-=item -r pathRemove
-
-path prefix that will be replaced with pathAdd
-
-=item -p pathAdd
-
-new path prefix
-
-=item -c level
-
-compression level (default is 0, no compression)
-
-=back
-
-The -h, -n and -s options specify which dump is used to generate
-the zip archive.  The -r and -p options can be used to relocate
-the paths in the zip archive so extracted files can be placed
-in a location different from their original location.
+shareName.  The zip file is written to stdout. The -h, -n and -s
+options specify which dump is used to generate the zip archive.  The
+-r and -p options can be used to relocate the paths in the zip archive
+so extracted files can be placed in a location different from their
+original location.
 
 =back
 
@@ -1793,6 +1754,17 @@ to archive and press the "Archive Selected Hosts" button.
 The next screen allows you to adjust the parameters for this archive run.
 Press the "Start the Archive" to start archiving the selected hosts with the
 parameters displayed.
+
+=head2 Starting an Archive from the command line
+
+The script BackupPC_archiveStart can be used to start an archive from
+the command line (or cron etc).  The usage is:
+
+    BackupPC_archiveStart archiveHost userName hosts...
+
+This creates an archive of the most recent backup of each of
+the specified hosts.  The first two arguments are the archive
+host and the user name making the request.
 
 =head1 Other CGI Functions
 

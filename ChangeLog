@@ -21,8 +21,16 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Added some performance improvements to BackupPC::Xfer::RsyncFileIO
-  for the case of small files with cached checksums.
+* Added new script BackupPC_archiveStart that allows command-line
+  starting of archives.  Based on script written by Sergey Kovzik,
+  which in turn was based on an earlier version by Holger Parplies.
+
+* Added Simplified Chinese CGI translation from Youlin Feng,
+  plus fixed a couple of cases where utf8 share names were
+  not displayed correctly.
+
+* Added sorting by column feature to host summary table in CGI
+  interface.  Implemented by Jeremy Tietsort.
 
 * Added optional support for IO::Dirent which allows inode information
   to be extracted from the dirent directory structure.  This allows
@@ -31,10 +39,14 @@
   gain.  On other file systems there is no real improvement.  This
   optimization is turned on automatically if IO::Dirent is installed.
 
-* Added sorting by column feature to host summary table in CGI
-  interface.  Implemented by Jeremy Tietsort.
+* Added some performance improvements to BackupPC::Xfer::RsyncFileIO
+  for the case of small files with cached checksums.
 
-* Added Simplified Chinese CGI translation from Youlin Feng.
+* Added check to BackupPC at startup that $TopDir can support
+  hardlinks. Also added check to BackupPC_dump that a hardlink
+  below $TopDir/pc/HOST can be made to below $TopDir/cpool.
+  Also added the need for a hard-link capable file system to
+  the documentation.  Suggested by Nils Breunese.
 
 * Added FreeBSD init.d file provided by Gabriel Rossetti.
 
@@ -42,11 +54,36 @@
   provide a file list (without creating the archive).
   Requested by Dirk.
 
+* Made the default charset for BackupPC_zipCreate cp1252, which
+  appears to work correctly with WinZip.  Unfortunately there is
+  no clear standard for charset encoding in zip files.
+
+* Added support so that pre-3.0 backups with non-utf8 charsets
+  can be viewed and restored correctly.  A new config variable
+  $Conf{ClientCharsetLegacy} specifies the charset used to
+  encode file names in legacy backups.  This is only relevant
+  if you are trying to view or restore a backup made with
+  BackupPC 2.x and some of the file names have non-ascii
+  characters.
+
+* Added setting of the environment variable BPC_REQUSER to
+  the requesting user name in BackupPC prior to fork(), so
+  each child process inherits the value.  Submitted by
+  Holger Parplies.
+
+* Fixed bug in rsync incrementals that happens on particular
+  file names when a file being backed up fails in both rsync
+  phases.  Reported by Dan Smisko.
+
 * Fixed single-restore file name charsets for IE, reported by
   Francis Lessard.
 
 * Fixed makeDist so that the --config-dir option to configure.pl
   works correctly.  Reported by Randy Barlow, Tony Shadwick and others.
+
+* Removed ConfDir from config editor (since it is hardcoded in
+  lib/BackupPC/Lib.pm).  Also made TopDir and LogDir only visible
+  if useFHS (for non-FHS they are hardcoded in lib/BackupPC/Lib.pm).
 
 * Applied patch from Holger Parplies that fixes cleanup of early abort
   in BackupPC_dump.

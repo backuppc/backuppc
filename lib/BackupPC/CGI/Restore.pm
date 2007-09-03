@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -40,7 +40,7 @@ use strict;
 use BackupPC::CGI::Lib qw(:all);
 use Data::Dumper;
 use File::Path;
-use Encode;
+use Encode qw/decode_utf8/;
 
 sub action
 {
@@ -80,7 +80,7 @@ EOF
 EOF
     }
     $hiddenStr .= "<input type=\"hidden\" name=\"fcbMax\" value=\"$In{fcbMax}\">\n";
-    $hiddenStr .= "<input type=\"hidden\" name=\"share\" value=\"${EscHTML($share)}\">\n";
+    $hiddenStr .= "<input type=\"hidden\" name=\"share\" value=\"${EscHTML(decode_utf8($share))}\">\n";
     $badFileCnt++ if ( $In{pathHdr} =~ m{(^|/)\.\.(/|$)} );
     $badFileCnt++ if ( $In{num} =~ m{(^|/)\.\.(/|$)} );
     if ( @fileList == 0 ) {
@@ -113,7 +113,8 @@ EOF
         # Tell the user what options they have
         #
         $pathHdr = decode_utf8($pathHdr);
-	$content .= eval("qq{$Lang->{Restore_Options_for__host2}}");
+        $share   = decode_utf8($share);
+	$content = eval("qq{$Lang->{Restore_Options_for__host2}}");
 
         if ( @hosts == 1 ) {
             #

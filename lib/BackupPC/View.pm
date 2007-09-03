@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -46,6 +46,7 @@ use BackupPC::Lib;
 use BackupPC::Attrib qw(:all);
 use BackupPC::FileZIO;
 use Data::Dumper;
+use Encode qw/from_to/;
 
 sub new
 {
@@ -109,7 +110,8 @@ sub dirCache
 	push(@{$m->{mergeNums}}, $backupNum);
 	my $mangle   = $m->{backups}[$i]{mangle};
 	my $compress = $m->{backups}[$i]{compress};
-	my $path = "$m->{topDir}/pc/$m->{host}/$backupNum/";
+	my $path     = "$m->{topDir}/pc/$m->{host}/$backupNum/";
+	my $legacyCharset = $m->{backups}[$i]{version} < 3.0;
         my $sharePathM;
         if ( $mangle ) {
             $sharePathM = $m->{bpc}->fileNameEltMangle($share)
@@ -118,9 +120,17 @@ sub dirCache
             $sharePathM = $share . $dir;
         }
         $path .= $sharePathM;
-	#print(STDERR "Opening $path (share=$share)\n");
+        #print(STDERR "Opening $path (share=$share, mangle=$mangle)\n");
 
-        my $dirInfo = $m->{bpc}->dirRead($path, $m->{dirOpts});
+        my $dirOpts    = { %{$m->{dirOpts} || {} } };
+        my $attribOpts = { compress => $compress };
+        if ( $legacyCharset ) {
+            $dirOpts->{charsetLegacy}
+                    = $attribOpts->{charsetLegacy}
+                    = $m->{bpc}->{Conf}{ClientCharsetLegacy} || "iso-8859-1";
+        }
+
+        my $dirInfo = $m->{bpc}->dirRead($path, $dirOpts);
 	if ( !defined($dirInfo) ) {
             if ( $i == $m->{idx} ) {
                 #
@@ -133,9 +143,9 @@ sub dirCache
         }
         my $attr;
 	if ( $mangle ) {
-	    $attr = BackupPC::Attrib->new({ compress => $compress });
+	    $attr = BackupPC::Attrib->new($attribOpts);
 	    if ( !$attr->read($path) ) {
-                $m->{error} = "Can't read attribute file in $path";
+                $m->{error} = "Can't read attribute file in $path: " . $attr->errStr();
 		$attr = undef;
 	    }
 	}
@@ -152,6 +162,7 @@ sub dirCache
 		    || $file eq "."
 		    || $file eq "backupInfo"
 		    || $mangle && $file eq "attrib" );
+
             if ( defined($attr) && defined(my $a = $attr->get($fileUM)) ) {
                 $m->{files}{$fileUM} = $a;
                 #
@@ -166,7 +177,12 @@ sub dirCache
                 # is on.  We have to stat the file and read compressed files
                 # to determine their size.
                 #
-                my @s = stat("$path/$file");
+                my $realPath = "$path/$file";
+
+                from_to($realPath, "utf8", $attribOpts->{charsetLegacy})
+                                if ( $attribOpts->{charsetLegacy} ne "" );
+
+                my @s = stat($realPath);
                 next if ( $i < $m->{idx} && -d _ );
                 $m->{files}{$fileUM} = {
                     type  => -d _ ? BPC_FTYPE_DIR : BPC_FTYPE_FILE,
@@ -180,10 +196,10 @@ sub dirCache
                     #
                     # Compute the correct size by reading the whole file
                     #
-                    my $f = BackupPC::FileZIO->open("$path/$file",
+                    my $f = BackupPC::FileZIO->open($realPath,
 						    0, $compress);
                     if ( !defined($f) ) {
-                        $m->{error} = "Can't open $path/$file";
+                        $m->{error} = "Can't open $realPath";
                     } else {
                         my($data, $size);
                         while ( $f->read(\$data, 65636 * 8) > 0 ) {
@@ -198,6 +214,8 @@ sub dirCache
             ($m->{files}{$fileUM}{sharePathM} = "$sharePathM/$file")
                                                                =~ s{//+}{/}g;
             ($m->{files}{$fileUM}{fullPath}   = "$path/$file") =~ s{//+}{/}g;
+            from_to($m->{files}{$fileUM}{fullPath}, "utf8", $attribOpts->{charsetLegacy})
+                                if ( $attribOpts->{charsetLegacy} ne "" );
             $m->{files}{$fileUM}{backupNum}   = $backupNum;
             $m->{files}{$fileUM}{compress}    = $compress;
 	    $m->{files}{$fileUM}{nlink}       = $entry->{nlink}
@@ -218,6 +236,8 @@ sub dirCache
 		$m->{files}{$fileUM}{relPath}    = "$dir/$fileUM";
 		$m->{files}{$fileUM}{sharePathM} = "$sharePathM/$file";
 		$m->{files}{$fileUM}{fullPath}   = "$path/$file";
+                from_to($m->{files}{$fileUM}{fullPath}, "utf8", $attribOpts->{charsetLegacy})
+                                    if ( $attribOpts->{charsetLegacy} ne "" );
 		$m->{files}{$fileUM}{backupNum}  = $backupNum;
 		$m->{files}{$fileUM}{compress}   = $compress;
 		$m->{files}{$fileUM}{nlink}      = 0;
@@ -378,6 +398,7 @@ sub dirHistory
 	my $mangle    = $m->{backups}[$i]{mangle};
 	my $compress  = $m->{backups}[$i]{compress};
 	my $path      = "$m->{topDir}/pc/$m->{host}/$backupNum/";
+	my $legacyCharset = $m->{backups}[$i]{version} < 3.0;
         my $sharePathM;
         if ( $mangle ) {
             $sharePathM = $m->{bpc}->fileNameEltMangle($share)
@@ -388,7 +409,15 @@ sub dirHistory
         $path .= $sharePathM;
 	#print(STDERR "Opening $path (share=$share)\n");
 
-        my $dirInfo = $m->{bpc}->dirRead($path, $m->{dirOpts});
+        my $dirOpts    = { %{$m->{dirOpts} || {} } };
+        my $attribOpts = { compress => $compress };
+        if ( $legacyCharset ) {
+            $dirOpts->{charsetLegacy}
+                    = $attribOpts->{charsetLegacy}
+                    = $m->{bpc}->{Conf}{ClientCharsetLegacy} || "iso-8859-1";
+        }
+
+        my $dirInfo = $m->{bpc}->dirRead($path, $dirOpts);
 	if ( !defined($dirInfo) ) {
 	    #
 	    # Oops, directory doesn't exist.
@@ -397,7 +426,7 @@ sub dirHistory
         }
         my $attr;
 	if ( $mangle ) {
-	    $attr = BackupPC::Attrib->new({ compress => $compress });
+	    $attr = BackupPC::Attrib->new($attribOpts);
 	    if ( !$attr->read($path) ) {
                 $m->{error} = "Can't read attribute file in $path";
 		$attr = undef;
@@ -415,7 +444,11 @@ sub dirHistory
 		    || $file eq "."
 		    || $mangle && $file eq "attrib"
 		    || defined($files->{$fileUM}[$i]) );
-	    my @s = stat("$path/$file");
+
+            my $realPath = "$path/$file";
+            from_to($realPath, "utf8", $attribOpts->{charsetLegacy})
+                            if ( $attribOpts->{charsetLegacy} ne "" );
+            my @s = stat($realPath);
             if ( defined($attr) && defined(my $a = $attr->get($fileUM)) ) {
                 $files->{$fileUM}[$i] = $a;
 		$attr->set($fileUM, undef);
@@ -437,7 +470,7 @@ sub dirHistory
                     #
                     # Compute the correct size by reading the whole file
                     #
-                    my $f = BackupPC::FileZIO->open("$path/$file",
+                    my $f = BackupPC::FileZIO->open("$realPath",
 						    0, $compress);
                     if ( !defined($f) ) {
                         $m->{error} = "Can't open $path/$file";

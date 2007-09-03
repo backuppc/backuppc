@@ -474,7 +474,7 @@ if ( $Conf{CgiDir} ne "" ) {
 
 BackupPC's CGI script needs to display various GIF images that
 should be stored where Apache can serve them.  They should be
-placed somewher under Apache's DocumentRoot.  BackupPC also
+placed somewhere under Apache's DocumentRoot.  BackupPC also
 needs to know the URL to access these images.  Example:
 
     Apache image directory:  /usr/local/apache/htdocs/BackupPC

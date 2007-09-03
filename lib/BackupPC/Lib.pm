@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -49,7 +49,7 @@ use Socket;
 use Cwd;
 use Digest::MD5;
 use Config;
-use Encode;
+use Encode qw/from_to encode_utf8/;
 
 use vars qw( $IODirentOk );
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
@@ -115,7 +115,7 @@ sub new
             useFHS     => $useFHS,
             TopDir     => $topDir,
             InstallDir => $installDir,
-            ConfDir    => $confDir eq "" ? '/etc/BackupPC' : $confDir,
+            ConfDir    => $confDir eq "" ? '/tera0/backup/BackupPC/conf' : $confDir,
             LogDir     => '/var/log/BackupPC',
         };
     } else {
@@ -130,7 +130,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '3.0.0',
+        Version => '3.1.0beta0',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -884,6 +884,33 @@ sub MakeFileLink
             return 0;
         }
     }
+}
+
+#
+# Tests if we can create a hardlink from a file in directory
+# $newDir to a file in directory $targetDir.  A temporary
+# file in $targetDir is created and an attempt to create a
+# hardlink of the same name in $newDir is made.  The temporary
+# files are removed.
+#
+# Like link(), returns true on success and false on failure.
+#
+sub HardlinkTest
+{
+    my($bpc, $targetDir, $newDir) = @_;
+
+    my($targetFile, $newFile, $fd);
+    for ( my $i = 0 ; ; $i++ ) {
+        $targetFile = "$targetDir/.TestFileLink.$$.$i";
+        $newFile    = "$newDir/.TestFileLink.$$.$i";
+        last if ( !-e $targetFile && !-e $newFile );
+    }
+    return 0 if ( !open($fd, ">", $targetFile) );
+    close($fd);
+    my $ret = link($targetFile, $newFile);
+    unlink($targetFile);
+    unlink($newFile);
+    return $ret;
 }
 
 sub CheckHostAlive

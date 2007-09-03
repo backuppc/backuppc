@@ -869,6 +869,17 @@ $Conf{XferLogLevel} = 1;
 $Conf{ClientCharset} = '';
 
 #
+# Prior to 3.x no charset conversion was done by BackupPC.  Backups were
+# stored in what ever charset the XferMethod provided - typically utf8
+# for smbclient and the client's locale settings for rsync and tar (eg:
+# cp1252 for rsync on WinXX and perhaps iso-8859-1 with rsync on linux).
+# This setting tells BackupPC the charset that was used to store file
+# names in old backups taken with BackupPC 2.x, so that non-ascii file
+# names in old backups can be viewed and restored.
+#
+$Conf{ClientCharsetLegacy} = 'iso-8859-1';
+
+#
 # Name of the host share that is backed up when using SMB.  This can be a
 # string or an array of strings if there are multiple shares per host.
 # Examples:
@@ -2034,6 +2045,7 @@ $Conf{CgiUserConfigEdit} = {
         BlackoutPeriods           => 1,
         BackupZeroFilesIsFatal    => 1,
         ClientCharset             => 1,
+        ClientCharsetLegacy       => 1,
         XferMethod                => 1,
         XferLogLevel              => 1,
         SmbShareName              => 1,

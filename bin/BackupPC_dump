@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -388,7 +388,6 @@ my(@lastIdxByLevel, $incrCntSinceFull);
 # as a starting point for an incremental.
 #
 @Backups = $bpc->BackupInfoRead($client);
-## @Backups = sort( { $a->{startTime} <=> $b->{startTime} }, @Backups);
 for ( my $i = 0 ; $i < @Backups ; $i++ ) {
     $needLink = 1 if ( $Backups[$i]{nFilesNew} eq ""
                         || -f "$Dir/NewFileList.$Backups[$i]{num}" );
@@ -455,6 +454,19 @@ if ( @Backups == 0
     }
 } else {
     NothingToDo($needLink);
+}
+
+if ( !$bpc->HardlinkTest($Dir, "$TopDir/cpool") ) {
+    print(LOG $bpc->timeStamp, "Can't create a test hardlink between a file"
+               . " in $Dir and $TopDir/cpool.  Either these are different"
+               . " file systems, or this file system doesn't support hardlinks,"
+               . " or these directories don't exist, or there is a permissions"
+               . " problem, or the file system is out of inodes or full.  Use"
+               . " df, df -i, and ls -ld to check each of these possibilities."
+               . " Quitting...\n");
+    print("test hardlink between $Dir and $TopDir/cpool failed\n");
+    print("link $clientURI\n") if ( $needLink );
+    exit(1);
 }
 
 #
@@ -907,6 +919,15 @@ if ( $type eq "full" && $stat{hostError} eq ""
 }
 
 $stat{xferOK} = 0 if ( $Abort );
+
+#
+# If there is no "new" directory then the backup is bad
+#
+if ( $stat{xferOK} && !-d "$Dir/new" ) {
+    $stat{hostError} = "No backup directory $Dir/new"
+                            if ( $stat{hostError} eq "" );
+    $stat{xferOK} = 0;
+}
 
 #
 # Do one last check to make sure it is still the machine we expect.
@@ -1379,6 +1400,7 @@ sub BackupSave
     # (the new backup might also be a partial, but that's ok).
     #
     BackupPartialRemove($client, \@Backups);
+    $needLink = 1 if ( -f "$Dir/NewFileList" );
 
     #
     # Number the new backup
@@ -1391,8 +1413,8 @@ sub BackupSave
     if ( !rename("$Dir/new", "$Dir/$num") ) {
         print(LOG $bpc->timeStamp, "Rename $Dir/new -> $Dir/$num failed\n");
         $stat{xferOK} = 0;
+        return;
     }
-    $needLink = 1 if ( -f "$Dir/NewFileList" );
 
     #
     # Add the new backup information to the backup file

@@ -21,8 +21,7 @@
 #       -r pathRemove   path prefix that will be replaced with pathAdd
 #       -p pathAdd      new path prefix
 #       -c level        compression level (default is 0, no compression)
-#       -e charset      charset for encoding file names (default: value of
-#                       $Conf{ClientCharset} when backup was done)
+#       -e charset      charset for encoding file names (default: cp1252)
 #
 #     The -h, -n and -s options specify which dump is used to generate
 #     the zip archive.  The -r and -p options can be used to relocate
@@ -52,7 +51,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -94,8 +93,7 @@ usage: $0 [options] files/directories...
      -r pathRemove   path prefix that will be replaced with pathAdd
      -p pathAdd      new path prefix
      -c level        compression level (default is 0, no compression)
-     -e charset      charset for encoding file names (default: value of
-                     \$Conf{ClientCharset} when backup was done)
+     -e charset      charset for encoding file names (default: cp1252)
 EOF
     exit(1);
 }
@@ -137,7 +135,7 @@ if ( $i >= @Backups ) {
     exit(1);
 }
 
-my $Charset = $Backups[$i]{charset};
+my $Charset = "cp1252";
 $Charset = $opts{e} if ( $opts{e} ne "" );
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );

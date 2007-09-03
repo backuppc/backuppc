@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -199,6 +199,7 @@ use vars qw(%ConfigMeta);
     XferLogLevel	=> "integer",
 
     ClientCharset       => "string",
+    ClientCharsetLegacy => "string",
 
     SmbShareName 	=> {
 	    type   => "list",
@@ -382,6 +383,7 @@ use vars qw(%ConfigMeta);
                 XferMethod                => "boolean",
                 XferLogLevel              => "boolean",
                 ClientCharset             => "boolean",
+                ClientCharsetLegacy       => "boolean",
                 SmbShareName              => "boolean",
                 SmbShareUserName          => "boolean",
                 SmbSharePasswd            => "boolean",

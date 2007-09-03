@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -37,7 +37,7 @@
 package BackupPC::CGI::Browse;
 
 use strict;
-use Encode;
+use Encode qw/decode_utf8/;
 use BackupPC::CGI::Lib qw(:all);
 use BackupPC::View;
 use BackupPC::Attrib qw(:all);
@@ -301,7 +301,8 @@ EOF
         }
         $filledBackup .= eval("qq{$Lang->{Visit_this_directory_in_backup}}");
     }
-    $dir = decode_utf8($dir);
+    $dir   = decode_utf8($dir);
+    $share = decode_utf8($share);
     my $content = eval("qq{$Lang->{Backup_browse_for__host}}");
     Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"), $content);
     Trailer();

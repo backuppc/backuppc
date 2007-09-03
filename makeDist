@@ -53,8 +53,8 @@ die("BackupPC::Lib->new failed\n")
 
 umask(0022);
 
-my $Version     = "3.1.0";
-my $ReleaseDate = "15 Apr 2007";
+my $Version     = "3.1.0beta0";
+my $ReleaseDate = "3 Sep 2007";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -157,6 +157,7 @@ $ConfVars->{LogDir}       = 2;
 $ConfVars->{ConfDir}      = 2;
 $ConfVars->{InstallDir}   = 2;
 $ConfVars->{CgiImageDir}  = 2;
+$ConfVars->{ClientCharsetLegacy}  = 2;      # actually used
 
 #
 # These config parameters are used in the code to be backward compatible,

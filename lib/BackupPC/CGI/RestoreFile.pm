@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -41,7 +41,7 @@ use BackupPC::CGI::Lib qw(:all);
 use BackupPC::FileZIO;
 use BackupPC::Attrib qw(:all);
 use BackupPC::View;
-use Encode qw/from_to/;
+use Encode qw/from_to decode_utf8/;
 
 sub action
 {
@@ -157,6 +157,10 @@ sub restoreFile
         ErrorExit("Can't restore bad file ${EscHTML($dir)} ($num, $share)");
     }
     my $f = BackupPC::FileZIO->open($a->{fullPath}, 0, $a->{compress});
+    if ( !defined($f) ) {
+        my $fullPath = decode_utf8($a->{fullPath});
+        ErrorExit("Unable to open file ${EscHTML($fullPath)} ($num, $share)");
+    }
     my $data;
     if ( !$skipHardLink && $a->{type} == BPC_FTYPE_HARDLINK ) {
 	#
@@ -182,7 +186,8 @@ sub restoreFile
     print "Content-Type: $contentType\n";
     print "Content-Transfer-Encoding: binary\n";
 
-    if ( $ENV{HTTP_USER_AGENT} =~ /\bmsie\b/i ) {
+    if ( $ENV{HTTP_USER_AGENT} =~ /\bmsie\b/i
+                && $ENV{HTTP_USER_AGENT} !~ /\bopera\b/i ) {
         #
         # Convert to cp1252 for MS IE.  TODO: find a way to get IE
         # to accept UTF8 encoding.  Firefox accepts inline encoding

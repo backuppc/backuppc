@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 3.0.0, released 28 Jan 2007.
+# Version 3.1.0beta0, released 3 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,7 +59,7 @@ use vars qw(%Status %Info $Hosts);
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
-use Encode;
+use Encode qw/decode_utf8/;
 
 use File::Path;
 use Data::Dumper;
@@ -248,20 +248,33 @@ sub Main_Initialize
     umask($Conf{UmaskMode});
 
     #
-    # Check for another running process, check that PASSWD is set and
-    # verify executables are configured correctly.
+    # Check for another running process, verify executables are configured
+    # correctly and make sure $TopDir is on a file system that supports
+    # hardlinks.
     #
     if ( $Info{pid} ne "" && kill(0, $Info{pid}) ) {
         print(STDERR $bpc->timeStamp,
                  "Another BackupPC is running (pid $Info{pid}); quitting...\n");
         exit(1);
     }
+
     foreach my $progName ( qw(SmbClientPath NmbLookupPath PingPath DfPath
                               SendmailPath SshPath) ) {
         next if ( $Conf{$progName} eq "" || -x $Conf{$progName} );
         print(STDERR $bpc->timeStamp,
                      "\$Conf{$progName} = '$Conf{$progName}' is not a"
                    . " valid executable program\n");
+        exit(1);
+    }
+
+    if ( !$bpc->HardlinkTest("$TopDir/pc", "$TopDir/cpool") ) {
+        print(STDERR $bpc->timeStamp, "Can't create a test hardlink between a file"
+                   . " in $TopDir/pc and $TopDir/cpool.  Either these are different"
+                   . " file systems, or this file system doesn't support hardlinks,"
+                   . " or these directories don't exist, or there is a permissions"
+                   . " problem, or the file system is out of inodes or full.  Use"
+                   . " df, df -i, and ls -ld to check each of these possibilities."  
+                   . " Quitting...\n");
         exit(1);
     }
 
@@ -522,6 +535,7 @@ sub Main_TryToRun_CmdQueue
         }
         if ( !$pid ) {
             setpgrp 0,0;
+            $ENV{BPC_REQUSER} = $req->{user};
             exec(@$cmd);
             print(LOG $bpc->timeStamp, "can't exec @$cmd for $host\n");
             exit(0);
@@ -1576,10 +1590,7 @@ sub StatusWrite
              [  \%Info, \%Status],
              [qw(*Info   *Status)]);
     $dump->Indent(1);
-    if ( open(STATUS, ">", "$LogDir/status.pl") ) {
-        print(STATUS $dump->Dump);
-        close(STATUS);
-    }
+    $bpc->{storage}->TextFileWrite("$LogDir/status.pl", $dump->Dump);
 }
 
 #

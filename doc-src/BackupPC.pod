@@ -2788,6 +2788,10 @@ Jono Woodhouse from CapeSoft Software (www.capesoft.com) provided a
 new CSS skin for 3.0.0 with several layout improvements.  Sean Cameron
 (also from CapeSoft) designed new and more compact file icons for 3.0.0.
 
+Youlin Feng provided the Chinese translation for 3.1.0.
+
+Jeremy Tietsort provided the host summary table sorting feature for 3.1.0.
+
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mail lists.
 

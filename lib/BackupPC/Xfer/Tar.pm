@@ -101,8 +101,7 @@ sub start
         if ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
             foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
             {
-                $file = $2 if ( $file =~ m{^(\./+|/+)(.*)}s );
-		$file = "./$file";
+                $file = "./$2" if ( $file =~ m{^(\./+|/+)(.*)}s );
                 $file = encode($conf->{ClientCharset}, $file)
                             if ( $conf->{ClientCharset} ne "" );
                 push(@fileList, "--exclude=$file");

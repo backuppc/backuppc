@@ -725,9 +725,14 @@ EOF
             ($mesg, my $hostChange) = hostsDiffMesg($hostsNew);
             $bpc->HostInfoWrite($hostsNew) if ( $hostChange );
             foreach my $host ( keys(%$copyConf) ) {
-                my $confData = $bpc->ConfigDataRead($copyConf->{$host});
+                #
+                # Currently host names are forced to lc when they
+                # are read from the hosts file.  Therefore we need
+                # to force the from and to hosts to lc.
+                #
+                my $confData = $bpc->ConfigDataRead(lc($copyConf->{$host}));
                 my $fromHost = $copyConf->{$host};
-                $err  .= $bpc->ConfigDataWrite($host, $confData);
+                $err  .= $bpc->ConfigDataWrite(lc($host), $confData);
                 $mesg .= eval("qq($Lang->{CfgEdit_Log_Copy_host_config})");
             }
 

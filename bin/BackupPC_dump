@@ -303,6 +303,7 @@ my $lastFullTime = 0;
 my $lastIncrTime = 0;
 my $partialIdx = -1;
 my $partialNum;
+my $partialFileCnt;
 my $lastBkupNum;
 my $lastPartial = 0;
 
@@ -405,9 +406,10 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
         $lastIncrTime = $Backups[$i]{startTime}
                 if ( $lastIncrTime < $Backups[$i]{startTime} );
     } elsif ( $Backups[$i]{type} eq "partial" ) {
-        $partialIdx  = $i;
-        $lastPartial = $Backups[$i]{startTime};
-        $partialNum  = $Backups[$i]{num};
+        $partialIdx     = $i;
+        $lastPartial    = $Backups[$i]{startTime};
+        $partialNum     = $Backups[$i]{num};
+        $partialFileCnt = $Backups[$i]{nFiles};
     }
 }
 
@@ -1128,7 +1130,9 @@ sub BackupFailCleanup
 
     #
     # We keep this backup if it is a full and we actually backed
-    # up some files.
+    # up some files.  If the prior backup was a partial too, we
+    # only keep this backup if it has more files than the previous
+    # partial.
     #
     if ( $type eq "full" ) {
 	if ( $nFilesTotal == 0 && $xfer->getStats->{fileCnt} == 0 ) {
@@ -1137,13 +1141,29 @@ sub BackupFailCleanup
 	    # directory just in case.
 	    #
 	    find(\&CheckForNewFiles, "$Dir/new");
-	    $keepPartial = 1 if ( $nFilesTotal );
-	} else {
-	    #
-	    # Xfer reported some files
-	    #
+        }
+        my $str;
+        if ( $nFilesTotal > $partialFileCnt
+                || $xfer->getStats->{fileCnt} > $partialFileCnt ) {
+            #
+            # If the last backup wasn't a partial then
+            # $partialFileCnt is undefined, so the above
+            # test is simply $nFilesTotal > 0
+            #
 	    $keepPartial = 1;
-	}
+            if ( $partialFileCnt ) {
+                $str = "Saving this as a partial backup\n";
+            } else {
+                $str = sprintf("Saving this as a partial backup, replacing the"
+                         . " prior one (got %d and %d files versus %d)\n",
+                         $nFilesTotal, $xfer->getStats->{fileCnt}, $partialFileCnt);
+            }
+	} else {
+            $str = sprintf("Not saving this as a partial backup since it has fewer"
+                     . " files than the prior one (got %d and %d files versus %d)\n",
+                     $nFilesTotal, $xfer->getStats->{fileCnt}, $partialFileCnt);
+        }
+        $XferLOG->write(\$str);
     }
 
     #

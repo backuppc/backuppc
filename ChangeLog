@@ -21,6 +21,27 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* When there is an existing partial, a new partials is only saved
+  if it has more files than the existing partial.  Requested by
+  Carl Soderstrom.
+
+* Fixed handling of $Conf{BackupFilesExclude} for tar XferMethod.
+  Patch supplied by Frans Pop.
+
+* Fixed numeric column sorting in host summary table, reported by
+  Michael Pellegrino.
+
+* Fixed host CGI editor so it creates the new host's config.pl file
+  using the lower-case host name, since host names are mapped to
+  lower case when they are read from the hosts file.  Reported by
+  Alexander Onic.
+
+* Applied documentation patches from Frans Pop.
+
+#------------------------------------------------------------------------
+# Version 3.1.0beta0, 3 Sep 2007
+#------------------------------------------------------------------------
+
 * Added new script BackupPC_archiveStart that allows command-line
   starting of archives.  Based on script written by Sergey Kovzik,
   which in turn was based on an earlier version by Holger Parplies.
@@ -104,8 +125,6 @@
 
 * configure.pl clears $Conf{ParPath} if it doesn't point to a valid
   executable.
-
-* Added freebsd-backuppc init.d script from Gabriel Rossetti.
 
 * Added documentation for BackupPC_tarPCCopy, including use of -P option
   to tar suggested by Daniel Berteaud.

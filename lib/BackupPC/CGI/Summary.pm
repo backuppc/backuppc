@@ -136,18 +136,18 @@ sub action
 	}
 
         $str = <<EOF;
-<tr$reasonHilite><td class="border"> ${HostLink($host)} </td>
+<tr$reasonHilite><td class="border">${HostLink($host)}</td>
     <td align="center" class="border"> ${UserLink(defined($Hosts->{$host})
 				    ? $Hosts->{$host}{user} : "")} </td>
-    <td align="center" class="border"> $fullCnt </td>
-    <td align="center" class="border"> $fullAge </td>
-    <td align="center" class="border"> $fullSize </td>
-    <td align="center" class="border"> $fullRate </td>
-    <td align="center" class="border"> $incrCnt </td>
-    <td align="center" class="border"> $incrAge </td>
-    <td align="center" class="border"> $lastAge </td> 
-    <td align="center" class="border"> $Lang->{$tempState} </td>
-    <td class="border"> $Lang->{$tempReason}$shortErr </td></tr>
+    <td align="center" class="border">$fullCnt</td>
+    <td align="center" class="border">$fullAge</td>
+    <td align="center" class="border">$fullSize</td>
+    <td align="center" class="border">$fullRate</td>
+    <td align="center" class="border">$incrCnt</td>
+    <td align="center" class="border">$incrAge</td>
+    <td align="center" class="border">$lastAge</td> 
+    <td align="center" class="border">$Lang->{$tempState}</td>
+    <td class="border">$Lang->{$tempReason}$shortErr</td></tr>
 EOF
         if ( @Backups == 0 ) {
             $hostCntNone++;

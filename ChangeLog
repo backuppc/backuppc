@@ -38,6 +38,13 @@
 
 * Applied documentation patches from Frans Pop.
 
+* Added Polish translation from Semper.
+
+* Fixed BackupPC_nightly reporting of repeated pool file hashes,
+  reported by XXX.
+
+* Add run-time check that IO::Dirent is functioning correctly.
+
 #------------------------------------------------------------------------
 # Version 3.1.0beta0, 3 Sep 2007
 #------------------------------------------------------------------------

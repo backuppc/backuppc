@@ -113,6 +113,7 @@ my @PerlSrc = qw(
     lib/BackupPC/Lang/fr.pm
     lib/BackupPC/Lang/it.pm
     lib/BackupPC/Lang/nl.pm
+    lib/BackupPC/Lang/pl.pm
     lib/BackupPC/Lang/pt_br.pm
     lib/BackupPC/Lang/zh_CN.pm
     lib/BackupPC/Storage/Text.pm
@@ -561,7 +562,7 @@ sub CheckLangTags
     my($en, $enVars) = LangParse("lib/BackupPC/Lang/en.pm");
     my($errors);
 
-    foreach my $lang ( qw(fr.pm de.pm es.pm it.pm nl.pm pt_br.pm zh_CN.pm) ) {
+    foreach my $lang ( qw(fr.pm de.pm es.pm it.pm nl.pm pl.pm pt_br.pm zh_CN.pm) ) {
 	my($d, $dVars) = LangParse("lib/BackupPC/Lang/$lang");
 	foreach my $v1 ( @$en ) {
 	    my $v2 = shift(@$d);

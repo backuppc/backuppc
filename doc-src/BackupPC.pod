@@ -2807,6 +2807,8 @@ new CSS skin for 3.0.0 with several layout improvements.  Sean Cameron
 
 Youlin Feng provided the Chinese translation for 3.1.0.
 
+Semper provided the Polish translation for 3.1.0.
+
 Jeremy Tietsort provided the host summary table sorting feature for 3.1.0.
 
 Many people have reported bugs, made useful suggestions and helped

@@ -223,9 +223,14 @@ The SourceForge project page is at:
 
 This page has links to the current releases of BackupPC.
 
-=item BackupPC FAQ
+=item BackupPC Wiki
 
-BackupPC has a FAQ at L<http://backuppc.sourceforge.net/faq>.
+BackupPC has a Wiki at L<http://backuppc.wiki.sourceforge.net>.
+Everyone is encouraged to contribute to the Wiki.  Anyone with
+a SourceForge account can edit the Wiki.
+
+The old FAQ is at L<http://backuppc.sourceforge.net/faq>, but
+is deprecated in favor of the Wiki.
 
 =item Mailing lists
 
@@ -321,9 +326,10 @@ time and money) for marketing, PR and advertising, so it's up to
 all of you!  Feel free to vote for BackupPC at
 L<http://freshmeat.net/projects/backuppc>.
 
-Also, everyone is encouraged to contribute patches, bug reports, feature
-and design suggestions, new code, FAQs, and documentation corrections or
-improvements.  Answering questions on the mailing list is a big help too.
+Also, everyone is encouraged to contribute patches, bug reports,
+feature and design suggestions, new code, Wiki additions (you can
+do those directly) and documentation corrections or improvements.
+Answering questions on the mailing list is a big help too.
 
 =head1 Installing BackupPC
 
@@ -1532,8 +1538,9 @@ copy the pc directory using BackupPC_tarPCCopy:
 
 =head2 Fixing installation problems
 
-Please see the FAQ at L<http://backuppc.sourceforge.net/faq> for
-debugging suggestions.
+Please see the Wiki at L<http://backuppc.wiki.sourceforge.net> for
+debugging suggestions.  If you find a solution to your problem that
+could help other users please add it to the Wiki!
 
 =head1 Restore functions
 
@@ -2807,7 +2814,7 @@ new CSS skin for 3.0.0 with several layout improvements.  Sean Cameron
 
 Youlin Feng provided the Chinese translation for 3.1.0.
 
-Semper provided the Polish translation for 3.1.0.
+Karol 'Semper' Stelmaczonek provided the Polish translation for 3.1.0.
 
 Jeremy Tietsort provided the host summary table sorting feature for 3.1.0.
 

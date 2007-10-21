@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0beta0, released 3 Sep 2007.
+# Version 3.1.0beta1, released 23 Sep 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -210,7 +210,7 @@ use vars qw(%ConfigMeta);
     SmbClientPath 	=> {type => "execPath", undefIfEmpty => 1},
     SmbClientFullCmd 	=> "string",
     SmbClientIncrCmd 	=> "string",
-    SmbClientRestoreCmd => "string",
+    SmbClientRestoreCmd => {type => "string", undefIfEmpty => 1},
 
     TarShareName 	=> {
 	    type   => "list",
@@ -219,7 +219,7 @@ use vars qw(%ConfigMeta);
     TarClientCmd	=> "string",
     TarFullArgs 	=> "string",
     TarIncrArgs		=> "string",
-    TarClientRestoreCmd	=> "string",
+    TarClientRestoreCmd	=> {type => "string", undefIfEmpty => 1},
     TarClientPath 	=> {type => "string", undefIfEmpty => 1},
 
     RsyncShareName 	=> {
@@ -237,14 +237,15 @@ use vars qw(%ConfigMeta);
 
     RsyncCsumCacheVerifyProb => "float",
     RsyncArgs	 	=> {
-	    type   => "list",
-	    emptyOk => 1,
-	    child  => "string",
+	    type         => "list",
+	    emptyOk      => 1,
+	    child        => "string",
     },
     RsyncRestoreArgs	=> {
-	    type   => "list",
-	    emptyOk => 1,
-	    child  => "string",
+	    type         => "list",
+	    emptyOk      => 1,
+            undefIfEmpty => 1,
+	    child        => "string",
     },
 
     BackupPCdCmd        => "string",
@@ -313,7 +314,7 @@ use vars qw(%ConfigMeta);
     CgiURL	 	=> "string",
     Language	 	=> {
 	    type   => "select",
-	    values => [qw(de en es fr it nl pt_br zh_CN)],
+	    values => [qw(de en es fr it nl pl pt_br zh_CN)],
     },
     CgiUserHomePageCheck => "string",
     CgiUserUrlCreate    => "string",

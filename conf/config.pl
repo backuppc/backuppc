@@ -207,6 +207,10 @@ $Conf{DfPath} = '';
 #   $dfPath      path to df ($Conf{DfPath})
 #   $topDir      top-level BackupPC data directory
 #
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
+#
 $Conf{DfCmd} = '$dfPath $topDir';
 
 #
@@ -331,6 +335,10 @@ $Conf{PerlModuleLoad}     = undef;
 # $Conf{ServerInitdStartCmd} = '$sshPath -q -x -l root $serverHost'
 #                            . ' $serverInitdPath start'
 #                            . ' < /dev/null >& /dev/null';
+#
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
 #
 $Conf{ServerInitdPath} = '';
 $Conf{ServerInitdStartCmd} = '';
@@ -938,6 +946,10 @@ $Conf{SmbClientPath} = '';
 #    $X_option        exclude option (if $fileList is an exclude list)
 #    $timeStampFile   start time for incremental dump
 #
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
+#
 $Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
 	    . ' $I_option -U $userName -E -N -d 1'
             . ' -c tarmode\\ full -Tc$X_option - $fileList';
@@ -947,6 +959,10 @@ $Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
 # This setting only matters if $Conf{XferMethod} = 'smb'.
 #
 # Same variable substitutions are applied as $Conf{SmbClientFullCmd}.
+#
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
 #
 $Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
 	    . ' $I_option -U $userName -E -N -d 1'
@@ -961,6 +977,10 @@ $Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
 # If your smb share is read-only then direct restores will fail.
 # You should set $Conf{SmbClientRestoreCmd} to undef and the
 # corresponding CGI restore option will be removed.
+#
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
 #
 $Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
             . ' $I_option -U $userName -E -N -d 1'
@@ -1032,6 +1052,10 @@ $Conf{TarShareName} = '/';
 #
 # This setting only matters if $Conf{XferMethod} = 'tar'.
 #
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
+#
 $Conf{TarClientCmd} = '$sshPath -q -x -n -l root $host'
                     . ' env LC_ALL=C $tarPath -c -v -f - -C $shareName+'
                     . ' --totals';
@@ -1089,6 +1113,10 @@ $Conf{TarIncrArgs} = '--newer=$incrDate+ $fileList+';
 # $Conf{TarClientRestoreCmd} to undef and the corresponding CGI
 # restore option will be removed.
 #
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
+#
 $Conf{TarClientRestoreCmd} = '$sshPath -q -x -l root $host'
 		   . ' env LC_ALL=C $tarPath -x -p --numeric-owner --same-owner'
 		   . ' -v -f - -C $shareName+';
@@ -1137,6 +1165,10 @@ $Conf{RsyncClientCmd} = '$sshPath -q -x -l root $host $rsyncPath $argList+';
 #                        $Conf{BackupFilesOnly}
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
+#
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
 #
 $Conf{RsyncClientRestoreCmd} = '$sshPath -q -x -l root $host $rsyncPath $argList+';
 
@@ -1345,6 +1377,10 @@ $Conf{BackupPCdCmd} = '$bpcdPath $host $shareName $poolDir XXXX $poolCompress $t
 #
 # This setting only matters if $Conf{XferMethod} = 'backuppcd'.
 #
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
+#
 $Conf{BackupPCdRestoreCmd} = '$bpcdPath TODO';
 
 
@@ -1413,6 +1449,10 @@ $Conf{ArchiveSplit} = 0;
 #   $archiveloc    The location to put the archive
 #   $parfile       The amount of parity data to create (percentage)
 #
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
+#
 $Conf{ArchiveClientCmd} = '$Installdir/bin/BackupPC_archiveHost'
 	. ' $tarCreatePath $splitpath $parpath $host $backupnumber'
 	. ' $compression $compext $splitsize $archiveloc $parfile *';
@@ -1442,6 +1482,10 @@ $Conf{NmbLookupPath} = '';
 # This command is only used for DHCP hosts: given an IP address, this
 # command should try to find its NetBios name.
 #
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
+#
 $Conf{NmbLookupCmd} = '$nmbLookupPath -A $host';
 
 #
@@ -1468,6 +1512,10 @@ $Conf{NmbLookupCmd} = '$nmbLookupPath -A $host';
 #
 # Experiment manually for your site to see what form of nmblookup command
 # works.
+#
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
 #
 $Conf{NmbLookupFindHostCmd} = '$nmbLookupPath $host';
 
@@ -1501,6 +1549,10 @@ $Conf{PingPath} = '';
 # Wade Brown reports that on solaris 2.6 and 2.7 ping -s returns the wrong
 # exit status (0 even on failure).  Replace with "ping $host 1", which
 # gets the correct exit status but we don't get the round-trip time.
+#
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
 #
 $Conf{PingCmd} = '$pingPath -c 1 $host';
 
@@ -1647,6 +1699,10 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #        $sshPath      value of $Conf{SshPath},
 #        $type         set to "archive"
 #        $cmdType      set to ArchivePreUserCmd or ArchivePostUserCmd
+#
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
 #
 $Conf{DumpPreUserCmd}     = undef;
 $Conf{DumpPostUserCmd}    = undef;
@@ -1938,8 +1994,8 @@ $Conf{CgiNavBarLinks} = [
         lname => "Documentation",    # actually displays $Lang->{Documentation}
     },
     {
-        link  => "http://backuppc.sourceforge.net/faq",
-        name  => "FAQ",              # displays literal "FAQ"
+        link  => "http://backuppc.wiki.sourceforge.net",
+        name  => "Wiki",              # displays literal "Wiki"
     },
     {
         link  => "http://backuppc.sourceforge.net",

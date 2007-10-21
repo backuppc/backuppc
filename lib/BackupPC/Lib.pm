@@ -72,7 +72,20 @@ require DynaLoader;
 
 BEGIN {
     eval "use IO::Dirent qw( readdirent DT_DIR );";
-    $IODirentOk = 1 if ( !$@ );
+    if ( !$@ && opendir(my $fh, ".") ) {
+        #
+        # Make sure the IO::Dirent really works - some installs
+        # on certain file systems don't return a valid type.
+        #
+        my $dt_dir = eval("DT_DIR");
+        foreach my $e ( readdirent($fh) ) {
+            if ( $e->{name} eq "." && $e->{type} == $dt_dir ) {
+                $IODirentOk = 1;
+                last;
+            }
+        }
+        closedir($fh);
+    }
 };
 
 #

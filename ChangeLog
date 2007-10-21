@@ -36,14 +36,29 @@
   lower case when they are read from the hosts file.  Reported by
   Alexander Onic.
 
-* Applied documentation patches from Frans Pop.
+* Applied documentation patches from Frans Pop.  Also updated
+  Pod::Html to improve documentation formatting.
 
 * Added Polish translation from Semper.
 
-* Fixed BackupPC_nightly reporting of repeated pool file hashes,
-  reported by XXX.
+* Fixed BackupPC_nightly reporting of repeated pool file hashes.
 
-* Add run-time check that IO::Dirent is functioning correctly.
+* Add run-time check that IO::Dirent is functioning correctly,
+  reported by Doug Lytle.
+
+* Added comment to Cmd settings in conf/config.pl that they are
+  not executed by a shell, as suggested by Erik van Linstee.
+
+* Added undefIfEmpty => 1 to lib/BackupPC/Config/Meta.pm for
+  RsyncRestoreArgs, TarClientRestoreCmd and SmbClientRestoreCmd
+  so that restores can be disabled by clear these fields in the
+  CGI editor.  Patch supplied by Stephen Joyce
+
+* Replaced the FAQ link with Wiki in the navigation bar and added
+  mention of the Wiki to the documentation.  Since these navigation
+  bar links are specified in the config file, upgrades will keep
+  the old FAQ link.  The FAQ opening page will have a prominent
+  link to the Wiki.
 
 #------------------------------------------------------------------------
 # Version 3.1.0beta0, 3 Sep 2007

@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0beta0, released 3 Sep 2007.
+# Version 3.1.0beta1, released 21 Oct 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1590,7 +1590,8 @@ sub StatusWrite
              [  \%Info, \%Status],
              [qw(*Info   *Status)]);
     $dump->Indent(1);
-    $bpc->{storage}->TextFileWrite("$LogDir/status.pl", $dump->Dump);
+    my $text = $dump->Dump;
+    $bpc->{storage}->TextFileWrite("$LogDir/status.pl", $text);
 }
 
 #

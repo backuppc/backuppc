@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0beta0, released 3 Sep 2007.
+# Version 3.1.0, released 25 Nov 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -143,7 +143,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '3.1.0beta0',
+        Version => '3.1.0',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -409,6 +409,12 @@ sub ConfigRead
 	return $mesg;
     }
     $bpc->{Lang} = \%Lang;
+
+    #
+    # Make sure IncrLevels is defined
+    #
+    $bpc->{Conf}{IncrLevels} = [1] if ( !defined($bpc->{Conf}{IncrLevels}) );
+
     return;
 }
 

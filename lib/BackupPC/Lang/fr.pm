@@ -456,7 +456,7 @@ EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
 Vous pouvez démarrer une restauration de ces fichiers 
-directement sur \$host.
+directement sur <b>\$directHost</b>.
 </p><p>
 <b>Attention:</b>
 tous les fichiers correspondant à ceux que vous avez sélectionnés vont être écrasés !

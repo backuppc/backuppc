@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0beta0, released 3 Sep 2007.
+# Version 3.1.0, released 25 Nov 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -101,13 +101,38 @@ EOF
 	#
 	# Build list of hosts
 	#
-	my $hostDestSel;
-        my @hosts;
+	my($hostDestSel, @hosts, $gotThisHost, $directHost);
+
+        #
+        # Check all the hosts this user has permissions for
+        # and make sure direct restore is enabled.
+        # Note: after this loop we have the config for the
+        # last host in @hosts, not the original $In{host}!!
+        #
+        $directHost = $host;
 	foreach my $h ( GetUserHosts(1) ) {
-	    my $sel = " selected" if ( $h eq $In{host} );
-	    $hostDestSel .= "<option value=\"$h\"$sel>${EscHTML($h)}</option>";
-            push(@hosts, $h);
+            #
+            # Pick up the host's config file
+            #
+            $bpc->ConfigRead($h);
+            %Conf = $bpc->Conf();
+            my $cmd = $Conf{XferMethod} eq "smb" ? $Conf{SmbClientRestoreCmd}
+                    : $Conf{XferMethod} eq "tar" ? $Conf{TarClientRestoreCmd}
+                    : $Conf{XferMethod} eq "archive" ? undef
+                    : $Conf{RsyncRestoreArgs};
+            if ( ref($cmd) eq "ARRAY" ? @$cmd : $cmd ne "" ) {
+                #
+                # Direct restore is enabled
+                #
+                push(@hosts, $h);
+                $gotThisHost = 1 if ( $h eq $host );
+            }
 	}
+        $directHost = $hosts[0] if ( !$gotThisHost && @hosts );
+        foreach my $h ( @hosts ) {
+            my $sel = " selected" if ( $h eq $directHost );
+            $hostDestSel .= "<option value=\"$h\"$sel>${EscHTML($h)}</option>";
+        }
 
         #
         # Tell the user what options they have
@@ -116,27 +141,15 @@ EOF
         $share   = decode_utf8($share);
 	$content = eval("qq{$Lang->{Restore_Options_for__host2}}");
 
-        if ( @hosts == 1 ) {
-            #
-            # Pick up the host's config file
-            #
-            $bpc->ConfigRead($hosts[0]);
-            %Conf = $bpc->Conf();
-	}
-
 	#
 	# Decide if option 1 (direct restore) is available based
 	# on whether the restore command is set.
 	#
-	my $cmd = $Conf{XferMethod} eq "smb" ? $Conf{SmbClientRestoreCmd}
-		: $Conf{XferMethod} eq "tar" ? $Conf{TarClientRestoreCmd}
-		: $Conf{XferMethod} eq "archive" ? undef
-		: $Conf{RsyncRestoreArgs};
-	if ( defined($cmd) ) {
+	if ( $hostDestSel ne "" ) {
 	    $content .= eval(
 		"qq{$Lang->{Restore_Options_for__host_Option1}}");
 	} else {
-	    my $hostDest = $hosts[0];
+	    my $hostDest = $In{host};
 	    $content .= eval(
 		"qq{$Lang->{Restore_Options_for__host_Option1_disabled}}");
 	}

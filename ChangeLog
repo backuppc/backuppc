@@ -21,6 +21,46 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+#------------------------------------------------------------------------
+# Version 3.1.0, 25 Nov 2007
+#------------------------------------------------------------------------
+
+* Fixed config editor bug for case where override is unchecked on
+  an array where the current array is shorter than the main config's
+  array.
+
+* Fixed missing close quote in BackupPC_archiveHost reported by Franky
+  Van Liedekerke.
+
+* Replaced "$BinDir/.." with $bpc->InstallDir() for path to BackupPC
+  docs, mentioned by Kenneth Porter.
+
+* Moved default of $Conf{IncrLevels} from lib/BackupPC/Storage/Text.pm
+  to lib/BackupPC/Lib.pm (after the merge of the config files).  This
+  fixes a bug that caused $Conf{IncrLevels} to get over-ridden if it
+  was only defined in the main config file. Reported by John Rouillard.
+
+* Fixed the completion status message in BackupPC_dump so that missing
+  error counts appear as 0, rather than empty.  Reported by Bill.
+
+* Changed lib/BackupPC/Xfer/RsyncFileIO.pm to only increment the error
+  count when the md4 checksum fails on the second phase, not the first.
+  Reported by Adrian Bridgett.
+
+* Updated a comment in config.pl about BackupPC_nightly, reported by
+  Dan Pritts.
+
+* Modified lib/BackupPC/CGI/Restore.pm to ensure that the list of hosts
+  presented for direct restore do have direct restore enabled.  Reported
+  by Stephen Joyce.
+
+* Modified lib/BackupPC/CGI/RestoreFile.pm to replace \n with \r\n in
+  the restore http response headers.  Patch submitted by Thomas Eckhardt.
+
+#------------------------------------------------------------------------
+# Version 3.1.0beta1, 21 Oct 2007
+#------------------------------------------------------------------------
+
 * When there is an existing partial, a new partials is only saved
   if it has more files than the existing partial.  Requested by
   Carl Soderstrom.

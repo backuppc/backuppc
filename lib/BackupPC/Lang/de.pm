@@ -465,7 +465,7 @@ Bitte wählen Sie eine der folgenden Möglichkeiten:.
 EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
-Sie können diese Wiederherstellung starten um die Dateien/Verzeichnisse direkt auf den Computer \$host wiederherzustellen. 
+Sie können diese Wiederherstellung starten um die Dateien/Verzeichnisse direkt auf den Computer <b>\$directHost</b> wiederherzustellen. 
 Alternativ können Sie einen anderen Computer und/oder Freigabe als Ziel angeben.
 </p><p>
 <b>Warnung:</b> alle aktuell existierenden Dateien/Verzeichnisse, die bereits vorhanden sind,

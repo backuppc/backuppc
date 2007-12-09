@@ -461,7 +461,7 @@ EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
 É possível iniciar um processo que restaurará estes arquivos diretamente em
-\$host.
+<b>\$directHost</b>.
 </p><p>
 <b>Atenção!:</b> Qualquer arquivo existente com o mesmo nome que o que está
 selecionado será sobrescrito!

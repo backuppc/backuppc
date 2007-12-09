@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0beta0, released 3 Sep 2007.
+# Version 3.1.0, released 25 Nov 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -987,6 +987,11 @@ my $newNum = BackupSave();
 
 my $otherCount = $stat{xferErrCnt} - $stat{xferBadFileCnt}
                                    - $stat{xferBadShareCnt};
+$stat{fileCnt}         ||= 0;
+$stat{byteCnt}         ||= 0;
+$stat{xferErrCnt}      ||= 0;
+$stat{xferBadFileCnt}  ||= 0;
+$stat{xferBadShareCnt} ||= 0;
 print(LOG $bpc->timeStamp,
           "$type backup $newNum complete, $stat{fileCnt} files,"
         . " $stat{byteCnt} bytes,"

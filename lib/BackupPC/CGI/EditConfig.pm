@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0beta0, released 3 Sep 2007.
+# Version 3.1.0, released 25 Nov 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -379,13 +379,17 @@ sub action
 	}
         if ( (my $var = $In{overrideUncheck}) ne "" ) {
             #
-            # a compound variable was unchecked; delete extra
-            # variables to make the shape the same.
+            # a compound variable was unchecked; delete or
+            # add extra variables to make the shape the same.
             #
             #print STDERR Dumper(\%In);
             foreach my $v ( keys(%In) ) {
-                next if ( $v !~ /^v_zZ_(\Q$var\E(_zZ_.*|$))/ );
-                delete($In{$v}) if ( !defined($In{"orig_zZ_$1"}) );
+                if ( $v =~ /^v_zZ_(\Q$var\E(_zZ_.*|$))/ ) {
+                    delete($In{$v}) if ( !defined($In{"orig_zZ_$1"}) );
+                }
+                if ( $v =~ /^orig_zZ_(\Q$var\E(_zZ_.*|$))/ ) {
+                    $In{"v_zZ_$1"} = $In{$v};
+                }
             }
             delete($In{"vflds.$var"});
         }

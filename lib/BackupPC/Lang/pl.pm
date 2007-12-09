@@ -456,7 +456,7 @@ EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
 Możesz zacząć przywracanie bezpośrednio na 
-\$host.
+<b>\$directHost</b>.
 </p><p>
 <b>Uwaga:</b> jakikolwiek plik pasujący do tych ktore masz
 zaznaczone będzie nadpisany !

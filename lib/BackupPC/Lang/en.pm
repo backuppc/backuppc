@@ -456,7 +456,7 @@ EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
 You can start a restore that will restore these files directly onto
-\$host.
+<b>\$directHost</b>.
 </p><p>
 <b>Warning:</b> any existing files that match the ones you have
 selected will be overwritten!

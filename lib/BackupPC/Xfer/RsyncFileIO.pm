@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0beta0, released 3 Sep 2007.
+# Version 3.1.0, released 25 Nov 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1155,11 +1155,11 @@ sub fileDeltaRxDone
             if ( $phase > 0 ) {
                 $fio->log("$name: fatal error: md4 doesn't match on retry;"
                         . " file removed");
+                $fio->{stats}{errorCnt}++;
             } else {
                 $fio->log("$name: md4 doesn't match: will retry in phase 1;"
                         . " file removed");
             }
-            $fio->{stats}{errorCnt}++;
             if ( defined($fio->{rxOutFd}) ) {
                 $fio->{rxOutFd}->close;
                 unlink($fio->{rxOutFile});

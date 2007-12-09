@@ -457,7 +457,7 @@ EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
 U kan deze bestanden rechtstreeks herstellen naar pc
-\$host.
+<b>\$directHost</b>.
 </p><p>
 <b>Waarschuwing:</b> bestaande bestanden met dezelfde naam zullen 
 overschreven worden!

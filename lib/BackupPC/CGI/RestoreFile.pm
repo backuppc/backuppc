@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0beta0, released 3 Sep 2007.
+# Version 3.1.0, released 25 Nov 2007.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -183,8 +183,8 @@ sub restoreFile
     my $fileName = $1 if ( $dir =~ /.*\/(.*)/ );
     $fileName =~ s/"/\\"/g;
 
-    print "Content-Type: $contentType\n";
-    print "Content-Transfer-Encoding: binary\n";
+    print "Content-Type: $contentType\r\n";
+    print "Content-Transfer-Encoding: binary\r\n";
 
     if ( $ENV{HTTP_USER_AGENT} =~ /\bmsie\b/i
                 && $ENV{HTTP_USER_AGENT} !~ /\bopera\b/i ) {
@@ -196,7 +196,7 @@ sub restoreFile
         from_to($fileName, "utf8", "cp1252")
                         if ( $Conf{ClientCharset} ne "" );
     }
-    print "Content-Disposition: attachment; filename=\"$fileName\"\n\n";
+    print "Content-Disposition: attachment; filename=\"$fileName\"\r\n\r\n";
     while ( $f->read(\$data, 1024 * 1024) > 0 ) {
         print STDOUT $data;
     }

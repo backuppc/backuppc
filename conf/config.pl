@@ -144,8 +144,9 @@ $Conf{MaxPendingCmds} = 10;
 # Each night, at the first wakeup listed in $Conf{WakeupSchedule},
 # BackupPC_nightly is run.  Its job is to remove unneeded files
 # in the pool, ie: files that only have one link.  To avoid race
-# conditions, BackupPC_nightly runs only when there are no backups
-# running, and no backups will start while it runs.
+# conditions, BackupPC_nightly and BackupPC_link cannot run at
+# the same time.  Starting in v3.0.0, BackupPC_nightly can run
+# concurrently with backups (BackupPC_dump).
 #
 # So to reduce the elapsed time, you might want to increase this
 # setting to run several BackupPC_nightly processes in parallel

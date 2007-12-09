@@ -452,7 +452,7 @@ $Lang{Restore_Options_for__host2} = <<EOF;
 EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
-你可以将这些文件直接恢复到客户机 \$host 上。
+你可以将这些文件直接恢复到客户机 <b>\$directHost</b> 上。
 </p><p>
 <b>警告：</b> 客户机上现存的文件，如果和被恢复的文件具有相同文件名并且位于相同路径，其内容将会被替换！
 </p>

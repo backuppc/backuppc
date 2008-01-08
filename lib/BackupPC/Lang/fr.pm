@@ -127,9 +127,9 @@ $Lang{BackupPC_Summary}=<<EOF;
 <p>
 <ul>
 <li>Ce statut a été généré le \$now.
-<li>L\'espace de stockage a ?t? r?cemment rempli ? \$Info{DUlastValue}%
-    (\$DUlastTime), le maximum aujourd\'hui a ?t? de \$Info{DUDailyMax}% (\$DUmaxTime)
-    et hier le maximum ?tait \$Info{DUDailyMaxPrev}%.
+<li>L\'espace de stockage a été récemment rempli à \$Info{DUlastValue}%
+    (\$DUlastTime), le maximum aujourd\'hui a été de \$Info{DUDailyMax}% (\$DUmaxTime)
+    et hier le maximum était \$Info{DUDailyMaxPrev}%.
 </ul>
 </p>
 

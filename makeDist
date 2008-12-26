@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/env perl
 #
 # makeDist: Build a BackupPC distribution
 #
@@ -53,8 +53,8 @@ die("BackupPC::Lib->new failed\n")
 
 umask(0022);
 
-my $Version     = "3.1.0";
-my $ReleaseDate = "25 Nov 2007";
+my $Version     = "3.2.0";
+my $ReleaseDate = "31 Dec 2008";
 my $DistDir     = "dist/BackupPC-$Version";
 
 my @PerlSrc = qw(
@@ -117,14 +117,19 @@ my @PerlSrc = qw(
     lib/BackupPC/Lang/pt_br.pm
     lib/BackupPC/Lang/zh_CN.pm
     lib/BackupPC/Storage/Text.pm
+    lib/BackupPC/Xfer.pm
     lib/BackupPC/Xfer/Archive.pm
     lib/BackupPC/Xfer/BackupPCd.pm
-    lib/BackupPC/Xfer/Smb.pm
-    lib/BackupPC/Xfer/Tar.pm
+    lib/BackupPC/Xfer/Ftp.pm
+    lib/BackupPC/Xfer/Protocol.pm
     lib/BackupPC/Xfer/Rsync.pm
     lib/BackupPC/Xfer/RsyncDigest.pm
     lib/BackupPC/Xfer/RsyncFileIO.pm
+    lib/BackupPC/Xfer/Smb.pm
+    lib/BackupPC/Xfer/Tar.pm
     lib/BackupPC/Zip/FileMember.pm
+    lib/Net/FTP/AutoReconnect.pm
+    lib/Net/FTP/RetrHandle.pm
     cgi-bin/BackupPC_Admin
 );
 
@@ -169,7 +174,11 @@ $ConfVars->{BlackoutHourEnd}   = 2;
 $ConfVars->{BlackoutWeekDays}  = 2;
 $ConfVars->{RsyncLogLevel}     = 2;
 
+system("perl -Ilib -c conf/config.pl >& /dev/null")
+                && die("$0: conf/config.pl contains a syntax error\n");
 foreach my $file ( @PerlSrc ) {
+    system("perl -Ilib -c $file >& /dev/null")
+                && die("$0: $file contains a syntax error\n");
     $errCnt += CheckConfigParams($file, $ConfVars, 1);
 }
 if ( !$opts{l} ) {
@@ -195,13 +204,14 @@ if ( $errCnt ) {
 rmtree($DistDir, 0, 0);
 mkpath($DistDir, 0, 0777);
 
-foreach my $dir ( qw(bin doc conf images init.d/src cgi-bin
+foreach my $dir ( qw(bin doc conf images init.d/src cgi-bin httpd/src
 		     lib/BackupPC/CGI
 		     lib/BackupPC/Config
 		     lib/BackupPC/Lang
 		     lib/BackupPC/Storage
 		     lib/BackupPC/Xfer
 		     lib/BackupPC/Zip
+		     lib/Net/FTP
 		) ) {
     mkpath("$DistDir/$dir", 0, 0777);
 }
@@ -237,6 +247,7 @@ foreach my $file ( (@PerlSrc,
 		init.d/src/slackware-backuppc
 		init.d/src/solaris-backuppc
 		init.d/src/suse-backuppc
+		httpd/src/BackupPC.conf
 		doc/BackupPC.pod
 		doc/BackupPC.html
 		README

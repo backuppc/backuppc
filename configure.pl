@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/env perl
 #============================================================= -*-perl-*-
 #
 # configure.pl: Configuration and installation program for BackupPC
@@ -97,6 +97,7 @@ if ( !GetOptions(
             "cgi-dir=s",
             "compress-level=i",
             "config-path=s",
+            "config-override=s%",
             "config-dir=s",
             "data-dir=s",
             "dest-dir=s",
@@ -230,10 +231,15 @@ EOF
 # Create defaults for FHS setup
 #
 if ( $opts{fhs} ) {
-    $Conf{TopDir}       ||= "/data/BackupPC";
-    $Conf{ConfDir}      ||= $opts{"config-dir"} || "/etc/BackupPC";
-    $Conf{InstallDir}   ||= "/usr/local/BackupPC";
-    $Conf{LogDir}       ||= $opts{"log-dir"} || "/var/log/BackupPC";
+    $Conf{TopDir}       ||= $opts{"data-dir"}    || "/data/BackupPC";
+    $Conf{ConfDir}      ||= $opts{"config-dir"}  || "/etc/BackupPC";
+    $Conf{InstallDir}   ||= $opts{"install-dir"} || "/usr/local/BackupPC";
+    $Conf{LogDir}       ||= $opts{"log-dir"}     || "/var/log/BackupPC";
+} else {
+    $Conf{TopDir}       ||= $opts{"data-dir"}    || "/data/BackupPC";
+    $Conf{ConfDir}      ||= $opts{"config-dir"}  || "$Conf{TopDir}/conf";
+    $Conf{InstallDir}   ||= $opts{"install-dir"} || "/usr/local/BackupPC";
+    $Conf{LogDir}       ||= $opts{"log-dir"}     || "$Conf{TopDir}/log";
 }
 
 #
@@ -528,6 +534,7 @@ foreach my $dir ( qw(bin doc
 		     lib/BackupPC/Storage
 		     lib/BackupPC/Xfer
 		     lib/BackupPC/Zip
+                     lib/Net/FTP
 		 ) ) {
     next if ( -d "$DestDir$Conf{InstallDir}/$dir" );
     mkpath("$DestDir$Conf{InstallDir}/$dir", 0, 0755);
@@ -615,6 +622,9 @@ foreach my $init ( qw(gentoo-backuppc gentoo-backuppc.conf linux-backuppc
                       suse-backuppc slackware-backuppc ) ) {
     InstallFile("init.d/src/$init", "init.d/$init", 0444);
 }
+
+printf("Making Apache configuration file for suid-perl\n");
+InstallFile("httpd/src/BackupPC.conf", "httpd/BackupPC.conf", 0644);
 
 printf("Installing docs in $DestDir$Conf{InstallDir}/doc\n");
 foreach my $doc ( qw(BackupPC.pod BackupPC.html) ) {
@@ -793,6 +803,23 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
 }
 
 #
+# Apply any command-line configuration parameter settings
+#
+foreach my $param ( keys(%{$opts{"config-override"}}) ) {
+    my $val = eval { $opts{"config-override"}{$param} };
+    if ( @$ ) {
+        printf("Can't eval --config-override setting %s=%s\n",
+                        $param, $opts{"config-override"}{$param});
+        exit(1);
+    }
+    if ( !defined($newVars->{$param}) ) {
+        printf("Unkown config parameter %s in --config-override\n", $param);
+        exit(1);
+    }
+    $newConf->[$newVars->{$param}]{text} = $opts{"config-override"}{$param};
+}
+
+#
 # Now backup and write the config file
 #
 my $confCopy = "$dest.pre-__VERSION__";
@@ -930,6 +957,8 @@ sub InstallFile
                                     if ( $prog =~ /Lib.pm/ );
 	    s/__BACKUPPCUSER__/$Conf{BackupPCUser}/g;
 	    s/__CGIDIR__/$Conf{CgiDir}/g;
+            s/__IMAGEDIR__/$Conf{CgiImageDir}/g;
+            s/__IMAGEDIRURL__/$Conf{CgiImageDirURL}/g;
 	    if ( $first && /^#.*bin\/perl/ ) {
 		#
 		# Fill in correct path to perl (no taint for >= 2.0.1).

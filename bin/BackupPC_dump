@@ -82,10 +82,7 @@ use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
 use BackupPC::Storage;
-use BackupPC::Xfer::Smb;
-use BackupPC::Xfer::Tar;
-use BackupPC::Xfer::Rsync;
-use BackupPC::Xfer::BackupPCd;
+use BackupPC::Xfer;
 use Encode;
 use Socket;
 use File::Path;
@@ -458,6 +455,28 @@ if ( @Backups == 0
     NothingToDo($needLink);
 }
 
+#
+# Create top-level directories if they don't exist
+#
+foreach my $dir ( (
+            "$Conf{TopDir}",
+            "$Conf{TopDir}/pool",
+            "$Conf{TopDir}/cpool",
+            "$Conf{TopDir}/pc",
+            "$Conf{TopDir}/trash",
+        ) ) {
+    next if ( -d $dir );
+    mkpath($dir, 0, 0750);
+    if ( !-d $dir ) {
+        print("Failed to create $dir\n");
+        printf(LOG "%sFailed to create directory %s\n", $bpc->timeStamp, $dir);
+        print("link $clientURI\n") if ( $needLink );
+        exit(1);
+    } else {
+        printf(LOG "%sCreated directory %s\n", $bpc->timeStamp, $dir);
+    }
+}
+
 if ( !$bpc->HardlinkTest($Dir, "$TopDir/cpool") ) {
     print(LOG $bpc->timeStamp, "Can't create a test hardlink between a file"
                . " in $Dir and $TopDir/cpool.  Either these are different"
@@ -566,17 +585,7 @@ my $sizeTotal     = 0;
 my($logMsg, %stat, $xfer, $ShareNames, $noFilesErr);
 my $newFilesFH;
 
-if ( $Conf{XferMethod} eq "tar" ) {
-    $ShareNames = $Conf{TarShareName};
-} elsif ( $Conf{XferMethod} eq "rsync" || $Conf{XferMethod} eq "rsyncd" ) {
-    $ShareNames = $Conf{RsyncShareName};
-} elsif ( $Conf{XferMethod} eq "backuppcd" ) {
-    $ShareNames = $Conf{BackupPCdShareName};
-} else {
-    $ShareNames = $Conf{SmbShareName};
-}
-
-$ShareNames = [ $ShareNames ] unless ref($ShareNames) eq "ARRAY";
+$ShareNames = BackupPC::Xfer::getShareNames(\%Conf);
 
 #
 # Run an optional pre-dump command
@@ -617,40 +626,14 @@ for my $shareName ( @$ShareNames ) {
         exit(1);
     }
 
-    if ( $Conf{XferMethod} eq "tar" ) {
-        #
-        # Use tar (eg: tar/ssh) as the transport program.
-        #
-        $xfer = BackupPC::Xfer::Tar->new($bpc);
-    } elsif ( $Conf{XferMethod} eq "rsync" || $Conf{XferMethod} eq "rsyncd" ) {
-        #
-        # Use rsync as the transport program.
-        #
-        if ( !defined($xfer = BackupPC::Xfer::Rsync->new($bpc)) ) {
-            my $errStr = BackupPC::Xfer::Rsync::errStr;
-            print(LOG $bpc->timeStamp, "dump failed: $errStr\n");
-            print("dump failed: $errStr\n");
-	    UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
-            UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
-            exit(1);
-        }
-    } elsif ( $Conf{XferMethod} eq "backuppcd" ) {
-        #
-        # Use backuppcd as the transport program.
-        #
-        if ( !defined($xfer = BackupPC::Xfer::BackupPCd->new($bpc)) ) {
-            my $errStr = BackupPC::Xfer::BackupPCd::errStr;
-            print(LOG $bpc->timeStamp, "dump failed: $errStr\n");
-            print("dump failed: $errStr\n");
-	    UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
-            UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
-            exit(1);
-        }
-    } else {
-        #
-        # Default is to use smbclient (smb) as the transport program.
-        #
-        $xfer = BackupPC::Xfer::Smb->new($bpc);
+    $xfer = BackupPC::Xfer::create($Conf{XferMethod}, $bpc);
+    if ( !defined($xfer) ) {
+        my $errStr = BackupPC::Xfer::errStr();
+        print(LOG $bpc->timeStamp, "dump failed: $errStr\n");
+        print("dump failed: $errStr\n");
+        UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
+        UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
+        exit(1);
     }
 
     my $useTar = $xfer->useTar;
@@ -789,43 +772,41 @@ for my $shareName ( @$ShareNames ) {
 	# we use a select.
 	#
 	my($FDread, $tarOut, $mesg);
-	vec($FDread, fileno(TAR), 1) = 1 if ( $useTar );
+	vec($FDread, fileno(TAR), 1) = 1;
 	$xfer->setSelectMask(\$FDread);
 
 	SCAN: while ( 1 ) {
 	    my $ein = $FDread;
 	    last if ( $FDread =~ /^\0*$/ );
 	    select(my $rout = $FDread, undef, $ein, undef);
-	    if ( $useTar ) {
-		if ( vec($rout, fileno(TAR), 1) ) {
-		    if ( sysread(TAR, $mesg, 8192) <= 0 ) {
-			vec($FDread, fileno(TAR), 1) = 0;
-			close(TAR);
-		    } else {
-			$tarOut .= $mesg;
-		    }
-		}
-		while ( $tarOut =~ /(.*?)[\n\r]+(.*)/s ) {
-		    $_ = $1;
-		    $tarOut = $2;
-                    if ( /^  / ) {
-                        $XferLOG->write(\"$_\n");
-                    } else {
-                        $XferLOG->write(\"tarExtract: $_\n");
-                    }
-                    if ( /^BackupPC_tarExtact aborting \((.*)\)/ ) {
-                        $stat{hostError} = $1;
-                    }
-		    if ( /^Done: (\d+) errors, (\d+) filesExist, (\d+) sizeExist, (\d+) sizeExistComp, (\d+) filesTotal, (\d+) sizeTotal/ ) {
-			$tarErrs       += $1;
-			$nFilesExist   += $2;
-			$sizeExist     += $3;
-			$sizeExistComp += $4;
-			$nFilesTotal   += $5;
-			$sizeTotal     += $6;
-		    }
-		}
-	    }
+            if ( vec($rout, fileno(TAR), 1) ) {
+                if ( sysread(TAR, $mesg, 8192) <= 0 ) {
+                    vec($FDread, fileno(TAR), 1) = 0;
+                    close(TAR);
+                } else {
+                    $tarOut .= $mesg;
+                }
+            }
+            while ( $tarOut =~ /(.*?)[\n\r]+(.*)/s ) {
+                $_ = $1;
+                $tarOut = $2;
+                if ( /^  / ) {
+                    $XferLOG->write(\"$_\n");
+                } else {
+                    $XferLOG->write(\"tarExtract: $_\n");
+                }
+                if ( /^BackupPC_tarExtact aborting \((.*)\)/ ) {
+                    $stat{hostError} = $1;
+                }
+                if ( /^Done: (\d+) errors, (\d+) filesExist, (\d+) sizeExist, (\d+) sizeExistComp, (\d+) filesTotal, (\d+) sizeTotal/ ) {
+                    $tarErrs       += $1;
+                    $nFilesExist   += $2;
+                    $sizeExist     += $3;
+                    $sizeExistComp += $4;
+                    $nFilesTotal   += $5;
+                    $sizeTotal     += $6;
+                }
+            }
 	    last if ( !$xfer->readOutput(\$FDread, $rout) );
 	    while ( my $str = $xfer->logMsgGet ) {
 		print(LOG $bpc->timeStamp, "xfer: $str\n");

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.1.1, released 22 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -173,6 +173,7 @@ our %ConfigMenu = (
             {name => "ClientCharset"},
             {name => "ClientCharsetLegacy"},
 
+            ### Smb Settings
             {text => "CfgEdit_Title_Smb_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
             {name => "SmbShareName",
@@ -182,11 +183,13 @@ our %ConfigMenu = (
             {name => "SmbSharePasswd",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
 
+            ### Tar Settings
             {text => "CfgEdit_Title_Tar_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
             {name => "TarShareName",
                 visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
 
+            ### Rsync Settings
             {text => "CfgEdit_Title_Rsync_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
             {text => "CfgEdit_Title_Rsyncd_Settings",
@@ -202,6 +205,25 @@ our %ConfigMenu = (
             {name => "RsyncCsumCacheVerifyProb",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
 
+            ### Ftp Settings
+            {text    => "CfgEdit_Title_Ftp_Settings",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+            {name    => "FtpShareName",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+            {name    => "FtpUserName",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+            {name    => "FtpPasswd",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+            {name    => "FtpBlockSize",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+            {name    => "FtpPort",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+            {name    => "FtpTimeout",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+            {name    => "FtpFollowSymlinks",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+            
+            ### BackupPCd Settings
             {text => "CfgEdit_Title_BackupPCd_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "backuppcd"; } },
             {name => "BackupPCdShareName",
@@ -213,6 +235,7 @@ our %ConfigMenu = (
             {name => "BackupPCdRestoreCmd",
                 visible => sub { return $_[0]->{XferMethod} eq "backuppcd"; } },
 
+            ### Archive Settings
             {text => "CfgEdit_Title_Archive_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
             {name => "ArchiveDest",
@@ -224,6 +247,7 @@ our %ConfigMenu = (
             {name => "ArchiveSplit",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
 
+            ### Include/Exclude Settings
             {text => "CfgEdit_Title_Include_Exclude",
                 visible => sub { return $_[0]->{XferMethod} ne "archive"; } },
             {name => "BackupFilesOnly",
@@ -231,6 +255,7 @@ our %ConfigMenu = (
             {name => "BackupFilesExclude",
                 visible => sub { return $_[0]->{XferMethod} ne "archive"; } },
 
+            ### Samba paths and commands
             {text => "CfgEdit_Title_Smb_Paths_Commands",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
             {name => "SmbClientPath",
@@ -242,6 +267,7 @@ our %ConfigMenu = (
             {name => "SmbClientRestoreCmd",
                 visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
 
+            ### Tar paths and commands
             {text => "CfgEdit_Title_Tar_Paths_Commands",
                 visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
             {name => "TarClientPath",
@@ -255,6 +281,7 @@ our %ConfigMenu = (
             {name => "TarClientRestoreCmd",
                 visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
 
+            ### Rsync paths and commands
             {text => "CfgEdit_Title_Rsync_Paths_Commands_Args",
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
             {text => "CfgEdit_Title_Rsyncd_Port_Args",
@@ -272,6 +299,7 @@ our %ConfigMenu = (
             {name => "RsyncRestoreArgs",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
 
+            ### Archive paths and commands
             {text => "CfgEdit_Title_Archive_Paths_Commands",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
             {name => "ArchiveClientCmd",

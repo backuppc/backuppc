@@ -64,7 +64,7 @@ if ( @ARGV != 3 ) {
 }
 $user = $1 if ( $ARGV[0] =~ /(.+)/ );
 $client = $1 if ( $ARGV[1] =~ /(.+)/ );
-if ( $ARGV[2] !~ /^([\w.]+)$/ ) {
+if ( $ARGV[2] !~ /^([\w\.\s-]+)$/ ) {
     print("$0: bad reqFileName (arg #3): $ARGV[2]\n");
     exit(1);
 }

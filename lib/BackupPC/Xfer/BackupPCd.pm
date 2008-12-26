@@ -38,6 +38,7 @@
 package BackupPC::Xfer::BackupPCd;
 
 use strict;
+use base qw(BackupPC::Xfer::Protocol);
 
 sub new
 {
@@ -69,20 +70,6 @@ sub new
     }, $class;
 
     return $t;
-}
-
-sub args
-{
-    my($t, $args) = @_;
-
-    foreach my $arg ( keys(%$args) ) {
-	$t->{$arg} = $args->{$arg};
-    }
-}
-
-sub useTar
-{
-    return 0;
 }
 
 sub start
@@ -219,49 +206,6 @@ sub run
 	    $stats->{TotalFileSize}
 	);
     }
-}
-
-sub abort
-{
-    my($t, $reason) = @_;
-
-    # TODO
-    return 1;
-}
-
-sub errStr
-{
-    my($t) = @_;
-
-    return $t->{_errStr};
-}
-
-sub xferPid
-{
-    my($t) = @_;
-
-    return ();
-}
-
-#
-# Returns a hash ref giving various status information about
-# the transfer.
-#
-sub getStats
-{
-    my($t) = @_;
-
-    return { map { $_ => $t->{$_} }
-            qw(byteCnt fileCnt xferErrCnt xferBadShareCnt xferBadFileCnt
-               xferOK hostAbort hostError lastOutputLine)
-    };
-}
-
-sub getBadFiles
-{
-    my($t) = @_;
-
-    return @{$t->{badFiles}};
 }
 
 1;

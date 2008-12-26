@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.1.1, released 22 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -194,13 +194,16 @@ use vars qw(%ConfigMeta);
     ######################################################################
     XferMethod => {
 	    type   => "select",
-	    values => [qw(archive rsync rsyncd smb tar)],
+	    values => [qw(archive ftp rsync rsyncd smb tar)],
     },
     XferLogLevel	=> "integer",
 
     ClientCharset       => "string",
     ClientCharsetLegacy => "string",
 
+    ######################################################################
+    # Smb Configuration
+    ######################################################################
     SmbShareName 	=> {
 	    type   => "list",
 	    child  => "string",
@@ -212,6 +215,9 @@ use vars qw(%ConfigMeta);
     SmbClientIncrCmd 	=> "string",
     SmbClientRestoreCmd => {type => "string", undefIfEmpty => 1},
 
+    ######################################################################
+    # Tar Configuration
+    ######################################################################
     TarShareName 	=> {
 	    type   => "list",
 	    child  => "string",
@@ -222,6 +228,9 @@ use vars qw(%ConfigMeta);
     TarClientRestoreCmd	=> {type => "string", undefIfEmpty => 1},
     TarClientPath 	=> {type => "string", undefIfEmpty => 1},
 
+    ######################################################################
+    # Rsync Configuration
+    ######################################################################
     RsyncShareName 	=> {
 	    type   => "list",
 	    child  => "string",
@@ -230,11 +239,17 @@ use vars qw(%ConfigMeta);
     RsyncClientCmd 	=> "string",
     RsyncClientRestoreCmd => "string",
 
+    ######################################################################
+    # Rsyncd Configuration
+    ######################################################################
     RsyncdClientPort	=> "integer",
     RsyncdUserName 	=> "string",
     RsyncdPasswd 	=> "string",
     RsyncdAuthRequired	=> "boolean",
 
+    ######################################################################
+    # Rsync(d) Options
+    ######################################################################
     RsyncCsumCacheVerifyProb => "float",
     RsyncArgs	 	=> {
 	    type         => "list",
@@ -248,11 +263,34 @@ use vars qw(%ConfigMeta);
 	    child        => "string",
     },
 
+    ######################################################################
+    # FTP Configuration
+    ######################################################################
+    FtpShareName        => {
+            type  => "list",
+            child => "string",
+    },
+    FtpUserName         => "string",
+    FtpPasswd           => "string",
+    FtpBlockSize        => "integer",
+    FtpPort             => "integer",
+    FtpTimeout          => "integer",
+    FtpFollowSymlinks   => "boolean",
+    
+    ######################################################################
+    # BackupPCd Configuration
+    ######################################################################
+    BackupPCdShareName  => {
+            type  => "list",
+            child => "string",
+    },
     BackupPCdCmd        => "string",
     BackupPCdPath       => "string",
-    BackupPCdShareName  => "string",
     BackupPCdRestoreCmd => "string",
 
+    ######################################################################
+    # Archive Configuration
+    ######################################################################
     ArchiveDest 	=> "string",
     ArchiveComp		=> {
 	    type   => "select",
@@ -262,6 +300,9 @@ use vars qw(%ConfigMeta);
     ArchiveSplit	=> "float",
     ArchiveClientCmd 	=> "string",
 
+    ######################################################################
+    # Other Client Configuration
+    ######################################################################
     NmbLookupCmd 	=> "string",
     NmbLookupFindHostCmd => "string",
 
@@ -408,6 +449,16 @@ use vars qw(%ConfigMeta);
                 RsyncClientCmd            => "boolean",
                 RsyncClientPath           => "boolean",
                 RsyncClientRestoreCmd     => "boolean",
+                FtpShareName              => "boolean",
+                FtpUserName               => "boolean",
+                FtpPasswd                 => "boolean",
+                FtpBlockSize              => "boolean",
+                FtpPort                   => "boolean",
+                FtpTimeout                => "boolean",
+                BackupPCdShareName        => "boolean",
+                BackupPCdCmd              => "boolean",
+                BackupPCdPath             => "boolean",
+                BackupPCdRestoreCmd       => "boolean",
                 ArchiveDest               => "boolean",
                 ArchiveComp               => "boolean",
                 ArchivePar                => "boolean",

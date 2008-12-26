@@ -21,6 +21,49 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Added BackupPC::Xfer::Protocol as a common class for each Xfer
+  method.  This simplifies some of the xfer specific code.
+  Implemented by Paul Mantz.
+
+* Added FTP xfer method, implemented by Paul Mantz.
+
+* Added BackupPC::Xfer module to provide a common interface to the
+  different xfer methods.  Implemented by Paul Mantz.
+
+* Moved setting of $bpc->{PoolDir} and $bpc->{CPoolDir} after the
+  config file is read in BackupPC::Lib. Fix proposed by Tim Taylor
+  and Joe Krahn.
+
+* Create $TopDir and related data directories in BackupPC_dump
+  prior to hardlink test.  Requested by Les Stott.
+
+* Modified lib/BackupPC/CGI/RSS.pm to replace \n with \r\n in the RSS
+  http response headers.  Patch submitted by Thomas Eckhardt.
+
+* Modified bin/BackupPC_archive to allow the archive request file
+  name to contain spaces and dashes, requested by Tim Massey.
+
+* Fix to configure.pl for --no-fhs case to initialize ConfigDir
+  from Dan Pritts.  Also changed perl path to #!/usr/bin/env perl.
+
+* Modified bin/BackupPC_archiveHost to shell escape the output file
+  name.  That allows it to contain spaces and other special characters.
+  Requested by Toni Van Remortel.
+
+* Added --config-override to configure.pl, allow config settings to be
+  set on the command line.  Proposed by Les Stott and Holger Parplies.
+
+* Minor updates to lib/BackupPC/Lang/fr.pm from Nicolas STRANSKY
+  applied by GFK.
+
+* Minor updates to lib/BackupPC/Lang/de.pm from Klaus Weidenbach.
+
+* lib/BackupPC/Xfer/Smb.pm now increments xferErrCnt on NT_STATUS_ACCESS_DENIED
+  and ERRnoaccess errors from smbclient.  Reported by Jesús Martel.
+
+* Modified bin/BackupPC_sendEmail to not send any per-client email if
+  $Conf{BackupsDisable} is set.
+
 #------------------------------------------------------------------------
 # Version 3.1.0, 25 Nov 2007
 #------------------------------------------------------------------------

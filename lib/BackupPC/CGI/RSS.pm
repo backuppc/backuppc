@@ -135,7 +135,7 @@ sub action
     $incrSizeTot = sprintf("%.2f", $incrSizeTot / 1000);
     my $now      = timeStamp2(time);
 
-    print 'Content-type: text/xml', "\n\n",
+    print 'Content-type: text/xml', "\r\n\r\n",
           $rss->as_string;
 
 }

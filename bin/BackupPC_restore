@@ -40,10 +40,7 @@ no  utf8;
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
-use BackupPC::Xfer::Smb;
-use BackupPC::Xfer::Tar;
-use BackupPC::Xfer::Rsync;
-use BackupPC::Xfer::BackupPCd;
+use BackupPC::Xfer;
 use Socket;
 
 use File::Path;
@@ -236,37 +233,14 @@ if ( $? && $Conf{UserCmdCheckStatus} ) {
 }
 $NeedPostCmd = 1;
 
-if ( $Conf{XferMethod} eq "tar" ) {
-    #
-    # Use tar (eg: tar/ssh) as the transport program.
-    #
-    $xfer = BackupPC::Xfer::Tar->new($bpc);
-} elsif ( $Conf{XferMethod} eq "rsync" || $Conf{XferMethod} eq "rsyncd" ) {
-    #
-    # Use rsync as the transport program.
-    #
-    if ( !defined($xfer = BackupPC::Xfer::Rsync->new($bpc)) ) {
-        my $errStr = BackupPC::Xfer::Rsync->errStr;
-	UserCommandRun("RestorePostUserCmd") if ( $NeedPostCmd );
-	$stat{hostError} = $errStr;
-	exit(RestoreCleanup($client));
-    }
-} elsif ( $Conf{XferMethod} eq "backuppcd" ) {
-    #
-    # Use backuppcd as the transport program.
-    #
-    if ( !defined($xfer = BackupPC::Xfer::BackupPCd->new($bpc)) ) {
-        my $errStr = BackupPC::Xfer::BackupPCd->errStr;
-	UserCommandRun("RestorePostUserCmd") if ( $NeedPostCmd );
-	$stat{hostError} = $errStr;
-	exit(RestoreCleanup($client));
-    }
-} else {
-    #
-    # Default is to use smbclient (smb) as the transport program.
-    #
-    $xfer = BackupPC::Xfer::Smb->new($bpc);
+$xfer = BackupPC::Xfer::create($Conf{XferMethod}, $bpc);
+if ( !defined($xfer) ) {
+    my $errStr = BackupPC::Xfer::errStr();
+    UserCommandRun("RestorePostUserCmd") if ( $NeedPostCmd );
+    $stat{hostError} = $errStr;
+    exit(RestoreCleanup($client));
 }
+
 my $useTar = $xfer->useTar;
 
 if ( $useTar ) {

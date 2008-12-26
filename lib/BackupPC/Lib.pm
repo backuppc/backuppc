@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -51,7 +51,7 @@ use Digest::MD5;
 use Config;
 use Encode qw/from_to encode_utf8/;
 
-use vars qw( $IODirentOk );
+use vars qw( $IODirentOk $IODirentLoaded );
 use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 require Exporter;
@@ -72,20 +72,7 @@ require DynaLoader;
 
 BEGIN {
     eval "use IO::Dirent qw( readdirent DT_DIR );";
-    if ( !$@ && opendir(my $fh, ".") ) {
-        #
-        # Make sure the IO::Dirent really works - some installs
-        # on certain file systems don't return a valid type.
-        #
-        my $dt_dir = eval("DT_DIR");
-        foreach my $e ( readdirent($fh) ) {
-            if ( $e->{name} eq "." && $e->{type} == $dt_dir ) {
-                $IODirentOk = 1;
-                last;
-            }
-        }
-        closedir($fh);
-    }
+    $IODirentLoaded = 1 if ( !$@ );
 };
 
 #
@@ -115,7 +102,7 @@ sub new
     #
     # Set defaults for $topDir and $installDir.
     #
-    $topDir     = '/tera0/backup/BackupPC' if ( $topDir eq "" );
+    $topDir     = '/data/BackupPC' if ( $topDir eq "" );
     $installDir = '/usr/local/BackupPC'    if ( $installDir eq "" );
 
     #
@@ -128,7 +115,7 @@ sub new
             useFHS     => $useFHS,
             TopDir     => $topDir,
             InstallDir => $installDir,
-            ConfDir    => $confDir eq "" ? '/tera0/backup/BackupPC/conf' : $confDir,
+            ConfDir    => $confDir eq "" ? '/data/BackupPC/conf' : $confDir,
             LogDir     => '/var/log/BackupPC',
         };
     } else {
@@ -143,7 +130,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '3.1.0',
+        Version => '3.2.0',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -152,8 +139,6 @@ sub new
     # Clean up %ENV and setup other variables.
     #
     delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
-    $bpc->{PoolDir}  = "$bpc->{TopDir}/pool";
-    $bpc->{CPoolDir} = "$bpc->{TopDir}/cpool";
     if ( defined(my $error = $bpc->ConfigRead()) ) {
         print(STDERR $error, "\n");
         return;
@@ -167,6 +152,8 @@ sub new
         $paths->{$dir} = $bpc->{$dir} = $bpc->{Conf}{$dir};
     }
     $bpc->{storage}->setPaths($paths);
+    $bpc->{PoolDir}  = "$bpc->{TopDir}/pool";
+    $bpc->{CPoolDir} = "$bpc->{TopDir}/cpool";
 
     #
     # Verify we are running as the correct user
@@ -486,6 +473,26 @@ sub dirRead
     from_to($path, "utf8", $need->{charsetLegacy})
                         if ( $need->{charsetLegacy} ne "" );
     return if ( !opendir(my $fh, $path) );
+    if ( $IODirentLoaded && !$IODirentOk ) {
+        #
+        # Make sure the IO::Dirent really works - some installs
+        # on certain file systems (eg: XFS) don't return a valid type.
+        #
+        if ( opendir(my $fh, $bpc->{TopDir}) ) {
+            my $dt_dir = eval("DT_DIR");
+            foreach my $e ( readdirent($fh) ) {
+                if ( $e->{name} eq "." && $e->{type} == $dt_dir ) {
+                    $IODirentOk = 1;
+                    last;
+                }
+            }
+            closedir($fh);
+        }
+        #
+        # if it isn't ok then don't check again.
+        #
+        $IODirentLoaded = 0 if ( !$IODirentOk );
+    }
     if ( $IODirentOk ) {
         @entries = sort({ $a->{inode} <=> $b->{inode} } readdirent($fh));
         map { $_->{type} = 0 + $_->{type} } @entries;   # make type numeric
@@ -1463,7 +1470,40 @@ sub sortedPCLogFiles
         }
         closedir(DIR);
     }
-    return sort(compareLOGName @files);
+    return sort compareLOGName @files;
+}
+
+#
+# converts a glob-style pattern into a perl regular expression.
+#
+sub glob2re
+{
+    my ( $bpc, $glob ) = @_;
+    my ( $char, $subst );
+
+    # $escapeChars escapes characters with no special glob meaning but
+    # have meaning in regexps.
+    my $escapeChars = [ '.', '/', ];
+
+    # $charMap is where we implement the special meaning of glob
+    # patterns and translate them to regexps.
+    my $charMap = {
+                    '?' => '[^/]',
+                    '*' => '[^/]*', };
+
+    # multiple forward slashes are equivalent to one slash.  We should
+    # never have to use this.
+    $glob =~ s/\/+/\//;
+
+    foreach $char (@$escapeChars) {
+        $glob =~ s/\Q$char\E/\\$char/g;
+    }
+
+    while ( ( $char, $subst ) = each(%$charMap) ) {
+        $glob =~ s/(?<!\\)\Q$char\E/$subst/g;
+    }
+
+    return $glob;
 }
 
 1;

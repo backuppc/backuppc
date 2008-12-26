@@ -86,8 +86,9 @@ my $mesg = "Writing tar archive for host $host, backup #$bkupNum";
 #
 # Build the command we will run
 #
-$share  = $bpc->shellEscape($share);
-$host   = $bpc->shellEscape($host);
+$share       = $bpc->shellEscape($share);
+$host        = $bpc->shellEscape($host);
+my $outLocE  = $bpc->shellEscape($outLoc);
 
 #
 # We prefer to use /bin/csh because the exit status of a pipeline
@@ -112,8 +113,8 @@ if ( -b $outLoc || -c $outLoc || -f $outLoc ) {
     #
     # Output file is a device or a regular file, so don't use split
     #
-    $cmd  .= ">> $outLoc";
-    $mesg .= " to $outLoc";
+    $cmd  .= ">> $outLocE";
+    $mesg .= " to $outLocE";
 } else {
     mkpath($outLoc) if ( !-d $outLoc );
     if ( !-d $outLoc ) {
@@ -121,11 +122,11 @@ if ( -b $outLoc || -c $outLoc || -f $outLoc ) {
         exit(1);
     }
     if ( $splitSize > 0 && -x $splitPath ) {
-        $cmd  .= "| $splitPath -b $splitSize - $outLoc/$host.$bkupNum.tar$fileExt.";
-        $mesg .= ", split to output files $outLoc/$host.$bkupNum.tar$fileExt.*";
+        $cmd  .= "| $splitPath -b $splitSize - $outLocE/$host.$bkupNum.tar$fileExt.";
+        $mesg .= ", split to output files $outLocE/$host.$bkupNum.tar$fileExt.*";
     } else {
-        $cmd  .= "> $outLoc/$host.$bkupNum.tar$fileExt";
-        $mesg .= " to output file $outLoc/$host.$bkupNum.tar$fileExt";
+        $cmd  .= "> $outLocE/$host.$bkupNum.tar$fileExt";
+        $mesg .= " to output file $outLocE/$host.$bkupNum.tar$fileExt";
     }
 }
 print("$mesg\n");
@@ -147,7 +148,7 @@ if ( $ret ) {
 if ( -d $outLoc && -x $parPath ) {
     if ( $parfile != 0 ) {
         print("Running $parPath to create parity files\n");
-	my $parCmd = "$parPath c -r$parfile $outLoc/$host.$bkupNum.tar$fileExt.par2 $outLoc/$host.$bkupNum.tar$fileExt*";
+	my $parCmd = "$parPath c -r$parfile $outLocE/$host.$bkupNum.tar$fileExt.par2 $outLocE/$host.$bkupNum.tar$fileExt*";
         $ret = system($parCmd);
         if ( $ret ) {
 	    print("Executing: $parCmd\n");

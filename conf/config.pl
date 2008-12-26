@@ -888,6 +888,10 @@ $Conf{ClientCharset} = '';
 #
 $Conf{ClientCharsetLegacy} = 'iso-8859-1';
 
+###########################################################################
+# Samba Configuration
+# (can be overwritten in the per-PC log file)
+###########################################################################
 #
 # Name of the host share that is backed up when using SMB.  This can be a
 # string or an array of strings if there are multiple shares per host.
@@ -987,6 +991,10 @@ $Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
             . ' $I_option -U $userName -E -N -d 1'
             . ' -c tarmode\\ full -Tx -';
 
+###########################################################################
+# Tar Configuration
+# (can be overwritten in the per-PC log file)
+###########################################################################
 #
 # Which host directories to backup when using tar transport.  This can be a
 # string or an array of strings if there are multiple directories to
@@ -1130,6 +1138,10 @@ $Conf{TarClientRestoreCmd} = '$sshPath -q -x -l root $host'
 #
 $Conf{TarClientPath} = '';
 
+###########################################################################
+# Rsync/Rsyncd Configuration
+# (can be overwritten in the per-PC log file)
+###########################################################################
 #
 # Path to rsync executable on the client
 #
@@ -1324,6 +1336,73 @@ $Conf{RsyncRestoreArgs} = [
 	    #
 ];
 
+###########################################################################
+# FTP Configuration
+# (can be overwritten in the per-PC log file)
+##########################################################################
+#
+# Name of the host share that is backed up when using FTP.  This can be a
+# string or an array of strings if there are multiple shares per host.
+# Examples:
+#
+#   $Conf{FtpShareName} = 'c';          # backup 'c' share
+#   $Conf{FtpShareName} = ['c', 'd'];   # backup 'c' and 'd' shares
+#
+# This setting only matters if $Conf{XferMethod} = 'ftp'.
+#
+$Conf{FtpShareName} = '';
+
+#
+# FTP user name.  This is used to log into the server.
+#
+# This setting is used only if $Conf{XferMethod} = 'ftp'.
+#
+$Conf{FtpUserName} = '';
+
+#
+# FTP user password.  This is used to log into the server.
+#
+# This setting is used only if $Conf{XferMethod} = 'ftp'.
+#
+$Conf{FtpPasswd} = '';
+
+#
+# Transfer block size. This sets the size of the amounts of data in
+# each frame. While undefined, this value takes the default value.
+#
+# This setting is used only if $Conf{XferMethod} = 'ftp'.
+#
+$Conf{FtpBlockSize} = 10240;
+
+#
+# The port of the ftp server.  If undefined, 21 is used.
+#
+# This setting is used only if $Conf{XferMethod} = 'ftp'.
+#
+$Conf{FtpPort} = 21;
+
+#
+# Connection timeout for FTP.  When undefined, the default is 120 seconds.
+#
+# This setting is used only if $Conf{XferMethod} = 'ftp'.
+#
+$Conf{FtpTimeout} = 120;
+
+#
+# Behaviour when BackupPC encounters symlinks on the FTP share.
+#
+# Symlinks cannot be restored via FTP, so the desired behaviour will
+# be different depending on the setup of the share. The default for
+# this behavor is 1.  Directory shares with more complicated directory
+# structures should consider other protocols.
+#
+$Conf{FtpFollowSymlinks} = 0;
+
+
+###########################################################################
+# BackupPCd Configuration
+# (can be overwritten in the per-PC log file)
+###########################################################################
 #
 # Share name to backup.  For $Conf{XferMethod} = "backuppcd" this should
 # be a file system path, eg '/' or '/home'.
@@ -1384,7 +1463,10 @@ $Conf{BackupPCdCmd} = '$bpcdPath $host $shareName $poolDir XXXX $poolCompress $t
 #
 $Conf{BackupPCdRestoreCmd} = '$bpcdPath TODO';
 
-
+###########################################################################
+# Archive Configuration
+# (can be overwritten in the per-PC log file)
+###########################################################################
 #
 # Archive Destination
 #
@@ -2128,6 +2210,16 @@ $Conf{CgiUserConfigEdit} = {
         RsyncClientCmd            => 0,
         RsyncClientRestoreCmd     => 0,
         RsyncClientPath           => 0,
+        FtpShareName              => 1,
+        FtpUserName               => 1,
+        FtpPasswd                 => 1,
+        FtpBlockSize              => 1,
+        FtpPort                   => 1,
+        FtpTimeout                => 1,
+        BackupPCdPath             => 1,
+        BackupPCdShareName        => 1,
+        BackupPCdCmd              => 1,
+        BackupPCdRestoreCmd       => 1,
         ArchiveDest               => 1,
         ArchiveComp               => 1,
         ArchivePar                => 1,

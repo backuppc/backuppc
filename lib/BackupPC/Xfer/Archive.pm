@@ -38,40 +38,7 @@
 package BackupPC::Xfer::Archive;
 
 use strict;
-
-sub new
-{
-    my($class, $bpc, $args) = @_;
-
-    $args ||= {};
-    my $t = bless {
-        bpc       => $bpc,
-        conf      => { $bpc->Conf },
-        host      => "",
-        hostIP    => "",
-        shareName => "",
-        pipeRH    => undef,
-        pipeWH    => undef,
-        badFiles  => [],
-        %$args,
-    }, $class;
-
-    return $t;
-}
-
-sub args
-{
-    my($t, $args) = @_;
-
-    foreach my $arg ( keys(%$args) ) {
-	$t->{$arg} = $args->{$arg};
-    }
-}
-
-sub useArchive
-{
-    return 1;
-}
+use base qw(BackupPC::Xfer::Protocol);
 
 sub start
 {
@@ -128,38 +95,6 @@ sub run
     }
     $t->{XferLOG}->write(\"Completed Archive\n");
     return "Completed Archive";
-}
-
-sub errStr
-{
-    my($t) = @_;
-
-    return $t->{_errStr};
-}
-
-sub abort
-{
-}
-
-sub xferPid
-{
-    my($t) = @_;
-
-    return ($t->{xferPid});
-}
-
-sub logMsg
-{
-    my($t, $msg) = @_;
-
-    push(@{$t->{_logMsg}}, $msg);
-}
-
-sub logMsgGet
-{
-    my($t) = @_;
-
-    return shift(@{$t->{_logMsg}});
 }
 
 1;

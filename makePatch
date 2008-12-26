@@ -8,8 +8,8 @@ use strict;
 use File::Find;
 use File::Path;
 
-my $BaseVersion  = "2.1.2";
-my $PatchLevel   = "pl1";
+my $BaseVersion  = "3.2.0";
+my $PatchLevel   = "pl0";
 my $PatchVersion = "$BaseVersion$PatchLevel";
 
 my $Base         = "/home/craig/admin/packages/BackupPC-$BaseVersion";

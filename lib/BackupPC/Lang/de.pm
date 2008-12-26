@@ -141,8 +141,8 @@ $Lang{BackupPC_Summary}=<<EOF;
 <li>Dieser Status wurde am \$now generiert.
 <li>Das Pool Filesystem (Backup-Speicherplatz) ist zu \$Info{DUlastValue}%
     (\$DUlastTime) voll, das Maximum heute ist \$Info{DUDailyMax}% (\$DUmaxTime)
-    und das Maximum gestern war \$Info{DUDailyMaxPrev}%. (Hinweis: Sollten ca. 70% ?berschritten werden, so
-    ist evtl. bald eine Erweiterung des Backupspeichers erforderlich. Ist weitere Planung n?tig?)
+    und das Maximum gestern war \$Info{DUDailyMaxPrev}%. (Hinweis: Sollten ca. 70% überschritten werden, so
+    ist evtl. bald eine Erweiterung des Backupspeichers erforderlich. Ist weitere Planung nötig?)
 </ul>
 </p>
 
@@ -1391,6 +1391,7 @@ $Lang{CfgEdit_Title_Smb_Settings} = "Smb Einstellungen";
 $Lang{CfgEdit_Title_Tar_Settings} = "Tar Einstellungen";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Einstellungen";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Einstellungen";
+$Lang{CfgEdit_Title_Ftp_Settings} = "FTP Einstellungen";
 $Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd Einstellungen";
 $Lang{CfgEdit_Title_Archive_Settings} = "Archive Einstellungen";
 $Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";

@@ -42,6 +42,7 @@ no  utf8;
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::FileZIO;
+use Encode;
 
 use Data::Dumper;
 use Getopt::Std;
@@ -363,6 +364,8 @@ sub user2name
 sub sendUserEmail
 {
     my($user, $host, $mesg, $subj, $vars) = @_;
+    return if ( $Conf{BackupsDisable} );
+
     $vars->{user}     = $user;
     $vars->{host}     = $host;
     $vars->{headers}  = $Conf{EMailHeaders};
@@ -370,7 +373,7 @@ sub sendUserEmail
     $vars->{domain}   = $Conf{EMailUserDestDomain};
     $vars->{CgiURL}   = $Conf{CgiURL};
     $subj =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
-    $vars->{subj}   = $subj;
+    $vars->{subj}     = $subj;
     $mesg =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
     SendMail($mesg);
     $UserEmailInfo{$user}{lastTime} = time;
@@ -388,6 +391,7 @@ sub SendMail
 
     if ( $opts{t} ) {
         binmode(STDOUT, ":utf8") if ( $utf8 );
+        
         print("#" x 75, "\n");
         print $mesg;
         return;

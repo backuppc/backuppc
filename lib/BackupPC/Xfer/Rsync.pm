@@ -41,6 +41,7 @@ use strict;
 use BackupPC::View;
 use BackupPC::Xfer::RsyncFileIO;
 use Encode qw/from_to encode/;
+use base qw(BackupPC::Xfer::Protocol);
 
 use vars qw( $RsyncLibOK $RsyncLibErr );
 
@@ -59,7 +60,7 @@ BEGIN {
         if ( $File::RsyncP::VERSION < 0.68 ) {
             $RsyncLibOK = 0;
             $RsyncLibErr = "File::RsyncP module version"
-                         . " ($File::RsyncP::VERSION) too old: need 0.68";
+                         . " ($File::RsyncP::VERSION) too old: need >= 0.68";
         } else {
             $RsyncLibOK = 1;
         }
@@ -71,46 +72,8 @@ sub new
     my($class, $bpc, $args) = @_;
 
     return if ( !$RsyncLibOK );
-    $args ||= {};
-    my $t = bless {
-        bpc       => $bpc,
-        conf      => { $bpc->Conf },
-        host      => "",
-        hostIP    => "",
-        shareName => "",
-        badFiles  => [],
-
-	#
-	# Various stats
-	#
-        byteCnt         => 0,
-	fileCnt         => 0,
-	xferErrCnt      => 0,
-	xferBadShareCnt => 0,
-	xferBadFileCnt  => 0,
-	xferOK          => 0,
-
-	#
-	# User's args
-	#
-        %$args,
-    }, $class;
-
-    return $t;
-}
-
-sub args
-{
-    my($t, $args) = @_;
-
-    foreach my $arg ( keys(%$args) ) {
-	$t->{$arg} = $args->{$arg};
-    }
-}
-
-sub useTar
-{
-    return 0;
+    my $t = BackupPC::Xfer::Protocol->new($bpc, $args);
+    return bless($t, $class);
 }
 
 sub start
@@ -480,11 +443,6 @@ sub abort
     return 1;
 }
 
-sub setSelectMask
-{
-    my($t, $FDreadRef) = @_;
-}
-
 sub errStr
 {
     my($t) = @_;
@@ -498,41 +456,6 @@ sub xferPid
     my($t) = @_;
 
     return ();
-}
-
-sub logMsg
-{
-    my($t, $msg) = @_;
-
-    push(@{$t->{_logMsg}}, $msg);
-}
-
-sub logMsgGet
-{
-    my($t) = @_;
-
-    return shift(@{$t->{_logMsg}});
-}
-
-#
-# Returns a hash ref giving various status information about
-# the transfer.
-#
-sub getStats
-{
-    my($t) = @_;
-
-    return { map { $_ => $t->{$_} }
-            qw(byteCnt fileCnt xferErrCnt xferBadShareCnt xferBadFileCnt
-               xferOK hostAbort hostError lastOutputLine)
-    };
-}
-
-sub getBadFiles
-{
-    my($t) = @_;
-
-    return @{$t->{badFiles}};
 }
 
 1;

@@ -39,35 +39,7 @@ package BackupPC::Xfer::Smb;
 
 use strict;
 use Encode qw/from_to encode/;
-
-sub new
-{
-    my($class, $bpc, $args) = @_;
-
-    $args ||= {};
-    my $t = bless {
-        bpc       => $bpc,
-        conf      => { $bpc->Conf },
-        host      => "",
-        hostIP    => "",
-        shareName => "",
-        pipeRH    => undef,
-        pipeWH    => undef,
-        badFiles  => [],
-        %$args,
-    }, $class;
-
-    return $t;
-}
-
-sub args
-{
-    my($t, $args) = @_;
-
-    foreach my $arg ( keys(%$args) ) {
-	$t->{$arg} = $args->{$arg};
-    }
-}
+use base qw(BackupPC::Xfer::Protocol);
 
 sub useTar
 {
@@ -284,6 +256,7 @@ sub readOutput
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
         } elsif ( /^\s*NT_STATUS_ACCESS_DENIED listing (.*)/
 	       || /^\s*ERRDOS - ERRnoaccess \(Access denied\.\) listing (.*)/ ) {
+            $t->{xferErrCnt}++;
 	    my $badDir = $1;
 	    $badDir =~ s{\\}{/}g;
 	    $badDir =~ s{/+}{/}g;
@@ -349,68 +322,11 @@ sub readOutput
     return 1;
 }
 
-sub abort
-{
-    my($t, $reason) = @_;
-
-    $t->{abort} = 1;
-    $t->{abortReason} = $reason;
-}
-
 sub setSelectMask
 {
     my($t, $FDreadRef) = @_;
 
     vec($$FDreadRef, fileno($t->{pipeSMB}), 1) = 1;
-}
-
-sub errStr
-{
-    my($t) = @_;
-
-    return $t->{_errStr};
-}
-
-sub xferPid
-{
-    my($t) = @_;
-
-    return ($t->{xferPid});
-}
-
-sub logMsg
-{
-    my($t, $msg) = @_;
-
-    push(@{$t->{_logMsg}}, $msg);
-}
-
-sub logMsgGet
-{
-    my($t) = @_;
-
-    return shift(@{$t->{_logMsg}});
-}
-
-#
-# Returns a hash ref giving various status information about
-# the transfer.
-#
-sub getStats
-{
-    my($t) = @_;
-
-    return { map { $_ => $t->{$_} }
-            qw(byteCnt fileCnt xferErrCnt xferBadShareCnt xferBadFileCnt
-               xferOK hostAbort hostError lastOutputLine)
-    };
-}
-
-sub getBadFiles
-{
-    my($t) = @_;
-
-    return @{$t->{badFiles}};
 }
 
 1;

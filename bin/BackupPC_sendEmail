@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -373,7 +373,7 @@ sub sendUserEmail
     $vars->{domain}   = $Conf{EMailUserDestDomain};
     $vars->{CgiURL}   = $Conf{CgiURL};
     $subj =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
-    $vars->{subj}     = $subj;
+    $vars->{subj}     = encode('MIME-Header', $subj);
     $mesg =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
     SendMail($mesg);
     $UserEmailInfo{$user}{lastTime} = time;
@@ -403,13 +403,7 @@ sub SendMail
     	printf("Can't run sendmail ($Conf{SendmailPath}): $!\n");
 	return;
     }
-    if ( $utf8 ) {
-	binmode(MAIL, ":utf8");
-	if ($mesg =~ /^Subject: (.*)$/m) {
-		my $new_subj = encode('MIME-Header', $1);
-		$mesg =~ s/^Subject: .*$/Subject: $new_subj/m;
-	}
-    }
+    binmode(MAIL, ":utf8") if ( $utf8 );
     print MAIL $mesg;
     close(MAIL);
 }

@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -234,7 +234,7 @@ if ($Conf{XferMethod} eq "archive" ) {
     exit(0);
 }
 
-if ( !$opts{d} ) {
+if ( !$opts{d} && !$Conf{BackupsDisable} ) {
     #
     # In the non-DHCP case, make sure the host can be looked up
     # via NS, or otherwise find the IP address via NetBios.
@@ -1628,6 +1628,7 @@ sub UserCommandRun
     $bpc->cmdSystemOrEval($cmd,
 	    sub {
 		$XferLOG->write(\$_[0]);
+                print(LOG $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
 	    },
 	    $vars, \%Conf);
 }

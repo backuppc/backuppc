@@ -43,7 +43,6 @@ use strict;
 use Encode qw/from_to encode/;
 
 use BackupPC::Xfer::Archive;
-use BackupPC::Xfer::BackupPCd;
 use BackupPC::Xfer::Ftp;
 use BackupPC::Xfer::Protocol;
 use BackupPC::Xfer::Rsync;
@@ -63,12 +62,6 @@ sub create
 
         $xfer = BackupPC::Xfer::Archive->new( $bpc, $args );
         $errStr = BackupPC::Xfer::Archive::errStr() if ( !defined($xfer) );
-        return $xfer;
-
-    } elsif ( $protocol eq 'backuppcd' ) {
-
-        $xfer = BackupPC::Xfer::BackupPCd->new( $bpc, $args );
-        $errStr = BackupPC::Xfer::BackupPCd::errStr() if ( !defined($xfer) );
         return $xfer;
 
     } elsif ( $protocol eq 'ftp' ) {
@@ -126,9 +119,6 @@ sub getShareNames
 
     } elsif ( $conf->{XferMethod} eq "rsync" || $conf->{XferMethod} eq "rsyncd" ) {
         $ShareNames = $conf->{RsyncShareName};
-
-    } elsif ( $conf->{XferMethod} eq "backuppcd" ) {
-        $ShareNames = $conf->{BackupPCdShareName};
 
     } elsif ( $conf->{XferMethod} eq "smb" ) {
         $ShareNames = $conf->{SmbShareName};

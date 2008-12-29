@@ -1352,7 +1352,6 @@ $Lang{CfgEdit_Title_Tar_Settings} = "Tar 设置";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Rsync 设置";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd 设置";
 $Lang{CfgEdit_Title_Ftp_Settings} = "FTP 设置";
-$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd 设置";
 $Lang{CfgEdit_Title_Archive_Settings} = "备档设置";
 $Lang{CfgEdit_Title_Include_Exclude} = "包含／排除";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb 路径／命令";

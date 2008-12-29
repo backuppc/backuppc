@@ -31,11 +31,20 @@
   different xfer methods.  Implemented by Paul Mantz.
 
 * Moved setting of $bpc->{PoolDir} and $bpc->{CPoolDir} after the
-  config file is read in BackupPC::Lib. Fix proposed by Tim Taylor
-  and Joe Krahn.
+  config file is read in BackupPC::Lib.  Fix proposed by Tim Taylor
+  and Joe Krahn, and rediscovered by several others including
+  Holger Parplies.
 
 * Create $TopDir and related data directories in BackupPC_dump
   prior to hardlink test.  Requested by Les Stott.
+
+* Fixed encoding of email subject header in bin/BackupPC_sendEmail as
+  suggested by Jean-Claude Repetto.  Also changed $Conf{EMailHeaders}
+  charset to utf-8.  Also changed bin/BackupPC_sendEmail to not send
+  any per-client email if $Conf{BackupsDisable} is set.
+
+* Added server message for queuing a single host based on patch
+  submitted by Joe Digilio.
 
 * Modified lib/BackupPC/CGI/RSS.pm to replace \n with \r\n in the RSS
   http response headers.  Patch submitted by Thomas Eckhardt.
@@ -50,19 +59,49 @@
   name.  That allows it to contain spaces and other special characters.
   Requested by Toni Van Remortel.
 
+* Added $Conf{CmdQueueNice} to specify nice level for command queue
+  commands (eg: BackupPC_link and BackupPC_nightly).  Suggested by
+  Carl Soderstrom.
+
 * Added --config-override to configure.pl, allow config settings to be
   set on the command line.  Proposed by Les Stott and Holger Parplies.
+
+* Changed bin/BackupPC_dump to not ping or lookup the host if
+  $Conf{BackupsDisable} is set.  Requested by John Rouillard.
+
+* Added error check in BackupPC::Xfer::RsyncFileIO after call to
+  BackupPC::Xfer::RsyncDigest->digestStart(), reported by Jeff
+  Kosowsky.
+
+* Minor fix to sprintf arguments in BackupPC::Attrib, reported by
+  Jonathan Kamens.
+
+* Fixed sort compareLOGName syntax in bin/BackupPC for perl 5.10.x,
+  reported by Jeff Kosowsky and Holger Parplies.
+
+* Fixed bin/BackupPC_archiveStart to set compression correctly,
+  and also set the file extension to .gz when compression is on.
+  Reported by Stephen Vaughan.
+
+* Updated BackupPC.pod for $Conf{BackupsDisable}, reported by
+  Nils Breunese.
 
 * Minor updates to lib/BackupPC/Lang/fr.pm from Nicolas STRANSKY
   applied by GFK.
 
 * Minor updates to lib/BackupPC/Lang/de.pm from Klaus Weidenbach.
 
-* lib/BackupPC/Xfer/Smb.pm now increments xferErrCnt on NT_STATUS_ACCESS_DENIED
-  and ERRnoaccess errors from smbclient.  Reported by Jesús Martel.
+* Updates to makeDist for command-line setting of version and
+  release date from Paul Mantz.
 
-* Modified bin/BackupPC_sendEmail to not send any per-client email if
-  $Conf{BackupsDisable} is set.
+* Add output from Pre/Post commands to per-client LOG file, in addition
+  to existing output in the XferLOG file.  Patch from Stuart Teasdale.
+
+* lib/BackupPC/Xfer/Smb.pm now increments xferErrCnt on
+  NT_STATUS_ACCESS_DENIED and ERRnoaccess errors from smbclient.
+  Reported by Jesús Martel.
+
+* Removed BackupPC_compressPool and BackupPC::Xfer::BackupPCd.
 
 #------------------------------------------------------------------------
 # Version 3.1.0, 25 Nov 2007

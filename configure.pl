@@ -407,10 +407,8 @@ BackupPC can compress pool files, but it needs the Compress::Zlib
 package installed (see www.cpan.org). Compression will provide around a
 40% reduction in pool size, at the expense of cpu time.  You can leave
 compression off and run BackupPC without compression, in which case you
-should leave the compression level at 0 (which means off).  You could
-install Compress::Zlib and turn compression on later, but read the
-documentation first about how to do this.  Or the better choice is
-to quit, install Compress::Zlib, and re-run configure.pl.
+should leave the compression level at 0 (which means off).  Or the better
+choice is to quit, install Compress::Zlib, and re-run configure.pl.
 
 EOF
     } elsif ( $Conf{CompressLevel} ) {
@@ -418,14 +416,12 @@ EOF
         print <<EOF;
 
 BackupPC now supports pool file compression.  Since you are upgrading
-BackupPC you probably have existing uncompressed backups.  You have
-several choices if you want to turn on compression.  You can run
-the script BackupPC_compressPool to convert everything to compressed
-form.  Or you can simply turn on compression, so that new backups
-will be compressed.  This will increase the pool storage requirement,
-since both uncompressed and compressed copies of files will be stored.
-But eventually the old uncompressed backups will expire, recovering
-the pool storage.  Please see the documentation for more details.
+BackupPC you probably have existing uncompressed backups.  You could
+turn on compression, so that new backups will be compressed.  This
+will increase the pool storage requirement, since both uncompressed
+and compressed copies of files will be stored. But eventually the old
+uncompressed backups will expire, recovering the pool storage.  Please
+see the documentation for more details.
 
 If you are not sure what to do, leave the Compression Level at 0,
 which disables compression.  You can always read the documentation
@@ -440,8 +436,6 @@ BackupPC now supports pool file compression, but it needs the
 Compress::Zlib module (see www.cpan.org).  For now, leave
 the compression level set at 0 to disable compression.  If you
 want you can install Compress::Zlib and turn compression on.
-Please see the documentation for more details about converting
-old backups to compressed form.
 
 EOF
     }

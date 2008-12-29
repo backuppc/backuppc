@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.1, released 22 Dec 2008.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -73,6 +73,7 @@ our %ConfigMenu = (
 	    {name => "UmaskMode"},
 	    {name => "MyPath"},
             {name => "DHCPAddressRanges"},
+            {name => "CmdQueueNice"},
             {name => "PerlModuleLoad"},
             {name => "ServerInitdPath"},
             {name => "ServerInitdStartCmd"},
@@ -223,18 +224,6 @@ our %ConfigMenu = (
             {name    => "FtpFollowSymlinks",
              visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
             
-            ### BackupPCd Settings
-            {text => "CfgEdit_Title_BackupPCd_Settings",
-                visible => sub { return $_[0]->{XferMethod} eq "backuppcd"; } },
-            {name => "BackupPCdShareName",
-                visible => sub { return $_[0]->{XferMethod} eq "backuppcd"; } },
-            {name => "BackupPCdPath",
-                visible => sub { return $_[0]->{XferMethod} eq "backuppcd"; } },
-            {name => "BackupPCdCmd",
-                visible => sub { return $_[0]->{XferMethod} eq "backuppcd"; } },
-            {name => "BackupPCdRestoreCmd",
-                visible => sub { return $_[0]->{XferMethod} eq "backuppcd"; } },
-
             ### Archive Settings
             {text => "CfgEdit_Title_Archive_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },

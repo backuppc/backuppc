@@ -1392,7 +1392,6 @@ $Lang{CfgEdit_Title_Tar_Settings} = "Tar Einstellungen";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Einstellungen";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Einstellungen";
 $Lang{CfgEdit_Title_Ftp_Settings} = "FTP Einstellungen";
-$Lang{CfgEdit_Title_BackupPCd_Settings} = "BackupPCd Einstellungen";
 $Lang{CfgEdit_Title_Archive_Settings} = "Archive Einstellungen";
 $Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Pfade/Kommandos";

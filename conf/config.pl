@@ -136,7 +136,13 @@ $Conf{MaxUserBackups} = 4;
 # This limit is to make sure BackupPC doesn't fall too far behind in
 # running BackupPC_link commands.
 #
-$Conf{MaxPendingCmds} = 10;
+$Conf{MaxPendingCmds} = 15;
+
+#
+# Nice level at which CmdQueue commands (eg: BackupPC_link and
+# BackupPC_nightly) are run at.
+#
+$Conf{CmdQueueNice} = 10;
 
 #
 # How many BackupPC_nightly processes to run in parallel.
@@ -287,6 +293,14 @@ $Conf{BackupPCUser} = '';
 #                perl scripts include this path.  You must reinstall
 #                with configure.pl to change InstallDir.
 #   CgiDir     - Apache CGI directory for BackupPC_Admin
+#
+# Note: it is STRONGLY recommended that you don't change the
+# values here.  These are set at installation time and are here
+# for reference and are used during upgrades.
+#
+# Instead of changing TopDir here it is recommended that you use
+# a symbolic link to the new location, or mount the new BackupPC
+# store at the existing $Conf{TopDir} setting.
 #
 $Conf{TopDir}      = '';
 $Conf{ConfDir}     = '';
@@ -1398,71 +1412,6 @@ $Conf{FtpTimeout} = 120;
 #
 $Conf{FtpFollowSymlinks} = 0;
 
-
-###########################################################################
-# BackupPCd Configuration
-# (can be overwritten in the per-PC log file)
-###########################################################################
-#
-# Share name to backup.  For $Conf{XferMethod} = "backuppcd" this should
-# be a file system path, eg '/' or '/home'.
-#
-# This can also be a list of multiple file system paths or modules.
-# (Can it??)
-#
-#     $Conf{BackupPCdShareName} = ['/', '/var', '/data', '/boot'];
-#
-$Conf{BackupPCdShareName} = '/';
-
-#
-# Path to backuppcd executable on the server
-#
-$Conf{BackupPCdPath} = '';
-
-#
-# Full command to run backuppcd on the server to backup a given
-# client machine.  The following variables are substituted at
-# run-time (TODO: update this list)
-#
-#        $host           host name being backed up
-#        $hostIP         host's IP address
-#        $shareName      share name to backup (ie: top-level directory path)
-#        $backuppcdPath  same as $Conf{BackupPCdPath}
-#        $sshPath        same as $Conf{SshPath}
-#
-# This setting only matters if $Conf{XferMethod} = 'backuppcd'.
-#
-# Arguments to backupcpd are:
-#
-#   - the host name to backup
-#   - the share name to backup
-#   - the directory where the pool is
-#   - the directory where the last run was (NOT DONE YET)
-#   - a boolean value indicating whether or not the pool is
-#      compressed or not
-#   - the directory where the new run should occur (currently it assumes ".")
-#
-$Conf{BackupPCdCmd} = '$bpcdPath $host $shareName $poolDir XXXX $poolCompress $topDir/pc/$client/new';
-
-#
-# Full command to run backuppcd on the server for restore to a
-# client machine.  The following variables are substituted at
-# run-time (TODO: update this list)
-#
-#        $host           host name being backed up
-#        $hostIP         host's IP address
-#        $shareName      share name to backup (ie: top-level directory path)
-#        $backuppcdPath  same as $Conf{BackupPCdPath}
-#        $sshPath        same as $Conf{SshPath}
-#
-# This setting only matters if $Conf{XferMethod} = 'backuppcd'.
-#
-# Note: all Cmds are executed directly without a shell, so the prog name
-# needs to be a full path and you can't include shell syntax like
-# redirection and pipes; put that in a script if you need it.
-#
-$Conf{BackupPCdRestoreCmd} = '$bpcdPath TODO';
-
 ###########################################################################
 # Archive Configuration
 # (can be overwritten in the per-PC log file)
@@ -1962,13 +1911,12 @@ $Conf{EMailOutlookBackupSubj} = undef;
 $Conf{EMailOutlookBackupMesg} = undef;
 
 #
-# Additional email headers.  If you change the charset
-# to utf8 then BackupPC_sendEmail will use utf8 for
-# the email body.
+# Additional email headers.  This sets to charset to
+# utf8.
 #
 $Conf{EMailHeaders} = <<EOF;
 MIME-Version: 1.0
-Content-Type: text/plain; charset="iso-8859-1"
+Content-Type: text/plain; charset="utf-8"
 EOF
 
 ###########################################################################
@@ -2216,10 +2164,6 @@ $Conf{CgiUserConfigEdit} = {
         FtpBlockSize              => 1,
         FtpPort                   => 1,
         FtpTimeout                => 1,
-        BackupPCdPath             => 1,
-        BackupPCdShareName        => 1,
-        BackupPCdCmd              => 1,
-        BackupPCdRestoreCmd       => 1,
         ArchiveDest               => 1,
         ArchiveComp               => 1,
         ArchivePar                => 1,

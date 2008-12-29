@@ -1218,7 +1218,7 @@ sub cmdVarSubstitute
         }
     }
     #
-    # Merge variables into @tarClientCmd
+    # Merge variables into @cmd
     #
     foreach my $arg ( @$template ) {
         #

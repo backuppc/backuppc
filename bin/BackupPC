@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -536,6 +536,7 @@ sub Main_TryToRun_CmdQueue
         if ( !$pid ) {
             setpgrp 0,0;
             $ENV{BPC_REQUSER} = $req->{user};
+            POSIX::nice($Conf{CmdQueueNice}) if ( $Conf{CmdQueueNice} );
             exec(@$cmd);
             print(LOG $bpc->timeStamp, "can't exec @$cmd for $host\n");
             exit(0);
@@ -1341,6 +1342,24 @@ sub Main_Check_Client_Messages
                 QueueAllPCs();
             } elsif ( $cmd =~ /^BackupPC_nightly run$/ ) {
                 $RunNightlyWhenIdle = 1;
+            } elsif ( $cmd =~ /^queue (\S+)$/ ) {
+                $host = $1;
+		$host = $bpc->uriUnesc($host);
+                if ( !defined($Hosts->{$host}) ) {
+                    print(LOG $bpc->timeStamp,
+                              "User requested backup of unknown host $host\n");
+                    $reply = "error: unknown host $host";
+                } else {
+                    if ( QueueOnePC($host) ) {
+                        print(LOG $bpc->timeStamp,
+                           "Disk too full ($Info{DUlastValue}%); skipped 1 host\n");
+                        $Info{DUDailySkipHostCnt}++;
+                        $reply = "error: disk too full to queue $host";
+                    } else {
+                        print(LOG $bpc->timeStamp, "Host $host queued by user.\n");
+                        $reply = "ok: $host queued";
+                    }
+                }
             } elsif ( $cmd =~ /^backup (\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ) {
                 my $hostIP = $1;
                 $host      = $2;
@@ -1348,7 +1367,7 @@ sub Main_Check_Client_Messages
                 my $doFull = $4;
 		$host      = $bpc->uriUnesc($host);
 		$hostIP    = $bpc->uriUnesc($hostIP);
-                if ( !defined($Status{$host}) ) {
+                if ( !defined($Hosts->{$host}) ) {
                     print(LOG $bpc->timeStamp,
                                "User $user requested backup of unknown host"
                              . " $host\n");
@@ -1413,7 +1432,7 @@ sub Main_Check_Client_Messages
                 my $reqFileName = $4;
 		$host      = $bpc->uriUnesc($host);
 		$hostIP    = $bpc->uriUnesc($hostIP);
-                if ( !defined($Status{$host}) ) {
+                if ( !defined($Hosts->{$host}) ) {
                     print(LOG $bpc->timeStamp,
                                "User $user requested restore to unknown host"
                              . " $host");
@@ -1609,7 +1628,6 @@ sub HostSortCompare
     #
     # Hosts with no errors go after hosts with errors
     #
-
     return  1 if ( $Status{$a}{error} eq "" && $Status{$b}{error} ne "" );
 
     #
@@ -1624,6 +1642,65 @@ sub HostSortCompare
     return $a cmp $b;
 }
 
+sub QueueOnePC
+{
+    my($host) = @_;
+    my $skipped = 0;
+
+    delete($Status{$host}{backoffTime})
+            if ( defined($Status{$host}{backoffTime})
+              && $Status{$host}{backoffTime} < time );
+    return if ( defined($Jobs{$host})
+                || $BgQueueOn{$host}
+                || $UserQueueOn{$host}
+                || $CmdQueueOn{$host} ); 
+    if ( $Hosts->{$host}{dhcp} ) {
+        $Status{$host}{dhcpCheckCnt}++;
+        if ( $RunNightlyWhenIdle ) {
+            #
+            # Once per night queue a check for DHCP hosts that just
+            # checks for expired dumps.  We need to do this to handle
+            # the case when a DHCP host has not been on the network for
+            # a long time, and some of the old dumps need to be expired.
+            # Normally expiry checks are done by BackupPC_dump only
+            # after the DHCP hosts has been detected on the network.
+            #
+            unshift(@BgQueue,
+                {host => $host, user => "BackupPC", reqTime => time,
+                 dhcp => 0, dumpExpire => 1});
+            $BgQueueOn{$host} = 1;
+        }
+    } else {
+        #
+        # this is a fixed ip host: queue it
+        #
+        if ( $Info{DUlastValue} > $Conf{DfMaxUsagePct} ) {
+            #
+            # Since we are out of disk space, instead of queuing
+            # a regular job, queue an expire check instead.  That
+            # way if the admin reduces the number of backups to
+            # keep then we will actually delete them.  Otherwise
+            # BackupPC_dump will never run since we have exceeded
+            # the limit.
+            #
+            $skipped = 1;
+            unshift(@BgQueue,
+                {host => $host, user => "BackupPC", reqTime => time,
+                 dhcp => $Hosts->{$host}{dhcp}, dumpExpire => 1});
+        } else {
+            #
+            # Queue regular background backup
+            #
+            unshift(@BgQueue,
+                {host => $host, user => "BackupPC", reqTime => time,
+                 dhcp => $Hosts->{$host}{dhcp}});
+        }
+        $BgQueueOn{$host} = 1;
+    }
+
+    return $skipped;
+}
+
 #
 # Queue all the hosts for backup.  This means queuing all the fixed
 # ip hosts and all the dhcp address ranges.  We also additionally
@@ -1632,57 +1709,9 @@ sub HostSortCompare
 sub QueueAllPCs
 {
     my $nSkip = 0;
+
     foreach my $host ( sort(HostSortCompare keys(%$Hosts)) ) {
-        delete($Status{$host}{backoffTime})
-                if ( defined($Status{$host}{backoffTime})
-                  && $Status{$host}{backoffTime} < time );
-        next if ( defined($Jobs{$host})
-                || $BgQueueOn{$host}
-                || $UserQueueOn{$host}
-                || $CmdQueueOn{$host} ); 
-        if ( $Hosts->{$host}{dhcp} ) {
-            $Status{$host}{dhcpCheckCnt}++;
-            if ( $RunNightlyWhenIdle ) {
-                #
-                # Once per night queue a check for DHCP hosts that just
-                # checks for expired dumps.  We need to do this to handle
-                # the case when a DHCP host has not been on the network for
-                # a long time, and some of the old dumps need to be expired.
-                # Normally expiry checks are done by BackupPC_dump only
-                # after the DHCP hosts has been detected on the network.
-                #
-                unshift(@BgQueue,
-                    {host => $host, user => "BackupPC", reqTime => time,
-                     dhcp => 0, dumpExpire => 1});
-                $BgQueueOn{$host} = 1;
-            }
-        } else {
-            #
-            # this is a fixed ip host: queue it
-            #
-            if ( $Info{DUlastValue} > $Conf{DfMaxUsagePct} ) {
-                #
-                # Since we are out of disk space, instead of queuing
-                # a regular job, queue an expire check instead.  That
-                # way if the admin reduces the number of backups to
-                # keep then we will actually delete them.  Otherwise
-                # BackupPC_dump will never run since we have exceeded
-                # the limit.
-                #
-                $nSkip++;
-                unshift(@BgQueue,
-                    {host => $host, user => "BackupPC", reqTime => time,
-                     dhcp => $Hosts->{$host}{dhcp}, dumpExpire => 1});
-            } else {
-                #
-                # Queue regular background backup
-                #
-                unshift(@BgQueue,
-                    {host => $host, user => "BackupPC", reqTime => time,
-                     dhcp => $Hosts->{$host}{dhcp}});
-            }
-            $BgQueueOn{$host} = 1;
-        }
+        $nSkip += QueueOnePC($host);
     }
     if ( $nSkip ) {
         print(LOG $bpc->timeStamp,

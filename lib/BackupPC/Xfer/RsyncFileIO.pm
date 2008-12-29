@@ -12,7 +12,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -162,6 +162,12 @@ sub csumStart
                                      $defBlkSize, $fio->{checksumSeed},
                                      0, $attr->{compress}, 0,
                                      $fio->{protocol_version});
+        if ( $err ) {
+            $fio->log("Can't get rsync digests from $attr->{fullPath}"
+                    . " (err=$err, name=$f->{name})");
+            $fio->{stats}{errorCnt}++;
+            return -1;
+        }
         my($isCached, $isInvalid) = $d->isCached;
         if ( $fio->{logLevel} >= 5 ) {
             $fio->log("$attr->{fullPath} verify; cached = $isCached,"

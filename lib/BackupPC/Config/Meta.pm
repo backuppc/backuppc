@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.1, released 22 Dec 2008.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -80,6 +80,7 @@ use vars qw(%ConfigMeta);
     MaxBackupPCNightlyJobs => "integer",
     BackupPCNightlyPeriod  => "integer",
     MaxOldLogFiles      => "integer",
+    CmdQueueNice        => "integer",
 
     SshPath	 	=> {type => "execPath", undefIfEmpty => 1},
     NmbLookupPath 	=> {type => "execPath", undefIfEmpty => 1},
@@ -278,17 +279,6 @@ use vars qw(%ConfigMeta);
     FtpFollowSymlinks   => "boolean",
     
     ######################################################################
-    # BackupPCd Configuration
-    ######################################################################
-    BackupPCdShareName  => {
-            type  => "list",
-            child => "string",
-    },
-    BackupPCdCmd        => "string",
-    BackupPCdPath       => "string",
-    BackupPCdRestoreCmd => "string",
-
-    ######################################################################
     # Archive Configuration
     ######################################################################
     ArchiveDest 	=> "string",
@@ -455,10 +445,6 @@ use vars qw(%ConfigMeta);
                 FtpBlockSize              => "boolean",
                 FtpPort                   => "boolean",
                 FtpTimeout                => "boolean",
-                BackupPCdShareName        => "boolean",
-                BackupPCdCmd              => "boolean",
-                BackupPCdPath             => "boolean",
-                BackupPCdRestoreCmd       => "boolean",
                 ArchiveDest               => "boolean",
                 ArchiveComp               => "boolean",
                 ArchivePar                => "boolean",

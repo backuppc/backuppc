@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -214,9 +214,9 @@ sub read
     }
     (my $magic, $data) = unpack("N a*", $data);
     if ( $magic != $a->{type} ) {
-	$a->{_errStr} = sprintf("Wrong magic number in $file"
+	$a->{_errStr} = sprintf("Wrong magic number in %s"
                                . " (got 0x%x, expected 0x%x)",
-                                   $magic, $a->{type});
+                                   $file, $magic, $a->{type});
 	$fd->close;
 	return;
     }

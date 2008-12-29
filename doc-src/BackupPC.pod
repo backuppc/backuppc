@@ -1446,17 +1446,17 @@ machine) you have two choices.  First, you can keep the backups accessible
 and browsable, but disable all new backups.  Alternatively, you can
 completely remove the client and all its backups.
 
-To disable backups for a client there are two special values for
-$Conf{FullPeriod} in that client's per-PC config.pl file:
+To disable backups for a client $Conf{BackupsDisable} can be
+set to two different values in that client's per-PC config.pl file:
 
 =over 4
 
-=item -1
+=item 1
 
 Don't do any regular backups on this machine.  Manually
 requested backups (via the CGI interface) will still occur.
 
-=item -2
+=item 2
 
 Don't do any backups on this machine.  Manually requested
 backups (via the CGI interface) will be ignored.
@@ -1473,11 +1473,11 @@ BackupPC a HUP (-1) signal so that it re-reads the hosts file.
 If you don't do this, BackupPC will automatically re-read the
 hosts file at the next regular wakeup.
 
-Note that when you remove a client's backups you won't initially recover
-a lot of disk space.  That's because the client's files are still in
-the pool.  Overnight, when BackupPC_nightly next runs, all the unused
-pool files will be deleted and this will recover the disk space used
-by the client's backups.
+Note that when you remove a client's backups you won't initially
+recover much disk space.  That's because the client's files are
+still in the pool.  Overnight, when BackupPC_nightly next runs,
+all the unused pool files will be deleted and this will recover
+the disk space used by the client's backups.
 
 =item Copying the pool
 

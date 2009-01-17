@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -337,7 +337,7 @@ EOF
                          [  \%restoreReq],
                          [qw(*RestoreReq)]);
         $dump->Indent(1);
-        mkpath("$TopDir/pc/$hostDest", 0, 0777)
+        eval { mkpath("$TopDir/pc/$hostDest", 0, 0777) }
                                     if ( !-d "$TopDir/pc/$hostDest" );
 	my $openPath = "$TopDir/pc/$hostDest/$reqFileName";
         if ( open(REQ, ">", $openPath) ) {

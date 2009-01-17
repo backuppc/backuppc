@@ -2058,7 +2058,7 @@ $Conf{CgiHeaders} = '<meta http-equiv="pragma" content="no-cache">';
 # used by configure.pl when you upgrade BackupPC.
 #
 # Example:
-#     $Conf{CgiImageDir} = '/usr/local/apache/htdocs/BackupPC';
+#     $Conf{CgiImageDir} = '/var/www/htdocs/BackupPC';
 #
 $Conf{CgiImageDir} = '';
 

@@ -43,6 +43,21 @@
   charset to utf-8.  Also changed bin/BackupPC_sendEmail to not send
   any per-client email if $Conf{BackupsDisable} is set.
 
+* Modified bin/BackupPC_dump to fix the case of a single partial
+  backup followed by a successful incremental resulting in a full
+  backup of level 1, rather than level 0.  Reported by Jeff
+  Kosowsky.
+
+* Fixed BackupPC::PoolWrite to always create the parent directory.
+  This fixed a case with rsync/rsyncd where a file like "-i" in the
+  top-level directory sorts before ".", which meant the directory
+  creation is after the file creation.  Also PoolWrite errors now
+  increment xferError count.  Reported by Jeff Kosowsky.
+
+* BackupPC now gives a more useful error message if BackupPC_nightly
+  takes more than 24 hours (ie: when the next one is meant to
+  start).  Reported by Tony Schreiner.
+
 * Added server message for queuing a single host based on patch
   submitted by Joe Digilio.
 

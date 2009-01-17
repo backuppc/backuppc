@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -376,7 +376,26 @@ sub run
 	    $t->{hostError} = $err;
 	    return;
 	}
+        
+        #
+        # This is a hack.  To avoid wide chars we encode the arguments
+        # to utf8 byte streams, then to the client's local charset.
+        # The second conversion should really go in File::RsyncP, since
+        # it shouldn't be applied to in-line include/exclude arguments.
+        #
+        for ( my $i = 0 ; $i < @{$rs->{rsyncArgs}} ; $i++ ) {
+            $rs->{rsyncArgs}[$i] = encode('utf8', $rs->{rsyncArgs}[$i]);
+            from_to($rs->{rsyncArgs}[$i], 'utf8', $conf->{ClientCharset})
+                                    if ( $conf->{ClientCharset} ne "" );
+        }
+    
+	my $str = "RsyncArgsBefore: " . join(" ", @{$rs->{rsyncArgs}}) . "\n";
+        $t->{XferLOG}->write(\$str);
+
 	$rs->serverStart($remoteSend, $remoteDirDaemon);
+
+	my $str = "RsyncArgsAfter: " . join(" ", @{$rs->{rsyncArgs}}) . "\n";
+        $t->{XferLOG}->write(\$str);
     }
     my $shareNameSlash = $t->{shareNameSlash};
     from_to($shareNameSlash, "utf8", $conf->{ClientCharset})

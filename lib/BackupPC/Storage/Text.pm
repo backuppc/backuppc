@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -214,7 +214,10 @@ sub TextFileWrite
 
     (my $dir = $file) =~ s{(.+)/(.+)}{$1};
 
-    mkpath($dir, 0, 0775) if ( !-d $dir );
+    if ( !-d $dir ) {
+        eval { mkpath($dir, 0, 0775) };
+        return "TextFileWrite: can't create directory $dir" if ( $@ );
+    }
     if ( open(FD, ">", "$file.new") ) {
 	binmode(FD);
         print FD $contents;

@@ -413,7 +413,7 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
 #
 # Decide whether we do nothing, or a full or incremental backup.
 #
-if ( @Backups == 0
+if ( $lastFullTime == 0
         || $opts{f}
         || (!$opts{i} && (time - $lastFullTime > $Conf{FullPeriod} * 24*3600
             && time - $lastIncrTime > $Conf{IncrPeriod} * 24*3600)) ) {

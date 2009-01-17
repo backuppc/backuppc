@@ -304,7 +304,13 @@ sub write
     my($data) = $a->writeData;
 
     $file = $a->fileName($dir, $file);
-    mkpath($dir, 0, 0777) if ( !-d $dir );
+    if ( !-d $dir ) {
+        eval { mkpath($dir, 0, 0777) };
+        if ( $@ ) {
+            $a->{_errStr} = "Can't create directory $dir";
+            return;
+        }
+    }
     my $fd = BackupPC::FileZIO->open($file, 1, $a->{compress});
     if ( !$fd ) {
 	$a->{_errStr} = "Can't open/write to $file";

@@ -624,7 +624,15 @@ sub RmTreeDefer
     my($i, $f);
 
     return if ( !-e $file );
-    mkpath($trashDir, 0, 0777) if ( !-d $trashDir );
+    if ( !-d $trashDir ) {
+        eval { mkpath($trashDir, 0, 0777) };
+        if ( $@ ) {
+            #
+            # There's no good place to send this error - use stderr
+            #
+            print(STDERR "RmTreeDefer: can't create directory $trashDir");
+        }
+    }
     for ( $i = 0 ; $i < 1000 ; $i++ ) {
         $f = sprintf("%s/%d_%d_%d", $trashDir, time, $$, $i);
         next if ( -e $f );
@@ -903,7 +911,10 @@ sub MakeFileLink
         } elsif ( $newFile && -f $name && (stat($name))[3] == 1 ) {
             my($newDir);
             ($newDir = $rawFile) =~ s{(.*)/.*}{$1};
-            mkpath($newDir, 0, 0777) if ( !-d $newDir );
+            if ( !-d $newDir ) {
+                eval { mkpath($newDir, 0, 0777) };
+                return -5 if ( $@ );
+            }
             return -4 if ( !link($name, $rawFile) );
             return 2;
         } else {

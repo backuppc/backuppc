@@ -409,7 +409,6 @@ sub Main_TryToRun_nightly
 	$CmdQueueOn{$bpc->trashJob} = 1;
     }
     if ( $RunNightlyWhenIdle == 1 ) {
-
         #
         # Queue multiple nightly jobs based on the configuration
         #
@@ -477,7 +476,6 @@ sub Main_TryToRun_nightly
             $start = $start0 + int(($end - $start0)
 				  * ($i + 1) / $Conf{MaxBackupPCNightlyJobs});
             push(@$cmd, $start - 1);
-
             my $job = $bpc->adminJob($i);
             unshift(@CmdQueue, {
                     host    => $job,
@@ -868,7 +866,12 @@ sub Main_Check_Timeout
         # Remember to run the nightly script when the next CmdQueue
         # job is done.
         #
-        $RunNightlyWhenIdle = 1;
+        if ( $RunNightlyWhenIdle == 2 ) {
+            print(LOG $bpc->timeStamp, "BackupPC_nightly is still running after 24 hours!!"
+                                     . "  You should adjust the config settings; Skipping this run\n");
+        } else {
+            $RunNightlyWhenIdle = 1;
+        }
     }
     #
     # Write out the current status and then queue all the PCs

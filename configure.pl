@@ -472,12 +472,12 @@ if ( $Conf{CgiDir} ne "" ) {
 
     print <<EOF;
 
-BackupPC's CGI script needs to display various GIF images that
-should be stored where Apache can serve them.  They should be
-placed somewhere under Apache's DocumentRoot.  BackupPC also
-needs to know the URL to access these images.  Example:
+BackupPC's CGI script needs to display various PNG/GIF images that
+should be stored where Apache can serve them.  They should be placed
+somewhere under Apache's DocumentRoot.  BackupPC also needs to know
+the URL to access these images.  Example:
 
-    Apache image directory:  /usr/local/apache/htdocs/BackupPC
+    Apache image directory:  /var/www/htdocs/BackupPC
     URL for image directory: /BackupPC
 
 The URL for the image directory should start with a slash.
@@ -1235,7 +1235,7 @@ specified for a batch new install.
 
 Example:
 
-    --html-dir /usr/local/apache/htdocs/BackupPC
+    --html-dir /var/www/htdocs/BackupPC
 
 =item B<--html-dir-url URL>
 

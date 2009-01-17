@@ -602,7 +602,10 @@ sub processClose
     my($exists, $digest, $outSize, $errs) = $poolWrite->close;
 
     $fileName =~ s{^/+}{};
-    $fio->log(@$errs) if ( defined($errs) && @$errs );
+    if ( defined($errs) && @$errs ) {
+        $fio->log(@$errs);
+        $fio->{stats}{errorCnt} += @$errs;
+    }
     if ( $doStats ) {
 	$fio->{stats}{TotalFileCnt}++;
 	$fio->{stats}{TotalFileSize} += $origSize;
@@ -644,7 +647,7 @@ sub makePath
     $fio->logFileAction("create", $f) if ( $fio->{logLevel} >= 1 );
     $fio->log("makePath($path, 0777)") if ( $fio->{logLevel} >= 5 );
     $path = $1 if ( $path =~ /(.*)/s );
-    File::Path::mkpath($path, 0, 0777) if ( !-d $path );
+    eval { File::Path::mkpath($path, 0, 0777) } if ( !-d $path );
     return $fio->attribSet($f) if ( -d $path );
     $fio->log("Can't create directory $path");
     $fio->{stats}{errorCnt}++;

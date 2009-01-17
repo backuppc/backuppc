@@ -56,7 +56,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0, released 31 Dec 2008.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -95,6 +95,12 @@ sub new
     # Always unlink any current file in case it is already linked
     #
     unlink($fileName) if ( -f $fileName );
+    if ( $fileName =~ m{(.*)/.+} && !-d $1 ) {
+        eval { mkpath($1, 0, 0777) };
+        if ( $@ ) {
+            push(@{$self->{errors}}, "Unable to create directory $1 for $self->{fileName}");
+        }
+    }
     return $self;
 }
 
@@ -135,7 +141,7 @@ sub write
         if ( !defined($a->{base} = $a->{bpc}->MD52Path($a->{digest},
                                                        $a->{compress})) ) {
             push(@{$a->{errors}}, "Unable to get path from '$a->{digest}'"
-                                . " for $a->{fileName}\n");
+                                . " for $a->{fileName}");
         } else {
             while ( @{$a->{files}} < $MaxFiles ) {
                 my $fh;
@@ -176,7 +182,7 @@ sub write
                                               1, $a->{compress});
             if ( !defined($a->{fhOut}) ) {
                 push(@{$a->{errors}}, "Unable to open $a->{fileName}"
-                                    . " for writing\n");
+                                    . " for writing");
             }
         }
     }
@@ -220,7 +226,7 @@ sub write
                 if ( !$a->{files}[$i]->{fh}->rewind() ) {
                     push(@{$a->{errors}},
                             "Unable to rewind $a->{files}[$i]->{name}"
-                          . " for compare\n");
+                          . " for compare");
                 }
                 $match = $a->filePartialCompare($a->{files}[$i]->{fh}, $fh,
                                           $a->{nWrite}, $dataLen, \$a->{data});
@@ -249,12 +255,12 @@ sub write
                     if ( !defined($a->{fhOut}) ) {
                         push(@{$a->{errors}},
                                 "Unable to open $a->{fileName}"
-                              . " for writing\n");
+                              . " for writing");
                     } else {
                         if ( !$a->{files}[$i]->{fh}->rewind() ) {
                             push(@{$a->{errors}}, 
                                      "Unable to rewind"
-                                   . " $a->{files}[$i]->{name} for copy\n");
+                                   . " $a->{files}[$i]->{name} for copy");
                         }
                         $a->filePartialCopy($a->{files}[$i]->{fh}, $a->{fhOut},
                                         $a->{nWrite});
@@ -273,7 +279,7 @@ sub write
         my $n = $a->{fhOut}->write(\$a->{data});
         if ( $n != $dataLen ) {
             push(@{$a->{errors}}, "Unable to write $dataLen bytes to"
-                                . " $a->{fileName} (got $n)\n");
+                                . " $a->{fileName} (got $n)");
         }
     }
     $a->{nWrite} += $dataLen;
@@ -322,7 +328,7 @@ sub write
 	      || !defined($fh = BackupPC::FileZIO->open($fileName, 0,
 						 $a->{compress})) ) {
 		push(@{$a->{errors}}, "Can't rename $a->{fileName} -> $fileName"
-				    . " or open during size fixup\n");
+				    . " or open during size fixup");
 	    }
 	    #print("Using temporary name $fileName\n");
 	} elsif ( defined($a->{files}) && defined($a->{files}[0]) ) {
@@ -347,7 +353,7 @@ sub write
 		if ( $n != $thisRead ) {
 		    push(@{$a->{errors}},
 				"Unable to read $thisRead bytes during resize"
-			       . " from temp $fileName (got $n)\n");
+			       . " from temp $fileName (got $n)");
 		    last;
 		}
 		$poolWrite->write(\$data);
@@ -371,7 +377,7 @@ sub write
         local(*OUT);
         if ( !open(OUT, ">", $a->{fileName}) ) {
             push(@{$a->{errors}}, "Can't open $a->{fileName} for empty"
-                                . " output\n");
+                                . " output");
         } else {
             close(OUT);
         }
@@ -394,7 +400,7 @@ sub write
     } else {
         if ( @{$a->{files}} == 0 ) {
             push(@{$a->{errors}}, "Botch, no matches on $a->{fileName}"
-                                . " ($a->{digest})\n");
+                                . " ($a->{digest})");
         } elsif ( @{$a->{files}} > 1 ) {
 	    #
 	    # This is no longer a real error because $Conf{HardLinkMax}
@@ -429,7 +435,7 @@ sub write
             if ( !$a->{files}[$i]->{fh}->rewind() ) {
                 push(@{$a->{errors}}, 
                          "Unable to rewind $a->{files}[$i]->{name}"
-                       . " for copy after link fail\n");
+                       . " for copy after link fail");
                 next;
             }
             $a->{fhOut} = BackupPC::FileZIO->open($a->{fileName},
@@ -437,7 +443,7 @@ sub write
             if ( !defined($a->{fhOut}) ) {
                 push(@{$a->{errors}},
                         "Unable to open $a->{fileName}"
-                      . " for writing after link fail\n");
+                      . " for writing after link fail");
             } else {
                 $a->filePartialCopy($a->{files}[$i]->{fh}, $a->{fhOut},
                                     $a->{nWrite});
@@ -501,14 +507,14 @@ sub filePartialCopy
         if ( $n != $thisRead ) {
             push(@{$a->{errors}},
                         "Unable to read $thisRead bytes from "
-                       . $fhIn->name . " (got $n)\n");
+                       . $fhIn->name . " (got $n)");
             return;
         }
         $n = $fhOut->write(\$data, $thisRead);
         if ( $n != $thisRead ) {
             push(@{$a->{errors}},
                         "Unable to write $thisRead bytes to "
-                       . $fhOut->name . " (got $n)\n");
+                       . $fhOut->name . " (got $n)");
             return;
         }
         $nRead += $thisRead;
@@ -531,7 +537,7 @@ sub filePartialCompare
         $n = $fh0->read(\$data0, $thisRead);
         if ( $n != $thisRead ) {
             push(@{$a->{errors}}, "Unable to read $thisRead bytes from "
-                                 . $fh0->name . " (got $n)\n");
+                                 . $fh0->name . " (got $n)");
             return;
         }
         $n = $fh1->read(\$data1, $thisRead);

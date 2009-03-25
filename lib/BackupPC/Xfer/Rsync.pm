@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Dec 2008.
+# Version 3.2.0beta0, released 17 Jan 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -285,6 +285,9 @@ sub start
                 },
 	pidHandler   => sub {
 			    $t->{pidHandler}(@_);
+			},
+	completionPercent => sub {
+			    $t->{completionPercent}(@_);
 			},
         clientCharset => $conf->{ClientCharset},
 	fio          => BackupPC::Xfer::RsyncFileIO->new({

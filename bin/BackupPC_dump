@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Dec 2008.
+# Version 3.2.0beta0, released 17 Jan 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -158,6 +158,7 @@ if ( !defined($Hosts->{$client}) ) {
 my $Dir     = "$TopDir/pc/$client";
 my @xferPid = ();
 my $tarPid  = -1;
+my $completionPercent;
 
 #
 # Re-read config file, so we can include the PC-specific config
@@ -232,33 +233,6 @@ if ($Conf{XferMethod} eq "archive" ) {
     print(STDERR "Exiting because the XferMethod is set to archive\n")
                 if ( $opts{v} );
     exit(0);
-}
-
-if ( !$opts{d} && !$Conf{BackupsDisable} ) {
-    #
-    # In the non-DHCP case, make sure the host can be looked up
-    # via NS, or otherwise find the IP address via NetBios.
-    #
-    if ( $Conf{ClientNameAlias} ne "" ) {
-        $host = $Conf{ClientNameAlias};
-    } else {
-        $host = $client;
-    }
-    if ( !defined(gethostbyname($host)) ) {
-        #
-        # Ok, NS doesn't know about it.  Maybe it is a NetBios name
-        # instead.
-        #
-	print(STDERR "Name server doesn't know about $host; trying NetBios\n")
-			if ( $opts{v} );
-        if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
-	    print(LOG $bpc->timeStamp, "Can't find host $host via netbios\n");
-            print("host not found\n");
-            exit(1);
-        }
-    } else {
-        $hostIP = $host;
-    }
 }
 
 ###########################################################################
@@ -490,6 +464,33 @@ if ( !$bpc->HardlinkTest($Dir, "$TopDir/cpool") ) {
     exit(1);
 }
 
+if ( !$opts{d} ) {
+    #
+    # In the non-DHCP case, make sure the host can be looked up
+    # via NS, or otherwise find the IP address via NetBios.
+    #
+    if ( $Conf{ClientNameAlias} ne "" ) {
+        $host = $Conf{ClientNameAlias};
+    } else {
+        $host = $client;
+    }
+    if ( !defined(gethostbyname($host)) ) {
+        #
+        # Ok, NS doesn't know about it.  Maybe it is a NetBios name
+        # instead.
+        #
+	print(STDERR "Name server doesn't know about $host; trying NetBios\n")
+			if ( $opts{v} );
+        if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
+	    print(LOG $bpc->timeStamp, "Can't find host $host via netbios\n");
+            print("host not found\n");
+            exit(1);
+        }
+    } else {
+        $hostIP = $host;
+    }
+}
+
 #
 # Check if $host is alive
 #
@@ -594,8 +595,9 @@ UserCommandRun("DumpPreUserCmd");
 if ( $? && $Conf{UserCmdCheckStatus} ) {
     print(LOG $bpc->timeStamp,
             "DumpPreUserCmd returned error status $?... exiting\n");
-    print("dump failed: DumpPreUserCmd returned error status $?\n");
-    exit(1);
+    $XferLOG->write(\"DumpPreUserCmd returned error status $?... exiting\n");
+    $stat{hostError} = "DumpPreUserCmd returned error status $?";
+    BackupFailCleanup();
 }
 $NeedPostCmd = 1;
 
@@ -621,19 +623,21 @@ for my $shareName ( @$ShareNames ) {
     if ( $? && $Conf{UserCmdCheckStatus} ) {
         print(LOG $bpc->timeStamp,
                 "DumpPreShareCmd returned error status $?... exiting\n");
-        print("dump failed: DumpPreShareCmd returned error status $?\n");
         UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
-        exit(1);
+        $XferLOG->write(\"DumpPreShareCmd returned error status $?... exiting\n");
+        $stat{hostError} = "DumpPreShareCmd returned error status $?";
+        BackupFailCleanup();
     }
 
     $xfer = BackupPC::Xfer::create($Conf{XferMethod}, $bpc);
     if ( !defined($xfer) ) {
         my $errStr = BackupPC::Xfer::errStr();
         print(LOG $bpc->timeStamp, "dump failed: $errStr\n");
-        print("dump failed: $errStr\n");
         UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
         UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
-        exit(1);
+        $XferLOG->write(\"BackupPC::Xfer::create failed: $errStr\n");
+        $stat{hostError} = $errStr;
+        BackupFailCleanup();
     }
 
     my $useTar = $xfer->useTar;
@@ -723,14 +727,14 @@ for my $shareName ( @$ShareNames ) {
 	compress     => $Conf{CompressLevel},
 	XferMethod   => $Conf{XferMethod},
 	logLevel     => $Conf{XferLogLevel},
-	pidHandler   => \&pidHandler,
         partialNum   => $partialNum,
+	pidHandler   => \&pidHandler,
+	completionPercent => \&completionPercent,
     });
 
     if ( !defined($logMsg = $xfer->start()) ) {
-        print(LOG $bpc->timeStamp, "xfer start failed: ", $xfer->errStr, "\n");
-        print("dump failed: ", $xfer->errStr, "\n");
-        print("link $clientURI\n") if ( $needLink );
+        my $errStr = "xfer start failed: " . $xfer->errStr . "\n";
+        print(LOG $bpc->timeStamp, $errStr);
         #
         # kill off the tar process, first nicely then forcefully
         #
@@ -746,7 +750,9 @@ for my $shareName ( @$ShareNames ) {
 	}
 	UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
 	UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
-        exit(1);
+        $XferLOG->write(\"xfer start failed: $errStr\n");
+        $stat{hostError} = $errStr;
+        BackupFailCleanup();
     }
 
     @xferPid = $xfer->xferPid;
@@ -1564,7 +1570,7 @@ sub CorrectHostCheck
 		|| $Conf{NmbLookupCmd} eq "" );
     my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($hostIP);
     return "host $host has mismatching netbios name $netBiosHost"
-		if ( $netBiosHost ne $host );
+		if ( lc($netBiosHost) ne lc(substr($host, 0, 15)) );
     return;
 }
 
@@ -1583,6 +1589,23 @@ sub pidHandler
     my $str = join(",", @pids);
     $XferLOG->write(\"Xfer PIDs are now $str\n") if ( defined($XferLOG) );
     print("xferPids $str\n");
+}
+
+#
+# The Xfer method might tell us from time to time about progress
+# in the backup or restore
+#
+sub completionPercent
+{
+    my($percent) = @_;
+
+    $percent = 100 if ( $percent > 100 );
+    $percent =   0 if ( $percent <   0 );
+    if ( !defined($completionPercent)
+        || int($completionPercent + 0.5) != int($percent) ) {
+            printf("completionPercent %.0f\n", $percent);
+    }
+    $completionPercent = $percent;
 }
 
 #

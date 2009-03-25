@@ -81,6 +81,15 @@
 * Added --config-override to configure.pl, allow config settings to be
   set on the command line.  Proposed by Les Stott and Holger Parplies.
 
+* Moved call to NmbLookupFindHostCmd in BackupPC_dump to after the
+  check of whether a backup needs to be done.  This makes wakeonlan
+  work correctly, rather than waking up the client every WakeupSchedule.
+  Reported by David Lasker.
+
+* Improved settings for compression and compext in BackupPC_archiveStart
+  based on compression type, as proposed by Paul Dugas.  compext is now
+  empty, .gz or .bz2 based on ArchiveComp.
+
 * Changed bin/BackupPC_dump to not ping or lookup the host if
   $Conf{BackupsDisable} is set.  Requested by John Rouillard.
 
@@ -98,11 +107,21 @@
   and also set the file extension to .gz when compression is on.
   Reported by Stephen Vaughan.
 
+* Fixed netbios name comparison in bin/BackupPC_dump and
+  bin/BackupPC_restore to just use the first 15 characters
+  of the host name.  Patch from Dan MacNeil.
+
+* Fixed nmblookup parsing in BackupPC::Lib::NetBiosInfoGet to ignore
+  entries with the <GROUP> tag.  Based on patch from Dan MacNeil.
+
+* Fixed BackupPC_dump so that the XferLOG file is saved when
+  DumpPreUserCmd fails.  Reported by John Rouillard.
+
 * Updated BackupPC.pod for $Conf{BackupsDisable}, reported by
   Nils Breunese.
 
 * Minor updates to lib/BackupPC/Lang/fr.pm from Nicolas STRANSKY
-  applied by GFK.
+  applied by GFK, and also from Vincent Fleuranceau.
 
 * Minor updates to lib/BackupPC/Lang/de.pm from Klaus Weidenbach.
 

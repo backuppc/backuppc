@@ -51,7 +51,7 @@ $Lang{Admin_Start_Server} = <<EOF;
 <form action="\$MyURL" method="get">
 Le serveur BackupPC sur <tt>\$Conf{ServerHost}</tt>, port <tt>\$Conf{ServerPort}</tt>
 n'est pas en fonction (vous l'avez peut-être arrêté, ou vous ne l'avez pas encore démarré).<br>
-Voulez-vous le démarrer?
+Voulez-vous le démarrer ?
 <input type="hidden" name="action" value="startServer">
 <input type="submit" value="Démarrer le serveur" name="ignore">
 </form>

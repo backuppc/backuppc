@@ -35,7 +35,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Dec 2008.
+# Version 3.2.0beta0, released 17 Jan 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -94,9 +94,11 @@ for ( my $i = 0 ; ; $i++ ) {
 my %ArchiveReq = (
     archiveloc  => $bpc->{Conf}{ArchiveDest},
     archtype    => 0,
-    compression => $bpc->{Conf}{ArchiveComp} eq "none" ? $bpc->{Conf}{CatPath}
-                                                       : $bpc->{Conf}{ArchiveComp},
-    compext     => $bpc->{Conf}{ArchiveComp} eq "none" ? '.raw' : '.gz',
+    compression => $bpc->{Conf}{ArchiveComp} eq 'none' ? $bpc->{Conf}{CatPath}
+                    : ($bpc->{Conf}{ArchiveComp} eq 'gzip'
+                      ? $bpc->{Conf}{GzipPath} : $bpc->{Conf}{Bzip2Path}),
+    compext     => $bpc->{Conf}{ArchiveComp} eq 'none' ? ''
+                    : ($bpc->{Conf}{ArchiveComp} eq 'gzip' ? '.gz' : '.bz2'),
     parfile     => $bpc->{Conf}{ArchivePar},
     splitsize   => '0000000',
     host        => $ArchiveHost,

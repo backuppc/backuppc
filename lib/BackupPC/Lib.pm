@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Dec 2008.
+# Version 3.2.0beta0, released 17 Jan 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -130,7 +130,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '3.2.0',
+        Version => '3.2.0beta0',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -1046,6 +1046,10 @@ sub NetBiosInfoGet
     };
     $nmbCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{NmbLookupCmd}, $args);
     foreach ( split(/[\n\r]+/, $bpc->cmdSystemOrEval($nmbCmd, undef, $args)) ) {
+        #
+        # skip <GROUP> and other non <ACTIVE> entries
+        #
+        next if ( /<\w{2}> - <GROUP>/i );
         next if ( !/^\s*([\w\s-]+?)\s*<(\w{2})\> - .*<ACTIVE>/i );
         $netBiosHostName ||= $1 if ( $2 eq "00" );  # host is first 00
         $netBiosUserName   = $1 if ( $2 eq "03" );  # user is last 03

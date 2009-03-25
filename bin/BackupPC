@@ -47,7 +47,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Dec 2008.
+# Version 3.2.0beta0, released 17 Jan 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -961,6 +961,8 @@ sub Main_Check_Job_Messages
                                 if ( $Status{$host}{dhcpCheckCnt} > 0 );
             } elsif ( $mesg =~ /^xferPids (.*)/ ) {
                 $Jobs{$host}{xferPid} = $1;
+            } elsif ( $mesg =~ /^completionPercent (.*)/ ) {
+                $Jobs{$host}{completionPercent} = $1;
             } elsif ( $mesg =~ /^started_restore/ ) {
                 $Jobs{$host}{type}    = "restore";
                 print(LOG $bpc->timeStamp,

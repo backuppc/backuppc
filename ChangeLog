@@ -58,8 +58,11 @@
   takes more than 24 hours (ie: when the next one is meant to
   start).  Reported by Tony Schreiner.
 
-* Added server message for queuing a single host based on patch
-  submitted by Joe Digilio.
+* Added more options to server backup command: rather than just forcing
+  an incremental or full backup, a regular (auto) backup can be queued
+  (ie: do nothing/incr/full based on schedule), as well as doing just
+  an incremental or full or nothing based on the client schedule.
+  Based on patches submitted by Joe Digilio.
 
 * Modified lib/BackupPC/CGI/RSS.pm to replace \n with \r\n in the RSS
   http response headers.  Patch submitted by Thomas Eckhardt.
@@ -93,9 +96,21 @@
 * Changed bin/BackupPC_dump to not ping or lookup the host if
   $Conf{BackupsDisable} is set.  Requested by John Rouillard.
 
+* Changed BackupPC_tarCreate to disable output of final nulls in
+  tar archive when -l or -L option is used.  Reported by John
+  Rouillard.
+
 * Added error check in BackupPC::Xfer::RsyncFileIO after call to
   BackupPC::Xfer::RsyncDigest->digestStart(), reported by Jeff
   Kosowsky.
+
+* Added variable substitution for host, confDir, client in
+  RsyncArgs, and also added option RsyncArgsExtra to allow
+  more easy customization of RsyncArgs on a per-client basis.
+  Proposed (with patch) by Raman Gupta.
+
+* Added Xfer error column to the host summary table in the CGI
+  interface.  Based on patch submitted by Jan Kratochvíl.
 
 * Minor fix to sprintf arguments in BackupPC::Attrib, reported by
   Jonathan Kamens.
@@ -119,6 +134,9 @@
 
 * Updated BackupPC.pod for $Conf{BackupsDisable}, reported by
   Nils Breunese.
+
+* Added alternate freebsd-backuppc2 init.d script that is
+  more compact.  Submitted by Dan Niles.
 
 * Minor updates to lib/BackupPC/Lang/fr.pm from Nicolas STRANSKY
   applied by GFK, and also from Vincent Fleuranceau.

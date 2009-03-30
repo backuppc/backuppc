@@ -174,15 +174,20 @@ sub start
     # Collect FTP configuration arguments and translate them for
     # passing to the FTP module.
     #
-    $args = $t->getFTPArgs();
+    unless ( $args = $t->getFTPArgs() ) {
+        return;
+    }
 
     #
     # Create the Net::FTP::AutoReconnect or Net::FTP object.
     #
-    unless ( $t->{ftp} = ($ARCLibOK) ? Net::FTP::AutoReconnect->new(%$args)
-                                     : Net::FTP->new(%$args) )
-    {
-        $t->{_errStr} = "Can't open connection to $args->{Host}";
+    undef $@;
+    eval {
+        $t->{ftp} = ($ARCLibOK) ? Net::FTP::AutoReconnect->new(%$args)
+                                : Net::FTP->new(%$args);
+    };
+    if ($@) {
+        $t->{_errStr} = "Can't open connection to $args->{Host}: $!";
         $t->{xferErrCnt}++;
         return;
     }
@@ -190,28 +195,37 @@ sub start
     #
     # Log in to the ftp server and set appropriate path information.
     #
-    unless ( $t->{ftp}->login( $conf->{FtpUserName}, $conf->{FtpPasswd} ) ) {
-        $t->{_errStr} = "Can't login to $args->{Host}";
+    undef $@;
+    eval { $t->{ftp}->login( $conf->{FtpUserName}, $conf->{FtpPasswd} ); };
+    if ( $@ ) {
+        $t->{_errStr} = "Can't login to $args->{Host}: $!";
         $t->{xferErrCnt}++;
         return;
     }
 
-    unless ( $t->{ftp}->binary() ) {
-        $t->{_errStr} = "Can't enable binary transfer mode to $args->{Host}";
+    undef $@;
+    eval { $t->{ftp}->binary(); };
+    if ($@) {
+        $t->{_errStr} =
+          "Can't enable binary transfer mode to $args->{Host}: $!";
         $t->{xferErrCnt}++;
         return;
     }
 
-    unless (    ( $t->{shareName} =~ m/^\.?$/ )
-             || ( $t->{ftp}->cwd( $t->{shareName} ) ) )
-    {
-        $t->{_errStr} = "Can't change working directory to $t->{shareName}";
+    undef $@;
+    eval { $t->{shareName} =~ m/^\.?$/ || $t->{ftp}->cwd( $t->{shareName} ); };
+    if ($@) {
+        $t->{_errStr} =
+            "Can't change working directory to $t->{shareName}: $!";
         $t->{xferErrCnt}++;
         return;
     }
 
-    unless  ( $t->{sharePath} = $t->{ftp}->pwd() ) {
-        $t->{_errStr} = "Can't retrieve full working directory of $t->{shareName}";
+    undef $@;
+    eval { $t->{sharePath} = $t->{ftp}->pwd(); };
+    if ($@) {
+        $t->{_errStr} =
+            "Can't retrieve full working directory of $t->{shareName}: $!";
         $t->{xferErrCnt}++;
         return;
     }
@@ -366,8 +380,9 @@ sub restoreDir
     #
     # Create the remote directory
     #
-    unless ( $ftp->mkdir( $path, 1 ) ) {
-
+    undef $@;
+    eval { $ftp->mkdir( $path, 1 ); };
+    if ($@) {
         $t->logFileAction( "fail", $dirName, $dirAttr );
         return;
     }
@@ -426,14 +441,16 @@ sub restoreFile
 
     #print STDERR "BackupPC::Xfer::Ftp->restoreFile($fileName)\n";
 
-    #
-    # Note: is logging necessary here?
-    #
-    if ( $ftp->put( $poolFile, $fileDest ) ) {
-        $t->logFileAction("restore", $fileName, $fileAttr);
-
-    } else {
-        $t->logFileAction("fail", $fileName, $fileAttr);
+    undef $@;
+    eval {
+        if ( $ftp->put( $poolFile, $fileDest ) ) {
+            $t->logFileAction( "restore", $fileName, $fileAttr );
+        } else {
+            $t->logFileAction( "fail", $fileName, $fileAttr );
+        }
+    };
+    if ($@) {
+        $t->logFileAction( "fail", $fileName, $fileAttr );
     }
 }
 
@@ -466,7 +483,7 @@ sub backup
     #
     # Prepare backup folder
     #
-    unless ( mkpath( $OutDir, 0, 0755 ) ) {
+    unless ( eval { mkpath( $OutDir, 0, 0755 ); } ) {
         $t->{_errStr} = "can't create OutDir: $OutDir";
         $t->{xferErrCnt}++;
         return;
@@ -508,62 +525,22 @@ sub backup
 sub getFTPArgs
 {
     my ($t)  = @_;
-    my $bpc  = $t->{bpc};
     my $conf = $t->{conf};
 
-    #
-    # accepted default key => value pairs to Net::FTP
-    #
-    my $args = {
-                 Host         => undef,
-                 Firewall     => undef,          # not used
-                 FirewallType => undef,          # not used
-                 BlockSize    => 10240,
-                 Port         => 21,
-                 Timeout      => 120,
-                 Debug        => 0,              # do not touch
-                 Passive      => 1,              # do not touch
-                 Hash         => undef,          # do not touch
-                 LocalAddr    => "localhost",    # do not touch
-               };
-
-    #
-    # This is mostly to fool makeDist
-    #
-    exists( $conf->{ClientNameAlias} ) && exists( $conf->{FtpBlockSize} ) &&
-    exists( $conf->{FtpPort} )         && exists( $conf->{FtpTimeout} )
-        or die "Configuration variables for FTP not present in config.pl";
-
-    #
-    # map of options from %Conf in the config.pl scripts to options
-    # the Net::FTP::AutoReconnect object.
-    #
-    my $argMap = {
-                   "Host"      => "ClientNameAlias",
-                   "BlockSize" => "FtpBlockSize",
-                   "Port"      => "FtpPort",
-                   "Timeout"   => "FtpTimeout",
-                 };
-
-    foreach my $key ( keys(%$args) ) {
-        $args->{$key} = $conf->{ $argMap->{$key} } || $args->{$key};
-    }
-
-    #
-    # Fix for $args->{Host} since it can be in more than one location.
-    # Note the precedence here, this may need to be fixed.  Order of
-    # precedence:
-    #   $conf->{ClientNameAlias}
-    #   $t->{hostIP}
-    #   $t->{host}
-    #
-    $args->{Host} ||= $t->{hostIP};
-    $args->{Host} ||= $t->{host};
-
-    #
-    # return the reference to the hash of items
-    #
-    return $args;
+    return {
+        Host         => $conf->{ClientNameAlias}
+                     || $t->{hostIP}
+                     || $t->{host},
+        Firewall     => undef,                            # not used
+        FirewallType => undef,                            # not used
+        BlockSize    => $conf->{FtpBlockSize} || 10240,
+        Port         => $conf->{FtpPort}      || 21,
+        Timeout      => $conf->{FtpTimeout}   || 120,
+        Debug        => 0,                                # do not touch
+        Passive      => 1,                                # do not touch
+        Hash         => undef,                            # do not touch
+        LocalAddr    => "localhost",                      # do not touch
+    };
 }
 
 
@@ -589,32 +566,29 @@ sub remotels
 
     my ( $dirContents, $remoteDir, $f );
 
-    unless ( $dirContents = ($path =~ /^\.?$/ ) ? $ftp->dir() :
-                                                  $ftp->dir("$path/") )
-    {
+    undef $@;
+    eval {
+        $dirContents = ( $path =~ /^\.?$/ ) ? $ftp->dir()
+                                            : $ftp->dir("$path/");
+    };
+    if ($@) {
         $t->{xferErrCnt}++;
-        return "can't retrieve remote directory contents of $path";
+        return "can't retrieve remote directory contents of $path: $!";
     }
 
     foreach my $info ( @{parse_dir($dirContents)} ) {
 
         $f = {
-	       name   => $info->[0],
-	       type   => $info->[1],
-	       size   => $info->[2],
-	       mtime  => $info->[3],
-	       mode   => $info->[4],
-	     };
+            name  => $info->[0],
+            type  => $info->[1],
+            size  => $info->[2],
+            mtime => $info->[3],
+            mode  => $info->[4],
+        };
 
-	#
-	# convert & store utf8 version of filename
-        #
         $f->{utf8name} = $f->{name};
         from_to( $f->{utf8name}, $conf->{ClientCharset}, "utf8" );
 
-	#
-	# construct the full name
-	#
 	$f->{fullName} = "$t->{sharePath}/$path/$f->{name}";
 	$f->{fullName} =~ s/\/+/\//g;
 
@@ -623,7 +597,6 @@ sub remotels
 
         push( @$remoteDir, $f );
     }
-
     return $remoteDir;
 }
 
@@ -637,17 +610,10 @@ sub ignoreFileCheck
 {
     my ( $t, $f, $attrib ) = @_;
 
-    #
-    # case for ignoring the files '.' & '..'
-    #
     if ( $f->{name} =~ /^\.\.?$/ ) {
         return 1;
     }
 
-    #
-    # Check the include/exclude lists.  the function returns true if
-    # the file should be backed up, so return the opposite.
-    #
     return ( !$t->checkIncludeExclude( $f->{fullName} ) );
 }
 
@@ -685,26 +651,30 @@ sub handleSymlink
         $f->{type} =~ /^l (.*)/;
         $target = $1;
 
-        if ( $targetDesc = $ftp->dir("$target/") ) {
-            $t->handleSymDir( $f, $OutDir, $attrib, $targetDesc );
+        undef $@;
+        eval {
+            if ( $targetDesc = $ftp->dir("$target/") ) {
+                $t->handleSymDir( $f, $OutDir, $attrib, $targetDesc );
 
-        } elsif ( $targetDesc = $ftp->dir($target) ) {
-            if ( $targetDesc->[4] eq 'file' ) {
-                $t->handleSymFile( $f, $OutDir, $attrib );
+            } elsif ( $targetDesc = $ftp->dir($target) ) {
+                if ( $targetDesc->[4] eq 'file' ) {
+                    $t->handleSymFile( $f, $OutDir, $attrib );
 
-            } elsif ( $targetDesc->[4] =~ /l (.*)/) {
-
-                $t->logFileAction("fail", $f->{utf8name}, $attribInfo);
+                } elsif ( $targetDesc->[4] =~ /l (.*)/ ) {
+                    $t->logFileAction( "fail", $f->{utf8name}, $attribInfo );
+                    return;
+                }
+            } else {
+                $t->( "fail", $f );
                 return;
             }
-        } else {
-
-            $t->("fail", $f);
+        };
+        if ($@) {
+            $t->logFileAction( "fail", $f->{utf8name}, $attribInfo );
             return;
         }
 
     } else {
-
         #
         # If we are not following symlinks, record them normally.
         #
@@ -731,23 +701,22 @@ sub handleSymFile
     my $conf = $t->{conf};
 
     my $f = {
-              name  => $fSym->{name},
-              type  => $targetDesc->[1],
-              size  => $targetDesc->[2],
-              mtime => $targetDesc->[3],
-              mode  => $targetDesc->[4]
-            };
+        name  => $fSym->{name},
+        type  => $targetDesc->[1],
+        size  => $targetDesc->[2],
+        mtime => $targetDesc->[3],
+        mode  => $targetDesc->[4]
+    };
 
     $f->{utf8name} = $fSym->{name};
     from_to( $f->{utf8name}, $conf->{ClientCharset}, "utf8" );
 
-    $f->{relPath} = $fSym->{relPath};
-
+    $f->{relPath}  = $fSym->{relPath};
     $f->{fullName} = "$t->{shareName}/$fSym->{relPath}/$fSym->{name}";
     $f->{fullName} =~ s/\/+/\//g;
 
     #
-    # since FTP servers follow symlinks, we can jsut do this:
+    # since FTP servers follow symlinks, we can just do this:
     #
     return $t->handleFile( $f, $OutDir, $attrib );
 }
@@ -777,8 +746,13 @@ sub handleDir
 
     unless ( -d $OutDir ) {
 
-        mkpath( $OutDir, 0, 0755 );
-        $t->logFileAction( "create", $dir->{utf8name}, $dir );
+        eval { mkpath( $OutDir, 0, 0755 ) };
+        if ( $@ ) {
+            $t->logFileAction( "fail", $dir->{utf8name}, $dir );
+            return;
+        } else {
+            $t->logFileAction( "create", $dir->{utf8name}, $dir );
+        }
     }
 
     $attrib    = BackupPC::Attrib->new( { compress => $t->{Compress} } );
@@ -905,8 +879,9 @@ sub handleFile
     # If this is a full backup or the file has changed on the host,
     # back it up.
     #
-    unless ( tie( *FTP, 'Net::FTP::RetrHandle', $ftp, $f->{fullName} ) ) {
-
+    undef $@;
+    eval { tie ( *FTP, 'Net::FTP::RetrHandle', $ftp, $f->{fullName} ); };
+    if ( !*FTP || $@ ) {
         $t->handleFileAction( "fail", $attribInfo );
         $t->{xferBadFileCnt}++;
         $stats->{errCnt}++;
@@ -918,22 +893,21 @@ sub handleFile
                                            $bpc->{xfer}{compress} );
 
     $localSize = 0;
-    while (<FTP>) {
 
-        $localSize += length($_);
-        $poolWrite->write( \$_ );
-    }
+    undef $@;
+    eval {
+        while (<FTP>) {
+            $localSize += length($_);
+            $poolWrite->write( \$_ );
+        }
+    };
     ( $exists, $digest, $outSize, $errs ) = $poolWrite->close();
-
-    #
-    # calculate the file statistics
-    #
-    if (@$errs) {
+    if ( !*FTP || $@ || @$errs ) {
 
         $t->logFileAction( "fail", $f->{utf8name}, $attribInfo );
         unlink($poolFile);
         $t->{xferBadFileCnt}++;
-        $t->{errCnt} += scalar(@$errs);
+        $stats->{errCnt} += scalar @$errs;
         return;
     }
 
@@ -941,7 +915,6 @@ sub handleFile
     # this should never happen
     #
     if ( $localSize != $f->{size} ) {
-
         $t->logFileAction( "fail", $f->{utf8name}, $attribInfo );
         unklink($poolFile);
         $stats->{xferBadFileCnt}++;
@@ -953,7 +926,8 @@ sub handleFile
     # Perform logging
     #
     $attrib->set( $f->{utf8name}, $attribInfo );
-    $t->logFileAction( $exists ? "pool" : "create", $f->{utf8name}, $attribInfo );
+    $t->logFileAction( $exists ? "pool" : "create",
+                       $f->{utf8name}, $attribInfo );
     print $newFilesFH "$digest $f->{size} $poolFile\n" unless $exists;
 
     #

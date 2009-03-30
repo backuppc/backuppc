@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Dec 2008.
+# Version 3.2.0beta0, released 17 Jan 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -257,6 +257,11 @@ use vars qw(%ConfigMeta);
 	    emptyOk      => 1,
 	    child        => "string",
     },
+    RsyncArgsExtra	 => {
+	    type         => "list",
+	    emptyOk      => 1,
+	    child        => "string",
+    },
     RsyncRestoreArgs	=> {
 	    type         => "list",
 	    emptyOk      => 1,
@@ -277,7 +282,8 @@ use vars qw(%ConfigMeta);
     FtpPort             => "integer",
     FtpTimeout          => "integer",
     FtpFollowSymlinks   => "boolean",
-    
+    FtpRestoreEnabled   => "boolean",
+
     ######################################################################
     # Archive Configuration
     ######################################################################
@@ -435,6 +441,7 @@ use vars qw(%ConfigMeta);
                 RsyncdAuthRequired        => "boolean",
                 RsyncCsumCacheVerifyProb  => "boolean",
                 RsyncArgs                 => "boolean",
+                RsyncArgsExtra            => "boolean",
                 RsyncRestoreArgs          => "boolean",
                 RsyncClientCmd            => "boolean",
                 RsyncClientPath           => "boolean",
@@ -445,6 +452,8 @@ use vars qw(%ConfigMeta);
                 FtpBlockSize              => "boolean",
                 FtpPort                   => "boolean",
                 FtpTimeout                => "boolean",
+                FtpFollowSymlinks         => "boolean",
+                FtpRestoreEnabled         => "boolean",
                 ArchiveDest               => "boolean",
                 ArchiveComp               => "boolean",
                 ArchivePar                => "boolean",

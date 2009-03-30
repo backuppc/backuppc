@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 
 #my %lang;
 #use strict;
@@ -152,6 +152,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> 最后一次增量备份 (天前) </td>
     <td align="center"> 最后一次备份 (天前) </td>
     <td align="center"> 当前状态 </td>
+    <td align="center"> 传输错误数目 </td>
     <td align="center"> 最后一次备份结果 </td></tr>
 \$strGood
 </table>
@@ -171,6 +172,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> 最后一次增量备份 (天前) </td>
     <td align="center"> 最后一次备份 (天前) </td>
     <td align="center"> 当前状态 </td>
+    <td align="center"> 传输错误数目 </td>
     <td align="center"> 最后一次备份结果 </td></tr>
 \$strNone
 </table>
@@ -1347,11 +1349,11 @@ $Lang{CfgEdit_Title_User_URLs} = "用户 URLs";
 $Lang{CfgEdit_Title_User_Config_Editing} = "用户配置编辑";
 $Lang{CfgEdit_Title_Xfer} = "传输";
 $Lang{CfgEdit_Title_Xfer_Settings} = "传输设置";
+$Lang{CfgEdit_Title_Ftp_Settings} = "FTP 设置";
 $Lang{CfgEdit_Title_Smb_Settings} = "Smb 设置";
 $Lang{CfgEdit_Title_Tar_Settings} = "Tar 设置";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Rsync 设置";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd 设置";
-$Lang{CfgEdit_Title_Ftp_Settings} = "FTP 设置";
 $Lang{CfgEdit_Title_Archive_Settings} = "备档设置";
 $Lang{CfgEdit_Title_Include_Exclude} = "包含／排除";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb 路径／命令";

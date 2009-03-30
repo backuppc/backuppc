@@ -23,26 +23,34 @@ Fetching CVS:
     cd somewhere/BackupPC
     cvs -z3 -d:pserver:anonymous@backuppc.cvs.sourceforge.net:/cvsroot/backuppc co BackupPC
 
-* To fetch the CVS code tagged at a particular release (eg: v2.1.2):
+* To fetch the CVS code tagged at a particular release (eg: v3.2.0):
 
-    cvs -z3 -d:pserver:anonymous@backuppc.cvs.sourceforge.net:/cvsroot/backuppc co -r v2_1_2 BackupPC
+    cvs -z3 -d:pserver:anonymous@backuppc.cvs.sourceforge.net:/cvsroot/backuppc co -r v3_2_0 BackupPC
 
 Building an installable release from the CVS source:
 ---------------------------------------------------
 
-* Edit makeDist and set the version number and release date
-
 * Update makeDist and configure.pl if you add any new files to the release.
 
-* Run makeDist.  makeDist merges the version number, release date and turns
-  all the library paths etc back into the symbolic form (eg: __INSTALLDIR__)
+* Run makeDist, using arguments to specify the release date and version:
+
+    makeDist --releasedate '29 Mar 2009' --version 3.2.0beta0
+
+  makeDist merges the version number, release date and turns all the
+  library paths etc back into the symbolic form (eg: __INSTALLDIR__)
   so that configure.pl will do the right thing.
 
-  Often the language files are not up to date, and makeDist exits after
-  complaining about the lang files being inconsistent.  Use the -l option
-  to turn off that checking.
+  Sometime the language files are not up to date, and makeDist exits
+  after complaining about the lang files being inconsistent.  Use
+  the --nolangCheck option to turn off that checking.
 
-* You should now have a sub-directory dist/BackupPC-version containing
-  the release and a tar ball dist/BackupPC-VERSION.tar.gz.  The tar
-  ball can be copied, extracted and installed using configure.pl
+  By default makeDist does a syntax check on all the source files.
+  If you want to skip that you can use tune --nosyntaxCheck option, eg:
+
+    makeDist --nolangCheck --nosyntaxCheck --releasedate '29 Mar 2009' --version 3.2.0beta0
+
+* You should now have a sub-directory dist/BackupPC-VERSION containing
+  the release and a tar ball dist/BackupPC-VERSION.tar.gz.  You can
+  cd to dist/BackupPC-VERSION and run configure.pl from there, or
+  the tar ball can be copied, extracted and installed using configure.pl
   like any BackupPC release.

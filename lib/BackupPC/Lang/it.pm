@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 #
 # Italian i18n file
 #
@@ -163,6 +163,7 @@ Ci sono \$hostCntGood host sottoposti a backup per un totale di:
     <td align="center"> Et&agrave; incrementali (giorni) </td>
     <td align="center"> Ultimo Backup (giorni) </td>
     <td align="center"> Stato </td>
+    <td align="center"> Numero errori trasferimento </td>
     <td align="center"> Ultimo tentativo </td></tr>
 \$strGood
 </table>
@@ -182,6 +183,7 @@ Ci sono \$hostCntNone host senza alcun backup.
     <td align="center"> Et&agrave; incrementali (giorni) </td>
     <td align="center"> Ultimo Backup (giorni) </td>
     <td align="center"> Stato </td>
+    <td align="center"> Numero errori trasferimento </td>
     <td align="center"> Ultimo tentativo </td></tr>
 \$strNone
 </table>
@@ -1394,11 +1396,11 @@ $Lang{CfgEdit_Title_User_URLs} = "URL Utenti";
 $Lang{CfgEdit_Title_User_Config_Editing} = "Modifica Configurazione Utenti";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
 $Lang{CfgEdit_Title_Xfer_Settings} = "Configurazione Xfer";
+$Lang{CfgEdit_Title_Ftp_Settings} = "Configurazione FTP";
 $Lang{CfgEdit_Title_Smb_Settings} = "Configurazione Smb";
 $Lang{CfgEdit_Title_Tar_Settings} = "Configurazione Tar";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Configurazione Rsync";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Configurazione Rsyncd";
-$Lang{CfgEdit_Title_Ftp_Settings} = "Configurazione FTP";
 $Lang{CfgEdit_Title_Archive_Settings} = "Configurazione Archivi";
 $Lang{CfgEdit_Title_Include_Exclude} = "Includi/Escludi";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Percorsi/Comandi";

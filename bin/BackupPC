@@ -285,7 +285,7 @@ sub Main_Initialize
         #
         my $pid;
         defined($pid = fork) or die("Can't fork: $!");
-        exit if( $pid );   # parent exits
+        exit if ( $pid );   # parent exits
 
         POSIX::setsid();
         defined($pid = fork) or die("Can't fork: $!");
@@ -655,8 +655,6 @@ sub Main_TryToRun_Bg_or_User_Queue
                 push(@deferUserQueue, $req);
                 next;
             }
-            push(@args, $req->{doFull} ? "-f" : "-i")
-                            if (( !$req->{restore} ) && ( !$req->{archive} ));
             $UserQueueOn{$req->{host}} = 0;
         } elsif ( $nJobs < $Conf{MaxBackups}
                         && (@CmdQueue + $nJobs)
@@ -692,7 +690,11 @@ sub Main_TryToRun_Bg_or_User_Queue
         } else {
             $progName = "BackupPC_dump";
             $type     = "backup";
-            push(@args, "-d") if ( $req->{dhcp} );
+            push(@args, "-I") if ( $req->{backupType} eq "autoIncr" );
+            push(@args, "-F") if ( $req->{backupType} eq "autoFull" );
+            push(@args, "-i") if ( $req->{backupType} eq "doIncr" );
+            push(@args, "-f") if ( $req->{backupType} eq "doFull" );
+            push(@args, "-d") if ( $req->{backupType} eq "dhcpPoll" );
             push(@args, "-e") if ( $req->{dumpExpire} );
             push(@args, $host);
         }
@@ -1347,58 +1349,66 @@ sub Main_Check_Client_Messages
                 QueueAllPCs();
             } elsif ( $cmd =~ /^BackupPC_nightly run$/ ) {
                 $RunNightlyWhenIdle = 1;
-            } elsif ( $cmd =~ /^queue (\S+)$/ ) {
-                $host = $1;
-		$host = $bpc->uriUnesc($host);
-                if ( !defined($Hosts->{$host}) ) {
-                    print(LOG $bpc->timeStamp,
-                              "User requested backup of unknown host $host\n");
-                    $reply = "error: unknown host $host";
-                } else {
-                    if ( QueueOnePC($host) ) {
-                        print(LOG $bpc->timeStamp,
-                           "Disk too full ($Info{DUlastValue}%); skipped 1 host\n");
-                        $Info{DUDailySkipHostCnt}++;
-                        $reply = "error: disk too full to queue $host";
-                    } else {
-                        print(LOG $bpc->timeStamp, "Host $host queued by user.\n");
-                        $reply = "ok: $host queued";
-                    }
-                }
             } elsif ( $cmd =~ /^backup (\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ) {
-                my $hostIP = $1;
-                $host      = $2;
-                my $user   = $3;
-                my $doFull = $4;
-		$host      = $bpc->uriUnesc($host);
-		$hostIP    = $bpc->uriUnesc($hostIP);
+                my $hostIP     = $1;
+                $host          = $2;
+                my $user       = $3;
+                my $backupType = $4;
+		$host          = $bpc->uriUnesc($host);
+		$hostIP        = $bpc->uriUnesc($hostIP);
                 if ( !defined($Hosts->{$host}) ) {
                     print(LOG $bpc->timeStamp,
                                "User $user requested backup of unknown host"
                              . " $host\n");
                     $reply = "error: unknown host $host";
                 } else {
-                    print(LOG $bpc->timeStamp,
-                               "User $user requested backup of $host"
-                             . " ($hostIP)\n");
-                    if ( $BgQueueOn{$hostIP} ) {
-                        @BgQueue = grep($_->{host} ne $hostIP, @BgQueue);
-                        $BgQueueOn{$hostIP} = 0;
+                    #
+                    # Handle numeric backupType for backward compatibility
+                    # (technically -1 is a new feature for auto)
+                    #
+                    $backupType = 'auto'   if ( $backupType eq '-1' );
+                    $backupType = 'doIncr' if ( $backupType eq '0' );
+                    $backupType = 'doFull' if ( $backupType eq '1' );
+                    if ( $backupType !~ /^doIncr|doFull|autoIncr|autoFull|auto$/i ) {
+                        $reply = "error: unknown backup type $backupType";
+                    } else {
+                        print(LOG $bpc->timeStamp,
+                                   "User $user requested backup of $host"
+                                 . " ($hostIP)\n");
+                        if ( $BgQueueOn{$hostIP} ) {
+                            @BgQueue = grep($_->{host} ne $hostIP, @BgQueue);
+                            $BgQueueOn{$hostIP} = 0;
+                        }
+                        if ( $UserQueueOn{$hostIP} ) {
+                            @UserQueue = grep($_->{host} ne $hostIP, @UserQueue);
+                            $UserQueueOn{$hostIP} = 0;
+                        }
+                        my $status = QueueOnePC($host, $hostIP, $user, 'user', $backupType);
+                        if ( $status == 0 ) {
+                            $reply = "ok: requested backup of $host ($backupType)";
+                        } elsif ( $status == 1 ) {
+                            #should never see this we just dequeued it
+                            $reply = "warning: $host was already queued."
+                                   . " Ignoring this request";
+                        } elsif ( $status == 2 ) {
+                            print(LOG $bpc->timeStamp,
+                                   "Disk too full ($Info{DUlastValue}%)."
+                                 . " Not queueing backup of $host\n");
+                            $reply = "error: disk too full ($Info{DUlastValue}%)";
+                            $Info{DUDailySkipHostCnt}++;
+                        } elsif ( $status == 3 ) {
+                            # should never reach this because
+                            # it's set to "user" above
+                            $reply = "error: unknown queue name";
+                        } else {
+                            $reply = "error: unknown queue status $status";
+                            if ( $BgQueueOn{$hostIP} || $UserQueueOn{$hostIP} ) {
+                                $reply .= ".  Host is queued.";
+                            } else {
+                                $reply .= ".  Host is not queued.";
+                            }
+                        }
                     }
-                    if ( $UserQueueOn{$hostIP} ) {
-                        @UserQueue = grep($_->{host} ne $hostIP, @UserQueue);
-                        $UserQueueOn{$hostIP} = 0;
-                    }
-                    unshift(@UserQueue, {
-                                host    => $hostIP,
-                                user    => $user,
-                                reqTime => time,
-                                doFull  => $doFull,
-                                userReq => 1,
-                                dhcp    => $hostIP eq $host ? 0 : 1,
-                        });
-                    $UserQueueOn{$hostIP} = 1;
-                    $reply = "ok: requested backup of $host";
                 }
             } elsif ( $cmd =~ /^archive (\S+)\s+(\S+)\s+(\S+)/ ) {
                 my $user         = $1;
@@ -1419,7 +1429,7 @@ sub Main_Check_Client_Messages
                     } else {
                         unshift(@UserQueue, {
                                 host    => $host,
-                                hostIP  => $user,
+                                user    => $user,
                                 reqFileName => $reqFileName,
                                 reqTime => time,
                                 dhcp    => 0,
@@ -1647,18 +1657,33 @@ sub HostSortCompare
     return $a cmp $b;
 }
 
+#
+# Attempt to queue a host.
+# Returns 0 on success; 1 if host is already queued;
+#         2 if host was skipped; 3 on invalid queue name
+#
+# $host       is the client's host name
+# $hostIP     is usually the client's host name too, or IP address
+#             if the user specified it in the manual backup command
+# $user       is the user name, or BackupPC by default
+# $queue      is which queue to use ("bg" by default)
+# $backupType is the backup type (doIncr|doFull|autoIncr|autoFull|auto|dhcpPoll)
+#
+# Note: starting in 3.2.0, the PC is queued even if it has a current
+# job running
+#
 sub QueueOnePC
 {
-    my($host) = @_;
-    my $skipped = 0;
+    my($host, $hostIP, $user, $queue, $backupType) = @_;
+    my $retVal  = 0;
+    $user       = "BackupPC" if ( $user eq '' );
+    $queue      = "bg"   if ( $queue eq '' && $user eq 'BackupPC' );
+    $backupType = "auto" if ( $backupType eq '' );
 
     delete($Status{$host}{backoffTime})
             if ( defined($Status{$host}{backoffTime})
-              && $Status{$host}{backoffTime} < time );
-    return if ( defined($Jobs{$host})
-                || $BgQueueOn{$host}
-                || $UserQueueOn{$host}
-                || $CmdQueueOn{$host} ); 
+                  && $Status{$host}{backoffTime} < time );
+    return 1 if ( $BgQueueOn{$host} || $UserQueueOn{$host} );
     if ( $Hosts->{$host}{dhcp} ) {
         $Status{$host}{dhcpCheckCnt}++;
         if ( $RunNightlyWhenIdle ) {
@@ -1671,13 +1696,13 @@ sub QueueOnePC
             # after the DHCP hosts has been detected on the network.
             #
             unshift(@BgQueue,
-                {host => $host, user => "BackupPC", reqTime => time,
+                {host => $hostIP, user => $user, reqTime => time,
                  dhcp => 0, dumpExpire => 1});
             $BgQueueOn{$host} = 1;
         }
     } else {
         #
-        # this is a fixed ip host: queue it
+        # this is a fixed ip host or DHCP ip address: queue it
         #
         if ( $Info{DUlastValue} > $Conf{DfMaxUsagePct} ) {
             #
@@ -1688,22 +1713,31 @@ sub QueueOnePC
             # BackupPC_dump will never run since we have exceeded
             # the limit.
             #
-            $skipped = 1;
+            $retVal = 2;
             unshift(@BgQueue,
-                {host => $host, user => "BackupPC", reqTime => time,
-                 dhcp => $Hosts->{$host}{dhcp}, dumpExpire => 1});
-        } else {
+                {host => $hostIP, user => $user, reqTime => time, dumpExpire => 1});
+            $BgQueueOn{$host} = 1;
+        } elsif( $queue eq 'bg' ) {
             #
             # Queue regular background backup
             #
             unshift(@BgQueue,
-                {host => $host, user => "BackupPC", reqTime => time,
-                 dhcp => $Hosts->{$host}{dhcp}});
+                {host => $hostIP, user => $user, reqTime => time, backupType => $backupType});
+            $BgQueueOn{$host} = 1;
+        } elsif( $queue eq 'user' ) {
+            #
+            # Queue user backup
+            #
+            unshift(@UserQueue,
+                {host => $hostIP, user => $user, reqTime => time, backupType => $backupType});
+            $UserQueueOn{$host} = 1;
+        } else {
+            # unknown $queue type
+            $retVal = 3;
         }
-        $BgQueueOn{$host} = 1;
     }
 
-    return $skipped;
+    return $retVal;
 }
 
 #
@@ -1716,29 +1750,18 @@ sub QueueAllPCs
     my $nSkip = 0;
 
     foreach my $host ( sort(HostSortCompare keys(%$Hosts)) ) {
-        $nSkip += QueueOnePC($host);
+        $nSkip++ if ( QueueOnePC($host, $host, 'BackupPC', 'bg', 'auto') == 2 );
+    }
+    foreach my $dhcp ( @{$Conf{DHCPAddressRanges}} ) {
+        for ( my $i = $dhcp->{first} ; $i <= $dhcp->{last} ; $i++ ) {
+            my $ipAddr = "$dhcp->{ipAddrBase}.$i";
+            $nSkip++ if ( QueueOnePC($ipAddr, $ipAddr, 'BackupPC', 'bg', 'dhcpPoll') == 2 );
+        }
     }
     if ( $nSkip ) {
         print(LOG $bpc->timeStamp,
                "Disk too full ($Info{DUlastValue}%); skipped $nSkip hosts\n");
         $Info{DUDailySkipHostCnt} += $nSkip;
-    }
-    foreach my $dhcp ( @{$Conf{DHCPAddressRanges}} ) {
-        for ( my $i = $dhcp->{first} ; $i <= $dhcp->{last} ; $i++ ) {
-            my $ipAddr = "$dhcp->{ipAddrBase}.$i";
-            next if ( defined($Jobs{$ipAddr})
-                    || $BgQueueOn{$ipAddr}
-                    || $UserQueueOn{$ipAddr}
-                    || $CmdQueueOn{$ipAddr} ); 
-            #
-            # this is a potential dhcp ip address (we don't know the
-            # host name yet): queue it
-            #
-            unshift(@BgQueue,
-                {host => $ipAddr, user => "BackupPC", reqTime => time,
-                 dhcp => 1});
-            $BgQueueOn{$ipAddr} = 1;
-        }
     }
 }
 

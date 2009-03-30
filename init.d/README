@@ -83,8 +83,11 @@ FreeBSD:
 =======
 
 When configure.pl is run, the script freebsd-backuppc is created.
+An alternative more compact script is freebsd-backuppc2, submitted
+by Dan Niles.
 
-Copy this script to /usr/local/etc/rc.d/backuppc and make execuatble.
+Copy one of these scripts to /usr/local/etc/rc.d/backuppc and make
+execuatble.
 
 Add the following line to /etc/rc.conf to enable BackupPC:
 

@@ -134,6 +134,67 @@ sub getShareNames
     return $ShareNames;
 }
 
+
+sub getRestoreCmd
+{
+    my($conf) = @_;
+    my $restoreCmd;
+
+    if ( $conf->{XferMethod} eq "archive" ) {
+        $restoreCmd = undef;
+
+    } elsif ( $conf->{XferMethod} eq "ftp" ) {
+        $restoreCmd = undef;
+
+    } elsif ( $conf->{XferMethod} eq "rsync"
+           || $conf->{XferMethod} eq "rsyncd" ) {
+        $restoreCmd = $conf->{RsyncRestoreArgs};
+
+    } elsif ( $conf->{XferMethod} eq "tar" ) {
+        $restoreCmd = $conf->{TarClientRestoreCmd};
+
+    } elsif ( $conf->{XferMethod} eq "smb" ) {
+        $restoreCmd = $conf->{SmbClientRestoreCmd};
+
+    } else {
+
+        #
+        # protocol unrecognized
+        #
+        $restoreCmd = undef;
+    }
+    return $restoreCmd;
+}
+
+
+sub restoreEnabled
+{
+    my($conf) = @_;
+    my $restoreCmd;
+
+    if ( $conf->{XferMethod} eq "archive" ) {
+        return;
+
+    } elsif ( $conf->{XferMethod} eq "ftp" ) {
+        return !!( $conf->{FtpRestoreEnabled} );
+
+    } elsif ( $conf->{XferMethod} eq "rsync"
+           || $conf->{XferMethod} eq "rsyncd"
+           || $conf->{XferMethod} eq "tar"
+           || $conf->{XferMethod} eq "smb" ) {
+        $restoreCmd = getRestoreCmd( $conf );
+        return !!(
+            ref $restoreCmd eq "ARRAY"
+            ? @$restoreCmd
+            : $restoreCmd ne ""
+        );
+
+    } else {
+        return;
+    }
+}
+
+
 sub errStr
 {
     return $errStr;

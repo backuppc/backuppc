@@ -55,7 +55,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0beta0, released 17 Jan 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -186,13 +186,15 @@ if ( $ShareName eq "*" ) {
     archiveWriteHardLinks($fh);
 }
 
-#
-# Finish with two null 512 byte headers, and then round out a full
-# block.
-# 
-my $data = "\0" x ($tar_header_length * 2);
-TarWrite($fh, \$data);
-TarWrite($fh, undef);
+if ( !$opts{l} && !$opts{L} ) {
+    #
+    # Finish with two null 512 byte headers, and then round out a full
+    # block.
+    # 
+    my $data = "\0" x ($tar_header_length * 2);
+    TarWrite($fh, \$data);
+    TarWrite($fh, undef);
+}
 
 #
 # print out totals if requested

@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 
 #my %lang;
 
@@ -155,6 +155,7 @@ Il y a \$hostCntGood hosts tienen copia de seguridad, de un total de :
     <td align="center"> Incrementales Antig (Días) </td>
     <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Estado </td>
+    <td align="center"> Nº Xfer errs </td>
     <td align="center"> Ultimo Intento </td></tr>
 \$strGood
 </table>
@@ -174,6 +175,7 @@ Hay \$hostCntNone hosts sin copias de seguridad.
     <td align="center"> Incrementales Antig (Días) </td>
     <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Estado </td>
+    <td align="center"> Nº Xfer errs </td>
     <td align="center"> Ultimo Intento </td></tr>
 \$strNone
 </table>
@@ -1383,11 +1385,11 @@ $Lang{CfgEdit_Title_User_URLs} = "User URLs";
 $Lang{CfgEdit_Title_User_Config_Editing} = "User Config Editing";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
 $Lang{CfgEdit_Title_Xfer_Settings} = "Xfer Settings";
+$Lang{CfgEdit_Title_Ftp_Settings} = "FTP Settings";
 $Lang{CfgEdit_Title_Smb_Settings} = "Smb Settings";
 $Lang{CfgEdit_Title_Tar_Settings} = "Tar Settings";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Settings";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Settings";
-$Lang{CfgEdit_Title_Ftp_Settings} = "FTP Settings";
 $Lang{CfgEdit_Title_Archive_Settings} = "Archive Settings";
 $Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Paths/Commands";

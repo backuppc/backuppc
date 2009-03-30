@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 #
 # By Reginaldo Ferreira <reginaldo@lepper.com.br> (23.07.2004 for V2.1.10)
 #
@@ -159,6 +159,7 @@ Existem \$hostCntGood hosts com backup, de um total de :
     <td align="center"> Incrementais Antig (Dias) </td>
     <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Estado </td>
+    <td align="center"> Nº Xfer errs </td>
     <td align="center"> Última Tentativa </td></tr>
 \$strGood
 </table>
@@ -178,6 +179,7 @@ Existem \$hostCntNone hosts sem backups.
     <td align="center"> Incrementais Antig (Dias) </td>
     <td align="center"> ENG Last Backup (days) </td>
     <td align="center"> Estado </td>
+    <td align="center"> Nº Xfer errs </td>
     <td align="center"> Última tentativa </td></tr>
 \$strNone
 </table>
@@ -1383,11 +1385,11 @@ $Lang{CfgEdit_Title_User_URLs} = "URLs do Usuário";
 $Lang{CfgEdit_Title_User_Config_Editing} = "Edição de Configurações do Usuário";
 $Lang{CfgEdit_Title_Xfer} = "Transferência";
 $Lang{CfgEdit_Title_Xfer_Settings} = "Configurações de transferência";
+$Lang{CfgEdit_Title_Ftp_Settings} = "Configurações do FTP";
 $Lang{CfgEdit_Title_Smb_Settings} = "Configurações do Smb";
 $Lang{CfgEdit_Title_Tar_Settings} = "Configurações do Tar";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Configurações do Rsync";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Configurações do Rsyncd";
-$Lang{CfgEdit_Title_Ftp_Settings} = "Configurações do FTP";
 $Lang{CfgEdit_Title_Archive_Settings} = "Configurações do Archive";
 $Lang{CfgEdit_Title_Include_Exclude} = "Inclui/Exclui";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Caminhos/Comandos do Smb";

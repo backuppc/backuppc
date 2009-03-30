@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 #
 # by Ralph Passgang <ralph@debianbase.de> (13.11.2006 for V3.0.0)
 # by Ralph Passgang <ralph@debianbase.de> (30.06.2006 for V3.0.0)
@@ -167,6 +167,7 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
     <td align="center"> Alter (Tage) </td>
     <td align="center"> Letzes Backup (Tage) </td>
     <td align="center"> Status </td>
+    <td align="center"> #Xfer Fehler </td>
     <td align="center"> Letzte Aktion </td></tr>
 \$strGood
 </table>
@@ -186,6 +187,7 @@ Es gibt \$hostCntNone Computer ohne Backups !!!
     <td align="center"> Alter (Tage) </td>
     <td align="center"> Letztes Backup (Tage) </td>
     <td align="center"> Status </td>
+    <td align="center"> #Xfer Fehler </td>
     <td align="center"> Letzter Versuch </td></tr>
 \$strNone
 </table>
@@ -1387,11 +1389,11 @@ $Lang{CfgEdit_Title_User_URLs} = "Benutzer URLs";
 $Lang{CfgEdit_Title_User_Config_Editing} = "Benutzerkonfiguration ändern";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
 $Lang{CfgEdit_Title_Xfer_Settings} = "Xfer Einstellungen";
+$Lang{CfgEdit_Title_Ftp_Settings} = "FTP Einstellungen";
 $Lang{CfgEdit_Title_Smb_Settings} = "Smb Einstellungen";
 $Lang{CfgEdit_Title_Tar_Settings} = "Tar Einstellungen";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Einstellungen";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Einstellungen";
-$Lang{CfgEdit_Title_Ftp_Settings} = "FTP Einstellungen";
 $Lang{CfgEdit_Title_Archive_Settings} = "Archive Einstellungen";
 $Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Pfade/Kommandos";

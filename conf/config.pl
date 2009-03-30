@@ -1272,16 +1272,6 @@ $Conf{RsyncCsumCacheVerifyProb} = 0.01;
 # Arguments to rsync for backup.  Do not edit the first set unless you
 # have a thorough understanding of how File::RsyncP works.
 #
-# Examples of additional arguments that should work are --exclude/--include,
-# eg:
-#
-#     $Conf{RsyncArgs} = [
-#           # original arguments here
-#           '-v',
-#           '--exclude', '/proc',
-#           '--exclude', '*.tmp',
-#     ];
-#
 $Conf{RsyncArgs} = [
 	    #
 	    # Do not edit these!
@@ -1305,11 +1295,39 @@ $Conf{RsyncArgs} = [
             # to enable checksum caching.
 	    #
 	    #'--checksum-seed=32761',
-
-	    #
-	    # Add additional arguments here
-	    #
 ];
+
+#
+# Additional arguments added to RsyncArgs.  This can be used in
+# conbination with $Conf{RsyncArgs} to allow customization of
+# the rsync arguments on a part-client basis.  The standard
+# arguments go in $Conf{RsyncArgs} and $Conf{RsyncArgsExtra}
+# can be set on a per-client basis.
+#
+# Examples of additional arguments that should work are --exclude/--include,
+# eg:
+#
+#     $Conf{RsyncArgsExtra} = [
+#           '--exclude', '/proc',
+#           '--exclude', '*.tmp',
+#     ];
+#
+# Both $Conf{RsyncArgs} and $Conf{RsyncArgsExtra} are subject
+# to the following variable substitutions:
+#
+#        $client       client name being backed up
+#        $host         host name (could be different from client name if
+#                                 $Conf{ClientNameAlias} is set)
+#        $hostIP       IP address of host
+#        $confDir      configuration directory path
+#
+# This allows settings of the form:
+#
+#     $Conf{RsyncArgsExtra} = [
+#             '--exclude-from=$confDir/pc/$host.exclude',
+#     ];
+#
+$Conf{RsyncArgsExtra} = [];
 
 #
 # Arguments to rsync for restore.  Do not edit the first set unless you
@@ -1318,6 +1336,17 @@ $Conf{RsyncArgs} = [
 # If you want to disable direct restores using rsync (eg: is the module
 # is read-only), you should set $Conf{RsyncRestoreArgs} to undef and
 # the corresponding CGI restore option will be removed.
+#
+# $Conf{RsyncRestoreArgs} is subject to the following variable
+# substitutions:
+#
+#        $client       client name being backed up
+#        $host         host name (could be different from client name if
+#                                 $Conf{ClientNameAlias} is set)
+#        $hostIP       IP address of host
+#        $confDir      configuration directory path
+#
+# Note: $Conf{RsyncArgsExtra} doesn't apply to $Conf{RsyncRestoreArgs}.
 #
 $Conf{RsyncRestoreArgs} = [
 	    #
@@ -1411,6 +1440,13 @@ $Conf{FtpTimeout} = 120;
 # structures should consider other protocols.
 #
 $Conf{FtpFollowSymlinks} = 0;
+
+#
+# Direct restore enabling for FTP.
+#
+# Currently set to 0 since restore functionality is incomplete.
+#
+$Conf{FtpRestoreEnabled} = 0;
 
 ###########################################################################
 # Archive Configuration
@@ -2154,6 +2190,7 @@ $Conf{CgiUserConfigEdit} = {
         RsyncdAuthRequired        => 1,
         RsyncCsumCacheVerifyProb  => 1,
         RsyncArgs                 => 1,
+        RsyncArgsExtra            => 1,
         RsyncRestoreArgs          => 1,
         RsyncClientCmd            => 0,
         RsyncClientRestoreCmd     => 0,
@@ -2164,6 +2201,8 @@ $Conf{CgiUserConfigEdit} = {
         FtpBlockSize              => 1,
         FtpPort                   => 1,
         FtpTimeout                => 1,
+        FtpFollowSymlinks         => 1,
+        FtpRestoreEnabled         => 1,
         ArchiveDest               => 1,
         ArchiveComp               => 1,
         ArchivePar                => 1,

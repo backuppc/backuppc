@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 
 #my %lang;
 #use strict;
@@ -154,6 +154,7 @@ Jest \$hostCntGood hostów które zostaly zabezpieczone, na całkowita liczbę:
     <td align="center"> Wiek Inkr (dni) </td>
     <td align="center"> Ostatnia kopia bezpieczeństwa (dni) </td>
     <td align="center"> Status </td>
+    <td align="center"> #Xfer  błędó</td>
     <td align="center"> Ostatnia próba </td></tr>
 \$strGood
 </table>
@@ -173,6 +174,7 @@ Jest \$hostCntNone hostów bez kopii bezpieczeństwa.
     <td align="center"> Wiek Inkr (dni) </td>
     <td align="center"> Ostatnia kopia bezpieczeństwa (dni) </td>
     <td align="center"> Status </td>
+    <td align="center"> #Xfer  błędó</td>
     <td align="center"> Ostatnia próba </td></tr>
 \$strNone
 </table>
@@ -1373,11 +1375,11 @@ $Lang{CfgEdit_Title_User_URLs} = "URLe użytkownika";
 $Lang{CfgEdit_Title_User_Config_Editing} = "Edytowanie konfiguracji użytkownika";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
 $Lang{CfgEdit_Title_Xfer_Settings} = "Ustawienia Xfer";
+$Lang{CfgEdit_Title_Ftp_Settings} = "Ustawienia FTP";
 $Lang{CfgEdit_Title_Smb_Settings} = "Ustawienia Smb";
 $Lang{CfgEdit_Title_Tar_Settings} = "Ustawienia Tar";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Ustawienia Rsync";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Ustawienia Rsyncd";
-$Lang{CfgEdit_Title_Ftp_Settings} = "Ustawienia FTP";
 $Lang{CfgEdit_Title_Archive_Settings} = "Ustawienia Archiwizacji";
 $Lang{CfgEdit_Title_Include_Exclude} = "Dodaj/Usuń";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Ściezki/Polecenia Smb";

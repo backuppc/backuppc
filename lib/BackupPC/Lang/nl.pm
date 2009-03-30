@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 
 #my %lang;
 #use strict;
@@ -154,6 +154,7 @@ Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
     <td align="center"> Incr.Lftd (dagen) </td>
     <td align="center"> Vorige Backup (dagen) </td>
     <td align="center"> Status </td>
+    <td align="center"> Aantal fouten </td>
     <td align="center"> Laatste poging</td></tr>
 \$strGood
 </table>
@@ -173,6 +174,7 @@ Er zijn \$hostCntNone hosts zonder backup.
     <td align="center"> Incr.Lftd (dagen) </td>
     <td align="center"> Vorige Backup (dagen) </td>
     <td align="center"> Status </td>
+    <td align="center"> Aantal fouten </td>
     <td align="center"> Laatste poging </td></tr>
 \$strNone
 </table>
@@ -1392,11 +1394,11 @@ $Lang{CfgEdit_Title_User_URLs} = "Gebruiker URLs";
 $Lang{CfgEdit_Title_User_Config_Editing} = "Wijzigen gebruikersconfiguratie";
 $Lang{CfgEdit_Title_Xfer} = "Overdracht";
 $Lang{CfgEdit_Title_Xfer_Settings} = "Overdracht instellingen";
+$Lang{CfgEdit_Title_Ftp_Settings} = "FTP instellingen";
 $Lang{CfgEdit_Title_Smb_Settings} = "Smb instellingen";
 $Lang{CfgEdit_Title_Tar_Settings} = "Tar instellingen";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Rsync instellingen";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd instellingen";
-$Lang{CfgEdit_Title_Ftp_Settings} = "FTP instellingen";
 $Lang{CfgEdit_Title_Archive_Settings} = "Archivering instellingen";
 $Lang{CfgEdit_Title_Include_Exclude} = "Inclusief/Exclusief";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Pad/Opdrachten";

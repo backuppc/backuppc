@@ -5,7 +5,7 @@
 #
 # DESCRIPTION
 #
-#   Usage: BackupPC_dump [-i] [-f] [-d] [-e] [-v] <client>
+#   Usage: BackupPC_dump [-i] [-f] [-F] [-I] [-d] [-e] [-v] <client>
 #
 #   Flags:
 #
@@ -13,6 +13,13 @@
 #          dump will be done if no dumps have yet succeeded)
 #
 #     -f   Do a full dump, overriding any scheduling.
+#
+#     -I   Do an increment dump if the regular schedule requires a
+#          full or incremental, otherwise do nothing (a full is done
+#          if no dumps have yet succeeded)
+#
+#     -F   Do a full dump if the regular schedule requires a
+#          full or incremental, otherwise do nothing
 #
 #     -d   Host is a DHCP pool address, and the client argument
 #          just an IP address.  We lookup the NetBios name from
@@ -105,14 +112,19 @@ my $Abort;
 $bpc->ChildInit();
 
 my %opts;
-if ( !getopts("defiv", \%opts) || @ARGV != 1 ) {
-    print("usage: $0 [-d] [-e] [-f] [-i] [-v] <client>\n");
+if ( !getopts("defivFI", \%opts) || @ARGV != 1 ) {
+    print("usage: $0 [-d] [-e] [-f] [-i] [-F] [-I] [-v] <client>\n");
     exit(1);
 }
 if ( $ARGV[0] !~ /^([\w\.\s-]+)$/ ) {
     print("$0: bad client name '$ARGV[0]'\n");
     exit(1);
 }
+if ( (defined($opts{f}) + defined($opts{i}) + defined($opts{F}) + defined($opts{I})) > 1 ) {
+    print("$0: exiting because you can only use one of -f, -i, -F, and -I\n");
+    exit(1);
+}
+
 my $client = $1;   # BackupPC's client name (might not be real host name)
 my $hostIP;        # this is the IP address
 my $host;          # this is the real host name
@@ -387,15 +399,21 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
 #
 # Decide whether we do nothing, or a full or incremental backup.
 #
+my $needs_full = (time - $lastFullTime > $Conf{FullPeriod} * 24 * 3600
+               && time - $lastIncrTime > $Conf{IncrPeriod} * 24 * 3600);
+my $needs_incr = (time - $lastIncrTime > $Conf{IncrPeriod} * 24 * 3600
+               && time - $lastFullTime > $Conf{IncrPeriod} * 24 * 3600);
+
 if ( $lastFullTime == 0
         || $opts{f}
-        || (!$opts{i} && (time - $lastFullTime > $Conf{FullPeriod} * 24*3600
-            && time - $lastIncrTime > $Conf{IncrPeriod} * 24*3600)) ) {
+        || (!$opts{i} && !$opts{I} && $needs_full)
+        || ( $opts{F} && $needs_incr) ) {
     $type = "full";
     $incrLevel = 0;
     $incrBaseBkupNum = $lastBkupNum;
-} elsif ( $opts{i} || (time - $lastIncrTime > $Conf{IncrPeriod} * 24*3600
-        && time - $lastFullTime > $Conf{IncrPeriod} * 24*3600) ) {
+} elsif ( $opts{i}
+        || $needs_incr
+        || ($opts{I} && $needs_full) ) {
     $type = "incr";
     #
     # For an incremental backup, figure out which level we should

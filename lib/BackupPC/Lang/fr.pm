@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 
 #my %Lang;
 #use strict;
@@ -154,6 +154,7 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
     <td align="center"> Incrémentielles Âge (jours) </td>
     <td align="center"> Dernière sauvegarde (jours) </td>
     <td align="center"> État actuel </td>
+    <td align="center"> Nb erreurs transfert </td>
     <td align="center"> Dernière tentative </td></tr>
 \$strGood
 </table>
@@ -173,6 +174,7 @@ Il y a \$hostCntNone hôtes sans sauvegardes.
     <td align="center"> Incrémentielles Âge (jours) </td>
     <td align="center"> Dernière sauvegarde (jours) </td>
     <td align="center"> État actuel </td>
+    <td align="center"> Nb erreurs transfert </td>
     <td align="center"> Dernière tentative </td></tr>
 \$strNone
 </table>
@@ -1380,11 +1382,11 @@ $Lang{CfgEdit_Title_User_URLs} = "URL des usagers";
 $Lang{CfgEdit_Title_User_Config_Editing} = "Modifications des configurations des usagers";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
 $Lang{CfgEdit_Title_Xfer_Settings} = "Paramètres des transfers";
+$Lang{CfgEdit_Title_Ftp_Settings} = "Paramètres de FTP";
 $Lang{CfgEdit_Title_Smb_Settings} = "Paramètres de Smb";
 $Lang{CfgEdit_Title_Tar_Settings} = "Paramètres de Tar";
 $Lang{CfgEdit_Title_Rsync_Settings} = "Paramètres de Rsync";
 $Lang{CfgEdit_Title_Rsyncd_Settings} = "Paramètres de Rsyncd";
-$Lang{CfgEdit_Title_Ftp_Settings} = "Paramètres de FTP";
 $Lang{CfgEdit_Title_Archive_Settings} = "Paramètres d'archivage";
 $Lang{CfgEdit_Title_Include_Exclude} = "Inclure/Exclure";
 $Lang{CfgEdit_Title_Smb_Paths_Commands} = "Chemins/Commandes Smb";

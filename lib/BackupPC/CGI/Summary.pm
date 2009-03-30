@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0beta0, released 29 Mar 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -50,7 +50,7 @@ sub action
 
     foreach my $host ( GetUserHosts(1) ) {
         my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite,
-           $lastAge, $tempState, $tempReason);
+           $lastAge, $tempState, $tempReason, $lastXferErrors);
 	my($shortErr);
         my @Backups = $bpc->BackupInfoRead($host);
         my $fullCnt = $incrCnt = 0;
@@ -106,6 +106,7 @@ sub action
         $incrTot += $incrCnt;
         $fullSize = sprintf("%.2f", $fullSize / 1000);
 	$incrAge = "&nbsp;" if ( $incrAge eq "" );
+        $lastXferErrors = $Backups[@Backups-1]{xferErrs} if ( @Backups );
 	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
 		      || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
 	if ( $Conf{BackupsDisable} == 1 ) {
@@ -147,6 +148,7 @@ sub action
     <td align="center" class="border">$incrAge</td>
     <td align="center" class="border">$lastAge</td> 
     <td align="center" class="border">$Lang->{$tempState}</td>
+    <td align="center" class="border">$lastXferErrors</td> 
     <td class="border">$Lang->{$tempReason}$shortErr</td></tr>
 EOF
         if ( @Backups == 0 ) {

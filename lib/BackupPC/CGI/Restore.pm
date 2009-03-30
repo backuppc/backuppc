@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Dec 2008.
+# Version 3.2.0beta0, released 17 Jan 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,6 +38,7 @@ package BackupPC::CGI::Restore;
 
 use strict;
 use BackupPC::CGI::Lib qw(:all);
+use BackupPC::Xfer;
 use Data::Dumper;
 use File::Path;
 use Encode qw/decode_utf8/;
@@ -116,11 +117,7 @@ EOF
             #
             $bpc->ConfigRead($h);
             %Conf = $bpc->Conf();
-            my $cmd = $Conf{XferMethod} eq "smb" ? $Conf{SmbClientRestoreCmd}
-                    : $Conf{XferMethod} eq "tar" ? $Conf{TarClientRestoreCmd}
-                    : $Conf{XferMethod} eq "archive" ? undef
-                    : $Conf{RsyncRestoreArgs};
-            if ( ref($cmd) eq "ARRAY" ? @$cmd : $cmd ne "" ) {
+            if ( BackupPC::Xfer::restoreEnabled( \%Conf ) ) {
                 #
                 # Direct restore is enabled
                 #
@@ -263,11 +260,7 @@ EOF
         # Decide if option 1 (direct restore) is available based
         # on whether the restore command is set.
         #
-        my $cmd = $Conf{XferMethod} eq "smb" ? $Conf{SmbClientRestoreCmd}
-                : $Conf{XferMethod} eq "tar" ? $Conf{TarClientRestoreCmd}
-                : $Conf{XferMethod} eq "archive" ? undef
-                : $Conf{RsyncRestoreArgs};
-        if ( !defined($cmd) ) {
+        unless ( BackupPC::Xfer::restoreEnabled( \%Conf ) ) {
 	    ErrorExit(eval("qq{$Lang->{Restore_Options_for__host_Option1_disabled}}"));
         }
 

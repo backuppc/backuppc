@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Dec 2008.
+# Version 3.2.0beta0, released 17 Jan 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -223,7 +223,10 @@ our %ConfigMenu = (
              visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
             {name    => "FtpFollowSymlinks",
              visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            
+            {name    => "FtpRestoreEnabled",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+
+
             ### Archive Settings
             {text => "CfgEdit_Title_Archive_Settings",
                 visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
@@ -284,6 +287,8 @@ our %ConfigMenu = (
             {name => "RsyncdClientPort",
                 visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
             {name => "RsyncArgs",
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
+            {name => "RsyncArgsExtra",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
             {name => "RsyncRestoreArgs",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },

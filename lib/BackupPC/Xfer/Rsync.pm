@@ -92,6 +92,17 @@ sub start
     if ( $t->{type} eq "restore" ) {
         $rsyncClientCmd = $conf->{RsyncClientRestoreCmd};
 	$rsyncArgs = $conf->{RsyncRestoreArgs};
+
+        #
+        # Merge variables into $rsyncArgs
+        #
+        $rsyncArgs = $bpc->cmdVarSubstitute($rsyncArgs, {
+                            host      => $t->{host},
+                            hostIP    => $t->{hostIP},
+                            client    => $t->{client},
+                            confDir   => $conf->{ConfDir},
+                        });
+
 	my $remoteDir = "$t->{shareName}/$t->{pathHdrDest}";
 	$remoteDir    =~ s{//+}{/}g;
         from_to($remoteDir, "utf8", $conf->{ClientCharset})
@@ -209,6 +220,23 @@ sub start
         # transferred, even though it is a full dump.
         #
 	$rsyncArgs = $conf->{RsyncArgs};
+
+        #
+        # Add any additional rsync args
+        #
+	$rsyncArgs = [@$rsyncArgs, @{$conf->{RsyncArgsExtra}}]
+                        if ( ref($conf->{RsyncArgsExtra}) eq 'ARRAY' );
+
+        #
+        # Merge variables into $rsyncArgs
+        #
+        $rsyncArgs = $bpc->cmdVarSubstitute($rsyncArgs, {
+                            host      => $t->{host},
+                            hostIP    => $t->{hostIP},
+                            client    => $t->{client},
+                            confDir   => $conf->{ConfDir},
+                        });
+
 	$rsyncArgs = [@$rsyncArgs, @fileList] if ( @fileList );
         $rsyncArgs = [@$rsyncArgs, "--ignore-times"]
                                     if ( $t->{type} eq "full" );
@@ -392,13 +420,13 @@ sub run
                                     if ( $conf->{ClientCharset} ne "" );
         }
     
-	my $str = "RsyncArgsBefore: " . join(" ", @{$rs->{rsyncArgs}}) . "\n";
-        $t->{XferLOG}->write(\$str);
+	##my $str = "RsyncArgsBefore: " . join(" ", @{$rs->{rsyncArgs}}) . "\n";
+        ##$t->{XferLOG}->write(\$str);
 
 	$rs->serverStart($remoteSend, $remoteDirDaemon);
 
-	my $str = "RsyncArgsAfter: " . join(" ", @{$rs->{rsyncArgs}}) . "\n";
-        $t->{XferLOG}->write(\$str);
+	##$str = "RsyncArgsAfter: " . join(" ", @{$rs->{rsyncArgs}}) . "\n";
+        ##$t->{XferLOG}->write(\$str);
     }
     my $shareNameSlash = $t->{shareNameSlash};
     from_to($shareNameSlash, "utf8", $conf->{ClientCharset})

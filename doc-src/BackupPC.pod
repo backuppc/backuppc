@@ -43,15 +43,16 @@ and restore files from backups.
 
 The http/cgi user interface has internationalization (i18n) support,
 currently providing English, French, German, Spanish, Italian,
-Dutch and Portuguese-Brazilian.
+Dutch, Polish, Portuguese-Brazilian and Chinese
 
 =item *
 
-No client-side software is needed. On WinXX the standard smb protocol is
-used to extract backup data. On linux, unix or MacOSX clients, rsync or
-tar (over ssh/rsh/nfs) is used to extract backup data. Alternatively,
-rsync can also be used on WinXX (using cygwin), and Samba could be
-installed on the linux or unix client to provide smb shares).
+No client-side software is needed. On WinXX the standard smb
+protocol is used to extract backup data. On linux, unix or MacOSX
+clients, rsync, tar (over ssh/rsh/nfs) or ftp is used to extract
+backup data. Alternatively, rsync can also be used on WinXX (using
+cygwin), and Samba could be installed on the linux or unix client
+to provide smb shares).
 
 =item *
 
@@ -278,9 +279,8 @@ pooling) and a convenient user interface to rsync.
 Two popular open source packages that do tape backup are
 Amanda (L<http://www.amanda.org>)
 and Bacula (L<http://www.bacula.org>).
-Amanda can also backup WinXX machines to tape using samba.
-These packages can be used as back ends to BackupPC to backup the
-BackupPC server data to tape.
+These packages can be used as complete solutions, or also as back
+ends to BackupPC to backup the BackupPC server data to tape.
 
 Various programs and scripts use rsync to provide hardlinked backups.
 See, for example, Mike Rubel's site (L<http://www.mikerubel.org/computers/rsync_snapshots>),
@@ -304,7 +304,7 @@ consideration.
 =head2 Road map
 
 The new features planned for future releases of BackupPC
-are at L<http://backuppc.sourceforge.net/faq/roadMap.html>.
+are on the Wiki at L<http://backuppc.wiki.sourceforge.net>.
 
 Comments and suggestions are welcome.
 
@@ -350,7 +350,7 @@ moderately configured server.
 Several users have reported significantly better performance using
 reiserfs compared to ext3 for the BackupPC data file system.  It is
 also recommended you consider either an LVM or RAID setup (either
-in HW or SW; eg: 3Ware RAID5) so that you can expand the
+in HW or SW; eg: 3Ware RAID10 or RAID5) so that you can expand the
 file system as necessary.
 
 When BackupPC starts with an empty pool, all the backup data will be
@@ -397,11 +397,10 @@ distributions for most platforms.
 
 =item *
 
-If you are using tar to backup linux/unix machines you should have version
-1.13.7 at a minimum, with version 1.13.20 or higher recommended.  Use
+If you are using tar to backup linux/unix machines, those machines should have
+version 1.13.7 at a minimum, with version 1.13.20 or higher recommended.  Use
 "tar --version" to check your version.  Various GNU mirrors have the newest
-versions of tar, see for example L<http://www.funet.fi/pub/gnu/alpha/gnu/tar>.
-As of July 2006 the latest version is 1.15.1.
+versions of tar; see L<http://www.gnu.org/software/tar/>.
 
 =item *
 
@@ -552,15 +551,22 @@ module is installed.
 To use rsync and rsyncd with BackupPC you will need to install File::RsyncP.
 You can run "perldoc File::RsyncP" to see if this module is installed.
 File::RsyncP is available from L<http://perlrsync.sourceforge.net>.
-Version 0.52 or later is required.
+Version 0.68 or later is required.
+
+=item File::RsyncP
+
+To use ftp with BackupPC you will need to install three libraries:
+Net::FTP, Net::FTP::RetrHandle and Net::FTP::AutoReconnect. You can
+run "perldoc Net::FTP" to see if a particular module is installed.
 
 =back
 
-To build and install these packages, fetch the tar.gz file and
-then run these commands:
+To build and install these packages you should use the cpan program.
+Alternatively, you can fetch the tar.gz file from L<http://www.cpan.org>
+and then run these commands:
 
-    tar zxvf Archive-Zip-1.16.tar.gz
-    cd Archive-Zip-1.16
+    tar zxvf Archive-Zip-1.26.tar.gz
+    cd Archive-Zip-1.26
     perl Makefile.PL
     make
     make test
@@ -695,11 +701,12 @@ they can be set for new installations using command-line options.
 =head2 Step 3: Setting up config.pl
 
 After running configure.pl, browse through the config file,
-__CONFDIR__/config.pl, and make sure all the default settings
-are correct. In particular, you will need to decide whether to use
-smb, tar or rsync transport (or whether to set it on a per-PC basis)
-and set the relevant parameters for that transport method.
-See the section L<Client Setup|step 5: client setup> for more details.
+__CONFDIR__/config.pl, and make sure all the default settings are
+correct. In particular, you will need to decide whether to use
+smb, tar,or rsync or ftp transport (or whether to set it on a
+per-PC basis) and set the relevant parameters for that transport
+method. See the section L<Client Setup|step 5: client setup> for
+more details.
 
 =head2 Step 4: Setting up the hosts file
 
@@ -803,9 +810,10 @@ Here's a simple example of a hosts file:
 
 =head2 Step 5: Client Setup
 
-Three methods for getting backup data from a client are supported: smb,
-tar and rsync.  Smb or rsync are the preferred methods for WinXX clients
-and rsync or tar are the preferred methods for linux/unix/MacOSX clients.
+Four methods for getting backup data from a client are supported:
+smb, tar, rsync and ftp.  Smb or rsync are the preferred methods
+for WinXX clients and rsync or tar are the preferred methods for
+linux/unix/MacOSX clients.
 
 The transfer method is set using the $Conf{XferMethod} configuration
 setting. If you have a mixed environment (ie: you will use smb for some
@@ -977,14 +985,21 @@ the client machine and BackupPC connects directly to it.
 
 The relevant configuration settings are $Conf{RsyncdClientPort},
 $Conf{RsyncdUserName}, $Conf{RsyncdPasswd}, $Conf{RsyncdAuthRequired},
-$Conf{RsyncShareName}, $Conf{RsyncArgs}, and $Conf{RsyncRestoreArgs}.
-$Conf{RsyncShareName} is the name of an rsync module (ie: the thing
-in square brackets in rsyncd's conf file -- see rsyncd.conf), not a
-file system path.
+$Conf{RsyncShareName}, $Conf{RsyncArgs}, $Conf{RsyncArgsExtra}, and
+$Conf{RsyncRestoreArgs}. $Conf{RsyncShareName} is the name of an rsync
+module (ie: the thing in square brackets in rsyncd's conf file -- see
+rsyncd.conf), not a file system path.
 
 Be aware that rsyncd will remove the leading '/' from path names in
 symbolic links if you specify "use chroot = no" in the rsynd.conf file.
 See the rsyncd.conf manual page for more information.
+
+=item ftp
+
+You need to be running an ftp server on the client machine.
+The relevant configuration settings are $Conf{FtpShareName},
+$Conf{FtpUserName}, $Conf{FtpPasswd}, $Conf{FtpBlockSize},
+$Conf{FtpPort}, $Conf{FtpTimeout}, and $Conf{FtpFollowSymlinks}.
 
 =back
 
@@ -1045,7 +1060,7 @@ network data you can use ssh to create a tunnel, or use a
 program like stunnel.
 
 Setup instructions for ssh can be found at
-L<http://backuppc.sourceforge.net/faq/ssh.html>.
+L<http://backuppc.sourceforge.net/faq/ssh.html> or on the Wiki.
 
 =item Clients that use DHCP
 
@@ -1594,7 +1609,7 @@ will be deferred if there is a backup currently running for that host.
 When the restore job is run, smbclient, tar, rsync or rsyncd is used
 (depending upon $Conf{XferMethod}) to actually restore the files.
 Sorry, there is currently no option to cancel a restore that has been
-started.
+started.  Currently ftp restores are not fully implemented.
 
 A record of the restore request, including the result and list of
 files and directories, is kept.  It can be browsed from the host's
@@ -1981,15 +1996,15 @@ same (only displayed if $Conf{XferLogLevel} >= 2).
 =back
 
 As BackupPC_tarExtract extracts the files from smbclient or tar, or as
-rsync runs, it checks each file in the backup to see if it is identical
-to an existing file from any previous backup of any PC. It does this
-without needed to write the file to disk. If the file matches an
-existing file, a hardlink is created to the existing file in the pool.
-If the file does not match any existing files, the file is written to
-disk and the file name is saved in __TOPDIR__/pc/$host/NewFileList for
-later processing by BackupPC_link.  BackupPC_tarExtract and rsync can handle
-arbitrarily large files and multiple candidate matching files without
-needing to write the file to disk in the case of a match.  This
+rsync or ftp runs, it checks each file in the backup to see if it is
+identical to an existing file from any previous backup of any PC. It
+does this without needed to write the file to disk. If the file matches
+an existing file, a hardlink is created to the existing file in the
+pool. If the file does not match any existing files, the file is written
+to disk and the file name is saved in __TOPDIR__/pc/$host/NewFileList
+for later processing by BackupPC_link.  BackupPC_tarExtract and rsync
+can handle arbitrarily large files and multiple candidate matching files
+without needing to write the file to disk in the case of a match.  This
 significantly reduces disk writes (and also reads, since the pool file
 comparison is done disk to memory, rather than disk to disk).
 
@@ -2225,7 +2240,7 @@ a suffix of 0, 1, ....
 
 =item XferERR or XferERR.z
 
-Output from the transport program (ie: smbclient, tar or rsync)
+Output from the transport program (ie: smbclient, tar, rsync or ftp)
 for the most recent failed backup.
 
 =item new
@@ -2235,7 +2250,7 @@ directory is renamed if the backup succeeds.
 
 =item XferLOG or XferLOG.z
 
-Output from the transport program (ie: smbclient, tar or rsync)
+Output from the transport program (ie: smbclient, tar, rsync or ftp)
 for the current backup.
 
 =item nnn (an integer)
@@ -2244,7 +2259,7 @@ Successful backups are in directories numbered sequentially starting at 0.
 
 =item XferLOG.nnn or XferLOG.nnn.z
 
-Output from the transport program (ie: smbclient, tar or rsync)
+Output from the transport program (ie: smbclient, tar, rsync or ftp)
 corresponding to backup number nnn.
 
 =item RestoreInfo.nnn
@@ -2304,11 +2319,11 @@ Stop time of the backup in unix seconds.
 
 =item nFiles
 
-Number of files backed up (as reported by smbclient, tar or rsync).
+Number of files backed up (as reported by smbclient, tar, rsync or ftp).
 
 =item size
 
-Total file size backed up (as reported by smbclient, tar or rsync).
+Total file size backed up (as reported by smbclient, tar, rsync or ftp).
 
 =item nFilesExist
 
@@ -2332,7 +2347,7 @@ Total size of files that were not in the pool
 
 =item xferErrs
 
-Number of errors or warnings from smbclient, tar or rsync.
+Number of errors or warnings from smbclient, tar, rsync or ftp.
 
 =item xferBadFile
 
@@ -2431,7 +2446,7 @@ Number of errors from BackupPC_tarCreate during restore.
 
 =item xferErrs
 
-Number of errors from smbclient, tar or rsync during restore.
+Number of errors from smbclient, tar, rsync or ftp during restore.
 
 =back
 
@@ -2817,6 +2832,8 @@ Youlin Feng provided the Chinese translation for 3.1.0.
 Karol 'Semper' Stelmaczonek provided the Polish translation for 3.1.0.
 
 Jeremy Tietsort provided the host summary table sorting feature for 3.1.0.
+
+Paul Mantz contributed the ftp Xfer method for 3.2.0.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mailing lists.

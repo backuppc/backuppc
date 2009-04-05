@@ -75,7 +75,8 @@
 
 * Modified bin/BackupPC_archiveHost to shell escape the output file
   name.  That allows it to contain spaces and other special characters.
-  Requested by Toni Van Remortel.
+  Requested by Toni Van Remortel.  Also updated bin/BackupPC_archiveHost
+  to shell escape and check other arguments.
 
 * Added $Conf{CmdQueueNice} to specify nice level for command queue
   commands (eg: BackupPC_link and BackupPC_nightly).  Suggested by

@@ -168,7 +168,7 @@ sub start
     # Convert the encoding type of the names if at all possible
     #
     from_to( $args->{shareName}, "utf8", $conf->{ClientCharset} )
-        if ( $conf->{ClientCharset} ne "" );
+                                if ( $conf->{ClientCharset} ne "" );
 
     #
     # Collect FTP configuration arguments and translate them for
@@ -187,7 +187,7 @@ sub start
                                 : Net::FTP->new(%$args);
     };
     if ($@) {
-        $t->{_errStr} = "Can't open connection to $args->{Host}: $!";
+        $t->{_errStr} = "Can't open connection to $args->{host}: $!";
         $t->{xferErrCnt}++;
         return;
     }
@@ -198,7 +198,7 @@ sub start
     undef $@;
     eval { $t->{ftp}->login( $conf->{FtpUserName}, $conf->{FtpPasswd} ); };
     if ( $@ ) {
-        $t->{_errStr} = "Can't login to $args->{Host}: $!";
+        $t->{_errStr} = "Can't login to $args->{host}: $!";
         $t->{xferErrCnt}++;
         return;
     }
@@ -207,7 +207,7 @@ sub start
     eval { $t->{ftp}->binary(); };
     if ($@) {
         $t->{_errStr} =
-          "Can't enable binary transfer mode to $args->{Host}: $!";
+          "Can't enable binary transfer mode to $args->{host}: $!";
         $t->{xferErrCnt}++;
         return;
     }
@@ -234,18 +234,20 @@ sub start
     # log the beginning of action based on type
     #
     if ( $t->{type} eq 'restore' ) {
-        $logMsg = "restore started on directory $t->{shareName}";
+        $logMsg = "ftp restore for host $t->{host} started on directory "
+          . "$t->{shareName}\n";
 
     } elsif ( $t->{type} eq 'full' ) {
-        $logMsg = "full backup started on directory $t->{shareName}";
+        $logMsg = "ftp full backup for host $t->{host} started on directory "
+          . "$t->{shareName}\n";
 
     } elsif ( $t->{type} eq 'incr' ) {
-
         $incrDate = $bpc->timeStamp( $t->{incrBaseTime} - 3600, 1 );
-        $logMsg = "incremental backup started back to $incrDate" .
-            " (backup #$t->{incrBaseBkupNum}) for directory" . "
-            $t->{shareName}";
+        $logMsg = "ftp incremental backup for $t->{host} started back to "
+          . "$incrDate (backup #$t->{incrBaseBkupNum}) for directory "
+          . "$t->{shareName}\n";
     }
+    $t->logWrite($logMsg, 1);
 
     #
     # call the recursive function based on the type of action
@@ -253,17 +255,17 @@ sub start
     if ( $t->{type} eq 'restore' ) {
 
         $t->restore();
-        $logMsg = "Restore of $args->{Host} complete";
+        $logMsg = "Restore of $t->{host} complete";
 
     } elsif ( $t->{type} eq 'incr' ) {
 
         $t->backup();
-        $logMsg = "Incremental backup of $args->{Host} complete";
+        $logMsg = "Incremental backup of $t->{host} complete";
 
     } elsif ( $t->{type} eq 'full' ) {
 
         $t->backup();
-        $logMsg = "Full backup of $args->{Host} complete";
+        $logMsg = "Full backup of $t->{host} complete";
     }
 
     delete $t->{_errStr};
@@ -297,8 +299,8 @@ sub run
         return ( $t->{fileCnt}, $t->{byteCnt}, 0, 0 );
 
     } else {
-        return \( $tarErrs,      $nFilesExist, $sizeExist,
-                  $sizeExistCom, $nFilesTotal, $sizeTotal );
+        return ( $tarErrs,      $nFilesExist, $sizeExist,
+                 $sizeExistCom, $nFilesTotal, $sizeTotal );
     }
 }
 
@@ -587,7 +589,8 @@ sub remotels
         };
 
         $f->{utf8name} = $f->{name};
-        from_to( $f->{utf8name}, $conf->{ClientCharset}, "utf8" );
+        from_to( $f->{utf8name}, $conf->{ClientCharset}, "utf8" )
+                                if ( $conf->{ClientCharset} ne "" );
 
 	$f->{fullName} = "$t->{sharePath}/$path/$f->{name}";
 	$f->{fullName} =~ s/\/+/\//g;
@@ -709,7 +712,8 @@ sub handleSymFile
     };
 
     $f->{utf8name} = $fSym->{name};
-    from_to( $f->{utf8name}, $conf->{ClientCharset}, "utf8" );
+    from_to( $f->{utf8name}, $conf->{ClientCharset}, "utf8" )
+                            if ( $conf->{ClientCharset} ne "" );
 
     $f->{relPath}  = $fSym->{relPath};
     $f->{fullName} = "$t->{shareName}/$fSym->{relPath}/$fSym->{name}";
@@ -755,7 +759,7 @@ sub handleDir
         }
     }
 
-    $attrib    = BackupPC::Attrib->new( { compress => $t->{Compress} } );
+    $attrib    = BackupPC::Attrib->new( { compress => $t->{compress} } );
     $remoteDir = $t->remotels( $dir->{relPath} );
 
     if ( $t->{type} eq "incr" ) {
@@ -828,7 +832,7 @@ sub handleDir
     my $data     = $attrib->writeData();
 
     $poolWrite = BackupPC::PoolWrite->new( $bpc, $fileName, length($data),
-                                           $t->{Compress} );
+                                           $t->{compress} );
     $poolWrite->write( \$data );
     ( $exists, $digest, $outSize, $errs ) = $poolWrite->close();
 
@@ -867,13 +871,12 @@ sub handleFile
     }
 
     my $attribInfo = {
-                       type  => BPC_FTYPE_FILE,
-                       mode  => $f->{mode},
-                       uid   => undef,            # unsupported
-                       gid   => undef,            # unsupported
-                       size  => $f->{size},
-                       mtime => $f->{mtime},
-                     };
+        %$f,
+        type  => BPC_FTYPE_FILE,
+        uid   => undef,            # unsupported
+        gid   => undef,            # unsupported
+    };
+    delete $attribInfo->{utf8name}; # unused value
 
     #
     # If this is a full backup or the file has changed on the host,
@@ -882,15 +885,15 @@ sub handleFile
     undef $@;
     eval { tie ( *FTP, 'Net::FTP::RetrHandle', $ftp, $f->{fullName} ); };
     if ( !*FTP || $@ ) {
-        $t->handleFileAction( "fail", $attribInfo );
+        $t->logFileAction( "fail", $f->{utf8name}, $attribInfo );
         $t->{xferBadFileCnt}++;
         $stats->{errCnt}++;
         return;
     }
 
-    $poolFile  = $OutDir . "/" . $bpc->fileNameMangle( $f->{name} );
-    $poolWrite = BackupPC::PoolWrite->new( $bpc, $poolFile, $f->{size},
-                                           $bpc->{xfer}{compress} );
+    $poolFile    = $OutDir . "/" .  $bpc->fileNameMangle( $f->{name} );
+    $poolWrite   = BackupPC::PoolWrite->new( $bpc, $poolFile, $f->{size},
+                                           $t->{compress} );
 
     $localSize = 0;
 
@@ -916,7 +919,7 @@ sub handleFile
     #
     if ( $localSize != $f->{size} ) {
         $t->logFileAction( "fail", $f->{utf8name}, $attribInfo );
-        unklink($poolFile);
+        unlink($poolFile);
         $stats->{xferBadFileCnt}++;
         $stats->{errCnt}++;
         return;
@@ -928,7 +931,12 @@ sub handleFile
     $attrib->set( $f->{utf8name}, $attribInfo );
     $t->logFileAction( $exists ? "pool" : "create",
                        $f->{utf8name}, $attribInfo );
-    print $newFilesFH "$digest $f->{size} $poolFile\n" unless $exists;
+
+    my $relPoolFile = $bpc->fileNameEltMangle( $t->{shareName} )
+                    . "/"
+                    . $bpc->fileNameMangle($attribInfo->{relPath});
+
+    print $newFilesFH "$digest $f->{size} $relPoolFile\n" unless $exists;
 
     #
     # Cumulate the stats
@@ -955,12 +963,13 @@ sub incrFileExistCheck
     my $view = $t->{view};
 
     my $oldAttribInfo = $view->fileAttrib( $t->{incrBaseBkupNum},
-                                       $t->{shareName}, $f->{relPath} );
+                                       $t->{shareName}, "/" . $f->{relPath} );
 
-    #print STDERR "*" x 50 . "\n";
-    #print STDERR "Old data:\n" . Dumper($oldAttribInfo);
-    #print STDERR "New data:\n" . Dumper($f);
-    #print STDERR "$f->{fullName}: $oldAttribInfo->{mtime} ?= $f->{mtime}, $oldAttribInfo->{size} ?= $f->{size}\n";
+    ##$t->logWrite( "Old attrib:\n" . Dumper($oldAttribInfo), 1 );
+    ##$t->logWrite( "New attrib:\n" . Dumper($f), 1 );
+    ##$t->logWrite( sprintf("%s: mtime %d vs %d, size %d vs %d\n", $f->{fullName},
+    ##              $oldAttribInfo->{mtime}, $f->{mtime},
+    ##              $oldAttribInfo->{size}, $f->{size}), 1);
 
     return ( $oldAttribInfo->{mtime} == $f->{mtime}
           && $oldAttribInfo->{size} == $f->{size} );
@@ -983,9 +992,11 @@ sub logFileAction
     $name  = "."   if ( $name  eq "" );
     $owner = "-/-" if ( $owner eq "/" );
 
-    my $fileAction = sprintf( "  %-6s %1s%4o %9s %11.0f %s\n",
-                              $action, $type, $attrib->{mode} & 07777,
-                              $owner, $attrib->{size}, $name );
+    my $fileAction = sprintf(
+        "  %-6s %1s%4o %9s %11.0f %s\n",
+        $action, $type, $attrib->{mode} & 07777,
+        $owner, $attrib->{size}, $attrib->{relPath}
+    );
 
     return $t->logWrite( $fileAction, 1 );
 }

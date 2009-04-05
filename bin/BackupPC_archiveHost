@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 #=============================================================
 #
 # BackupPC_archiveHost: Archive files for a single host
@@ -38,7 +38,7 @@
 #
 #========================================================================
 #
-# Version 3.1.0, released 25 Nov 2007.
+# Version 3.2.0beta0, released 29 Mar 2009.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -77,6 +77,10 @@ die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 # Make sure the specified programs are executable
 #
 foreach my $prog ( ($tarCreate, $compPath, $splitPath, $parPath) ) {
+    if ( $prog =~ /[][;&()<>{}|^\n\r\t *\$\\'"`?]/ ) {
+        print("Error: executable path $prog contains suspicious characters\n");
+        exit(1);
+    }
     next if ( $prog eq "" || -x $prog );
     print("Error: $prog is not an executable program\n");
     exit(1);
@@ -88,6 +92,10 @@ my $mesg = "Writing tar archive for host $host, backup #$bkupNum";
 #
 $share       = $bpc->shellEscape($share);
 $host        = $bpc->shellEscape($host);
+$bkupNum     = $bpc->shellEscape($bkupNum);
+$fileExt     = $bpc->shellEscape($fileExt);
+$splitSize   = $bpc->shellEscape($splitSize);
+$parfile     = $bpc->shellEscape($parfile);
 my $outLocE  = $bpc->shellEscape($outLoc);
 
 #
@@ -114,7 +122,7 @@ if ( -b $outLoc || -c $outLoc || -f $outLoc ) {
     # Output file is a device or a regular file, so don't use split
     #
     $cmd  .= ">> $outLocE";
-    $mesg .= " to $outLocE";
+    $mesg .= " to $outLoc";
 } else {
     mkpath($outLoc) if ( !-d $outLoc );
     if ( !-d $outLoc ) {
@@ -146,7 +154,7 @@ if ( $ret ) {
 # ie: not a tape device).
 #
 if ( -d $outLoc && -x $parPath ) {
-    if ( $parfile != 0 ) {
+    if ( length($parfile) ) {
         print("Running $parPath to create parity files\n");
 	my $parCmd = "$parPath c -r$parfile $outLocE/$host.$bkupNum.tar$fileExt.par2 $outLocE/$host.$bkupNum.tar$fileExt*";
         $ret = system($parCmd);

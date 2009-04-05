@@ -717,6 +717,12 @@ $Conf{BackupFilesOnly} = undef;
 # Users report that for smbclient you should specify a directory
 # followed by "/*", eg: "/proc/*", instead of just "/proc".
 #
+# FTP servers are traversed recursively so excluding directories will
+# also exclude its contents.  You can use the wildcard characters "*"
+# and "?" to define files for inclusion and exclusion.  Both
+# attributes $Conf{BackupFilesOnly} and $Conf{BackupFilesExclude} can
+# be defined for the same share.
+#
 # If a hash is used, a special key "*" means it applies to all
 # shares that don't have a specific entry.
 #
@@ -1384,12 +1390,33 @@ $Conf{RsyncRestoreArgs} = [
 # (can be overwritten in the per-PC log file)
 ##########################################################################
 #
-# Name of the host share that is backed up when using FTP.  This can be a
+# Which host directories to backup when using FTP.  This can be a
 # string or an array of strings if there are multiple shares per host.
-# Examples:
 #
-#   $Conf{FtpShareName} = 'c';          # backup 'c' share
-#   $Conf{FtpShareName} = ['c', 'd'];   # backup 'c' and 'd' shares
+# This value must be specified in one of two ways: either as a
+# subdirectory of the 'share root' on the server, or as the absolute
+# path of the directory.
+#
+# In the following example, if the directory /home/username is the
+# root share of the ftp server with the given username, the following
+# two values will back up the same directory:
+#
+#    $Conf{FtpShareName} = 'www';                # www directory
+#    $Conf{FtpShareName} = '/home/username/www'; # same directory
+#
+# Path resolution is not supported; i.e.; you may not have an ftp
+# share path defined as '../otheruser' or '~/games'.
+#
+#  Multiple shares may also be specified, as with other protocols:
+#
+#    $Conf{FtpShareName} = [ 'www',
+#                            'bin',
+#                            'config' ];
+#
+# Note also that you can also use $Conf{BackupFilesOnly} to specify
+# a specific list of directories to backup.  It's more efficient to
+# use this option instead of $Conf{FtpShareName} since a new tar is
+# run for each entry in $Conf{FtpShareName}.
 #
 # This setting only matters if $Conf{XferMethod} = 'ftp'.
 #

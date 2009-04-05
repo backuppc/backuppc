@@ -266,7 +266,7 @@ my %Programs = (
 foreach my $prog ( sort(keys(%Programs)) ) {
     my $path;
     foreach my $subProg ( split(/\//, $prog) ) {
-        $path = FindProgram("$ENV{PATH}:/bin:/usr/bin:/sbin:/usr/sbin",
+        $path = FindProgram("$ENV{PATH}:/usr/bin:/bin:/sbin:/usr/sbin",
                             $subProg) if ( !length($path) );
     }
     $Conf{$Programs{$prog}} = $path if ( !length($Conf{$Programs{$prog}}) );

@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_restore: Restore files to a client.
@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 17 Jan 2009.
+# Version 3.2.0beta0, released 5 April 2009.
 #
 # See http://backuppc.sourceforge.net.
 #

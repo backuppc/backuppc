@@ -29,7 +29,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2007  Craig Barratt
+#   Copyright (C) 2001-2009  Craig Barratt
 #
 #   See http://backuppc.sourceforge.net.
 #

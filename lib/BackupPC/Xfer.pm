@@ -12,7 +12,7 @@
 #   Paul Mantz  <pcmantz@zmanda.com>
 #
 # COPYRIGHT
-#   Copyright (C) 2008  Zmanda
+#   Copyright (C) 2001-2009  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by

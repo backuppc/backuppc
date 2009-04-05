@@ -2784,7 +2784,7 @@ See L<http://backuppc.sourceforge.net>.
 
 =head1 Copyright
 
-Copyright (C) 2001-2007 Craig Barratt
+Copyright (C) 2001-2009 Craig Barratt
 
 =head1 Credits
 

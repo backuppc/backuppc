@@ -1437,6 +1437,16 @@ $Conf{FtpUserName} = '';
 $Conf{FtpPasswd} = '';
 
 #
+# Whether passive mode is used.  The correct setting depends upon
+# whether local or remote ports are accessible from the other machine,
+# which is affected by any firewall or routers between the FTP server
+# on the client and the BackupPC server.
+#
+# This setting is used only if $Conf{XferMethod} = 'ftp'.
+#
+$Conf{FtpPassive} = 1;
+
+#
 # Transfer block size. This sets the size of the amounts of data in
 # each frame. While undefined, this value takes the default value.
 #
@@ -1467,13 +1477,6 @@ $Conf{FtpTimeout} = 120;
 # structures should consider other protocols.
 #
 $Conf{FtpFollowSymlinks} = 0;
-
-#
-# Direct restore enabling for FTP.
-#
-# Currently set to 0 since restore functionality is incomplete.
-#
-$Conf{FtpRestoreEnabled} = 0;
 
 ###########################################################################
 # Archive Configuration

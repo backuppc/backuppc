@@ -49,12 +49,16 @@ $Lang{Admin_Options_Page} = <<EOF;
 </ul>
 -->
 EOF
-$Lang{Unable_to_connect_to_BackupPC_server} = "Kann keine Verbindung zu dem BackupPC Server herstellen!",
-            "Dieses CGI Script (\$MyURL) kann keine Verbindung zu dem BackupPC"
-          . " Server auf \$Conf{ServerHost} Port \$Conf{ServerPort} herstellen. Der Fehler"
-          . " war: \$err.",
-            "Möglicherweise ist der BackupPC Server Prozess nicht gestartet oder es besteht ein"
-          . " Konfigurationsfehler. Bitte teilen Sie diese Fehlermeldung dem Systemadministrator mit.";
+
+$Lang{Unable_to_connect_to_BackupPC_server} = "Kann keine Verbindung zu dem BackupPC Server herstellen!";
+$Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
+Dieses CGI Script (\$MyURL) kann keine Verbindung zu dem BackupPC Server
+auf \$Conf{ServerHost} Port \$Conf{ServerPort} herstellen.<br>
+Der Fehler war: \$err.<br>
+Möglicherweise ist der BackupPC Server Prozess nicht gestartet oder es besteht ein
+Konfigurationsfehler. Bitte teilen Sie diese Fehlermeldung dem Systemadministrator mit.
+EOF
+
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">

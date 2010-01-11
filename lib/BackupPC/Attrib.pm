@@ -252,11 +252,18 @@ sub read
 	    $fd->read(\$newData, 65536);
 	    $data .= $newData;
 	}
-	(
-            @{$a->{files}{$fileName}}{@FldsUnixW},
-            @{$a->{files}{$fileName}}{@FldsUnixN},
-            $data
-        ) = unpack("w$nFldsW N$nFldsN a*", $data);
+        eval {
+           (
+               @{$a->{files}{$fileName}}{@FldsUnixW},
+               @{$a->{files}{$fileName}}{@FldsUnixN},
+               $data
+            ) = unpack("w$nFldsW N$nFldsN a*", $data);
+        };
+        if ( $@ ) {
+            $a->{_errStr} = "unpack: Can't read attributes for $fileName from $file ($@)";
+            $fd->close;
+            return;
+        }
         if ( $a->{files}{$fileName}{$FldsUnixN[-1]} eq "" ) {
             $a->{_errStr} = "Can't read attributes for $fileName"
                           . " from $file";

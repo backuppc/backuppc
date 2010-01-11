@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 5 April 2009.
+# Version 3.2.0beta1, released 5 Jan 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -63,6 +63,7 @@ sub new
         pipeRH    => undef,
         pipeWH    => undef,
         badFiles  => [],
+        logLevel  => $bpc->{Conf}{XferLogLevel},
 
         #
         # Various stats

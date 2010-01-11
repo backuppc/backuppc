@@ -327,6 +327,7 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
                     || !defined($p->{hourBegin})
                     || !defined($p->{hourEnd})
                 );
+        my $matchWday = $wday;
         if ( $p->{hourBegin} > $p->{hourEnd} ) {
             $blackout = $p->{hourBegin} <= $currHours
                           || $currHours <= $p->{hourEnd};
@@ -336,14 +337,14 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
                 # weekday check (eg: Monday 11pm-1am means Monday 2300 to
                 # Tuesday 0100, not Monday 2300-2400 plus Monday 0000-0100).
                 #
-                $wday--;
-                $wday += 7 if ( $wday < 0 );
+                $matchWday--;
+                $matchWday += 7 if ( $matchWday < 0 );
             }
         } else {
             $blackout = $p->{hourBegin} <= $currHours
                           && $currHours <= $p->{hourEnd};
         }
-        if ( $blackout && grep($_ == $wday, @{$p->{weekDays}}) ) {
+        if ( $blackout && grep($_ == $matchWday, @{$p->{weekDays}}) ) {
 #           print(LOG $bpc->timeStamp, "skipping because of blackout"
 #                      . " (alive $StatusHost{aliveCnt} times)\n");
             print(STDERR "Skipping $client because of blackout\n")

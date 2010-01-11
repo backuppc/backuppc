@@ -41,9 +41,14 @@ $Lang{Admin_Options_Page} = <<EOF;
 </ul>
 -->
 EOF
-$Lang{Unable_to_connect_to_BackupPC_server} = "无法连接到 BackupPC 服务器",
-            "CGI 脚本程序 (\$MyURL) 无法连接到 BackupPC 服务器 \$Conf{ServerHost} 端口 \$Conf{ServerPort}。错误信息：\$err。",
-            "可能 BackupPC 服务器没有运行，或者服务器配置不正确。请通知网络系统管理员。";
+
+$Lang{Unable_to_connect_to_BackupPC_server} = "无法连接到 BackupPC 服务器";
+$Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
+CGI 脚本程序 (\$MyURL) 无法连接到 BackupPC 服务器 \$Conf{ServerHost} 端口 \$Conf{ServerPort}。错误信息：\$err。
+可能 BackupPC 服务器没有运行，或者服务器配置不正确。请通知网络系统管理员。
+<br><br>
+EOF
+
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">

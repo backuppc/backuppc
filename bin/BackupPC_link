@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 5 April 2009.
+# Version 3.2.0beta1, released 10 Jan 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -108,12 +108,23 @@ while ( 1 ) {
     $CurrDumpDir = "$Dir/$Backups[$num]{num}";
     $Compress = $Backups[$num]{compress};
     if ( open(NEW, "<", "$Dir/NewFileList.$Backups[$num]{num}") ) {
+        my(@shareAttribArgs);
 	binmode(NEW);
         while ( <NEW> ) {
             chomp;
             next if ( !/(\w+) (\d+) (.*)/ );
-            LinkNewFile($1, $2, "$CurrDumpDir/$3");
+            if ( $3 eq "attrib" ) {
+                #
+                # Defer linking top-level attrib file until the end
+                # since it can appear multiple times when multiple shares
+                # are dumped.
+                #
+                @shareAttribArgs = ($1, $2, "$CurrDumpDir/$3");
+            } else {
+                LinkNewFile($1, $2, "$CurrDumpDir/$3");
+            }
         }
+        LinkNewFile(@shareAttribArgs) if ( @shareAttribArgs );
         close(NEW);
     }
     unlink("$Dir/NewFileList.$Backups[$num]{num}")

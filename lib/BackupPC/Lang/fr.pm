@@ -40,12 +40,16 @@ $Lang{Admin_Options_Page} = <<EOF;
 </ul>
 -->
 EOF
-$Lang{Unable_to_connect_to_BackupPC_server} = "Impossible de se connecter au serveur BackupPC",
-            "Ce script CGI (\$MyURL) est incapable de se connecter au serveur BackupPC"
-          . " sur \$Conf{ServerHost} au port \$Conf{ServerPort}. L'erreur"
-          . " est: \$err."
-          . " Il est possible que le serveur BackupPC ne fonctionne pas actuellement ou qu'il"
-          . " y ait une erreur de configuration. Veuillez contacter votre administrateur système.";
+
+$Lang{Unable_to_connect_to_BackupPC_server} = "Impossible de se connecter au serveur BackupPC";
+$Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
+Ce script CGI (\$MyURL) est incapable de se connecter au serveur BackupPC
+sur \$Conf{ServerHost} au port \$Conf{ServerPort}.<br>
+L'erreur est: \$err.<br>
+Il est possible que le serveur BackupPC ne fonctionne pas actuellement ou qu'il
+y ait une erreur de configuration. Veuillez contacter votre administrateur système.
+EOF
+
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">
@@ -67,7 +71,7 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
 <ul>
 <li> Le PID du serveur est \$Info{pid}, sur l\'hôte \$Conf{ServerHost},
      version \$Info{Version}, démarré le \$serverStartTime.
-<li> Ce rapport à été généré le \$now.
+<li> Ce rapport a été généré le \$now.
 <li> La configuration a été chargée pour la dernière fois à \$configLoadTime.
 <li> La prochaine file d\'attente sera remplie à \$nextWakeupTime.
 <li> Autres infos:
@@ -78,7 +82,7 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         \$poolInfo
         <li>L\'espace de stockage a été récemment rempli à \$Info{DUlastValue}%
             (\$DUlastTime), le maximum aujourd\'hui a été de \$Info{DUDailyMax}% (\$DUmaxTime)
-            et hier le maximum était \$Info{DUDailyMaxPrev}%.
+            et hier le maximum était de \$Info{DUDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -129,7 +133,7 @@ $Lang{BackupPC_Summary}=<<EOF;
 <li>Ce statut a été généré le \$now.
 <li>L\'espace de stockage a été récemment rempli à \$Info{DUlastValue}%
     (\$DUlastTime), le maximum aujourd\'hui a été de \$Info{DUDailyMax}% (\$DUmaxTime)
-    et hier le maximum était \$Info{DUDailyMaxPrev}%.
+    et hier le maximum était de \$Info{DUDailyMaxPrev}%.
 </ul>
 </p>
 
@@ -305,7 +309,7 @@ EOF
 $Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: Confirmation du démarrage de la sauvegarde de \$host";
 # --------------------------------
 $Lang{Are_you_sure_start} = <<EOF;
-\${h1("Êtes vous certain ?")}
+\${h1("Êtes-vous certain ?")}
 <p>
 Vous allez bientôt démarrer une sauvegarde \$type depuis \$host.
 
@@ -326,7 +330,7 @@ $Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: Confirmer l\'arrêt de
 # --------------------------------
 $Lang{Are_you_sure_stop} = <<EOF;
 
-\${h1("Êtes vous certain ?")}
+\${h1("Êtes-vous certain ?")}
 
 <p>
 Vous êtes sur le point d\'arrêter/supprimer de la file les sauvegardes de \$host;
@@ -578,7 +582,7 @@ EOF
 $Lang{Restore_Confirm_on__host} = "BackupPC: Confirmation de restauration sur \$host";
 
 $Lang{Are_you_sure} = <<EOF;
-\${h1("Êtes-vous sur ?")}
+\${h1("Êtes-vous sûr ?")}
 <p>
 Vous êtes sur le point de démarrer une restauration directement sur 
 la machine \$In{hostDest}. Les fichiers suivants vont être restaurés 

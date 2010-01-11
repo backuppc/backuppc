@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 5 April 2009.
+# Version 3.2.0beta1, released 10 Jan 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -50,14 +50,32 @@ sub action
     ReadUserEmailInfo();
     my(%EmailStr, $str);
     foreach my $u ( keys(%UserEmailInfo) ) {
-        next if ( !defined($UserEmailInfo{$u}{lastTime}) );
-        my $emailTimeStr = timeStamp2($UserEmailInfo{$u}{lastTime});
-        $EmailStr{$UserEmailInfo{$u}{lastTime}} .= <<EOF;
+        my $info;
+        if ( defined($UserEmailInfo{$u}{lastTime})
+                && ref($UserEmailInfo{$u}{lastTime}) ne 'HASH' ) {
+            #
+            # old format $UserEmailInfo - pre 3.2.0.
+            #
+            my $host = $UserEmailInfo{$u}{lastHost};
+            $info = {
+                $host => {
+                    lastTime => $UserEmailInfo{$u}{lastTime},
+                    lastSubj => $UserEmailInfo{$u}{lastSubj},
+                },
+            };
+        } else {
+            $info = $UserEmailInfo{$u};
+        }
+        foreach my $host ( keys(%$info) ) {
+            next if ( !defined($info->{$host}{lastTime}) );
+            my $emailTimeStr = timeStamp2($info->{$host}{lastTime});
+            $EmailStr{$info->{$host}{lastTime}} .= <<EOF;
 <tr><td>${UserLink($u)} </td>
-    <td>${HostLink($UserEmailInfo{$u}{lastHost})} </td>
+    <td>${HostLink($host)} </td>
     <td>$emailTimeStr </td>
-    <td>$UserEmailInfo{$u}{lastSubj} </td></tr>
+    <td>$info->{$host}{lastSubj} </td></tr>
 EOF
+        }
     }
     foreach my $t ( sort({$b <=> $a} keys(%EmailStr)) ) {
         $str .= $EmailStr{$t};

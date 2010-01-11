@@ -364,9 +364,9 @@ sub ConfigRead
     # Read host config file
     #
     if ( $host ne "" ) {
-	($mesg, $config) = $bpc->{storage}->ConfigDataRead($host);
+	($mesg, $config) = $bpc->{storage}->ConfigDataRead($host, $config);
 	return $mesg if ( defined($mesg) );
-	$bpc->{Conf} = { %{$bpc->{Conf}}, %$config };
+	$bpc->{Conf} = $config;
     }
 
     #
@@ -1237,18 +1237,23 @@ sub cmdVarSubstitute
     #
     foreach my $arg ( @$template ) {
         #
+        # Replace $VAR with ${VAR} so that both types of variable
+        # substitution are supported
+        #
+        $arg =~ s[\$(\w+)]{\${$1}}g;
+        #
         # Replace scalar variables first
         #
-        $arg =~ s{\$(\w+)(\+?)}{
+        $arg =~ s[\${(\w+)}(\+?)]{
             exists($vars->{$1}) && ref($vars->{$1}) ne "ARRAY"
                 ? ($2 eq "+" ? $bpc->shellEscape($vars->{$1}) : $vars->{$1})
-                : "\$$1$2"
+                : "\${$1}$2"
         }eg;
         #
         # Now replicate any array arguments; this just works for just one
         # array var in each argument.
         #
-        if ( $arg =~ m{(.*)\$(\w+)(\+?)(.*)} && ref($vars->{$2}) eq "ARRAY" ) {
+        if ( $arg =~ m[(.*)\${(\w+)}(\+?)(.*)] && ref($vars->{$2}) eq "ARRAY" ) {
             my $pre  = $1;
             my $var  = $2;
             my $esc  = $3;

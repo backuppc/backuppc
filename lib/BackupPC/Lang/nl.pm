@@ -40,12 +40,16 @@ $Lang{Admin_Options_Page} = <<EOF;
 </ul>
 -->
 EOF
-$Lang{Unable_to_connect_to_BackupPC_server} = "Verbinding met de BackupPC server is mislukt",
-            "Dit CGI script (\$MyURL) kon geen verbinding maken met de BackupPC-server"
-          . " op \$Conf{ServerHost} poort \$Conf{ServerPort}."
-          . " De foutmelding was: \$err.",
-            "Mogelijk draait de BackupPC server niet of is er een "
-          . " configuratiefout.  Gelieve dit te melden aan uw systeembeheerder.";
+
+$Lang{Unable_to_connect_to_BackupPC_server} = "Verbinding met de BackupPC server is mislukt";
+$Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
+Dit CGI script (\$MyURL) kon geen verbinding maken met de BackupPC-server
+op \$Conf{ServerHost} poort \$Conf{ServerPort}.<br>
+De foutmelding was: \$err.<br>
+Mogelijk draait de BackupPC server niet of is er een
+configuratiefout.  Gelieve dit te melden aan uw systeembeheerder.
+EOF
+
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">

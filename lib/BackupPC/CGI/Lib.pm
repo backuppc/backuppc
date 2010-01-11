@@ -294,7 +294,8 @@ sub ServerConnect
             Trailer();
             exit(1);
         } else {
-            ErrorExit(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"));
+            ErrorExit(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"),
+                      eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server_error_message}}"));
         }
     }
 }
@@ -447,6 +448,7 @@ sub Header
 <html><head>
 <title>$title</title>
 <link rel=stylesheet type="text/css" href="$Conf{CgiImageDirURL}/$Conf{CgiCSSFile}" title="CSSFile">
+<link rel=icon href="$Conf{CgiImageDirURL}/favicon.ico" type="image/x-icon">
 $Conf{CgiHeaders}
 <script src="$Conf{CgiImageDirURL}/sorttable.js"></script>
 </head><body onLoad="document.getElementById('NavMenu').style.height=document.body.scrollHeight">

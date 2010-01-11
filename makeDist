@@ -243,6 +243,7 @@ foreach my $dir ( qw(bin doc conf images init.d/src cgi-bin httpd/src
 
 my %ConfName;
 my $ConfPod = config2pod();
+
 rmtree("doc", 0, 0);
 mkpath("doc", 0, 0777);
 InstallFile("doc-src/BackupPC.pod", "doc/BackupPC.pod");
@@ -257,6 +258,7 @@ pod2html("doc/BackupPC.pod",
 foreach my $file ( (@PerlSrc,
 	    <images/*.gif>,
 	    <images/*.png>,
+	    <images/*.ico>,
 	    qw(
 		conf/config.pl
 		conf/hosts
@@ -300,7 +302,7 @@ sub InstallFile
     my($file, $dest) = @_;
 
     unlink($dest) if ( -d $dest );
-    if ( $file =~ /\.gif/ || $file =~ /\.png/ ) {
+    if ( $file =~ /\.gif/ || $file =~ /\.png/ || $file =~ /\.ico/ ) {
         die("can't copy($file, $dest)\n") unless copy($file, $dest);
     } else {
 	open(FILE, $file)   || die("can't open $file for reading\n");
@@ -315,10 +317,10 @@ sub InstallFile
 		#
 		# fixup for conf links
 		#
-		if ( !/A NAME="item_(%|_)conf/i ) {
+		if ( !/a name="_conf/i ) {
 		    s/\$Conf{([^}]*)}/
 			defined($ConfName{$1})
-			    ? "\L<a href=\"#$ConfName{$1}\">\E\$Conf{$1}<\/A>"
+			    ? "\L<a href=\"#$ConfName{$1}\">\E\$Conf{$1}<\/a>"
 			    : "\$Conf{$1}"/eg;
 		}
 		s/^<DD>/<DD><P>/;
@@ -394,7 +396,7 @@ sub config2pod
             push(@conf, $_);
             my $text = "_conf_${var}_";
             $text =~ s{[\W\s]}{_}g;
-            $ConfName{$var} = "item_$text";
+            $ConfName{$var} = "$text";
         } elsif ( /^$/ ) {
             if ( $str ne "" && @conf ) {
                 $out .= "=item " . join("\n\n=item ", @conf) . "\n\n";

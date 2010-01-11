@@ -31,12 +31,11 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 5 April 2009.
+# Version 3.2.0beta1, released 5 Jan 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
-
 
 package BackupPC::Xfer::Ftp;
 
@@ -187,10 +186,11 @@ sub start
                                 : Net::FTP->new(%$args);
     };
     if ($@) {
-        $t->{_errStr} = "Can't open connection to $args->{host}: $!";
+        $t->{_errStr} = "Can't open connection to $args->{Host}: $!";
         $t->{xferErrCnt}++;
         return;
     }
+    $t->logWrite("Connected to $args->{Host}\n", 2);
 
     #
     # Log in to the ftp server and set appropriate path information.
@@ -198,19 +198,21 @@ sub start
     undef $@;
     eval { $t->{ftp}->login( $conf->{FtpUserName}, $conf->{FtpPasswd} ); };
     if ( $@ ) {
-        $t->{_errStr} = "Can't login to $args->{host}: $!";
+        $t->{_errStr} = "Can't login to $args->{Host}: $!";
         $t->{xferErrCnt}++;
         return;
     }
+    $t->logWrite("Login successful to $conf->{FtpUserName}\@$args->{Host}\n", 2);
 
     undef $@;
     eval { $t->{ftp}->binary(); };
     if ($@) {
         $t->{_errStr} =
-          "Can't enable binary transfer mode to $args->{host}: $!";
+          "Can't enable binary transfer mode to $args->{Host}: $!";
         $t->{xferErrCnt}++;
         return;
     }
+    $t->logWrite("Binary command successful\n", 2);
 
     undef $@;
     eval { $t->{shareName} =~ m/^\.?$/ || $t->{ftp}->cwd( $t->{shareName} ); };
@@ -220,6 +222,7 @@ sub start
         $t->{xferErrCnt}++;
         return;
     }
+    $t->logWrite("Set cwd to $t->{shareName}\n", 2);
 
     undef $@;
     eval { $t->{sharePath} = $t->{ftp}->pwd(); };
@@ -229,6 +232,7 @@ sub start
         $t->{xferErrCnt}++;
         return;
     }
+    $t->logWrite("Pwd returned as $t->{sharePath}\n", 2);
 
     #
     # log the beginning of action based on type
@@ -255,17 +259,20 @@ sub start
     if ( $t->{type} eq 'restore' ) {
 
         $t->restore();
-        $logMsg = "Restore of $t->{host} complete";
+        $logMsg = "Restore of $t->{host} "
+                . ($t->{xferOK} ? "complete" : "failed");
 
     } elsif ( $t->{type} eq 'incr' ) {
 
         $t->backup();
-        $logMsg = "Incremental backup of $t->{host} complete";
+        $logMsg = "Incremental backup of $t->{host} "
+                . ($t->{xferOK} ? "complete" : "failed");
 
     } elsif ( $t->{type} eq 'full' ) {
 
         $t->backup();
-        $logMsg = "Full backup of $t->{host} complete";
+        $logMsg = "Full backup of $t->{host} "
+                . ($t->{xferOK} ? "complete" : "failed");
     }
 
     delete $t->{_errStr};
@@ -490,6 +497,7 @@ sub backup
         $t->{xferErrCnt}++;
         return;
     }
+    $t->logWrite("Created output directory $OutDir\n", 3);
 
     #
     # determine the filetype of the shareName and back it up
@@ -537,14 +545,12 @@ sub getFTPArgs
         FirewallType => undef,                            # not used
         BlockSize    => $conf->{FtpBlockSize} || 10240,
         Port         => $conf->{FtpPort}      || 21,
-        Timeout      => $conf->{FtpTimeout}   || 120,
-        Debug        => 0,                                # do not touch
-        Passive      => 1,                                # do not touch
+        Timeout      => defined($conf->{FtpTimeout}) ? $conf->{FtpTimeout} : 120,
+        Debug        => $t->{logLevel} >= 10 ? 1 : 0,
+        Passive      => defined($conf->{FtpPassive}) ? $conf->{FtpPassive} : 1,          
         Hash         => undef,                            # do not touch
-        LocalAddr    => "localhost",                      # do not touch
     };
 }
-
 
 #
 #   usage:
@@ -568,14 +574,21 @@ sub remotels
 
     my ( $dirContents, $remoteDir, $f );
 
+    $remoteDir = [];
     undef $@;
+    $t->logWrite("remotels: about to list $path\n", 4);
     eval {
         $dirContents = ( $path =~ /^\.?$/ ) ? $ftp->dir()
                                             : $ftp->dir("$path/");
     };
     if ($@) {
         $t->{xferErrCnt}++;
+        $t->logWrite("remotels: can't retrieve remote directory contents of $path: $!\n", 1);
         return "can't retrieve remote directory contents of $path: $!";
+    }
+    if ( $t->{logLevel} >= 4 ) {
+        my $str = join("\n", @$dirContents);
+        $t->logWrite("remotels: got dir() result:\n$str\n", 4);
     }
 
     foreach my $info ( @{parse_dir($dirContents)} ) {
@@ -587,6 +600,8 @@ sub remotels
             mtime => $info->[3],
             mode  => $info->[4],
         };
+
+        $t->logWrite("remotels: adding name $f->{name}, type $f->{type}, size $f->{size}, mode $f->{mode}\n", 4);
 
         $f->{utf8name} = $f->{name};
         from_to( $f->{utf8name}, $conf->{ClientCharset}, "utf8" )
@@ -759,8 +774,16 @@ sub handleDir
         }
     }
 
+    $t->logWrite("handleDir: dir->relPath = $dir->{relPath}, OutDir = $OutDir\n", 4);
+
     $attrib    = BackupPC::Attrib->new( { compress => $t->{compress} } );
     $remoteDir = $t->remotels( $dir->{relPath} );
+
+    if ( ref($remoteDir) ne 'ARRAY' ) {
+        $t->logWrite("handleDir failed: $remoteDir\n", 1);
+        $t->logFileAction( "fail", $dir->{utf8name}, $dir );
+        return;
+    }
 
     if ( $t->{type} eq "incr" ) {
         $localDir  = $view->dirAttrib( $t->{incrBaseBkupNum},
@@ -894,7 +917,6 @@ sub handleFile
     $poolFile    = $OutDir . "/" .  $bpc->fileNameMangle( $f->{name} );
     $poolWrite   = BackupPC::PoolWrite->new( $bpc, $poolFile, $f->{size},
                                            $t->{compress} );
-
     $localSize = 0;
 
     undef $@;
@@ -908,6 +930,7 @@ sub handleFile
     if ( !*FTP || $@ || @$errs ) {
 
         $t->logFileAction( "fail", $f->{utf8name}, $attribInfo );
+        $t->logWrite("Unlinking($poolFile) because of error on close\n", 3);
         unlink($poolFile);
         $t->{xferBadFileCnt}++;
         $stats->{errCnt} += scalar @$errs;
@@ -919,6 +942,7 @@ sub handleFile
     #
     if ( $localSize != $f->{size} ) {
         $t->logFileAction( "fail", $f->{utf8name}, $attribInfo );
+        $t->logWrite("Unlinking($poolFile) because of size mismatch ($localSize vs $f->{size})\n", 3);
         unlink($poolFile);
         $stats->{xferBadFileCnt}++;
         $stats->{errCnt}++;

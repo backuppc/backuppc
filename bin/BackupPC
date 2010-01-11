@@ -1749,7 +1749,7 @@ sub QueueAllPCs
 {
     my $nSkip = 0;
 
-    foreach my $host ( sort(HostSortCompare keys(%$Hosts)) ) {
+    foreach my $host ( sort HostSortCompare keys(%$Hosts) ) {
         $nSkip++ if ( QueueOnePC($host, $host, 'BackupPC', 'bg', 'auto') == 2 );
     }
     foreach my $dhcp ( @{$Conf{DHCPAddressRanges}} ) {

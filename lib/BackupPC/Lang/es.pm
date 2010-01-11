@@ -41,12 +41,16 @@ $Lang{Admin_Options_Page} = <<EOF;
 </ul>
 -->
 EOF
-$Lang{Unable_to_connect_to_BackupPC_server} = "Imposible conectar al servidor BackupPC",
-            "Este script CGI (\$MyURL) no puede conectar al servidor BackupPC"
-          . " en \$Conf{ServerHost} puerto \$Conf{ServerPort}.  El error"
-          . " fué: \$err.",
-            "Quizá el servidor BackupPC no está activo o hay un "
-          . " error de configuración. Por favor informe a su administrador de sistemas.";
+
+$Lang{Unable_to_connect_to_BackupPC_server} = "Imposible conectar al servidor BackupPC";
+$Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
+Este script CGI (\$MyURL) no puede conectar al servidor BackupPC
+en \$Conf{ServerHost} puerto \$Conf{ServerPort}.<br>
+El error fué: \$err.<br>
+Quizá el servidor BackupPC no está activo o hay un
+error de configuración. Por favor informe a su administrador de sistemas.
+EOF
+
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">

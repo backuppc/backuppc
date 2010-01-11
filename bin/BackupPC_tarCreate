@@ -21,8 +21,8 @@
 #       -t              print summary totals
 #       -r pathRemove   path prefix that will be replaced with pathAdd
 #       -p pathAdd      new path prefix
-#       -b BLOCKS       BLOCKS x 512 bytes per record (default 20; same as tar)
-#       -w writeBufSz   write buffer size (default 1MB)
+#       -b BLOCKS       output write buffer size in 512-byte blocks (default 20; same as tar)
+#       -w readBufSz    buffer size for reading files (default 1048576 = 1MB)
 #       -e charset      charset for encoding file names (default: value of
 #                       $Conf{ClientCharset} when backup was done)
 #       -l              just print a file listing; don't generate an archive
@@ -90,8 +90,8 @@ usage: $0 [options] files/directories...
      -t              print summary totals
      -r pathRemove   path prefix that will be replaced with pathAdd
      -p pathAdd      new path prefix
-     -b BLOCKS       BLOCKS x 512 bytes per record (default 20; same as tar)
-     -w writeBufSz   write buffer size (default 1048576 = 1MB)
+     -b BLOCKS       output write buffer size in 512-byte blocks (default 20; same as tar)
+     -w readBufSz    buffer size for reading files (default 1048576 = 1MB)
      -e charset      charset for encoding file names (default: value of
                      \$Conf{ClientCharset} when backup was done)
      -l              just print a file listing; don't generate an archive
@@ -601,6 +601,12 @@ sub TarWriteFile
         $hdr->{size} = 0;
         TarWriteFileInfo($fh, $hdr);
 	$SpecialCnt++;
+    } elsif ( $hdr->{type} == BPC_FTYPE_SOCKET
+           || $hdr->{type} == BPC_FTYPE_UNKNOWN ) {
+        #
+        # ignore these two file types - these are dynamic file types created
+        # by applications as needed
+        #
     } else {
         print(STDERR "Got unknown type $hdr->{type} for $hdr->{name}\n");
 	$ErrorCnt++;

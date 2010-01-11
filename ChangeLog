@@ -21,6 +21,67 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fixed FTP xfer method, with help from Holger Parplies and
+  Mirco Piccin.  FTP restores are still not supported.
+
+* Fixed bug in BackupPC_sendEmail where a user only receives
+  email about one host.
+
+* Fixed bug where top-level attrib file was linked into the pool with
+  the wrong digest, caused by it being updated multiple times with
+  multiple shares.  Reported by Jeff Kosowsky who also supplied a
+  patch.
+
+* Fixed bug in blackout calculation when multiple periods span midnight.
+  Report and patch from Joachim Falk.
+
+* Wrapped eval {} around attribute unpacking to make it more robust
+  to data corruption.  Path submitted by Tim Connors.
+
+* Ignore fileType 8 and 9 in BackupPC_tarCreate rather than consider then
+  errors.  These are sockets and unknown (eg: solaris door) files that
+  are created dynamicaly by applications - there is no meaningful restore
+  for these file types.
+
+* Changed lib/BackupPC/Lib.pm and lib/BackupPC/Storage/Text.pm based on
+  patches from Davide Brini and Holger Parplies so that main config
+  %Conf values are available in the host config file, allowing more
+  flexibility in perl expressions in the config files.  Use beware,
+  since the CGI editor won't work correctly if the config file have
+  perl expressions.
+
+* Obscure password values in LOG file when CGI editor is used to change
+  values.  Proposed by Steve Ling.
+
+* Added favicon.ico from Axel Beckert.  Thanks to Tyler Wagner for submitting
+  another version and reminding me about the first.
+
+* Replace "sort(HostSortCompare keys(%$Hosts))" with "sort HostSortCompare keys(%$Hosts)"
+  in bin/BackupPC to avoid an error with certain versions of perl.
+
+* Fixed $Conf{XX} links in the BackupPC.html and the CGI editor so they
+  correctly reference the definition.
+
+* Support ${VAR} style variable substitution in commands, in addition to
+  existing $VAR style.  Suggested by Jeffrey Kosowsky.
+
+* Clarified usage of -b and -w options to BackupPC_tarCreate.  Submitted by
+  Michael Selway.
+
+* Repaired Unable_to_connect_to_BackupPC_server Lang string and added new
+  string Unable_to_connect_to_BackupPC_server_error_message.  Proposed and
+  explained by Holger Parplies.
+
+* Added 'use utf8' to lib/BackupPC/Lang/pl.pm.  Reported by Michal Sawicz.
+
+* Minor updates to lib/BackupPC/Lang/fr.pm from Hubert Tournier.
+
+* Minor update to lib/BackupPC/Lang/en.pm from David Relson.
+
+#------------------------------------------------------------------------
+# Version 3.2.0beta0, 5 April 2009
+#------------------------------------------------------------------------
+
 * Added BackupPC::Xfer::Protocol as a common class for each Xfer
   method.  This simplifies some of the xfer specific code.
   Implemented by Paul Mantz.
@@ -57,6 +118,9 @@
 * BackupPC now gives a more useful error message if BackupPC_nightly
   takes more than 24 hours (ie: when the next one is meant to
   start).  Reported by Tony Schreiner.
+
+* Fixed IO::Dirent run-time check.  Reported by Bernhard Ott and Tino Schwarze
+  debugged it.
 
 * Added more options to server backup command: rather than just forcing
   an incremental or full backup, a regular (auto) backup can be queued
@@ -616,7 +680,7 @@
   Marko Tukiainen, who both helped debugging the problem.
 
 * Fixed bug in lib/BackupPC/Xfer/RsyncFileIO.pm that caused
-  incorrected deleted attributes to be set in directories
+  incorrectly deleted attributes to be set in directories
   where one of the files had an rsync phase 1 retry during
   an incremental.  Reported by Tony Nelson.
 
@@ -1416,7 +1480,7 @@
   processing by BackupPC_link, embedded newlines in the file's path
   will cause problems which are avoided by mangling.
 
-  The CGI script undoes the mangling, so it is invisibe to the user.
+  The CGI script undoes the mangling, so it is invisible to the user.
   Of course, old (unmangled) backups are still supported by the CGI
   interface.
 

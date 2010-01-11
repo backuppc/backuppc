@@ -274,25 +274,25 @@ sub ConfigPath
 
 sub ConfigDataRead
 {
-    my($s, $host) = @_;
+    my($s, $host, $prevConfig) = @_;
     my($ret, $mesg, $config, @configs);
 
     #
     # TODO: add lock
     #
-    my $conf = {};
+    my $conf = $prevConfig || {};
     my $configPath = $s->ConfigPath($host);
 
     push(@configs, $configPath) if ( -f $configPath );
     foreach $config ( @configs ) {
-        %Conf = ();
+        %Conf = %$conf;
         if ( !defined($ret = do $config) && ($! || $@) ) {
             $mesg = "Couldn't open $config: $!" if ( $! );
             $mesg = "Couldn't execute $config: $@" if ( $@ );
             $mesg =~ s/[\n\r]+//;
             return ($mesg, $conf);
         }
-        %$conf = ( %$conf, %Conf );
+        %$conf = %Conf;
     }
 
     #

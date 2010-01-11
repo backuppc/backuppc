@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 5 April 2009.
+# Version 3.2.0beta1, released 10 Jan 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -47,7 +47,7 @@ use Encode;
 use Data::Dumper;
 use Getopt::Std;
 use DirHandle ();
-use vars qw($Lang $TopDir $BinDir $LogDir %Conf);
+use vars qw($Lang $TopDir $BinDir $LogDir %Conf $Hosts);
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 $TopDir = $bpc->TopDir();
@@ -55,6 +55,7 @@ $LogDir = $bpc->LogDir();
 $BinDir = $bpc->BinDir();
 %Conf   = $bpc->Conf();
 $Lang   = $bpc->Lang();
+$Hosts  = $bpc->HostInfoRead();
 
 $bpc->ChildInit();
 
@@ -74,6 +75,57 @@ options:
   -u  send a test email to userEmail
 EOF
     exit(1);
+}
+
+#
+# Upgrade legacy version of %UserEmailInfo
+#
+# Prior to 3.2.0, it was a hash with entries:
+#
+#    $UserEmailInfo{$user}{lastTime}
+#    $UserEmailInfo{$user}{lastSubj}
+#    $UserEmailInfo{$user}{lastHost}
+#
+# However, if a user had multiple hosts, then an email about one
+# host prevents mail delivery about other hosts.  Starting in 3.2.0
+# the hash is:
+#
+#    $UserEmailInfo{$user}{$host}{lastTime}
+#    $UserEmailInfo{$user}{$host}{lastSubj}
+#
+my $oldFormat = 0;
+foreach my $user ( keys(%UserEmailInfo) ) {
+    if ( defined($UserEmailInfo{$user}{lastTime})
+            && ref($UserEmailInfo{$user}{lastTime}) ne 'HASH' ) {
+        $oldFormat = 1;
+        last;
+    }
+}
+if ( $oldFormat ) {
+    #
+    # Convert to the new format
+    #
+    my %UserEmailInfoOld = %UserEmailInfo;
+    %UserEmailInfo = ();
+    foreach my $user ( keys(%UserEmailInfoOld) ) {
+        next if ( $user eq "" );
+        my $host = $UserEmailInfoOld{$user}{lastHost};
+        next if ( !defined($host) );
+        $UserEmailInfo{$user}{$host}{lastTime} = $UserEmailInfoOld{$user}{lastTime};
+        $UserEmailInfo{$user}{$host}{lastSubj} = $UserEmailInfoOld{$user}{lastSubj};
+    }
+}
+
+#
+# Prune hosts that no longer exist
+#
+foreach my $user ( keys(%UserEmailInfo) ) {
+    foreach my $host ( keys(%{$UserEmailInfo{$user}}) ) {
+        next if ( defined($Hosts->{$host}) );
+        delete($UserEmailInfo{$user}{$host});
+    }
+    next if ( $UserEmailInfo{$user} );
+    delete($UserEmailInfo{$user});
 }
 
 my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
@@ -124,7 +176,6 @@ EOF
 ###########################################################################
 # Generate per-host warning messages sent to each user
 ###########################################################################
-my $Hosts = $bpc->HostInfoRead();
 my @AdminBadHosts = ();
 
 foreach my $host ( sort(keys(%Status)) ) {
@@ -134,6 +185,8 @@ foreach my $host ( sort(keys(%Status)) ) {
     $bpc->ConfigRead($host);
     %Conf = $bpc->Conf();
     my $user = $Hosts->{$host}{user};
+
+    next if ( $user eq "" );
 
     #
     # Accumulate host errors for the admin email below
@@ -146,7 +199,7 @@ foreach my $host ( sort(keys(%Status)) ) {
         push(@AdminBadHosts, "$host ($Status{$host}{error})");
     }
 
-    next if ( time - $UserEmailInfo{$user}{lastTime}
+    next if ( time - $UserEmailInfo{$user}{$host}{lastTime}
                         < $Conf{EMailNotifyMinDays} * 24*3600
               || $Conf{XferMethod} eq "archive"
               || $Conf{BackupsDisable}
@@ -376,9 +429,8 @@ sub sendUserEmail
     $vars->{subj}     = encode('MIME-Header', $subj);
     $mesg =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
     SendMail($mesg);
-    $UserEmailInfo{$user}{lastTime} = time;
-    $UserEmailInfo{$user}{lastSubj} = $subj;
-    $UserEmailInfo{$user}{lastHost} = $host;
+    $UserEmailInfo{$user}{$host}{lastTime} = time;
+    $UserEmailInfo{$user}{$host}{lastSubj} = $subj;
 }
 
 sub SendMail

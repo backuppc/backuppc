@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 5 April 2009.
+# Version 3.2.0beta1, released 5 Jan 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -215,6 +215,8 @@ our %ConfigMenu = (
              visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
             {name    => "FtpPasswd",
              visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
+            {name    => "FtpPassive",
+             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
             {name    => "FtpBlockSize",
              visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
             {name    => "FtpPort",
@@ -222,8 +224,6 @@ our %ConfigMenu = (
             {name    => "FtpTimeout",
              visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
             {name    => "FtpFollowSymlinks",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            {name    => "FtpRestoreEnabled",
              visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
 
 
@@ -1028,7 +1028,7 @@ sub fieldEditBuild
     if ( $level == 0 ) {
         my $lcVarName = lc($varName);
 	$content .= <<EOF;
-<tr><td class="border"><a href="?action=view&type=docs#item__conf_${lcVarName}_">$varName</a>
+<tr><td class="border"><a href="?action=view&type=docs#_conf_${lcVarName}_">$varName</a>
 EOF
 	if ( defined($overrideVar) ) {
 	    my $override_checked = "";
@@ -1541,6 +1541,10 @@ sub configDiffMesg
             my $value = $dump->Dump;
             $value =~ s/\n/\\n/g;
             $value =~ s/\r/\\r/g;
+            if ( $p =~ /Passwd/ || $p =~ /Secret/ ) {
+                $value = "'*'";
+            }
+
             $mesg .= eval("qq($Lang->{CfgEdit_Log_Add_param_value})");
         } else {
             my $dump = Data::Dumper->new([$newConf->{$p}]);
@@ -1568,6 +1572,10 @@ sub configDiffMesg
             $valueOld =~ s/\n/\\n/g;
             $valueNew =~ s/\r/\\r/g;
             $valueOld =~ s/\r/\\r/g;
+            if ( $p =~ /Passwd/ || $p =~ /Secret/ ) {
+                $valueNew = "'*'";
+                $valueOld = "'*'";
+            }
 
             $mesg .= eval("qq($Lang->{CfgEdit_Log_Change_param_value})");
         }

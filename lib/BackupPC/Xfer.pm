@@ -176,7 +176,7 @@ sub restoreEnabled
         return;
 
     } elsif ( $conf->{XferMethod} eq "ftp" ) {
-        return !!( $conf->{FtpRestoreEnabled} );
+        return;
 
     } elsif ( $conf->{XferMethod} eq "rsync"
            || $conf->{XferMethod} eq "rsyncd"

@@ -2,6 +2,7 @@
 
 #my %lang;
 #use strict;
+use utf8;
 
 # --------------------------------
 
@@ -40,12 +41,16 @@ $Lang{Admin_Options_Page} = <<EOF;
 </ul>
 -->
 EOF
-$Lang{Unable_to_connect_to_BackupPC_server} = "Nie można połączyć się z serwerem BackupPC",
-            "Ten skrypt CGI (\$MyURL) nie może połączyć się z BackupPC"
-          . " serwer na \$Conf{ServerHost} porcie \$Conf{ServerPort}.  Błąd"
-          . " to: \$err.",
-            "Możliwe ,że serwer BackupPC nie jest uruchomiony albo że występuje "
-          . " błąd w konfiguracji.  Proszę powiadomić o tym swojego Administratora.";
+
+$Lang{Unable_to_connect_to_BackupPC_server} = "Nie można połączyć się z serwerem BackupPC";
+$Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
+Ten skrypt CGI (\$MyURL) nie może połączyć się z BackupPC
+serwer na \$Conf{ServerHost} porcie \$Conf{ServerPort}.<br>
+Błąd to: \$err.<br>
+Możliwe ,że serwer BackupPC nie jest uruchomiony albo że występuje
+błąd w konfiguracji.  Proszę powiadomić o tym swojego Administratora.
+EOF
+
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">

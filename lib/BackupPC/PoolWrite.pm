@@ -96,9 +96,10 @@ sub new
     #
     unlink($fileName) if ( -f $fileName );
     if ( $fileName =~ m{(.*)/.+} && !-d $1 ) {
-        eval { mkpath($1, 0, 0777) };
+        my $newDir = $1;
+        eval { mkpath($newDir, 0, 0777) };
         if ( $@ ) {
-            push(@{$self->{errors}}, "Unable to create directory $1 for $self->{fileName}");
+            push(@{$self->{errors}}, "Unable to create directory $newDir for $self->{fileName}");
         }
     }
     return $self;

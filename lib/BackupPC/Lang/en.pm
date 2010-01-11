@@ -40,12 +40,16 @@ $Lang{Admin_Options_Page} = <<EOF;
 </ul>
 -->
 EOF
-$Lang{Unable_to_connect_to_BackupPC_server} = "Unable to connect to BackupPC server",
-            "This CGI script (\$MyURL) is unable to connect to the BackupPC"
-          . " server on \$Conf{ServerHost} port \$Conf{ServerPort}.  The error"
-          . " was: \$err.",
-            "Perhaps the BackupPC server is not running or there is a "
-          . " configuration error.  Please report this to your Sys Admin.";
+
+$Lang{Unable_to_connect_to_BackupPC_server} = "Unable to connect to BackupPC server";
+$Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
+This CGI script (\$MyURL) is unable to connect to the BackupPC
+server on \$Conf{ServerHost} port \$Conf{ServerPort}.<br>
+The error was: \$err.<br>
+Perhaps the BackupPC server is not running or there is a configuration error.
+Please report this to your Sys Admin.
+EOF
+
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">
@@ -1284,7 +1288,7 @@ $headers
 Dear $userName,
 
 Your PC ($host) has not been successfully backed up for $days days.
-Your PC has been correctly backed up $numBackups times from $firstTime to $days
+Your PC has been correctly backed up $numBackups times from $firstTime to $days days
 ago.  PC backups should occur automatically when your PC is connected
 to the network.
 

@@ -46,7 +46,7 @@
 * Changed lib/BackupPC/Lib.pm and lib/BackupPC/Storage/Text.pm based on
   patches from Davide Brini and Holger Parplies so that main config
   %Conf values are available in the host config file, allowing more
-  flexibility in perl expressions in the config files.  Use beware,
+  flexibility in perl expressions in the config files.  Users beware,
   since the CGI editor won't work correctly if the config file have
   perl expressions.
 

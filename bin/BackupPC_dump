@@ -77,7 +77,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 5 April 2009.
+# Version 3.2.0, released 31 Jul 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -623,6 +623,7 @@ $NeedPostCmd = 1;
 #
 # Now backup each of the shares
 #
+my $shareDuplicate = {};
 for my $shareName ( @$ShareNames ) {
     local(*RH, *WH);
 
@@ -632,11 +633,17 @@ for my $shareName ( @$ShareNames ) {
     $shareName = encode("utf8", $shareName);
     $stat{xferOK} = $stat{hostAbort} = undef;
     $stat{hostError} = $stat{lastOutputLine} = undef;
-    if ( -d "$Dir/new/$shareName" ) {
+    if ( $shareName eq "" ) {
+        print(LOG $bpc->timeStamp,
+                  "unexpected empty share name skipped\n");
+        next;
+    }
+    if ( $shareDuplicate->{$shareName} ) {
         print(LOG $bpc->timeStamp,
                   "unexpected repeated share name $shareName skipped\n");
         next;
     }
+    $shareDuplicate->{$shareName} = 1;
 
     UserCommandRun("DumpPreShareCmd", $shareName);
     if ( $? && $Conf{UserCmdCheckStatus} ) {
@@ -915,6 +922,10 @@ for my $shareName ( @$ShareNames ) {
         #
         last;
     }
+    #
+    # Wait for any child processes to exit
+    #
+    # 1 while ( wait() >= 0 );
 }
 
 #

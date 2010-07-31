@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 5 April 2009.
+# Version 3.2.0, released 31 Jul 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -130,7 +130,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '3.2.0beta0',
+        Version => '3.2.0',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);

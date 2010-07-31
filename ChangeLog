@@ -21,6 +21,17 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fixed code that detects duplicate shares in bin/BackupPC_dump
+
+* Added fix to lib/BackupPC/Zip/FileMember.pm to avoid bug in
+  Archive::Zip 1.30 when creating compressed archives.
+
+* Added Czech translation from Petr Pokorny.
+
+#------------------------------------------------------------------------
+# Version 3.2.0beta1, 24 Jan 2010
+#------------------------------------------------------------------------
+
 * Fixed FTP xfer method, with help from Holger Parplies and
   Mirco Piccin.  FTP restores are still not supported.
 

@@ -20,7 +20,7 @@
 #   Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2009  Craig Barratt
+#   Copyright (C) 2001-2010  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -103,6 +103,7 @@ my @PerlSrc = qw(
     lib/BackupPC/CGI/Summary.pm
     lib/BackupPC/CGI/View.pm
     lib/BackupPC/Config/Meta.pm
+    lib/BackupPC/Lang/cz.pm
     lib/BackupPC/Lang/de.pm
     lib/BackupPC/Lang/en.pm
     lib/BackupPC/Lang/es.pm
@@ -601,7 +602,7 @@ sub CheckLangTags
     my($en, $enVars) = LangParse("lib/BackupPC/Lang/en.pm");
     my($errors);
 
-    foreach my $lang ( qw(fr.pm de.pm es.pm it.pm nl.pm pl.pm pt_br.pm zh_CN.pm) ) {
+    foreach my $lang ( qw(cz.pm fr.pm de.pm es.pm it.pm nl.pm pl.pm pt_br.pm zh_CN.pm) ) {
 	my($d, $dVars) = LangParse("lib/BackupPC/Lang/$lang");
 	foreach my $v1 ( @$en ) {
 	    my $v2 = shift(@$d);

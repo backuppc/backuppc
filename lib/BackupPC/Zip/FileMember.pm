@@ -33,7 +33,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta0, released 5 April 2009.
+# Version 3.2.0, released 31 Jul 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -132,4 +132,20 @@ sub _readRawChunk	# BackupPC::Zip::FileMember
 sub extractToFileNamed	# BackupPC::Zip::FileMember
 {
     die("BackupPC::Zip::FileMember::extractToFileNamed not supported\n");
+}
+
+#
+# There is a bug in Archive::Zip 1.30 that causes BackupPC_zipCreate
+# to fail when compression is on and it is writing to an unseekable
+# output file (eg: pipe or socket); see:
+#
+#    https://rt.cpan.org/Public/Bug/Display.html?id=54827
+#
+# We overload the bitFlag function here to avoid the bug.
+#
+sub bitFlag
+{
+    my $self = shift;
+
+    return $self->{bitFlag};
 }

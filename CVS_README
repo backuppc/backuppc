@@ -47,7 +47,7 @@ Building an installable release from the CVS source:
   By default makeDist does a syntax check on all the source files.
   If you want to skip that you can use tune --nosyntaxCheck option, eg:
 
-    makeDist --nolangCheck --nosyntaxCheck --releasedate '29 Mar 2009' --version 3.2.0beta0
+    makeDist --nolangCheck --nosyntaxCheck --releasedate '31 Jul 2010' --version 3.2.0
 
 * You should now have a sub-directory dist/BackupPC-VERSION containing
   the release and a tar ball dist/BackupPC-VERSION.tar.gz.  You can

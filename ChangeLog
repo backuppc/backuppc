@@ -32,8 +32,11 @@
   empty email info doesn't appear; reported by Wayne Trevena,
   and based on patch from Tyler Wagner.
 
+* Several fixes to FTP xfer mode related to file excludes, from
+  Dave Pearce.
+
 * Wrapped eval() around unpack() in lib/BackupPC/Attrib.pm to avoid
-  failures on corrupted attrib files.
+  failures on corrupted attrib files; patch from Tim Connors.
 
 * Applied documention patch from Alexander Moisseev.
 

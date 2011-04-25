@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -288,12 +288,9 @@ sub loadInclExclRegexps
     my @BackupFilesExclude = ();
     my ($shareName, $shareNameRE);
     
-    #
-    # $conf->{$shareType} shold be a reference to an array with one
-    # element, thanks to BackupFileConfFix().
-    #
-    $shareName = @{ $conf->{$shareType} }[0];
+    $shareName = $t->{shareName};
     $shareName =~ s/\/*$//;    # remove trailing slashes
+    $shareName = "/" if ( $shareName eq "" );
 
     $t->{shareName}   = $shareName;
     $t->{shareNameRE} = $bpc->glob2re($shareName);
@@ -422,18 +419,18 @@ sub checkExcludeMatch
     my ($t, $file) = @_;
 
     my $shareName = $t->{shareName};
-    my $includes  = $t->{BackupFilesOnly} || return 0;
+    my $excludes  = $t->{BackupFilesExclude} || return 0;
     my $match = "";
 
-    foreach my $include ( @{$includes} ) {
+    foreach my $exclude ( @{$excludes} ) {
 
         #
         # construct regexp elsewhere to avoid syntactical evil
         #
-        $match = '^' . quotemeta( $shareName . $include ) . '(?=\/.*)?';
+        $match = '^' . quotemeta( $shareName . $exclude ) . '(?=\/.*)?';
 
 	#
-        # return true if the include folder is a parent of the file,
+        # return true if the exclude folder is a parent of the file,
         # or the folder itself.
 	#
         return 1 if ( $file =~ /$match/ );
@@ -441,10 +438,10 @@ sub checkExcludeMatch
         $match = '^' . quotemeta($file) . '(?=\/.*)?';
                 
 	#
-        # return true if the file is a parent of the include folder,
+        # return true if the file is a parent of the exclude folder,
         # or the folder itself.
 	#
-        return 1 if ( "$shareName$include" =~ /$match/ );
+        return 1 if ( "$shareName$exclude" =~ /$match/ );
     }
     return 0;
 }

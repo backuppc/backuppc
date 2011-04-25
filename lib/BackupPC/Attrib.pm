@@ -297,10 +297,15 @@ sub writeData
                     = $a->{files}{$file}{size} % (4096 * 1024 * 1024);
         $a->{files}{$file}{sizeDiv4GB}
                     = int($a->{files}{$file}{size} / (4096 * 1024 * 1024));
-	$data .= pack("w a* w$nFldsW N$nFldsN", length($file), $file,
-			       @{$a->{files}{$file}}{@FldsUnixW},
-			       @{$a->{files}{$file}}{@FldsUnixN},
-                    );
+        eval {
+            $data .= pack("w a* w$nFldsW N$nFldsN", length($file), $file,
+                                   @{$a->{files}{$file}}{@FldsUnixW},
+                                   @{$a->{files}{$file}}{@FldsUnixN},
+                        );
+        };
+        if ( $@ ) {
+            $a->{_errStr} = "Can't pack attr for $file: " . Dumper($a->{files}{$file});
+        }
     }
     return $data;
 }

@@ -126,7 +126,7 @@ sub start
 
         if ( defined($conf->{BackupFilesOnly}{$t->{shareName}}) ) {
             my(@inc, @exc, %incDone, %excDone);
-            foreach my $file ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
+            foreach my $file2 ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
                 #
                 # If the user wants to just include /home/craig, then
                 # we need to do create include/exclude pairs at
@@ -144,6 +144,7 @@ sub start
                 # To make this easier we do all the includes first and all
                 # of the excludes at the end (hopefully they commute).
                 #
+                my $file = $file2;
                 $file =~ s{/$}{};
                 $file = "/$file";
                 $file =~ s{//+}{/}g;
@@ -185,11 +186,11 @@ sub start
             }
         }
         if ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
-            foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
-            {
+            foreach my $file2 ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} ) {
                 #
                 # just append additional exclude lists onto the end
                 #
+                my $file = $file2;
                 $file = encode($conf->{ClientCharset}, $file)
                             if ( $conf->{ClientCharset} ne "" );
                 push(@fileList, "--exclude=$file");

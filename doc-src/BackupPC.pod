@@ -522,7 +522,7 @@ and install BackupPC yourself.  If you use a package provided by a
 distribution, the package management system should take of installing
 any needed dependencies.
 
-First off, there are three perl modules you should install.
+First off, there are five perl modules you should install.
 These are all optional, but highly recommended:
 
 =over 4
@@ -553,11 +553,13 @@ You can run "perldoc File::RsyncP" to see if this module is installed.
 File::RsyncP is available from L<http://perlrsync.sourceforge.net>.
 Version 0.68 or later is required.
 
-=item File::RsyncP
+=item File::Listing, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect
 
-To use ftp with BackupPC you will need to install three libraries:
-Net::FTP, Net::FTP::RetrHandle and Net::FTP::AutoReconnect. You can
-run "perldoc Net::FTP" to see if a particular module is installed.
+To use ftp with BackupPC you will need four libraries, but actually
+need to install only File::Listing from L<http://www.cpan.org>.
+You can run "perldoc File::Listing" to see if this module is installed.
+Net::FTP is a standard module. Net::FTP::RetrHandle and
+Net::FTP::AutoReconnect included in BackupPC distribution.
 
 =back
 

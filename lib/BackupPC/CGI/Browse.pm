@@ -73,8 +73,8 @@ sub action
     for ( $i = 0 ; $i < @Backups ; $i++ ) {
         last if ( $Backups[$i]{num} == $num );
     }
-    if ( $i >= @Backups ) {
-        ErrorExit("Backup number $num for host ${EscHTML($host)} does"
+    if ( $i >= @Backups || $num !~ /^\d+$/ ) {
+        ErrorExit("Backup number ${EscHTML($num)} for host ${EscHTML($host)} does"
 	        . " not exist.");
     }
     my $backupTime = timeStamp2($Backups[$i]{startTime});

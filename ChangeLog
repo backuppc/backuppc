@@ -21,6 +21,26 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Ensure $num is numeric in lib/BackupPC/CGI/Browse.pm to avoid XSS
+  attack.  Report and patch by Adam E.
+
+* Fixed application of "*" in $Conf{BackupFilesOnly} and
+  $Conf{BackupFilesExclud} for 2nd and later shares.  Reported
+  by Alessandro and Alexander Maringer.
+
+* Fixed email status check in lib/BackupPC/CGI/HostInfo.pl so that
+  empty email info doesn't appear; reported by Wayne Trevena,
+  and based on patch from Tyler Wagner.
+
+* Wrapped eval() around unpack() in lib/BackupPC/Attrib.pm to avoid
+  failures on corrupted attrib files.
+
+* Applied documention patch from Alexander Moisseev.
+
+#------------------------------------------------------------------------
+# Version 3.2.0, 31 Jul 2010
+#------------------------------------------------------------------------
+
 * Fixed code that detects duplicate shares in bin/BackupPC_dump
 
 * Added fix to lib/BackupPC/Zip/FileMember.pm to avoid bug in

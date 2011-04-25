@@ -71,8 +71,8 @@ sub start
 	$bpc->backupFileConfFix($conf, "TarShareName");
 
         if ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
-            foreach my $file ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} )
-            {
+            foreach my $file2 ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} ) {
+                my $file = $file2;
                 $file = "./$2" if ( $file =~ m{^(\./+|/+)(.*)}s );
                 $file = encode($conf->{ClientCharset}, $file)
                             if ( $conf->{ClientCharset} ne "" );
@@ -80,7 +80,8 @@ sub start
             }
         }
         if ( defined($conf->{BackupFilesOnly}{$t->{shareName}}) ) {
-            foreach my $file ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
+            foreach my $file2 ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
+                my $file = $file2;
                 $file = $2 if ( $file =~ m{^(\./+|/+)(.*)}s );
 		$file = "./$file";
                 $file = encode($conf->{ClientCharset}, $file)

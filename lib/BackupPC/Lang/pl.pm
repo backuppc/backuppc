@@ -1399,7 +1399,6 @@ $Lang{CfgEdit_Title_Blackouts} = "Przeciążenia";
 $Lang{CfgEdit_Title_Other} = "Inne";
 $Lang{CfgEdit_Title_Backup_Settings} = "Ustawienia Kopii";
 $Lang{CfgEdit_Title_Client_Lookup} = "Sprawdzenie klienta";
-$Lang{CfgEdit_Title_Other} = "Inne";
 $Lang{CfgEdit_Title_User_Commands} = "Polecenia dla użytkownika";
 $Lang{CfgEdit_Title_Hosts} = "Hosty";
 

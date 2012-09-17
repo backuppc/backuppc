@@ -109,9 +109,12 @@ my @PerlSrc = qw(
     lib/BackupPC/Lang/es.pm
     lib/BackupPC/Lang/fr.pm
     lib/BackupPC/Lang/it.pm
+    lib/BackupPC/Lang/ja.pm
     lib/BackupPC/Lang/nl.pm
     lib/BackupPC/Lang/pl.pm
     lib/BackupPC/Lang/pt_br.pm
+    lib/BackupPC/Lang/ru.pm
+    lib/BackupPC/Lang/uk.pm
     lib/BackupPC/Lang/zh_CN.pm
     lib/BackupPC/Storage/Text.pm
     lib/BackupPC/Xfer.pm
@@ -207,9 +210,9 @@ foreach my $file ( @PerlSrc ) {
     next if ( $file =~ m/lib\/Net\/FTP/ );
     $errCnt += CheckConfigParams($file, $ConfVars, 1);
 }
-if ( !$opts{langCheck} ) {
+if ( $opts{langCheck} ) {
     $errCnt += CheckLangUsage();
-    $errCnt += CheckLangTags();
+    $errCnt += CheckLangTags(\@PerlSrc);
 }
 if ( $errCnt ) {
     print("Exiting because of errors\n");
@@ -599,10 +602,15 @@ sub CheckLangUsage
 #
 sub CheckLangTags
 {
+    my($perlSrc) = @_;
     my($en, $enVars) = LangParse("lib/BackupPC/Lang/en.pm");
     my($errors);
 
-    foreach my $lang ( qw(cz.pm fr.pm de.pm es.pm it.pm nl.pm pl.pm pt_br.pm zh_CN.pm) ) {
+    foreach my $srcFile ( @$perlSrc ) {
+        next if ( $srcFile !~ m{lib/BackupPC/Lang/(.*)} );
+        my $lang = $1;
+        next if ( $lang eq "en.pm" );
+
 	my($d, $dVars) = LangParse("lib/BackupPC/Lang/$lang");
 	foreach my $v1 ( @$en ) {
 	    my $v2 = shift(@$d);

@@ -1398,7 +1398,6 @@ $Lang{CfgEdit_Title_Blackouts} = "Pøetížení";
 $Lang{CfgEdit_Title_Other} = "Ostatní";
 $Lang{CfgEdit_Title_Backup_Settings} = "Nastavení zálohování";
 $Lang{CfgEdit_Title_Client_Lookup} = "Vyhledávání klientùp";
-$Lang{CfgEdit_Title_Other} = "Ostatní";
 $Lang{CfgEdit_Title_User_Commands} = "Uživatelské pøíkazy";
 $Lang{CfgEdit_Title_Hosts} = "Hosti";
 

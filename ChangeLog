@@ -21,6 +21,39 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Ensure $num is numeric in lib/BackupPC/CGI/View.pm error message
+  to avoid XSS attack.  Report and patch by Jamie Strandboge.
+
+* Fixed qw(...) deprecated syntax warnings in lib/BackupPC/Storage/Text.pm
+  and lib/BackupPC/Lib.pm.  Patch supplied by Juergen Harms.
+
+* Fixed error in bin/BackupPC_sendEmail that caused accumulation of
+  per-host errors in the admin email to be skipped if a host's user
+  is not defined.  Reported by Marco Dalla Via.
+
+* Fixed lib/BackupPC/CGI/RSS.pm so that the base_url is correct for https.
+  Report and fix by Samuel Monsarrat.
+
+* Added Japanese language file lib/BackupPC/Lang/ja.pm submitted by Rikiya
+  Yamamoto.
+
+* Added Ukrainian language file lib/BackupPC/Lang/uk.pm submitted by Yakim.
+
+* Added Russian language file lib/BackupPC/Lang/ru.pm submitted by Sergei Butakov.
+
+* Removed redundant setting of $Lang{CfgEdit_Title_Other} from all the Lang files.
+
+* Changed restore file name from restore.{zip|tar} to restore_$host_YYYY-MM-DD.{zip|tar},
+  where the date is the start date of the backup.  Originally suggested by Brad Alexander,
+  with a healthy debate among Les, Holger, Jeffrey, Adam and others.
+
+* Applied couple of fixes to Lib.pm suggested by Jeffrey Kosowsky for special case of where
+  configuration commands are fragments of perl code.
+
+#------------------------------------------------------------------------
+# Version 3.2.1, 24 Apr 2011
+#------------------------------------------------------------------------
+
 * Ensure $num is numeric in lib/BackupPC/CGI/Browse.pm to avoid XSS
   attack.  Report and patch by Adam E.
 

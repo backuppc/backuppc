@@ -1405,7 +1405,6 @@ $Lang{CfgEdit_Title_Blackouts} = "Suspension";
 $Lang{CfgEdit_Title_Other} = "Divers";
 $Lang{CfgEdit_Title_Backup_Settings} = "Paramètres de sauvegarde";
 $Lang{CfgEdit_Title_Client_Lookup} = "Consultation des clients";
-$Lang{CfgEdit_Title_Other} = "Autre";
 $Lang{CfgEdit_Title_User_Commands} = "Commandes des usagers";
 $Lang{CfgEdit_Title_Hosts} = "Machines";
 

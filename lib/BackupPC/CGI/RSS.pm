@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -42,7 +42,8 @@ use XML::RSS;
 
 sub action
 {
-    my $base_url = 'http://' . $ENV{'SERVER_NAME'} . $ENV{SCRIPT_NAME};
+    my $protocol = $ENV{HTTPS} eq "on" ?  'https://' : 'http://';
+    my $base_url = $protocol . $ENV{'SERVER_NAME'} . $ENV{SCRIPT_NAME};
 
     my($fullTot, $fullSizeTot, $incrTot, $incrSizeTot, $str,
        $strNone, $strGood, $hostCntGood, $hostCntNone);

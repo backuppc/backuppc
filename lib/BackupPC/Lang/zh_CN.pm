@@ -1373,7 +1373,6 @@ $Lang{CfgEdit_Title_Blackouts} = "备份暂停期";
 $Lang{CfgEdit_Title_Other} = "其它";
 $Lang{CfgEdit_Title_Backup_Settings} = "备份设置";
 $Lang{CfgEdit_Title_Client_Lookup} = "客户机查找";
-$Lang{CfgEdit_Title_Other} = "其它";
 $Lang{CfgEdit_Title_User_Commands} = "用户命令";
 $Lang{CfgEdit_Title_Hosts} = "客户机";
 

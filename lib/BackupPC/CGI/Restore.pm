@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -179,10 +179,22 @@ EOF
         if ( $In{relative} ) {
             @pathOpts = ("-r", $pathHdr, "-p", "");
         }
+        
+        #
+        # generate a file name based on the host, backup date and backup number
+        #
+        my $fileName = "restore_$host";
+        for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+            next if ( $Backups[$i]{num} != $num );
+            my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($Backups[$i]{startTime});
+            $fileName .= sprintf("_%d-%02d-%02d", 1900 + $year, 1 + $mon, $mday);
+            last;
+        }
+
 	print(STDOUT <<EOF);
 Content-Type: application/x-gtar
 Content-Transfer-Encoding: binary
-Content-Disposition: attachment; filename=\"restore.tar\"
+Content-Disposition: attachment; filename=\"$fileName.tar\"
 
 EOF
 	#
@@ -216,10 +228,22 @@ EOF
         if ( $In{relative} ) {
             @pathOpts = ("-r", $pathHdr, "-p", "");
         }
+
+        #
+        # generate a file name based on the host, backup date and backup number
+        #
+        my $fileName = "restore_$host";
+        for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+            next if ( $Backups[$i]{num} != $num );
+            my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($Backups[$i]{startTime});
+            $fileName .= sprintf("_%d-%02d-%02d", 1900 + $year, 1 + $mon, $mday);
+            last;
+        }
+
 	print(STDOUT <<EOF);
 Content-Type: application/zip
 Content-Transfer-Encoding: binary
-Content-Disposition: attachment; filename=\"restore.zip\"
+Content-Disposition: attachment; filename=\"$fileName.zip\"
 
 EOF
 	$In{compressLevel} = 5 if ( $In{compressLevel} !~ /^\d+$/ );

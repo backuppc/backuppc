@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -186,8 +186,6 @@ foreach my $host ( sort(keys(%Status)) ) {
     %Conf = $bpc->Conf();
     my $user = $Hosts->{$host}{user};
 
-    next if ( $user eq "" );
-
     #
     # Accumulate host errors for the admin email below
     #
@@ -204,6 +202,7 @@ foreach my $host ( sort(keys(%Status)) ) {
               || $Conf{XferMethod} eq "archive"
               || $Conf{BackupsDisable}
               || $Hosts->{$host}{user} eq ""
+              || $user eq ""
           );
     my @Backups = $bpc->BackupInfoRead($host);
     my $numBackups = @Backups;

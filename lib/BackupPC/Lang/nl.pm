@@ -1417,7 +1417,6 @@ $Lang{CfgEdit_Title_Blackouts} = "Blackouts";
 $Lang{CfgEdit_Title_Other} = "Andere";
 $Lang{CfgEdit_Title_Backup_Settings} = "Backup instellingen";
 $Lang{CfgEdit_Title_Client_Lookup} = "Cli&euml;nt locatie";
-$Lang{CfgEdit_Title_Other} = "Andere";
 $Lang{CfgEdit_Title_User_Commands} = "Opdrachten van gebruiker";
 $Lang{CfgEdit_Title_Hosts} = "Machines";
 

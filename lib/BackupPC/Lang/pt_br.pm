@@ -1408,7 +1408,6 @@ $Lang{CfgEdit_Title_Blackouts} = "Blackouts";
 $Lang{CfgEdit_Title_Other} = "Outros";
 $Lang{CfgEdit_Title_Backup_Settings} = "Configurações do Backup";
 $Lang{CfgEdit_Title_Client_Lookup} = "Busca Cliente";
-$Lang{CfgEdit_Title_Other} = "Outro";
 $Lang{CfgEdit_Title_User_Commands} = "Commandos de usuário";
 $Lang{CfgEdit_Title_Hosts} = "Hosts";
 

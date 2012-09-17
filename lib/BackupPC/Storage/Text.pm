@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -298,7 +298,7 @@ sub ConfigDataRead
     #
     # Promote BackupFilesOnly and BackupFilesExclude to hashes
     #
-    foreach my $param qw(BackupFilesOnly BackupFilesExclude) {
+    foreach my $param ( qw(BackupFilesOnly BackupFilesExclude) ) {
         next if ( !defined($conf->{$param}) || ref($conf->{$param}) eq "HASH" );
         $conf->{$param} = [ $conf->{$param} ]
                                 if ( ref($conf->{$param}) ne "ARRAY" );

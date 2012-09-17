@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -46,7 +46,7 @@ sub action
     my $compress = 0;
     my $fh;
     my $host = $In{host};
-    my $num  = $In{num};
+    my $num  = ${EscHTML($In{num})};
     my $type = $In{type};
     my $linkHosts = 0;
     my($file, $comment);

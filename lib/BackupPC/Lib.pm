@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -130,7 +130,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '3.2.0',
+        Version => '3.2.1',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -1218,7 +1218,7 @@ sub cmdVarSubstitute
     # indicating this is perl code.
     #
     if ( (ref($template) eq "ARRAY" ? $template->[0] : $template) =~ /^\&/ ) {
-        return $template;
+        return ref($template) eq "ARRAY" ? $template : [$template];
     }
     if ( ref($template) ne "ARRAY" ) {
 	#
@@ -1280,7 +1280,7 @@ sub cmdExecOrEval
     my($bpc, $cmd, @args) = @_;
     
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
-        $cmd = join(" ", $cmd) if ( ref($cmd) eq "ARRAY" );
+        $cmd = join(" ", @$cmd) if ( ref($cmd) eq "ARRAY" );
 	print(STDERR "cmdExecOrEval: about to eval perl code $cmd\n")
 			if ( $bpc->{verbose} );
         eval($cmd);
@@ -1322,7 +1322,7 @@ sub cmdSystemOrEvalLong
     
     $? = 0;
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
-        $cmd = join(" ", $cmd) if ( ref($cmd) eq "ARRAY" );
+        $cmd = join(" ", @$cmd) if ( ref($cmd) eq "ARRAY" );
 	print(STDERR "cmdSystemOrEval: about to eval perl code $cmd\n")
 			if ( $bpc->{verbose} );
         $out = eval($cmd);
@@ -1409,7 +1409,7 @@ sub backupFileConfFix
 
     $conf->{$shareName} = [ $conf->{$shareName} ]
                     if ( ref($conf->{$shareName}) ne "ARRAY" );
-    foreach my $param qw(BackupFilesOnly BackupFilesExclude) {
+    foreach my $param ( qw(BackupFilesOnly BackupFilesExclude) ) {
         next if ( !defined($conf->{$param}) );
         if ( ref($conf->{$param}) eq "HASH" ) {
             #

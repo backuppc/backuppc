@@ -531,8 +531,15 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
  \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (інакше архів буде містити повні шляхи).
 <br>
-Compression (0=off, 1=fast,...,9=best)
-<input type="text" size="6" value="5" name="compressLevel">
+<table class="tableStnd" border="0">
+<tr>
+    <td>Compression (0=off, 1=fast,...,9=best)</td>
+    <td><input type="text" size="6" value="5" name="compressLevel"></td>
+</tr><tr>
+    <td>Code page (e.g. cp866)</td>
+    <td><input type="text" size="6" value="utf8" name="codePage"></td>
+</tr>
+</table>
 <br>
 <input type="submit" value="Download Zip File" name="ignore">
 </form>

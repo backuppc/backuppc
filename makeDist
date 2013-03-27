@@ -254,7 +254,7 @@ InstallFile("doc-src/BackupPC.pod", "doc/BackupPC.pod");
 
 use Pod::Html;
 pod2html("doc/BackupPC.pod",
-        "--backlink=Back to Top",
+        #"--backlink=Back to Top",
         "--header",
         "--title=BackupPC",
         "--outfile=doc/BackupPC.html");
@@ -321,14 +321,25 @@ sub InstallFile
 		#
 		# fixup for conf links
 		#
-		if ( !/a name="_conf/i ) {
+		if ( /<dt id="Conf-/ ) {
+		    s/<dt id=("Conf-.*)>\$Conf{([^}]*)}/
+			defined($ConfName{$2})
+			    ? "\L<dt id=\"$ConfName{$2}\">\E\$Conf{$2}<\/a>"
+			    : "<dt id=$1>\$Conf{$2}"/eg;
+                } else {
 		    s/\$Conf{([^}]*)}/
 			defined($ConfName{$1})
 			    ? "\L<a href=\"#$ConfName{$1}\">\E\$Conf{$1}<\/a>"
 			    : "\$Conf{$1}"/eg;
 		}
+                s{^(<dt id="_conf.*</dt>)}{<strong>$1</strong>};
 		s/^<DD>/<DD><P>/;
 		s/^<li><\/li>/<li>/;
+                #
+                # add diveder lines before <h1>
+                #
+                s{^<h1}{<hr />\n<h1}g;
+
 	    }
 	    if ( /__CONFIGPOD__/ ) {
 		print OUT $ConfPod;

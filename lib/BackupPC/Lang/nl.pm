@@ -531,8 +531,15 @@ harde schijfruimte beschikken om het bestand te kunnen bevatten.
 aan \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (in het andere geval zal het archiefbestand volledige padnamen bevatten).
 <br>
-Compressie (0=uit, 1=snel,...,9=hoogst)
-<input type="text" size="6" value="5" name="compressLevel">
+<table class="tableStnd" border="0">
+<tr>
+    <td>Compressie (0=uit, 1=snel,...,9=hoogst)</td>
+    <td><input type="text" size="6" value="5" name="compressLevel"></td>
+</tr><tr>
+    <td>Code page (e.g. cp866)</td>
+    <td><input type="text" size="6" value="utf8" name="codePage"></td>
+</tr>
+</table>
 <br>
 <input type="submit" value="Download Zip-bestand" name="ignore">
 </form>

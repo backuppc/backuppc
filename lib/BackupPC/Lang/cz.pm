@@ -529,8 +529,15 @@ minuty, a budete potøebovat dostatek místa na lokálním disku.
 k \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (jinak bude archiv obsahovat plnou cestu).
 <br>
-Komprese (0=off, 1=rychlá,...,9=nejlepší)
-<input type="text" size="6" value="5" name="compressLevel">
+<table class="tableStnd" border="0">
+<tr>
+    <td>Komprese (0=off, 1=rychlá,...,9=nejlepší)</td>
+    <td><input type="text" size="6" value="5" name="compressLevel"></td>
+</tr><tr>
+    <td>Code page (e.g. cp866)</td>
+    <td><input type="text" size="6" value="utf8" name="codePage"></td>
+</tr>
+</table>
 <br>
 <input type="submit" value="Stáhnout Zip soubor" name="ignore">
 </form>

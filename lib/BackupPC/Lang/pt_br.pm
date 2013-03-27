@@ -535,8 +535,15 @@ local para armazená-lo.
 a \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (caso contrário o arquivo conterá os caminhos completos).
 <br>
-Compressão (0=desativada, 1=rápida,...,9=máxima)
-<input type="text" size="6" value="5" name="compressLevel">
+<table class="tableStnd" border="0">
+<tr>
+    <td>Compressão (0=desativada, 1=rápida,...,9=máxima)</td>
+    <td><input type="text" size="6" value="5" name="compressLevel"></td>
+</tr><tr>
+    <td>Code page (e.g. cp866)</td>
+    <td><input type="text" size="6" value="utf8" name="codePage"></td>
+</tr>
+</table>
 <br>
 <input type="submit" value="Download Zip File" name="ignore">
 </form>

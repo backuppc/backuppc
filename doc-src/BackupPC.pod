@@ -173,7 +173,7 @@ ownership, and modification time) separately from the file contents.
 
 Based on your site's requirements you need to decide what your backup
 policy is.  BackupPC is not designed to provide exact re-imaging of
-failed disks.  See L<Limitations|limitations> for more information.
+failed disks.  See L<Limitations> for more information.
 However, the addition of tar transport for linux/unix clients, plus
 full support for special file types and unix attributes in v1.4.0
 likely means an exact image of a linux/unix file system can be made.
@@ -483,7 +483,7 @@ single file, which often becomes huge. Any change to this file requires
 a separate copy of the file to be saved during backup. Outlook is even
 more troublesome, since it keeps this file locked all the time, so it
 cannot be read by smbclient whenever Outlook is running.  See the
-L<Limitations|limitations> section for more discussion of this problem.
+L<Limitations> section for more discussion of this problem.
 
 In addition to total disk space, you should make sure you have
 plenty of inodes on your BackupPC data partition. Some users have
@@ -707,7 +707,7 @@ __CONFDIR__/config.pl, and make sure all the default settings are
 correct. In particular, you will need to decide whether to use
 smb, tar,or rsync or ftp transport (or whether to set it on a
 per-PC basis) and set the relevant parameters for that transport
-method. See the section L<Client Setup|step 5: client setup> for
+method. See the section L<Step 5: Client Setup> for
 more details.
 
 =head2 Step 4: Setting up the hosts file
@@ -748,7 +748,7 @@ This is typically the host name or NetBios name of the client machine
 and should be in lower case.  The host name can contain spaces (escape
 with a backslash), but it is not recommended.
 
-Please read the section L<How BackupPC Finds Hosts|how backuppc finds hosts>.
+Please read the section L<How BackupPC Finds Hosts>.
 
 In certain cases you might want several distinct clients to refer
 to the same physical machine.  For example, you might have a database
@@ -765,7 +765,7 @@ real host name of the machine.
 Starting with v2.0.0 the way hosts are discovered has changed and now
 in most cases you should specify 0 for the DHCP flag, even if the host
 has a dynamically assigned IP address.
-Please read the section L<How BackupPC Finds Hosts|how backuppc finds hosts>
+Please read the section L<How BackupPC Finds Hosts>
 to understand whether you need to set the DHCP flag.
 
 You only need to set DHCP to 1 if your client machine doesn't
@@ -1083,7 +1083,7 @@ information.
 Alternatively, you can set $Conf{NmbLookupFindHostCmd} to any command
 that returns the IP address given the host name.
 
-Please read the section L<How BackupPC Finds Hosts|how backuppc finds hosts>
+Please read the section L<How BackupPC Finds Hosts>
 for more details.
 
 =back
@@ -1369,7 +1369,7 @@ images into $Conf{CgiImageDir} that BackupPC_Admin needs to serve
 up.  You should make sure that $Conf{CgiImageDirURL} is the correct
 URL for the image directory.
 
-See the section L<Fixing installation problems|fixing installation problems> for suggestions on debugging the Apache authentication setup.
+See the section L<Fixing installation problems> for suggestions on debugging the Apache authentication setup.
 
 =head2 How BackupPC Finds Hosts
 
@@ -1729,7 +1729,7 @@ The usage is:
        -r pathRemove   path prefix that will be replaced with pathAdd
        -p pathAdd      new path prefix
        -c level        compression level (default is 0, no compression)
-       -e charset      charset for encoding file names (default: cp1252)
+       -e charset      charset for encoding file names (default: utf8)
 
 The command-line files and directories are relative to the specified
 shareName.  The zip file is written to stdout. The -h, -n and -s
@@ -2095,8 +2095,7 @@ The directory __CONFDIR__ contains:
 
 =item config.pl
 
-Configuration file. See L<Configuration file|configuration file>
-below for more details.
+Configuration file. See L<Configuration File> below for more details.
 
 =item hosts
 
@@ -2836,6 +2835,14 @@ Karol 'Semper' Stelmaczonek provided the Polish translation for 3.1.0.
 Jeremy Tietsort provided the host summary table sorting feature for 3.1.0.
 
 Paul Mantz contributed the ftp Xfer method for 3.2.0.
+
+Petr Pokorny provided the Czech translation for 3.2.1.
+
+Rikiya Yamamoto provided the Japanese translation for 3.2.2.
+
+Yakim provided the Ukrainian translation for 3.2.2.
+
+Sergei Butakov provided the Russian translation for 3.2.2.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mailing lists.

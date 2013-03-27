@@ -38,7 +38,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -154,7 +154,7 @@ if ( $ret ) {
 # ie: not a tape device).
 #
 if ( -d $outLoc && -x $parPath ) {
-    if ( length($parfile) ) {
+    if ( length($parfile) && $parfile != 0 ) {
         print("Running $parPath to create parity files\n");
 	my $parCmd = "$parPath c -r$parfile $outLocE/$host.$bkupNum.tar$fileExt.par2 $outLocE/$host.$bkupNum.tar$fileExt*";
         $ret = system($parCmd);

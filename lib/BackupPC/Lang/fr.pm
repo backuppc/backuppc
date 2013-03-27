@@ -528,8 +528,15 @@ et transférer cette archive, et vous aurez besoin d\'assez d\'espace disque pour
 \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (Autrement l\'archive contiendra les chemins complets).
 <br>
-Compression (0=désactivée, 1=rapide,...,9=meilleure)
-<input type="text" size="6" value="5" name="compressLevel">
+<table class="tableStnd" border="0">
+<tr>
+    <td>Compression (0=désactivée, 1=rapide,...,9=meilleure)</td>
+    <td><input type="text" size="6" value="5" name="compressLevel"></td>
+</tr><tr>
+    <td>Code page (e.g. cp866)</td>
+    <td><input type="text" size="6" value="utf8" name="codePage"></td>
+</tr>
+</table>
 <br>
 <input type="submit" value="Télécharger le fichier Zip" name="ignore">
 </form>

@@ -523,8 +523,15 @@ space to store it.
 to \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (otherwise archive will contain full paths).
 <br>
-圧縮 (0=なし, 1=高速,...,9=最高)
-<input type="text" size="6" value="5" name="compressLevel">
+<table class="tableStnd" border="0">
+<tr>
+    <td>圧縮 (0=なし, 1=高速,...,9=最高)</td>
+    <td><input type="text" size="6" value="5" name="compressLevel"></td>
+</tr><tr>
+    <td>Code page (e.g. cp866)</td>
+    <td><input type="text" size="6" value="utf8" name="codePage"></td>
+</tr>
+</table>
 <br>
 <input type="submit" value="ZIPファイルのダウンロード" name="ignore">
 </form>

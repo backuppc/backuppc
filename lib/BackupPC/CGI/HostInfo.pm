@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -248,12 +248,15 @@ EOF
         if ( $user ne "" ) {
             $statusStr .= eval("qq{$Lang->{This_PC_is_used_by}$moreUserStr}");
         }
-        if ( defined($UserEmailInfo{$user}) && defined($UserEmailInfo{$user}{$host}) ) {
+        if ( defined($UserEmailInfo{$user})
+                && defined($UserEmailInfo{$user}{$host})
+                && defined($UserEmailInfo{$user}{$host}{lastSubj}) ) {
             my $mailTime = timeStamp2($UserEmailInfo{$user}{$host}{lastTime});
             my $subj     = $UserEmailInfo{$user}{$host}{lastSubj};
             $statusStr  .= eval("qq{$Lang->{Last_email_sent_to__was_at___subject}}");
         } elsif ( defined($UserEmailInfo{$user})
-                && $UserEmailInfo{$user}{lastHost} eq $host ) {
+                && $UserEmailInfo{$user}{lastHost} eq $host
+                && defined($UserEmailInfo{$user}{lastSubj}) ) {
             #
             # Old format %UserEmailInfo - pre 3.2.0.
             #

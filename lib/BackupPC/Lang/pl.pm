@@ -531,8 +531,15 @@ do przechowania.
 z \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (inaczej bedzie zawierac pełne scieżki do plików).
 <br>
-Kompresja (0=off, 1=fast,...,9=best)
-<input type="text" size="6" value="5" name="compressLevel">
+<table class="tableStnd" border="0">
+<tr>
+    <td>Kompresja (0=off, 1=fast,...,9=best)</td>
+    <td><input type="text" size="6" value="5" name="compressLevel"></td>
+</tr><tr>
+    <td>Code page (e.g. cp866)</td>
+    <td><input type="text" size="6" value="utf8" name="codePage"></td>
+</tr>
+</table>
 <br>
 <input type="submit" value="Sciągnij plik Zip" name="ignore">
 </form>

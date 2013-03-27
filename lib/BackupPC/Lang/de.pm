@@ -542,8 +542,15 @@ evtl. die Dateien/Verzeichnisse erneut und lassen sehr große und unnötige Dateie
  \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (andernfalls enthält die Archiv Datei vollständige Pfade).
 <br>
-Kompression (0=aus, 1=schnelle,...,9=höchste)
-<input type="text" size="6" value="5" name="compressLevel">
+<table class="tableStnd" border="0">
+<tr>
+    <td>Kompression (0=aus, 1=schnelle,...,9=höchste)</td>
+    <td><input type="text" size="6" value="5" name="compressLevel"></td>
+</tr><tr>
+    <td>Code page (e.g. cp866)</td>
+    <td><input type="text" size="6" value="utf8" name="codePage"></td>
+</tr>
+</table>
 <br>
 <input type="submit" value="Zip Datei downloaden" name="ignore">
 </form>

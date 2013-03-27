@@ -522,8 +522,15 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
 <input type="checkbox" value="1" name="relative" checked> 备档中所有文件具有相对路径，在 \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)} 目录内
 （否则备档中文件具有完整路径）。
 <br>
-选择压缩比（0＝不压缩，1＝最低但速度快，...，9＝最高但速度慢）
-<input type="text" size="6" value="5" name="compressLevel">
+<table class="tableStnd" border="0">
+<tr>
+    <td>选择压缩比（0＝不压缩，1＝最低但速度快，...，9＝最高但速度慢）</td>
+    <td><input type="text" size="6" value="5" name="compressLevel"></td>
+</tr><tr>
+    <td>Code page (e.g. cp866)</td>
+    <td><input type="text" size="6" value="utf8" name="codePage"></td>
+</tr>
+</table>
 <br>
 <input type="submit" value="下载 Zip 文件" name="ignore">
 </form>

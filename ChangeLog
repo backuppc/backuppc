@@ -21,11 +21,29 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Patch from Alexander Moisseev that fixed file name encodings in zip files.
+  The default charset is now utf8.  Added a menu option to override the codepage.
+
+* Removed -N option from smbclient command in conf/config.pl to remain compatible
+  with more recent versions (3.2.3 and later) of smbclient.  Reported and discussed
+  by various people on the mail list, most recently by Jeff Boyce, Les Mikesell and
+  Holger Parplies.  Alexander Moisseev also submitted a patch.
+
+  Using smbclient >= 3.2.3 with the -N option will give a "tree connect failed:
+  NT_STATUS_ACCESS_DENIED" error.
+
+* Reapplied a patch from Tyler Wagner for lib/BackupPC/CGI/HostInfo.pl so that
+  empty email status info doesn't appear.  Somehow this missed 3.2.1.
+
+* Fixed check on $parfile in bin/BackupPC_archiveHost since it is numeric.
+  Fix submitted by Tim Massey.
+
 * Ensure $num is numeric in lib/BackupPC/CGI/View.pm error message
   to avoid XSS attack.  Report and patch by Jamie Strandboge.
 
 * Fixed qw(...) deprecated syntax warnings in lib/BackupPC/Storage/Text.pm
-  and lib/BackupPC/Lib.pm.  Patch supplied by Juergen Harms.
+  and lib/BackupPC/Lib.pm.  Patch supplied by Juergen Harms.  Also got a
+  patch from Alexander Moisseev.
 
 * Fixed error in bin/BackupPC_sendEmail that caused accumulation of
   per-host errors in the admin email to be skipped if a host's user

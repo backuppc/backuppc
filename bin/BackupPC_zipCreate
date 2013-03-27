@@ -21,7 +21,7 @@
 #       -r pathRemove   path prefix that will be replaced with pathAdd
 #       -p pathAdd      new path prefix
 #       -c level        compression level (default is 0, no compression)
-#       -e charset      charset for encoding file names (default: cp1252)
+#       -e charset      charset for encoding file names (default: utf8)
 #
 #     The -h, -n and -s options specify which dump is used to generate
 #     the zip archive.  The -r and -p options can be used to relocate
@@ -51,7 +51,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.1, released 24 Apr 2011.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -93,7 +93,7 @@ usage: $0 [options] files/directories...
      -r pathRemove   path prefix that will be replaced with pathAdd
      -p pathAdd      new path prefix
      -c level        compression level (default is 0, no compression)
-     -e charset      charset for encoding file names (default: cp1252)
+     -e charset      charset for encoding file names (default: utf8)
 EOF
     exit(1);
 }
@@ -135,7 +135,7 @@ if ( $i >= @Backups ) {
     exit(1);
 }
 
-my $Charset = "cp1252";
+my $Charset = ""; # default: utf8
 $Charset = $opts{e} if ( $opts{e} ne "" );
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
@@ -310,6 +310,14 @@ sub ZipWriteFile
     
     # Specify the compression level for this member
     $zipmember->desiredCompressionLevel($compLevel) if ($compLevel =~ /[0-9]/);
+    
+    if ( $Charset =~ /^(?:utf[-_]?8)?$/i ) {
+        # Set general purpose bit 11 for UTF-8 code page
+        $zipmember->{bitFlag} = $zipmember->{bitFlag} | 0x0800 ;
+    } elsif ( $Charset =~ /^cp(?:437|720|737|775|85[02578]|86[069]|874|93[26]|949|950)$/i ) {
+        # Set "version made by" field to 0 (MS-DOS) for OEM code pages
+        $zipmember->fileAttributeFormat('FA_MSDOS');
+    }
     
     # Finally Zip the member
     $zipfh->addMember($zipmember);

@@ -181,7 +181,7 @@ EOF
         }
         
         #
-        # generate a file name based on the host, backup date and backup number
+        # generate a file name based on the host and backup date
         #
         my $fileName = "restore_$host";
         for ( my $i = 0 ; $i < @Backups ; $i++ ) {
@@ -230,7 +230,7 @@ EOF
         }
 
         #
-        # generate a file name based on the host, backup date and backup number
+        # generate a file name based on the host and backup date
         #
         my $fileName = "restore_$host";
         for ( my $i = 0 ; $i < @Backups ; $i++ ) {
@@ -247,6 +247,7 @@ Content-Disposition: attachment; filename=\"$fileName.zip\"
 
 EOF
 	$In{compressLevel} = 5 if ( $In{compressLevel} !~ /^\d+$/ );
+        $In{codePage} = ""     if ( $In{codePage} !~ /^[-._:\w]*$/ );
 	#
 	# Fork the child off and manually copy the output to our stdout.
 	# This is necessary to ensure the output gets to the correct place
@@ -257,6 +258,7 @@ EOF
 		 "-n", $num,
 		 "-c", $In{compressLevel},
 		 "-s", $share,
+		 "-e", $In{codePage},
 		 @pathOpts,
 		 @fileList
 	    ],

@@ -1758,7 +1758,7 @@ and the output is optionally compressed and split into fixed-sized
 files (eg: 650MB).
 
 The archive for each host is done by default using
-__INSTALLDIR__/BackupPC_archiveHost.  This script can be copied
+__INSTALLDIR__/bin/BackupPC_archiveHost.  This script can be copied
 and customized as needed.
 
 =head2 Configuring an Archive Host
@@ -1779,7 +1779,7 @@ to change them (eg: output device).
 The per-host archive command is $Conf{ArchiveClientCmd}.  By default
 this invokes
 
-     __INSTALLDIR__/BackupPC_archiveHost
+     __INSTALLDIR__/bin/BackupPC_archiveHost
 
 which you can copy and customize as necessary.
 
@@ -2785,7 +2785,7 @@ See L<http://backuppc.sourceforge.net>.
 
 =head1 Copyright
 
-Copyright (C) 2001-2009 Craig Barratt
+Copyright (C) 2001-2013 Craig Barratt
 
 =head1 Credits
 
@@ -2838,11 +2838,11 @@ Paul Mantz contributed the ftp Xfer method for 3.2.0.
 
 Petr Pokorny provided the Czech translation for 3.2.1.
 
-Rikiya Yamamoto provided the Japanese translation for 3.2.2.
+Rikiya Yamamoto provided the Japanese translation for 3.3.0.
 
-Yakim provided the Ukrainian translation for 3.2.2.
+Yakim provided the Ukrainian translation for 3.3.0.
 
-Sergei Butakov provided the Russian translation for 3.2.2.
+Sergei Butakov provided the Russian translation for 3.3.0.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mailing lists.

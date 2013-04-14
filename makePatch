@@ -1,4 +1,4 @@
-#!/bin/perl
+#!/usr/bin/env perl
 #
 # Script that generates a patch file for BackupPC.
 #
@@ -8,11 +8,11 @@ use strict;
 use File::Find;
 use File::Path;
 
-my $BaseVersion  = "3.2.0";
+my $BaseVersion  = "3.2.1";
 my $PatchLevel   = "pl0";
 my $PatchVersion = "$BaseVersion$PatchLevel";
 
-my $Base         = "/home/craig/admin/packages/BackupPC-$BaseVersion";
+my $Base         = "/Users/craig/perl/BackupPC/dist/BackupPC-$BaseVersion";
 my $TmpDir       = "patch.tmp";
 my $OutFile      = "BackupPC-$PatchVersion.diff";
 
@@ -48,8 +48,9 @@ print OUT <<EOF;
 #
 EOF
 
+mkdir($TmpDir) if ( !-d $TmpDir );
 foreach my $dir ( qw(bin lib cgi-bin) ) {
-    open(DIFF, "diff -ur -I '^# Version .*, released ' $Base/$dir $TmpDir/$dir|")
+    open(DIFF, "diff -ur -I '^# Version .*, released ' -I '#.*/bin/perl' $Base/$dir $TmpDir/$dir|")
 	    || die("can't run diff\n");
     while ( <DIFF> ) {
 	next if ( /^Only/ || /^diff / );

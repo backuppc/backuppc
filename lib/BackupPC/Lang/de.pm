@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 #
 # by Ralph Passgang <ralph@debianbase.de> (13.11.2006 for V3.0.0)
 # by Ralph Passgang <ralph@debianbase.de> (30.06.2006 for V3.0.0)
@@ -842,7 +842,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Inhalt von \${EscHTML(\$dirDisplay)}")}
+\${h2("Inhalt von \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -897,7 +897,7 @@ Diese Ansicht zeigt alle unterschiedlichen Versionen der Dateien in den Datensic
 <li> Dateien mit der gleichen Version können unterschiedliche Attribute haben. Wählen Sie die Datensicherungsnummer um die Attribute anzuzeigen.
 </ul>
 
-\${h2("Historie von \${EscHTML(\$dirDisplay)}")}
+\${h2("Historie von \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -987,7 +987,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Nur berechtigte Benutzer können Backups starten und stoppen für"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "ungültige Nummer \$num";
+$Lang{Invalid_number__num} = "ungültige Nummer \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "kann Datei nicht öffnen \$file: Konfigurationsproblem?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Nur berechtigte Benutzer können Log oder Config Dateien einsehen.";
 $Lang{Only_privileged_users_can_view_log_files} = "Nur berechtigte Benutzer können LOG Dateien einsehen.";
@@ -1216,7 +1216,7 @@ $Lang{No} = "nein";
 $Lang{Yes} = "ja";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">Das Verzeichnis \${EscHTML(\$dirDisplay)} ist leer.
+<tr><td bgcolor="#ffffff">Das Verzeichnis \$dirDisplay ist leer.
 </td></tr>
 EOF
 

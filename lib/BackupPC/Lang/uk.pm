@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 # By Serhiy Yakimchuck yakim@yakim.org.ua 02 sept 2012 vor version 3.2.1
 
@@ -832,7 +832,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Contents of \${EscHTML(\$dirDisplay)}")}
+\${h2("Contents of \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -892,7 +892,7 @@ $Lang{DirHistory_for__host} = <<EOF;
      Виберіть номмер резервної копії для перегляду атрибутів.
 </ul>
 
-\${h2("Історія \${EscHTML(\$dirDisplay)}")}
+\${h2("Історія \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -982,7 +982,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Тільки привілейований користувач може запустити резевне копіювання на"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Неправильнмй номер \$num";
+$Lang{Invalid_number__num} = "Неправильнмй номер \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Неможливо відкрити \$file: проблеми з конфігурацією?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Тільки привілейований користувач може переглядати log чи файл конфігурації.";
 $Lang{Only_privileged_users_can_view_log_files} = "Тільки привілейований користувач може переглядати log файли.";
@@ -1212,7 +1212,7 @@ $Lang{No} = "ні";
 $Lang{Yes} = "так";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">The directory \${EscHTML(\$dirDisplay)} is empty
+<tr><td bgcolor="#ffffff">The directory \$dirDisplay is empty
 </td></tr>
 EOF
 

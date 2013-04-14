@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 #my %lang;
 #use strict;
@@ -833,7 +833,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Contents of \${EscHTML(\$dirDisplay)}")}
+\${h2("Contents of \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -893,7 +893,7 @@ the backups:
      Select the backup number to see the file attributes.
 </ul>
 
-\${h2("History of \${EscHTML(\$dirDisplay)}")}
+\${h2("History of \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -983,7 +983,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Only privileged users can stop or start backups on"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Invalid number \$num";
+$Lang{Invalid_number__num} = "Invalid number \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Unable to open \$file: configuration problem?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Only privileged users can view log or config files.";
 $Lang{Only_privileged_users_can_view_log_files} = "Only privileged users can view log files.";
@@ -1213,7 +1213,7 @@ $Lang{No} = "no";
 $Lang{Yes} = "yes";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">The directory \${EscHTML(\$dirDisplay)} is empty
+<tr><td bgcolor="#ffffff">The directory \$dirDisplay is empty
 </td></tr>
 EOF
 

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 #my %lang;
 #use strict;
@@ -834,7 +834,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Inhoud van \${EscHTML(\$dirDisplay)}")}
+\${h2("Inhoud van \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -895,7 +895,7 @@ alle backups heen:
      de attributen van het bestand te bekijken.
 </ul>
 
-\${h2("Geschiedenis van \${EscHTML(\$dirDisplay)}")}
+\${h2("Geschiedenis van \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -984,7 +984,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
 		  "Enkel gebruikers met bijzondere rechten kunnen backups stoppen of starten van machine"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Ongeldig of onjuist nummer \$num";
+$Lang{Invalid_number__num} = "Ongeldig of onjuist nummer \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Ik kan \$file niet openen: misschien problemen met de configuratie?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Enkel gebruikers met bijzondere rechten kunnen log- of configuratiebestanden bekijken.";
 $Lang{Only_privileged_users_can_view_log_files} = "Enkel gebruikers met bijzondere rechten kunnen logbestanden bekijken.";
@@ -1214,7 +1214,7 @@ $Lang{No} = "nee";
 $Lang{Yes} = "ja";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">De map/directory \${EscHTML(\$dirDisplay)} is leeg
+<tr><td bgcolor="#ffffff">De map/directory \$dirDisplay is leeg
 </td></tr>
 EOF
 

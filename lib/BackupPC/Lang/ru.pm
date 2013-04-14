@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 #
 # by Sergei Butakov <sergei@bslos.com> (2011-05-1x - 2011-05-2x for V3.2.1)
 #
@@ -834,7 +834,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Содержание каталога \${EscHTML(\$dirDisplay)}")}
+\${h2("Содержание каталога \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -894,7 +894,7 @@ $Lang{DirHistory_for__host} = <<EOF;
      Выберите  номер копии, чтобы посмотреть эти атрибуты.
 </ul>
 
-\${h2("История \${EscHTML(\$dirDisplay)}")}
+\${h2("История \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -984,7 +984,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Only privileged users can stop or start backups on"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Invalid number \$num";
+$Lang{Invalid_number__num} = "Invalid number \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Unable to open \$file: configuration problem?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Only privileged users can view log or config files.";
 $Lang{Only_privileged_users_can_view_log_files} = "Only privileged users can view log files.";
@@ -1213,7 +1213,7 @@ $Lang{No} = "нет";
 $Lang{Yes} = "да";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">The directory \${EscHTML(\$dirDisplay)} is empty
+<tr><td bgcolor="#ffffff">The directory \$dirDisplay is empty
 </td></tr>
 EOF
 

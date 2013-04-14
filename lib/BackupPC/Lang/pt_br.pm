@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 #
 # By Reginaldo Ferreira <reginaldo@lepper.com.br> (23.07.2004 for V2.1.10)
 #
@@ -838,7 +838,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Conteúdo do \${EscHTML(\$dirDisplay)}")}
+\${h2("Conteúdo do \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -897,7 +897,7 @@ Este quadro mostra cada versão única disponível nos diversos backups:
      Selecione o número do backup para ver os atributos do arquivo.
 </ul>
 
-\${h2("Histórico de \${EscHTML(\$dirDisplay)}")}
+\${h2("Histórico de \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -987,7 +987,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Somente os usuários autorizados podem iniciar ou parar as cópias"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Número inválido \$num";
+$Lang{Invalid_number__num} = "Número inválido \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Não pode abrir \$file: problema de configuração?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Somente os usuários autorizados podem ver registros ou arquivos de configuração.";
 $Lang{Only_privileged_users_can_view_log_files} = "Somente os usuários autorizados podem ver arquivos de registro.";
@@ -1216,7 +1216,7 @@ $Lang{No} = "não";
 $Lang{Yes} = "sim";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">O diretório \${EscHTML(\$dirDisplay)} está vazio
+<tr><td bgcolor="#ffffff">O diretório \$dirDisplay está vazio
 </td></tr>
 EOF
 

@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2009  Craig Barratt
+#   Copyright (C) 2003-2013  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.3.0, released 13 Apr 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -137,7 +137,7 @@ sub action
 		$inode = -2;			# special value for dir
 		$type  = $hist->{$f}[$i]{type};
 		$url   = <<EOF;
-<a href="$MyURL?action=dirHistory&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$Lang->{DirHistory_dirLink}</a>
+<a href="$MyURL?action=dirHistory&host=${EscURI($host)}&share=$shareURI&dir=$path">$Lang->{DirHistory_dirLink}</a>
 EOF
 	    } else {
 		$inode = $hist->{$f}[$i]{inode};
@@ -164,10 +164,31 @@ EOF
 	$fileStr .= "</tr>\n";
     }
 
-    my $dirDisplay = decode_utf8("$share/$dir");
-    $dirDisplay =~ s{//+}{/}g;
-    $dirDisplay =~ s{/+$}{}g;
-    $dirDisplay = "/" if ( $dirDisplay eq "" );
+    #
+    # allow each level of the directory path to be navigated to
+    #
+    my($thisPath, $dirDisplay);
+    my $dirClean = $dir;
+    $dirClean =~ s{//+}{/}g;
+    $dirClean =~ s{/+$}{};
+    my @dirElts = split(/\//, $dirClean);
+    @dirElts = ("/") if ( !@dirElts );
+    foreach my $d ( @dirElts ) {
+        my($thisDir);
+
+        if ( $thisPath eq "" ) {
+            $thisDir  = decode_utf8($share);
+            $thisPath = "/";
+        } else {
+            $thisPath .= "/" if ( $thisPath ne "/" );
+            $thisPath .= "$d";
+            $thisDir = decode_utf8($d);
+        }
+        my $thisPathURI = $thisPath;
+        $thisPathURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+        $dirDisplay .= "/" if ( $dirDisplay ne "" );
+        $dirDisplay .= "<a href=\"$MyURL?action=dirHistory&host=${EscURI($host)}&share=$shareURI&dir=$thisPathURI\">${EscHTML($thisDir)}</a>";
+    }
     my $content = eval("qq{$Lang->{DirHistory_for__host}}");
     Header(eval("qq{$Lang->{DirHistory_backup_for__host}}"), $content);
     Trailer();

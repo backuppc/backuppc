@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 #
 # Italian i18n file
 #
@@ -844,7 +844,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Contents of \${EscHTML(\$dirDisplay)}")}
+\${h2("Contents of \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -904,7 +904,7 @@ Questa videata mostra tutte le versioni uniche disponibili nei diversi backup:
      attributi del file.
 </ul>
 
-\${h2("Cronologia di \${EscHTML(\$dirDisplay)}")}
+\${h2("Cronologia di \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -994,7 +994,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Solo gli utenti privilegiati possono arrestare o avviare un backup su"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Numero non valido: \$num";
+$Lang{Invalid_number__num} = "Numero non valido: \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Impossibile aprire il file \$file: problema di configurazione?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Solo gli utenti privilegiati possono visualizzare i file di log o di configurazione.";
 $Lang{Only_privileged_users_can_view_log_files} = "Solo gli utenti privilegiati possono visualizzare i file di log.";
@@ -1226,7 +1226,7 @@ $Lang{No} = "no";
 $Lang{Yes} = "s&igrave;";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">La directory \${EscHTML(\$dirDisplay)} &egrave; vuota
+<tr><td bgcolor="#ffffff">La directory \$dirDisplay &egrave; vuota
 </td></tr>
 EOF
 

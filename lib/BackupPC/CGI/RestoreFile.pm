@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2009  Craig Barratt
+#   Copyright (C) 2003-2013  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.3.0, released 13 Apr 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -45,7 +45,16 @@ use Encode qw/from_to decode_utf8/;
 
 sub action
 {
-    restoreFile($In{host}, $In{num}, $In{share}, $In{dir});
+    my $num    = $In{num};
+    my $share  = $In{share};
+    my $dir    = $In{dir};
+
+    ErrorExit(eval("qq{$Lang->{Invalid_number__num}}"))
+                    if ( $num ne "" && $num !~ /^\d+$/ );
+    ErrorExit($Lang->{Nice_try__but_you_can_t_put})
+                     if ( $dir =~ m{(^|/)\.\.(/|$)} );
+
+    restoreFile($In{host}, $num, $share, $dir);
 }
 
 sub restoreFile
@@ -154,12 +163,12 @@ sub restoreFile
     my $a = $view->fileAttrib($num, $share, $dir);
     if ( $dir =~ m{(^|/)\.\.(/|$)} || !defined($a) ) {
         $dir = decode_utf8($dir);
-        ErrorExit("Can't restore bad file ${EscHTML($dir)} ($num, $share)");
+        ErrorExit("Can't restore bad file ${EscHTML($dir)} (${EscHTML($num)}, ${EscHTML($share)})");
     }
     my $f = BackupPC::FileZIO->open($a->{fullPath}, 0, $a->{compress});
     if ( !defined($f) ) {
         my $fullPath = decode_utf8($a->{fullPath});
-        ErrorExit("Unable to open file ${EscHTML($fullPath)} ($num, $share)");
+        ErrorExit("Unable to open file ${EscHTML($fullPath)} (${EscHTML($num)}, ${EscHTML($share)})");
     }
     my $data;
     if ( !$skipHardLink && $a->{type} == BPC_FTYPE_HARDLINK ) {

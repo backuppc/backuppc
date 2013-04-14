@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 #my %lang;
 #use strict;
@@ -817,7 +817,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("\${EscHTML(\$dirDisplay)} 的内容")}
+\${h2("\$dirDisplay 的内容")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -872,7 +872,7 @@ $Lang{DirHistory_for__host} = <<EOF;
 <li> 具有相同版本号的文件可能在不同备份中有不同的文件属性。可以点击备份序列号来查看文件在相应备份中的属性。
 </ul>
 
-\${h2("\${EscHTML(\$dirDisplay)} 的历史")}
+\${h2("\$dirDisplay 的历史")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -962,7 +962,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "只有特权用户可以执行备份的开始或停止操作于客户机"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "无效数字 \$num";
+$Lang{Invalid_number__num} = "无效数字 \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "无法打开文件 \$file：配置有误？";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "只有特权用户可以查看日志或配置文件。";
 $Lang{Only_privileged_users_can_view_log_files} = "只有特权用户可以查看日志文件。";
@@ -1186,7 +1186,7 @@ $Lang{No} = "否";
 $Lang{Yes} = "是";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">目录 \${EscHTML(\$dirDisplay)} 是空目录
+<tr><td bgcolor="#ffffff">目录 \$dirDisplay 是空目录
 </td></tr>
 EOF
 

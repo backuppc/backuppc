@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2009  Craig Barratt
+#   Copyright (C) 2003-2013  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.1, released 24 Apr 2011.
+# Version 3.3.0, released 13 Apr 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -46,7 +46,7 @@ sub action
     my $compress = 0;
     my $fh;
     my $host = $In{host};
-    my $num  = ${EscHTML($In{num})};
+    my $num  = $In{num};
     my $type = $In{type};
     my $linkHosts = 0;
     my($file, $comment);
@@ -54,6 +54,9 @@ sub action
 
     ErrorExit(eval("qq{$Lang->{Invalid_number__num}}"))
 		    if ( $num ne "" && $num !~ /^\d+$/ );
+    if ( $type ne "docs" && !$Privileged ) {
+        ErrorExit($Lang->{Only_privileged_users_can_view_log_or_config_files});
+    }
     if ( $type eq "XferLOG" ) {
         $file = "$TopDir/pc/$host/SmbLOG$ext";
         $file = "$TopDir/pc/$host/XferLOG$ext" if ( !-f $file && !-f "$file.z");
@@ -99,9 +102,6 @@ sub action
     } else {
         $file = "$LogDir/LOG$ext";
         $linkHosts = 1;
-    }
-    if ( $type ne "docs" && !$Privileged ) {
-        ErrorExit($Lang->{Only_privileged_users_can_view_log_or_config_files});
     }
     if ( !-f $file && -f "$file.z" ) {
         $file .= ".z";

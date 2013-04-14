@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 #============================================================= -*-perl-*-w
 #
 # BackupPC_Admin: Apache/CGI interface for BackupPC.
@@ -39,7 +39,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0, released 31 Jul 2010.
+# Version 3.2.2, released 27 Mar 2013.
 #
 # See http://backuppc.sourceforge.net.
 #

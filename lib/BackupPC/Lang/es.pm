@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 #my %lang;
 
@@ -834,7 +834,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Contenido de \${EscHTML(\$dirDisplay)}")}
+\${h2("Contenido de \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -894,7 +894,7 @@ las copias de seguridad:
      Seleccione el número de copia de seguridad para ver los atributos del archivo.
 </ul>
 
-\${h2("History of \${EscHTML(\$dirDisplay)}")}
+\${h2("History of \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -984,7 +984,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Sólo los usuarios autorizados pueden comenzar a detener las copias"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Número no válido \$num";
+$Lang{Invalid_number__num} = "Número no válido \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "No puedo abrir \$file: ¿problema de configuración?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Sólo los usuarios autorizados pueden ver registros o archivos de configuración.";
 $Lang{Only_privileged_users_can_view_log_files} = "Sólo los usuarios autorizados pueden ver archivos de registro.";
@@ -1214,7 +1214,7 @@ $Lang{No} = "no";
 $Lang{Yes} = "si";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">El directorio \${EscHTML(\$dirDisplay)} está vacio
+<tr><td bgcolor="#ffffff">El directorio \$dirDisplay está vacio
 </td></tr>
 EOF
 

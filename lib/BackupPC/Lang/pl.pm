@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 #my %lang;
 #use strict;
@@ -832,7 +832,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Zawartość \${EscHTML(\$dirDisplay)}")}
+\${h2("Zawartość \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -890,7 +890,7 @@ Przedstawienie każdej unikalnej wersji każdego pliku we wszystkich kopiach:
      Wybierz numer kopii aby zobaczyć atrybuty plików.
 </ul>
 
-\${h2("Historia \${EscHTML(\$dirDisplay)}")}
+\${h2("Historia \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -980,7 +980,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Tylko uprzywilejowani użytkownicy mogą dokonywać kopii na"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Zły numer \$num";
+$Lang{Invalid_number__num} = "Zły numer \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Niemozna otworzyć \$file: problem z konfiguracja ?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Tylko uprzywilejowani użytkownicy mogą przeglądac logi/pliki konf.";
 $Lang{Only_privileged_users_can_view_log_files} = "Tylko uprzywilejowani użytkownicy mogą przeglądać logi.";
@@ -1210,7 +1210,7 @@ $Lang{No} = "nie";
 $Lang{Yes} = "tak";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">Ten katalog jest \${EscHTML(\$dirDisplay)} pusty
+<tr><td bgcolor="#ffffff">Ten katalog jest \$dirDisplay pusty
 </td></tr>
 EOF
 

@@ -309,6 +309,7 @@ sub InstallFile
     if ( $file =~ /\.gif/ || $file =~ /\.png/ || $file =~ /\.ico/ ) {
         die("can't copy($file, $dest)\n") unless copy($file, $dest);
     } else {
+        my $lineCnt = 0;
 	open(FILE, $file)   || die("can't open $file for reading\n");
 	open(OUT, ">$dest") || die("can't open $dest for writing\n");
 	binmode(FILE);
@@ -317,6 +318,7 @@ sub InstallFile
 	    s/^([#*\s]+)Version \d+\.\d+[\.\w]*, released \d+ \w+ \d{4}\.?/$1Version __VERSION__, released __RELEASEDATE__./;
 	    s/__VERSION__/$Version/g;
 	    s/__RELEASEDATE__/$ReleaseDate/g;
+	    s/^([#*\s]+)Copyright\s+\(C\)\s+(\d{4})-\d{4}\s+Craig\s+Barratt/$1Copyright (C) $2-$year  Craig Barratt/i;
 	    if ( $file =~ /BackupPC\.html$/ ) {
 		#
 		# fixup for conf links
@@ -341,6 +343,13 @@ sub InstallFile
                 s{^<h1}{<hr />\n<h1}g;
 
 	    }
+            if ( $lineCnt == 0 && m{^#!/usr/local/bin/perl} ) {
+                #
+                # configure.pl overwrites the perl path on install, but do this to keep the
+                # distribution path backward compatible.
+                #
+                s{/usr/local/bin/perl}{/usr/bin/perl};
+            }
 	    if ( /__CONFIGPOD__/ ) {
 		print OUT $ConfPod;
 	    } elsif ( /^use lib ".*BackupPC\/lib";/
@@ -365,6 +374,7 @@ sub InstallFile
 	    } else {
 		print OUT;
 	    }
+            $lineCnt++;
 	}
 	close(FILE);
 	close(OUT);

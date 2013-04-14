@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 #my %lang;
 #use strict;
@@ -831,7 +831,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Obsah \${EscHTML(\$dirDisplay)}")}
+\${h2("Obsah \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -891,7 +891,7 @@ ze všech záloh:
      Vyber èíslo zálohy k zobrazení atributù souboru.
 </ul>
 
-\${h2("Historie \${EscHTML(\$dirDisplay)}")}
+\${h2("Historie \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -981,7 +981,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Pouze oprávnìní uživatelé mohou ukonèit nebo spustit zálohování na"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Špatné èíslo \$num";
+$Lang{Invalid_number__num} = "Špatné èíslo \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Nepodaøilo se otevøít \$file: problém konfigurace?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Pouze oprávnìní uživatelé mají pøístup k log a konfiguraèním souborùm.";
 $Lang{Only_privileged_users_can_view_log_files} = "Pouze oprávnìní uživatelé mají pøístup k log souborùm.";
@@ -1211,7 +1211,7 @@ $Lang{No} = "ne";
 $Lang{Yes} = "ano";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">Adresáø \${EscHTML(\$dirDisplay)} je prázdný
+<tr><td bgcolor="#ffffff">Adresáø \$dirDisplay je prázdný
 </td></tr>
 EOF
 

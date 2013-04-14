@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2009  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 3.2.1, released 24 Apr 2011.
+# Version 3.3.0, released 13 Apr 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -71,7 +71,7 @@ require DynaLoader;
 %EXPORT_TAGS = ('BPC_DT_ALL' => [@EXPORT, @EXPORT_OK]);
 
 BEGIN {
-    eval "use IO::Dirent qw( readdirent DT_DIR );";
+    eval "use IO::Dirent qw( readdirent );";
     $IODirentLoaded = 1 if ( !$@ );
 };
 
@@ -96,7 +96,7 @@ sub new
     # Whether to use filesystem hierarchy standard for file layout.
     # If set, text config files are below /etc/BackupPC.
     #
-    my $useFHS = 0;
+    my $useFHS = 1;
     my $paths;
 
     #
@@ -115,7 +115,7 @@ sub new
             useFHS     => $useFHS,
             TopDir     => $topDir,
             InstallDir => $installDir,
-            ConfDir    => $confDir eq "" ? '/data/BackupPC/conf' : $confDir,
+            ConfDir    => $confDir eq "" ? '/etc/BackupPC' : $confDir,
             LogDir     => '/var/log/BackupPC',
         };
     } else {
@@ -130,7 +130,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '3.2.1',
+        Version => '3.3.0',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -477,21 +477,38 @@ sub dirRead
         #
         # Make sure the IO::Dirent really works - some installs
         # on certain file systems (eg: XFS) don't return a valid type.
+        # and some fail to return valid inode numbers.
         #
+        # Also create a temporary file to make sure the inode matches.
+        #
+        my $tempTestFile = ".TestFileDirent.$$";
+        my $fullTempTestFile = $bpc->{TopDir} . "/$tempTestFile";
+        if ( open(my $fh, ">", $fullTempTestFile) ) {
+            close($fh);
+        }
         if ( opendir(my $fh, $bpc->{TopDir}) ) {
-            my $dt_dir = eval("DT_DIR");
             foreach my $e ( readdirent($fh) ) {
-                if ( $e->{name} eq "." && $e->{type} == $dt_dir ) {
-                    $IODirentOk = 1;
-                    last;
+                if ( $e->{name} eq "."
+                        && $e->{type} == BPC_DT_DIR
+                        && $e->{inode} == (stat($bpc->{TopDir}))[1] ) {
+                    $IODirentOk |= 0x1;
+                }
+                if ( $e->{name} eq $tempTestFile
+                        && $e->{type} == BPC_DT_REG
+                        && $e->{inode} == (stat($fullTempTestFile))[1] ) {
+                    $IODirentOk |= 0x2;
                 }
             }
             closedir($fh);
         }
+        unlink($fullTempTestFile) if ( -f $fullTempTestFile );
         #
         # if it isn't ok then don't check again.
         #
-        $IODirentLoaded = 0 if ( !$IODirentOk );
+        if ( $IODirentOk != 0x3 ) {
+            $IODirentLoaded = 0;
+            $IODirentOk     = 0;
+        }
     }
     if ( $IODirentOk ) {
         @entries = sort({ $a->{inode} <=> $b->{inode} } readdirent($fh));

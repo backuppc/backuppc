@@ -1047,10 +1047,13 @@ $Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
 $Conf{TarShareName} = '/';
 
 #
-# Full command to run tar on the client.  GNU tar is required.  You will
+# Command to run tar on the client.  GNU tar is required.  You will
 # need to fill in the correct paths for ssh2 on the local host (server)
 # and GNU tar on the client.  Security caution: normal users should not
 # allowed to write to these executable files or directories.
+#
+# $Conf{TarClientCmd} is appended with with either $Conf{TarFullArgs} or
+# $Conf{TarIncrArgs} to create the final command that is run.
 #
 # See the documentation for more information about setting up ssh2 keys.
 #

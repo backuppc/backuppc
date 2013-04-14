@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2009  Craig Barratt
+#   Copyright (C) 2003-2013  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.1, released 24 Apr 2011.
+# Version 3.3.0, released 13 Apr 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -255,10 +255,35 @@ EOF
 	}
     }
     $share = $currDir;
-    my $dirDisplay = decode_utf8("$share/$dir");
-    $dirDisplay =~ s{//+}{/}g;
-    $dirDisplay =~ s{/+$}{}g;
-    $dirDisplay = "/" if ( $dirDisplay eq "" );
+    my $shareURI = $share;
+    $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+
+    #
+    # allow each level of the directory path to be navigated to
+    #
+    my($thisPath, $dirDisplay);
+    my $dirClean = $dir;
+    $dirClean =~ s{//+}{/}g;
+    $dirClean =~ s{/+$}{};
+    my @dirElts = split(/\//, $dirClean);
+    @dirElts = ("/") if ( !@dirElts );
+    foreach my $d ( @dirElts ) {
+        my($thisDir);
+
+        if ( $thisPath eq "" ) {
+            $thisDir  = decode_utf8($share);
+            $thisPath = "/";
+        } else {
+            $thisPath .= "/" if ( $thisPath ne "/" );
+            $thisPath .= "$d";
+            $thisDir = decode_utf8($d);
+        }
+        my $thisPathURI = $thisPath;
+        $thisPathURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+        $dirDisplay .= "/" if ( $dirDisplay ne "" );
+        $dirDisplay .= "<a href=\"$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$thisPathURI\">${EscHTML($thisDir)}</a>";
+    }
+
     my $filledBackup;
 
     if ( (my @mergeNums = @{$view->mergeNums}) > 1 ) {
@@ -287,9 +312,7 @@ EOF
 	$fileStr = eval("qq{$Lang->{The_directory_is_empty}}");
     }
     my $pathURI  = $dir;
-    my $shareURI = $share;
     $pathURI  =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-    $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
     if ( my @otherDirs = $view->backupList($share, $dir) ) {
         my $otherDirs;
         foreach my $i ( @otherDirs ) {
@@ -303,6 +326,7 @@ EOF
     }
     $dir   = decode_utf8($dir);
     $share = decode_utf8($share);
+
     my $content = eval("qq{$Lang->{Backup_browse_for__host}}");
     Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"), $content);
     Trailer();

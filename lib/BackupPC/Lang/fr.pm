@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 #my %Lang;
 #use strict;
@@ -832,7 +832,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </ul>
 </form>
 
-\${h2("Contenu de \${EscHTML(\$dirDisplay)}")}
+\${h2("Contenu de \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
@@ -891,7 +891,7 @@ Cette page montre toutes les version disponibles des fichiers sauvegardés pour l
      Choisissez le numéro de sauvegarde pour voir les attributs de fichiers.
 </ul>
 
-\${h2("Historique de \${EscHTML(\$dirDisplay)}")}
+\${h2("Historique de \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
@@ -981,7 +981,7 @@ $Lang{Wrong_user__my_userid_is___} =
 $Lang{Only_privileged_users_can_stop_or_start_backups} = 
                   "Seuls les utilisateurs privilégiés peuvent arrêter ou démarrer des sauvegardes sur "
                   . " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Numéro invalide \$num";
+$Lang{Invalid_number__num} = "Numéro invalide \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Impossible d\'ouvrir \$file : problème de configuration ?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Seuls les utilisateurs privilégiés peuvent voir les fichiers de journal ou les fichiers de configuration.";
 $Lang{Only_privileged_users_can_view_log_files} = "Seuls les utilisateurs privilégiés peuvent voir les fichiers de journal.";
@@ -1211,7 +1211,7 @@ $Lang{No} = "non";
 $Lang{Yes} = "oui";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">Le répertoire \${EscHTML(\$dirDisplay)} est vide
+<tr><td bgcolor="#ffffff">Le répertoire \$dirDisplay est vide
 </td></tr>
 EOF
 

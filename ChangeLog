@@ -11,27 +11,18 @@
 #
 #========================================================================
 #
-# Version __VERSION__, released __RELEASEDATE__.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 #------------------------------------------------------------------------
-# Version __VERSION__, __RELEASEDATE__
+# Version 4.0.0alpha0, 23 Jun 2013
 #------------------------------------------------------------------------
 
-#------------------------------------------------------------------------
-# Version 3.3.1, 11 Jan 2015
-#------------------------------------------------------------------------
+* Major changes.
 
-* Added more helpful text (instead of "New Key") for BackupFilesOnly and
-  BackupFilesExclude in the CGI editor.
-
-* Removed deprecated defined(@Backups) from lib/BackupPC/CGI/Browse.pm;
-  patch from Alexander Moisseev.
-
-* Updated Spanish language file lib/BackupPC/Lang/es.pm from Luis Bustamante.
 
 * Updated init.d/debian-backuppc from Eduardo Díaz Rodríguez.
 

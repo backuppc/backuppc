@@ -1,10 +1,22 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #
 # by Sergei Butakov <sergei@bslos.com> (2011-05-1x - 2011-05-2x for V3.2.1)
 #
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
-#my %lang;
-#use strict;
 use utf8;
 # --------------------------------
 
@@ -106,6 +118,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td>Команда</td>
     <td align="center">PID</td>
     <td align="center">Xfer PID</td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1222,6 +1236,7 @@ $Lang{off} = "откл.";
 
 $Lang{backupType_full}    = "полн.";
 $Lang{backupType_incr}    = "инкр.";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "частичный";
 
 $Lang{failed} = "неудачно";
@@ -1235,8 +1250,8 @@ $Lang{Status_backup_starting} = "началось копирование";
 $Lang{Status_backup_in_progress} = "в процессе копирования";
 $Lang{Status_restore_starting} = "началось восстановление";
 $Lang{Status_restore_in_progress} = "в процессе восстановления";
-$Lang{Status_link_pending} = "link pending";
-$Lang{Status_link_running} = "link running";
+$Lang{Status_admin_pending} = "link pending";
+$Lang{Status_admin_running} = "link running";
 
 $Lang{Reason_backup_done}    = "копирование закончено";
 $Lang{Reason_restore_done}   = "восстановление закончено";
@@ -1444,7 +1459,6 @@ $Lang{CfgEdit_Button_Delete}   = "Удалить";
 $Lang{CfgEdit_Button_Add}      = "Добавить";
 $Lang{CfgEdit_Button_Override} = "Заменить";
 $Lang{CfgEdit_Button_New_Key}  = "New Key";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Ошибка: не сохранено из-за наличия ошибок";

@@ -1,7 +1,19 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
-#my %lang;
-#use strict;
 use utf8;
 
 # --------------------------------
@@ -102,6 +114,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td> 命令 </td>
     <td align="center"> 进程号 </td>
     <td align="center"> 传输进程号 </td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1195,6 +1209,7 @@ $Lang{off} = "关";
 
 $Lang{backupType_full}    = "完全";
 $Lang{backupType_incr}    = "增量";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "部分";
 
 $Lang{failed} = "失败";
@@ -1208,8 +1223,8 @@ $Lang{Status_backup_starting} = "备份已开始";
 $Lang{Status_backup_in_progress} = "备份进行中";
 $Lang{Status_restore_starting} = "恢复已开始";
 $Lang{Status_restore_in_progress} = "恢复进行中";
-$Lang{Status_link_pending} = "文件链接待建立";
-$Lang{Status_link_running} = "文件链接建立中";
+$Lang{Status_admin_pending} = "文件链接待建立";
+$Lang{Status_admin_running} = "文件链接建立中";
 
 $Lang{Reason_backup_done}    = "完成";
 $Lang{Reason_restore_done}   = "恢复完成";
@@ -1418,8 +1433,7 @@ $Lang{CfgEdit_Button_Insert}   = "插入";
 $Lang{CfgEdit_Button_Delete}   = "删除";
 $Lang{CfgEdit_Button_Add}      = "添加";
 $Lang{CfgEdit_Button_Override} = "替换";
-$Lang{CfgEdit_Button_New_Key}  = "文件卷名";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
+$Lang{CfgEdit_Button_New_Key}  = "文件卷名(Windows Share)";
 
 $Lang{CfgEdit_Error_No_Save}
             = "错误：有误，无法保存";

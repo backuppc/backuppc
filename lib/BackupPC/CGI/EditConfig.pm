@@ -10,11 +10,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2005-2015  Craig Barratt
+#   Copyright (C) 2005-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -23,12 +23,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -49,10 +48,10 @@ our %ConfigMenu = (
         param => [
             {text => "CfgEdit_Title_General_Parameters"},
             {name => "ServerHost"},
+            {name => "PoolV3Enabled"},
             {name => "BackupPCUser"},
             {name => "BackupPCUserVerify"},
             {name => "MaxOldLogFiles"},
-            {name => "TrashCleanSleepSec"},
 
             {text => "CfgEdit_Title_Wakeup_Schedule"},
             {name => "WakeupSchedule"},
@@ -201,10 +200,6 @@ our %ConfigMenu = (
                 visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
             {name => "RsyncdPasswd",
                 visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
-            {name => "RsyncdAuthRequired",
-                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
-            {name => "RsyncCsumCacheVerifyProb",
-                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
 
             ### Ftp Settings
             {text    => "CfgEdit_Title_Ftp_Settings",
@@ -278,17 +273,19 @@ our %ConfigMenu = (
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
             {text => "CfgEdit_Title_Rsyncd_Port_Args",
                 visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
+            {name => "RsyncBackupPCPath",
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
             {name => "RsyncClientPath",
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
-            {name => "RsyncClientCmd",
-                visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
-            {name => "RsyncClientRestoreCmd",
+            {name => "RsyncSshArgs",
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
             {name => "RsyncdClientPort",
                 visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
             {name => "RsyncArgs",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
             {name => "RsyncArgsExtra",
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
+            {name => "RsyncFullArgsExtra",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
             {name => "RsyncRestoreArgs",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
@@ -306,6 +303,7 @@ our %ConfigMenu = (
         param => [
 	    {text => "CfgEdit_Title_Full_Backups"},
 	    {name => "FullPeriod"},
+	    {name => "FillCycle"},
 	    {name => "FullKeepCnt"},
 	    {name => "FullKeepCntMin"},
 	    {name => "FullAgeMax"},
@@ -315,8 +313,6 @@ our %ConfigMenu = (
 	    {name => "IncrKeepCnt"},
 	    {name => "IncrKeepCntMin"},
 	    {name => "IncrAgeMax"},
-	    {name => "IncrLevels"},
-	    {name => "IncrFill"},
 
 	    {text => "CfgEdit_Title_Blackouts"},
             {name => "BackupsDisable"},
@@ -325,7 +321,6 @@ our %ConfigMenu = (
             {name => "BlackoutPeriods"},
 
 	    {text => "CfgEdit_Title_Other"},
-	    {name => "PartialAgeMax"},
 	    {name => "RestoreInfoKeepCnt"},
 	    {name => "ArchiveInfoKeepCnt"},
 	    {name => "BackupZeroFilesIsFatal"},
@@ -1201,10 +1196,9 @@ EOF
         }
 
         if ( !$type->{noKeyEdit} ) {
-            my $keyText = defined($type->{keyText}) ? $Lang->{$type->{keyText}} : $Lang->{CfgEdit_Button_New_Key};
             $content .= <<EOF;
 <tr><td class="border" colspan="2">
-$keyText: <input type="text" class="editTextInput" name="addVarKey_$varName" size="20" maxlength="256" value="">
+$Lang->{CfgEdit_Button_New_Key}: <input type="text" class="editTextInput" name="addVarKey_$varName" size="20" maxlength="256" value="">
 <input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}" onClick="addSubmit('$varName', 1)">
 </td></tr>
 EOF

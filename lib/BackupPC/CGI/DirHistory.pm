@@ -10,11 +10,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2015  Craig Barratt
+#   Copyright (C) 2003-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -23,12 +23,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -39,7 +38,7 @@ package BackupPC::CGI::DirHistory;
 use strict;
 use BackupPC::CGI::Lib qw(:all);
 use BackupPC::View;
-use BackupPC::Attrib qw(:all);
+use BackupPC::XS qw(:all);
 use Encode;
 
 sub action
@@ -82,13 +81,22 @@ sub action
 	$backupTimeStr .= "<td align=center>$backupTime</td>";
     }
 
+    #
+    # For V3 we rely on inodes to identify identical files.
+    #
+    # For V4 the (fake) inodes might be the same between different versions of
+    # a file, so we rely on matching the digests instead.
+    #
+    # So, if digests are defined, we use those.  Otherwise we used inodes.
+    #
     foreach my $f ( sort {uc($a) cmp uc($b)} keys(%$hist) ) {
 	my %inode2name;
+	my %digest2name;
 	my $nameCnt = 0;
 	(my $fDisp  = "${EscHTML($f)}") =~ s/ /&nbsp;/g;
         $fDisp      = decode_utf8($fDisp);
 	$fileStr   .= "<tr><td align=\"left\"  class=\"histView\">$fDisp</td>";
-	my($colSpan, $url, $inode, $type);
+	my($colSpan, $url, $inode, $type, $digest);
 	my $tdClass = ' class="histView"';
 	foreach $i ( @backupList ) {
 	    my($path);
@@ -96,13 +104,14 @@ sub action
 		#
 		# The file is the same if it also size==0 (inode == -1)
 		# or if it is a directory and the previous one is (inode == -2)
-		# or if the inodes agree and the types are the same.
+		# or if the inodes and digests agree and the types are the same.
 		#
 		if ( defined($hist->{$f}[$i])
 		    && $hist->{$f}[$i]{type} == $type
 		    && (($hist->{$f}[$i]{size} == 0 && $inode == -1)
-		     || ($hist->{$f}[$i]{type} == BPC_FTYPE_DIR && $inode == -2)
-		     || $hist->{$f}[$i]{inode} == $inode) ) {
+		        || ($hist->{$f}[$i]{type} == BPC_FTYPE_DIR && $inode == -2)
+		        || (length($hist->{$f}[$i]{digest}) ? $hist->{$f}[$i]{digest} eq $digest
+                                                            : $hist->{$f}[$i]{inode} == $inode)) ) {
 		    $colSpan++;
 		    next;
 		}
@@ -140,19 +149,29 @@ sub action
 <a href="$MyURL?action=dirHistory&host=${EscURI($host)}&share=$shareURI&dir=$path">$Lang->{DirHistory_dirLink}</a>
 EOF
 	    } else {
-		$inode = $hist->{$f}[$i]{inode};
-		$type  = $hist->{$f}[$i]{type};
+                my $thisName;
+		$inode  = $hist->{$f}[$i]{inode};
+		$digest = $hist->{$f}[$i]{digest};
+		$type   = $hist->{$f}[$i]{type};
 		#
 		# special value for empty file
 		#
 		$inode = -1 if ( $hist->{$f}[$i]{size} == 0 );
-		if ( !defined($inode2name{$inode}) ) {
-		    $inode2name{$inode}
-				= "$Lang->{DirHistory_fileLink}$nameCnt";
-		    $nameCnt++;
+		if ( length($digest) ) {
+                    if ( !defined($digest2name{$digest}) ) {
+                        $thisName = $digest2name{$digest}
+                                  = "$Lang->{DirHistory_fileLink}$nameCnt";
+                        $nameCnt++;
+                    }
+                } else {
+                    if ( !defined($inode2name{$inode}) ) {
+                        $thisName = $inode2name{$inode}
+                                  = "$Lang->{DirHistory_fileLink}$nameCnt";
+                        $nameCnt++;
+                    }
 		}
 		$url = <<EOF;
-<a href="$MyURL?action=RestoreFile&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$inode2name{$inode}</a>
+<a href="$MyURL?action=RestoreFile&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$thisName</a>
 EOF
 	    }
 	    $colSpan = 1;

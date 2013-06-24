@@ -1,7 +1,7 @@
 /*
  * BackupPC standard CSS definitions
  *
- * Version 3.0.0, released 28 Jan 2007.
+ * Version 4.0.0alpha0, released 23 Jun 2013.
  *
  * See http://backuppc.sourceforge.net.
  *
@@ -9,7 +9,7 @@
  *   Craig Barratt  <cbarratt@users.sourceforge.net>
  *
  * COPYRIGHT
- *   Copyright (C) 2004-2009  Craig Barratt
+ *   Copyright (C) 2004-2013  Craig Barratt
  */
 
 body {
@@ -46,6 +46,14 @@ a {
 
 dt {
     color:#3333ff
+}
+
+pre {
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
 
 a:hover {

@@ -11,11 +11,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2015  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -24,12 +24,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -40,52 +39,16 @@ package BackupPC::Lib;
 use strict;
 
 use vars qw(%Conf %Lang);
-use BackupPC::Storage;
 use Fcntl ':mode';
 use Carp;
-use File::Path;
-use File::Compare;
 use Socket;
 use Cwd;
 use Digest::MD5;
 use Config;
 use Encode qw/from_to encode_utf8/;
 
-use vars qw( $IODirentOk $IODirentLoaded );
-use vars qw(@ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
-
-require Exporter;
-require DynaLoader;
-
-@ISA = qw(Exporter DynaLoader);
-@EXPORT_OK = qw( BPC_DT_UNKNOWN
-                 BPC_DT_FIFO
-                 BPC_DT_CHR
-                 BPC_DT_DIR
-                 BPC_DT_BLK
-                 BPC_DT_REG
-                 BPC_DT_LNK
-                 BPC_DT_SOCK
-               );
-@EXPORT = qw( );
-%EXPORT_TAGS = ('BPC_DT_ALL' => [@EXPORT, @EXPORT_OK]);
-
-BEGIN {
-    eval "use IO::Dirent qw( readdirent );";
-    $IODirentLoaded = 1 if ( !$@ );
-};
-
-#
-# The need to match the constants in IO::Dirent
-#
-use constant BPC_DT_UNKNOWN =>   0;
-use constant BPC_DT_FIFO    =>   1;    ## named pipe (fifo)
-use constant BPC_DT_CHR     =>   2;    ## character special
-use constant BPC_DT_DIR     =>   4;    ## directory
-use constant BPC_DT_BLK     =>   6;    ## block special
-use constant BPC_DT_REG     =>   8;    ## regular
-use constant BPC_DT_LNK     =>  10;    ## symbolic link
-use constant BPC_DT_SOCK    =>  12;    ## socket
+use BackupPC::Storage;
+use BackupPC::XS;
 
 sub new
 {
@@ -96,14 +59,14 @@ sub new
     # Whether to use filesystem hierarchy standard for file layout.
     # If set, text config files are below /etc/BackupPC.
     #
-    my $useFHS = 1;
+    my $useFHS = 0;
     my $paths;
 
     #
     # Set defaults for $topDir and $installDir.
     #
-    $topDir     = '/data/BackupPC' if ( $topDir eq "" );
-    $installDir = '/usr/local/BackupPC'    if ( $installDir eq "" );
+    $topDir     = '__TOPDIR__' if ( $topDir eq "" );
+    $installDir = '__INSTALLDIR__'    if ( $installDir eq "" );
 
     #
     # Pick some initial defaults.  For FHS the only critical
@@ -115,7 +78,7 @@ sub new
             useFHS     => $useFHS,
             TopDir     => $topDir,
             InstallDir => $installDir,
-            ConfDir    => $confDir eq "" ? '/etc/BackupPC' : $confDir,
+            ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir,
             LogDir     => '/var/log/BackupPC',
         };
     } else {
@@ -130,7 +93,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '3.3.1',
+        Version => '4.0.0alpha0',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -152,8 +115,8 @@ sub new
         $paths->{$dir} = $bpc->{$dir} = $bpc->{Conf}{$dir};
     }
     $bpc->{storage}->setPaths($paths);
-    $bpc->{PoolDir}  = "$bpc->{TopDir}/pool";
-    $bpc->{CPoolDir} = "$bpc->{TopDir}/cpool";
+    $bpc->{PoolDir}    = "$bpc->{TopDir}/pool";
+    $bpc->{CPoolDir}   = "$bpc->{TopDir}/cpool";
 
     #
     # Verify we are running as the correct user
@@ -166,6 +129,9 @@ sub new
 	print(STDERR "Please su $bpc->{Conf}{BackupPCUser} first\n");
 	return;
     }
+
+    BackupPC::XS::Lib::ConfInit($bpc->{TopDir}, $bpc->{Conf}{HardLinkMax}, $bpc->{Conf}{PoolV3Enabled}, $bpc->{Conf}{XferLogLevel});
+
     return $bpc;
 }
 
@@ -173,6 +139,12 @@ sub TopDir
 {
     my($bpc) = @_;
     return $bpc->{TopDir};
+}
+
+sub PoolDir
+{
+    my($bpc, $compress) = @_;
+    return $compress ? $bpc->{CPoolDir} : $bpc->{PoolDir}
 }
 
 sub BinDir
@@ -240,11 +212,6 @@ sub isAdminJob
 {
     my($bpc, $str) = @_;
     return $str =~ /^ admin/;
-}
-
-sub trashJob
-{
-    return " trashClean ";
 }
 
 sub ConfValue
@@ -397,11 +364,6 @@ sub ConfigRead
     }
     $bpc->{Lang} = \%Lang;
 
-    #
-    # Make sure IncrLevels is defined
-    #
-    $bpc->{Conf}{IncrLevels} = [1] if ( !defined($bpc->{Conf}{IncrLevels}) );
-
     return;
 }
 
@@ -444,250 +406,6 @@ sub HostsMTime
     my($bpc) = @_;
 
     return $bpc->{storage}->HostsMTime();
-}
-
-#
-# Read a directory and return the entries in sorted inode order.
-# This relies on the IO::Dirent module being installed.  If not,
-# the inode data is empty and the default directory order is
-# returned.
-#
-# The returned data is a list of hashes with entries {name, type, inode, nlink}.
-# The returned data includes "." and "..".
-#
-# $need is a hash of file attributes we need: type, inode, or nlink.
-# If set, these parameters are added to the returned hash.
-#
-# To support browsing pre-3.0.0 backups where the charset encoding
-# is typically iso-8859-1, the charsetLegacy option can be set in
-# $need to convert the path from utf8 and convert the names to utf8.
-#
-# If IO::Dirent is successful if will get type and inode for free.
-# Otherwise, a stat is done on each file, which is more expensive.
-#
-sub dirRead
-{
-    my($bpc, $path, $need) = @_;
-    my(@entries, $addInode);
-
-    from_to($path, "utf8", $need->{charsetLegacy})
-                        if ( $need->{charsetLegacy} ne "" );
-    return if ( !opendir(my $fh, $path) );
-    if ( $IODirentLoaded && !$IODirentOk ) {
-        #
-        # Make sure the IO::Dirent really works - some installs
-        # on certain file systems (eg: XFS) don't return a valid type.
-        # and some fail to return valid inode numbers.
-        #
-        # Also create a temporary file to make sure the inode matches.
-        #
-        my $tempTestFile = ".TestFileDirent.$$";
-        my $fullTempTestFile = $bpc->{TopDir} . "/$tempTestFile";
-        if ( open(my $fh, ">", $fullTempTestFile) ) {
-            close($fh);
-        }
-        if ( opendir(my $fh, $bpc->{TopDir}) ) {
-            foreach my $e ( readdirent($fh) ) {
-                if ( $e->{name} eq "."
-                        && $e->{type} == BPC_DT_DIR
-                        && $e->{inode} == (stat($bpc->{TopDir}))[1] ) {
-                    $IODirentOk |= 0x1;
-                }
-                if ( $e->{name} eq $tempTestFile
-                        && $e->{type} == BPC_DT_REG
-                        && $e->{inode} == (stat($fullTempTestFile))[1] ) {
-                    $IODirentOk |= 0x2;
-                }
-            }
-            closedir($fh);
-        }
-        unlink($fullTempTestFile) if ( -f $fullTempTestFile );
-        #
-        # if it isn't ok then don't check again.
-        #
-        if ( $IODirentOk != 0x3 ) {
-            $IODirentLoaded = 0;
-            $IODirentOk     = 0;
-        }
-    }
-    if ( $IODirentOk ) {
-        @entries = sort({ $a->{inode} <=> $b->{inode} } readdirent($fh));
-        map { $_->{type} = 0 + $_->{type} } @entries;   # make type numeric
-    } else {
-        @entries = map { { name => $_} } readdir($fh);
-    }
-    closedir($fh);
-    if ( defined($need) ) {
-        for ( my $i = 0 ; $i < @entries ; $i++ ) {
-            next if ( (!$need->{inode} || defined($entries[$i]{inode}))
-                   && (!$need->{type}  || defined($entries[$i]{type}))
-                   && (!$need->{nlink} || defined($entries[$i]{nlink})) );
-            my @s = stat("$path/$entries[$i]{name}");
-            $entries[$i]{nlink} = $s[3] if ( $need->{nlink} );
-            if ( $need->{inode} && !defined($entries[$i]{inode}) ) {
-                $addInode = 1;
-                $entries[$i]{inode} = $s[1];
-            }
-            if ( $need->{type} && !defined($entries[$i]{type}) ) {
-                my $mode = S_IFMT($s[2]);
-                $entries[$i]{type} = BPC_DT_FIFO if ( S_ISFIFO($mode) );
-                $entries[$i]{type} = BPC_DT_CHR  if ( S_ISCHR($mode) );
-                $entries[$i]{type} = BPC_DT_DIR  if ( S_ISDIR($mode) );
-                $entries[$i]{type} = BPC_DT_BLK  if ( S_ISBLK($mode) );
-                $entries[$i]{type} = BPC_DT_REG  if ( S_ISREG($mode) );
-                $entries[$i]{type} = BPC_DT_LNK  if ( S_ISLNK($mode) );
-                $entries[$i]{type} = BPC_DT_SOCK if ( S_ISSOCK($mode) );
-            }
-        }
-    }
-    #
-    # Sort the entries if inodes were added (the IO::Dirent case already
-    # sorted above)
-    #
-    @entries = sort({ $a->{inode} <=> $b->{inode} } @entries) if ( $addInode );
-    #
-    # for browing pre-3.0.0 backups, map iso-8859-1 to utf8 if requested
-    #
-    if ( $need->{charsetLegacy} ne "" ) {
-        for ( my $i = 0 ; $i < @entries ; $i++ ) {
-            from_to($entries[$i]{name}, $need->{charsetLegacy}, "utf8");
-        }
-    }
-    return \@entries;
-}
-
-#
-# Same as dirRead, but only returns the names (which will be sorted in
-# inode order if IO::Dirent is installed)
-#
-sub dirReadNames
-{
-    my($bpc, $path, $need) = @_;
-
-    my $entries = $bpc->dirRead($path, $need);
-    return if ( !defined($entries) );
-    my @names = map { $_->{name} } @$entries;
-    return \@names;
-}
-
-sub find
-{
-    my($bpc, $param, $dir, $dontDoCwd) = @_;
-
-    return if ( !chdir($dir) );
-    my $entries = $bpc->dirRead(".", {inode => 1, type => 1});
-    #print Dumper($entries);
-    foreach my $f ( @$entries ) {
-        next if ( $f->{name} eq ".." || $f->{name} eq "." && $dontDoCwd );
-        $param->{wanted}($f->{name}, "$dir/$f->{name}");
-        next if ( $f->{type} != BPC_DT_DIR || $f->{name} eq "." );
-        chdir($f->{name});
-        $bpc->find($param, "$dir/$f->{name}", 1);
-        return if ( !chdir("..") );
-    }
-}
-
-#
-# Stripped down from File::Path.  In particular we don't print
-# many warnings and we try three times to delete each directory
-# and file -- for some reason the original File::Path rmtree
-# didn't always completely remove a directory tree on a NetApp.
-#
-# Warning: this routine changes the cwd.
-#
-sub RmTreeQuiet
-{
-    my($bpc, $pwd, $roots) = @_;
-    my(@files, $root);
-
-    if ( defined($roots) && length($roots) ) {
-      $roots = [$roots] unless ref $roots;
-    } else {
-      print(STDERR "RmTreeQuiet: No root path(s) specified\n");
-    }
-    chdir($pwd);
-    foreach $root (@{$roots}) {
-	$root = $1 if ( $root =~ m{(.*?)/*$} );
-	#
-	# Try first to simply unlink the file: this avoids an
-	# extra stat for every file.  If it fails (which it
-	# will for directories), check if it is a directory and
-	# then recurse.
-	#
-	if ( !unlink($root) ) {
-            if ( -d $root ) {
-                my $d = $bpc->dirReadNames($root);
-		if ( !defined($d) ) {
-		    print(STDERR "Can't read $pwd/$root: $!\n");
-		} else {
-		    @files = grep $_ !~ /^\.{1,2}$/, @$d;
-		    $bpc->RmTreeQuiet("$pwd/$root", \@files);
-		    chdir($pwd);
-		    rmdir($root) || rmdir($root);
-		}
-            } else {
-                unlink($root) || unlink($root);
-            }
-        }
-    }
-}
-
-#
-# Move a directory or file away for later deletion
-#
-sub RmTreeDefer
-{
-    my($bpc, $trashDir, $file) = @_;
-    my($i, $f);
-
-    return if ( !-e $file );
-    if ( !-d $trashDir ) {
-        eval { mkpath($trashDir, 0, 0777) };
-        if ( $@ ) {
-            #
-            # There's no good place to send this error - use stderr
-            #
-            print(STDERR "RmTreeDefer: can't create directory $trashDir");
-        }
-    }
-    for ( $i = 0 ; $i < 1000 ; $i++ ) {
-        $f = sprintf("%s/%d_%d_%d", $trashDir, time, $$, $i);
-        next if ( -e $f );
-        return if ( rename($file, $f) );
-    }
-    # shouldn't get here, but might if you tried to call this
-    # across file systems.... just remove the tree right now.
-    if ( $file =~ /(.*)\/([^\/]*)/ ) {
-        my($d) = $1;
-        my($f) = $2;
-        my($cwd) = Cwd::fastcwd();
-        $cwd = $1 if ( $cwd =~ /(.*)/ );
-        $bpc->RmTreeQuiet($d, $f);
-        chdir($cwd) if ( $cwd );
-    }
-}
-
-#
-# Empty the trash directory.  Returns 0 if it did nothing, 1 if it
-# did something, -1 if it failed to remove all the files.
-#
-sub RmTreeTrashEmpty
-{
-    my($bpc, $trashDir) = @_;
-    my(@files);
-    my($cwd) = Cwd::fastcwd();
-
-    $cwd = $1 if ( $cwd =~ /(.*)/ );
-    return if ( !-d $trashDir );
-    my $d = $bpc->dirReadNames($trashDir) or carp "Can't read $trashDir: $!";
-    @files = grep $_ !~ /^\.{1,2}$/, @$d;
-    return 0 if ( !@files );
-    $bpc->RmTreeQuiet($trashDir, \@files);
-    foreach my $f ( @files ) {
-	return -1 if ( -e $f );
-    }
-    chdir($cwd) if ( $cwd );
-    return 1;
 }
 
 #
@@ -802,6 +520,105 @@ sub ChildInit
 }
 
 #
+# New digest calculation for BackupPC >= 4.X.
+#
+# Compute the MD5 digest of an entire file.
+# Returns the binary MD5 digest.
+# On error returns undef.
+#
+sub File2MD5
+{
+    my($bpc, $md5, $name) = @_;
+    my($data, $fileSize);
+    local(*N);
+
+    $name = $1 if ( $name =~ /(.*)/ );
+    return undef if ( !open(N, $name) );
+    binmode(N);
+    $md5->reset();
+    $md5->addfile(*N);
+    close(N);
+    return $md5->digest;
+}
+
+#
+# New digest calculation for BackupPC >= 4.X.
+#
+# Compute the MD5 digest of a buffer (string).
+# Returns the binary MD5 digest.
+#
+sub Buffer2MD5
+{
+    my($bpc, $md5, $dataRef) = @_;
+
+    $md5->reset();
+    $md5->add($$dataRef);
+    return $md5->digest;
+}
+
+#
+# Given a binary MD5 digest $d and a compress flag, return the
+# full path in the pool.  We use the top 7 bits of the first
+# byte for the top-level directory and the top 7 bits of the
+# second byte for the 2nd-level directory.
+#
+sub MD52Path
+{
+    my($bpc, $d, $compress, $poolDir) = @_;
+
+    my $b2 = vec($d, 0, 16);
+
+    $poolDir = ($compress ? $bpc->{CPoolDir} : $bpc->{PoolDir})
+		    if ( !defined($poolDir) );
+    return sprintf("%s/%02x/%02x/%s", $poolDir,
+                     ($b2 >> 8) & 0xfe,
+                     ($b2 >> 0) & 0xfe,
+                     unpack("H*", $d));
+}
+
+#
+# V4 digest extension for MD5 collisions.
+#
+# Take the digest and append $extCnt in binary, with leading
+# 0x0 removed.  That means when $extCnt == 0, nothing is
+# appended and the digest is the original 16 byte MD5 digest.
+#
+# Example: when $extCnt == 1 then 0x01 is appended (1 more byte).
+# When $extCnt == 258 then 0x0102 is appended (2 more bytes).
+#
+sub digestConcat
+{
+    my($bpc, $digest, $extCnt, $compress) = @_;
+
+    $digest = substr($digest, 16) if ( length($digest) > 16 );
+    my $ext = pack("N", $extCnt);
+    $ext =~ s/^\x00+//;
+    my $thisDigest = $digest . $ext;
+    my $poolName = $bpc->MD52Path($thisDigest, $compress);
+
+    return($thisDigest, $poolName);
+}
+
+#
+# Given a digest from digestConcat() return the extension value
+# as an integer
+#
+sub digestExtGet
+{
+    my($bpc, $digest) = @_;
+
+    #
+    # get the extension bytes, which start a byte 16.
+    # also, prepend hour 0x0 bytes, then take the last 4 bytes.
+    # this repads the extension to "N" format with leading 0x0
+    # bytes.
+    #
+    return unpack("N", substr(pack("N", 0) . substr($digest, 16), -4));
+}
+
+#
+# Old Digest calculation for BackupPC <= 3.X.
+#
 # Compute the MD5 digest of a file.  For efficiency we don't
 # use the whole file for big files:
 #   - for files <= 256K we use the file size and the whole file.
@@ -814,7 +631,7 @@ sub ChildInit
 #
 # Returns the MD5 digest (a hex string) and the file size.
 #
-sub File2MD5
+sub File2MD5_v3
 {
     my($bpc, $md5, $name) = @_;
     my($data, $fileSize);
@@ -848,6 +665,8 @@ sub File2MD5
 }
 
 #
+# Old Digest calculation for BackupPC <= 3.X.
+#
 # Compute the MD5 digest of a buffer (string).  For efficiency we don't
 # use the whole string for big strings:
 #   - for files <= 256K we use the file size and the whole file.
@@ -860,7 +679,7 @@ sub File2MD5
 #
 # Returns the MD5 digest (a hex string).
 #
-sub Buffer2MD5
+sub Buffer2MD5_v3
 {
     my($bpc, $md5, $fileSize, $dataRef) = @_;
 
@@ -884,10 +703,14 @@ sub Buffer2MD5
 }
 
 #
+# Old pool path for BackupPC <= 3.X.  Prior to 4.X the pool
+# was stored in a directory tree 3 levels deep using the first
+# 3 hex digits of the digest.
+#
 # Given an MD5 digest $d and a compress flag, return the full
 # path in the pool.
 #
-sub MD52Path
+sub MD52Path_v3
 {
     my($bpc, $d, $compress, $poolDir) = @_;
 
@@ -1345,8 +1168,8 @@ sub cmdSystemOrEvalLong
         $out = eval($cmd);
 	$$stdoutCB .= $out if ( ref($stdoutCB) eq 'SCALAR' );
 	&$stdoutCB($out)   if ( ref($stdoutCB) eq 'CODE' );
-	print(STDERR "cmdSystemOrEval: finished: got output $out\n")
-			if ( $bpc->{verbose} );
+	#print(STDERR "cmdSystemOrEval: finished: got output $out\n")
+	#		if ( $bpc->{verbose} );
 	return $out        if ( !defined($stdoutCB) );
 	return;
     } else {
@@ -1400,8 +1223,8 @@ sub cmdSystemOrEvalLong
 	$? = 0;
 	close(CHILD);
     }
-    print(STDERR "cmdSystemOrEval: finished: got output $allOut\n")
-			if ( $bpc->{verbose} );
+    #print(STDERR "cmdSystemOrEval: finished: got output $allOut\n")
+    #   		if ( $bpc->{verbose} );
     return $out;
 }
 
@@ -1541,6 +1364,15 @@ sub glob2re
     }
 
     return $glob;
+}
+
+sub flushXSLibMesgs()
+{
+    my $msg = BackupPC::XS::Lib::logMsgGet();
+    return if ( !defined($msg) );
+    foreach my $m ( @$msg ) {
+        print($m);
+    }
 }
 
 1;

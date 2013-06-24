@@ -1,11 +1,11 @@
 
                               BackupPC
 
-                            Version __VERSION__
+                            Version 4.0.0alpha0
 
-                            __RELEASEDATE__
+                            23 Jun 2013
 
-         Copyright (C) 2001-2010 Craig Barratt.  All rights reserved.
+         Copyright (C) 2001-2013  Craig Barratt.  All rights reserved.
 
       This program is free software; you can redistribute it and/or
       modify it under the terms of the GNU General Public License.
@@ -28,8 +28,8 @@ plus rsync 2.5.6 on the client machines.
 
 To install BackupPC run these commands as root:
 
-    tar zxf BackupPC-__VERSION__.tar.gz
-    cd BackupPC-__VERSION__
+    tar zxf BackupPC-4.0.0alpha0.tar.gz
+    cd BackupPC-4.0.0alpha0
     perl configure.pl
 
 This will automatically determine some system information and prompt you

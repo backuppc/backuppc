@@ -19,11 +19,11 @@
 #   Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2010  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -32,12 +32,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.1.0beta0, released 3 Sep 2007.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,7 +58,7 @@ if ( $EncodeVersion < 1.99 ) {
 
 my @Packages = qw(File::Path File::Spec File::Copy DirHandle Digest::MD5
                   Data::Dumper Getopt::Std Getopt::Long Pod::Usage
-                  BackupPC::Lib BackupPC::FileZIO);
+                  BackupPC::Lib BackupPC::XS);
 
 foreach my $pkg ( @Packages ) {
     eval "use $pkg";
@@ -72,7 +71,7 @@ BackupPC cannot load the package $pkg, which is included in the
 BackupPC distribution.  This probably means you did not cd to the
 unpacked BackupPC distribution before running configure.pl, eg:
 
-    cd BackupPC-__VERSION__
+    cd BackupPC-4.0.0alpha0
     ./configure.pl
 
 Please try again.
@@ -161,7 +160,7 @@ my $ConfigPath = "";
 my $ConfigFileOK = 1;
 while ( 1 ) {
     if ( $ConfigFileOK && -f "/etc/BackupPC/config.pl"
-            && (!defined($opts{fhs}) || $opts{fhs}) && !defined($opts{"config-path"}) ) {
+            && (!defined($opts{fhs}) || $opts{fhs}) ) {
         $ConfigPath = "/etc/BackupPC/config.pl";
         $opts{fhs} = 1 if ( !defined($opts{fhs}) );
         print <<EOF;
@@ -248,6 +247,7 @@ if ( $opts{fhs} ) {
 #
 my %Programs = (
     perl           => "PerlPath",
+    rsync_bpc      => "RsyncBackupPCPath",
     'gtar/tar'     => "TarClientPath",
     smbclient      => "SmbClientPath",
     nmblookup      => "NmbLookupPath",
@@ -388,65 +388,6 @@ while ( 1 ) {
 $Conf{CompressLevel} = $opts{"compress-level"}
                             if ( defined($opts{"compress-level"}) );
 
-if ( !defined($Conf{CompressLevel}) ) {
-    $Conf{CompressLevel} = BackupPC::FileZIO->compOk ? 3 : 0;
-    if ( $ConfigPath eq "" && $Conf{CompressLevel} ) {
-        print <<EOF;
-
-BackupPC can compress pool files, providing around a 40% reduction in pool
-size (your mileage may vary). Specify the compression level (0 turns
-off compression, and 1 to 9 represent good/fastest to best/slowest).
-The recommended values are 0 (off) or 3 (reasonable compression and speed).
-Increasing the compression level to 5 will use around 20% more cpu time
-and give perhaps 2-3% more compression.
-
-EOF
-    } elsif ( $ConfigPath eq "" ) {
-        print <<EOF;
-
-BackupPC can compress pool files, but it needs the Compress::Zlib
-package installed (see www.cpan.org). Compression will provide around a
-40% reduction in pool size, at the expense of cpu time.  You can leave
-compression off and run BackupPC without compression, in which case you
-should leave the compression level at 0 (which means off).  Or the better
-choice is to quit, install Compress::Zlib, and re-run configure.pl.
-
-EOF
-    } elsif ( $Conf{CompressLevel} ) {
-        $Conf{CompressLevel} = 0;
-        print <<EOF;
-
-BackupPC now supports pool file compression.  Since you are upgrading
-BackupPC you probably have existing uncompressed backups.  You could
-turn on compression, so that new backups will be compressed.  This
-will increase the pool storage requirement, since both uncompressed
-and compressed copies of files will be stored. But eventually the old
-uncompressed backups will expire, recovering the pool storage.  Please
-see the documentation for more details.
-
-If you are not sure what to do, leave the Compression Level at 0,
-which disables compression.  You can always read the documentation
-and turn it on later.
-
-EOF
-    } else {
-        $Conf{CompressLevel} = 0;
-        print <<EOF;
-
-BackupPC now supports pool file compression, but it needs the
-Compress::Zlib module (see www.cpan.org).  For now, leave
-the compression level set at 0 to disable compression.  If you
-want you can install Compress::Zlib and turn compression on.
-
-EOF
-    }
-    while ( 1 ) {
-        $Conf{CompressLevel}
-                    = prompt("--> Compression level", $Conf{CompressLevel});
-        last if ( $Conf{CompressLevel} =~ /^\d+$/ );
-    }
-}
-
 print <<EOF;
 
 BackupPC has a powerful CGI perl interface that runs under Apache.
@@ -562,7 +503,6 @@ foreach my $dir ( (
             "$Conf{TopDir}/pool",
             "$Conf{TopDir}/cpool",
             "$Conf{TopDir}/pc",
-            "$Conf{TopDir}/trash",
             "$Conf{ConfDir}",
             "$Conf{LogDir}",
         ) ) {
@@ -577,16 +517,112 @@ foreach my $dir ( (
 
 printf("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
 foreach my $prog ( qw(
-        __CONFIGURE_BIN_LIST__
+        bin/BackupPC
+        bin/BackupPC_archive
+        bin/BackupPC_archiveHost
+        bin/BackupPC_archiveStart
+        bin/BackupPC_attribPrint
+        bin/BackupPC_backupDelete
+        bin/BackupPC_backupDuplicate
+        bin/BackupPC_dump
+        bin/BackupPC_fixupBackupSummary
+        bin/BackupPC_fsck
+        bin/BackupPC_ls
+        bin/BackupPC_nightly
+        bin/BackupPC_poolCntPrint
+        bin/BackupPC_refCountUpdate
+        bin/BackupPC_restore
+        bin/BackupPC_sendEmail
+        bin/BackupPC_serverMesg
+        bin/BackupPC_tarCreate
+        bin/BackupPC_tarExtract
+        bin/BackupPC_zcat
+        bin/BackupPC_zipCreate
     ) ) {
     InstallFile($prog, "$DestDir$Conf{InstallDir}/$prog", 0555);
 }
 
+#
+# remove old pre-v4 programs
+#
+foreach my $prog ( qw(
+        bin/BackupPC_link
+        bin/BackupPC_tarPCCopy
+        bin/BackupPC_trashClean
+        bin/BackupPC_compressPool
+    ) ) {
+    unlink("$DestDir$Conf{InstallDir}/$prog");
+}
+
 printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(
-        __CONFIGURE_LIB_LIST__
+        lib/BackupPC/Config/Meta.pm
+        lib/BackupPC/Config.pm
+        lib/BackupPC/DirOps.pm
+        lib/BackupPC/Lib.pm
+        lib/BackupPC/Storage.pm
+        lib/BackupPC/View.pm
+        lib/BackupPC/Xfer/Archive.pm
+        lib/BackupPC/Xfer/Ftp.pm
+        lib/BackupPC/Xfer/Protocol.pm
+        lib/BackupPC/Xfer/Rsync.pm
+        lib/BackupPC/Xfer/Smb.pm
+        lib/BackupPC/Xfer/Tar.pm
+        lib/BackupPC/Xfer.pm
+        lib/BackupPC/Zip/FileMember.pm
+        lib/Net/FTP/AutoReconnect.pm
+        lib/Net/FTP/RetrHandle.pm
+        lib/BackupPC/CGI/AdminOptions.pm
+        lib/BackupPC/CGI/Archive.pm
+        lib/BackupPC/CGI/ArchiveInfo.pm
+        lib/BackupPC/CGI/Browse.pm
+        lib/BackupPC/CGI/DirHistory.pm
+        lib/BackupPC/CGI/EditConfig.pm
+        lib/BackupPC/CGI/EmailSummary.pm
+        lib/BackupPC/CGI/GeneralInfo.pm
+        lib/BackupPC/CGI/HostInfo.pm
+        lib/BackupPC/CGI/Lib.pm
+        lib/BackupPC/CGI/LOGlist.pm
+        lib/BackupPC/CGI/Queue.pm
+        lib/BackupPC/CGI/ReloadServer.pm
+        lib/BackupPC/CGI/Restore.pm
+        lib/BackupPC/CGI/RestoreFile.pm
+        lib/BackupPC/CGI/RestoreInfo.pm
+        lib/BackupPC/CGI/RSS.pm
+        lib/BackupPC/CGI/StartServer.pm
+        lib/BackupPC/CGI/StartStopBackup.pm
+        lib/BackupPC/CGI/StopServer.pm
+        lib/BackupPC/CGI/Summary.pm
+        lib/BackupPC/CGI/View.pm
+        lib/BackupPC/Lang/cz.pm
+        lib/BackupPC/Lang/de.pm
+        lib/BackupPC/Lang/en.pm
+        lib/BackupPC/Lang/es.pm
+        lib/BackupPC/Lang/fr.pm
+        lib/BackupPC/Lang/it.pm
+        lib/BackupPC/Lang/ja.pm
+        lib/BackupPC/Lang/nl.pm
+        lib/BackupPC/Lang/pl.pm
+        lib/BackupPC/Lang/pt_br.pm
+        lib/BackupPC/Lang/ru.pm
+        lib/BackupPC/Lang/uk.pm
+        lib/BackupPC/Lang/zh_CN.pm
+        lib/BackupPC/Storage/Text.pm
     ) ) {
     InstallFile($lib, "$DestDir$Conf{InstallDir}/$lib", 0444);
+}
+
+#
+# remove old pre-v4 libraries
+#
+foreach my $lib ( qw(
+        lib/BackupPC/Attrib.pm
+        lib/BackupPC/FileZIO.pm
+        lib/BackupPC/PoolWrite.pm
+        lib/BackupPC/Xfer/RsyncDigest.pm
+        lib/BackupPC/Xfer/RsyncFileIO.pm
+    ) ) {
+    unlink("$DestDir$Conf{InstallDir}/$lib");
 }
 
 if ( $Conf{CgiImageDir} ne "" ) {
@@ -599,7 +635,7 @@ if ( $Conf{CgiImageDir} ne "" ) {
     #
     # Install new CSS file, making a backup copy if necessary
     #
-    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-__VERSION__";
+    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-4.0.0alpha0";
     if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
 	rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
     }
@@ -709,14 +745,9 @@ if ( defined($Conf{RsyncLogLevel}) ) {
 }
 
 #
-# In 2.1.0 the default for $Conf{CgiNavBarAdminAllHosts} is now 1
+# Since 2.1.0 the default for $Conf{CgiNavBarAdminAllHosts} is now 1
 #
 $Conf{CgiNavBarAdminAllHosts} = 1;
-
-#
-# IncrFill should now be off
-#
-$Conf{IncrFill} = 0;
 
 #
 # Empty $Conf{ParPath} if it isn't a valid executable
@@ -798,10 +829,31 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
 }
 
 #
+# If it exists, use $Conf{RsyncClientCmd} to create the default $Conf{RsyncSshArgs}.
+#
+if ( $Conf{RsyncClientCmd} =~ /(\$sshPath.* +-l +\S+)/ && defined($newVars->{RsyncSshArgs}) ) {
+    my $value = "[\n    '-e', '$1',\n];\n\n";
+    $newConf->[$newVars->{RsyncSshArgs}]{text}
+            =~ s/(\s*\$Conf\{RsyncSshArgs}\s*=\s*).*/$1$value/s;
+}
+
+#
+# Overwrite $Conf{RsyncArgs} and $Conf{RsyncRestoreArgs}.
+#
+$newConf->[$newVars->{RsyncArgs}]{text}        = $distConf->[$distVars->{RsyncArgs}]{text};
+$newConf->[$newVars->{RsyncRestoreArgs}]{text} = $distConf->[$distVars->{RsyncRestoreArgs}]{text};
+
+#
+# If this is an upgrade from V3, then set $Conf{PoolV3Enabled}
+#
+$Conf{PoolV3Enabled} = 1 if ( defined($Conf{ServerHost}) && !defined($Conf{PoolV3Enabled}) );
+
+#
 # Apply any command-line configuration parameter settings
 #
 foreach my $param ( keys(%{$opts{"config-override"}}) ) {
-    my $val = eval { $opts{"config-override"}{$param} };
+    my $value = $opts{"config-override"}{$param};
+    my $val = eval { $value };
     if ( @$ ) {
         printf("Can't eval --config-override setting %s=%s\n",
                         $param, $opts{"config-override"}{$param});
@@ -811,13 +863,15 @@ foreach my $param ( keys(%{$opts{"config-override"}}) ) {
         printf("Unkown config parameter %s in --config-override\n", $param);
         exit(1);
     }
-    $newConf->[$newVars->{$param}]{text} = $opts{"config-override"}{$param};
+    $value .= ";\n\n";
+    $newConf->[$newVars->{$param}]{text}
+            =~ s/(\s*\$Conf\{$param}\s*=\s*).*/$1$value/s;
 }
 
 #
 # Now backup and write the config file
 #
-my $confCopy = "$dest.pre-__VERSION__";
+my $confCopy = "$dest.pre-4.0.0alpha0";
 if ( -f $dest && !-f $confCopy ) {
     #
     # Make copy of config file, preserving ownership and modes
@@ -906,12 +960,6 @@ with large file support enabled.  Use
 
 to check if perl has large file support (undef means no support).
 EOF
-}
-
-eval "use File::RsyncP;";
-if ( !$@ && $File::RsyncP::VERSION < 0.68 ) {
-    print("\nWarning: you need to upgrade File::RsyncP;"
-        . " I found $File::RsyncP::VERSION and BackupPC needs 0.68\n");
 }
 
 exit(0);
@@ -1167,14 +1215,22 @@ Examples
 
 =item B<--compress-level=N>
 
-Set the configuration compression level to N.  Default is 3
-if Compress::Zlib is installed.
+Set the configuration compression level to N.  Default is 3.
 
 =item B<--config-dir CONFIG_DIR>
 
 Configuration directory for new installations.  Defaults
 to /etc/BackupPC with FHS.  Automatically extracted
 from --config-path for existing installations.
+
+=item B<--config-override name=value>
+
+Override a specific configuration parameter.  Can be specified multiple
+times.  "Name" is the parameter name and "value" is the exact text that
+is inserted in the config.pl file (so you will need to escape quotes etc).
+For example, to override $Conf{ServerHost} you would specify:
+
+    --config-override ServerHost=\"myhost\"
 
 =item B<--config-path CONFIG_PATH>
 

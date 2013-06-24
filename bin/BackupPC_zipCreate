@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_zipCreate: create a zip archive of an existing dump
@@ -21,7 +21,7 @@
 #       -r pathRemove   path prefix that will be replaced with pathAdd
 #       -p pathAdd      new path prefix
 #       -c level        compression level (default is 0, no compression)
-#       -e charset      charset for encoding file names (default: utf8)
+#       -e charset      charset for encoding file names (default: cp1252)
 #
 #     The -h, -n and -s options specify which dump is used to generate
 #     the zip archive.  The -r and -p options can be used to relocate
@@ -33,11 +33,11 @@
 #   Based on Backup_tarCreate by Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2015  Craig Barratt and Guillaume Filion
+#   Copyright (C) 2002-2013  Craig Barratt and Guillaume Filion
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -46,12 +46,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,15 +58,14 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "__INSTALLDIR__/lib";
 use Archive::Zip qw(:ERROR_CODES);
 use File::Path;
 use Getopt::Std;
 use Encode qw/from_to/;
 use IO::Handle;
 use BackupPC::Lib;
-use BackupPC::Attrib qw(:all);
-use BackupPC::FileZIO;
+use BackupPC::XS qw( :all );
 use BackupPC::Zip::FileMember;
 use BackupPC::View;
 
@@ -256,7 +254,7 @@ sub ZipWriteFile
         #
 	# Start by reading the contents of the link.
 	#
-        my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0, $hdr->{compress});
+        my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
             print(STDERR "Unable to open file $hdr->{fullPath}\n");
             $ErrorCnt++;
@@ -310,7 +308,7 @@ sub ZipWriteFile
     
     # Specify the compression level for this member
     $zipmember->desiredCompressionLevel($compLevel) if ($compLevel =~ /[0-9]/);
-    
+
     if ( $Charset =~ /^(?:utf[-_]?8)?$/i ) {
         # Set general purpose bit 11 for UTF-8 code page
         $zipmember->{bitFlag} = $zipmember->{bitFlag} | 0x0800 ;

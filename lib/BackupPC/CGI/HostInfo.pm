@@ -10,11 +10,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2015  Craig Barratt
+#   Copyright (C) 2003-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -23,12 +23,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -125,26 +124,30 @@ EOF
     my @Backups = $bpc->BackupInfoRead($host);
     my($str, $sizeStr, $compStr, $errStr, $warnStr);
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-        my $startTime = timeStamp2($Backups[$i]{startTime});
-        my $dur       = $Backups[$i]{endTime} - $Backups[$i]{startTime};
-        $dur          = 1 if ( $dur <= 0 );
-        my $duration  = sprintf("%.1f", $dur / 60);
-        my $MB        = sprintf("%.1f", $Backups[$i]{size} / (1024*1024));
-        my $MBperSec  = sprintf("%.2f", $Backups[$i]{size} / (1024*1024*$dur));
-        my $MBExist   = sprintf("%.1f", $Backups[$i]{sizeExist} / (1024*1024));
-        my $MBNew     = sprintf("%.1f", $Backups[$i]{sizeNew} / (1024*1024));
         my($MBExistComp, $ExistComp, $MBNewComp, $NewComp);
-        if ( $Backups[$i]{sizeExist} && $Backups[$i]{sizeExistComp} ) {
-            $MBExistComp = sprintf("%.1f", $Backups[$i]{sizeExistComp}
-                                                / (1024 * 1024));
-            $ExistComp = sprintf("%.1f%%", 100 *
-                  (1 - $Backups[$i]{sizeExistComp} / $Backups[$i]{sizeExist}));
-        }
-        if ( $Backups[$i]{sizeNew} && $Backups[$i]{sizeNewComp} ) {
-            $MBNewComp = sprintf("%.1f", $Backups[$i]{sizeNewComp}
-                                                / (1024 * 1024));
-            $NewComp = sprintf("%.1f%%", 100 *
-                  (1 - $Backups[$i]{sizeNewComp} / $Backups[$i]{sizeNew}));
+        my($dur, $duration, $MB, $MBperSec, $MBExist, $MBNew);
+        my $startTime = timeStamp2($Backups[$i]{startTime});
+
+        if ( $Backups[$i]{type} ne "active" ) {
+            $dur       = $Backups[$i]{endTime} - $Backups[$i]{startTime};
+            $dur          = 1 if ( $dur <= 0 );
+            $duration  = sprintf("%.1f", $dur / 60);
+            $MB        = sprintf("%.1f", $Backups[$i]{size} / (1024*1024));
+            $MBperSec  = sprintf("%.2f", $Backups[$i]{size} / (1024*1024*$dur));
+            $MBExist   = sprintf("%.1f", $Backups[$i]{sizeExist} / (1024*1024));
+            $MBNew     = sprintf("%.1f", $Backups[$i]{sizeNew} / (1024*1024));
+            if ( $Backups[$i]{sizeExist} && $Backups[$i]{sizeExistComp} ) {
+                $MBExistComp = sprintf("%.1f", $Backups[$i]{sizeExistComp}
+                                                    / (1024 * 1024));
+                $ExistComp = sprintf("%.1f%%", 100 *
+                      (1 - $Backups[$i]{sizeExistComp} / $Backups[$i]{sizeExist}));
+            }
+            if ( $Backups[$i]{sizeNew} && $Backups[$i]{sizeNewComp} ) {
+                $MBNewComp = sprintf("%.1f", $Backups[$i]{sizeNewComp}
+                                                    / (1024 * 1024));
+                $NewComp = sprintf("%.1f%%", 100 *
+                      (1 - $Backups[$i]{sizeNewComp} / $Backups[$i]{sizeNew}));
+            }
         }
         my $age = sprintf("%.1f", (time - $Backups[$i]{startTime}) / (24*3600));
         my $browseURL = "$MyURL?action=browse&host=${EscURI($host)}&num=$Backups[$i]{num}";

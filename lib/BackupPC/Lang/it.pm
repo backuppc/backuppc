@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #
 # Italian i18n file
 #
@@ -7,7 +7,20 @@
 #  Giuseppe Iuculano 2006
 #  Vittorio Macchi 2006
 #
-
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 # --------------------------------
 
@@ -111,6 +124,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td> Comando </td>
     <td align="center"> PID </td>
     <td align="center"> PID Xfer </td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1235,6 +1250,7 @@ $Lang{off} = "spento";
 
 $Lang{backupType_full} = "comp.";
 $Lang{backupType_incr} = "incr.";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "parziale";
 
 $Lang{failed} = "fallito";
@@ -1248,8 +1264,8 @@ $Lang{Status_backup_starting} = "avvio backup";
 $Lang{Status_backup_in_progress} = "backup in esecuzione";
 $Lang{Status_restore_starting} = "avvio ripristino";
 $Lang{Status_restore_in_progress} = "restore in esecuzione";
-$Lang{Status_link_pending} = "collegamenti pendenti";
-$Lang{Status_link_running} = "collegamenti in esecuzione";
+$Lang{Status_admin_pending} = "collegamenti pendenti";
+$Lang{Status_admin_running} = "collegamenti in esecuzione";
 
 $Lang{Reason_backup_done}    = "backup eseguito";
 $Lang{Reason_restore_done}   = "restore eseguito";
@@ -1461,7 +1477,6 @@ $Lang{CfgEdit_Button_Delete}   = "Cancella";
 $Lang{CfgEdit_Button_Add}      = "Aggiungi";
 $Lang{CfgEdit_Button_Override} = "Sovrascrivi";
 $Lang{CfgEdit_Button_New_Key}  = "Nuova chiave";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Errore: Non salvo poich&eacute; sono presenti errori";

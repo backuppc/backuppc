@@ -29,7 +29,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2009  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
 #   See http://backuppc.sourceforge.net.
 #
@@ -114,6 +114,15 @@ $Conf{UmaskMode} = 027;
 # of regular backups to run).
 #
 $Conf{WakeupSchedule} = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
+
+#
+# If a V3 pool exists (ie: an upgrade) set this to 1.  This causes the
+# V3 pool to be checked for matches if there are no matches in the V4
+# pool.
+#
+# For new installations, this should be set to 0.
+#
+$Conf{PoolV3Enabled} = 0;
 
 #
 # Maximum number of simultaneous backups to run.  If there
@@ -241,12 +250,6 @@ $Conf{Bzip2Path} = '';
 $Conf{DfMaxUsagePct} = 95;
 
 #
-# How long BackupPC_trashClean sleeps in seconds between each check
-# of the trash directory.  Once every 5 minutes should be reasonable.
-#
-$Conf{TrashCleanSleepSec} = 300;
-
-#
 # List of DHCP address ranges we search looking for PCs to backup.
 # This is an array of hashes for each class C address range.
 # This is only needed if hosts in the conf/hosts file have the
@@ -358,7 +361,6 @@ $Conf{PerlModuleLoad}     = undef;
 $Conf{ServerInitdPath} = '';
 $Conf{ServerInitdStartCmd} = '';
 
-
 ###########################################################################
 # What to backup and when to do it
 # (can be overridden in the per-PC config.pl)
@@ -386,45 +388,81 @@ $Conf{FullPeriod} = 6.97;
 $Conf{IncrPeriod} = 0.97;
 
 #
-# Number of full backups to keep.  Must be >= 1.
+# In V4+, full/incremental backups are decoupled from whether the stored
+# backup is filled/unfilled.
+#
+# To mimic V3 behaviour, if $Conf{FillCycle} is set to zero then fill/unfilled
+# will continue to match full/incremental: full backups will remained filled,
+# and incremental backups will be unfilled.  (However, the most recent
+# backup is always filled, whether it is full or incremental.)  This is
+# the recommended setting to keep things simple: since the backup expiry
+# is actually done based on filled/unfilled (not full/incremental), keeping
+# them synched makes it easier to understand the expiry settings.
+#
+# If you plan to do incremental-only backups (ie: set FullPeriod to a very
+# large value), then you should set $Conf{FillCycle} to how often you
+# want a stored backup to be filled.  For example, if $Conf{FillCycle} is
+# set to 7, then every 7th backup will be filled (whether or not the
+# corresponding backup was a full or not).
+#
+# There are two reasons you will want a non-zero $Conf{FillCycle} setting
+# when you are only doing incrementals:
+#
+#   - a filled backup is a starting point for merging deltas when you restore
+#     or view backups.  So having periodic filled backups makes it more
+#     efficient to view or restore older backups.
+#
+#   - more importantly, in V4+, deleting backups is done based on Fill/Unfilled,
+#     not whether the original backup was full/incremental.  If there aren't
+#     any filled backups (other than the most recent), then the FillKeepPeriod
+#     settings won't have any effect.
+#
+$Conf{FillCycle} = 0;
+
+#
+# Number of filled backups to keep.  Must be >= 1.
+#
+# Note: Starting in V4+, deleting backups is done based on Fill/Unfilled,
+# not whether the original backup was full/incremental.  
+# reasons these parameters continue to be called FullKeepCnt, rather than
+# FilledKeepCnt.  If $Conf{FillCycle} is 0, then full backups continue
+# to be filled, so the terms are interchangeable.  For V3 backups,
+# the expiry settings have their original meanings.
 #
 # In the steady state, each time a full backup completes successfully
 # the oldest one is removed.  If this number is decreased, the
 # extra old backups will be removed.
 #
-# If filling of incremental dumps is off the oldest backup always
-# has to be a full (ie: filled) dump.  This might mean one or two
-# extra full dumps are kept until the oldest incremental backups expire.
-#
 # Exponential backup expiry is also supported.  This allows you to specify:
 #
-#   - num fulls to keep at intervals of 1 * $Conf{FullPeriod}, followed by
-#   - num fulls to keep at intervals of 2 * $Conf{FullPeriod},
-#   - num fulls to keep at intervals of 4 * $Conf{FullPeriod},
-#   - num fulls to keep at intervals of 8 * $Conf{FullPeriod},
-#   - num fulls to keep at intervals of 16 * $Conf{FullPeriod},
+#   - num fulls to keep at intervals of 1 * $Conf{FillCycle}, followed by
+#   - num fulls to keep at intervals of 2 * $Conf{FillCycle},
+#   - num fulls to keep at intervals of 4 * $Conf{FillCycle},
+#   - num fulls to keep at intervals of 8 * $Conf{FillCycle},
+#   - num fulls to keep at intervals of 16 * $Conf{FillCycle},
 #
 # and so on.  This works by deleting every other full as each expiry
-# boundary is crossed.
+# boundary is crossed.  Note: if $Conf{FillCycle} is 0, then
+# $Conf{FullPeriod} is used instead in these calculations.
 #
 # Exponential expiry is specified using an array for $Conf{FullKeepCnt}:
 #
 #   $Conf{FullKeepCnt} = [4, 2, 3];
 #
 # Entry #n specifies how many fulls to keep at an interval of
-# 2^n * $Conf{FullPeriod} (ie: 1, 2, 4, 8, 16, 32, ...).
+# 2^n * $Conf{FillCycle} (ie: 1, 2, 4, 8, 16, 32, ...).
 #
 # The example above specifies keeping 4 of the most recent full backups
 # (1 week interval) two full backups at 2 week intervals, and 3 full
 # backups at 4 week intervals, eg:
 #
 #    full 0 19 weeks old   \
-#    full 1 15 weeks old    >---  3 backups at 4 * $Conf{FullPeriod}
+#    full 1 15 weeks old    >---  3 backups at 4 * $Conf{FillCycle}
 #    full 2 11 weeks old   / 
-#    full 3  7 weeks old   \____  2 backups at 2 * $Conf{FullPeriod}
+#    full 3  7 weeks old   \____  2 backups at 2 * $Conf{FillCycle}
 #    full 4  5 weeks old   /
 #    full 5  3 weeks old   \
-#    full 6  2 weeks old    \___  4 backups at 1 * $Conf{FullPeriod}
+#    full 6  2 weeks old    \___  4 backups at 1 * $Conf{FillCycle}
 #    full 7  1 week old     /
 #    full 8  current       /
 #
@@ -433,12 +471,12 @@ $Conf{IncrPeriod} = 0.97;
 # new full is completed and the oldest is deleted, giving:
 #
 #    full 0 16 weeks old   \
-#    full 1 12 weeks old    >---  3 backups at 4 * $Conf{FullPeriod}
+#    full 1 12 weeks old    >---  3 backups at 4 * $Conf{FillCycle}
 #    full 2  8 weeks old   / 
-#    full 3  6 weeks old   \____  2 backups at 2 * $Conf{FullPeriod}
+#    full 3  6 weeks old   \____  2 backups at 2 * $Conf{FillCycle}
 #    full 4  4 weeks old   /
 #    full 5  3 weeks old   \
-#    full 6  2 weeks old    \___  4 backups at 1 * $Conf{FullPeriod}
+#    full 6  2 weeks old    \___  4 backups at 1 * $Conf{FillCycle}
 #    full 7  1 week old     /
 #    full 8  current       /
 #
@@ -447,9 +485,9 @@ $Conf{IncrPeriod} = 0.97;
 #
 #   $Conf{FullKeepCnt} = [4, 0, 4, 0, 0, 2];
 #
-# This will keep 10 full dumps, 4 most recent at 1 * $Conf{FullPeriod},
-# followed by 4 at an interval of 4 * $Conf{FullPeriod} (approx 1 month
-# apart), and then 2 at an interval of 32 * $Conf{FullPeriod} (approx
+# This will keep 10 full dumps, 4 most recent at 1 * $Conf{FillCycle},
+# followed by 4 at an interval of 4 * $Conf{FillCycle} (approx 1 month
+# apart), and then 2 at an interval of 32 * $Conf{FillCycle} (approx
 # 7-8 months apart).
 #
 # Example: these two settings are equivalent and both keep just
@@ -466,7 +504,7 @@ $Conf{FullKeepCnt} = 1;
 # they are.
 #
 # Note that $Conf{FullAgeMax} will be increased to $Conf{FullKeepCnt}
-# times $Conf{FullPeriod} if $Conf{FullKeepCnt} specifies enough
+# times $Conf{FillCycle} if $Conf{FullKeepCnt} specifies enough
 # full backups to exceed $Conf{FullAgeMax}.
 #
 $Conf{FullKeepCntMin} = 1;
@@ -474,6 +512,13 @@ $Conf{FullAgeMax}     = 90;
 
 #
 # Number of incremental backups to keep.  Must be >= 1.
+#
+# Note: Starting in V4+, deleting backups is done based on Fill/Unfilled,
+# not whether the original backup was full/incremental.  For historical
+# reasons these parameters continue to be called IncrKeepCnt, rather than
+# UnfilledKeepCnt.  If $Conf{FillCycle} is 0, then incremental backups
+# continue to be unfilled, so the terms are interchangeable.  For V3 backups,
+# the expiry settings have their original meanings.
 #
 # In the steady state, each time an incr backup completes successfully
 # the oldest one is removed.  If this number is decreased, the
@@ -488,84 +533,6 @@ $Conf{IncrKeepCnt} = 6;
 #
 $Conf{IncrKeepCntMin} = 1;
 $Conf{IncrAgeMax}     = 30;
-
-#
-# Level of each incremental.  "Level" follows the terminology
-# of dump(1).  A full backup has level 0.  A new incremental
-# of level N will backup all files that have changed since
-# the most recent backup of a lower level.
-#
-# The entries of $Conf{IncrLevels} apply in order to each
-# incremental after each full backup.  It wraps around until
-# the next full backup.  For example, these two settings
-# have the same effect:
-#
-#       $Conf{IncrLevels} = [1, 2, 3];
-#       $Conf{IncrLevels} = [1, 2, 3, 1, 2, 3];
-#
-# This means the 1st and 4th incrementals (level 1) go all
-# the way back to the full.  The 2nd and 3rd (and 5th and
-# 6th) backups just go back to the immediate preceeding
-# incremental.
-#
-# Specifying a sequence of multi-level incrementals will
-# usually mean more than $Conf{IncrKeepCnt} incrementals will
-# need to be kept, since lower level incrementals are needed
-# to merge a complete view of a backup.  For example, with
-#
-#       $Conf{FullPeriod}  = 7;
-#       $Conf{IncrPeriod}  = 1;
-#       $Conf{IncrKeepCnt} = 6;
-#       $Conf{IncrLevels}  = [1, 2, 3, 4, 5, 6];
-#
-# there will be up to 11 incrementals in this case: 
-#
-#       backup #0  (full, level 0, oldest)
-#       backup #1  (incr, level 1)
-#       backup #2  (incr, level 2)
-#       backup #3  (incr, level 3)
-#       backup #4  (incr, level 4)
-#       backup #5  (incr, level 5)
-#       backup #6  (incr, level 6)
-#       backup #7  (full, level 0)
-#       backup #8  (incr, level 1)
-#       backup #9  (incr, level 2)
-#       backup #10 (incr, level 3)
-#       backup #11 (incr, level 4)
-#       backup #12 (incr, level 5, newest)
-#
-# Backup #1 (the oldest level 1 incremental) can't be deleted
-# since backups 2..6 depend on it.  Those 6 incrementals can't
-# all be deleted since that would only leave 5 (#8..12).
-# When the next incremental happens (level 6), the complete
-# set of 6 older incrementals (#1..6) will be deleted, since
-# that maintains the required number ($Conf{IncrKeepCnt})
-# of incrementals.  This situation is reduced if you set
-# shorter chains of multi-level incrementals, eg:
-#
-#       $Conf{IncrLevels}  = [1, 2, 3];
-#
-# would only have up to 2 extra incremenals before all 3
-# are deleted.
-#
-# BackupPC as usual merges the full and the sequence
-# of incrementals together so each incremental can be
-# browsed and restored as though it is a complete backup.
-# If you specify a long chain of incrementals then more
-# backups need to be merged when browsing, restoring,
-# or getting the starting point for rsync backups.
-# In the example above (levels 1..6), browing backup
-# #6 requires 7 different backups (#0..6) to be merged.
-#
-# Because of this merging and the additional incrementals
-# that need to be kept, it is recommended that some
-# level 1 incrementals be included in $Conf{IncrLevels}.
-#
-# Prior to version 3.0 incrementals were always level 1,
-# meaning each incremental backed up all the files that
-# changed since the last full.
-#
-$Conf{IncrLevels} = [1];
 
 #
 # Disable all full and incremental backups.  These settings are
@@ -589,51 +556,6 @@ $Conf{IncrLevels} = [1];
 $Conf{BackupsDisable} = 0;
 
 #
-# A failed full backup is saved as a partial backup.  The rsync
-# XferMethod can take advantage of the partial full when the next
-# backup is run. This parameter sets the age of the partial full
-# in days: if the partial backup is older than this number of
-# days, then rsync will ignore (not use) the partial full when
-# the next backup is run.  If you set this to a negative value
-# then no partials will be saved.  If you set this to 0, partials
-# will be saved, but will not be used by the next backup.
-#
-# The default setting of 3 days means that a partial older than
-# 3 days is ignored when the next full backup is done.
-#
-$Conf{PartialAgeMax} = 3;
-
-#
-# Whether incremental backups are filled.  "Filling" means that the
-# most recent full (or filled) dump is merged into the new incremental
-# dump using hardlinks.  This makes an incremental dump look like a
-# full dump.  Prior to v1.03 all incremental backups were filled.
-# In v1.4.0 and later the default is off.
-#
-# BackupPC, and the cgi interface in particular, do the right thing on
-# un-filled incremental backups.  It will correctly display the merged
-# incremental backup with the most recent filled backup, giving the
-# un-filled incremental backups a filled appearance.  That means it
-# invisible to the user whether incremental dumps are filled or not.
-#
-# Filling backups takes a little extra disk space, and it does cost
-# some extra disk activity for filling, and later removal.  Filling
-# is no longer useful, since file mangling and compression doesn't
-# make a filled backup very useful. It's likely the filling option
-# will be removed from future versions: filling will be delegated to
-# the display and extraction of backup data.
-#
-# If filling is off, BackupPC makes sure that the oldest backup is
-# a full, otherwise the following incremental backups will be
-# incomplete.  This might mean an extra full backup has to be
-# kept until the following incremental backups expire.
-#
-# The default is off.  You can turn this on or off at any
-# time without affecting existing backups.
-#
-$Conf{IncrFill} = 0;
-
-#
 # Number of restore logs to keep.  BackupPC remembers information about
 # each restore request.  This number per client will be kept around before
 # the oldest ones are pruned.
@@ -654,11 +576,6 @@ $Conf{ArchiveInfoKeepCnt} = 10;
 #
 # List of directories or files to backup.  If this is defined, only these
 # directories or files will be backed up.
-#
-# When editing from the web interface, you should add a valid ShareName
-# (based on $Conf{XferMethod}), and then enter the directories specific
-# to that ShareName.  A special ShareName "*" matches any ShareName that
-# doesn't have an explicit entry.
 #
 # For Smb, only one of $Conf{BackupFilesExclude} and $Conf{BackupFilesOnly}
 # can be specified per share. If both are set for a particular share, then
@@ -696,11 +613,6 @@ $Conf{BackupFilesOnly} = undef;
 # can be specified per share.  If both are set for a particular share,
 # then $Conf{BackupFilesOnly} takes precedence and
 # $Conf{BackupFilesExclude} is ignored.
-#
-# When editing from the web interface, you should add a valid ShareName
-# (based on $Conf{XferMethod}), and then enter the directories or files
-# specific to that ShareName.  A special ShareName "*" matches any
-# ShareName that doesn't have an explicit entry.
 #
 # This can be set to a string, an array of strings, or, in the case
 # of multiple shares, a hash of strings or arrays.  A hash is used
@@ -1176,47 +1088,34 @@ $Conf{TarClientPath} = '';
 # (can be overwritten in the per-PC log file)
 ###########################################################################
 #
-# Path to rsync executable on the client
+# Path to rsync executable on the client.  If it is set, it is passed to
+# to rsync_bpc using the --rsync-path option.  You can also add sudo,
+# for example:
+#
+#       $Conf{RsyncClientPath} = 'sudo /usr/bin/rsync';
+#
+# This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
 $Conf{RsyncClientPath} = '';
 
 #
-# Full command to run rsync on the client machine.  The following variables
-# are substituted at run-time:
+# Full path to rsync_bpc on the server.  Rsync_bpc is the customized
+# version of rsync that is used on the server for rsync and rsyncd
+# transfers.
 #
-#        $host           host name being backed up
-#        $hostIP         host's IP address
-#        $shareName      share name to backup (ie: top-level directory path)
-#        $rsyncPath      same as $Conf{RsyncClientPath}
-#        $sshPath        same as $Conf{SshPath}
-#        $argList        argument list, built from $Conf{RsyncArgs},
-#                        $shareName, $Conf{BackupFilesExclude} and
-#                        $Conf{BackupFilesOnly}
-#
-# This setting only matters if $Conf{XferMethod} = 'rsync'.
-#
-$Conf{RsyncClientCmd} = '$sshPath -q -x -l root $host $rsyncPath $argList+';
+$Conf{RsyncBackupPCPath} = "";
 
 #
-# Full command to run rsync for restore on the client.  The following
-# variables are substituted at run-time:
-#
-#        $host           host name being backed up
-#        $hostIP         host's IP address
-#        $shareName      share name to backup (ie: top-level directory path)
-#        $rsyncPath      same as $Conf{RsyncClientPath}
-#        $sshPath        same as $Conf{SshPath}
-#        $argList        argument list, built from $Conf{RsyncArgs},
-#                        $shareName, $Conf{BackupFilesExclude} and
-#                        $Conf{BackupFilesOnly}
+# Ssh srguments for rsync to run ssh to connec to the client.
+# Rather than permit root ssh on the client, it is more secure
+# to just allow ssh via a low-privileged user, and use sudo
+# in $Conf{RsyncClientPath}.
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
-# Note: all Cmds are executed directly without a shell, so the prog name
-# needs to be a full path and you can't include shell syntax like
-# redirection and pipes; put that in a script if you need it.
-#
-$Conf{RsyncClientRestoreCmd} = '$sshPath -q -x -l root $host $rsyncPath $argList+';
+$Conf{RsyncSshArgs} = [
+        '-e', '$sshPath -l root',
+];
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should
@@ -1257,63 +1156,49 @@ $Conf{RsyncdUserName} = '';
 $Conf{RsyncdPasswd} = '';
 
 #
-# Whether authentication is mandatory when connecting to the client's
-# rsyncd.  By default this is on, ensuring that BackupPC will refuse to
-# connect to an rsyncd on the client that is not password protected.
-# Turn off at your own risk.
+# Additional arguments for a full rsync or rsyncd backup.
 #
-$Conf{RsyncdAuthRequired} = 1;
-
+# The --checksum argument causes the client to send full-file checksum
+# for every file (meaning the client reads every file and computes the
+# checksum, which is sent with the file list).  On the server, rsync_bpc
+# will skip any files that have a matching full-file checksum, and size,
+# mtime and number of hardlinks.  Any file that has different attributes
+# will be updating using the block rsync algorithm.
 #
-# When rsync checksum caching is enabled (by adding the
-# --checksum-seed=32761 option to $Conf{RsyncArgs}), the cached
-# checksums can be occasionally verified to make sure the file
-# contents matches the cached checksums.  This is to avoid the
-# risk that disk problems might cause the pool file contents to
-# get corrupted, but the cached checksums would make BackupPC
-# think that the file still matches the client.
+# In V3, full backups applied the block rsync algorithm to every file,
+# which is a lot slower but a bit more conservative.  To get that
+# behavior, replace --checksum with --ignore-times.
 #
-# This setting is the probability (0 means never and 1 means always)
-# that a file will be rechecked.  Setting it to 0 means the checksums
-# will not be rechecked (unless there is a phase 0 failure).  Setting
-# it to 1 (ie: 100%) means all files will be checked, but that is
-# not a desirable setting since you are better off simply turning
-# caching off (ie: remove the --checksum-seed option).
-#   
-# The default of 0.01 means 1% (on average) of the files during a full
-# backup will have their cached checksum re-checked.
-#   
-# This setting has no effect unless checksum caching is turned on.
-#   
-$Conf{RsyncCsumCacheVerifyProb} = 0.01;
+$Conf{RsyncFullArgsExtra} = [
+            '--checksum',
+];
 
 #
 # Arguments to rsync for backup.  Do not edit the first set unless you
-# have a thorough understanding of how File::RsyncP works.
+# have a good understanding of rsync options.
 #
 $Conf{RsyncArgs} = [
-	    #
-	    # Do not edit these!
-	    #
+            '--super',
+            '--recursive',
+            '--protect-args',
             '--numeric-ids',
             '--perms',
             '--owner',
             '--group',
             '-D',
+            '--times',
             '--links',
             '--hard-links',
-            '--times',
-            '--block-size=2048',
-            '--recursive',
-
+            '--delete',
+            '--partial',
+            '--log-format=log: %o %i %B %8U,%8G %9l %f%L',
+            '--stats',
 	    #
-	    # Rsync >= 2.6.3 supports the --checksum-seed option
-            # which allows rsync checksum caching on the server.
-	    # Uncomment this to enable rsync checksum caching if
-            # you have a recent client rsync version and you want
-            # to enable checksum caching.
+	    # Add additional arguments here, for example --acls or --xattrs
+            # if all the clients support them.
 	    #
-	    #'--checksum-seed=32761',
+            #'--acls',
+            #'--xattrs',
 ];
 
 #
@@ -1329,6 +1214,8 @@ $Conf{RsyncArgs} = [
 #     $Conf{RsyncArgsExtra} = [
 #           '--exclude', '/proc',
 #           '--exclude', '*.tmp',
+#           '--acls',
+#           '--xattrs',
 #     ];
 #
 # Both $Conf{RsyncArgs} and $Conf{RsyncArgsExtra} are subject
@@ -1368,34 +1255,26 @@ $Conf{RsyncArgsExtra} = [];
 # Note: $Conf{RsyncArgsExtra} doesn't apply to $Conf{RsyncRestoreArgs}.
 #
 $Conf{RsyncRestoreArgs} = [
-	    #
-	    # Do not edit these!
-	    #
-	    '--numeric-ids',
-	    '--perms',
-	    '--owner',
-	    '--group',
-	    '-D',
-	    '--links',
+            '--recursive',
+            '--super',
+            '--protect-args',
+            '--numeric-ids',
+            '--perms',
+            '--owner',
+            '--group',
+            '-D',
+            '--times',
+            '--links',
             '--hard-links',
-	    '--times',
-	    '--block-size=2048',
-	    '--relative',
-	    '--ignore-times',
-	    '--recursive',
-
-	    #
-	    # Rsync >= 2.6.3 supports the --checksum-seed option
-            # which allows rsync checksum caching on the server.
-	    # Uncomment this to enable rsync checksum caching if
-            # you have a recent client rsync version and you want
-            # to enable checksum caching.
-	    #
-	    #'--checksum-seed=32761',
-
+            '--delete',
+            '--partial',
+            '--log-format=log: %o %i %B %8U,%8G %9l %f%L',
+            '--stats',
 	    #
 	    # Add additional arguments here
 	    #
+            #'--acls',
+            #'--xattrs',
 ];
 
 ###########################################################################
@@ -1703,11 +1582,7 @@ $Conf{PingMaxMsec} = 20;
 # pool.  This avoids having the pool grow to accommodate both compressed
 # and uncompressed backups.  See the documentation for more information.
 #
-# Note: compression needs the Compress::Zlib perl library.  If the
-# Compress::Zlib library can't be found then $Conf{CompressLevel} is
-# forced to 0 (compression off).
-#
-$Conf{CompressLevel} = 0;
+$Conf{CompressLevel} = 3;
 
 #
 # Timeout in seconds when listening for the transport program's
@@ -2192,15 +2067,13 @@ $Conf{CgiUserConfigEditEnable} = 1;
 $Conf{CgiUserConfigEdit} = {
         FullPeriod                => 1,
         IncrPeriod                => 1,
+        FillCycle                 => 1,
         FullKeepCnt               => 1,
         FullKeepCntMin            => 1,
         FullAgeMax                => 1,
         IncrKeepCnt               => 1,
         IncrKeepCntMin            => 1,
         IncrAgeMax                => 1,
-        IncrLevels                => 1,
-        IncrFill                  => 1,
-        PartialAgeMax             => 1,
         RestoreInfoKeepCnt        => 1,
         ArchiveInfoKeepCnt        => 1,
         BackupFilesOnly           => 1,
@@ -2231,12 +2104,11 @@ $Conf{CgiUserConfigEdit} = {
         RsyncdPasswd              => 1,
         RsyncdUserName            => 1,
         RsyncdAuthRequired        => 1,
-        RsyncCsumCacheVerifyProb  => 1,
         RsyncArgs                 => 1,
         RsyncArgsExtra            => 1,
+        RsyncFullArgsExtra        => 1,
+        RsyncSshArgs              => 1,
         RsyncRestoreArgs          => 1,
-        RsyncClientCmd            => 0,
-        RsyncClientRestoreCmd     => 0,
         RsyncClientPath           => 0,
         FtpShareName              => 1,
         FtpUserName               => 1,

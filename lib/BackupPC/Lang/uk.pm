@@ -1,9 +1,21 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 
 # By Serhiy Yakimchuck yakim@yakim.org.ua 02 sept 2012 vor version 3.2.1
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
-#my %lang;
-#use strict;
 use utf8;
 # --------------------------------
 
@@ -105,6 +117,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td> Команда </td>
     <td align="center"> PID </td>
     <td align="center"> Xfer PID </td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1221,6 +1235,7 @@ $Lang{off} = "off";
 
 $Lang{backupType_full}    = "повний";
 $Lang{backupType_incr}    = "інкрементальний";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "частковий";
 
 $Lang{failed} = "неуспішно";
@@ -1234,8 +1249,8 @@ $Lang{Status_backup_starting} = "Резерв. копіювання запуще
 $Lang{Status_backup_in_progress} = "Резерв. копіювання в процесі";
 $Lang{Status_restore_starting} = "Відновлення запущено";
 $Lang{Status_restore_in_progress} = "Відновлення в процесі";
-$Lang{Status_link_pending} = "link pending";
-$Lang{Status_link_running} = "link running";
+$Lang{Status_admin_pending} = "link pending";
+$Lang{Status_admin_running} = "link running";
 
 $Lang{Reason_backup_done}    = "зроблено";
 $Lang{Reason_restore_done}   = "відновлення зроблено";
@@ -1443,7 +1458,6 @@ $Lang{CfgEdit_Button_Delete}   = "Видалити";
 $Lang{CfgEdit_Button_Add}      = "Додати";
 $Lang{CfgEdit_Button_Override} = "Перезаписати";
 $Lang{CfgEdit_Button_New_Key}  = "Нове значення";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Error: No save due to errors";

@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_archive: Archive files for an archive client.
@@ -11,11 +11,11 @@
 #   Josh Marshall
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2015  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -24,12 +24,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -37,9 +36,9 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "__INSTALLDIR__/lib";
 use BackupPC::Lib;
-use BackupPC::FileZIO;
+use BackupPC::XS;
 use BackupPC::Xfer::Archive;
 
 use vars qw( %ArchiveReq );
@@ -93,7 +92,7 @@ if ( !-f "$Dir/LOCK" ) {
 }
 
 my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-my $logPath = sprintf("$Dir/LOG.%02d%04d", $mon + 1, $year + 1900);
+my $logPath = sprintf("%s/LOG.%02d%04d", $Dir, $mon + 1, $year + 1900);
 
 if ( !-f $logPath ) {
     #
@@ -107,7 +106,7 @@ if ( !-f $logPath ) {
         }
         $lastLog--;
         next if ( $file =~ /\.z$/ || !$Conf{CompressLevel} );
-        BackupPC::FileZIO->compressCopy($file,
+        BackupPC::XS::compressCopy($file,
                                         "$file.z",
                                         undef,
                                         $Conf{CompressLevel}, 1);
@@ -157,15 +156,8 @@ if ( $Conf{ClientNameAlias} ne "" ) {
     $host = $client;
 }
 
-#
-# Setup file extension for compression and open ArchiveLOG output file
-#
-if ( $Conf{CompressLevel} && !BackupPC::FileZIO->compOk ) {
-    $stat{hostError} = "Compress::Zlib not found";
-    exit(ArchiveCleanup($client));
-}
 my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
-my $ArchiveLOG = BackupPC::FileZIO->open("$Dir/ArchiveLOG$fileExt", 1,
+my $ArchiveLOG = BackupPC::XS::FileZIO::open("$Dir/ArchiveLOG$fileExt", 1,
                                      $Conf{CompressLevel});
 my($logMsg, $xfer);
 

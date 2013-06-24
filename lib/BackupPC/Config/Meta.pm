@@ -10,11 +10,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2015  Craig Barratt
+#   Copyright (C) 2004-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -23,12 +23,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -74,6 +73,7 @@ use vars qw(%ConfigMeta);
             type  => "shortlist",
             child => "float",
         },
+    PoolV3Enabled       => "boolean",
     MaxBackups	 	=> "integer",
     MaxUserBackups	=> "integer",
     MaxPendingCmds	=> "integer",
@@ -93,7 +93,6 @@ use vars qw(%ConfigMeta);
     GzipPath	 	=> {type => "execPath", undefIfEmpty => 1},
     Bzip2Path	 	=> {type => "execPath", undefIfEmpty => 1},
     DfMaxUsagePct	=> "float",
-    TrashCleanSleepSec	=> "integer",
     DHCPAddressRanges   => {
             type    => "list",
 	    emptyOk => 1,
@@ -131,6 +130,7 @@ use vars qw(%ConfigMeta);
     ######################################################################
     FullPeriod	 	=> "float",
     IncrPeriod	 	=> "float",
+    FillCycle	 	=> "integer",
     FullKeepCnt         => {
 	    type   => "shortlist",
 	    child  => "integer",
@@ -140,19 +140,12 @@ use vars qw(%ConfigMeta);
     IncrKeepCnt	 	=> "integer",
     IncrKeepCntMin	=> "integer",
     IncrAgeMax		=> "float",
-    IncrLevels          => {
-	    type   => "shortlist",
-	    child  => "integer",
-    },
-    PartialAgeMax	=> "float",
     BackupsDisable      => "integer",
-    IncrFill	 	=> "boolean",
     RestoreInfoKeepCnt	=> "integer",
     ArchiveInfoKeepCnt	=> "integer",
 
     BackupFilesOnly	=> {
             type      => "hash",
-            keyText   => "CfgEdit_Button_New_Share",
             emptyOk   => 1,
             childType => {
                 type      => "list",
@@ -162,7 +155,6 @@ use vars qw(%ConfigMeta);
     },
     BackupFilesExclude	=> {
             type      => "hash",
-            keyText   => "CfgEdit_Button_New_Share",
             emptyOk   => 1,
             childType => {
                 type      => "list",
@@ -238,9 +230,13 @@ use vars qw(%ConfigMeta);
 	    type   => "list",
 	    child  => "string",
     },
+    RsyncBackupPCPath	=> {type => "execPath", undefIfEmpty => 1},
     RsyncClientPath 	=> {type => "string", undefIfEmpty => 1},
-    RsyncClientCmd 	=> "string",
-    RsyncClientRestoreCmd => "string",
+    RsyncSshArgs	=> {
+	    type        => "list",
+	    emptyOk     => 1,
+	    child       => "string",
+    },
 
     ######################################################################
     # Rsyncd Configuration
@@ -248,12 +244,10 @@ use vars qw(%ConfigMeta);
     RsyncdClientPort	=> "integer",
     RsyncdUserName 	=> "string",
     RsyncdPasswd 	=> "string",
-    RsyncdAuthRequired	=> "boolean",
 
     ######################################################################
     # Rsync(d) Options
     ######################################################################
-    RsyncCsumCacheVerifyProb => "float",
     RsyncArgs	 	=> {
 	    type         => "list",
 	    emptyOk      => 1,
@@ -268,6 +262,11 @@ use vars qw(%ConfigMeta);
 	    type         => "list",
 	    emptyOk      => 1,
             undefIfEmpty => 1,
+	    child        => "string",
+    },
+    RsyncFullArgsExtra	 => {
+	    type         => "list",
+	    emptyOk      => 1,
 	    child        => "string",
     },
 
@@ -402,15 +401,13 @@ use vars qw(%ConfigMeta);
 	    child => {
                 FullPeriod                => "boolean",
                 IncrPeriod                => "boolean",
+                FillCycle                 => "boolean",
                 FullKeepCnt               => "boolean",
                 FullKeepCntMin            => "boolean",
                 FullAgeMax                => "boolean",
                 IncrKeepCnt               => "boolean",
                 IncrKeepCntMin            => "boolean",
                 IncrAgeMax                => "boolean",
-                IncrLevels                => "boolean",
-                PartialAgeMax             => "boolean",
-                IncrFill                  => "boolean",
                 RestoreInfoKeepCnt        => "boolean",
                 ArchiveInfoKeepCnt        => "boolean",
                 BackupFilesOnly           => "boolean",
@@ -441,13 +438,12 @@ use vars qw(%ConfigMeta);
                 RsyncdUserName            => "boolean",
                 RsyncdPasswd              => "boolean",
                 RsyncdAuthRequired        => "boolean",
-                RsyncCsumCacheVerifyProb  => "boolean",
                 RsyncArgs                 => "boolean",
                 RsyncArgsExtra            => "boolean",
                 RsyncRestoreArgs          => "boolean",
-                RsyncClientCmd            => "boolean",
+                RsyncFullArgsExtra        => "boolean",
+                RsyncSshArgs              => "boolean",
                 RsyncClientPath           => "boolean",
-                RsyncClientRestoreCmd     => "boolean",
                 FtpShareName              => "boolean",
                 FtpUserName               => "boolean",
                 FtpPasswd                 => "boolean",

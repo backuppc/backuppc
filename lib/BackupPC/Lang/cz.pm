@@ -1,8 +1,18 @@
-#!/usr/local/bin/perl
-
-#my %lang;
-#use strict;
-#use utf8;
+#!/usr/bin/perl
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 # --------------------------------
 
@@ -103,6 +113,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td> Pøíkaz </td>
     <td align="center"> PID </td>
     <td align="center"> Xfer PID </td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1220,6 +1232,7 @@ $Lang{off} = "vypnout";
 
 $Lang{backupType_full}    = "plný";
 $Lang{backupType_incr}    = "inkr";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "èásteèný";
 
 $Lang{failed} = "neúspìšný";
@@ -1233,8 +1246,8 @@ $Lang{Status_backup_starting} = "záloha se spouští";
 $Lang{Status_backup_in_progress} = "záloha probíhá";
 $Lang{Status_restore_starting} = "obnovení se spouští";
 $Lang{Status_restore_in_progress} = "obnovení probíhá";
-$Lang{Status_link_pending} = "link èeká";
-$Lang{Status_link_running} = "link bìží";
+$Lang{Status_admin_pending} = "link èeká";
+$Lang{Status_admin_running} = "link bìží";
 
 $Lang{Reason_backup_done}    = "hotovo";
 $Lang{Reason_restore_done}   = "obnovení dokonèeno";
@@ -1438,7 +1451,6 @@ $Lang{CfgEdit_Button_Delete}   = "Smazat";
 $Lang{CfgEdit_Button_Add}      = "Pøidat";
 $Lang{CfgEdit_Button_Override} = "Pøepsat";
 $Lang{CfgEdit_Button_New_Key}  = "Nový klíè";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Chyba: Neuloženo z dùvody chyb";

@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_dump: Dump a single client.
@@ -38,20 +38,26 @@
 #   full or incremental backup needs to be run.  If no backup is
 #   scheduled, or a ping to $client fails, then BackupPC_dump quits.
 #
+#   Starting in 4.x, the most recent backup is always filled and the prior
+#   backups are stored as reverse-time deltas.  So before the backup
+#   starts, the last prior backup numbered $M in $TopDir/pc/$client/$M
+#   is renamed to $TopDir/pc/$client/{$M+1}, and a new empty directory
+#   $TopDir/pc/$client/$M is created to stored the deltas.
+#
 #   The backup is done using the selected XferMethod (smb, tar, rsync,
-#   backuppcd etc), extracting the dump into $TopDir/pc/$client/new.
-#   The xfer output is put into $TopDir/pc/$client/XferLOG.
+#   backuppcd etc), extracting the dump into $TopDir/pc/$client/{$M+1}.
+#   The xfer output is put into $TopDir/pc/$client/XferLOG.{$M+1}.z.
 #
-#   If the dump succeeds (based on parsing the output of the XferMethod):
-#     - $TopDir/pc/$client/new is renamed to $TopDir/pc/$client/nnn, where
-#           nnn is the next sequential dump number.
-#     - $TopDir/pc/$client/XferLOG is renamed to $TopDir/pc/$client/XferLOG.nnn.
-#     - $TopDir/pc/$client/backups is updated.
+#   If the dump succeeds (based on parsing the output of the XferMethod)
+#   $TopDir/pc/$client/backups is updated.
 #
-#   If the dump fails:
-#     - $TopDir/pc/$client/new is moved to $TopDir/trash for later removal.
-#     - $TopDir/pc/$client/XferLOG is renamed to $TopDir/pc/$client/XferLOG.bad
-#           for later viewing.
+#   If the dump fails with no files backed up, then $TopDir/pc/$client/{$M+1}
+#   is renamed back to $TopDir/pc/$client/$M and
+#   $TopDir/pc/$client/XferLOG{$M+1}.z is renamed to
+#   $TopDir/pc/$client/XferLOG.bad.z for later viewing.
+#
+#   In 4.x the concept of a partial backup has been eliminated.
+#   TODO update this.
 #
 #   BackupPC_dump communicates to BackupPC via printing to STDOUT.
 #
@@ -59,11 +65,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2015  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -72,12 +78,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -85,12 +90,15 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "__INSTALLDIR__/lib";
+use BackupPC::DirOps;
 use BackupPC::Lib;
-use BackupPC::FileZIO;
 use BackupPC::Storage;
 use BackupPC::Xfer;
+use BackupPC::XS;
+use Data::Dumper;
 use Encode;
+use Errno qw(EINTR);
 use Socket;
 use File::Path;
 use File::Find;
@@ -170,7 +178,6 @@ if ( !defined($Hosts->{$client}) ) {
 my $Dir     = "$TopDir/pc/$client";
 my @xferPid = ();
 my $tarPid  = -1;
-my $completionPercent;
 
 #
 # Re-read config file, so we can include the PC-specific config
@@ -181,6 +188,8 @@ if ( defined(my $error = $bpc->ConfigRead($client)) ) {
     exit(1);
 }
 %Conf = $bpc->Conf();
+BackupPC::XS::Lib::logLevelSet($Conf{XferLogLevel});
+flushLibMessages();
 
 #
 # Catch various signals
@@ -201,12 +210,9 @@ my $Pid = $$;
 alarm($Conf{ClientTimeout});
 
 mkpath($Dir, 0, 0777) if ( !-d $Dir );
-if ( !-f "$Dir/LOCK" ) {
-    open(LOCK, ">", "$Dir/LOCK") && close(LOCK);
-}
 
 my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-my $logPath = sprintf("$Dir/LOG.%02d%04d", $mon + 1, $year + 1900);
+my $logPath = sprintf("%s/LOG.%02d%04d", $Dir, $mon + 1, $year + 1900);
 
 if ( !-f $logPath ) {
     #
@@ -220,10 +226,10 @@ if ( !-f $logPath ) {
         }
         $lastLog--;
         next if ( $file =~ /\.z$/ || !$Conf{CompressLevel} );
-        BackupPC::FileZIO->compressCopy($file,
-                                        "$file.z",
-                                        undef,
-                                        $Conf{CompressLevel}, 1);
+        BackupPC::XS::compressCopy($file,
+                                    "$file.z",
+                                    undef,
+                                    $Conf{CompressLevel}, 1);
     }
 }
 
@@ -280,15 +286,12 @@ if ( $opts{d} ) {
     print("DHCP $hostIP $clientURI\n");
 }
 
-my($needLink, @Backups, $type);
-my($incrBaseTime, $incrBaseBkupNum, $incrBaseLevel, $incrLevel);
+my(@Backups, $type);
 my $lastFullTime = 0;
 my $lastIncrTime = 0;
-my $partialIdx = -1;
-my $partialNum;
-my $partialFileCnt;
-my $lastBkupNum;
-my $lastPartial = 0;
+my($incrBaseTime, $incrBaseBkupNum);
+my($lastBkupIdx, $lastBkupNum, $lastBkupType, $lastBkupCompressLevel, $prevBkupIdx);
+my($newBkupNum, $newBkupIdx, $preV4, $noFillCnt);
 
 #
 # Maintain backward compatibility with $Conf{FullPeriod} == -1 or -2
@@ -309,7 +312,7 @@ if ( $Conf{BackupsDisable} == 1 && !$opts{f} && !$opts{i}
 		if ( defined($StatusHost{errorTime})
 		     && $StatusHost{reason} ne "Reason_backup_done"
 		     && time - $StatusHost{errorTime} > 4 * 24 * 3600 );
-    NothingToDo($needLink);
+    NothingToDo();
 }
 
 if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
@@ -349,7 +352,7 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
 #                      . " (alive $StatusHost{aliveCnt} times)\n");
             print(STDERR "Skipping $client because of blackout\n")
                             if ( $opts{v} );
-            NothingToDo($needLink);
+            NothingToDo();
         }
     }
 }
@@ -357,7 +360,7 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
 if ( !$opts{i} && !$opts{f} && $StatusHost{backoffTime} > time ) {
     printf(LOG "%sskipping because of user requested delay (%.1f hours left)\n",
                 $bpc->timeStamp, ($StatusHost{backoffTime} - time) / 3600);
-    NothingToDo($needLink);
+    NothingToDo();
 }
 
 #
@@ -365,35 +368,35 @@ if ( !$opts{i} && !$opts{f} && $StatusHost{backoffTime} > time ) {
 #
 BackupExpire($client);
 
-my(@lastIdxByLevel, $incrCntSinceFull);
-
 #
-# Read Backup information, and find times of the most recent full and
-# incremental backups.  Also figure out which backup we will use
-# as a starting point for an incremental.
+# Read Backup information, and find the most recent backup, times of
+# the most recent full and incremental backups, and check if the
+# most recent backup is V4+ or prior to V4 (ie: preV4).
 #
+my $thisNoFillCnt;
 @Backups = $bpc->BackupInfoRead($client);
 for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-    $needLink = 1 if ( $Backups[$i]{nFilesNew} eq ""
-                        || -f "$Dir/NewFileList.$Backups[$i]{num}" );
+    $Backups[$i]{preV4} = ($Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./) ? 1 : 0;
+    $thisNoFillCnt++ if ( $Backups[$i]{noFill} );
+    if ( !defined($lastBkupNum) || $Backups[$i]{num} > $lastBkupNum ) {
+        $lastBkupNum           = $Backups[$i]{num};
+        $prevBkupIdx           = $lastBkupIdx;
+        $lastBkupIdx           = $i;
+        $incrBaseBkupNum       = $Backups[$i]{num};
+        $incrBaseTime          = $Backups[$i]{startTime};
+        $lastBkupType          = $Backups[$i]{type};
+        $lastBkupCompressLevel = $Backups[$i]{compress};
+        $preV4                 = $Backups[$i]{preV4};
+        $noFillCnt             = $thisNoFillCnt;
+    }
+    $thisNoFillCnt = 0 if ( !$Backups[$i]{noFill} );
     if ( $Backups[$i]{type} eq "full" ) {
-        $incrCntSinceFull = 0;
-        $lastBkupNum = $Backups[$i]{num};
-        $lastIdxByLevel[0] = $i;
 	if ( $lastFullTime < $Backups[$i]{startTime} ) {
 	    $lastFullTime = $Backups[$i]{startTime};
 	}
     } elsif ( $Backups[$i]{type} eq "incr" ) {
-        $incrCntSinceFull++;
-        $lastBkupNum = $Backups[$i]{num};
-        $lastIdxByLevel[$Backups[$i]{level}] = $i;
         $lastIncrTime = $Backups[$i]{startTime}
                 if ( $lastIncrTime < $Backups[$i]{startTime} );
-    } elsif ( $Backups[$i]{type} eq "partial" ) {
-        $partialIdx     = $i;
-        $lastPartial    = $Backups[$i]{startTime};
-        $partialNum     = $Backups[$i]{num};
-        $partialFileCnt = $Backups[$i]{nFiles};
     }
 }
 
@@ -405,82 +408,41 @@ my $needs_full = (time - $lastFullTime > $Conf{FullPeriod} * 24 * 3600
 my $needs_incr = (time - $lastIncrTime > $Conf{IncrPeriod} * 24 * 3600
                && time - $lastFullTime > $Conf{IncrPeriod} * 24 * 3600);
 
-if ( $lastFullTime == 0
-        || $opts{f}
+$needs_full = 0 if ( $Conf{FullPeriod} == 0 );
+
+if ( $opts{f}
         || (!$opts{i} && !$opts{I} && $needs_full)
         || ( $opts{F} && $needs_incr) ) {
     $type = "full";
-    $incrLevel = 0;
-    $incrBaseBkupNum = $lastBkupNum;
 } elsif ( $opts{i}
         || $needs_incr
         || ($opts{I} && $needs_full) ) {
     $type = "incr";
-    #
-    # For an incremental backup, figure out which level we should
-    # do and the index of the reference backup, which is the most
-    # recent backup at any lower level.
-    #
-    @{$Conf{IncrLevels}} = [$Conf{IncrLevels}]
-                            unless ref($Conf{IncrLevels}) eq "ARRAY";
-    @{$Conf{IncrLevels}} = [1] if ( !@{$Conf{IncrLevels}} );
-    $incrCntSinceFull = $incrCntSinceFull % @{$Conf{IncrLevels}};
-    $incrLevel = $Conf{IncrLevels}[$incrCntSinceFull];
-    for ( my $i = 0 ; $i < $incrLevel ; $i++ ) {
-        my $idx = $lastIdxByLevel[$i];
-        next if ( !defined($idx) );
-        if ( !defined($incrBaseTime)
-                || $Backups[$idx]{startTime} > $incrBaseTime ) {
-            $incrBaseBkupNum = $Backups[$idx]{num};
-            $incrBaseLevel   = $Backups[$idx]{level};
-            $incrBaseTime    = $Backups[$idx]{startTime};
-        }
-    }
-    #
-    # Can't find any earlier lower-level backup!  Shouldn't
-    # happen - just do full instead
-    #
-    if ( !defined($incrBaseBkupNum) || $incrLevel < 1 ) {
-        $type = "full";
-        $incrBaseBkupNum = $lastBkupNum;
-    }
 } else {
-    NothingToDo($needLink);
+    NothingToDo();
 }
+
+print("Backup type: type = $type, needs_full = $needs_full, needs_incr = $needs_incr, lastFullTime = $lastFullTime,"
+    . " opts{f} = $opts{f}, opts{i} = $opts{i}, opts{F} = $opts{F}\n") if ( $opts{v} );
 
 #
 # Create top-level directories if they don't exist
 #
 foreach my $dir ( (
-            "$Conf{TopDir}",
             "$Conf{TopDir}/pool",
             "$Conf{TopDir}/cpool",
-            "$Conf{TopDir}/pc",
-            "$Conf{TopDir}/trash",
+            $Dir,
+            "$Dir/refCnt",
         ) ) {
     next if ( -d $dir );
-    mkpath($dir, 0, 0750);
+    mkpath($dir, 0, 0777);
     if ( !-d $dir ) {
         print("Failed to create $dir\n");
         printf(LOG "%sFailed to create directory %s\n", $bpc->timeStamp, $dir);
-        print("link $clientURI\n") if ( $needLink );
         exit(1);
     } else {
         printf(LOG "%sCreated directory %s\n", $bpc->timeStamp, $dir);
     }
-}
-
-if ( !$bpc->HardlinkTest($Dir, "$TopDir/cpool") ) {
-    print(LOG $bpc->timeStamp, "Can't create a test hardlink between a file"
-               . " in $Dir and $TopDir/cpool.  Either these are different"
-               . " file systems, or this file system doesn't support hardlinks,"
-               . " or these directories don't exist, or there is a permissions"
-               . " problem, or the file system is out of inodes or full.  Use"
-               . " df, df -i, and ls -ld to check each of these possibilities."
-               . " Quitting...\n");
-    print("test hardlink between $Dir and $TopDir/cpool failed\n");
-    print("link $clientURI\n") if ( $needLink );
-    exit(1);
 }
 
 if ( !$opts{d} ) {
@@ -517,13 +479,11 @@ my $delay = $bpc->CheckHostAlive($hostIP);
 if ( $delay < 0 ) {
     print(LOG $bpc->timeStamp, "no ping response\n");
     print("no ping response\n");
-    print("link $clientURI\n") if ( $needLink );
     exit(1);
 } elsif ( $delay > $Conf{PingMaxMsec} ) {
     printf(LOG "%sping too slow: %.4gmsec\n", $bpc->timeStamp, $delay);
     printf("ping too slow: %.4gmsec (threshold is %gmsec)\n",
                     $delay, $Conf{PingMaxMsec});
-    print("link $clientURI\n") if ( $needLink );
     exit(1);
 }
 
@@ -540,70 +500,274 @@ if ( !$opts{d} && (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
 }
 
 #
-# Get a clean directory $Dir/new
+# There are six cases:
 #
-$bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
+#  1) No backups at all: create a new backup #0 and do inPlace.
+#                        do a full backup.
+#
+#  2) V3 backups, no V4: duplicate last V3 backup, and do inPlace.
+#                        do a full backup.
+#
+#  3) V4 backups: last is a full, or more than $Conf{FillCycle}
+#     since last filled: duplicate last backup and do inPlace.
+#
+#  4) V4 backups, less than $Conf{FillCycle} since last filled:
+#                        renumber last backup to #n+1, deltas in #n.
+#
+#  5) CompressLevel has toggled on/off.   Very hard to support
+#     efficiently.  We treat this as a brand new (empty) backup
+#     inPlace, that is therefore filled.  That way we won't mess
+#     up merging backups with compress on/off.
+#
+#  6) Last backup was a V4 partial.  If prior V4 backup is filled
+#     (and not partial), then just do another in-place backup.
+#     Otherwise, treat as case 4.  When complete (whether successful
+#     or another partial), delete the prior deltas in #n, which
+#     merges the cumulative changes into #n-1.
+#
+# We remember which case it is so we can figure out what to clean
+# up on a failed backup.
+#
+# Note: $Conf{FillCycle} == 0, then the V4 fill cycle matches the
+# full/incr cycle.
+#
+
+#
+# $inPlace means the Xfer method makes all the changes in place, without
+# stored any reverse deltas in a prior backup tree.
+#
+my $inPlace     = 0;
+
+#
+# doDuplicate means we run BackupPC_backupDuplicate, which duplicates the
+# most recent v3 and v4 backup.
+#
+my $doDuplicate = 0;
+my $copyXferLOG;
+
+#
+# Remember which case, so we can figure out what to clean up on a failed backup.
+#
+my $BackupCase;
+
+if ( !defined($lastBkupNum) ) {
+    #
+    # case 1: no backups.  Create a new empty backup and do inPLace.
+    #
+    $BackupCase  = 1;
+    $inPlace     = 1;
+    $doDuplicate = 0;
+    $newBkupNum  = 0;
+    $newBkupIdx  = 0;
+    $lastBkupNum = undef;
+    $lastBkupIdx = undef;
+    $type        = "full";
+} elsif ( ($lastBkupCompressLevel != 0) xor ($Conf{CompressLevel} != 0) ) {
+    #
+    # case 5: compress on/off toggled.  Do a brand new filled backup starting with an empty tree.
+    #
+    $BackupCase  = 5;
+    $inPlace     = 1;
+    $doDuplicate = 0;
+    $newBkupNum  = $lastBkupNum + 1;
+    $newBkupIdx  = @Backups;
+    $lastBkupNum = undef;
+    $lastBkupIdx = undef;
+} elsif ( defined($lastBkupNum) && $preV4 ) {
+    #
+    # case 2: last backup is V3, so duplicate and do inPlace.
+    #
+    $BackupCase  = 2;
+    $inPlace     = 1;
+    $doDuplicate = 1;
+    $newBkupNum  = $lastBkupNum + 1;    # will exist after BackupPC_backupDuplicate
+    $newBkupIdx  = @Backups;
+    $lastBkupNum = undef;
+    $lastBkupIdx = undef;
+    $type        = "full";
+} else {
+    if ( ($lastBkupType eq "partial" || $lastBkupType eq "active")
+          && (!defined($prevBkupIdx) || $Backups[$prevBkupIdx]{preV4} || !$Backups[$prevBkupIdx]{noFill}) ) {
+        #
+        # case 6: partial, and either no previous, V3 previous, or filled previous: simply update in place,
+        # with no prior deltas.
+        #
+        $BackupCase  = 6;
+        $inPlace     = 1;
+        $doDuplicate = 0;
+        #
+        # We need to append the current XferLOG file.  Rename it and copy it below.
+        #
+        my $fileExt = $lastBkupCompressLevel > 0 ? ".z" : "";
+        if ( -f "$Dir/XferLOG.$lastBkupNum$fileExt" ) {
+            print("Renaming $Dir/XferLOG.$lastBkupNum$fileExt -> $Dir/XferLOG.$lastBkupNum$fileExt.tmp\n");
+            rename("$Dir/XferLOG.$lastBkupNum$fileExt", "$Dir/XferLOG.$lastBkupNum$fileExt.tmp");
+            $copyXferLOG = ["$Dir/XferLOG.$lastBkupNum$fileExt.tmp", $lastBkupCompressLevel, 1];
+        }
+        $newBkupNum  = $lastBkupNum;
+        $newBkupIdx  = $lastBkupIdx;
+        $lastBkupNum = undef;
+        $lastBkupIdx = undef;
+    } elsif ( $lastBkupType eq "full" || ($Conf{FillCycle} > 0 && $noFillCnt >= $Conf{FillCycle} - 1) ) {
+        #
+        # case 3: V4; last is filled, so duplicate and do in place
+        #
+        $BackupCase  = 3;
+        $inPlace     = 1;
+        $doDuplicate = 1;
+        $newBkupNum  = $lastBkupNum + 1;    # will exist after BackupPC_backupDuplicate
+        $newBkupIdx  = @Backups;
+        $lastBkupNum = undef;
+        $lastBkupIdx = undef;
+    } else {
+        #
+        # case 4 or part of case 6: V4; renumber to #n+1 with deltas in #n
+        #
+        $BackupCase  = 4;
+        $inPlace     = 0;
+        $doDuplicate = 0;
+        $newBkupNum  = $lastBkupNum + 1;
+        $newBkupIdx  = @Backups;
+        do { 
+            $newBkupNum  = $lastBkupNum + 1;
+        } while ( -d "$Dir/newBkupNum" );
+        if ( !rename("$Dir/$lastBkupNum", "$Dir/$newBkupNum") ) {
+            print(LOG $bpc->timeStamp, "Can't rename $Dir/$lastBkupNum to $Dir/$newBkupNum\n");
+            print(STDERR "Exiting because rename $Dir/$lastBkupNum to $Dir/$newBkupNum failed\n")
+                                                if ( $opts{v} );
+            exit(1);
+        }
+        $Backups[$lastBkupIdx]{noFill} = 1;
+        eval { mkpath("$Dir/$lastBkupNum", 0, 0777) };
+        if ( $@ ) {
+            print(LOG $bpc->timeStamp, "Can't create $Dir/$lastBkupNum\n");
+            print(STDERR "Can't create backup directory $Dir/$lastBkupNum")
+                                                if ( $opts{v} );
+            exit(1);
+        }
+        BackupPC::Storage->backupInfoWrite($Dir, $lastBkupNum, $Backups[$lastBkupIdx]);
+        if ( $lastBkupType eq "partial" || $lastBkupType eq "active" ) {
+            #
+            # need to copy the previous partial XferLOG into this one, since $lastBkupNum will
+            # be deleted once the backup finishes.
+            #
+            my $fileExt = $lastBkupCompressLevel > 0 ? ".z" : "";
+            $copyXferLOG = ["$Dir/XferLOG.$lastBkupNum$fileExt", $lastBkupCompressLevel, 0];
+        }
+    }
+}
 
 #
 # Setup file extension for compression and open XferLOG output file
 #
-if ( $Conf{CompressLevel} && !BackupPC::FileZIO->compOk ) {
-    print(LOG $bpc->timeStamp, "dump failed: can't find Compress::Zlib\n");
-    print("dump failed: can't find Compress::Zlib\n");
-    exit(1);
-}
 my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
-my $XferLOG = BackupPC::FileZIO->open("$Dir/XferLOG$fileExt", 1,
-                                     $Conf{CompressLevel});
+unlink("$Dir/XferLOG.$newBkupNum$fileExt") if ( -e "$Dir/XferLOG.$newBkupNum$fileExt" );
+my $XferLOG = BackupPC::XS::FileZIO::open("$Dir/XferLOG.$newBkupNum$fileExt", 1, $Conf{CompressLevel});
 if ( !defined($XferLOG) ) {
     print(LOG $bpc->timeStamp, "dump failed: unable to open/create"
-			     . " $Dir/XferLOG$fileExt\n");
-    print("dump failed: unable to open/create $Dir/XferLOG$fileExt\n");
+			     . " $Dir/XferLOG.$newBkupNum$fileExt\n");
+    print("dump failed: unable to open/create $Dir/XferLOG.$newBkupNum$fileExt\n");
     exit(1);
 }
-
-#
-# Ignore the partial dump in the case of an incremental
-# or when the partial is too old.  A partial is a partial full.
-#
-if ( $type ne "full" || time - $lastPartial > $Conf{PartialAgeMax} * 24*3600 ) {
-    $partialNum = undef;
-    $partialIdx = -1;
-}
-
-#
-# If this is a partial, copy the old XferLOG file
-#
-if ( $partialNum ) {
-    my($compress, $fileName);
-    if ( -f "$Dir/XferLOG.$partialNum.z" ) {
-	$fileName = "$Dir/XferLOG.$partialNum.z";
-	$compress = 1;
-    } elsif ( -f "$Dir/XferLOG.$partialNum" ) {
-	$fileName = "$Dir/XferLOG.$partialNum";
-	$compress = 0;
-    }
-    if ( my $oldLOG = BackupPC::FileZIO->open($fileName, 0, $compress) ) {
-	my $data;
-	while ( $oldLOG->read(\$data, 65536) > 0 ) {
-	    $XferLOG->write(\$data);
-	}
-	$oldLOG->close;
-    }
-}
-
+xferLOGCopyFile(@$copyXferLOG) if ( defined($copyXferLOG) );
 $XferLOG->writeTeeStderr(1) if ( $opts{v} );
-unlink("$Dir/NewFileList") if ( -f "$Dir/NewFileList" );
+my $str = "XferLOG file $Dir/XferLOG.$newBkupNum$fileExt created " . $bpc->timeStamp . "\n";
+$XferLOG->write(\$str);
+
+if ( $Conf{XferLogLevel} >= 1 || $opts{v} ) {
+    $str = "Backup prep: type = $type, case = $BackupCase, inPlace = $inPlace, doDuplicate = $doDuplicate,"
+         . " newBkupNum = $newBkupNum, newBkupIdx = $newBkupIdx, lastBkupNum = $lastBkupNum, lastBkupIdx = $lastBkupIdx"
+         . " (FillCycle = $Conf{FillCycle}, noFillCnt = $noFillCnt)\n";
+    $XferLOG->write(\$str);
+}
+
+#
+# See if this client needs an fsck.
+#
+my $needFsck    = 0;
+my $refCntFiles = BackupPC::DirOps::dirRead($bpc, "$Dir/refCnt");
+foreach my $file ( @$refCntFiles ) {
+    next if ( $file !~ /^needFsck/ );
+    $needFsck = 1;
+    last;
+}
+RefCountUpdate(1, 0) if ( $needFsck );
+
+#
+# Duplicate the most recent backup, if required
+#
+if ( $doDuplicate ) {
+    #
+    # Run BackupPC_backupDuplicate, then re-read the backups file.
+    #
+    my $cmd = ["$BinDir/BackupPC_backupDuplicate", "-h", $client];
+    $XferLOG->write(\"Executing @$cmd\n");
+    $bpc->cmdSystemOrEval($cmd,
+	    sub {
+                if ( $_[0] =~ /^__bpc_progress_/ ) {
+                    print(STDERR $_[0]);
+                } else {
+                    $XferLOG->write(\$_[0]);
+                }
+	    },
+	    {}, \%Conf);
+    @Backups = $bpc->BackupInfoRead($client);
+}
+
+#
+# Create a placeholder backups entry if needed
+#
+if ( $newBkupIdx >= @Backups ) {
+    $Backups[$newBkupIdx]{num}        = $newBkupNum;
+    $Backups[$newBkupIdx]{level}      = $type eq "incr" ? 1 : 0;
+    $Backups[$newBkupIdx]{startTime}  = time;
+    $Backups[$newBkupIdx]{noFill}     = 0;
+    $Backups[$newBkupIdx]{mangle}     = 1;     # name mangling always on for v1.04+
+    $Backups[$newBkupIdx]{xferMethod} = $Conf{XferMethod};
+    $Backups[$newBkupIdx]{charset}    = $Conf{ClientCharset};
+    $Backups[$newBkupIdx]{version}    = $bpc->Version();
+    $Backups[$newBkupIdx]{inodeLast}  = $Backups[$lastBkupIdx]{inodeLast};
+    $Backups[$newBkupIdx]{compress}   = $Conf{CompressLevel};
+}
+#
+# New backup shows as "active" while running
+#
+$Backups[$newBkupIdx]{type} = "active";
+
+#
+# Create new directory
+#
+if ( defined($newBkupNum) && !-d "$Dir/$newBkupNum" ) {
+    #
+    # Create the new backup directory
+    #
+    eval { mkpath("$Dir/$newBkupNum", 0, 0777) };
+    if ( $@ ) {
+        print(LOG $bpc->timeStamp, "Can't create $Dir/$newBkupNum\n");
+        print(STDERR "Can't create backup directory $Dir/$newBkupNum")
+                                            if ( $opts{v} );
+        exit(1);
+    }
+}
+
+#
+# Save backupInfo and backups
+#
+BackupPC::Storage->backupInfoWrite($Dir, $newBkupNum, $Backups[$newBkupIdx]);
+$bpc->BackupInfoWrite($client, @Backups);
 
 my $startTime     = time();
 my $tarErrs       = 0;
 my $nFilesExist   = 0;
 my $sizeExist     = 0;
 my $sizeExistComp = 0;
+my $nFilesNew     = 0;
+my $sizeNew       = 0;
+my $sizeNewComp   = 0;
 my $nFilesTotal   = 0;
 my $sizeTotal     = 0;
+my $inodeLast;
 my($logMsg, %stat, $xfer, $ShareNames, $noFilesErr);
-my $newFilesFH;
 
 $ShareNames = BackupPC::Xfer::getShareNames(\%Conf);
 
@@ -654,6 +818,8 @@ for my $shareName ( @$ShareNames ) {
         $stat{hostError} = "DumpPreShareCmd returned error status $?";
         BackupFailCleanup();
     }
+
+    print("__bpc_progress_state__ backup $shareName\n");
 
     $xfer = BackupPC::Xfer::create($Conf{XferMethod}, $bpc);
     if ( !defined($xfer) ) {
@@ -716,46 +882,39 @@ for my $shareName ( @$ShareNames ) {
 	    close(STDIN);
 	    open(STDIN, "<&RH");
 	    alarm(0);
-	    exec("$BinDir/BackupPC_tarExtract", $client, $shareName,
-			 $Conf{CompressLevel});
+            my @tarOpts = ("-h", $client, "-s", $shareName);
+            push(@tarOpts, "-f") if ( $type eq "full" );
+            push(@tarOpts, "-p") if ( $inPlace );
+	    exec("$BinDir/BackupPC_tarExtract", @tarOpts);
 	    print(LOG $bpc->timeStamp,
 			"can't exec $BinDir/BackupPC_tarExtract\n");
 	    exit(0);
 	}
-    } elsif ( !defined($newFilesFH) ) {
-	#
-	# We need to create the NewFileList output file
-	#
-	local(*NEW_FILES);
-	open(NEW_FILES, ">", "$TopDir/pc/$client/NewFileList")
-		     || die("can't open $TopDir/pc/$client/NewFileList");
-	$newFilesFH = *NEW_FILES;
-	binmode(NEW_FILES);
     }
 
     #
     # Run the transport program
     #
     $xfer->args({
-        host         => $host,
-        client       => $client,
-        hostIP       => $hostIP,
-        shareName    => $shareName,
-        pipeRH       => *RH,
-        pipeWH       => *WH,
-        XferLOG      => $XferLOG,
-	newFilesFH   => $newFilesFH,
-        outDir       => $Dir,
-        type         => $type,
-        incrBaseTime => $incrBaseTime,
-        incrBaseBkupNum => $incrBaseBkupNum,
-	backups      => \@Backups,
-	compress     => $Conf{CompressLevel},
-	XferMethod   => $Conf{XferMethod},
-	logLevel     => $Conf{XferLogLevel},
-        partialNum   => $partialNum,
-	pidHandler   => \&pidHandler,
-	completionPercent => \&completionPercent,
+        host              => $host,
+        client            => $client,
+        hostIP            => $hostIP,
+        shareName         => $shareName,
+        pipeRH            => *RH,
+        pipeWH            => *WH,
+        XferLOG           => $XferLOG,
+        outDir            => $Dir,
+        type              => $type,
+	backups           => \@Backups,
+	compress          => $Conf{CompressLevel},
+	XferMethod        => $Conf{XferMethod},
+	logLevel          => $Conf{XferLogLevel},
+        inPlace           => $inPlace,
+        newBkupIdx        => $newBkupIdx,
+        lastBkupIdx       => $lastBkupIdx,
+        incrBaseBkupNum   => $incrBaseBkupNum,
+        incrBaseTime      => $incrBaseTime,
+	pidHandler        => \&pidHandler,
     });
 
     if ( !defined($logMsg = $xfer->start()) ) {
@@ -770,6 +929,7 @@ for my $shareName ( @$ShareNames ) {
 	    kill($bpc->sigName2num("KILL"), $tarPid);
 	}
 	if ( @xferPid ) {
+	    sleep(1);
 	    kill($bpc->sigName2num("INT"), @xferPid);
 	    sleep(1);
 	    kill($bpc->sigName2num("KILL"), @xferPid);
@@ -780,6 +940,21 @@ for my $shareName ( @$ShareNames ) {
         $stat{hostError} = $errStr;
         BackupFailCleanup();
     }
+
+    #
+    # Create a needFsck file, so if we are killed and can't recover, we can
+    # make sure an fsck is run next time.
+    #
+    my $needFsckFH;
+    if ( !(open($needFsckFH, ">", "$Dir/refCnt/needFsck.dump") && close($needFsckFH)) ) {
+        $XferLOG->write(\"Can't create $Dir/refCnt/needFsck.dump ($?)\n");
+    }
+
+    #
+    # Also grab a lock file, so we can serialize any fsck that might be
+    # running.
+    #
+    my $lockFd = BackupPC::XS::DirOps::lockRangeFile("$Dir/refCnt/LOCK", 0, 1, 1);
 
     @xferPid = $xfer->xferPid;
 
@@ -813,8 +988,13 @@ for my $shareName ( @$ShareNames ) {
 	    select(my $rout = $FDread, undef, $ein, undef);
             if ( vec($rout, fileno(TAR), 1) ) {
                 if ( sysread(TAR, $mesg, 8192) <= 0 ) {
+                    next if ( $!{EINTR} );
                     vec($FDread, fileno(TAR), 1) = 0;
                     close(TAR);
+                    if ( $? ) {
+                        $XferLOG->write(\"BackupPC_tarExtract exited with fail status $?\n");
+                        $stat{hostError} = "BackupPC_tarExtract exited with fail status $?";
+                    }
                 } else {
                     $tarOut .= $mesg;
                 }
@@ -830,13 +1010,17 @@ for my $shareName ( @$ShareNames ) {
                 if ( /^BackupPC_tarExtact aborting \((.*)\)/ ) {
                     $stat{hostError} = $1;
                 }
-                if ( /^Done: (\d+) errors, (\d+) filesExist, (\d+) sizeExist, (\d+) sizeExistComp, (\d+) filesTotal, (\d+) sizeTotal/ ) {
+                if ( /^Done: (\d+) errors, (\d+) filesExist, (\d+) sizeExist, (\d+) sizeExistComp, (\d+) filesTotal, (\d+) sizeTotal, (\d+) filesNew, (\d+) sizeNew, (\d+) sizeNewComp, (\d+) inodeLast/ ) {
                     $tarErrs       += $1;
                     $nFilesExist   += $2;
                     $sizeExist     += $3;
                     $sizeExistComp += $4;
                     $nFilesTotal   += $5;
                     $sizeTotal     += $6;
+                    $nFilesNew     += $7;
+                    $sizeNew       += $8;
+                    $sizeNewComp   += $9;
+                    $inodeLast      = $10;
                 }
             }
 	    last if ( !$xfer->readOutput(\$FDread, $rout) );
@@ -867,6 +1051,10 @@ for my $shareName ( @$ShareNames ) {
 	$sizeExistComp += $results[3];
 	$nFilesTotal   += $results[4];
 	$sizeTotal     += $results[5];
+	$nFilesNew     += $results[6];
+	$sizeNew       += $results[7];
+	$sizeNewComp   += $results[8];
+        $inodeLast      = $results[9];
     }
 
     #
@@ -913,6 +1101,7 @@ for my $shareName ( @$ShareNames ) {
         # kill off the tar process, first nicely then forcefully
         #
 	if ( $tarPid > 0 ) {
+	    sleep(1);
 	    kill($bpc->sigName2num("INT"), $tarPid);
 	    sleep(1);
 	    kill($bpc->sigName2num("KILL"), $tarPid);
@@ -920,13 +1109,19 @@ for my $shareName ( @$ShareNames ) {
         #
         # don't do any more shares on this host
         #
+        BackupPC::XS::DirOps::unlockRangeFile($lockFd);
         last;
     }
     #
     # Wait for any child processes to exit
     #
-    # 1 while ( wait() >= 0 );
+    1 while ( wait() >= 0 );
+
+    unlink("$Dir/refCnt/needFsck.dump");
+    BackupPC::XS::DirOps::unlockRangeFile($lockFd);
 }
+$tarPid = 0;
+pidHandler();
 
 #
 # If this is a full, and any share had zero files then consider the dump bad
@@ -938,15 +1133,6 @@ if ( $type eq "full" && $stat{hostError} eq ""
 }
 
 $stat{xferOK} = 0 if ( $Abort );
-
-#
-# If there is no "new" directory then the backup is bad
-#
-if ( $stat{xferOK} && !-d "$Dir/new" ) {
-    $stat{hostError} = "No backup directory $Dir/new"
-                            if ( $stat{hostError} eq "" );
-    $stat{xferOK} = 0;
-}
 
 #
 # Do one last check to make sure it is still the machine we expect.
@@ -963,7 +1149,6 @@ if ( $? && $Conf{UserCmdCheckStatus} ) {
     $stat{hostError} = "DumpPostUserCmd returned error status $?";
     $stat{xferOK} = 0;
 }
-close($newFilesFH) if ( defined($newFilesFH) );
 
 my $endTime = time();
 
@@ -999,6 +1184,13 @@ if ( !$stat{xferOK} ) {
     #
     BackupFailCleanup();
 }
+if ( $BackupCase == 4 && ($lastBkupType eq "partial" || $lastBkupType eq "active") ) {
+    #
+    # Delete the prior backup #n, so that its deltas are merged into #n-1
+    #
+    $XferLOG->write(\"Removing prior partial backup #$lastBkupNum\n");
+    BackupRemove($client, $lastBkupIdx, 1);
+}
 
 my $newNum = BackupSave();
 
@@ -1014,10 +1206,29 @@ print(LOG $bpc->timeStamp,
         . " $stat{byteCnt} bytes,"
         . " $stat{xferErrCnt} xferErrs ($stat{xferBadFileCnt} bad files,"
         . " $stat{xferBadShareCnt} bad shares, $otherCount other)\n");
+$XferLOG->write(\"$type backup $newNum complete, $stat{fileCnt} files,"
+        . " $stat{byteCnt} bytes,"
+        . " $stat{xferErrCnt} xferErrs ($stat{xferBadFileCnt} bad files,"
+        . " $stat{xferBadShareCnt} bad shares, $otherCount other)\n")
+                    if ( $XferLOG && $Conf{XferLogLevel} >= 1 );
 
 BackupExpire($client);
 
+#
+# Update reference counts - first apply the deltas.
+#
+# Then, as a sanity/debig check, run a full fsck and check.
+#
+RefCountUpdate(0, 0);
+RefCountUpdate(1, 1);
+
+if ( $XferLOG ) {
+    $XferLOG->close();
+    $XferLOG = undef;
+}
+
 print("$type backup complete\n");
+exit(0);
 
 ###########################################################################
 # Subroutines
@@ -1025,10 +1236,7 @@ print("$type backup complete\n");
 
 sub NothingToDo
 {
-    my($needLink) = @_;
-
     print("nothing to do\n");
-    print("link $clientURI\n") if ( $needLink );
     exit(0);
 }
 
@@ -1049,6 +1257,7 @@ sub catch_signal
 	} else {
 	    $reason = "aborted by signal=$sigName";
 	}
+        $stat{hostError} = $reason;
 	if ( $Pid == $$ ) {
 	    #
 	    # Parent logs a message
@@ -1121,6 +1330,7 @@ sub catch_signal
 	kill($bpc->sigName2num("KILL"), @xferPid);
     }
     if ( $tarPid > 0 ) {
+	sleep(1);
         kill($bpc->sigName2num("INT"), $tarPid);
 	sleep(1);
 	kill($bpc->sigName2num("KILL"), $tarPid);
@@ -1133,112 +1343,189 @@ sub catch_signal
     BackupFailCleanup();
 }
 
-sub CheckForNewFiles
+sub CheckForAnyFiles
 {
-    if ( -f _ && $File::Find::name !~ /\/fattrib$/ ) {
-        $nFilesTotal++;
-    } elsif ( -d _ ) {
-	#
-	# No need to check entire tree
-	#
-        $File::Find::prune = 1 if ( $nFilesTotal );
+    my($name, $path, $compress) = @_;
+
+    return if ( $name !~ /^attrib/ );
+
+    $path =~ s{/attrib[^/]*$}{};
+
+    my $attr = BackupPC::XS::Attrib::new($compress);
+    if ( !$attr->read($path, $name) ) {
+        print("CheckForAnyFiles: can't read attribute file in $path\n");
+        return;
     }
+    my $attrAll = $attr->get();
+
+    foreach my $fileUM ( keys(%$attrAll) ) {
+        my $a = $attrAll->{$fileUM};
+        next if ( !defined($a->{digest}) );
+        $nFilesTotal++;
+    }
+    $File::Find::prune = 1 if ( $nFilesTotal );
+    flushLibMessages();
 }
 
 sub BackupFailCleanup
 {
     my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
-    my $keepPartial = 0;
+    my @logRenames;
+    @Backups = $bpc->BackupInfoRead($client);
 
+    print("__bpc_progress_state__ fail cleanup\n");
     #
-    # We keep this backup if it is a full and we actually backed
-    # up some files.  If the prior backup was a partial too, we
-    # only keep this backup if it has more files than the previous
-    # partial.
+    # There are six cases listed above that we have to clean up,
+    # based on whether any files were actually backed up.
     #
-    if ( $type eq "full" ) {
-	if ( $nFilesTotal == 0 && $xfer->getStats->{fileCnt} == 0 ) {
-	    #
-	    # Xfer didn't report any files, but check in the new
-	    # directory just in case.
-	    #
-	    find(\&CheckForNewFiles, "$Dir/new");
+    #  1) No backups at all: created a new backup #0 and do inPlace.
+    #       Cleanup: remove #0 if empty, otherwise mark partial.
+    #
+    #  2) V3 backups, no V4: duplicated last V3 backup, and do inPlace.
+    #       No cleanup; just keep new duplicated V4 backup, mark partial.
+    #
+    #  3) V4 backups, and $Conf{FillCycle} since last filled:
+    #                        duplicate last backup and do inPlace.
+    #       No cleanup; just keep new duplicated V4 backup, mark partial.
+    #
+    #  4) V4 backups, less than $Conf{FillCycle} since last filled:
+    #                        renumber last backup to #n+1, deltas in #n.
+    #       If prev backup empty, remove it, but don't renumber.
+    #
+    #  5) CompressLevel has toggled on/off.   Very hard to support
+    #     efficiently.  We treat this as a brand new (empty) backup
+    #     inPlace, that is therefore filled.  That way we won't mess
+    #     up merging backups with compress on/off.
+    #       Cleanup: remove latest backup if empty, otherwise mark partial.
+    #
+    #  6) Last backup was a V4 partial.  If prior V4 backup is filled
+    #     (and not partial), then just do another in-place backup.
+    #     This is the labeled case 6.  Otherwise, treat as case 4,
+    #     and it's actually labeled case 4.  When complete (whether
+    #     successful or another partial), delete the prior deltas in #n,
+    #     which merges the cumulative changes into #n-1.
+    #
+    my($checkDir, $compress, $removeIdx, $removeNum);
+    if ( $BackupCase == 1 || $BackupCase == 5 ) {
+        $checkDir  = "$Dir/$newBkupNum";
+        $compress  = $Backups[$newBkupIdx]{compress};
+        $removeIdx = $newBkupIdx;
+        $removeNum = $newBkupNum;
+    } elsif ( $BackupCase == 4 && $lastBkupType ne "partial" ) {
+        $checkDir  = "$Dir/$lastBkupNum";
+        $compress  = $Backups[$lastBkupIdx]{compress};
+        $removeIdx = $lastBkupIdx;
+        $removeNum = $lastBkupNum;
+    }
+    if ( $nFilesTotal == 0 && $checkDir ne "" ) {
+        BackupPC::DirOps::find($bpc, {wanted =>
+                sub {
+                    CheckForAnyFiles(@_, $compress);
+                }}, $checkDir);
+    }
+
+    $XferLOG->write(\"BackupFailCleanup: nFilesTotal = $nFilesTotal, type = $type, BackupCase = $BackupCase, inPlace = $inPlace, lastBkupNum = $lastBkupNum\n");
+
+    if ( $BackupCase == 4 && ($lastBkupType eq "partial" || $lastBkupType eq "active") ) {
+        #
+        # Delete the prior backup #n, so that its deltas are merged into #n-1
+        #
+        $XferLOG->write(\"Removing prior partial backup #$lastBkupNum\n");
+        BackupRemove($client, $lastBkupIdx, 1);
+        $Backups[-1]{type} = "partial" if ( @Backups );
+    } elsif ( $BackupCase == 4 ) {
+        if ( $nFilesTotal == 0 ) {
+            #
+            # Remove the empty backup directory.  The new XferLOG file gets renamed
+            # to bad.
+            #
+            $Backups[$newBkupIdx]         = {%{$Backups[$lastBkupIdx]}};
+            $Backups[$newBkupIdx]{num}    = $newBkupNum;
+            $Backups[$newBkupIdx]{noFill} = 0;
+            $XferLOG->write(\"Removing empty backup #$removeNum\n");
+            BackupRemove($client, $removeIdx, 0);
+            push(@logRenames,
+                {from => "$Dir/XferLOG.$newBkupNum$fileExt",  to => "$Dir/XferLOG.bad$fileExt"},
+                {from => "$Dir/XferLOG.$lastBkupNum$fileExt", to => "$Dir/XferLOG.$newBkupNum$fileExt"}
+            );
+        } else {
+            $XferLOG->write(\"Keeping non-empty backup #$removeNum ($checkDir)\n");
+            $Backups[-1]{type} = "partial" if ( @Backups );
         }
-        my $str;
-        if ( $nFilesTotal > $partialFileCnt
-                || $xfer->getStats->{fileCnt} > $partialFileCnt ) {
+    } elsif ( $BackupCase == 1 || $BackupCase == 5 ) {
+        if ( $nFilesTotal == 0 ) {
             #
-            # If the last backup wasn't a partial then
-            # $partialFileCnt is undefined, so the above
-            # test is simply $nFilesTotal > 0
+            # Remove the empty backup directory.  The new XferLOG file gets renamed
+            # to bad.
             #
-	    $keepPartial = 1;
-            if ( $partialFileCnt ) {
-                $str = "Saving this as a partial backup\n";
+            $XferLOG->write(\"Removing empty backup #$removeNum\n");
+            push(@logRenames,
+                {from => "$Dir/XferLOG.$newBkupNum$fileExt",  to => "$Dir/XferLOG.bad$fileExt"},
+            );
+            BackupRemove($client, $removeIdx, 0);
+        } else {
+            $XferLOG->write(\"Keeping non-empty backup #$removeNum ($checkDir)\n");
+            $Backups[-1]{type} = "partial" if ( @Backups );
+        }
+    } else {
+        if ( $nFilesTotal == 0 ) {
+            $XferLOG->write(\"BackupFailCleanup: inPlace with no new files... no cleanup\n");
+            if ( $BackupCase == 6 || $BackupCase == 2 ) {
+                $Backups[-1]{type} = "partial" if ( @Backups );
             } else {
-                $str = sprintf("Saving this as a partial backup, replacing the"
-                         . " prior one (got %d and %d files versus %d)\n",
-                         $nFilesTotal, $xfer->getStats->{fileCnt}, $partialFileCnt);
+                $Backups[-1]{type} = $type if ( @Backups );
             }
-	} else {
-            $str = sprintf("Not saving this as a partial backup since it has fewer"
-                     . " files than the prior one (got %d and %d files versus %d)\n",
-                     $nFilesTotal, $xfer->getStats->{fileCnt}, $partialFileCnt);
+        } else {
+            $XferLOG->write(\"BackupFailCleanup: inPlace with some new files... no cleanup and marking partial\n");
+            #
+            # Update the backups meta data
+            #
+            BackupSave(1);
+            $Backups[-1]{type} = "partial" if ( @Backups );
         }
-        $XferLOG->write(\$str);
     }
+    BackupPC::Storage->backupInfoWrite($Dir, $Backups[-1]{num}, $Backups[-1], 1) if ( @Backups > 0 );
+    $bpc->BackupInfoWrite($client, @Backups);
 
     #
-    # Don't keep partials if they are disabled
+    # Any kind of abort or failure likely means we need to rebuild the reference
+    # count database.
     #
-    $keepPartial = 0 if ( $Conf{PartialAgeMax} < 0 );
+    RefCountUpdate(1, 0);
 
-    if ( !$keepPartial ) {
-        #
-        # No point in saving this dump; get rid of eveything.
-        #
+    if ( $XferLOG ) {
         $XferLOG->close();
-        unlink("$Dir/timeStamp.level0")    if ( -f "$Dir/timeStamp.level0" );
-        unlink("$Dir/SmbLOG.bad")          if ( -f "$Dir/SmbLOG.bad" );
-        unlink("$Dir/SmbLOG.bad$fileExt")  if ( -f "$Dir/SmbLOG.bad$fileExt" );
-        unlink("$Dir/XferLOG.bad")         if ( -f "$Dir/XferLOG.bad" );
+        $XferLOG = undef;
+    }
+    if ( @logRenames ) {
         unlink("$Dir/XferLOG.bad$fileExt") if ( -f "$Dir/XferLOG.bad$fileExt" );
-        unlink("$Dir/NewFileList")         if ( -f "$Dir/NewFileList" );
-        rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.bad$fileExt");
-        $bpc->RmTreeDefer("$TopDir/trash", "$Dir/new") if ( -d "$Dir/new" );
-        print("dump failed: $stat{hostError}\n");
-        $XferLOG->close();
-        print("link $clientURI\n") if ( $needLink );
-        exit(1);
+        unlink("$Dir/XferLOG.bad")         if ( -f "$Dir/XferLOG.bad" );
+        foreach my $r ( @logRenames ) {
+            if ( !rename($r->{from}, $r->{to}) ) {
+                print("Can't rename $r->{from} -> $r->{to}\n");
+            }
+        }
     }
-    #
-    # Ok, now we should save this as a partial dump
-    #
-    $type = "partial";
-    my $newNum = BackupSave();
     print("dump failed: $stat{hostError}\n");
-    print("link $clientURI\n") if ( $needLink );
-    print(LOG $bpc->timeStamp, "Saved partial dump $newNum\n");
-    exit(2);
+    exit(1);
 }
 
 #
-# Decide which old backups should be expired by moving them
-# to $TopDir/trash.
+# Decide which old backups should be expired.
 #
 sub BackupExpire
 {
     my($client) = @_;
     my($Dir) = "$TopDir/pc/$client";
-    my(@Backups) = $bpc->BackupInfoRead($client);
     my($cntFull, $cntIncr, $firstFull, $firstIncr, $oldestIncr,
        $oldestFull, $changes);
 
+    @Backups = $bpc->BackupInfoRead($client);
     if ( $Conf{FullKeepCnt} <= 0 ) {
         print(LOG $bpc->timeStamp,
-                  "Invalid value for \$Conf{FullKeepCnt}=$Conf{FullKeepCnt}\n");
+                  "Invalid value for \$Conf{FullKeepCnt}=$Conf{FullKeepCnt}; not expiring any backups\n");
 	print(STDERR
-            "Invalid value for \$Conf{FullKeepCnt}=$Conf{FullKeepCnt}\n")
+            "Invalid value for \$Conf{FullKeepCnt}=$Conf{FullKeepCnt}; not expiring any backups\n")
 			    if ( $opts{v} );
         return;
     }
@@ -1246,32 +1533,51 @@ sub BackupExpire
 	$cntFull = $cntIncr = 0;
 	$oldestIncr = $oldestFull = 0;
 	for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-	    if ( $Backups[$i]{type} eq "full" ) {
-		$firstFull = $i if ( $cntFull == 0 );
-		$cntFull++;
-	    } elsif ( $Backups[$i]{type} eq "incr" ) {
-		$firstIncr = $i if ( $cntIncr == 0 );
-		$cntIncr++;
-	    }
+            $Backups[$i]{preV4} = ($Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./) ? 1 : 0;
+            if ( $Backups[$i]{preV4} ) {
+                if ( $Backups[$i]{type} eq "full" ) {
+                    $firstFull = $i if ( $cntFull == 0 );
+                    $cntFull++;
+                } elsif ( $Backups[$i]{type} eq "incr" ) {
+                    $firstIncr = $i if ( $cntIncr == 0 );
+                    $cntIncr++;
+                }
+            } else {
+                if ( !$Backups[$i]{noFill} ) {
+                    $firstFull = $i if ( $cntFull == 0 );
+                    $cntFull++;
+                } else {
+                    $firstIncr = $i if ( $cntIncr == 0 );
+                    $cntIncr++;
+                }
+            }
 	}
 	$oldestIncr = (time - $Backups[$firstIncr]{startTime}) / (24 * 3600)
                         if ( $cntIncr > 0 );
 	$oldestFull = (time - $Backups[$firstFull]{startTime}) / (24 * 3600)
                         if ( $cntFull > 0 );
 
+        $XferLOG->write(\"BackupExpire: cntFull = $cntFull, cntIncr = $cntIncr, firstFull = $firstFull,"
+                   . " firstIncr = $firstIncr, oldestIncr = $oldestIncr, oldestFull = $oldestFull\n")
+                                        if ( $XferLOG );
+
         #
-        # With multi-level incrementals, several of the following
-        # incrementals might depend upon this one, so we have to
-        # delete all of the them.  Figure out if that is possible
-        # by counting the number of consecutive incrementals that
-        # are unfilled and have a level higher than this one.
+        # In <= 3.x, with multi-level incrementals, several of the
+        # following incrementals might depend upon this one, so we
+        # have to delete all of the them.  Figure out if that is
+        # possible by counting the number of consecutive incrementals
+        # that are unfilled and have a level higher than this one.
+        #
+        # In >= 4.x any backup can be deleted since the changes get
+        # merged with the next older deltas, so we just do one at
+        # a time.
         #
         my $cntIncrDel = 1;
         my $earliestIncr = $oldestIncr;
 
 	for ( my $i = $firstIncr + 1 ; $i < @Backups ; $i++ ) {
-            last if ( $Backups[$i]{level} <= $Backups[$firstIncr]{level}
-                   || !$Backups[$i]{noFill} );
+            last if ( !$Backups[$i]{preV4} || $Backups[$i]{level} <= $Backups[$firstIncr]{level}
+                          || !$Backups[$i]{noFill} );
             $cntIncrDel++;
             $earliestIncr = (time - $Backups[$i]{startTime}) / (24 * 3600);
         }
@@ -1281,14 +1587,14 @@ sub BackupExpire
 		    && $earliestIncr > $Conf{IncrAgeMax}) ) {
             #
             # Only delete an incr backup if the Conf settings are satisfied
-            # for all $cntIncrDel incrementals.  Since BackupRemove() does
-            # a splice() we need to do the deletes in the reverse order.
+            # for all $cntIncrDel incrementals.  Since BackupRemove() updates
+            # the @Backups array we need to do the deletes in the reverse order.
             # 
             for ( my $i = $firstIncr + $cntIncrDel - 1 ;
                     $i >= $firstIncr ; $i-- ) {
-                print(LOG $bpc->timeStamp,
-                          "removing incr backup $Backups[$i]{num}\n");
-                BackupRemove($client, \@Backups, $i);
+                print("removing unfilled backup $Backups[$i]{num}\n");
+                $XferLOG->write(\"removing unfilled backup $Backups[$i]{num}\n") if ( $XferLOG );
+                last if ( BackupRemove($client, $i, 1) );
                 $changes++;
             }
             next;
@@ -1317,21 +1623,23 @@ sub BackupExpire
                && $oldestFull > $Conf{FullAgeMax}
                && $oldestFull > $fullAgeMax
 	       && $Conf{FullKeepCntMin} > 0
-	       && $Conf{FullAgeMax} > 0
-               && (@Backups <= $firstFull + 1
-                        || !$Backups[$firstFull + 1]{noFill}) ) {
+	       && $Conf{FullAgeMax} > 0 ) {
             #
             # Only delete a full backup if the Conf settings are satisfied.
-            # We also must make sure that either this backup is the most
-            # recent one, or the next backup is filled.
-            # (We can't deleted a full backup if the next backup is not
+            #
+            # For pre-V4 we also must make sure that either this backup is the
+            # most recent one, or the next backup is filled.
+            # (In pre-V4 we can't deleted a full backup if the next backup is not
             # filled.)
             # 
-	    print(LOG $bpc->timeStamp,
-                   "removing old full backup $Backups[$firstFull]{num}\n");
-            BackupRemove($client, \@Backups, $firstFull);
-            $changes++;
-            next;
+            if ( !$Backups[$firstFull]{preV4} || (@Backups <= $firstFull + 1
+                        || !$Backups[$firstFull + 1]{noFill}) ) {
+                print("removing filled backup $Backups[$firstFull]{num}\n");
+                $XferLOG->write(\"removing filled backup $Backups[$firstFull]{num}\n") if ( $XferLOG );
+                last if ( BackupRemove($client, $firstFull, 1) );
+                $changes++;
+                next;
+            }
         }
 
         #
@@ -1351,17 +1659,18 @@ sub BackupFullExpire
 {
     my($client, $Backups) = @_;
     my $fullCnt = 0;
-    my $fullPeriod = $Conf{FullPeriod};
+    my $fullPeriod = $Conf{FillCycle} <= 0 ? $Conf{FullPeriod} : $Conf{FillCycle};
     my $origFullPeriod = $fullPeriod;
     my $fullKeepCnt = $Conf{FullKeepCnt};
     my $fullKeepIdx = 0;
     my(@delete, @fullList);
 
     #
-    # Don't delete anything if $Conf{FullPeriod} or $Conf{FullKeepCnt} are
-    # not defined - possibly a corrupted config.pl file.
+    # Don't delete anything if $Conf{FillCycle}, $Conf{FullPeriod} or $Conf{FullKeepCnt}
+    # are not defined - possibly a corrupted config.pl file.
     #
-    return if ( !defined($Conf{FullPeriod}) || !defined($Conf{FullKeepCnt}) );
+    return if ( !defined($Conf{FillCycle}) || !defined($Conf{FullPeriod})
+                                           || !defined($Conf{FullKeepCnt}) );
 
     #
     # If regular backups are still disabled with $Conf{FullPeriod} < 0,
@@ -1372,17 +1681,22 @@ sub BackupFullExpire
     $fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
 
     for ( my $i = 0 ; $i < @$Backups ; $i++ ) {
-        next if ( $Backups->[$i]{type} ne "full" );
+        if ( $Backups[$i]{preV4} ) {
+            next if ( $Backups->[$i]{type} ne "full" );
+        } else {
+            next if ( $Backups->[$i]{noFill} );
+        }
         push(@fullList, $i);
     }
     for ( my $k = @fullList - 1 ; $k >= 0 ; $k-- ) {
         my $i = $fullList[$k];
         my $prevFull = $fullList[$k-1] if ( $k > 0 );
         #
-        # Don't delete any full that is followed by an unfilled backup,
+        # For pre-V4 don't delete any full that is followed by an unfilled backup,
         # since it is needed for restore.
         #
         my $noDelete = $i + 1 < @$Backups ? $Backups->[$i+1]{noFill} : 0;
+        $noDelete = 0 if ( !$Backups[$i]{preV4} );
 
         if ( !$noDelete && 
               ($fullKeepIdx >= @$fullKeepCnt
@@ -1411,59 +1725,28 @@ sub BackupFullExpire
     # Now actually delete the backups
     #
     for ( my $i = @delete - 1 ; $i >= 0 ; $i-- ) {
-        print(LOG $bpc->timeStamp,
-               "removing full backup $Backups->[$delete[$i]]{num}\n");
-        BackupRemove($client, $Backups, $delete[$i]);
+        print("removing filled backup $Backups->[$delete[$i]]{num}\n");
+        $XferLOG->write(\"removing filled backup $Backups->[$delete[$i]]{num}\n") if ( $XferLOG );
+        BackupRemove($client, $delete[$i], 1);
     }
     return @delete;
 }
 
-#
-# Removes any partial backups
-#
-sub BackupPartialRemove
-{
-    my($client, $Backups) = @_;
-
-    for ( my $i = @$Backups - 1 ; $i >= 0 ; $i-- ) {
-        next if ( $Backups->[$i]{type} ne "partial" );
-        BackupRemove($client, $Backups, $i);
-    }
-}
-
 sub BackupSave
 {
-    my @Backups = $bpc->BackupInfoRead($client);
-    my $num  = -1;
-    my $newFilesFH;
-
+    my($noWrite) = @_;
     #
-    # Since we got a good backup we should remove any partial dumps
-    # (the new backup might also be a partial, but that's ok).
+    # Update the new backup information to the backup file.
+    # A new entry in @Backups was created at the start of the backup,
+    # so we update the last entry of @Backups.
     #
-    BackupPartialRemove($client, \@Backups);
-    $needLink = 1 if ( -f "$Dir/NewFileList" );
-
-    #
-    # Number the new backup
-    #
-    for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-        $num = $Backups[$i]{num} if ( $num < $Backups[$i]{num} );
-    }
-    $num++;
-    $bpc->RmTreeDefer("$TopDir/trash", "$Dir/$num") if ( -d "$Dir/$num" );
-    if ( !rename("$Dir/new", "$Dir/$num") ) {
-        print(LOG $bpc->timeStamp, "Rename $Dir/new -> $Dir/$num failed\n");
-        $stat{xferOK} = 0;
-        return;
-    }
-
-    #
-    # Add the new backup information to the backup file
-    #
-    my $i = @Backups;
-    $Backups[$i]{num}           = $num;
+    @Backups = $bpc->BackupInfoRead($client);
+    my $i = @Backups - 1;
+    $i = 0 if ( $i < 0 );
+    $Backups[$i]{num} = $newBkupNum if ( !defined($Backups[$i]{num}) );
+    my $num                     = $Backups[$i]{num};
     $Backups[$i]{type}          = $type;
+    $Backups[$i]{level}         = $type eq "incr" ? 1 : 0;
     $Backups[$i]{startTime}     = $startTime;
     $Backups[$i]{endTime}       = $endTime;
     $Backups[$i]{size}          = $sizeTotal;
@@ -1474,14 +1757,19 @@ sub BackupSave
     $Backups[$i]{nFilesExist}   = $nFilesExist;
     $Backups[$i]{sizeExist}     = $sizeExist;
     $Backups[$i]{sizeExistComp} = $sizeExistComp;
+    $Backups[$i]{nFilesNew}     = $nFilesNew;
+    $Backups[$i]{sizeNew}       = $sizeNew;
+    $Backups[$i]{sizeNewComp}   = $sizeNewComp;
     $Backups[$i]{tarErrs}       = $tarErrs;
     $Backups[$i]{compress}      = $Conf{CompressLevel};
-    $Backups[$i]{noFill}        = $type eq "incr" ? 1 : 0;
-    $Backups[$i]{level}         = $incrLevel;
+    $Backups[$i]{noFill}        = 0;
     $Backups[$i]{mangle}        = 1;     # name mangling always on for v1.04+
     $Backups[$i]{xferMethod}    = $Conf{XferMethod};
     $Backups[$i]{charset}       = $Conf{ClientCharset};
     $Backups[$i]{version}       = $bpc->Version();
+    $Backups[$i]{inodeLast}     = $inodeLast;
+
+    return if ( $noWrite );
     #
     # Save the main backups file
     #
@@ -1491,7 +1779,7 @@ sub BackupSave
     # gets corrupted
     #
     BackupPC::Storage->backupInfoWrite($Dir, $Backups[$i]{num},
-                                             $Backups[$i]);
+                                             $Backups[$i], 1);
 
     unlink("$Dir/timeStamp.level0") if ( -f "$Dir/timeStamp.level0" );
     foreach my $ext ( qw(bad bad.z) ) {
@@ -1499,70 +1787,6 @@ sub BackupSave
 	unlink("$Dir/XferLOG.$ext.old") if ( -f "$Dir/XferLOG.$ext" );
 	rename("$Dir/XferLOG.$ext", "$Dir/XferLOG.$ext.old");
     }
-
-    #
-    # Now remove the bad files, replacing them if possible with links to
-    # earlier backups.
-    #
-    foreach my $f ( $xfer->getBadFiles ) {
-	my $j;
-	my $shareM = $bpc->fileNameEltMangle($f->{share});
-	my $fileM  = $bpc->fileNameMangle($f->{file});
-	unlink("$Dir/$num/$shareM/$fileM");
-	for ( $j = $i - 1 ; $j >= 0 ; $j-- ) {
-	    my $file;
-	    if ( $Backups[$j]{mangle} ) {
-		$file = "$shareM/$fileM";
-	    } else {
-		$file = "$f->{share}/$f->{file}";
-	    }
-	    next if ( !-f "$Dir/$Backups[$j]{num}/$file" );
-
-            my($exists, $digest, $origSize, $outSize, $errs)
-                                = BackupPC::PoolWrite::LinkOrCopy(
-                                      $bpc,
-                                      "$Dir/$Backups[$j]{num}/$file",
-                                      $Backups[$j]{compress},
-                                      "$Dir/$num/$shareM/$fileM",
-                                      $Conf{CompressLevel});
-            if ( !$exists ) {
-                #
-                # the hard link failed, most likely because the target
-                # file has too many links.  We have copied the file
-                # instead, so add this to the new file list.
-                #
-                if ( !defined($newFilesFH) ) {
-                    my $str = "Appending to NewFileList for $shareM/$fileM\n";
-                    $XferLOG->write(\$str);
-                    open($newFilesFH, ">>", "$TopDir/pc/$client/NewFileList")
-                         || die("can't open $TopDir/pc/$client/NewFileList");
-                    binmode($newFilesFH);
-                }
-                if ( -f "$Dir/$num/$shareM/$fileM" ) {
-                    print($newFilesFH "$digest $origSize $shareM/$fileM\n");
-                } else {
-                    my $str = "Unable to link/copy $num/$f->{share}/$f->{file}"
-                            . " to $Backups[$j]{num}/$f->{share}/$f->{file}\n";
-                    $XferLOG->write(\$str);
-                }
-	    } else {
-		my $str = "Bad file $num/$f->{share}/$f->{file} replaced"
-                        . " by link to"
-                        . " $Backups[$j]{num}/$f->{share}/$f->{file}\n";
-		$XferLOG->write(\$str);
-	    }
-	    last;
-	}
-	if ( $j < 0 ) {
-	    my $str = "Removed bad file $num/$f->{share}/$f->{file}"
-                    . " (no older copy to link to)\n";
-	    $XferLOG->write(\$str);
-	}
-    }
-    close($newFilesFH) if ( defined($newFilesFH) );
-    $XferLOG->close();
-    rename("$Dir/XferLOG$fileExt", "$Dir/XferLOG.$num$fileExt");
-    rename("$Dir/NewFileList", "$Dir/NewFileList.$num");
 
     return $num;
 }
@@ -1572,25 +1796,32 @@ sub BackupSave
 #
 sub BackupRemove
 {
-    my($client, $Backups, $idx) = @_;
-    my($Dir) = "$TopDir/pc/$client";
+    my($client, $idx, $removeXferLOG) = @_;
 
-    if ( $Backups->[$idx]{num} eq "" ) {
-        print("BackupRemove: ignoring empty backup number for idx $idx\n");
-        return;
-    }
+    my $fileExt = $Backups[$idx]{compress} > 0 ? ".z" : "";
+    my $bkupNum = $Backups[$idx]{num};
 
-    $bpc->RmTreeDefer("$TopDir/trash",
-                      "$Dir/$Backups->[$idx]{num}");
-    unlink("$Dir/SmbLOG.$Backups->[$idx]{num}")
-                if ( -f "$Dir/SmbLOG.$Backups->[$idx]{num}" );
-    unlink("$Dir/SmbLOG.$Backups->[$idx]{num}.z")
-                if ( -f "$Dir/SmbLOG.$Backups->[$idx]{num}.z" );
-    unlink("$Dir/XferLOG.$Backups->[$idx]{num}")
-                if ( -f "$Dir/XferLOG.$Backups->[$idx]{num}" );
-    unlink("$Dir/XferLOG.$Backups->[$idx]{num}.z")
-                if ( -f "$Dir/XferLOG.$Backups->[$idx]{num}.z" );
-    splice(@{$Backups}, $idx, 1);
+    print("__bpc_progress_state__ delete #$bkupNum\n");
+
+    unlink("$Dir/XferLOG.$bkupNum$fileExt") if ( $removeXferLOG );
+
+    $bpc->cmdSystemOrEval(
+        ["$BinDir/BackupPC_backupDelete",
+         "-h", $client,
+         "-n", $Backups[$idx]{num},
+         "-l",
+        ],
+        sub {
+            if ( $_[0] =~ /^__bpc_progress_/ || !defined($XferLOG) ) {
+                print(STDERR $_[0]);
+            } else {
+                $XferLOG->write(\$_[0]);
+            }
+        },
+        {}, \%Conf);
+    my $ret = $?;
+    splice(@Backups, $idx, 1);
+    return $ret;
 }
 
 sub CorrectHostCheck
@@ -1602,6 +1833,41 @@ sub CorrectHostCheck
     return "host $host has mismatching netbios name $netBiosHost"
 		if ( lc($netBiosHost) ne lc(substr($host, 0, 15)) );
     return;
+}
+
+#
+# Run BackupPC_refCountUpdate on this client
+#
+# With $doFsck = 0 and $doCheck = 0, a regular update based on the
+# delta files is done.
+#
+# With $doFsck = 1 and $doCheck = 0, the pool count files are rebuilt,
+# without checking the old one.
+#
+# With $doFsck = 1 and $doCheck = 1, the pool count files are rebuilt,
+# and differences to the current ones are listed.
+#
+sub RefCountUpdate
+{
+    my($doFsck, $doCheck) = @_;
+    my $t = time;
+
+    my $args = ["-h", $client];
+    push(@$args, "-f") if ( $doFsck  );
+    push(@$args, "-c") if ( $doCheck );
+    print("__bpc_progress_state__ fsck\n");
+    $XferLOG->write(\"Running BackupPC_refCountUpdate @$args on $client\n");
+    $bpc->cmdSystemOrEval(["$BinDir/BackupPC_refCountUpdate", @$args],
+            sub {
+                if ( $_[0] =~ /^__bpc_progress_/ || !defined($XferLOG) ) {
+                    print(STDERR $_[0]);
+                } else {
+                    $XferLOG->write(\$_[0]);
+                }
+            },
+            {}, \%Conf);
+    $t = time - $t;
+    $XferLOG->write(\"Finished BackupPC_refCountUpdate (running time: $t sec)\n");
 }
 
 #
@@ -1619,23 +1885,6 @@ sub pidHandler
     my $str = join(",", @pids);
     $XferLOG->write(\"Xfer PIDs are now $str\n") if ( defined($XferLOG) );
     print("xferPids $str\n");
-}
-
-#
-# The Xfer method might tell us from time to time about progress
-# in the backup or restore
-#
-sub completionPercent
-{
-    my($percent) = @_;
-
-    $percent = 100 if ( $percent > 100 );
-    $percent =   0 if ( $percent <   0 );
-    if ( !defined($completionPercent)
-        || int($completionPercent + 0.5) != int($percent) ) {
-            printf("completionPercent %.0f\n", $percent);
-    }
-    $completionPercent = $percent;
 }
 
 #
@@ -1668,6 +1917,17 @@ sub UserCommandRun
 
     if ($cmdType eq 'DumpPreShareCmd' || $cmdType eq 'DumpPostShareCmd') {
 	$vars->{share} = $sharename;
+        if ( $cmdType =~ /Post/ ) {
+            print("__bpc_progress_state__ post-cmd $sharename\n");
+        } else {
+            print("__bpc_progress_state__ pre-cmd $sharename\n");
+        }
+    } else {
+        if ( $cmdType =~ /Post/ ) {
+            print("__bpc_progress_state__ post-cmd\n");
+        } else {
+            print("__bpc_progress_state__ pre-cmd\n");
+        }
     }
 
     my $cmd = $bpc->cmdVarSubstitute($Conf{$cmdType}, $vars);
@@ -1684,4 +1944,34 @@ sub UserCommandRun
                 print(LOG $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
 	    },
 	    $vars, \%Conf);
+}
+
+sub flushLibMessages()
+{
+    my $msg = BackupPC::XS::Lib::logMsgGet();
+    return if ( !defined($msg) );
+    if ( $XferLOG ) {
+        foreach my $m ( @$msg ) {
+            $XferLOG->write(\$m);
+        }
+    } else {
+        foreach my $m ( @$msg ) {
+            print(LOG $m);
+            print($m);
+        }
+    }
+}
+
+sub xferLOGCopyFile
+{
+    my($srcFileName, $compress, $removeSrc) = @_;
+    my($f, $data);
+
+    $f = BackupPC::XS::FileZIO::open($srcFileName, 0, $compress);
+    return if ( !defined($f) );
+    while ( $f->read(\$data, 1 << 20) > 0 ) {
+        $XferLOG->write(\$data);
+    }
+    $f->close();
+    unlink($srcFileName) if ( $removeSrc );
 }

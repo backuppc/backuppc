@@ -1,7 +1,19 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
-#my %lang;
-#use strict;
 #File:  nl.pm       version 1.5
 # --------------------------------
 
@@ -103,6 +115,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td> Opdracht </td>
     <td align="center"> PID </td>
     <td align="center"> PID vd overdracht </td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1223,6 +1237,7 @@ $Lang{off} = "uit";
 
 $Lang{backupType_full}    = "volledig";
 $Lang{backupType_incr}    = "incrementeel";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "gedeeltelijk";
 
 $Lang{failed} = "mislukt";
@@ -1236,8 +1251,8 @@ $Lang{Status_backup_starting} = "backup start";
 $Lang{Status_backup_in_progress} = "backup bezig";
 $Lang{Status_restore_starting} = "herstel start";
 $Lang{Status_restore_in_progress} = "herstel bezig";
-$Lang{Status_link_pending} = "wacht op linken";
-$Lang{Status_link_running} = "linken is bezig";
+$Lang{Status_admin_pending} = "wacht op linken";
+$Lang{Status_admin_running} = "linken is bezig";
 
 $Lang{Reason_backup_done} = "backup voltooid";
 $Lang{Reason_restore_done} = "herstel voltooid";
@@ -1460,7 +1475,6 @@ $Lang{CfgEdit_Button_Delete}   = "Verwijderen";
 $Lang{CfgEdit_Button_Add}      = "Toevoegen";
 $Lang{CfgEdit_Button_Override} = "Overschrijven";
 $Lang{CfgEdit_Button_New_Key}  = "Nieuwe sleutel";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Fout: niet bewaard ten gevolge van fouten";

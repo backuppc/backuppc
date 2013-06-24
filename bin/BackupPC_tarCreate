@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_tarCreate: create a tar archive of an existing dump
@@ -37,11 +37,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2015  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -50,12 +50,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -63,13 +62,14 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "__INSTALLDIR__/lib";
 use File::Path;
 use Getopt::Std;
 use Encode qw/from_to/;
+use Data::Dumper;
+
 use BackupPC::Lib;
-use BackupPC::Attrib qw(:all);
-use BackupPC::FileZIO;
+use BackupPC::XS qw( :all );
 use BackupPC::View;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
@@ -131,7 +131,8 @@ if ( $i >= @Backups ) {
 }
 
 my $Charset = $Backups[$i]{charset};
-$Charset = $opts{e} if ( $opts{e} ne "" );
+$Charset    = $opts{e} if ( $opts{e} ne "" );
+my $PreV4   = ($Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./) ? 1 : 0;
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
 my $PathAdd    = $1 if ( $opts{p} =~ /(.+)/ );
@@ -160,7 +161,7 @@ my $WriteBuf   = "";
 my $WriteBufSz = ($opts{b} || 20) * $tar_header_length;
 
 my(%UidCache, %GidCache);
-my(%HardLinkExtraFiles, @HardLinks);
+my(%HardLinkExtraFiles, @HardLinks, %Inode2File);
 
 #
 # Write out all the requested files/directories
@@ -236,11 +237,13 @@ sub archiveWrite
 }
 
 #
-# Write out any hardlinks (if any)
+# Write out any hardlinks (if any); only for <= 3.x backups.
 #
 sub archiveWriteHardLinks
 {
     my($fh) = @_;
+
+    return if ( !$PreV4 );
     foreach my $hdr ( @HardLinks ) {
         $hdr->{size} = 0;
 	my $name = $hdr->{linkname};
@@ -389,8 +392,7 @@ sub TarWriteFileInfo
 
         my $name = $hdr->{name};
 
-        if ( $hdr->{type} == BPC_FTYPE_SYMLINK
-                || $hdr->{type} == BPC_FTYPE_HARDLINK ) {
+        if ( $hdr->{type} == BPC_FTYPE_SYMLINK ) {
             $name .= " -> $hdr->{linkname}";
         }
         $name =~ s/\n/\\n/g;
@@ -433,9 +435,6 @@ sub TarWriteFileInfo
     TarWriteHeader($fh, $hdr);
 }
 
-my $Attr;
-my $AttrDir;
-
 sub TarWriteFile
 {
     my($hdr, $fh, $tarPathOverride) = @_;
@@ -452,6 +451,26 @@ sub TarWriteFile
     $tarPath =~ s{//+}{/}g;
     $hdr->{name} = $tarPath;
 
+    if ( !$PreV4 && $hdr->{nlinks} > 0 && defined($hdr->{inode}) ) {
+        if ( defined($Inode2File{$hdr->{inode}}) ) {
+            #
+            # Later inodes: emit a hardlink to an existing file in the archive
+            # TODO: do path rewrite on link path?
+            #
+            $hdr->{size} = 0;
+            $hdr->{type} = BPC_FTYPE_HARDLINK;
+            $hdr->{linkname} = $Inode2File{$hdr->{inode}}{name};
+            TarWriteFileInfo($fh, $hdr);
+            return;
+        } else {
+            #
+            # First time: remember the data for this inode and dump
+            # the file in its original form.
+            #
+            $Inode2File{$hdr->{inode}} = { %$hdr };
+        }
+    }
+
     if ( $hdr->{type} == BPC_FTYPE_DIR ) {
         #
         # Directory: just write the header
@@ -464,7 +483,7 @@ sub TarWriteFile
         #
         # Regular file: write the header and file
         #
-        my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0, $hdr->{compress});
+        my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
             print(STDERR "Unable to open file $hdr->{fullPath}\n");
             $ErrorCnt++;
@@ -501,66 +520,82 @@ sub TarWriteFile
         }
 	$FileCnt++;
 	$ByteCnt += $size;
-    } elsif ( $hdr->{type} == BPC_FTYPE_HARDLINK ) {
+    } elsif ( $PreV4 && $hdr->{type} == BPC_FTYPE_HARDLINK ) {
+        #
+        # Note: the meaning of this type changed between BackupPC <= v3.x
+        # and >= 4.x.
+        #
+        # In 3.x a hardlink is stored like a symlink: the contents
+        # of the "file" is the path to the linked-to file.
+        #
+        # In 4.x+ a hardlink's attributes are stored with the
+        # inode, and the real attributes are stored by inode
+        # for all files with nlinks >= 1.
+        #
+        # The 4.x case is handled above.
+        #
+        # TODO: do path rewrite on link path?
         #
         # Hardlink file: either write a hardlink or the complete file
-	# depending upon whether the linked-to file will be written
-	# to the archive.
+        # depending upon whether the linked-to file will be written
+        # to the archive.
         #
-	# Start by reading the contents of the link.
-	#
-        my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0, $hdr->{compress});
+        # Start by reading the contents of the link.
+        #
+        my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
             print(STDERR "Unable to open file $hdr->{fullPath}\n");
             $ErrorCnt++;
-	    return;
+            return;
         }
         my $data;
         while ( $f->read(\$data, $BufSize) > 0 ) {
             $hdr->{linkname} .= $data;
         }
-	$f->close;
-	#
-	# Check @ARGV and the list of hardlinked files we have explicity
-	# dumped to see if we have dumped this file or not
-	#
-	my $done = 0;
-	my $name = $hdr->{linkname};
-	$name =~ s{^\./}{/};
-	if ( defined($HardLinkExtraFiles{$name}) ) {
-	    $done = 1;
-	} else {
-	    foreach my $arg ( @ARGV ) {
-		$arg = "/" if ( $arg eq "." );
-		$arg =~ s{^\./+}{/};
-		$arg =~ s{/+$}{};
-		$done = 1 if ( $name eq $arg || $name =~ /^\Q$arg\// || $arg eq "" );
-	    }
-	}
-	if ( $done ) {
-	    #
-	    # Target file will be or was written, so just remember
-	    # the hardlink so we can dump it later.
-	    #
-	    push(@HardLinks, $hdr);
-	    $SpecialCnt++;
-	} else {
-	    #
-	    # Have to dump the original file.  Just call the top-level
-	    # routine, so that we save the hassle of dealing with
-	    # mangling, merging and attributes.
-	    #
+        $f->close;
+        #
+        # Check @ARGV and the list of hardlinked files we have explicity
+        # dumped to see if we have dumped this file or not
+        #
+        my $done = 0;
+        my $name = $hdr->{linkname};
+        $name =~ s{^\.?/+}{/};
+        $name = "/$name" if ( $name !~ m{^/} );
+        if ( defined($HardLinkExtraFiles{$name}) ) {
+            $done = 1;
+        } else {
+            foreach my $arg ( @ARGV ) {
+                $arg = "/" if ( $arg eq "." );
+                $arg =~ s{^\.?/+}{/};
+                $arg =~ s{/+$}{};
+                $done = 1 if ( $name eq $arg || $name =~ /^\Q$arg\// || $arg eq "" );
+            }
+        }
+        if ( $done ) {
+            #
+            # Target file will be or was written, so just remember
+            # the hardlink so we can dump it later.
+            #
+            push(@HardLinks, $hdr);
+            $SpecialCnt++;
+        } else {
+            #
+            # Have to dump the original file.  Just call the top-level
+            # routine, so that we save the hassle of dealing with
+            # mangling, merging and attributes.
+            #
             my $name = $hdr->{linkname};
             $name =~ s{^\./}{/};
-	    $HardLinkExtraFiles{$name} = $hdr->{name};
-	    archiveWrite($fh, $name, $hdr->{name});
-	}
+            $HardLinkExtraFiles{$name} = $hdr->{name};
+            archiveWrite($fh, $name, $hdr->{name});
+        }
     } elsif ( $hdr->{type} == BPC_FTYPE_SYMLINK ) {
         #
         # Symbolic link: read the symbolic link contents into the header
         # and write the header.
+        # TODO: do path rewrite on link path?
         #
-        my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0, $hdr->{compress});
+        my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
             print(STDERR "Unable to open symlink file $hdr->{fullPath}\n");
             $ErrorCnt++;
@@ -582,7 +617,7 @@ sub TarWriteFile
         # major and minor numbers from a plain file.
         #
         if ( $hdr->{type} != BPC_FTYPE_FIFO ) {
-            my $f = BackupPC::FileZIO->open($hdr->{fullPath}, 0,
+            my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0,
 						$hdr->{compress});
             my $data;
             if ( !defined($f) || $f->read(\$data, $BufSize) < 0 ) {

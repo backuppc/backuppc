@@ -4,7 +4,7 @@
 #
 #   Startup init script for BackupPC on Redhat linux.
 #
-# Distributed with BackupPC version __VERSION__, released __RELEASEDATE__.
+# Distributed with BackupPC version 4.0.0alpha0, released 23 Jun 2013.
 #
 # chkconfig: - 91 35
 # description: Starts and stops the BackupPC server

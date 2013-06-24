@@ -1,12 +1,22 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #
 # By Reginaldo Ferreira <reginaldo@lepper.com.br> (23.07.2004 for V2.1.10)
 #
 # Edited by Rodrigo Real <rreal@ucpel.tche.br> (22.06.2006)
-
-#my %lang;
-
-#use strict;
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 # --------------------------------
 
@@ -108,6 +118,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td> Comando </td>
     <td align="center"> PID </td>
     <td align="center"> Transfer. PID </td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1225,6 +1237,7 @@ $Lang{off} = "inativo";
 
 $Lang{backupType_full}    = "completo";
 $Lang{backupType_incr}    = "incremental";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "parcial";
 
 $Lang{failed} = "falhado";
@@ -1238,8 +1251,8 @@ $Lang{Status_backup_starting} = "iniciando backup";
 $Lang{Status_backup_in_progress} = "backup em execução";
 $Lang{Status_restore_starting} = "iniciando restauração";
 $Lang{Status_restore_in_progress} = "restauração em execução";
-$Lang{Status_link_pending} = "conexão pendente";
-$Lang{Status_link_running} = "conexão em curso";
+$Lang{Status_admin_pending} = "conexão pendente";
+$Lang{Status_admin_running} = "conexão em curso";
 
 $Lang{Reason_backup_done} = "backup realizado";
 $Lang{Reason_restore_done} = "restauração realizada";
@@ -1451,7 +1464,6 @@ $Lang{CfgEdit_Button_Delete}   = "Excluir";
 $Lang{CfgEdit_Button_Add}      = "Adicionar";
 $Lang{CfgEdit_Button_Override} = "Sobrepor";
 $Lang{CfgEdit_Button_New_Key}  = "New Key";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "ENG Error: No save due to errors";

@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_nightly: Nightly cleanup & statistics script.
@@ -9,8 +9,10 @@
 #
 #      - monthly aging of per-PC log files (only with -m option)
 #
+#      - updating reference counts for V4+ backups
+#
 #      - pruning files from pool no longer used (ie: those with only one
-#        hard link).
+#        hard link in V3, or a reference count of zero for V4+)
 #
 #      - sending email to users and administrators (only with -m option)
 #
@@ -18,30 +20,44 @@
 #
 #   Flags:
 #
-#     -m   Do monthly aging of per-PC log files and sending of email.
+#     -m   Primary (master) BackupPC_nightly. Sends email.
 #          Otherise, BackupPC_nightly just does pool pruning.
 #          Since several BackupPC_nightly processes might run
 #          concurrently, just the first one is given the -m flag
 #          by BackupPC.
 #
 #   The poolRangeStart and poolRangeEnd arguments are integers from 0 to 255.
-#   These specify which parts of the pool to process.  There are 256 2nd-level
-#   directories in the pool (0/0, 0/1, ..., f/e, f/f).  BackupPC_nightly
-#   processes the given subset of this list (0 means 0/0, 255 means f/f).
-#   Therefore, arguments of 0 255 process the entire pool, 0 127 does
-#   the first half (ie: 0/0 through 7/f), 127 255 does the other half
-#   (eg: 8/0 through f/f) and 0 15 does just the first 1/16 of the pool
-#   (ie: 0/0 through 0/f).
+#   These specify which parts of the subtasks or pool to process.
+#
+#   In the V3 pool, there are 256 2nd-level directories in the pool
+#   (0/0, 0/1, ..., f/e, f/f).  BackupPC_nightly processes the given
+#   subset of this list (0 means 0/0, 255 means f/f).  Therefore,
+#   arguments of 0 255 process the entire pool, 0 127 does the first
+#   half (ie: 0/0 through 7/f), 127 255 does the other half (eg: 8/0
+#   through f/f) and 0 15 does just the first 1/16 of the pool (ie: 0/0
+#   through 0/f).
+#
+#
+#   TODO: Parallelize V4 reference count updating.  Tricky part is
+#   that the first phase (host updating) must be completely finished
+#   before final host updating is done.
+#
+#   In V4, reference count updating is done for each host.  The host
+#   list is divided up, and processed based on the 8 bit argument range.
+#
+#   The V4 pool has 128 first-level directories and 128 second-level
+#   directories.  The 0..255 argument is divided by 2 to select which
+#   top-level directories to process.  Odd numbers are skipped.
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2015  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -50,12 +66,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -63,9 +78,9 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "__INSTALLDIR__/lib";
 use BackupPC::Lib qw( :BPC_DT_ALL );
-use BackupPC::FileZIO;
+use BackupPC::XS;
 use Getopt::Std;
 
 use File::Path;
@@ -115,113 +130,41 @@ if ( $opts{m} ) {
 }
 
 ###########################################################################
-# Get statistics on the pool, and remove files that have only one link.
+# V3 pool: get statistics, and remove files that have only one link.
 ###########################################################################
-
-my $fileCnt;       # total number of files
-my $dirCnt;        # total number of directories
-my $blkCnt;        # total block size of files
-my $fileCntRm;     # total number of removed files
-my $blkCntRm;      # total block size of removed files
-my $blkCnt2;       # total block size of files with just 2 links
-                   # (ie: files that only occur once among all backups)
-my $fileCntRep;    # total number of file names containing "_", ie: files
+my $fileCnt;       # total number of v3 files
+my $dirCnt;        # total number of v3 directories
+my $blkCnt;        # total block size of v3 files
+my $fileCntRm;     # total number of removed v3 files
+my $blkCntRm;      # total block size of removed v3 files
+my $fileCntRep;    # total number of v3 file names containing "_", ie: files
                    # that have repeated md5 checksums
-my $fileRepMax;    # worse case number of files that have repeated checksums
+my $fileRepMax;    # worse case number of v3 files that have repeated checksums
                    # (ie: max(nnn+1) for all names xxxxxxxxxxxxxxxx_nnn)
-my $fileLinkMax;   # maximum number of hardlinks on a pool file
-my $fileLinkTotal; # total number of hardlinks on entire pool
-my $fileCntRename; # number of renamed files (to keep file numbering
+my $fileLinkMax;   # maximum number of hardlinks on a v3 pool file
+my $fileLinkTotal; # total number of hardlinks on entire v3 pool
+my $fileCntRename; # number of renamed v3 files (to keep file numbering
                    # contiguous)
-my %FixList;       # list of paths that need to be renamed to avoid
+my %FixList;       # list of v3 paths that need to be renamed to avoid
                    # new holes
-my @hexChars = qw(0 1 2 3 4 5 6 7 8 9 a b c d e f);
-
-for my $pool ( qw(pool cpool) ) {
-    for ( my $i = $poolRangeStart ; $i <= $poolRangeEnd ; $i++ ) {
-        my $dir        = "$hexChars[int($i / 16)]/$hexChars[$i % 16]";
-        # print("Doing $pool/$dir\n") if ( ($i % 16) == 0 );
-        $fileCnt       = 0;
-        $dirCnt        = 0;
-        $blkCnt        = 0;
-        $fileCntRm     = 0;
-        $blkCntRm      = 0;
-        $blkCnt2       = 0;
-        $fileCntRep    = 0;
-        $fileRepMax    = 0;
-        $fileLinkMax   = 0;
-        $fileCntRename = 0;
-        %FixList       = ();
-        $bpc->find({wanted => \&GetPoolStats}, "$TopDir/$pool/$dir")
-					    if ( -d "$TopDir/$pool/$dir" );
-        my $kb   = $blkCnt / 2;
-        my $kbRm = $blkCntRm / 2;
-        my $kb2  = $blkCnt2 / 2;
-
-	#
-	# Main BackupPC_nightly counts the top-level directory
-	#
-	$dirCnt++ if ( $opts{m} && -d "$TopDir/$pool" && $i == 0 );
-
-	#
-	# Also count the next level directories
-	#
-	$dirCnt++ if ( ($i % 16) == 0
-		       && -d "$TopDir/$pool/$hexChars[int($i / 16)]" );
-
-        #
-        # We need to process all pending deletes before we do the
-        # renames
-        #
-        if ( @PendingDelete ) {
-            sleep(1);
-            processPendingDeletes(1);
-        }
-
-        #
-        # Now make sure that files with repeated checksums are still
-        # sequentially numbered
-        #
-        foreach my $name ( sort(keys(%FixList)) ) {
-            my $rmCnt = $FixList{$name} + 1;
-            my $new = -1;
-            for ( my $old = -1 ; ; $old++ ) {
-                my $oldName = $name;
-                $oldName .= "_$old" if ( $old >= 0 );
-                if ( !-f $oldName ) {
-                    #
-                    # We know we are done when we have missed at least
-                    # the number of files that were removed from this
-                    # base name, plus a couple just to be sure
-                    #
-                    last if ( $rmCnt-- <= 0 );
-                    next;
-                }
-                my $newName = $name;
-                $newName .= "_$new" if ( $new >= 0 );
-                $new++;
-                next if ( $oldName eq $newName );
-                rename($oldName, $newName);
-                $fileCntRename++;
-            }
-        }
-        print("BackupPC_stats $i = $pool,$fileCnt,$dirCnt,$kb,$kb2,$kbRm,"
-                              . "$fileCntRm,$fileCntRep,$fileRepMax,"
-                              . "$fileCntRename,$fileLinkMax,$fileLinkTotal\n");
-    }
+if ( $Conf{PoolV3Enabled} ) {
+    ScanAndCleanV3Pool();
 }
 
-sleep(1);
-processPendingDeletes(1);
-
 ###########################################################################
-# Tell BackupPC that it is now ok to start running BackupPC_dump
-# commands.  We are guaranteed that no BackupPC_link commands will
-# run since only a single CmdQueue command runs at a time, and
-# that means we are safe.  As of 3.x this is irrelevant since
-# BackupPC_dump runs independent of BackupPC_dump.
+# Prior to V3, we need to tell BackupPC that it is now ok to start running
+# BackupPC_dump commands. In V3+ they are decoupled.
 ###########################################################################
 printf("BackupPC_nightly lock_off\n");
+
+###########################################################################
+# V4 pool: run reference count updating and pool cleaning
+# Currently this is only done by one BackupPC_nightly process.
+###########################################################################
+if ( $opts{m} ) {
+    print("log BackupPC_nightly now running BackupPC_refCountUpdate\n");
+    system("$BinDir/BackupPC_refCountUpdate -m -s -c");
+}
 
 ###########################################################################
 # Send email and generation of backupInfo files for each backup
@@ -229,35 +172,11 @@ printf("BackupPC_nightly lock_off\n");
 if ( $opts{m} ) {
     print("log BackupPC_nightly now running BackupPC_sendEmail\n");
     system("$BinDir/BackupPC_sendEmail");
-    doBackupInfoUpdate();
 }
 
-#
-# Update the backupInfo files based on the backups file.
-# We do this just once a week (on Sun) since it is only
-# needed for old backups with BackupPC <= 2.1.2.
-#
-sub doBackupInfoUpdate
-{
-    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-    return if ( $wday != 0 );
+exit(0);
 
-    foreach my $host ( sort(keys(%{$bpc->HostInfoRead()})) ) {
-        my @Backups = $bpc->BackupInfoRead($host);
-
-        for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-            #
-            # BackupPC::Storage->backupInfoWrite won't overwrite
-            # an existing file
-            #
-            BackupPC::Storage->backupInfoWrite("$TopDir/pc/$host",
-                                               $Backups[$i]{num},
-                                               $Backups[$i]);
-        }
-    }
-}
-
-sub GetPoolStats
+sub GetPoolStats_V3
 {
     my($file, $fullPath) = @_;
     my($inode, $nlinks, $nblocks) = (lstat($file))[1, 3, 12];
@@ -303,7 +222,6 @@ sub GetPoolStats
         }
         $fileCnt += 1;
         $blkCnt  += $nblocks;
-        $blkCnt2 += $nblocks if ( $nlinks == 2 );
         $fileLinkMax = $nlinks if ( $fileLinkMax < $nlinks );
         $fileLinkTotal += $nlinks - 1;
     }
@@ -327,4 +245,83 @@ sub processPendingDeletes
         # print("Deleting $f->{path} ($f->{inode})\n");
         unlink($f->{path});
     }
+}
+
+sub ScanAndCleanV3Pool()
+{
+    my @hexChars = qw(0 1 2 3 4 5 6 7 8 9 a b c d e f);
+
+    for my $pool ( qw(pool cpool) ) {
+        for ( my $i = $poolRangeStart ; $i <= $poolRangeEnd ; $i++ ) {
+            my $dir        = "$hexChars[int($i / 16)]/$hexChars[$i % 16]";
+            # print("Doing $pool/$dir\n") if ( ($i % 16) == 0 );
+            $fileCnt       = 0;
+            $dirCnt        = 0;
+            $blkCnt        = 0;
+            $fileCntRm     = 0;
+            $blkCntRm      = 0;
+            $fileCntRep    = 0;
+            $fileRepMax    = 0;
+            $fileLinkMax   = 0;
+            $fileCntRename = 0;
+            %FixList       = ();
+            BackupPC::DirOps::find($bpc, {wanted => \&GetPoolStats_V3}, "$TopDir/$pool/$dir")
+                                                if ( -d "$TopDir/$pool/$dir" );
+            my $kb   = $blkCnt / 2;
+            my $kbRm = $blkCntRm / 2;
+
+            #
+            # Main BackupPC_nightly counts the top-level directory
+            #
+            $dirCnt++ if ( $opts{m} && -d "$TopDir/$pool" && $i == 0 );
+
+            #
+            # Also count the next level directories
+            #
+            $dirCnt++ if ( ($i % 16) == 0
+                           && -d "$TopDir/$pool/$hexChars[int($i / 16)]" );
+
+            #
+            # We need to process all pending deletes before we do the
+            # renames
+            #
+            if ( @PendingDelete ) {
+                sleep(1);
+                processPendingDeletes(1);
+            }
+
+            #
+            # Now make sure that files with repeated checksums are still
+            # sequentially numbered
+            #
+            foreach my $name ( sort(keys(%FixList)) ) {
+                my $rmCnt = $FixList{$name} + 1;
+                my $new = -1;
+                for ( my $old = -1 ; ; $old++ ) {
+                    my $oldName = $name;
+                    $oldName .= "_$old" if ( $old >= 0 );
+                    if ( !-f $oldName ) {
+                        #
+                        # We know we are done when we have missed at least
+                        # the number of files that were removed from this
+                        # base name, plus a couple just to be sure
+                        #
+                        last if ( $rmCnt-- <= 0 );
+                        next;
+                    }
+                    my $newName = $name;
+                    $newName .= "_$new" if ( $new >= 0 );
+                    $new++;
+                    next if ( $oldName eq $newName );
+                    rename($oldName, $newName);
+                    $fileCntRename++;
+                }
+            }
+            print("BackupPC_stats $i = $pool,$fileCnt,$dirCnt,$kb,$kbRm,"
+                                  . "$fileCntRm,$fileCntRep,$fileRepMax,"
+                                  . "$fileCntRename,$fileLinkMax,$fileLinkTotal\n");
+        }
+    }
+    sleep(1);
+    processPendingDeletes(1);
 }

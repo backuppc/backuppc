@@ -1,0 +1,333 @@
+#!/usr/bin/perl
+#============================================================= -*-perl-*-
+#
+# BackupPC_fsck: Pool reference count file system check
+#
+# DESCRIPTION
+#
+#   BackupPC_fsck checks the pool reference counts
+#
+#   Usage: BackupPC_fsck
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001-2013  Craig Barratt
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#========================================================================
+#
+# Version 4.0.0alpha0, released 23 Jun 2013.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+no  utf8;
+use lib "__INSTALLDIR__/lib";
+use BackupPC::Lib;
+use BackupPC::XS;
+use BackupPC::Storage;
+use BackupPC::DirOps;
+use Getopt::Std;
+
+use File::Path;
+use Data::Dumper;
+
+my(@Ref, $RefTotal);
+my $ErrorCnt = 0;
+my %opts;
+
+my $EmptyMD5 = pack("H*", "d41d8cd98f00b204e9800998ecf8427e");
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+my $Hosts  = $bpc->HostInfoRead();
+my $s      = $bpc->{storage};
+
+if ( !getopts("fns", \%opts) || @ARGV >= 1 ) {
+    print STDERR <<EOF;
+usage: $0 [options]
+  Options:
+     -f              force regeneration of per-host reference counts
+     -n              don't remove zero count pool files - print only
+     -s              recompute pool stats
+EOF
+    exit(1);
+}
+
+#
+# We can't run if BackupPC is running
+#
+CheckIfServerRunning();
+
+my($Status, $Info);
+if ( $opts{s} ) {
+    ($Status, $Info) = $s->StatusDataRead();
+    if ( !defined($Info) && ref($Status) ne "HASH" ) {
+        print STDERR "$0: status.pl read failed: $Status\n";
+        $Info   = {};
+        $Status = {};
+    }
+    #
+    # Zero out the statistics
+    #
+    for my $p ( qw(pool4 cpool4) ) {
+        for ( my $i = 0 ; $i < 16 ; $i++ ) {
+            $Info->{pool}{$p}[$i]{FileCnt}       = 0;
+            $Info->{pool}{$p}[$i]{DirCnt}        = 0;
+            $Info->{pool}{$p}[$i]{KbRm}          = 0;
+            $Info->{pool}{$p}[$i]{Kb}            = 0;
+            $Info->{pool}{$p}[$i]{FileCntRm}     = 0;
+            $Info->{pool}{$p}[$i]{FileCntRep}    = 0;
+            $Info->{pool}{$p}[$i]{FileRepMax}    = 0;
+            $Info->{pool}{$p}[$i]{FileLinkMax}   = 0;
+            $Info->{pool}{$p}[$i]{Time}          = 0;
+        }
+    }
+}
+
+if ( $opts{f} ) {
+    foreach my $host ( sort(keys(%$Hosts)) ) {
+        print("BackupPC_fsck: Rebuilding count database for host $host\n");
+        system("$BinDir/BackupPC_refCountUpdate -h $host -f -p");
+    }
+}
+
+CheckIfServerRunning();
+
+print("BackupPC_fsck: building main count database\n");
+system("$BinDir/BackupPC_refCountUpdate -m -p");
+
+CheckIfServerRunning();
+
+print("BackupPC_fsck: Calling poolCountUpdate\n");
+poolCountUpdate();
+
+if ( $opts{s} ) {
+    print("$0: Rewriting $s->{LogDir}/status.pl\n");
+    $s->StatusDataWrite($Status, $Info);
+}
+
+print("$0: got $ErrorCnt errors\n");
+exit($ErrorCnt ? 1 : 0);
+
+sub poolCountUpdate
+{
+    for ( my $compress = 0 ; $compress < 2 ; $compress++ ) {
+        my $poolName = $compress ? "cpool4" : "pool4";
+        for ( my $refCntFile = 0 ; $refCntFile < 128 ; $refCntFile++ ) {
+            my $fileCnt = 0;       # total number of pool files
+            my $dirCnt = 0;        # total number of pool directories
+            my $blkCnt = 0;        # total block size of pool files
+            my $fileCntRm = 0;     # total number of removed files
+            my $blkCntRm = 0;      # total block size of removed pool files
+            my $fileCntRep = 0;    # total number of pool files with repeated md5 checksums
+                                   # (ie: digest > 16 bytes; first instance isn't counted)
+            my $fileRepMax = 0;    # worse case chain length of pool files that have repeated
+                                   # checksums (ie: max(NNN) for all digests xxxxxxxxxxxxxxxxNNN)
+            my $fileLinkMax = 0;   # maximum number of links on a pool file
+            my $fileLinkTotal = 0; # total number of links on entire pool
+
+            my $poolDir = sprintf("%s/%02x",
+                                  $compress ? $bpc->{CPoolDir} : $bpc->{PoolDir},
+                                  $refCntFile * 2);
+            next if ( !-d $poolDir );
+            $dirCnt++;
+
+            my $count       = BackupPC::XS::PoolRefCnt::new();
+            my $dirty       = 0;
+            my $poolCntFile = "$poolDir/poolCnt";
+
+            #
+            # Count the number of pool directories
+            #
+            my $entries = BackupPC::DirOps::dirRead($bpc, $poolDir);
+            foreach my $e ( @$entries ) {
+                next if ( $e->{name} !~ /^[\da-f][\da-f]$/ );
+                $dirCnt++;
+            }
+
+            #
+            # Grab a lock to make sure BackupPC_dump won't unmark and use a pending
+            # delete file.
+            #
+            my $lockFd = BackupPC::XS::DirOps::lockRangeFile("$poolDir/LOCK", 0, 1, 1);
+            if ( -f $poolCntFile && $count->read($poolCntFile) ) {
+                print("Can't read pool count file $poolCntFile\n");
+                $dirty = 1;
+                $ErrorCnt++;
+            }
+
+            #
+            # Check that every file in the pool has a corresponding count.
+            # There are 128 subdirectories below this level.
+            #
+            for ( my $subDir = 0 ; $subDir < 128 ; $subDir++ ) {
+                my $subPoolDir = sprintf("%s/%02x", $poolDir, $subDir * 2);
+                next if ( !-d $subPoolDir );
+                
+                my $entries = BackupPC::DirOps::dirRead($bpc, $subPoolDir);
+                next if ( !defined($entries) );
+
+                foreach my $e ( @$entries ) {
+                    next if ( $e->{name} eq "."
+                            || $e->{name} eq ".."
+                            || $e->{name} eq "LOCK" );
+                    my $digest = pack("H*", $e->{name});
+                    #printf("Got %s, digest = %s\n", $e->{name}, unpack("H*", $digest));
+                    my($nBlks, @s);
+                    if ( $opts{s} ) {
+                        @s = stat("$subPoolDir/$e->{name}");
+                        $nBlks    = $s[12];
+                        $blkCnt  += $nBlks;
+                    }
+                    next if ( $count->get($digest) != 0 );
+
+                    #
+                    # don't complain or remove a zero-length pool files
+                    # since those are used to fill in chains of duplicate
+                    # pool files.
+                    #
+                    # TODO: should we remove zero-length pool files that are
+                    # at the end of a chain?
+                    #
+                    @s = stat("$subPoolDir/$e->{name}") if ( !$opts{s} );
+                    next if ( $s[7] == 0 );
+
+                    if ( !defined($count->get($digest)) ) {
+                        print("$subPoolDir/$e->{name} exists in pool, but not in count: removing it\n");
+                    } else {
+                        print("$subPoolDir/$e->{name} has zero count: removing it\n");
+                    }
+
+                    if ( !$opts{n} ) {
+                        if ( unlink("$subPoolDir/$e->{name}") != 1 ) {
+                            printf("Can't remove %s\n", "$subPoolDir/$e->{name}");
+                            $ErrorCnt++;
+                        }
+                        $fileCntRm++;
+                        $blkCntRm += $nBlks;
+                    }
+                }
+            }
+
+            if ( $opts{s} ) {
+                my($digest, $cnt);
+                my $idx = 0;
+                while ( 1 ) {
+                    ($digest, $cnt, $idx) = $count->iterate($idx);
+                    last if ( !defined($digest) );
+
+                    $fileCnt++;
+                    $fileLinkTotal += $cnt;
+                    $fileLinkMax    = $cnt if ( $cnt > $fileLinkMax && $digest ne $EmptyMD5 );
+                    next if ( length($digest) <= 16 );
+                    my $ext = $bpc->digestExtGet($digest);
+                    $fileCntRep += $ext;
+                    $fileRepMax  = $ext if ( $ext > $fileRepMax );
+                }
+                my $kb   = int($blkCnt / 2 + 0.5);
+                my $kbRm = int($blkCntRm / 2 + 0.5);
+                #print("BackupPC_stats4 $refCntFile = $poolName,$fileCnt,$dirCnt,$kb,$kbRm,"
+                #      . "$fileCntRm,$fileCntRep,$fileRepMax,$fileLinkMax,$fileLinkTotal\n");
+                my $chunk = int($refCntFile / 8);
+                $Info->{pool}{$poolName}[$chunk]{FileCnt}       += $fileCnt;
+                $Info->{pool}{$poolName}[$chunk]{DirCnt}        += $dirCnt;
+                $Info->{pool}{$poolName}[$chunk]{Kb}            += $kb;
+                $Info->{pool}{$poolName}[$chunk]{KbRm}          += $kbRm;
+                $Info->{pool}{$poolName}[$chunk]{FileCntRm}     += $fileCntRm;
+                $Info->{pool}{$poolName}[$chunk]{FileCntRep}    += $fileCntRep;
+                $Info->{pool}{$poolName}[$chunk]{FileRepMax}     = $fileRepMax
+                        if ( $Info->{pool}{$poolName}[$chunk]{FileRepMax} < $fileRepMax );
+                $Info->{pool}{$poolName}[$chunk]{FileLinkMax}    = $fileLinkMax
+                        if ( $Info->{pool}{$poolName}[$chunk]{FileLinkMax} < $fileLinkMax );
+                $Info->{pool}{$poolName}[$chunk]{FileLinkTotal} += $fileLinkTotal;
+                $Info->{pool}{$poolName}[$chunk]{Time}           = time;
+            }
+        }
+    }
+    if ( $opts{s} ) {
+        #
+        # Update the cumulative statistics for pool4 and cpool4
+        #
+        for my $p ( qw(pool4 cpool4) ) {
+            $Info->{"${p}FileCnt"}       = 0;
+            $Info->{"${p}DirCnt"}        = 0;
+            $Info->{"${p}Kb"}            = 0;
+            $Info->{"${p}KbRm"}          = 0;
+            $Info->{"${p}FileCntRm"}     = 0;
+            $Info->{"${p}FileCntRep"}    = 0;
+            $Info->{"${p}FileRepMax"}    = 0;
+            $Info->{"${p}FileCntRename"} = 0;
+            $Info->{"${p}FileLinkMax"}   = 0;
+            $Info->{"${p}Time"}          = 0;
+            for ( my $i = 0 ; $i < 16 ; $i++ ) {
+                $Info->{"${p}FileCnt"}
+                       += $Info->{pool}{$p}[$i]{FileCnt};
+                $Info->{"${p}DirCnt"}
+                       += $Info->{pool}{$p}[$i]{DirCnt};
+                $Info->{"${p}Kb"}
+                       += $Info->{pool}{$p}[$i]{Kb};
+                $Info->{"${p}KbRm"}
+                       += $Info->{pool}{$p}[$i]{KbRm};
+                $Info->{"${p}FileCntRm"}
+                       += $Info->{pool}{$p}[$i]{FileCntRm};
+                $Info->{"${p}FileCntRep"}
+                       += $Info->{pool}{$p}[$i]{FileCntRep};
+                $Info->{"${p}FileRepMax"}
+                        = $Info->{pool}{$p}[$i]{FileRepMax}
+                          if ( $Info->{"${p}FileRepMax"} <
+                              $Info->{pool}{$p}[$i]{FileRepMax} );
+                $Info->{"${p}FileCntRename"}
+                       += $Info->{pool}{$p}[$i]{FileCntRename};
+                $Info->{"${p}FileLinkMax"}
+                        = $Info->{pool}{$p}[$i]{FileLinkMax}
+                          if ( $Info->{"${p}FileLinkMax"} <
+                             $Info->{pool}{$p}[$i]{FileLinkMax} );
+                $Info->{"${p}Time"} = $Info->{pool}{$p}[$i]{Time}
+                          if ( $Info->{"${p}Time"} <
+                                 $Info->{pool}{$p}[$i]{Time} );
+            }
+            printf("%s%s BackupPC_fsck removed %d files of"
+                   . " size %.2fGB\n",
+                     $bpc->timeStamp, ucfirst($p),
+                     $Info->{"${p}FileCntRm"},
+                     $Info->{"${p}KbRm"} / (1000 * 1024));
+            printf("%s%s is %.2fGB, %d files (%d repeated, "
+                   . "%d max chain, %d max links), %d directories\n",
+                     $bpc->timeStamp, ucfirst($p),
+                     $Info->{"${p}Kb"} / (1000 * 1024),
+                     $Info->{"${p}FileCnt"}, $Info->{"${p}FileCntRep"},
+                     $Info->{"${p}FileRepMax"},
+                     $Info->{"${p}FileLinkMax"}, $Info->{"${p}DirCnt"});
+        }
+    }
+}
+
+sub CheckIfServerRunning
+{
+    if ( !$opts{r} ) {
+        my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
+        if ( $err eq "" ) {
+            print STDERR "$0: can't run since BackupPC is running\n";
+            exit(1);
+        }
+    }
+}

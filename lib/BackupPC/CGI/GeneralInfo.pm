@@ -10,11 +10,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2015  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -23,12 +23,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -47,8 +46,6 @@ sub action
     my($jobStr, $statusStr);
     foreach my $host ( sort(keys(%Jobs)) ) {
         my $startTime = timeStamp2($Jobs{$host}{startTime});
-        next if ( $host eq $bpc->trashJob
-                    && $Jobs{$host}{processState} ne "running" );
         next if ( !$Privileged && !CheckPermission($host) );
         $Jobs{$host}{type} = $Status{$host}{type}
                     if ( $Jobs{$host}{type} eq "" && defined($Status{$host}));
@@ -63,6 +60,8 @@ sub action
     <td class="border"> $cmd </td>
     <td align="center" class="border"> $Jobs{$host}{pid} </td>
     <td align="center" class="border"> $xferPid </td>
+    <td align="center" class="border"> $Jobs{$host}{xferState} </td>
+    <td align="center" class="border"> $Jobs{$host}{xferFileCnt} </td>
 EOF
         $jobStr .= "</tr>\n";
     }
@@ -110,9 +109,16 @@ EOF
     my $numCmdQueue  = $QueueLen{CmdQueue};
     my $serverStartTime = timeStamp2($Info{startTime});
     my $configLoadTime  = timeStamp2($Info{ConfigLTime});
-    my $poolInfo     = genPoolInfo("pool", \%Info);
-    my $cpoolInfo    = genPoolInfo("cpool", \%Info);
-    if ( $Info{poolFileCnt} > 0 && $Info{cpoolFileCnt} > 0 ) {
+
+    if ( $Conf{PoolV3Enabled} ) {
+        foreach my $stat ( qw(DirCnt Kb KbRm FileCnt FileCntRep FileRepMax FileCntRm) ) {
+            $Info{"pool4$stat"}  += $Info{"pool$stat"};
+            $Info{"cpool4$stat"} += $Info{"cpool$stat"};
+        }
+    }
+    my $poolInfo     = genPoolInfo("pool4", \%Info);
+    my $cpoolInfo    = genPoolInfo("cpool4", \%Info);
+    if ( $Info{pool4FileCnt} > 0 && $Info{cpool4FileCnt} > 0 ) {
         $poolInfo = <<EOF;
 <li>Uncompressed pool:
 <ul>
@@ -123,7 +129,7 @@ $poolInfo
 $cpoolInfo
 </ul>
 EOF
-    } elsif ( $Info{cpoolFileCnt} > 0 ) {
+    } elsif ( $Info{cpool4FileCnt} > 0 ) {
         $poolInfo = $cpoolInfo;
     }
     my $generalInfo = eval("qq{$Lang->{BackupPC_Server_Status_General_Info}}")

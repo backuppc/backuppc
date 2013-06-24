@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_restore: Restore files to a client.
@@ -11,11 +11,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2015  Craig Barratt
+#   Copyright (C) 2001-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -24,12 +24,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -37,9 +36,9 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "__INSTALLDIR__/lib";
 use BackupPC::Lib;
-use BackupPC::FileZIO;
+use BackupPC::XS;
 use BackupPC::Xfer;
 use Socket;
 
@@ -62,10 +61,12 @@ my($hostIP, $host, $client, $reqFileName, %stat);
 
 $bpc->ChildInit();
 
-if ( @ARGV != 3 ) {
-    print("usage: $0 <hostIP> <client> <reqFileName>\n");
+my %opts;
+if ( !getopts("v", \%opts) || @ARGV != 3 ) {
+    print("usage: $0 [-v] <hostIP> <client> <reqFileName>\n");
     exit(1);
 }
+
 $hostIP = $1 if ( $ARGV[0] =~ /(.+)/ );
 $client = $1 if ( $ARGV[1] =~ /(.+)/ );
 if ( $ARGV[2] !~ /^([\w.]+)$/ ) {
@@ -73,6 +74,8 @@ if ( $ARGV[2] !~ /^([\w.]+)$/ ) {
     exit(1);
 }
 $reqFileName = $1;
+
+$bpc->verbose(1) if ( $opts{v} );
 
 my $startTime = time();
 
@@ -100,7 +103,7 @@ if ( !-f "$Dir/LOCK" ) {
 }
 
 my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-my $logPath = sprintf("$Dir/LOG.%02d%04d", $mon + 1, $year + 1900);
+my $logPath = sprintf("%s/LOG.%02d%04d", $Dir, $mon + 1, $year + 1900);
 
 if ( !-f $logPath ) {
     #
@@ -114,7 +117,7 @@ if ( !-f $logPath ) {
         }
         $lastLog--;
         next if ( $file =~ /\.z$/ || !$Conf{CompressLevel} );
-        BackupPC::FileZIO->compressCopy($file,
+        BackupPC::XS::compressCopy($file,
                                         "$file.z",
                                         undef,
                                         $Conf{CompressLevel}, 1);
@@ -202,22 +205,22 @@ if ( (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
     exit(RestoreCleanup($client));
 }
 
-#
-# Setup file extension for compression and open RestoreLOG output file
-#
-if ( $Conf{CompressLevel} && !BackupPC::FileZIO->compOk ) {
-    $stat{hostError} = "Compress:Zlib not found";
+my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
+my $RestoreLOG = BackupPC::XS::FileZIO::open("$Dir/RestoreLOG$fileExt", 1,
+                                     $Conf{CompressLevel});
+if ( !defined($RestoreLOG) ) {
+    $stat{hostError} = "unable to open/create $Dir/RestoreLOG.$fileExt";
     exit(RestoreCleanup($client));
 }
-my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
-my $RestoreLOG = BackupPC::FileZIO->open("$Dir/RestoreLOG$fileExt", 1,
-                                     $Conf{CompressLevel});
-my $tarCreateFileCnt = 0;
-my $tarCreateByteCnt = 0;
-my $tarCreateDirCnt  = 0;
-my $tarCreateErrCnt  = 1;	# assume not ok until we learn otherwise
-my $tarCreateErr;
+
+my $xferCreateFileCnt = 0;
+my $xferCreateByteCnt = 0;
+my $xferCreateDirCnt  = 0;
+my $xferCreateErrCnt  = 1;	# assume not ok until we learn otherwise
+my $xferCreateErr;
 my($logMsg, $xfer);
+
+$RestoreLOG->writeTeeStderr(1) if ( $opts{v} );
 
 $stat{xferOK} = $stat{hostAbort} = undef;
 $stat{hostError} = $stat{lastOutputLine} = undef;
@@ -232,6 +235,8 @@ if ( $? && $Conf{UserCmdCheckStatus} ) {
     exit(RestoreCleanup($client));
 }
 $NeedPostCmd = 1;
+
+print("__bpc_progress_state__ restore\n");
 
 $xfer = BackupPC::Xfer::create($Conf{XferMethod}, $bpc);
 if ( !defined($xfer) ) {
@@ -350,6 +355,7 @@ if ( $useTar ) {
 	alarm(0);
 	exec("$BinDir/BackupPC_tarCreate", @tarArgs);
 	print(LOG $bpc->timeStamp, "can't exec $BinDir/BackupPC_tarCreate\n");
+	print(STDERR "$0: can't exec $BinDir/BackupPC_tarCreate\n") if ( $opts{v} );
 	# FIX: need to cleanup xfer
 	exit(0);
     }
@@ -362,6 +368,7 @@ if ( $useTar ) {
     @xferPid = $xfer->xferPid;
 
     print(LOG $bpc->timeStamp, $logMsg, "\n");
+    print(STDERR $logMsg, "\n") if ( $opts{v} );
     print("started_restore\n");
 
     pidHandler(@xferPid);
@@ -384,8 +391,8 @@ if ( $useTar ) {
 	    if ( sysread(TAR, $mesg, 8192) <= 0 ) {
 		vec($FDread, fileno(TAR), 1) = 0;
 		if ( !close(TAR) ) {
-		    $tarCreateErrCnt  = 1;
-		    $tarCreateErr = "BackupPC_tarCreate failed";
+		    $xferCreateErrCnt  = 1;
+		    $xferCreateErr = "BackupPC_tarCreate failed";
 		}
 	    } else {
 		$tarOut .= $mesg;
@@ -396,15 +403,16 @@ if ( $useTar ) {
 	    $tarOut = $2;
 	    $RestoreLOG->write(\"tarCreate: $_\n");
 	    if ( /^Done: (\d+) files, (\d+) bytes, (\d+) dirs, (\d+) specials, (\d+) errors/ ) {
-		$tarCreateFileCnt = $1;
-		$tarCreateByteCnt = $2;
-		$tarCreateDirCnt  = $3;
-		$tarCreateErrCnt  = $5;
+		$xferCreateFileCnt = $1;
+		$xferCreateByteCnt = $2;
+		$xferCreateDirCnt  = $3;
+		$xferCreateErrCnt  = $5;
 	    }
 	}
 	last if ( !$xfer->readOutput(\$FDread, $rout) );
 	while ( my $str = $xfer->logMsgGet ) {
 	    print(LOG $bpc->timeStamp, "xfer: $str\n");
+            print(STDERR "xfer: $str\n") if ( $opts{v} );
 	}
 	if ( $xfer->getStats->{fileCnt} == 1 ) {
 	    #
@@ -424,9 +432,10 @@ if ( $useTar ) {
     # otherwise the xfer module does everything for us
     #
     print(LOG $bpc->timeStamp, $logMsg . "\n");
+    print(STDERR $logMsg, "\n") if ( $opts{v} );
     print("started_restore\n");
-    ($tarCreateFileCnt, $tarCreateByteCnt,
-	$tarCreateErrCnt, $tarCreateErr) = $xfer->run();
+    ($xferCreateFileCnt, $xferCreateByteCnt,
+	$xferCreateErrCnt, $xferCreateErr) = $xfer->run();
 }
 alarm(0);
 
@@ -483,6 +492,7 @@ sub catch_signal
     # Note: needs to be tested for each kind of XferMethod
     #
     print(LOG $bpc->timeStamp, "cleaning up after signal $signame\n");
+    print(STDERR "$0: cleaning up after signal $signame\n") if ( $opts{v} );
     $SIG{$signame} = 'IGNORE';
     $RestoreLOG->write(\"exiting after signal $signame\n");
     $stat{xferOK} = 0;
@@ -502,7 +512,7 @@ sub RestoreCleanup
     my($client) = @_;
 
     $stat{xferOK} = 0 if ( $stat{hostError} || $stat{hostAbort}
-			|| $tarCreateErr );
+			|| $xferCreateErr );
 
     if ( !$stat{xferOK} ) {
 	#
@@ -561,7 +571,7 @@ sub RestoreCleanup
 	#
 	# wait a short while and see if the system is still alive
 	#
-	$stat{hostError} ||= $tarCreateErr if ( $tarCreateErr ne "" );
+	$stat{hostError} ||= $xferCreateErr if ( $xferCreateErr ne "" );
 	$stat{hostError} = $stat{lastOutputLine} if ( $stat{hostError} eq "" );
 	sleep(2);
 	if ( $bpc->CheckHostAlive($hostIP) < 0 ) {
@@ -586,9 +596,9 @@ sub RestoreCleanup
     $Restores[$i]{endTime}       = $endTime;
     $Restores[$i]{result}        = $stat{xferOK} ? "ok" : "failed";
     $Restores[$i]{errorMsg}      = $stat{hostError};
-    $Restores[$i]{nFiles}        = $tarCreateFileCnt;
-    $Restores[$i]{size}          = $tarCreateByteCnt;
-    $Restores[$i]{tarCreateErrs} = $tarCreateErrCnt;
+    $Restores[$i]{nFiles}        = $xferCreateFileCnt;
+    $Restores[$i]{size}          = $xferCreateByteCnt;
+    $Restores[$i]{tarCreateErrs} = $xferCreateErrCnt;
     $Restores[$i]{xferErrs}      = $stat{xferErrCnt} || 0;
 
     while ( @Restores > $Conf{RestoreInfoKeepCnt} ) {
@@ -607,8 +617,8 @@ sub RestoreCleanup
     } else {
         $stat{xferErrCnt} ||= 0;
 	print(LOG $bpc->timeStamp, "restore $lastNum complete"
-                . " ($tarCreateFileCnt files, $tarCreateByteCnt bytes,"
-                . " $tarCreateDirCnt dirs, $stat{xferErrCnt} xferErrs)\n");
+                . " ($xferCreateFileCnt files, $xferCreateByteCnt bytes,"
+                . " $xferCreateDirCnt dirs, $stat{xferErrCnt} xferErrs)\n");
 	print("restore complete\n");
 	return;
     }
@@ -664,6 +674,11 @@ sub UserCommandRun
 	fileList     => $RestoreReq{fileList},
 	cmdType	     => $cmdType,
     };
+    if ( $cmdType eq "RestorePostUserCmd" ) {
+        print("__bpc_progress_state__ post-cmd\n");
+    } else {
+        print("__bpc_progress_state__ pre-cmd\n");
+    }
     my $cmd = $bpc->cmdVarSubstitute($Conf{$cmdType}, $vars);
     $RestoreLOG->write(\"Executing $cmdType: @$cmd\n");
     #

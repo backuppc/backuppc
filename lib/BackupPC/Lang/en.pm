@@ -1,7 +1,18 @@
-#!/usr/local/bin/perl
-
-#my %lang;
-#use strict;
+#!/usr/bin/perl
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 # --------------------------------
 
@@ -103,6 +114,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td> Command </td>
     <td align="center"> PID </td>
     <td align="center"> Xfer PID </td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1222,6 +1235,7 @@ $Lang{off} = "off";
 
 $Lang{backupType_full}    = "full";
 $Lang{backupType_incr}    = "incr";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "partial";
 
 $Lang{failed} = "failed";
@@ -1235,8 +1249,8 @@ $Lang{Status_backup_starting} = "backup starting";
 $Lang{Status_backup_in_progress} = "backup in progress";
 $Lang{Status_restore_starting} = "restore starting";
 $Lang{Status_restore_in_progress} = "restore in progress";
-$Lang{Status_link_pending} = "link pending";
-$Lang{Status_link_running} = "link running";
+$Lang{Status_admin_pending} = "link pending";
+$Lang{Status_admin_running} = "link running";
 
 $Lang{Reason_backup_done}    = "done";
 $Lang{Reason_restore_done}   = "restore done";
@@ -1444,7 +1458,6 @@ $Lang{CfgEdit_Button_Delete}   = "Delete";
 $Lang{CfgEdit_Button_Add}      = "Add";
 $Lang{CfgEdit_Button_Override} = "Override";
 $Lang{CfgEdit_Button_New_Key}  = "New Key";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Error: No save due to errors";

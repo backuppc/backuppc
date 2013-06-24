@@ -10,11 +10,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2015  Craig Barratt
+#   Copyright (C) 2003-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -23,12 +23,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,7 +37,8 @@ package BackupPC::CGI::View;
 
 use strict;
 use BackupPC::CGI::Lib qw(:all);
-use BackupPC::FileZIO;
+use BackupPC::XS;
+use Encode qw/decode_utf8/;
 
 sub action
 {
@@ -110,9 +110,8 @@ sub action
     my($contentPre, $contentSub, $contentPost);
     $contentPre .= eval("qq{$Lang->{Log_File__file__comment}}");
     if ( $file ne ""
-            && defined($fh = BackupPC::FileZIO->open($file, 0, $compress)) ) {
+            && defined($fh = BackupPC::XS::FileZIO::open($file, 0, $compress)) ) {
 
-        $fh->utf8(1);
         my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
 
 	$contentPre .= eval("qq{$Lang->{Contents_of_log_file}}");
@@ -158,7 +157,7 @@ sub action
 		    $c .= eval("qq{$Lang->{skipped__skipped_lines}}")
 							 if ( $skipped );
 		    $skipped = 0;
-		    $c .= ${EscHTML($s)} . "\n";
+		    $c .= decode_utf8(${EscHTML($s)}) . "\n";
 		}
 		return $c;
 	    };
@@ -176,7 +175,7 @@ sub action
 		    $s = ${EscHTML($s)};
 		    $s =~ s/\b([\w-.]+)\b/defined($Hosts->{$1})
 					    ? ${HostLink($1)} : $1/eg;
-		    $c .= $s . "\n";
+		    $c .= decode_utf8($s) . "\n";
 		}
 		return $c;
             };
@@ -203,7 +202,7 @@ sub action
 			$s =~ s{(\W)}{_}g;
 			"<a href=\"?action=view&type=docs#item_$s\"><tt>$c</tt></a>"
 		    ]eg;
-		    $c .= $s . "\n";
+		    $c .= decode_utf8($s) . "\n";
 		}
 		return $c;
             };
@@ -217,7 +216,7 @@ sub action
 		while ( length($c) < 65536 ) {
 		    $s = $fh->readLine();
 		    last if ( $s eq "" );
-		    $c .= $s;
+		    $c .= decode_utf8($s);
 		}
 		return $c;
             };
@@ -240,7 +239,7 @@ sub action
 		    last if ( $s eq "" );
 		    $s =~ s/[\n\r]+//g;
 		    $s = ${EscHTML($s)};
-		    $c .= $s . "\n";
+		    $c .= decode_utf8($s) . "\n";
 		}
 		return $c;
             };

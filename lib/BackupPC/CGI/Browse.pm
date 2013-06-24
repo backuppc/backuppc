@@ -10,11 +10,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2015  Craig Barratt
+#   Copyright (C) 2003-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -23,12 +23,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -40,7 +39,7 @@ use strict;
 use Encode qw/decode_utf8/;
 use BackupPC::CGI::Lib qw(:all);
 use BackupPC::View;
-use BackupPC::Attrib qw(:all);
+use BackupPC::XS qw(:all);
 
 sub action
 {
@@ -140,14 +139,22 @@ sub action
                 # Display directory if it exists in current backup.
                 # First find out if there are subdirs
                 #
+                my $subDirAttr = $share eq "" ? $view->dirAttrib($num, $f, "/")
+                                              : $view->dirAttrib($num, $share, "$relDir/$f");
+                my $subDirCnt = 0;
                 my $tdStyle;
                 my $linkStyle = "fview";
+
+                foreach my $sub ( keys(%$subDirAttr) ) {
+                    next if ( $subDirAttr->{$sub}{type} != BPC_FTYPE_DIR );
+                    $subDirCnt++;
+                }
 		$img |= 1 << 6;
-		$img |= 1 << 5 if ( $attr->{$f}{nlink} > 2 );
+		$img |= 1 << 5 if ( $subDirCnt );
 		if ( $dirOpen ) {
                     $linkStyle = "fviewbold";
 		    $img |= 1 << 2;
-		    $img |= 1 << 3 if ( $attr->{$f}{nlink} > 2 );
+		    $img |= 1 << 3 if ( $subDirCnt );
 		}
 		my $imgFileName = sprintf("%07b.gif", $img);
 		$imgStr = "<img src=\"$Conf{CgiImageDirURL}/$imgFileName\" align=\"absmiddle\" width=\"9\" height=\"19\" border=\"0\">";
@@ -200,8 +207,7 @@ EOF
                 if ( defined($a = $attr->{$f}) ) {
                     my $mtimeStr = $bpc->timeStamp($a->{mtime});
 		    # UGH -> fix this
-                    my $typeStr  = BackupPC::Attrib::fileType2Text(undef,
-								   $a->{type});
+                    my $typeStr  = BackupPC::XS::Attrib::fileType2Text($a->{type});
                     my $modeStr  = sprintf("0%o", $a->{mode} & 07777);
                     $iconStr = <<EOF;
 <img src="$Conf{CgiImageDirURL}/icon-$typeStr.png" valign="top">

@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #
 # by Ralph Passgang <ralph@debianbase.de> (13.11.2006 for V3.0.0)
 # by Ralph Passgang <ralph@debianbase.de> (30.06.2006 for V3.0.0)
@@ -8,9 +8,19 @@
 # by Manfred Herrmann (V1.1) (some typo errors + 3 new strings)
 # CVS-> Revision ???
 #
-#my %lang;
-
-#use strict;
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 # --------------------------------
 
@@ -115,6 +125,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td> Kommando </td>
     <td align="center"> PID </td>
     <td align="center"> Transport PID </td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1225,6 +1237,7 @@ $Lang{off} = "aus";
 
 $Lang{backupType_full}    = "voll";
 $Lang{backupType_incr}    = "inkrementell";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "unvollständig";
 
 $Lang{failed} = "fehler";
@@ -1238,8 +1251,8 @@ $Lang{Status_backup_starting} = "Backup startet";
 $Lang{Status_backup_in_progress} = "Backup läuft";
 $Lang{Status_restore_starting} = "Restore startet";
 $Lang{Status_restore_in_progress} = "Restore läuft";
-$Lang{Status_link_pending} = "Link steht an";
-$Lang{Status_link_running} = "Link läuft";
+$Lang{Status_admin_pending} = "Link steht an";
+$Lang{Status_admin_running} = "Link läuft";
 
 $Lang{Reason_backup_done} = "Backup durchgeführt";
 $Lang{Reason_restore_done} = "Restore durchgeführt";
@@ -1454,7 +1467,6 @@ $Lang{CfgEdit_Button_Delete}   = "Löschen";
 $Lang{CfgEdit_Button_Add}      = "Hinzufügen";
 $Lang{CfgEdit_Button_Override} = "Überschreiben";
 $Lang{CfgEdit_Button_New_Key}  = "Neuer Schlüssel";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Wegen Fehlern nicht gesichert";

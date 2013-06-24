@@ -12,11 +12,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2015  Craig Barratt
+#   Copyright (C) 2004-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -25,12 +25,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -39,10 +38,11 @@
 package BackupPC::Storage::Text;
 
 use strict;
-use vars qw(%Conf);
+use vars qw(%Conf %Status %Info);
 use Data::Dumper;
 use File::Path;
 use Fcntl qw/:flock/;
+use Storable qw(store retrieve fd_retrieve store_fd);
 
 sub new
 {
@@ -69,21 +69,26 @@ sub setPaths
 sub BackupInfoRead
 {
     my($s, $host) = @_;
-    local(*BK_INFO, *LOCK);
-    my(@Backups);
+    my(@Backups, $bkFd, $lockFd, $locked);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$s->{TopDir}/pc/$host/LOCK");
-    if ( open(BK_INFO, "$s->{TopDir}/pc/$host/backups") ) {
-	binmode(BK_INFO);
-        while ( <BK_INFO> ) {
+    if ( open($lockFd, ">", "$s->{TopDir}/pc/$host/LOCK") ) {
+        flock($lockFd, LOCK_EX);
+        $locked = 1;
+    }
+    if ( open($bkFd, "$s->{TopDir}/pc/$host/backups") ) {
+	binmode($bkFd);
+        while ( <$bkFd> ) {
             s/[\n\r]+//;
-            next if ( !/^(\d+\t(incr|full|partial).*)/ );
+            next if ( !/^(\d+\t(incr|full|partial|active).*)/ );
             $_ = $1;
             @{$Backups[@Backups]}{@{$s->{BackupFields}}} = split(/\t/);
         }
-        close(BK_INFO);
+        close($bkFd);
     }
-    close(LOCK);
+    if ( $locked ) {
+        flock($lockFd, LOCK_UN);
+        close($lockFd);
+    }
     #
     # Default the version field.  Prior to 3.0.0 the xferMethod
     # field is empty, so we use that to figure out the version.
@@ -102,7 +107,7 @@ sub BackupInfoRead
 sub BackupInfoWrite
 {
     my($s, $host, @Backups) = @_;
-    my($i, $contents, $fileOk);
+    my($i, $contents);
 
     #
     # Generate the file contents
@@ -121,29 +126,33 @@ sub BackupInfoWrite
 sub RestoreInfoRead
 {
     my($s, $host) = @_;
-    local(*RESTORE_INFO, *LOCK);
-    my(@Restores);
+    my(@Restores, $resFd, $lockFd, $locked);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$s->{TopDir}/pc/$host/LOCK");
-    if ( open(RESTORE_INFO, "$s->{TopDir}/pc/$host/restores") ) {
-	binmode(RESTORE_INFO);
-        while ( <RESTORE_INFO> ) {
+    if ( open($lockFd, ">", "$s->{TopDir}/pc/$host/LOCK") ) {
+        flock($lockFd, LOCK_EX);
+        $locked = 1;
+    }
+    if ( open($resFd, "$s->{TopDir}/pc/$host/restores") ) {
+	binmode($resFd);
+        while ( <$resFd> ) {
             s/[\n\r]+//;
             next if ( !/^(\d+.*)/ );
             $_ = $1;
             @{$Restores[@Restores]}{@{$s->{RestoreFields}}} = split(/\t/);
         }
-        close(RESTORE_INFO);
+        close($resFd);
     }
-    close(LOCK);
+    if ( $locked ) {
+        flock($lockFd, LOCK_UN);
+        close($lockFd);
+    }
     return @Restores;
 }
 
 sub RestoreInfoWrite
 {
     my($s, $host, @Restores) = @_;
-    local(*RESTORE_INFO, *LOCK);
-    my($i, $contents, $fileOk);
+    my($i, $contents);
 
     #
     # Generate the file contents
@@ -162,29 +171,33 @@ sub RestoreInfoWrite
 sub ArchiveInfoRead
 {
     my($s, $host) = @_;
-    local(*ARCHIVE_INFO, *LOCK);
-    my(@Archives);
+    my(@Archives, $archFd, $lockFd, $locked);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$s->{TopDir}/pc/$host/LOCK");
-    if ( open(ARCHIVE_INFO, "$s->{TopDir}/pc/$host/archives") ) {
-        binmode(ARCHIVE_INFO);
-        while ( <ARCHIVE_INFO> ) {
+    if ( open($lockFd, ">", "$s->{TopDir}/pc/$host/LOCK") ) {
+        flock($lockFd, LOCK_EX);
+        $locked = 1;
+    }
+    if ( open($archFd, "$s->{TopDir}/pc/$host/archives") ) {
+        binmode($archFd);
+        while ( <$archFd> ) {
             s/[\n\r]+//;
             next if ( !/^(\d+.*)/ );
             $_ = $1;
             @{$Archives[@Archives]}{@{$s->{ArchiveFields}}} = split(/\t/);
         }
-        close(ARCHIVE_INFO);
+        close($archFd);
     }
-    close(LOCK);
+    if ( $locked ) {
+        flock($lockFd, LOCK_UN);
+        close($lockFd);
+    }
     return @Archives;
 }
 
 sub ArchiveInfoWrite
 {
     my($s, $host, @Archives) = @_;
-    local(*ARCHIVE_INFO, *LOCK);
-    my($i, $contents, $fileOk);
+    my($i, $contents);
 
     #
     # Generate the file contents
@@ -209,8 +222,7 @@ sub ArchiveInfoWrite
 sub TextFileWrite
 {
     my($s, $file, $contents) = @_;
-    local(*FD, *LOCK);
-    my($fileOk);
+    my($fileOk, $fd);
 
     (my $dir = $file) =~ s{(.+)/(.+)}{$1};
 
@@ -218,29 +230,29 @@ sub TextFileWrite
         eval { mkpath($dir, 0, 0775) };
         return "TextFileWrite: can't create directory $dir" if ( $@ );
     }
-    if ( open(FD, ">", "$file.new") ) {
-	binmode(FD);
-        print FD $contents;
-        close(FD);
+    if ( open($fd, ">", "$file.new") ) {
+	binmode($fd);
+        print $fd $contents;
+        close($fd);
         #
         # verify the file
         #
-        if ( open(FD, "<", "$file.new") ) {
-            binmode(FD);
-            if ( join("", <FD>) ne $contents ) {
+        if ( open($fd, "<", "$file.new") ) {
+            binmode($fd);
+            if ( join("", <$fd>) ne $contents ) {
                 return "TextFileWrite: Failed to verify $file.new";
             } else {
                 $fileOk = 1;
             }
-            close(FD);
+            close($fd);
         }
     }
     if ( $fileOk ) {
-        my $lock;
+        my($locked, $lockFd);
         
-        if ( open(LOCK, "$dir/LOCK") || open(LOCK, ">", "$dir/LOCK") ) {
-            $lock = 1;
-            flock(LOCK, LOCK_EX);
+        if ( open($lockFd, ">", "$dir/LOCK") ) {
+            $locked = 1;
+            flock($lockFd, LOCK_EX);
         }
         if ( -s "$file" ) {
             unlink("$file.old")           if ( -f "$file.old" );
@@ -249,7 +261,10 @@ sub TextFileWrite
             unlink("$file") if ( -f "$file" );
         }
         rename("$file.new", "$file") if ( -f "$file.new" );
-        close(LOCK) if ( $lock );
+        if ( $locked ) {
+            flock($lockFd, LOCK_UN);
+            close($lockFd);
+        }
     } else {
         return "TextFileWrite: Failed to write $file.new";
     }
@@ -345,19 +360,18 @@ sub ConfigDataWrite
 sub ConfigFileMerge
 {
     my($s, $inFile, $newConf) = @_;
-    local(*C);
-    my($contents, $skipExpr, $fakeVar);
+    my($contents, $skipExpr, $fakeVar, $configFd);
     my $done = {};
 
     if ( -f $inFile ) {
         #
         # Match existing settings in current config file
         #
-        open(C, $inFile)
+        open($configFd, $inFile)
             || return ("ConfigFileMerge: can't open/read $inFile", undef);
-        binmode(C);
+        binmode($configFd);
 
-        while ( <C> ) {
+        while ( <$configFd> ) {
             if ( /^\s*\$Conf\{([^}]*)\}\s*=(.*)/ ) {
                 my $var = $1;
                 $skipExpr = "\$fakeVar = $2\n";
@@ -387,7 +401,7 @@ sub ConfigFileMerge
                 $skipExpr = undef if ( $@ eq "" );
             }
         }
-        close(C);
+        close($configFd);
     }
 
     #
@@ -415,6 +429,36 @@ sub ConfigMTime
     return (stat($s->ConfigPath()))[9];
 }
 
+sub StatusDataRead
+{
+    my($s) = @_;
+    my($ret, $mesg);
+
+    %Status = ();
+    %Info   = ();
+    if ( -f "$s->{LogDir}/status.pl"
+            && !defined($ret = do "$s->{LogDir}/status.pl") && ($! || $@) ) {
+        $mesg = "Couldn't open $s->{LogDir}/status.pl: $!" if ( $! );
+        $mesg = "Couldn't execute $s->{LogDir}/status.pl: $@" if ( $@ );
+        $mesg =~ s/[\n\r]+//;
+        rename("$s->{LogDir}/status.pl", "$s->{LogDir}/status.pl.bad");
+        return ($mesg, undef);
+    }
+    return (\%Status, \%Info);
+}
+
+sub StatusDataWrite
+{
+    my($s, $status, $info) = @_;
+
+    my($dump) = Data::Dumper->new(
+                     [  $info, $status],
+                     [qw(*Info *Status)]);
+    $dump->Indent(1);
+    my $text = $dump->Dump;
+    $s->TextFileWrite("$s->{LogDir}/status.pl", $text);
+}
+
 #
 # Returns information from the host file in $s->{ConfDir}/hosts.
 # With no argument a ref to a hash of hosts is returned.  Each
@@ -425,17 +469,21 @@ sub ConfigMTime
 sub HostInfoRead
 {
     my($s, $host) = @_;
-    my(%hosts, @hdr, @fld);
-    local(*HOST_INFO, *LOCK);
+    my(%hosts, @hdr, @fld, $hostFd, $lockFd, $locked);
 
-    flock(LOCK, LOCK_EX) if open(LOCK, "$s->{ConfDir}/LOCK");
-    if ( !open(HOST_INFO, "$s->{ConfDir}/hosts") ) {
+    my(@Backups, $bkFd, $lockFd, $locked);
+
+    if ( open($lockFd, ">", "$s->{ConfDir}/LOCK") ) {
+        flock($lockFd, LOCK_EX);
+        $locked = 1;
+    }
+    if ( !open($hostFd, "$s->{ConfDir}/hosts") ) {
         print(STDERR "Can't open $s->{ConfDir}/hosts\n");
         close(LOCK);
         return {};
     }
-    binmode(HOST_INFO);
-    while ( <HOST_INFO> ) {
+    binmode($hostFd);
+    while ( <$hostFd> ) {
         s/[\n\r]+//;
         s/#.*//;
         s/\s+$//;
@@ -456,8 +504,11 @@ sub HostInfoRead
             if ( defined($host) ) {
                 next if ( lc($fld[0]) ne lc($host) );
                 @{$hosts{lc($fld[0])}}{@hdr} = @fld;
-		close(HOST_INFO);
-                close(LOCK);
+		close($hostFd);
+                if ( $locked ) {
+                    flock($lockFd, LOCK_UN);
+                    close($lockFd);
+                }
                 return \%hosts;
             } else {
                 @{$hosts{lc($fld[0])}}{@hdr} = @fld;
@@ -466,8 +517,11 @@ sub HostInfoRead
             @hdr = @fld;
         }
     }
-    close(HOST_INFO);
-    close(LOCK);
+    close($hostFd);
+    if ( $locked ) {
+        flock($lockFd, LOCK_UN);
+        close($lockFd);
+    }
     return \%hosts;
 }
 
@@ -481,10 +535,9 @@ sub HostInfoRead
 sub HostInfoWrite
 {
     my($s, $hosts) = @_;
-    my($gotHdr, @fld, $hostText, $contents);
-    local(*HOST_INFO);
+    my($gotHdr, @fld, $hostText, $contents, $hostFd);
 
-    if ( !open(HOST_INFO, "$s->{ConfDir}/hosts") ) {
+    if ( !open($hostFd, "$s->{ConfDir}/hosts") ) {
         return "Can't open $s->{ConfDir}/hosts";
     }
     foreach my $host ( keys(%$hosts) ) {
@@ -496,8 +549,8 @@ sub HostInfoWrite
         $rest =~ s/ //g;
         $hostText->{$host} = $name . $rest;
     }
-    binmode(HOST_INFO);
-    while ( <HOST_INFO> ) {
+    binmode($hostFd);
+    while ( <$hostFd> ) {
         s/[\n\r]+//;
         if ( /^\s*$/ || /^\s*#/ ) {
             $contents .= $_ . "\n";
@@ -524,7 +577,7 @@ sub HostInfoWrite
         $contents .= $hostText->{$host} . "\n";
         delete($hostText->{$host});
     }
-    close(HOST_INFO);
+    close($hostFd);
 
     #
     # Write and verify the new host file

@@ -1,7 +1,18 @@
-#!/usr/local/bin/perl
-
-#my %Lang;
-#use strict;
+#!/usr/bin/perl
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 
 # --------------------------------
 
@@ -103,6 +114,8 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     <td> Commande </td>
     <td align="center"> PID </td>
     <td align="center"> PID du transfert </td>
+    <td align="center"> Status </td>
+    <td align="center"> Count </td>
     </tr>
 \$jobStr
 </table>
@@ -1220,6 +1233,7 @@ $Lang{off} = "inactif";
 
 $Lang{backupType_full}    = "complète";
 $Lang{backupType_incr}    = "incrémentielle";
+$Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "partielle";
 
 $Lang{failed} = "échec";
@@ -1233,8 +1247,8 @@ $Lang{Status_backup_starting} = "début de la sauvegarde";
 $Lang{Status_backup_in_progress} = "sauvegarde en cours";
 $Lang{Status_restore_starting} = "début de la restauration";
 $Lang{Status_restore_in_progress} = "restauration en cours";
-$Lang{Status_link_pending} = "en attente de l'édition de liens";
-$Lang{Status_link_running} = "édition de liens en cours";
+$Lang{Status_admin_pending} = "en attente de l'édition de liens";
+$Lang{Status_admin_running} = "édition de liens en cours";
 
 $Lang{Reason_backup_done}    = "sauvegarde terminée";
 $Lang{Reason_restore_done}   = "restauration terminée";
@@ -1445,7 +1459,6 @@ $Lang{CfgEdit_Button_Delete}   = "Détruire";
 $Lang{CfgEdit_Button_Add}      = "Ajouter";
 $Lang{CfgEdit_Button_Override} = "Écraser";
 $Lang{CfgEdit_Button_New_Key}  = "Nouvelle clé";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Erreur: Pas de sauvegarde à cause d'erreurs.";

@@ -1,0 +1,76 @@
+#!/usr/bin/perl
+#============================================================= -*-perl-*-
+#
+# BackupPC_poolCntPrint: print the contents of pool count and
+#  pool count delta files.
+#
+# DESCRIPTION
+#  
+#   Usage: BackupPC_poolCntPrint poolCntFilePath
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2005-2013  Craig Barratt
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#========================================================================
+#
+# Version 4.0.0alpha0, released 23 Jun 2013.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+no  utf8;
+use lib "__INSTALLDIR__/lib";
+
+use BackupPC::Lib;
+use BackupPC::XS;
+use Data::Dumper;
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my %Conf   = $bpc->Conf();
+my $s      = $bpc->{storage};
+
+if ( @ARGV == 0 ) {
+    print STDERR "Usage: $0 poolCntFilePath...\n";
+    exit(1);
+}
+while ( my $poolCntFile = shift(@ARGV) ) {
+    if ( !-f $poolCntFile ) {
+        print STDERR "$poolCntFile does not exist\n";
+        exit(1);
+    }
+
+    my $count = BackupPC::XS::PoolRefCnt::new();
+
+    if ( $count->read($poolCntFile) ) {
+        print("Can't read ref count file $poolCntFile\n");
+        exit(1);
+    }
+    print("Pool Ref Count file $poolCntFile:\n");
+    my $idx = 0;
+    my($d, $c);
+    while ( 1 ) {
+        ($d, $c, $idx) = $count->iterate($idx);
+        last if ( !defined($d) );
+        printf("    %-20s => %d\n", unpack("H*", $d), $c);
+    }
+}

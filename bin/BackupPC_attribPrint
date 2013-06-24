@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_attribPrint: print the contents of attrib files.
@@ -13,11 +13,11 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2005-2015  Craig Barratt
+#   Copyright (C) 2005-2013  Craig Barratt
 #
-#   This program is free software; you can redistribute it and/or modify
+#   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation, either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -26,12 +26,11 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 #========================================================================
 #
-# Version 3.3.1, released 11 Jan 2015.
+# Version 4.0.0alpha0, released 23 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -39,11 +38,10 @@
 
 use strict;
 no  utf8;
-use lib "/usr/local/BackupPC/lib";
+use lib "__INSTALLDIR__/lib";
 
 use BackupPC::Lib;
-use BackupPC::Attrib qw(:all);
-use BackupPC::FileZIO;
+use BackupPC::XS;
 use Data::Dumper;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
@@ -55,26 +53,43 @@ if ( @ARGV != 1 ) {
     print STDERR "Usage: $0 attribPath\n";
     exit(1);
 }
-if ( !-f $ARGV[0] ) {
-    print STDERR "$ARGV[0] does not exist\n";
-    exit(1);
-}
-
-my $attrib = BackupPC::Attrib->new({ compress => $Conf{CompressLevel} });
+my $attrib = BackupPC::XS::Attrib::new($Conf{CompressLevel});
 
 my($dir, $file);
 
-if ( $ARGV[0] =~ m{(.+)/(.+)} ) {
+if ( $ARGV[0] =~ m{(.*/inode)/(\d+)$} ) {
+    my $base = $2 & 0x3fff;
+    $dir  = sprintf("%s/%02x", $1, $base >> 7);
+    $file = sprintf("attrib%02x", $base & 0x7f);
+    print("Reading inode attrib file $dir/$file\n");
+} elsif ( $ARGV[0] =~ m{(.+)/(.+)} ) {
     $dir  = $1;
     $file = $2;
 } else {
     $dir = $ARGV[0];
 }
 
+if ( !-f "$dir/$file" ) {
+    print STDERR "BackupPC_attribPrint: $dir/$file does not exist\n";
+    exit(1);
+}
+
 if ( !$attrib->read($dir, $file) ) {
-    print STDERR "Cannot read attrib file $ARGV[0]\n";
+    my $digestStr = sprintf(" (%s)", unpack("H*", $attrib->digest())) if ( length($attrib->digest()) );
+    print STDERR "BackupPC_attribPrint: cannot read attrib file $ARGV[0]$digestStr\n";
     exit(1);
 }
 my $info = $attrib->get();
-$Data::Dumper::Indent = 1;
+#
+# convert digest to a hex string
+#
+foreach my $file ( keys(%$info) ) {
+    next if ( !defined($info->{$file}{digest}) );
+    $info->{$file}{digest} = unpack("H*", $info->{$file}{digest});
+}
+if ( length($attrib->digest()) ) {
+    printf("Attrib digest is %s\n", unpack("H*", $attrib->digest()));
+}
+$Data::Dumper::Indent   = 1;
+$Data::Dumper::Sortkeys = 1;
 print Dumper($info);

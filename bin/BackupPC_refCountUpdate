@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha0, released 23 Jun 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -94,12 +94,12 @@ if ( defined($opts{h}) ) {
     updateHostPoolCnt($opts{h}, $opts{f}, $opts{c});
 } elsif ( $opts{m} ) {
     #
-    # Check which jobs are running
+    # Check which jobs are running.  If we can't connect then it means
+    # the server (and we presume no jobs) is/are running, so it's ok
+    # to proceed.
     #
     my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
-    if ( $err ne "" ) {
-        print("Can't connect to server ($err)\n");
-    } else {
+    if ( $err eq "" ) {
         my $reply = $bpc->ServerMesg("longJobCheck");
         $reply = $1 if ( $reply =~ /^(-?\d+)/ );
         $bpc->ServerDisconnect();
@@ -535,7 +535,7 @@ sub updateRefCnt
             }
 
             #
-            # Scan the pool to add any missing files, with a zero count
+            # Scan the pool to add any missing files that have a zero count
             #
             for ( my $subDir = 0 ; $subDir < 128 ; $subDir++ ) {
                 my $poolSubDir = sprintf("%s/%02x", $poolDir, $subDir * 2);

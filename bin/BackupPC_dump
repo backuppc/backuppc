@@ -56,8 +56,11 @@
 #   $TopDir/pc/$client/XferLOG{$M+1}.z is renamed to
 #   $TopDir/pc/$client/XferLOG.bad.z for later viewing.
 #
-#   In 4.x the concept of a partial backup has been eliminated.
-#   TODO update this.
+#   In 4.x the concept of a partial backup has been modified.  While it
+#   still means the last backup was incomplete in some way, the storage
+#   still represents the most complete, up-to-date backup.  So a partial
+#   is never deleted, and it is intended to be used for browsing and
+#   restores.
 #
 #   BackupPC_dump communicates to BackupPC via printing to STDOUT.
 #
@@ -82,7 +85,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha0, released 23 Jun 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1470,7 +1473,7 @@ sub BackupFailCleanup
     } else {
         if ( $nFilesTotal == 0 ) {
             $XferLOG->write(\"BackupFailCleanup: inPlace with no new files... no cleanup\n");
-            if ( $BackupCase == 6 || $BackupCase == 2 ) {
+            if ( $BackupCase == 6 || $BackupCase == 2 || $BackupCase == 3 ) {
                 $Backups[-1]{type} = "partial" if ( @Backups );
             } else {
                 $Backups[-1]{type} = $type if ( @Backups );

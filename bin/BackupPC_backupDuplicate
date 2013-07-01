@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha0, released 23 Jun 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -427,7 +427,8 @@ sub copy_v3_file
                         $ErrorCnt++;
                         $found = 0;
                     }
-                } elsif ( !link($testPath, $path4) ) {
+                }
+                if ( !link($testPath, $path4) ) {
                     print(STDERR "Can't link($testPath,$path4)\n");
                     $ErrorCnt++;
                     $found = 0;
@@ -441,10 +442,12 @@ sub copy_v3_file
         }
         #
         # check one more time for the V4 pool in case someone else just moved it there
+        # (in which case the link error above is actually not an error).
         #
         if ( !$found && (@s = stat($path4)) && $s[1] == $inode ) {
             $found = 1;
-            print("$a->{relPath}: rediscovered in pool4 $path4\n") if ( $LogLevel >= 4 );
+            print("$a->{relPath}: rediscovered in pool4 $path4; prior link error is benign\n");
+            $ErrorCnt-- if ( $ErrorCnt > 0 );        # reverse increment above
         }
 
         if ( $found ) {

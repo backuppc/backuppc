@@ -109,7 +109,7 @@
 <hr />
 <h1 id="BackupPC-Introduction">BackupPC Introduction</h1>
 
-<p>This documentation describes BackupPC version 4.0.0alpha0, released on 23 Jun 2013.</p>
+<p>This documentation describes BackupPC version 4.0.0alpha1, released on 30 Jun 2013.</p>
 
 <h2 id="Overview">Overview</h2>
 
@@ -631,23 +631,23 @@
 
 <p>The same sequence of commands can be used for each module.</p>
 
-<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.0.0alpha0.tar.gz, run these commands as root:</p>
+<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.0.0alpha1.tar.gz, run these commands as root:</p>
 
-<pre><code>    tar zxf BackupPC-4.0.0alpha0.tar.gz
-    cd BackupPC-4.0.0alpha0
+<pre><code>    tar zxf BackupPC-4.0.0alpha1.tar.gz
+    cd BackupPC-4.0.0alpha1
     perl configure.pl</code></pre>
 
 <p>In the future this release might also have patches available on the SourceForge site. These patch files are text files, with a name of the form</p>
 
-<pre><code>    BackupPC-4.0.0alpha0plN.diff</code></pre>
+<pre><code>    BackupPC-4.0.0alpha1plN.diff</code></pre>
 
-<p>where N is the patch level, eg: pl2 is patch-level 2. These patch files are cumulative: you only need apply the last patch file, not all the earlier patch files. If a patch file is available, eg: BackupPC-4.0.0alpha0pl2.diff, you should apply the patch after extracting the tar file:</p>
+<p>where N is the patch level, eg: pl2 is patch-level 2. These patch files are cumulative: you only need apply the last patch file, not all the earlier patch files. If a patch file is available, eg: BackupPC-4.0.0alpha1pl2.diff, you should apply the patch after extracting the tar file:</p>
 
-<pre><code>     # fetch BackupPC-4.0.0alpha0.tar.gz
-     # fetch BackupPC-4.0.0alpha0pl2.diff
-     tar zxf BackupPC-4.0.0alpha0.tar.gz
-     cd BackupPC-4.0.0alpha0
-     patch -p0 &lt; ../BackupPC-4.0.0alpha0pl2.diff
+<pre><code>     # fetch BackupPC-4.0.0alpha1.tar.gz
+     # fetch BackupPC-4.0.0alpha1pl2.diff
+     tar zxf BackupPC-4.0.0alpha1.tar.gz
+     cd BackupPC-4.0.0alpha1
+     patch -p0 &lt; ../BackupPC-4.0.0alpha1pl2.diff
      perl configure.pl</code></pre>
 
 <p>A patch file includes comments that describe that bug fixes and changes. Feel free to review it before you apply the patch.</p>

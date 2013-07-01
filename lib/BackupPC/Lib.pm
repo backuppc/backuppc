@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha0, released 23 Jun 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -93,7 +93,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '4.0.0alpha0',
+        Version => '4.0.0alpha1',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);

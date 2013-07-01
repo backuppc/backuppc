@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha0, released 23 Jun 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -247,7 +247,7 @@ sub Main_Initialize
     }
 
     foreach my $progName ( qw(SmbClientPath NmbLookupPath PingPath DfPath
-                              SendmailPath SshPath) ) {
+                              SendmailPath SshPath RsyncBackupPCPath) ) {
         next if ( $Conf{$progName} eq "" || -x $Conf{$progName} );
         print(STDERR $bpc->timeStamp,
                      "\$Conf{$progName} = '$Conf{$progName}' is not a"

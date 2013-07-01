@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha0, released 23 Jun 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -104,9 +104,20 @@ if ( $opts{s} ) {
 }
 
 if ( $opts{f} ) {
+    #
+    # Rebuild host count database
+    #
     foreach my $host ( sort(keys(%$Hosts)) ) {
         print("BackupPC_fsck: Rebuilding count database for host $host\n");
         system("$BinDir/BackupPC_refCountUpdate -h $host -f -p");
+    }
+} else {
+    #
+    # Make sure each host count database is up to date
+    # (ie: process any delta files)
+    #
+    foreach my $host ( sort(keys(%$Hosts)) ) {
+        system("$BinDir/BackupPC_refCountUpdate -h $host -p");
     }
 }
 
@@ -186,44 +197,70 @@ sub poolCountUpdate
                 my $entries = BackupPC::DirOps::dirRead($bpc, $subPoolDir);
                 next if ( !defined($entries) );
 
-                foreach my $e ( @$entries ) {
+                #
+                # traverse the files in reverse order, in case we can delete multiple files in
+                # a single chain.
+                #
+                foreach my $e ( sort {$b cmp $a} @$entries ) {
                     next if ( $e->{name} eq "."
                             || $e->{name} eq ".."
                             || $e->{name} eq "LOCK" );
                     my $digest = pack("H*", $e->{name});
+                    my $poolFile = "$subPoolDir/$e->{name}";
                     #printf("Got %s, digest = %s\n", $e->{name}, unpack("H*", $digest));
                     my($nBlks, @s);
                     if ( $opts{s} ) {
-                        @s = stat("$subPoolDir/$e->{name}");
+                        @s = stat($poolFile);
                         $nBlks    = $s[12];
                         $blkCnt  += $nBlks;
                     }
                     next if ( $count->get($digest) != 0 );
 
                     #
-                    # don't complain or remove a zero-length pool files
-                    # since those are used to fill in chains of duplicate
-                    # pool files.
+                    # figure out the next file in the chain to see how to
+                    # handle this one.
                     #
-                    # TODO: should we remove zero-length pool files that are
-                    # at the end of a chain?
-                    #
-                    @s = stat("$subPoolDir/$e->{name}") if ( !$opts{s} );
-                    next if ( $s[7] == 0 );
-
-                    if ( !defined($count->get($digest)) ) {
-                        print("$subPoolDir/$e->{name} exists in pool, but not in count: removing it\n");
-                    } else {
-                        print("$subPoolDir/$e->{name} has zero count: removing it\n");
-                    }
-
-                    if ( !$opts{n} ) {
-                        if ( unlink("$subPoolDir/$e->{name}") != 1 ) {
-                            printf("Can't remove %s\n", "$subPoolDir/$e->{name}");
-                            $ErrorCnt++;
+                    @s = stat($poolFile) if ( !$opts{s} );
+                    my $ext = $bpc->digestExtGet($digest);
+                    my($nextDigest, $nextPoolFile) = $bpc->digestConcat($digest,
+                                                                        $ext + 1, $compress);
+                    if ( !-f $nextPoolFile ) {
+                        #
+                        # last in the chain (or no chain) - just delete it
+                        #
+                        print("Removing pool file $poolFile\n") if ( $Conf{XferLogLevel} >= 2 );
+                        if ( !$opts{n} ) {
+                            if ( unlink($poolFile) != 1 ) {
+                                print("Can't remove $poolFile\n");
+                                $ErrorCnt++;
+                                next;
+                            }
+                            $count->delete($digest);
+                            $fileCntRm++;
+                            $blkCntRm += $nBlks;
                         }
-                        $fileCntRm++;
-                        $blkCntRm += $nBlks;
+                    } elsif ( $s[7] > 0 ) {
+                        #
+                        # in the middle of a chain of pool files, so
+                        # we replace the file with an empty file.
+                        #
+                        print("Zeroing pool file $poolFile (next $nextPoolFile exists)\n") if ( $Conf{XferLogLevel} >= 2 );
+                        if ( !$opts{n} ) {
+                            if ( chmod(0644, $poolFile) != 1 ) {
+                                print("Can't chmod 0644 $poolFile\n");
+                                $ErrorCnt++;
+                            }
+                            if ( open(my $fh, ">", $poolFile) ) {
+                                close($fh);
+                            } else {
+                                print("Can't truncate $poolFile\n");
+                                $ErrorCnt++;
+                                next;
+                            }
+                            $count->delete($digest);
+                            $fileCntRm++;
+                            $blkCntRm += $nBlks;
+                        }
                     }
                 }
             }
@@ -323,11 +360,9 @@ sub poolCountUpdate
 
 sub CheckIfServerRunning
 {
-    if ( !$opts{r} ) {
-        my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
-        if ( $err eq "" ) {
-            print STDERR "$0: can't run since BackupPC is running\n";
-            exit(1);
-        }
+    my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
+    if ( $err eq "" ) {
+        print STDERR "$0: can't run since BackupPC is running\n";
+        exit(1);
     }
 }

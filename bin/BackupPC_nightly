@@ -70,7 +70,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha0, released 23 Jun 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -81,6 +81,7 @@ no  utf8;
 use lib "__INSTALLDIR__/lib";
 use BackupPC::Lib qw( :BPC_DT_ALL );
 use BackupPC::XS;
+use BackupPC::DirOps;
 use Getopt::Std;
 
 use File::Path;

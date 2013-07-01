@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha0, released 23 Jun 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -391,6 +391,10 @@ sub start
 
     #from_to($args->{shareName}, "utf8", $conf->{ClientCharset})
     #                        if ( $conf->{ClientCharset} ne "" );
+    if ( $conf->{RsyncBackupPCPath} eq "" || !-x $conf->{RsyncBackupPCPath} ) {
+        $t->{_errStr} = "\$Conf{RsyncBackupPCPath} is set to $conf->{RsyncBackupPCPath}, which isn't a valid executable";
+        return;
+    }
     $rsyncCmd = [$conf->{RsyncBackupPCPath}, @$rsyncArgs];
 
     my $rsyncFd;

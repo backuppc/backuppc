@@ -36,7 +36,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha0, released 23 Jun 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -71,7 +71,7 @@ BackupPC cannot load the package $pkg, which is included in the
 BackupPC distribution.  This probably means you did not cd to the
 unpacked BackupPC distribution before running configure.pl, eg:
 
-    cd BackupPC-4.0.0alpha0
+    cd BackupPC-4.0.0alpha1
     ./configure.pl
 
 Please try again.
@@ -232,14 +232,10 @@ EOF
 #
 if ( $opts{fhs} ) {
     $Conf{TopDir}       ||= $opts{"data-dir"}    || "/data/BackupPC";
-    $Conf{ConfDir}      ||= $opts{"config-dir"}  || "/etc/BackupPC";
     $Conf{InstallDir}   ||= $opts{"install-dir"} || "/usr/local/BackupPC";
-    $Conf{LogDir}       ||= $opts{"log-dir"}     || "/var/log/BackupPC";
 } else {
     $Conf{TopDir}       ||= $opts{"data-dir"}    || "/data/BackupPC";
-    $Conf{ConfDir}      ||= $opts{"config-dir"}  || "$Conf{TopDir}/conf";
     $Conf{InstallDir}   ||= $opts{"install-dir"} || "/usr/local/BackupPC";
-    $Conf{LogDir}       ||= $opts{"log-dir"}     || "$Conf{TopDir}/log";
 }
 
 #
@@ -383,6 +379,14 @@ while ( 1 ) {
         print("Need to specify --data-dir for new installation\n");
         exit(1);
     }
+}
+
+if ( $opts{fhs} ) {
+    $Conf{ConfDir}      ||= $opts{"config-dir"}  || "/etc/BackupPC";
+    $Conf{LogDir}       ||= $opts{"log-dir"}     || "/var/log/BackupPC";
+} else {
+    $Conf{ConfDir}      ||= $opts{"config-dir"}  || "$Conf{TopDir}/conf";
+    $Conf{LogDir}       ||= $opts{"log-dir"}     || "$Conf{TopDir}/log";
 }
 
 $Conf{CompressLevel} = $opts{"compress-level"}
@@ -635,7 +639,7 @@ if ( $Conf{CgiImageDir} ne "" ) {
     #
     # Install new CSS file, making a backup copy if necessary
     #
-    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-4.0.0alpha0";
+    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-4.0.0alpha1";
     if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
 	rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
     }
@@ -871,7 +875,7 @@ foreach my $param ( keys(%{$opts{"config-override"}}) ) {
 #
 # Now backup and write the config file
 #
-my $confCopy = "$dest.pre-4.0.0alpha0";
+my $confCopy = "$dest.pre-4.0.0alpha1";
 if ( -f $dest && !-f $confCopy ) {
     #
     # Make copy of config file, preserving ownership and modes

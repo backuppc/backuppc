@@ -11,18 +11,39 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
 
 #------------------------------------------------------------------------
+# Version 4.0.0alpha2, 15 Sep 2013
+#------------------------------------------------------------------------
+
+* Added SCGI support, allowing the Apache to run as any user, with requests
+  handled by BackupPC_Admin_SCGI, which is run by the BackupPC server.  This
+  provides an alternative to running Apache as the BackupPC user, or needing
+  to use a setuid BackupPC_Admin script.
+
+* Parallelized bin/BackupPC_refCountUpdate, so that $Conf{MaxBackupPCNightlyJobs}
+  instances run.
+
+* Fixed pool size counting.
+
+#------------------------------------------------------------------------
 # Version 4.0.0alpha1, 30 Jun 2013
 #------------------------------------------------------------------------
 
-* Major changes.
+* A few minor bug fixes.
 
+* Some improvements to bin/BackupPC_fsck
+
+#------------------------------------------------------------------------
+# Version 4.0.0alpha0, 23 Jun 2013
+#------------------------------------------------------------------------
+
+* Major changes.
 
 * Updated init.d/debian-backuppc from Eduardo Díaz Rodríguez.
 

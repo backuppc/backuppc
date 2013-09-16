@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -374,6 +374,11 @@ sub Main_Initialize
 sub Main_TryToRun_nightly
 {
     #
+    # Check if we should run BackupPC_Admin_SCGI.
+    #
+    SCGIStopStart();
+
+    #
     # Check if we should run BackupPC_nightly.
     # BackupPC_nightly is run when the current job queue is empty.
     #
@@ -385,6 +390,7 @@ sub Main_TryToRun_nightly
 		    if ( $Conf{MaxBackupPCNightlyJobs} <= 0 );
 	$Conf{BackupPCNightlyPeriod} = 1
 		    if ( $Conf{BackupPCNightlyPeriod} <= 0 );
+        $Info->{PoolSizeNightlyPhase} ||= 0;
 	#
 	# Decide what subset of the 16 top-level directories 0..9a..f
 	# we run BackupPC_nightly on, based on $Conf{BackupPCNightlyPeriod}.
@@ -402,37 +408,75 @@ sub Main_TryToRun_nightly
 	$end = $start + 1 if ( $end <= $start );
 	$Info->{NightlyPhase}++;
 	$Info->{NightlyPhase} = 0 if ( $end >= 16 );
+        
+        #
+        # Check if there is a job that is still running since the last
+        # time BackupPC_nightly finished.  If so, add the -r option to
+        # BackupPC_nightly so it doesn't run BackupPC_refCountUpdate.
+        #
+        my $dontRunRefCountUpdate;
+        foreach my $host ( keys(%Jobs) ) {
+            next if ( $host eq $bpc->scgiJob );
+            my $pid = $Jobs{$host}{pid};
+            if ( $Info->{RunningPIDs}{$pid} ) {
+                $dontRunRefCountUpdate = 1;
+                last;
+            }
+        }
 
-	#
-	# Zero out the data we expect to get from BackupPC_nightly.
-	#
-	for my $p ( qw(pool cpool) ) {
-	    for ( my $i = $start ; $i < $end ; $i++ ) {
-		$Info->{pool}{$p}[$i]{FileCnt}       = 0;
-		$Info->{pool}{$p}[$i]{DirCnt}        = 0;
-		$Info->{pool}{$p}[$i]{Kb}            = 0;
-		$Info->{pool}{$p}[$i]{KbRm}          = 0;
-		$Info->{pool}{$p}[$i]{FileCntRm}     = 0;
-		$Info->{pool}{$p}[$i]{FileCntRep}    = 0;
-		$Info->{pool}{$p}[$i]{FileRepMax}    = 0;
-		$Info->{pool}{$p}[$i]{FileCntRename} = 0;
-		$Info->{pool}{$p}[$i]{FileLinkMax}   = 0;
-		$Info->{pool}{$p}[$i]{Time}          = 0;
+        if ( !$dontRunRefCountUpdate ) {
+            #
+            # Zero out the data we expect to get from BackupPC_nightly
+            # (provided we are running BackupPC_refCountUpdate).
+            #
+            # Also remove Kb2 values, which aren't used in V4.
+            #
+            delete($Info->{poolKb2});
+            delete($Info->{cpoolKb2});
+            for my $p ( qw(pool cpool) ) {
+                for ( my $i = $start ; $i < $end ; $i++ ) {
+                    $Info->{pool}{$p}[$i]{FileCnt}       = 0;
+                    $Info->{pool}{$p}[$i]{DirCnt}        = 0;
+                    $Info->{pool}{$p}[$i]{Kb}            = 0;
+                    $Info->{pool}{$p}[$i]{KbRm}          = 0;
+                    $Info->{pool}{$p}[$i]{FileCntRm}     = 0;
+                    $Info->{pool}{$p}[$i]{FileCntRep}    = 0;
+                    $Info->{pool}{$p}[$i]{FileRepMax}    = 0;
+                    $Info->{pool}{$p}[$i]{FileCntRename} = 0;
+                    $Info->{pool}{$p}[$i]{FileLinkMax}   = 0;
+                    $Info->{pool}{$p}[$i]{FileLinkTotal} = 0;
+                    $Info->{pool}{$p}[$i]{Time}          = 0;
+                    delete($Info->{pool}{$p}[$i]{Kb2});
 
-                #
-                # Don't clear $Info->{pool}{"${p}4"}[$i]{Kb} since BackupPC_refCountUpdate
-                # only reports relative changes
-                #
-		$Info->{pool}{"${p}4"}[$i]{FileCnt}       = 0;
-		$Info->{pool}{"${p}4"}[$i]{DirCnt}        = 0;
-		$Info->{pool}{"${p}4"}[$i]{KbRm}          = 0;
-		$Info->{pool}{"${p}4"}[$i]{FileCntRm}     = 0;
-		$Info->{pool}{"${p}4"}[$i]{FileCntRep}    = 0;
-		$Info->{pool}{"${p}4"}[$i]{FileRepMax}    = 0;
-		$Info->{pool}{"${p}4"}[$i]{FileLinkMax}   = 0;
-		$Info->{pool}{"${p}4"}[$i]{Time}          = 0;
-	    }
-	}
+                    #
+                    # Normally BackupPC_refCountUpdate only reports relative changes to the
+                    # pool size, which is a lot more efficient.  BackupPC_refCountUpdate
+                    # computes the exact pool size only for a portion of the pool each
+                    # night, based on $Conf{PoolSizeNightlyUpdatePeriod}.
+                    #
+                    # So decide when to clear $Info->{pool}{"${p}4"}[$i]{Kb}.
+                    #
+                    my $clear;
+                    if ( $Conf{PoolSizeNightlyUpdatePeriod} > 0 ) {
+                        $clear = ($i % $Conf{PoolSizeNightlyUpdatePeriod})
+                                 == ($Info->{PoolSizeNightlyPhase} % $Conf{PoolSizeNightlyUpdatePeriod});
+                    }
+                    print(LOG $bpc->timeStamp, "updating $p size of $i (clear = $clear, phase = $Info->{PoolSizeNightlyPhase},"
+                                             . " \$Conf{PoolSizeNightlyUpdatePeriod} = $Conf{PoolSizeNightlyUpdatePeriod})\n");
+
+                    $Info->{pool}{"${p}4"}[$i]{Kb}            = 0 if ( $clear );
+                    $Info->{pool}{"${p}4"}[$i]{FileCnt}       = 0;
+                    $Info->{pool}{"${p}4"}[$i]{DirCnt}        = 0;
+                    $Info->{pool}{"${p}4"}[$i]{KbRm}          = 0;
+                    $Info->{pool}{"${p}4"}[$i]{FileCntRm}     = 0;
+                    $Info->{pool}{"${p}4"}[$i]{FileCntRep}    = 0;
+                    $Info->{pool}{"${p}4"}[$i]{FileRepMax}    = 0;
+                    $Info->{pool}{"${p}4"}[$i]{FileLinkMax}   = 0;
+                    $Info->{pool}{"${p}4"}[$i]{FileLinkTotal} = 0;
+                    $Info->{pool}{"${p}4"}[$i]{Time}          = 0;
+                }
+            }
+        }
 	print(LOG $bpc->timeStamp,
 		sprintf("Running %d BackupPC_nightly jobs from %d..%d"
 		      . " (out of 0..15)\n",
@@ -453,6 +497,8 @@ sub Main_TryToRun_nightly
             #
             my $cmd = ["$BinDir/BackupPC_nightly"];
             push(@$cmd, "-m") if ( $i == 0 );
+            push(@$cmd, "-r") if ( $dontRunRefCountUpdate );
+            push(@$cmd, "-P", $Info->{PoolSizeNightlyPhase});
             push(@$cmd, $start);
             $start = $start0 + int(($end - $start0)
 				  * ($i + 1) / $Conf{MaxBackupPCNightlyJobs});
@@ -467,6 +513,8 @@ sub Main_TryToRun_nightly
             $CmdQueueOn{$job} = 1;
         }
         $RunNightlyWhenIdle = 2;
+        $Info->{PoolSizeNightlyPhase}++;
+        $Info->{PoolSizeNightlyPhase} = 0 if ( $Info->{PoolSizeNightlyPhase} >= 16 );
     }
 }
 
@@ -529,7 +577,7 @@ sub Main_TryToRun_CmdQueue
         $Status->{$host}{state}   = "Status_admin_running";
         $Status->{$host}{activeJob} = 1;
         $Status->{$host}{endTime} = time;
-        $CmdJob = $host;
+        $CmdJob = $host if ( $host ne $bpc->scgiJob );
         $cmd =~ s/$BinDir\///g;
         print(LOG $bpc->timeStamp, "Running $cmd (pid=$pid)\n");
 	if ( $cmd =~ /^BackupPC_nightly\s/ ) {
@@ -624,6 +672,7 @@ sub Main_TryToRun_Bg_or_User_Queue
                 $nJobs--;
             }
         }
+        $nJobs-- if ( defined($Jobs{$bpc->scgiJob} ) );
         if ( $nJobs < $Conf{MaxBackups} + $Conf{MaxUserBackups}
                         && @UserQueue > 0 ) {
             $req = pop(@UserQueue);
@@ -884,7 +933,7 @@ sub Main_Check_Job_Messages
                         . " nothing to read from $host.  Debug dump:\n");
             my($dump) = Data::Dumper->new(
                          [  \%Clients, \%Jobs, \$FDread, \$fdRead],
-                         [qw(*Clients,  *Jobs   *FDread,  *fdRead)]);
+                         [qw(*Clients  *Jobs   *FDread   *fdRead)]);
             $dump->Indent(1);
             print(LOG $dump->Dump);
             next;
@@ -1134,6 +1183,16 @@ sub Main_Check_Job_Messages
                         $BackupPCNightlyJobs = 0;
                         $RunNightlyWhenIdle = 0;
                         $CmdJob = "";
+                        #
+                        # Update the list of currently running jobs, so
+                        # we can detect if a single backup spans two
+                        # consecutive BackupPC_nightly runs.
+                        #
+                        $Info->{RunningPIDs} = {};
+                        foreach my $host ( keys(%Jobs) ) {
+                            my $pid = $Jobs{$host}{pid};
+                            $Info->{RunningPIDs}{$pid} = 1 if ( $pid ne "" );
+                        }
 			#
 			# Combine the 16 per-directory results for the
                         # old (pool) and new pool (pool4)
@@ -1502,21 +1561,6 @@ sub Main_Check_Client_Messages
                 $reply = $dump->Dump;
             } elsif ( $cmd =~ /^log\s+(.*)/ ) {
                 print(LOG $bpc->timeStamp, "$1\n");
-            } elsif ( $cmd =~ /^longJobCheck/ ) {
-                #
-                # Check if any jobs running when the last longJobCheck command
-                # was sent are still running
-                #
-                $reply = -1;
-                my $currRunningPids = {};
-                foreach my $host ( keys(%Jobs) ) {
-                    my $pid = $Jobs{$host}{pid};
-                    $reply = $pid if ( $Info->{RunningPIDs}{$pid} );
-                    $currRunningPids->{$pid} = 1;
-                }
-                if ( $reply < 0 ) {
-                    $Info->{RunningPIDs} = $currRunningPids;
-                }
             } elsif ( $cmd =~ /^server\s+(\w+)/ ) {
                 my($type) = $1;
                 if ( $type eq 'reload' ) {
@@ -1785,7 +1829,8 @@ sub HostsUpdate
         print(LOG $bpc->timeStamp, "Added host $host to backup list\n");
     }
     foreach my $host ( sort(keys(%$Status)) ) {
-        next if ( $bpc->isAdminJob($host)
+        next if ( $host eq $bpc->scgiJob
+                     || $bpc->isAdminJob($host)
                      || defined($Hosts->{$host})
                      || defined($Jobs{$host})
                      || $BgQueueOn{$host}
@@ -1910,8 +1955,30 @@ sub ServerReload
     umask($Conf{UmaskMode});
     ServerSocketInit();
     HostsUpdate(0);
+    SCGIStopStart();
     $NextWakeup = 0;
     $Info->{ConfigLTime} = time;
+}
+
+sub SCGIStopStart
+{
+    if ( $Conf{SCGIServerPort} < 0 && defined($Jobs{$bpc->scgiJob}) ) {
+        #
+        # SCGI was disabled - kill it
+        #
+        kill($bpc->sigName2num("INT"), $Jobs{$bpc->scgiJob}{pid});
+    } elsif ( $Conf{SCGIServerPort} > 0 && !defined($Jobs{$bpc->scgiJob}) && !$CmdQueueOn{$bpc->scgiJob} ) {
+        #
+        # SCGI is enabled - start it
+        #
+        unshift(@CmdQueue, {
+                host    => $bpc->scgiJob,
+                user    => "BackupPC",
+                reqTime => time,
+                cmd     => ["$BinDir/BackupPC_Admin_SCGI"],
+            });
+        $CmdQueueOn{$bpc->scgiJob} = 1;
+    }
 }
 
 #

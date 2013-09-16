@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -330,6 +330,7 @@ sub GetStatusInfo
 	foreach my $host ( grep(/admin/, keys(%Status)) ) {
 	    delete($Status{$host}) if ( $bpc->isAdminJob($host) );
 	}
+        delete($Status{$bpc->scgiJob});
     }
 }
 

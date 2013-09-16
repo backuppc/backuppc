@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -64,7 +64,7 @@ sub action
     #
     # default to the newest backup
     #
-    if ( !defined($In{num}) && defined(@Backups) && @Backups > 0 ) {
+    if ( !defined($In{num}) && @Backups > 0 ) {
         $i = @Backups - 1;
         $num = $Backups[$i]{num};
     }

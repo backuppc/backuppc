@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -190,7 +190,7 @@ EOF
             last;
         }
 
-	print(STDOUT <<EOF);
+	print <<EOF;
 Content-Type: application/x-gtar
 Content-Transfer-Encoding: binary
 Content-Disposition: attachment; filename=\"$fileName.tar\"
@@ -239,7 +239,7 @@ EOF
             last;
         }
 
-	print(STDOUT <<EOF);
+	print <<EOF;
 Content-Type: application/zip
 Content-Transfer-Encoding: binary
 Content-Disposition: attachment; filename=\"$fileName.zip\"

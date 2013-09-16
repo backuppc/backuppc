@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -79,6 +79,7 @@ use vars qw(%ConfigMeta);
     MaxPendingCmds	=> "integer",
     MaxBackupPCNightlyJobs => "integer",
     BackupPCNightlyPeriod  => "integer",
+    PoolSizeNightlyUpdatePeriod => "integer",
     MaxOldLogFiles      => "integer",
     CmdQueueNice        => "integer",
 
@@ -349,6 +350,7 @@ use vars qw(%ConfigMeta);
     ######################################################################
     CgiAdminUserGroup 	=> "string",
     CgiAdminUsers	=> "string",
+    SCGIServerPort	=> "integer",
     CgiURL	 	=> "string",
     Language	 	=> {
 	    type   => "select",

@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -62,6 +62,7 @@ our %ConfigMenu = (
             {name => "MaxPendingCmds"},
             {name => "MaxBackupPCNightlyJobs"},
             {name => "BackupPCNightlyPeriod"},
+            {name => "PoolSizeNightlyUpdatePeriod"},
 
             {text => "CfgEdit_Title_Pool_Filesystem_Limits"},
 	    {name => "DfCmd"},
@@ -151,6 +152,7 @@ our %ConfigMenu = (
 	    {name => "CgiCSSFile"},
 
 	    {text => "CfgEdit_Title_Paths"},
+	    {name => "SCGIServerPort"},
 	    {name => "CgiURL"},
 	    {name => "CgiImageDir"},
 	    {name => "CgiImageDirURL"},

@@ -16,7 +16,7 @@
 #
 #      - sending email to users and administrators (only with -m option)
 #
-#   Usage: BackupPC_nightly [-m] poolRangeStart poolRangeEnd
+#   Usage: BackupPC_nightly [-m] [-r] [-p] [-P phase] poolRangeStart poolRangeEnd
 #
 #   Flags:
 #
@@ -25,6 +25,17 @@
 #          Since several BackupPC_nightly processes might run
 #          concurrently, just the first one is given the -m flag
 #          by BackupPC.
+#
+#     -r   Don't run BackupPC_refCountUpdate because there are long
+#          running BackupPC_dump jobs that were running the last time
+#          we ran BackupPC_refCountUpdate.
+#
+#     -p   don't show progress
+#
+#     -P phase
+#          Phase from 0..15 each time we run BackupPC_nightly.  Used by
+#          BackupPC_refCountUpdate to compute exact pool size for portions
+#          of the pool based on $Conf{PoolSizeNightlyUpdatePeriod}.
 #
 #   The poolRangeStart and poolRangeEnd arguments are integers from 0 to 255.
 #   These specify which parts of the subtasks or pool to process.
@@ -36,11 +47,6 @@
 #   half (ie: 0/0 through 7/f), 127 255 does the other half (eg: 8/0
 #   through f/f) and 0 15 does just the first 1/16 of the pool (ie: 0/0
 #   through 0/f).
-#
-#
-#   TODO: Parallelize V4 reference count updating.  Tricky part is
-#   that the first phase (host updating) must be completely finished
-#   before final host updating is done.
 #
 #   In V4, reference count updating is done for each host.  The host
 #   list is divided up, and processed based on the 8 bit argument range.
@@ -70,7 +76,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -104,8 +110,8 @@ my $PendingDeleteMax = 10240;
 $bpc->ChildInit();
 
 my %opts;
-if ( !getopts("m", \%opts) || @ARGV != 2 ) {
-    print("usage: $0 [-m] poolRangeStart poolRangeEnd\n");
+if ( !getopts("mprP:", \%opts) || @ARGV != 2 ) {
+    print("usage: $0 [-m] [-p] [-r] [-P phase] poolRangeStart poolRangeEnd\n");
     exit(1);
 }
 if ( $ARGV[0] !~ /^(\d+)$/ || $1 > 255 ) {
@@ -154,17 +160,21 @@ if ( $Conf{PoolV3Enabled} ) {
 
 ###########################################################################
 # Prior to V3, we need to tell BackupPC that it is now ok to start running
-# BackupPC_dump commands. In V3+ they are decoupled.
+# BackupPC_dump commands. In V3+ they are decoupled, so this isn't actually
+# needed anymore.
 ###########################################################################
 printf("BackupPC_nightly lock_off\n");
 
 ###########################################################################
 # V4 pool: run reference count updating and pool cleaning
-# Currently this is only done by one BackupPC_nightly process.
+# This runs in parallel for each subset of the pool
 ###########################################################################
-if ( $opts{m} ) {
-    print("log BackupPC_nightly now running BackupPC_refCountUpdate\n");
-    system("$BinDir/BackupPC_refCountUpdate -m -s -c");
+if ( $opts{r} ) {
+    print("log BackupPC_nightly skipping BackupPC_refCountUpdate\n");
+} else {
+    $opts{P} ||= 0;
+    print("log BackupPC_nightly now running BackupPC_refCountUpdate -m -s -c -P $opts{P} -r $poolRangeStart-$poolRangeEnd\n");
+    system("$BinDir/BackupPC_refCountUpdate -m -s -c -P $opts{P} -r $poolRangeStart-$poolRangeEnd");
 }
 
 ###########################################################################
@@ -172,6 +182,7 @@ if ( $opts{m} ) {
 ###########################################################################
 if ( $opts{m} ) {
     print("log BackupPC_nightly now running BackupPC_sendEmail\n");
+    print("__bpc_progress_state__ BackupPC_sendEmail\n") if ( !$opts{p} );
     system("$BinDir/BackupPC_sendEmail");
 }
 
@@ -180,8 +191,8 @@ exit(0);
 sub GetPoolStats_V3
 {
     my($file, $fullPath) = @_;
-    my($inode, $nlinks, $nblocks) = (lstat($file))[1, 3, 12];
- 
+    my($inode, $nlinks, $nblocks) = (lstat($fullPath))[1, 3, 12];
+
     if ( -d _ ) {
         $dirCnt++;
         return;
@@ -253,6 +264,7 @@ sub ScanAndCleanV3Pool()
     my @hexChars = qw(0 1 2 3 4 5 6 7 8 9 a b c d e f);
 
     for my $pool ( qw(pool cpool) ) {
+        print("__bpc_progress_state__ v3 $pool scan\n") if ( !$opts{p} );
         for ( my $i = $poolRangeStart ; $i <= $poolRangeEnd ; $i++ ) {
             my $dir        = "$hexChars[int($i / 16)]/$hexChars[$i % 16]";
             # print("Doing $pool/$dir\n") if ( ($i % 16) == 0 );
@@ -264,8 +276,10 @@ sub ScanAndCleanV3Pool()
             $fileCntRep    = 0;
             $fileRepMax    = 0;
             $fileLinkMax   = 0;
+            $fileLinkTotal = 0;
             $fileCntRename = 0;
             %FixList       = ();
+            print("__bpc_progress_fileCnt__ $i/$poolRangeEnd\n") if ( !$opts{p} );
             BackupPC::DirOps::find($bpc, {wanted => \&GetPoolStats_V3}, "$TopDir/$pool/$dir")
                                                 if ( -d "$TopDir/$pool/$dir" );
             my $kb   = $blkCnt / 2;

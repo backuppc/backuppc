@@ -199,6 +199,32 @@ $Conf{MaxBackupPCNightlyJobs} = 2;
 $Conf{BackupPCNightlyPeriod} = 1;
 
 #
+# The total size of the files in the new V4 pool is updated every
+# night when BackupPC_nightly runs BackupPC_refCountUpdate.  Instead
+# of adding up the size of every pool file, it just updates the pool
+# size total when files are added to or removed form the pool. 
+#
+# To make sure these cumulative pool file sizes stay accurate, we
+# recompute the V4 pool size for a portion of the pool each night
+# from scratch, ie: by checking every file in that portion of the
+# pool.
+#
+# $Conf{PoolSizeNightlyUpdatePeriod} sets how many nights it takes
+# to completely update the V4 pool size.  It can be set to:
+#   0:  never do a full refresh; simply maintain the cumulative sizes
+#       when files are added or deleted (fastest option)
+#   1:  recompute all  the V4 pool size every night (slowest option)
+#   2:  recompute 1/2  the V4 pool size every night
+#   4:  recompute 1/4  the V4 pool size every night
+#   8:  recompute 1/8  the V4 pool size every night
+#   16: recompute 1/16 the V4 pool size every night
+#       (2nd fastest option; ensures the pool files sizes
+#        stay accurate after a few day, in case the relative
+#        upgrades miss a file)
+#
+$Conf{PoolSizeNightlyUpdatePeriod} = 16;
+
+#
 # Maximum number of log files we keep around in log directory.
 # These files are aged nightly.  A setting of 14 means the log
 # directory will contain about 2 weeks of old log files, in
@@ -1907,7 +1933,33 @@ $Conf{CgiAdminUserGroup} = '';
 $Conf{CgiAdminUsers}     = '';
 
 #
-# URL of the BackupPC_Admin CGI script.  Used for email messages.
+# TCP port number of the SCGI server.  A negative value disables the
+# SCGI server.  Set to any available unprivileged TCP port number,
+# eg: 10268.  Apache needs the mod_scgi module installed, and you will
+# need to set the same port number in the Apache configuration. Here
+# are some typical settings you'll need in Apache's httpd.conf:
+#
+#    LoadModule scgi_module modules/mod_scgi.so
+#    SCGIMount /BackupPC_Admin 127.0.0.1:10268
+#    <Location /BackupPC_Admin>
+#        AuthUserFile /etc/httpd/conf/passwd
+#        AuthType basic
+#        AuthName "access"
+#        require valid-user
+#    </Location>
+#
+# Important security warning!!  The SCGIServerPort must not be
+# accessible by anyone untrusted.  That means you can't allow
+# untrusted users access to the BackupPC server, and you should
+# block the SCGIServerPort TCP port on the BackupPC server.  If you
+# don't understaand what that means, or can't confirm you have
+# configured SCGI securely, then don't enable it!!
+#
+$Conf{SCGIServerPort} = -1;
+
+#
+# Full URL of the BackupPC_Admin CGI script, or the configured path
+# for SCGI.  Used for links in email messages.
 #
 $Conf{CgiURL} = undef;
 

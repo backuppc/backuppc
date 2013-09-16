@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -205,7 +205,7 @@ sub restoreFile
     }
     print "Content-Disposition: attachment; filename=\"$fileName\"\r\n\r\n";
     while ( $f->read(\$data, 1024 * 1024) > 0 ) {
-        print STDOUT $data;
+        print $data;
     }
     $f->close;
 }

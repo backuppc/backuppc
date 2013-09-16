@@ -36,7 +36,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -60,10 +60,26 @@ my @Packages = qw(File::Path File::Spec File::Copy DirHandle Digest::MD5
                   Data::Dumper Getopt::Std Getopt::Long Pod::Usage
                   BackupPC::Lib BackupPC::XS);
 
+my $PackageVersion = {
+        "BackupPC::XS" => "0.20",
+    };
+
 foreach my $pkg ( @Packages ) {
     eval "use $pkg";
-    next if ( !$@ );
-    if ( $pkg =~ /BackupPC/ ) {
+    if ( !$@ ) {
+        next if ( !defined($PackageVersion->{$pkg}) );
+        my $version = eval "\$${pkg}::VERSION";
+        next if ( $version >= $PackageVersion->{$pkg} );
+        die <<EOF;
+
+Package $pkg needs to be at least version $PackageVersion->{$pkg}.
+The currently installed $pkg is version $version.
+
+Please upgrade package $pkg to the latest version and then re-run
+this script.
+EOF
+    }
+    if ( $pkg =~ /BackupPC::Lib/ ) {
         die <<EOF;
 
 Error loading $pkg: $@
@@ -71,7 +87,7 @@ BackupPC cannot load the package $pkg, which is included in the
 BackupPC distribution.  This probably means you did not cd to the
 unpacked BackupPC distribution before running configure.pl, eg:
 
-    cd BackupPC-4.0.0alpha1
+    cd BackupPC-4.0.0alpha2
     ./configure.pl
 
 Please try again.
@@ -108,6 +124,7 @@ if ( !GetOptions(
             "install-dir=s",
             "log-dir=s",
             "man",
+            "scgi-port=i",
             "set-perms!",
             "uid-ignore!",
         ) || @ARGV ) {
@@ -160,7 +177,7 @@ my $ConfigPath = "";
 my $ConfigFileOK = 1;
 while ( 1 ) {
     if ( $ConfigFileOK && -f "/etc/BackupPC/config.pl"
-            && (!defined($opts{fhs}) || $opts{fhs}) ) {
+            && (!defined($opts{fhs}) || $opts{fhs}) & !defined($opts{"config-path"}) ) {
         $ConfigPath = "/etc/BackupPC/config.pl";
         $opts{fhs} = 1 if ( !defined($opts{fhs}) );
         print <<EOF;
@@ -394,34 +411,52 @@ $Conf{CompressLevel} = $opts{"compress-level"}
 
 print <<EOF;
 
-BackupPC has a powerful CGI perl interface that runs under Apache.
-A single executable needs to be installed in a cgi-bin directory.
-This executable needs to run as set-uid $Conf{BackupPCUser}, or
-it can be run under mod_perl with Apache running as user $Conf{BackupPCUser}.
+BackupPC has SCGI and CGI perl interfaces that run under Apache.  You need
+to pick which one to run.
 
-Leave this path empty if you don't want to install the CGI interface.
+For SCGI, Apache uses the scgi_mod module to communicate with BackupPC_Admin_SCGI,
+which handles the requests.  This allows Apache to run as a different user as
+$Conf{BackupPCUser}.  To use SCGI you need to set SCGIServerPort to any spare
+non-privileged TCP port number.  A negative value disables SCGI.
+
+Important security warning!!  The SCGIServerPort must not be accessible by
+anyone untrusted.  That means you can't allow untrusted users access to the
+BackupPC server, and you should block the SCGIServerPort TCP port from
+network access.
+
+The traditional alternative is to use CGI.  In this case, an executable needs
+to be installed Apache's cgi-bin directory.  This executable needs to run as
+set-uid $Conf{BackupPCUser}, or it can be run under mod_perl with Apache
+running as user $Conf{BackupPCUser}.
 
 EOF
 
-while ( 1 ) {
-    $Conf{CgiDir} = prompt("--> CGI bin directory (full path)",
-                           $Conf{CgiDir},
-                           "cgi-dir");
-    last if ( $Conf{CgiDir} =~ /^\// || $Conf{CgiDir} eq "" );
-    if ( $opts{batch} ) {
-        print("Need to specify --cgi-dir for new installation\n");
-        exit(1);
+$Conf{SCGIServerPort} = prompt("--> SCGI port (-1 to disable)",
+                               $Conf{SCGIServerPort} || -1,
+                               "scgi-port");
+
+if ( $Conf{SCGIServerPort} < 0 ) {
+    while ( 1 ) {
+        $Conf{CgiDir} = prompt("--> CGI bin directory (full path, or empty for no CGI)",
+                               $Conf{CgiDir},
+                               "cgi-dir");
+        last if ( $Conf{CgiDir} =~ /^\// || $Conf{CgiDir} eq "" );
+        if ( $opts{batch} ) {
+            print("Need to specify --cgi-dir for new installation\n");
+            exit(1);
+        }
     }
+} else {
+    $Conf{CgiDir} = "";
 }
 
-if ( $Conf{CgiDir} ne "" ) {
-
+if ( $Conf{SCGIServerPort} > 0 || $Conf{CgiDir} ne "" ) {
     print <<EOF;
 
-BackupPC's CGI script needs to display various PNG/GIF images that
-should be stored where Apache can serve them.  They should be placed
-somewhere under Apache's DocumentRoot.  BackupPC also needs to know
-the URL to access these images.  Example:
+BackupPC's CGI and SCGI script need to display various PNG/GIF
+images that should be stored where Apache can serve them.  They
+should be placed somewhere under Apache's DocumentRoot.  BackupPC
+also needs to know the URL to access these images.  Example:
 
     Apache image directory:  /var/www/htdocs/BackupPC
     URL for image directory: /BackupPC
@@ -430,20 +465,20 @@ The URL for the image directory should start with a slash.
 
 EOF
     while ( 1 ) {
-	$Conf{CgiImageDir} = prompt("--> Apache image directory (full path)",
+        $Conf{CgiImageDir} = prompt("--> Apache image directory (full path, or empty for no S/CGI)",
                                     $Conf{CgiImageDir},
                                     "html-dir");
-	last if ( $Conf{CgiImageDir} =~ /^\// );
+        last if ( $Conf{CgiImageDir} =~ /^\// || $Conf{CgiImageDir} eq "" );
         if ( $opts{batch} ) {
             print("Need to specify --html-dir for new installation\n");
             exit(1);
         }
     }
     while ( 1 ) {
-	$Conf{CgiImageDirURL} = prompt("--> URL for image directory (omit http://host; starts with '/')",
-					$Conf{CgiImageDirURL},
+        $Conf{CgiImageDirURL} = prompt("--> URL for image directory (omit http://host; starts with '/', or empty for no S/CGI)",
+                                        $Conf{CgiImageDirURL},
                                         "html-dir-url");
-	last if ( $Conf{CgiImageDirURL} =~ /^\// );
+        last if ( $Conf{CgiImageDirURL} =~ /^\// || $Conf{CgiImageDirURL} eq "" );
         if ( $opts{batch} ) {
             print("Need to specify --html-dir-url for new installation\n");
             exit(1);
@@ -536,6 +571,7 @@ foreach my $prog ( qw(
         bin/BackupPC_poolCntPrint
         bin/BackupPC_refCountUpdate
         bin/BackupPC_restore
+        bin/BackupPC_Admin_SCGI
         bin/BackupPC_sendEmail
         bin/BackupPC_serverMesg
         bin/BackupPC_tarCreate
@@ -561,7 +597,6 @@ foreach my $prog ( qw(
 printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(
         lib/BackupPC/Config/Meta.pm
-        lib/BackupPC/Config.pm
         lib/BackupPC/DirOps.pm
         lib/BackupPC/Lib.pm
         lib/BackupPC/Storage.pm
@@ -621,6 +656,7 @@ foreach my $lib ( qw(
 #
 foreach my $lib ( qw(
         lib/BackupPC/Attrib.pm
+        lib/BackupPC/Config.pm
         lib/BackupPC/FileZIO.pm
         lib/BackupPC/PoolWrite.pm
         lib/BackupPC/Xfer/RsyncDigest.pm
@@ -639,7 +675,7 @@ if ( $Conf{CgiImageDir} ne "" ) {
     #
     # Install new CSS file, making a backup copy if necessary
     #
-    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-4.0.0alpha1";
+    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-4.0.0alpha2";
     if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
 	rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
     }
@@ -875,7 +911,7 @@ foreach my $param ( keys(%{$opts{"config-override"}}) ) {
 #
 # Now backup and write the config file
 #
-my $confCopy = "$dest.pre-4.0.0alpha1";
+my $confCopy = "$dest.pre-4.0.0alpha2";
 if ( -f $dest && !-f $confCopy ) {
     #
     # Make copy of config file, preserving ownership and modes
@@ -1078,7 +1114,7 @@ sub ConfigParse
 	    $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<(.*);/ );
 	    $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<'(.*)';/ );
         } else {
-	    $endLine = undef if ( defined($endLine) && /^\Q$endLine[\n\r]*$/ );
+	    $endLine = undef if ( defined($endLine) && /^\Q$endLine\E[\n\r]*$/ );
             $out .= $_;
         }
     }
@@ -1248,6 +1284,11 @@ doing a batch new install.
 Path to Apache's cgi-bin directory where the BackupPC_Admin
 script will be installed.  This option only needs to be
 specified for a batch new install.
+
+=item B<--scgi-port N>
+
+Numeric TCP port that is used for communication between Apache
+and BackupPC_Admin_SCGI.  A negative value disables SCGI.
 
 =item B<--data-dir DATA_DIR>
 

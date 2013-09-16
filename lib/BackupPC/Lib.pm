@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -93,7 +93,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '4.0.0alpha1',
+        Version => '4.0.0alpha2',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -199,6 +199,11 @@ sub Lang
 {
     my($bpc) = @_;
     return $bpc->{Lang};
+}
+
+sub scgiJob
+{
+    return " scgi ";
 }
 
 sub adminJob

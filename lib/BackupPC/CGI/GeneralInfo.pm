@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -46,6 +46,7 @@ sub action
     my($jobStr, $statusStr);
     foreach my $host ( sort(keys(%Jobs)) ) {
         my $startTime = timeStamp2($Jobs{$host}{startTime});
+        next if ( $host eq $bpc->scgiJob );
         next if ( !$Privileged && !CheckPermission($host) );
         $Jobs{$host}{type} = $Status{$host}{type}
                     if ( $Jobs{$host}{type} eq "" && defined($Status{$host}));
@@ -110,14 +111,8 @@ EOF
     my $serverStartTime = timeStamp2($Info{startTime});
     my $configLoadTime  = timeStamp2($Info{ConfigLTime});
 
-    if ( $Conf{PoolV3Enabled} ) {
-        foreach my $stat ( qw(DirCnt Kb KbRm FileCnt FileCntRep FileRepMax FileCntRm) ) {
-            $Info{"pool4$stat"}  += $Info{"pool$stat"};
-            $Info{"cpool4$stat"} += $Info{"cpool$stat"};
-        }
-    }
-    my $poolInfo     = genPoolInfo("pool4", \%Info);
-    my $cpoolInfo    = genPoolInfo("cpool4", \%Info);
+    my $poolInfo     = genPoolInfo("pool4",  "pool",  \%Info);
+    my $cpoolInfo    = genPoolInfo("cpool4", "cpool", \%Info);
     if ( $Info{pool4FileCnt} > 0 && $Info{cpool4FileCnt} > 0 ) {
         $poolInfo = <<EOF;
 <li>Uncompressed pool:
@@ -141,11 +136,18 @@ EOF
 
 sub genPoolInfo
 {
-    my($name, $info) = @_;
+    my($name, $name3, $info) = @_;
     my $poolSize   = sprintf("%.2f", $info->{"${name}Kb"} / (1000 * 1024));
     my $poolRmSize = sprintf("%.2f", $info->{"${name}KbRm"} / (1000 * 1024));
     my $poolTime   = timeStamp2($info->{"${name}Time"});
     $info->{"${name}FileCntRm"} = $info->{"${name}FileCntRm"} + 0;
+    if ( $Conf{PoolV3Enabled} ) {
+        $poolSize   .= sprintf("+%.2f", $info->{"${name3}Kb"} / (1000 * 1024));
+        $poolRmSize .= sprintf("+%.2f", $info->{"${name3}KbRm"} / (1000 * 1024));
+        foreach my $stat ( qw(DirCnt FileCnt FileCntRep FileRepMax FileCntRm) ) {
+            $Info{"$name$stat"} = $Info{"$name$stat"} . "+" . $Info{"$name3$stat"};
+        }
+    }
     return eval("qq{$Lang->{Pool_Stat}}");
 }
 

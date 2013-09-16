@@ -1,7 +1,7 @@
 =head1 BackupPC Introduction
 
-This documentation describes BackupPC version 4.0.0alpha1,
-released on 30 Jun 2013.
+This documentation describes BackupPC version 4.0.0alpha2,
+released on 15 Sep 2013.
 
 =head2 Overview
 
@@ -970,29 +970,29 @@ and then run these commands:
 The same sequence of commands can be used for each module.
 
 Now let's move onto BackupPC itself.  After fetching
-BackupPC-4.0.0alpha1.tar.gz, run these commands as root:
+BackupPC-4.0.0alpha2.tar.gz, run these commands as root:
 
-    tar zxf BackupPC-4.0.0alpha1.tar.gz
-    cd BackupPC-4.0.0alpha1
+    tar zxf BackupPC-4.0.0alpha2.tar.gz
+    cd BackupPC-4.0.0alpha2
     perl configure.pl
 
 In the future this release might also have patches available on the
 SourceForge site.  These patch files are text files, with a name of
 the form
 
-    BackupPC-4.0.0alpha1plN.diff
+    BackupPC-4.0.0alpha2plN.diff
 
 where N is the patch level, eg: pl2 is patch-level 2.  These
 patch files are cumulative: you only need apply the last patch
 file, not all the earlier patch files.  If a patch file is
-available, eg: BackupPC-4.0.0alpha1pl2.diff, you should apply
+available, eg: BackupPC-4.0.0alpha2pl2.diff, you should apply
 the patch after extracting the tar file:
 
-     # fetch BackupPC-4.0.0alpha1.tar.gz
-     # fetch BackupPC-4.0.0alpha1pl2.diff
-     tar zxf BackupPC-4.0.0alpha1.tar.gz
-     cd BackupPC-4.0.0alpha1
-     patch -p0 < ../BackupPC-4.0.0alpha1pl2.diff
+     # fetch BackupPC-4.0.0alpha2.tar.gz
+     # fetch BackupPC-4.0.0alpha2pl2.diff
+     tar zxf BackupPC-4.0.0alpha2.tar.gz
+     cd BackupPC-4.0.0alpha2
+     patch -p0 < ../BackupPC-4.0.0alpha2pl2.diff
      perl configure.pl
 
 A patch file includes comments that describe that bug fixes
@@ -1560,8 +1560,8 @@ You can also request that all hosts be queued:
     __INSTALLDIR__/bin/BackupPC_serverMesg backup all
 
 At this point you should make sure the CGI interface works since
-it will be much easier to see what is going on.  That's our
-next subject.
+it will be much easier to see what is going on.  We'll get to that
+shortly.
 
 =head2 Step 8: Checking email delivery
 
@@ -1592,76 +1592,93 @@ The CGI interface script, BackupPC_Admin, is a powerful and flexible
 way to see and control what BackupPC is doing.  It is written for an
 Apache server.  If you don't have Apache, see L<http://www.apache.org>.
 
-There are two options for setting up the CGI interface: standard
-mode and using mod_perl.  Mod_perl provides much higher performance
-(around 15x) and is the best choice if your Apache was built with
-mod_perl support.  To see if your apache was built with mod_perl
-run this command:
+There are three options for setting up the CGI interface:
 
-    httpd -l | egrep mod_perl
+=over 4
 
-If this prints mod_perl.c then your Apache supports mod_perl.
+=item SCGI
 
-Note: on some distributions (like Debian) the command is not ``httpd'',
-but ``apache'' or ``apache2''. Those distributions will generally also
-use ``apache'' for the Apache user account and configuration files.
+New to 4.x, SCGI uses the SCGI interface to Apache, which requires
+the mod_scgi.so module to be installed and loaded by Apache.  This
+allows Apache to run as any unprivileged user.  The actual SCGI
+server runs as the as the BackupPC user (__BACKUPPCUSER__), and
+handles the requests from Apache via a TCP socket.
 
-Using mod_perl with BackupPC_Admin requires a dedicated Apache
-to be run as the BackupPC user (__BACKUPPCUSER__).  This is
-because BackupPC_Admin needs permission to access various files
-in BackupPC's data directories.  In contrast, the standard
-installation (without mod_perl) solves this problem by having
-BackupPC_Admin installed as setuid to the BackupPC user, so that
-BackupPC_Admin runs as the BackupPC user.
+=item mod_perl
+
+Mod_perl required the mod_perl module to be loaded by Apache.  This
+allows BackupPC_Admin to be run from inside Apache.  Unlike SCGI,
+using mod_perl with BackupPC_Admin requires a dedicated Apache to
+be run as the BackupPC user (__BACKUPPCUSER__).  This is because
+BackupPC_Admin needs permission to access various files in BackupPC's
+data directories.
+
+=item standard
+
+The standard mode, which is significantly slower than SCGI or
+mod_perl, is where Apache runs BackupPC_Admin as a seperate process
+for every request.  This adds significant startup overhead for every
+request, and also requires that BackupPC_Admin be run as setuid to
+the BackupPC user (__BACKUPPCUSER__), if Apache isn't being run as
+that user.  Setuid scripts are discouraged, so the preference is to
+use SCGI or mod_perl.
+
+=back
 
 Here are some specifics for each setup:
 
 =over 4
 
-=item Standard Setup
+=item SCGI Setup
 
-The CGI interface should have been installed by the configure.pl script
-in __CGIDIR__/BackupPC_Admin.  BackupPC_Admin should have been installed
-as setuid to the BackupPC user (__BACKUPPCUSER__), in addition to user
-and group execute permission.
+First you need to install mod_scgi.  If you can't find a pre-built
+package, the source is available at L<http://python.ca/scgi>.  The
+release has subdirectories for apache1 and apache2.  Pick your
+matching version (nowadays most likely apache2).  You'll need apxs,
+the Apache Extension Tool, installed to build from source.  Once
+compiled, the module mod_scgi.so should be installed via the Makefile.
 
-You should be very careful about permissions on BackupPC_Admin and
-the directory __CGIDIR__: it is important that normal users cannot
-directly execute or change BackupPC_Admin, otherwise they can access
-backup files for any PC. You might need to change the group ownership
-of BackupPC_Admin to a group that Apache belongs to so that Apache
-can execute it (don't add "other" execute permission!).
-The permissions should look like this:
+To enable the SCGI server, set $Conf{SCGIServerPort} to an available
+non-privileged TCP port number, eg: 10268.  The matching port number
+has to appear in the Apache configuration file.  Typical Apache
+configuration entries will look like this:
 
-    ls -l __CGIDIR__/BackupPC_Admin
-    -swxr-x---    1 __BACKUPPCUSER__   web      82406 Jun 17 22:58 __CGIDIR__/BackupPC_Admin
+    LoadModule scgi_module modules/mod_scgi.so
+    SCGIMount /BackupPC_Admin 127.0.0.1:10268
+    <Location /BackupPC_Admin>
+        AuthUserFile /etc/httpd/conf/passwd
+        AuthType basic
+        AuthName "access"
+        require valid-user
+    </Location>
 
-The setuid script won't work unless perl on your machine was installed
-with setuid emulation.  This is likely the problem if you get an error
-saying such as "Wrong user: my userid is 25, instead of 150", meaning
-the script is running as the httpd user, not the BackupPC user.
-This is because setuid scripts are disabled by the kernel in most
-flavors of unix and linux.
+This allows the SCGI interface to be accessed with a URL:
 
-To see if your perl has setuid emulation, see if there is a program
-called sperl5.8.0 (or sperl5.8.2 etc, based on your perl version)
-in the place where perl is installed. If you can't find this program,
-then you have two options: rebuild and reinstall perl with the setuid
-emulation turned on (answer "y" to the question "Do you want to do
-setuid/setgid emulation?" when you run perl's configure script), or
-switch to the mod_perl alternative for the CGI script (which doesn't
-need setuid to work).
+    http://yourBackupPCServerHost/BackupPC_Admin
+
+You can use a different path or name if you prefer a different URL.
+Unlike traditional CGI, there is no need to specify a valid path to
+a CGI script.
+
+Important security warning!!  The SCGIServerPort must not be
+accessible by anyone untrusted.  That means you can't allow
+untrusted users access to the BackupPC server, and you should
+block the SCGIServerPort TCP port on the BackupPC server.  If you
+don't understaand what that means, or can't confirm you have
+configured SCGI securely, then don't enable SCGI - use one of
+the following two methods!!
 
 =item Mod_perl Setup
 
-The advantage of the mod_perl setup is that no setuid script is needed,
-and there is a huge performance advantage.  Not only does all the perl
-code need to be parsed just once, the config.pl and hosts files, plus
-the connection to the BackupPC server are cached between requests.  The
-typical speedup is around 15 times.
+The advantage of the mod_perl setup is that no setuid script is
+needed (like in the standard method below), and there is a significant
+performance advantage.  Not only does all the perl code need to be
+parsed just once, the config.pl and hosts files, plus the connection
+to the BackupPC server are cached between requests.  The typical
+speedup is around 10-15x.
 
 To use mod_perl you need to run Apache as user __BACKUPPCUSER__.
-If you need to run multiple Apache's for different services then
+If you need to run multiple Apaches for different services then
 you need to create multiple top-level Apache directories, each
 with their own config file.  You can make copies of /etc/init.d/httpd
 and use the -d option to httpd to point each http to a different
@@ -1718,6 +1735,40 @@ example, you can tell mod_perl to preload various perl modules,
 which saves memory compared to loading separate copies in every
 Apache process after they are forked.  See Stas's definitive
 mod_perl guide at L<http://perl.apache.org/guide>.
+
+=item Standard Setup
+
+The CGI interface should have been installed by the configure.pl script
+in __CGIDIR__/BackupPC_Admin.  BackupPC_Admin should have been installed
+as setuid to the BackupPC user (__BACKUPPCUSER__), in addition to user
+and group execute permission.
+
+You should be very careful about permissions on BackupPC_Admin and
+the directory __CGIDIR__: it is important that normal users cannot
+directly execute or change BackupPC_Admin, otherwise they can access
+backup files for any PC. You might need to change the group ownership
+of BackupPC_Admin to a group that Apache belongs to so that Apache
+can execute it (don't add "other" execute permission!).
+The permissions should look like this:
+
+    ls -l __CGIDIR__/BackupPC_Admin
+    -swxr-x---    1 __BACKUPPCUSER__   web      82406 Jun 17 22:58 __CGIDIR__/BackupPC_Admin
+
+The setuid script won't work unless perl on your machine was installed
+with setuid emulation.  This is likely the problem if you get an error
+saying such as "Wrong user: my userid is 25, instead of 150", meaning
+the script is running as the httpd user, not the BackupPC user.
+This is because setuid scripts are disabled by the kernel in most
+flavors of unix and linux.
+
+To see if your perl has setuid emulation, see if there is a program
+called sperl5.8.0 (or sperl5.8.2 etc, based on your perl version)
+in the place where perl is installed. If you can't find this program,
+then you have two options: rebuild and reinstall perl with the setuid
+emulation turned on (answer "y" to the question "Do you want to do
+setuid/setgid emulation?" when you run perl's configure script), or
+switch to the mod_perl alternative for the CGI script (which doesn't
+need setuid to work).
 
 =back
 
@@ -3284,6 +3335,31 @@ Examples:
 
    $Conf{BackupPCNightlyPeriod} = 4;   # four days to complete pool check
                                        # (different quarter each night)
+
+=item $Conf{PoolSizeNightlyUpdatePeriod} = 16;
+
+The total size of the files in the new V4 pool is updated every
+night when BackupPC_nightly runs BackupPC_refCountUpdate.  Instead
+of adding up the size of every pool file, it just updates the pool
+size total when files are added to or removed form the pool.
+
+To make sure these cumulative pool file sizes stay accurate, we
+recompute the V4 pool size for a portion of the pool each night
+from scratch, ie: by checking every file in that portion of the
+pool.
+
+$Conf{PoolSizeNightlyUpdatePeriod} sets how many nights it takes
+to completely update the V4 pool size.  It can be set to:
+  0:  never do a full refresh; simply maintain the cumulative sizes
+      when files are added or deleted (fastest option)
+  1:  recompute all  the V4 pool size every night (slowest option)
+  2:  recompute 1/2  the V4 pool size every night
+  4:  recompute 1/4  the V4 pool size every night
+  8:  recompute 1/8  the V4 pool size every night
+  16: recompute 1/16 the V4 pool size every night
+      (2nd fastest option; ensures the pool files sizes
+       stay accurate after a few day, in case the relative
+       upgrades miss a file)
 
 =item $Conf{MaxOldLogFiles} = 14;
 
@@ -4883,9 +4959,34 @@ Examples:
    $Conf{CgiAdminUsers}     = 'craig celia';
    --> administrative users are only craig and celia'.
 
+=item $Conf{SCGIServerPort} = -1;
+
+TCP port number of the SCGI server.  A negative value disables the
+SCGI server.  Set to any available unprivileged TCP port number,
+eg: 10268.  Apache needs the mod_scgi module installed, and you will
+need to set the same port number in the Apache configuration. Here
+are some typical settings you'll need in Apache's httpd.conf:
+
+   LoadModule scgi_module modules/mod_scgi.so
+   SCGIMount /BackupPC_Admin 127.0.0.1:10268
+   <Location /BackupPC_Admin>
+       AuthUserFile /etc/httpd/conf/passwd
+       AuthType basic
+       AuthName "access"
+       require valid-user
+   </Location>
+
+Important security warning!!  The SCGIServerPort must not be
+accessible by anyone untrusted.  That means you can't allow
+untrusted users access to the BackupPC server, and you should
+block the SCGIServerPort TCP port on the BackupPC server.  If you
+don't understaand what that means, or can't confirm you have
+configured SCGI securely, then don't enable it!!
+
 =item $Conf{CgiURL} = undef;
 
-URL of the BackupPC_Admin CGI script.  Used for email messages.
+Full URL of the BackupPC_Admin CGI script, or the configured path
+for SCGI.  Used for links in email messages.
 
 =item $Conf{Language} = 'en';
 

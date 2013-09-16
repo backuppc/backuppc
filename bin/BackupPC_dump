@@ -85,7 +85,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha1, released 30 Jun 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -118,7 +118,8 @@ my %Conf   = $bpc->Conf();
 my $NeedPostCmd;
 my $Hosts;
 my $SigName;
-my $Abort;
+my $Abort = 0;
+my $LockFd;
 
 $bpc->ChildInit();
 
@@ -957,7 +958,7 @@ for my $shareName ( @$ShareNames ) {
     # Also grab a lock file, so we can serialize any fsck that might be
     # running.
     #
-    my $lockFd = BackupPC::XS::DirOps::lockRangeFile("$Dir/refCnt/LOCK", 0, 1, 1);
+    $LockFd = BackupPC::XS::DirOps::lockRangeFile("$Dir/refCnt/LOCK", 0, 1, 1);
 
     @xferPid = $xfer->xferPid;
 
@@ -1112,7 +1113,8 @@ for my $shareName ( @$ShareNames ) {
         #
         # don't do any more shares on this host
         #
-        BackupPC::XS::DirOps::unlockRangeFile($lockFd);
+        BackupPC::XS::DirOps::unlockRangeFile($LockFd);
+        $LockFd = undef;
         last;
     }
     #
@@ -1121,7 +1123,8 @@ for my $shareName ( @$ShareNames ) {
     1 while ( wait() >= 0 );
 
     unlink("$Dir/refCnt/needFsck.dump");
-    BackupPC::XS::DirOps::unlockRangeFile($lockFd);
+    BackupPC::XS::DirOps::unlockRangeFile($LockFd);
+    $LockFd = undef;
 }
 $tarPid = 0;
 pidHandler();
@@ -1280,11 +1283,6 @@ sub catch_signal
 		kill($bpc->sigName2num("ARLM"), $tarPid);
 	    }
 
-	    #
-	    # Schedule a 20 second timer in case the clean
-	    # abort doesn't complete
-	    #
-	    alarm(20);
 	} else {
 	    #
 	    # Children ignore anything other than ALRM and INT
@@ -1298,11 +1296,6 @@ sub catch_signal
 	    #
 	    $xfer->abort($reason);
 
-	    #
-	    # Schedule a 15 second timer in case the clean
-	    # abort doesn't complete
-	    #
-	    alarm(15);
 	}
 	$SigName = $sigName;
 	$Abort = 1;
@@ -1375,6 +1368,9 @@ sub BackupFailCleanup
     my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
     my @logRenames;
     @Backups = $bpc->BackupInfoRead($client);
+
+    BackupPC::XS::DirOps::unlockRangeFile($LockFd) if ( defined($LockFd) );
+    $LockFd = undef;
 
     print("__bpc_progress_state__ fail cleanup\n");
     #

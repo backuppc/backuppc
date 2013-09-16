@@ -1,0 +1,484 @@
+#!/usr/bin/perl
+#============================================================= -*-perl-*-
+#
+# BackupPC_Admin_SCGI: An SCGI implementation of the BackupPC
+#                      admin interface.
+#
+# DESCRIPTION
+#
+#   BackupPC_Admin_SCGI runs as the BackupPC user, and spawns one
+#   or more children to hangle requests from apache.  Apache needs
+#   the mod_scgi plugin, and communicates with BackupPC_Admin_SCGI
+#   over a designated TCP port.
+#
+#   IMPORTANT SECURITY WARNING: the scgi protocol doesn't support any
+#   mutual authentication between apache and BackupPC_Admin_SCGI
+#   (ie: the SCGI server).  Since apache handles access control,
+#   the SCGI server assumes that every request is valid.
+#
+#   So *anyone* who can connect TCP port $Conf{SCGIServerPort} that
+#   BackupPC_Admin_SCGI is listening on has full access to all the
+#   BackupPC backups by spoofing SCGI requests.  So if you use
+#   BackupPC_Admin_SCGI, you must block the $Conf{SCGIServerPort}
+#   TCP port from any remote machines, and only allow trusted users
+#   to access the machine that BackupPC_Admin_SCGI is running on.
+#
+#   BackupPC_Admin_SCGI should refuse connections from non-localhost
+#   machines, but it is still recommended you configure your BackupPC
+#   host to block port $Conf{SCGIServerPort}.
+#
+# AUTHOR
+#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2013  Craig Barratt
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#========================================================================
+#
+# Version 4.0.0alpha2, released 15 Sep 2013.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+no  utf8;
+use lib "__INSTALLDIR__/lib";
+
+use IO::Socket;
+use Data::Dumper;
+use POSIX ":sys_wait_h";
+use CGI;
+
+use BackupPC::Lib;
+use BackupPC::XS;
+use BackupPC::CGI::Lib qw(:all);
+use BackupPC::CGI::AdminOptions;
+use BackupPC::CGI::Archive;
+use BackupPC::CGI::ArchiveInfo;
+use BackupPC::CGI::Browse;
+use BackupPC::CGI::DirHistory;
+use BackupPC::CGI::EditConfig;
+use BackupPC::CGI::EmailSummary;
+use BackupPC::CGI::GeneralInfo;
+use BackupPC::CGI::HostInfo;
+use BackupPC::CGI::LOGlist;
+use BackupPC::CGI::Queue;
+use BackupPC::CGI::ReloadServer;
+use BackupPC::CGI::Restore;
+use BackupPC::CGI::RestoreFile;
+use BackupPC::CGI::RestoreInfo;
+use BackupPC::CGI::StartServer;
+use BackupPC::CGI::StartStopBackup;
+use BackupPC::CGI::StopServer;
+use BackupPC::CGI::Summary;
+use BackupPC::CGI::View;
+
+my %ActionDispatch = (
+    "summary"                    => "Summary",
+    "Start_Incr_Backup"          => "StartStopBackup",
+    "Start_Full_Backup"          => "StartStopBackup",
+    "Stop_Dequeue_Backup"        => "StartStopBackup",
+    "Stop_Dequeue_Archive"       => "StartStopBackup",
+    "queue"                      => "Queue",
+    "view"                       => "View",
+    "LOGlist"                    => "LOGlist",
+    "emailSummary"               => "EmailSummary",
+    "browse"                     => "Browse",
+    "dirHistory"                 => "DirHistory",
+    "Restore"                    => "Restore",
+    "RestoreFile"                => "RestoreFile",
+    "hostInfo"                   => "HostInfo",
+    "generalInfo"                => "GeneralInfo",
+    "restoreInfo"                => "RestoreInfo",
+    "archiveInfo"                => "ArchiveInfo",
+    "Start_Archive"              => "Archive",
+    "Archive"                    => "Archive",
+    "Reload"                     => "ReloadServer",
+    "startServer"                => "StartServer",
+    "Stop"                       => "StopServer",
+    "adminOpts"                  => "AdminOptions",
+    "editConfig"                 => "EditConfig",
+);
+my %ChildPid2Num;
+
+BEGIN {
+    eval "use SCGI;";
+    if ( $@ ) {
+        print("BackupPC_Admin_SCGI: can't load perl SCGI module - install via CPAN; exiting in 60 seconds\n");
+        #
+        # if we exit immediately, BackupPC will restart us immediately
+        #
+        sleep(60);
+        exit(1);
+    }
+    eval "use BackupPC::CGI::RSS;";
+    if ( !$@ ) {
+        $ActionDispatch{rss} = "RSS";
+    }
+    if ( $BackupPC::XS::VERSION < 0.20 ) {
+        print("BackupPC_Admin_SCGI: old verison $BackupPC::XS::VERSION of BackupPC::XS: need >= 0.20; exiting in 60 seconds\n");
+        sleep(60);
+        exit(1);
+    }
+}
+
+#
+# Edit this if you want to get more information about each request
+#
+my $LogLevel = 0;
+
+$Cgi = new CGI;
+
+die("BackupPC::Lib->new failed\n") if ( !($bpc = BackupPC::Lib->new) );
+$TopDir   = $bpc->TopDir();
+$LogDir   = $bpc->LogDir();
+$BinDir   = $bpc->BinDir();
+%Conf     = $bpc->Conf();
+$Lang     = $bpc->Lang();
+$ConfigMTime = $bpc->ConfigMTime();
+umask($Conf{UmaskMode});
+
+my $LockFile    = "$LogDir/scgi_lock";
+my $LockFileSz  = 2048;
+my $ChildExited = 0;
+
+$SIG{INT}  = \&childKill;
+$SIG{CHLD} = \&childCleanup;
+my $socket = IO::Socket::INET->new(Listen => 5, ReuseAddr => 1, LocalPort => $Conf{SCGIServerPort} || 8199)
+                or die "cannot bind to port $Conf{SCGIServerPort}: $!";
+
+my $scgi = SCGI->new($socket, blocking => 1);
+
+#
+# IPv4 local host address, that we use to make sure we only respond to
+# connections from the localhost.
+#
+my $LocalHostAddr = pack("C*", 127, 0, 0, 1);
+
+#
+# Clean up %ENV for taint checking
+#
+delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+$ENV{PATH} = $Conf{MyPath};
+
+#
+# We use a lock file with $MaxChild + 1 number of bytes to serialize the multiple
+# children responding to requests, and to allow the parent to detect when all the
+# children are busy (meaning we need more). We create a dummy file with $LockFileSz
+# bytes.  The bytes are used as follows:
+#
+#  - Bytes 1..$MaxChild are locked by each child to indicate they are idle
+#    (which generally means they are blocking on locking byte #0).
+#
+#  - Byte #0 is used to serialize the child's accepts().  Each child tries to lock
+#    byte #0.  After one gets the lock, it does an accept().  Once the accept()
+#    returns, it unlocks byte #0, and also unlocks byte #child to indicate it is
+#    busy processing the request.
+#
+#  - the parent blocks trying to lock bytes 1..$MaxChild.  If it succeeds, it means
+#    all the children are busy, so it forks a new child.
+# 
+my $LockFd;
+if ( !open($LockFd, ">", $LockFile) ) {
+    print("BackupPC_Admin_SCGI: can't open/create $LockFile; exiting in 60 seconds\n");
+    sleep(60);
+    exit(1);
+}
+if ( syswrite($LockFd, chr(0) x $LockFileSz) != $LockFileSz ) {
+    print("BackupPC_Admin_SCGI: can't write $LockFileSz bytes to $LockFile; exiting in 60 seconds\n");
+    sleep(60);
+    exit(1);
+}
+close($LockFd);
+
+my $MaxChild = 1;
+for ( my $i = 0 ; $i < $MaxChild ; $i++ ) {
+    childRun($i);
+}
+
+#
+# This is the parent.  We try to get an exclusive lock on bytes 1..$MaxChild of the
+# lock file.  If we succeed in getting the lock, it means all the children are busy
+# servicing requests, so we need to spawn another child to service new requests.
+#
+if ( !open(my $LockFd, "+<", $LockFile) ) {
+    print("BackupPC_Admin_SCGI: can't open $LockFile; exiting in 60 seconds\n");
+    sleep(60);
+    exit(1);
+}
+my $LockFdNum = fileno($LockFd);
+while ( 1 ) {
+    if ( BackupPC::XS::DirOps::lockRangeFd($LockFdNum, 1, $MaxChild, 1) ) {
+        if ( $ChildExited ) {
+            $ChildExited = 0;
+            #
+            # If a second child dies while in the signal handler caused by the
+            # first death, we won’t get another signal. So we must do a non-blocking
+            # loop here else we will leave the unreaped child as a zombie. And
+            # the next time two children die we get another zombie. And so on.
+            #
+            # As we reap each child, we start another one in the same slot.
+            #
+            while ( (my $child = waitpid(-1, WNOHANG)) > 0 ) {
+               print("BackupPC_Admin_SCGI: child $child exited ($!)\n")
+                                               if ( $LogLevel >= 3 );
+               if ( defined($ChildPid2Num{$child}) ) {
+                   childRun($ChildPid2Num{$child});
+               }
+            }
+            next;
+        }
+        print("BackupPC_Admin_SCGI: parent lock failed ($!)... continuing\n")
+                                           if ( $LogLevel >= 3 );
+        sleep(1);
+        next;
+    }
+    BackupPC::XS::DirOps::unlockRangeFd($LockFdNum, 1, $MaxChild);
+    print("BackupPC_Admin_SCGI: all children busy... starting a new child $MaxChild\n")
+                                       if ( $LogLevel >= 5 );
+    if ( $MaxChild >= $LockFileSz - 2 ) {
+        #
+        # Need to extend the lock file size, since we need a lock byte for
+        # every child, plus one.
+        #
+        $LockFileSz *= 2;
+        print("BackupPC_Admin_SCGI: extending $LockFile to length $LockFileSz\n");
+        sysseek($LockFd, 0, 0);
+        if ( syswrite($LockFd, chr(0) x $LockFileSz) != $LockFileSz ) {
+            print("BackupPC_Admin_SCGI: can't write $LockFileSz bytes to $LockFile; terminating children and exiting...\n");
+            kill 2, keys(%ChildPid2Num);
+            sleep(1);
+            kill 9, keys(%ChildPid2Num);
+            exit(1);
+        }
+        sysseek($LockFd, 0, 0);
+    }
+    childRun($MaxChild++);
+}
+
+sub childRun
+{
+    my($childNum) = @_;
+    my($pid, $fhRead, $fhWrite);
+
+    #
+    # There is a race condition that we have to avoid when we fork a new child.
+    # If the parent returns quickly before the child has secured its idle lock,
+    # then the parent will immediately think all children are busy, and will
+    # start another child.
+    #
+    # So we create a pipe.  The parent waits for the child to close the pipe,
+    # which it does after it has secured its idle lock.  The parent can then
+    # continue, trying to lock bytes 1..$MaxChild, which will initially block
+    # due to the new child being idle.
+    #
+    pipe($fhRead, $fhWrite);
+    $pid = fork();
+    if ( $pid ) {
+        #
+        # Parent remembers the child's pid, and waits for the child
+        # to grab its idle lock.  Then we're done.
+        #
+        $ChildPid2Num{$pid} = $childNum;
+        print("BackupPC_Admin_SCGI: Parent about to read pipe\n") if ( $LogLevel >= 5 );
+        close($fhWrite);
+        sysread($fhRead, my $dummy, 1);
+        close($fhRead);
+        print("BackupPC_Admin_SCGI: Parent closing pipe\n") if ( $LogLevel >= 5 );
+        return;
+    }
+    #
+    # This is the child.
+    #
+    $SIG{INT} = "DEFAULT";
+    close($fhRead);
+    close($LockFd);
+    print("BackupPC_Admin_SCGI: child $childNum starting (pid $$)\n") if ( $LogLevel >= 3 );
+    if ( !open(my $LockFd, "+<", $LockFile) ) {
+        print("BackupPC_Admin_SCGI: child $childNum can't open $LockFile; exiting\n");
+        exit(1);
+    }
+    $LockFdNum = fileno($LockFd);
+    while ( 1 ) {
+        #
+        # Grab a lock on byte #$childNum to indicate we are idle.
+        #
+        if ( BackupPC::XS::DirOps::lockRangeFd($LockFdNum, 1 + $childNum, 1, 1) ) {
+            print("BackupPC_Admin_SCGI: child $childNum failed to get idle lock ($!)\n")
+                                                           if ( $LogLevel >= 3 );
+            sleep(1);
+            next;
+        }
+        print("BackupPC_Admin_SCGI: child $childNum got idle lock\n")
+                                                   if ( $LogLevel >= 5 );
+
+        if ( defined($fhWrite) ) {
+            #
+            # Now close the pipe write side, so the parent can safely continue.
+            #
+            close($fhWrite);
+            $fhWrite = undef;
+        }
+
+        #
+        # We use an exclusive lock on byte 0 of the lock file to make sure
+        # only one child does an accept at a time.  As we process the
+        # request, another child will get the lock on byte 0 and will accept
+        # the next request.
+        #
+        if ( BackupPC::XS::DirOps::lockRangeFd($LockFdNum, 0, 1, 1) ) {
+            print("BackupPC_Admin_SCGI: child $childNum lock failed ($!)... continuing\n")
+                                                   if ( $LogLevel >= 3 );
+            next;
+        }
+        print("BackupPC_Admin_SCGI: child $childNum got accept lock\n")
+                                                   if ( $LogLevel >= 5 );
+        my $request = $scgi->accept;
+        BackupPC::XS::DirOps::unlockRangeFd($LockFdNum, 0, 1);
+        BackupPC::XS::DirOps::unlockRangeFd($LockFdNum, 1 + $childNum, 1);
+
+        my $iaddr = $request->connection->sockaddr();
+        if ( $iaddr ne $LocalHostAddr ) {
+            my $addrStr = join(".", unpack("C*", $iaddr));
+            printf("BackupPC_Admin_SCGI: unexpected connection from $addrStr (%s) ignored\n",
+                                            gethostbyaddr($iaddr, AF_INET));
+            $request = undef;
+            return;
+        }
+        print("BackupPC_Admin_SCGI: child $childNum processing request\n")
+                                               if ( $LogLevel >= 5 );
+        handleRequest($request);
+        $request = undef;
+        select(STDOUT);
+        print("BackupPC_Admin_SCGI: child $childNum finished request\n")
+                                               if ( $LogLevel >= 5 );
+    }
+}
+
+sub handleRequest
+{
+    my($request) = @_;
+
+    $request->read_env;
+    my $con = $request->connection;
+    read($con, my $body, $request->env->{CONTENT_LENGTH});
+
+    select($con);
+    NewRequest($request, $body);
+
+    if ( $LogLevel >= 4 ) {
+        my $fdDebug;
+        open($fdDebug, ">", "$LogDir/request.txt");
+        print $fdDebug "Environment: ", Dumper($request->env), "\n\n";
+        print $fdDebug "Body: ", $body, "\n\n";
+        print $fdDebug "Other: ", "User = $User, MyURL = $MyURL, In = ", Dumper(\%In), "Conf = ", Dumper(\%Conf), "\n\n";
+        close($fdDebug);
+    }
+    if ( !defined($ActionDispatch{$In{action}}) ) {
+        $In{action} = defined($In{host}) ? "hostInfo" : "generalInfo";
+    }
+    my $action = $ActionDispatch{$In{action}};
+    $BackupPC::CGI::{"${action}::"}{action}();
+}
+
+sub NewRequest
+{
+    my($request, $body) = @_;
+    my($queryStr);
+
+    %In = ();
+    if ( $request->env->{REQUEST_METHOD} eq "POST" ) {
+        $queryStr = $body;
+    } else {
+        $queryStr = $request->env->{QUERY_STRING};
+    }
+    foreach my $p ( split(/&/, $queryStr) ) {
+        next if ( $p !~ /^([^=]*)=(.*)/ );
+        my $name = $1;
+        $In{$name} = $2;
+        $In{$name} =~ s/\+/ /g;
+        $In{$name} =~ s{%(..)}{chr(hex($1))}eg;
+    }
+    $ENV{SCRIPT_NAME} = $request->env->{SCRIPT_NAME};
+    $ENV{REMOTE_USER} = $request->env->{REMOTE_USER};
+
+    if ( $bpc->ConfigMTime() != $ConfigMTime ) {
+        $bpc->ConfigRead();
+	$TopDir   = $bpc->TopDir();
+	$LogDir   = $bpc->LogDir();
+	$BinDir   = $bpc->BinDir();
+        %Conf     = $bpc->Conf();
+        $Lang     = $bpc->Lang();
+        $ConfigMTime = $bpc->ConfigMTime();
+        umask($Conf{UmaskMode});
+    }
+
+    #
+    # Default REMOTE_USER so in a miminal installation the user
+    # has a sensible default.
+    #
+    $ENV{REMOTE_USER} = $Conf{BackupPCUser} if ( $ENV{REMOTE_USER} eq "" );
+
+    #
+    # We require that Apache pass in $ENV{SCRIPT_NAME} and $ENV{REMOTE_USER}.
+    # The latter requires .ht_access style authentication.  Replace this
+    # code if you are using some other type of authentication, and have
+    # a different way of getting the user name.
+    #
+    $MyURL  = $ENV{SCRIPT_NAME};
+    $User   = $ENV{REMOTE_USER};
+
+    #
+    # Handle LDAP uid=user when using mod_authz_ldap and otherwise untaint
+    #
+    $User   = $1 if ( $User =~ /uid=([^,]+)/i || $User =~ /(.*)/ );
+
+    if ( !defined($Hosts) || $bpc->HostsMTime() != $HostsMTime ) {
+	$HostsMTime = $bpc->HostsMTime();
+	$Hosts = $bpc->HostInfoRead();
+
+	# turn moreUsers list into a hash for quick lookups
+	foreach my $host (keys %$Hosts) {
+	   $Hosts->{$host}{moreUsers} =
+	       {map {$_, 1} split(",", $Hosts->{$host}{moreUsers}) }
+	}
+    }
+
+    #
+    # Untaint the host name
+    #
+    if ( $In{host} =~ /^([\w.\s-]+)$/ ) {
+	$In{host} = $1;
+    } else {
+	delete($In{host});
+    }
+}
+
+sub childCleanup
+{
+    $ChildExited = 1;
+    $SIG{CHLD} = \&childCleanup;
+}
+
+sub childKill
+{
+    #print("childKill: ", join(",", keys(%ChildPid2Num)), "\n");
+    kill 2, keys(%ChildPid2Num);
+    sleep(1);
+    kill 9, keys(%ChildPid2Num);
+    exit(0);
+}

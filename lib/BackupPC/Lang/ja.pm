@@ -104,8 +104,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("現在実行中のジョブ")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -121,7 +119,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("注意する必要がある失敗")}
 <p>
@@ -156,9 +156,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <p>
 \$hostCntGood 個のホストのバックアップが存在します。
 <ul>
-<li> \$fullTot 個のフルバックアップの合計サイズ \${fullSizeTot}GB
+<li> \$fullTot 個のフルバックアップの合計サイズ \${fullSizeTot}GiB
      (以前のプーリングと圧縮)
-<li> \$incrTot 個の増分バックアップの合計サイズ \${incrSizeTot}GB
+<li> \$incrTot 個の増分バックアップの合計サイズ \${incrSizeTot}GiB
      (以前のプーリングと圧縮)
 </ul>
 </p>
@@ -167,7 +167,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> ユーザ </td>
     <td align="center"> フル </td>
     <td align="center"> フル世代 (日数) </td>
-    <td align="center"> フルサイズ (GB) </td>
+    <td align="center"> フルサイズ (GiB) </td>
     <td align="center"> 速度(MB/s) </td>
     <td align="center"> 増分 </td>
     <td align="center"> 増分経過 (日数) </td>
@@ -187,7 +187,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> ユーザ </td>
     <td align="center"> #フル </td>
     <td align="center"> フル世代(日) </td>
-    <td align="center"> フルサイズ(GB) </td>
+    <td align="center"> フルサイズ(GiB) </td>
     <td align="center"> 速度(MB/s) </td>
     <td align="center"> #増分</td>
     <td align="center"> 増分(日) </td>
@@ -227,7 +227,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 
 //-->
 </script>
-\$hostCntGood ホストのバックアップ済の合計サイズ \${fullSizeTot}GB
+\$hostCntGood ホストのバックアップ済の合計サイズ \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -302,9 +302,9 @@ EOF
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
         <li>プールは \$info->{"\${name}FileCnt"}ファイルと
-            \$info->{"\${name}DirCnt"}ディレクトリ(\$poolTime 時点)を含む、\${poolSize}GBのサイズがあります。
+            \$info->{"\${name}DirCnt"}ディレクトリ(\$poolTime 時点)を含む、\${poolSize}GiBのサイズがあります。
         <li>プールのハッシングは最長 \$info->{"\${name}FileRepMax"} の \$info->{"\${name}FileCntRep"} の繰り返すファイルを提供します。
-        <li>\$poolTime の夜間のクリーンアップによって合計\${poolRmSize}GBの \$info->{"\${name}FileCntRm"} 個のファイルが
+        <li>\$poolTime の夜間のクリーンアップによって合計\${poolRmSize}GiBの \$info->{"\${name}FileCntRm"} 個のファイルが
             削除されました。
 EOF
 
@@ -1355,7 +1355,7 @@ $Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 Full Count: \$fullCnt;
 Full Age/days: \$fullAge;
-Full Size/GB: \$fullSize;
+Full Size/GiB: \$fullSize;
 Speed MB/sec: \$fullRate;
 Incr Count: \$incrCnt;
 Incr Age/Days: \$incrAge;

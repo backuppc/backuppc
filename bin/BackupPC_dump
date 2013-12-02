@@ -85,7 +85,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -373,12 +373,44 @@ if ( !$opts{i} && !$opts{f} && $StatusHost{backoffTime} > time ) {
 BackupExpire($client);
 
 #
-# Read Backup information, and find the most recent backup, times of
-# the most recent full and incremental backups, and check if the
-# most recent backup is V4+ or prior to V4 (ie: preV4).
+# Read Backup information, and if the most recent backup is v4, check
+# that it is filled and it exists.
+#
+@Backups = $bpc->BackupInfoRead($client);
+if ( @Backups
+        && ($Backups[-1]{version} ne "" && $Backups[-1]{version} !~ /^[23]\./)
+        && ($Backups[-1]{noFill} || !-d "$Dir/$Backups[-1]{num}") ) {
+    my $i;
+    if ( $Backups[-1]{noFill} ) {
+        printf(LOG "%sSerious error: last backup %d is not filled!  Need to remove back to last filled backup\n",
+                    $bpc->timeStamp, $Backups[-1]{num});
+        printf(STDERR "Serious error: last backup %d is not filled!  Need to remove back to last filled backup\n",
+                    $Backups[-1]{num}) if ( $opts{v} );
+    } else {
+        printf(LOG "%sSerious error: last backup %s directory doesn't exist!!!  Need to remove back to last filled backup\n",
+                    $bpc->timeStamp, "$Dir/$Backups[-1]{num}");
+        printf(STDERR "%sSerious error: last backup %s directory doesn't exist!!!  Need to remove back to last filled backup\n",
+                    $bpc->timeStamp, "$Dir/$Backups[-1]{num}") if ( $opts{v} );
+    }
+    for ( $i = @Backups - 1 ; $i >= 0 ; $i-- ) {
+        last if ( $Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./ );
+        last if ( !$Backups[$i]{noFill} && -d "$Dir/$Backups[$i]{num}");
+    }
+    $i++;
+    while ( $i < @Backups ) {
+        printf(LOG "%sDeleting backup %d\n", $bpc->timeStamp, $Backups[$i]{num});
+        printf(STDERR "%sDeleting backup %d\n", $bpc->timeStamp, $Backups[$i]{num}) if ( $opts{v} );
+        BackupRemove($client, $i, 1);
+        $bpc->BackupInfoWrite($client, @Backups);
+    }
+    exit(0);
+}
+
+#
+# Find the most recent backup, times of the most recent full and incremental backups,
+# and check if the most recent backup is V4+ or prior to V4 (ie: preV4).
 #
 my $thisNoFillCnt;
-@Backups = $bpc->BackupInfoRead($client);
 for ( my $i = 0 ; $i < @Backups ; $i++ ) {
     $Backups[$i]{preV4} = ($Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./) ? 1 : 0;
     $thisNoFillCnt++ if ( $Backups[$i]{noFill} );
@@ -1008,6 +1040,8 @@ for my $shareName ( @$ShareNames ) {
                 $tarOut = $2;
                 if ( /^  / ) {
                     $XferLOG->write(\"$_\n");
+                } elsif ( /^__bpc_progress_fileCnt__/ ) {
+                    print(STDERR "$_\n");
                 } else {
                     $XferLOG->write(\"tarExtract: $_\n");
                 }

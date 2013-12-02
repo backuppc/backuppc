@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -80,6 +80,7 @@ sub new
             InstallDir => $installDir,
             ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir,
             LogDir     => '/var/log/BackupPC',
+            RunDir     => '/var/run/BackupPC',
         };
     } else {
         $paths = {
@@ -88,12 +89,13 @@ sub new
             InstallDir => $installDir,
             ConfDir    => $confDir eq "" ? "$topDir/conf" : $confDir,
             LogDir     => "$topDir/log",
+            RunDir     => "$topDir/log",
         };
     }
 
     my $bpc = bless {
 	%$paths,
-        Version => '4.0.0alpha2',
+        Version => '4.0.0alpha3',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -110,7 +112,7 @@ sub new
     #
     # Update the paths based on the config file
     #
-    foreach my $dir ( qw(TopDir ConfDir InstallDir LogDir) ) {
+    foreach my $dir ( qw(TopDir ConfDir InstallDir LogDir RunDir) ) {
         next if ( $bpc->{Conf}{$dir} eq "" );
         $paths->{$dir} = $bpc->{$dir} = $bpc->{Conf}{$dir};
     }
@@ -157,6 +159,12 @@ sub LogDir
 {
     my($bpc) = @_;
     return $bpc->{LogDir};
+}
+
+sub RunDir
+{
+    my($bpc) = @_;
+    return $bpc->{RunDir};
 }
 
 sub ConfDir
@@ -426,7 +434,7 @@ sub ServerConnect
     #
     # First try the unix-domain socket
     #
-    my $sockFile = "$bpc->{LogDir}/BackupPC.sock";
+    my $sockFile = "$bpc->{RunDir}/BackupPC.sock";
     socket(*FH, PF_UNIX, SOCK_STREAM, 0)     || return "unix socket: $!";
     if ( !connect(*FH, sockaddr_un($sockFile)) ) {
         my $err = "unix connect: $!";

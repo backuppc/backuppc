@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -92,6 +92,7 @@ our %ConfigMenu = (
 	    {name => "CatPath"},
 	    {name => "GzipPath"},
 	    {name => "Bzip2Path"},
+	    {name => "RrdToolPath"},
 
             {text => "CfgEdit_Title_Install_Paths"},
             #
@@ -101,6 +102,8 @@ our %ConfigMenu = (
             {name => "TopDir",
                     visible => sub { return $_[1]->useFHS(); } },
             {name => "LogDir",
+                    visible => sub { return $_[1]->useFHS(); } },
+            {name => "RunDir",
                     visible => sub { return $_[1]->useFHS(); } },
 	    {name => "CgiDir"},
             #

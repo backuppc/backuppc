@@ -36,7 +36,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -61,7 +61,7 @@ my @Packages = qw(File::Path File::Spec File::Copy DirHandle Digest::MD5
                   BackupPC::Lib BackupPC::XS);
 
 my $PackageVersion = {
-        "BackupPC::XS" => "0.20",
+        "BackupPC::XS" => "0.30",
     };
 
 foreach my $pkg ( @Packages ) {
@@ -87,7 +87,7 @@ BackupPC cannot load the package $pkg, which is included in the
 BackupPC distribution.  This probably means you did not cd to the
 unpacked BackupPC distribution before running configure.pl, eg:
 
-    cd BackupPC-4.0.0alpha2
+    cd BackupPC-4.0.0alpha3
     ./configure.pl
 
 Please try again.
@@ -124,6 +124,7 @@ if ( !GetOptions(
             "install-dir=s",
             "log-dir=s",
             "man",
+            "run-dir=s",
             "scgi-port=i",
             "set-perms!",
             "uid-ignore!",
@@ -157,7 +158,7 @@ EOF
 #
 #    TopDir       which includes subdirs conf, log, pc, pool, cpool
 #                
-#    InstallDir   which includes subdirs bin, lib, doc
+#    InstallDir   which includes subdirs bin, lib, share/doc/BackupPC
 #
 # With FHS enabled (which is the default for new installations)
 # the config files move to /etc/BackupPC and log files to /var/log:
@@ -177,7 +178,7 @@ my $ConfigPath = "";
 my $ConfigFileOK = 1;
 while ( 1 ) {
     if ( $ConfigFileOK && -f "/etc/BackupPC/config.pl"
-            && (!defined($opts{fhs}) || $opts{fhs}) & !defined($opts{"config-path"}) ) {
+            && (!defined($opts{fhs}) || $opts{fhs}) && !defined($opts{"config-path"}) ) {
         $ConfigPath = "/etc/BackupPC/config.pl";
         $opts{fhs} = 1 if ( !defined($opts{fhs}) );
         print <<EOF;
@@ -229,6 +230,8 @@ if ( $ConfigPath ne "" && -r $ConfigPath ) {
                     if ( $Conf{TopDir} eq '' );
         $bpc->{LogDir} = $Conf{LogDir}  = "$Conf{TopDir}/log"
                     if ( $Conf{LogDir} eq '' );
+        $bpc->{RunDir} = $Conf{RunDir}  = "$Conf{TopDir}/log"
+                    if ( $Conf{RunDir} eq '' );
     }
     $bpc->{ConfDir} = $Conf{ConfDir} = $confDir;
     my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}, 1);
@@ -275,6 +278,7 @@ my %Programs = (
     cat            => "CatPath",
     gzip           => "GzipPath",
     bzip2          => "Bzip2Path",
+    rrdtool        => "RrdToolPath",
 );
 
 foreach my $prog ( sort(keys(%Programs)) ) {
@@ -401,9 +405,11 @@ while ( 1 ) {
 if ( $opts{fhs} ) {
     $Conf{ConfDir}      ||= $opts{"config-dir"}  || "/etc/BackupPC";
     $Conf{LogDir}       ||= $opts{"log-dir"}     || "/var/log/BackupPC";
+    $Conf{RunDir}       ||= $opts{"run-dir"}     || "/var/run/BackupPC";
 } else {
     $Conf{ConfDir}      ||= $opts{"config-dir"}  || "$Conf{TopDir}/conf";
     $Conf{LogDir}       ||= $opts{"log-dir"}     || "$Conf{TopDir}/log";
+    $Conf{RunDir}       ||= $opts{"run-dir"}     || "$Conf{TopDir}/log";
 }
 
 $Conf{CompressLevel} = $opts{"compress-level"}
@@ -502,7 +508,7 @@ exit unless prompt("--> Do you want to continue?", "y") =~ /y/i;
 #
 # Create install directories
 #
-foreach my $dir ( qw(bin doc
+foreach my $dir ( qw(bin share/doc/BackupPC
 		     lib/BackupPC/CGI
 		     lib/BackupPC/Config
 		     lib/BackupPC/Lang
@@ -544,6 +550,7 @@ foreach my $dir ( (
             "$Conf{TopDir}/pc",
             "$Conf{ConfDir}",
             "$Conf{LogDir}",
+            "$Conf{RunDir}",
         ) ) {
     mkpath("$DestDir$dir", 0, 0750) if ( !-d "$DestDir$dir" );
     if ( !-d "$DestDir$dir"
@@ -557,6 +564,7 @@ foreach my $dir ( (
 printf("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
 foreach my $prog ( qw(
         bin/BackupPC
+        bin/BackupPC_Admin_SCGI
         bin/BackupPC_archive
         bin/BackupPC_archiveHost
         bin/BackupPC_archiveStart
@@ -571,7 +579,7 @@ foreach my $prog ( qw(
         bin/BackupPC_poolCntPrint
         bin/BackupPC_refCountUpdate
         bin/BackupPC_restore
-        bin/BackupPC_Admin_SCGI
+        bin/BackupPC_rrdUpdate
         bin/BackupPC_sendEmail
         bin/BackupPC_serverMesg
         bin/BackupPC_tarCreate
@@ -665,6 +673,13 @@ foreach my $lib ( qw(
     unlink("$DestDir$Conf{InstallDir}/$lib");
 }
 
+#
+# clean pid and sock files from old location (they are now in $Conf{RunDir}, and they
+# get re-created each time BackupPC starts, so it's ok if RunDir eq LogDir).
+#
+unlink("$DestDir$Conf{LogDir}/BackupPC.pid")  if ( -f "$DestDir$Conf{LogDir}/BackupPC.pid" );
+unlink("$DestDir$Conf{LogDir}/BackupPC.sock") if ( -e "$DestDir$Conf{LogDir}/BackupPC.sock" );
+
 if ( $Conf{CgiImageDir} ne "" ) {
     printf("Installing images in $DestDir$Conf{CgiImageDir}\n");
     foreach my $img ( <images/*> ) {
@@ -675,7 +690,7 @@ if ( $Conf{CgiImageDir} ne "" ) {
     #
     # Install new CSS file, making a backup copy if necessary
     #
-    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-4.0.0alpha2";
+    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-4.0.0alpha3";
     if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
 	rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
     }
@@ -697,10 +712,18 @@ foreach my $init ( qw(gentoo-backuppc gentoo-backuppc.conf linux-backuppc
 printf("Making Apache configuration file for suid-perl\n");
 InstallFile("httpd/src/BackupPC.conf", "httpd/BackupPC.conf", 0644);
 
-printf("Installing docs in $DestDir$Conf{InstallDir}/doc\n");
+printf("Installing docs in $DestDir$Conf{InstallDir}/share/doc/BackupPC\n");
 foreach my $doc ( qw(BackupPC.pod BackupPC.html) ) {
-    InstallFile("doc/$doc", "$DestDir$Conf{InstallDir}/doc/$doc", 0444);
+    InstallFile("doc/$doc", "$DestDir$Conf{InstallDir}/share/doc/BackupPC/$doc", 0444);
+    #
+    # clean up files from old directory
+    #
+    unlink("$DestDir$Conf{InstallDir}/doc/$doc") if ( -f "$DestDir$Conf{InstallDir}/doc/$doc" );
 }
+#
+# clean up old directory (ok if it quietly fails if there are other files in that directory)
+#
+rmdir("$DestDir$Conf{InstallDir}/doc") if ( -d "$DestDir$Conf{InstallDir}/doc" );
 
 printf("Installing config.pl and hosts in $DestDir$Conf{ConfDir}\n");
 InstallFile("conf/hosts", "$DestDir$Conf{ConfDir}/hosts", 0644)
@@ -911,7 +934,7 @@ foreach my $param ( keys(%{$opts{"config-override"}}) ) {
 #
 # Now backup and write the config file
 #
-my $confCopy = "$dest.pre-4.0.0alpha2";
+my $confCopy = "$dest.pre-4.0.0alpha3";
 if ( -f $dest && !-f $confCopy ) {
     #
     # Make copy of config file, preserving ownership and modes
@@ -1034,6 +1057,7 @@ sub InstallFile
 	while ( <PROG> ) {
 	    s/__INSTALLDIR__/$Conf{InstallDir}/g;
 	    s/__LOGDIR__/$Conf{LogDir}/g;
+	    s/__RUNDIR__/$Conf{RunDir}/g;
 	    s/__CONFDIR__/$Conf{ConfDir}/g;
 	    s/__TOPDIR__/$Conf{TopDir}/g;
             s/^(\s*my \$useFHS\s*=\s*)\d;/${1}$opts{fhs};/
@@ -1366,6 +1390,10 @@ Log directory.  Defaults to /var/log/BackupPC with FHS.
 =item B<--man>
 
 Prints the manual page and exits.
+
+=item B<--run-dir RUN_DIR>
+
+Run directory.  Defaults to /var/run/BackupPC with FHS.
 
 =item B<--set-perms>
 

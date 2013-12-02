@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -92,8 +92,17 @@ my $EmptyMD5 = pack("H*", "d41d8cd98f00b204e9800998ecf8427e");
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
-my %Conf   = $bpc->Conf();
-my @Hosts  = sort(keys(%{$bpc->HostInfoRead()}));
+my $Hosts  = $bpc->HostInfoRead();
+my @Hosts  = sort(keys(%$Hosts));
+
+if ( $opts{h} ne "" ) {
+    if ( !defined($Hosts->{$opts{h}}) ) {
+        print(STDERR "BackupPC_refCountUpdate: host $opts{h} doesn't exist\n");
+        exit(1);
+    }
+    $bpc->ConfigRead($opts{h});
+}
+my %Conf = $bpc->Conf();
 my $PoolStats = {};
 
 $Conf{XferLogLevel} = 10 if ( $opts{v} );
@@ -594,9 +603,9 @@ sub updateRefCnt
                 $fullPoolScan = (int($refCntFile / 8) % $Conf{PoolSizeNightlyUpdatePeriod})
                                    == ($opts{P} % $Conf{PoolSizeNightlyUpdatePeriod});
             }
-            print("Computing full $poolName size for $refCntFile (phase = $opts{P},"
-                . " \$Conf{PoolSizeNightlyUpdatePeriod} = $Conf{PoolSizeNightlyUpdatePeriod})\n")
-                                if ( $fullPoolScan );
+#            print("Computing full $poolName size for $refCntFile (phase = $opts{P},"
+#                . " \$Conf{PoolSizeNightlyUpdatePeriod} = $Conf{PoolSizeNightlyUpdatePeriod})\n")
+#                                if ( $fullPoolScan );
 
             my $blkCnt = 0;        # size of pool files
             my $fileCntRep = 0;    # total number of pool files with repeated md5 checksums

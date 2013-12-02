@@ -106,8 +106,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("Работы, выполняемые в данный момент времени")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -123,7 +121,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("Сбои, нуждающиеся внимания")}
 <p>
@@ -158,9 +158,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <p>
 Всего \$hostCntGood узлов, которые содержат:
 <ul>
-<li> \$fullTot полных резервных копий общим размером \${fullSizeTot}GB
+<li> \$fullTot полных резервных копий общим размером \${fullSizeTot}GiB
      (до объединения и сжатия);
-<li> \$incrTot инкрементальных резервных копий общим размером \${incrSizeTot}GB
+<li> \$incrTot инкрементальных резервных копий общим размером \${incrSizeTot}GiB
      (до объединения и сжатия).
 </ul>
 </p>
@@ -304,12 +304,12 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>Пул занимает \${poolSize}GB, включая \$info->{"\${name}FileCnt"} файлов
+        <li>Пул занимает \${poolSize}GiB, включая \$info->{"\${name}FileCnt"} файлов
             и \$info->{"\${name}DirCnt"} каталогов (по данным на \$poolTime);
         <li>При хешировании пула произошло \$info->{"\${name}FileCntRep"} коллизии,
             максимальное количество файлов в одной коллизии - \$info->{"\${name}FileRepMax"};
         <li>Во время ночной очистки было удалено \$info->{"\${name}FileCntRm"} файлов
-            общим размером \${poolRmSize}GB (в районе \$poolTime);
+            общим размером \${poolRmSize}GiB (в районе \$poolTime);
 EOF
 
 # --------------------------------
@@ -1371,7 +1371,7 @@ $Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 Full Count: \$fullCnt;
 Full Age/days: \$fullAge;
-Full Size/GB: \$fullSize;
+Full Size/GiB: \$fullSize;
 Speed MB/sec: \$fullRate;
 Incr Count: \$incrCnt;
 Incr Age/Days: \$incrAge;

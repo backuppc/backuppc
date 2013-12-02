@@ -102,8 +102,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("正在运行的任务")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -119,7 +117,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("需要关注的错误")}
 <p>
@@ -154,9 +154,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <p>
 有 \$hostCntGood 台客户机已完成备份，总数是：
 <ul>
-<li> \$fullTot 个完全备份，总大小是 \${fullSizeTot}GB
+<li> \$fullTot 个完全备份，总大小是 \${fullSizeTot}GiB
      （被压缩前值），
-<li> \$incrTot 个增量备份，总大小是 \${incrSizeTot}GB
+<li> \$incrTot 个增量备份，总大小是 \${incrSizeTot}GiB
      （被压缩前值）。
 </ul>
 </p>
@@ -165,7 +165,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> 用户 </td>
     <td align="center"> 完全备份个数 </td>
     <td align="center"> 最后一次完全备份 (天前) </td>
-    <td align="center"> 完全备份大小 (GB) </td>
+    <td align="center"> 完全备份大小 (GiB) </td>
     <td align="center"> 完全备份速度 (MB/s) </td>
     <td align="center"> 增量备份个数 </td>
     <td align="center"> 最后一次增量备份 (天前) </td>
@@ -185,7 +185,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> 用户 </td>
     <td align="center"> 完全备份个数 </td>
     <td align="center"> 最后一次完全备份 (天前) </td>
-    <td align="center"> 完全备份大小 (GB) </td>
+    <td align="center"> 完全备份大小 (GiB) </td>
     <td align="center"> 完全备份速度 (MB/s) </td>
     <td align="center"> 增量备份个数 </td>
     <td align="center"> 最后一次增量备份 (天前) </td>
@@ -226,7 +226,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 //-->
 </script>
 
-一共有 \$hostCntGood 台客户机已经被备份，总备份大小为 \${fullSizeTot}GB
+一共有 \$hostCntGood 台客户机已经被备份，总备份大小为 \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -300,12 +300,12 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>备份服务器文件池大小是 \${poolSize}GB 包含 \$info->{"\${name}FileCnt"} 个文件
+        <li>备份服务器文件池大小是 \${poolSize}GiB 包含 \$info->{"\${name}FileCnt"} 个文件
             和 \$info->{"\${name}DirCnt"} 个文件夹／目录（截至 \$poolTime）。文件池大小基本就是所有备份数据占用的实际磁盘空间。
         <li>服务器文件池散列操作(Hashing)发现 \$info->{"\${name}FileCntRep"} 
             个文件具有重复散列值，其中 \$info->{"\${name}FileRepMax"} 个文件具有相同散列值。相同散列值并不意味着相同文件。散列操作被用来节省相同文件所占用的磁盘空间。
         <li>每日例行清理过期数据操作删除了 \$info->{"\${name}FileCntRm"} 个文件共
-             \${poolRmSize}GB （操作于 \$poolTime ）。
+             \${poolRmSize}GiB （操作于 \$poolTime ）。
 EOF
 
 # --------------------------------
@@ -1340,7 +1340,7 @@ $Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 完全备份个数：\$fullCnt;
 最后一次完全备份 (天前)：\$fullAge;
-完全备份大小 (GB)：\$fullSize;
+完全备份大小 (GiB)：\$fullSize;
 完全备份速度 (MB/sec)：\$fullRate;
 增量备份个数：\$incrCnt;
 最后一次增量备份 (天前)：\$incrAge;

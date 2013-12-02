@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -54,6 +54,19 @@ sub action
 
     ErrorExit(eval("qq{$Lang->{Invalid_number__num}}"))
 		    if ( $num ne "" && $num !~ /^\d+$/ );
+    if ( $type eq "poolUsage" && $Privileged ) {
+        $file = "$LogDir/poolUsage$num.png";
+        if ( open($fh, "<", $file) ) {
+            my $data;
+            print "Content-Type: image/png\r\n";
+            print "Content-Transfer-Encoding: binary\r\n\r\n";
+            while ( sysread($fh, $data, 1024 * 1024) > 0 ) {
+                print $data;
+            }
+            close($fh);
+        }
+        return;
+    }
     if ( $type ne "docs" && !$Privileged ) {
         ErrorExit($Lang->{Only_privileged_users_can_view_log_or_config_files});
     }
@@ -89,7 +102,7 @@ sub action
         $file = $bpc->ConfDir() . "/hosts";
         $linkHosts = 1;
     } elsif ( $type eq "docs" ) {
-        $file = $bpc->InstallDir() . "/doc/BackupPC.html";
+        $file = $bpc->InstallDir() . "/share/doc/BackupPC/BackupPC.html";
     } elsif ( $host ne "" ) {
         if ( !defined($In{num}) ) {
             # get the latest LOG file

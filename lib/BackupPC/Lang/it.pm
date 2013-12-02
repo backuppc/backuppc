@@ -112,8 +112,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("Processi attualmente in esecuzione")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -129,7 +127,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("Fallimenti che richiedono attenzione")}
 <p>
@@ -165,9 +165,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <p>
 Ci sono \$hostCntGood host sottoposti a backup per un totale di:
 <ul>
-<li> \$fullTot backup completi per una dimensione totale di \${fullSizeTot}GB
+<li> \$fullTot backup completi per una dimensione totale di \${fullSizeTot}GiB
      (prima del processo di pooling e compressione),
-<li> \$incrTot backup incrementali per una dimensione totale di \${incrSizeTot}GB
+<li> \$incrTot backup incrementali per una dimensione totale di \${incrSizeTot}GiB
      (prima del processo di pooling e compressione).
 </ul>
 </p>
@@ -176,7 +176,7 @@ Ci sono \$hostCntGood host sottoposti a backup per un totale di:
     <td align="center"> Utente </td>
     <td align="center"> Completi </td>
     <td align="center"> Et&agrave; completi (giorni) </td>
-    <td align="center"> Dimensione completi (GB) </td>
+    <td align="center"> Dimensione completi (GiB) </td>
     <td align="center"> Velocit&agrave; (MB/s) </td>
     <td align="center"> Incrementali </td>
     <td align="center"> Et&agrave; incrementali (giorni) </td>
@@ -196,7 +196,7 @@ Ci sono \$hostCntNone host senza alcun backup.
     <td align="center"> Utente </td>
     <td align="center"> Completi </td>
     <td align="center"> Et&agrave; completi (giorni) </td>
-    <td align="center"> Dimensione completi (GB) </td>
+    <td align="center"> Dimensione completi (GiB) </td>
     <td align="center"> Velocit&agrave; (MB/s) </td>
     <td align="center"> Incrementali </td>
     <td align="center"> Et&agrave; incrementali (giorni) </td>
@@ -238,7 +238,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 </script>
 
 &Egrave; stato effettuato il backup di \$hostCntGood host per una dimensione
-totale di \${fullSizeTot}GB
+totale di \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -312,12 +312,12 @@ EOF
   
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>Il pool di \${poolSize}GB comprende \$info->{"\${name}FileCnt"}
+        <li>Il pool di \${poolSize}GiB comprende \$info->{"\${name}FileCnt"}
             file e \$info->{"\${name}DirCnt"} directory (al \$poolTime),
         <li>L\'hash del pool d&agrave; \$info->{"\${name}FileCntRep"} file
             ripetuti con la catena pi&ugrave; lunga di \$info->{"\${name}FileRepMax"},
         <li>La pulizia notturna ha rimosso \$info->{"\${name}FileCntRm"}
-            file per una dimensione di \${poolRmSize}GB (circa il \$poolTime),
+            file per una dimensione di \${poolRmSize}GiB (circa il \$poolTime),
 EOF
 
 # --------------------------------
@@ -1387,7 +1387,7 @@ $Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 Completi: \$fullCnt;
 Et&agrave; completi (giorni): \$fullAge;
-Dimensione completi (GB): \$fullSize;
+Dimensione completi (GiB): \$fullSize;
 Velocit&agrave; (MB/s): \$fullRate;
 Incrementali: \$incrCnt;
 Et&agrave; incrementali (giorni): \$incrAge;

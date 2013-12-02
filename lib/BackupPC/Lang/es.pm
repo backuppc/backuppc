@@ -102,8 +102,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("Trabajos en Ejecución")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -119,7 +117,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("Fallos que Precisan Atención")}
 <p>
@@ -154,9 +154,9 @@ $Lang{BackupPC_Summary}=<<EOF;
 <p>
 Il y a \$hostCntGood hosts tienen copia de seguridad, de un total de :
 <ul>
-<li> \$fullTot copias de seguridad completas con tamaño total de \${fullSizeTot} GB
+<li> \$fullTot copias de seguridad completas con tamaño total de \${fullSizeTot} GiB
      (antes de agrupar y comprimir),
-<li> \$incrTot copias de seguridad incrementales con tamaño total de \${incrSizeTot} GB
+<li> \$incrTot copias de seguridad incrementales con tamaño total de \${incrSizeTot} GiB
      (antes de agrupar y comprimir).
 </ul>
 </p>
@@ -165,7 +165,7 @@ Il y a \$hostCntGood hosts tienen copia de seguridad, de un total de :
     <td align="center"> Usuario </td>
     <td align="center"> #Completo </td>
     <td align="center"> Completo Antig. (Días) </td>
-    <td align="center"> Completo Tamaño (GB) </td>
+    <td align="center"> Completo Tamaño (GiB) </td>
     <td align="center"> Velocidad MB/sec </td>
     <td align="center"> #Incrementales </td>
     <td align="center"> Incrementales Antig (Días) </td>
@@ -185,7 +185,7 @@ Hay \$hostCntNone hosts sin copias de seguridad.
     <td align="center"> Usuario </td>
     <td align="center"> #Completo </td>
     <td align="center"> Completo Antig. (Días) </td>
-    <td align="center"> Completo Tamaño (GB) </td>
+    <td align="center"> Completo Tamaño (GiB) </td>
     <td align="center"> Velocidad MB/sec </td>
     <td align="center"> #Incrementales </td>
     <td align="center"> Incrementales Antig (Días) </td>
@@ -226,7 +226,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 //-->
 </script>
 
-Hay \$hostCntGood hosts que tienen copia de seguridad con un tamaño total de \${fullSizeTot}GB
+Hay \$hostCntGood hosts que tienen copia de seguridad con un tamaño total de \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -300,12 +300,12 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>El grupo tiene \${poolSize}GB incluyendo \$info->{"\${name}FileCnt"} archivos
+        <li>El grupo tiene \${poolSize}GiB incluyendo \$info->{"\${name}FileCnt"} archivos
             y \$info->{"\${name}DirCnt"} directorios (as of \$poolTime),
         <li>El procesamiento del grupo da \$info->{"\${name}FileCntRep"} archivos
             repetidos cuya cadena más larga es \$info->{"\${name}FileRepMax"},
         <li>El proceso de limpieza nocturna ha eliminado \$info->{"\${name}FileCntRm"} archivos de
-            tamaño \${poolRmSize}GB (around \$poolTime),
+            tamaño \${poolRmSize}GiB (around \$poolTime),
 EOF
 
 # --------------------------------
@@ -1373,7 +1373,7 @@ $Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 #Completo: \$fullCnt;
 Completo Antig./Días: \$fullAge;
-Completo Tamaño/GB: \$fullSize;
+Completo Tamaño/GiB: \$fullSize;
 Velocidad MB/sec: \$fullRate;
 #Incrementales: \$incrCnt;
 Incrementales Antig/Días: \$incrAge;

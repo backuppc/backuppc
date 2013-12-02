@@ -103,8 +103,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("Momenteel lopende jobs")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -120,7 +118,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("Opgetreden fouten die aandacht vragen")}
 <p>
@@ -155,9 +155,9 @@ $Lang{BackupPC_Summary}=<<EOF;
 <p>
 Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
 <ul>
-<li> \$fullTot volledige backups met een totale grootte van \${fullSizeTot}GB
+<li> \$fullTot volledige backups met een totale grootte van \${fullSizeTot}GiB
      (voor samenvoegen),
-<li> \$incrTot oplopende backups met een totale grootte van \${incrSizeTot}GB
+<li> \$incrTot oplopende backups met een totale grootte van \${incrSizeTot}GiB
      (voor samenvoegen).
 </ul>
 </p>
@@ -166,7 +166,7 @@ Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
     <td align="center"> Gebruiker </td>
     <td align="center"> Aantal Voll. </td>
     <td align="center"> Voll.Lftd (dagen) </td>
-    <td align="center"> Voll.Grootte (GB) </td>
+    <td align="center"> Voll.Grootte (GiB) </td>
     <td align="center"> Snelheid (MB/sec) </td>
     <td align="center"> Aantal Incr. </td>
     <td align="center"> Incr.Lftd (dagen) </td>
@@ -186,7 +186,7 @@ Er zijn \$hostCntNone hosts zonder backup.
     <td align="center"> Gebruiker </td>
     <td align="center"> Aantal Voll. </td>
     <td align="center"> Voll.Lftd (dagen) </td>
-    <td align="center"> Voll.Grootte (GB) </td>
+    <td align="center"> Voll.Grootte (GiB) </td>
     <td align="center"> Snelheid (MB/sec) </td>
     <td align="center"> Aantal Incr. </td>
     <td align="center"> Incr.Lftd (dagen) </td>
@@ -227,7 +227,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 //-->
 </script>
 
-Er zijn \$hostCntGood machines gebackupt die een totale grootte vertegenwoordigen van \${fullSizeTot}GB
+Er zijn \$hostCntGood machines gebackupt die een totale grootte vertegenwoordigen van \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -301,13 +301,13 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>Gebruikte backupschijfruimte is \${poolSize}GB groot en bevat \$info->{"\${name}FileCnt"} bestanden
+        <li>Gebruikte backupschijfruimte is \${poolSize}GiB groot en bevat \$info->{"\${name}FileCnt"} bestanden
             en \$info->{"\${name}DirCnt"} mappen (op \$poolTime),
         <li>Schijfruimte bevat \$info->{"\${name}FileCntRep"} bestanden
             met identieke hashcodes
             (langste reeks is \$info->{"\${name}FileRepMax"},
         <li>Nachtelijke opruiming verwijderde \$info->{"\${name}FileCntRm"} bestanden
-            met een grootte van \${poolRmSize}GB (ongeveer \$poolTime),
+            met een grootte van \${poolRmSize}GiB (ongeveer \$poolTime),
 EOF
 
 # --------------------------------
@@ -1384,7 +1384,7 @@ $Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 Aantal Voll.: \$fullCnt;
 Voll.Lftd/dagen: \$fullAge;
-Voll.Grootte/GB: \$fullSize;
+Voll.Grootte/GiB: \$fullSize;
 Snelheid MB/sec: \$fullRate;
 Aantal Incr.: \$incrCnt;
 Incr.Lftd/dagen: \$incrAge;

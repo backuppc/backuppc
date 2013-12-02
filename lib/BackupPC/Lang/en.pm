@@ -102,8 +102,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("Currently Running Jobs")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -119,7 +117,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("Failures that need attention")}
 <p>
@@ -154,9 +154,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <p>
 There are \$hostCntGood hosts that have been backed up, for a total of:
 <ul>
-<li> \$fullTot full backups of total size \${fullSizeTot}GB
+<li> \$fullTot full backups of total size \${fullSizeTot}GiB
      (prior to pooling and compression),
-<li> \$incrTot incr backups of total size \${incrSizeTot}GB
+<li> \$incrTot incr backups of total size \${incrSizeTot}GiB
      (prior to pooling and compression).
 </ul>
 </p>
@@ -165,8 +165,8 @@ There are \$hostCntGood hosts that have been backed up, for a total of:
     <td align="center"> User </td>
     <td align="center"> #Full </td>
     <td align="center"> Full Age (days) </td>
-    <td align="center"> Full Size (GB) </td>
-    <td align="center"> Speed (MB/s) </td>
+    <td align="center"> Full Size (GiB) </td>
+    <td align="center"> Speed (MiB/s) </td>
     <td align="center"> #Incr </td>
     <td align="center"> Incr Age (days) </td>
     <td align="center"> Last Backup (days) </td>
@@ -185,8 +185,8 @@ There are \$hostCntNone hosts with no backups.
     <td align="center"> User </td>
     <td align="center"> #Full </td>
     <td align="center"> Full Age (days) </td>
-    <td align="center"> Full Size (GB) </td>
-    <td align="center"> Speed (MB/s) </td>
+    <td align="center"> Full Size (GiB) </td>
+    <td align="center"> Speed (MiB/s) </td>
     <td align="center"> #Incr </td>
     <td align="center"> Incr Age/days </td>
     <td align="center"> Last Backup (days) </td>
@@ -226,7 +226,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 //-->
 </script>
 
-There are \$hostCntGood hosts that have been backed up for a total size of \${fullSizeTot}GB
+There are \$hostCntGood hosts that have been backed up for a total size of \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -300,12 +300,12 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>Pool is \${poolSize}GB comprising \$info->{"\${name}FileCnt"} files
+        <li>Pool is \${poolSize}GiB comprising \$info->{"\${name}FileCnt"} files
             and \$info->{"\${name}DirCnt"} directories (as of \$poolTime),
         <li>Pool hashing gives \$info->{"\${name}FileCntRep"} repeated
             files with longest chain \$info->{"\${name}FileRepMax"},
         <li>Nightly cleanup removed \$info->{"\${name}FileCntRm"} files of
-            size \${poolRmSize}GB (around \$poolTime),
+            size \${poolRmSize}GiB (around \$poolTime),
 EOF
 
 # --------------------------------
@@ -726,12 +726,12 @@ Empty files and SMB errors aren\'t counted in the reuse and new counts.
     <td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> #Files </td>
-    <td align="center"> Size/MB </td>
-    <td align="center"> MB/sec </td>
+    <td align="center"> Size/MiB </td>
+    <td align="center"> MiB/sec </td>
     <td align="center"> #Files </td>
-    <td align="center"> Size/MB </td>
+    <td align="center"> Size/MiB </td>
     <td align="center"> #Files </td>
-    <td align="center"> Size/MB </td>
+    <td align="center"> Size/MiB </td>
 </tr>
 \$sizeStr
 </table>
@@ -750,11 +750,11 @@ compressed files.
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> Comp Level </td>
-    <td align="center"> Size/MB </td>
-    <td align="center"> Comp/MB </td>
+    <td align="center"> Size/MiB </td>
+    <td align="center"> Comp/MiB </td>
     <td align="center"> Comp </td>
-    <td align="center"> Size/MB </td>
-    <td align="center"> Comp/MB </td>
+    <td align="center"> Size/MiB </td>
+    <td align="center"> Comp/MiB </td>
     <td align="center"> Comp </td>
 </tr>
 \$compStr
@@ -936,8 +936,8 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 <tr><td class="tableheader"> Start time </td><td class="border"> \$startTime </td></tr>
 <tr><td class="tableheader"> Duration </td><td class="border"> \$duration min </td></tr>
 <tr><td class="tableheader"> Number of files </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
-<tr><td class="tableheader"> Total size </td><td class="border"> \${MB} MB </td></tr>
-<tr><td class="tableheader"> Transfer rate </td><td class="border"> \$MBperSec MB/sec </td></tr>
+<tr><td class="tableheader"> Total size </td><td class="border"> \${MB} MiB </td></tr>
+<tr><td class="tableheader"> Transfer rate </td><td class="border"> \$MBperSec MiB/sec </td></tr>
 <tr><td class="tableheader"> TarCreate errors </td><td class="border"> \$Restores[\$i]{tarCreateErrs} </td></tr>
 <tr><td class="tableheader"> Xfer errors </td><td class="border"> \$Restores[\$i]{xferErrs} </td></tr>
 <tr><td class="tableheader"> Xfer log file </td><td class="border">
@@ -1196,7 +1196,7 @@ Click on the restore number for more details.
     <td align="right"> Start Date</td>
     <td align="right"> Dur/mins</td>
     <td align="right"> #files </td>
-    <td align="right"> MB </td>
+    <td align="right"> MiB </td>
     <td align="right"> #tar errs </td>
     <td align="right"> #xferErrs </td>
 </tr>
@@ -1370,8 +1370,8 @@ $Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 Full Count: \$fullCnt;
 Full Age/days: \$fullAge;
-Full Size/GB: \$fullSize;
-Speed MB/sec: \$fullRate;
+Full Size/GiB: \$fullSize;
+Speed MiB/sec: \$fullRate;
 Incr Count: \$incrCnt;
 Incr Age/Days: \$incrAge;
 State: \$host_state;

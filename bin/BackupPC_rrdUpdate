@@ -1,0 +1,233 @@
+#!/usr/bin/perl
+#============================================================= -*-perl-*-
+#
+# BackupPC_rrdUpdate: Nightly pool graph update
+#
+# DESCRIPTION
+#
+#   Usage: BackupPC_rrdUpdate
+#
+# AUTHORS
+#   Alexander Moisseev  <moiseev@mezonplus.ru>
+#   Craig Barratt       <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2013  Alexander Moisseev and Craig Barratt
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#========================================================================
+#
+# Version 4.0.0alpha3, released 1 Dec 2013.
+#
+# See http://backuppc.sourceforge.net.
+#
+#========================================================================
+
+use strict;
+no  utf8;
+use lib "__INSTALLDIR__/lib";
+use BackupPC::Lib qw( :BPC_DT_ALL );
+use File::Path;
+use Data::Dumper;
+our(%Info);
+
+die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my $TopDir = $bpc->TopDir();
+my $BinDir = $bpc->BinDir();
+my $LogDir = $bpc->LogDir();
+my %Conf   = $bpc->Conf();
+
+if ( !-x $Conf{RrdToolPath} ) {
+    print("$Conf{RrdToolPath} is not a valid executable\n");
+    exit(0);
+}
+
+my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
+if ( $err ) {
+    print("Can't connect to server ($err)\n");
+    exit(1);
+}
+my $reply = $bpc->ServerMesg("status info");
+$reply = $1 if ( $reply =~ /(.*)/s );
+eval($reply);
+
+my $Now     = time();
+my $NowRnd0 = 86400 * int($Now / 86400);
+my $NowRnd1 = $NowRnd0 + 86400;
+my $RRDFile = "$LogDir/poolUsage.rrd";
+
+RRDUpdate();
+RRDGraph(4);
+RRDGraph(52);
+exit(0);
+
+#
+# Feeds pool size data values into an RRD $RRDFile
+#
+sub RRDUpdate
+{
+    #
+    # We store data in RRD with predicted time of next update.
+    #
+    if ( !-f $RRDFile ) {
+        print $bpc->cmdSystemOrEval(
+            [
+                $Conf{RrdToolPath},
+                "create", $RRDFile,
+                "--step", "86400",
+                "--start", "$NowRnd0 - 1d",
+                "DS:c3kB:GAUGE:172800:0:U",
+                "DS:tpkB:GAUGE:172800:0:U",
+                "DS:p3kB:GAUGE:172800:0:U",
+                "DS:p4kB:GAUGE:172800:0:U",
+                "DS:c4kB:GAUGE:172800:0:U",
+                "RRA:LAST:0:1:732"
+            ]);
+    }
+
+    #
+    # Calculate pool size totals prior to poolng and compression
+    #
+    my $sizeTot;
+    foreach my $host ( sort( keys( %{ $bpc->HostInfoRead() } ) ) ) {
+        my @Backups = $bpc->BackupInfoRead($host);
+        for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+            $sizeTot += $Backups[$i]{size};
+        }
+    }
+    $sizeTot = $sizeTot / 1024;
+
+    print $bpc->cmdSystemOrEval(
+            [
+                $Conf{RrdToolPath},
+                "update", $RRDFile,
+                $NowRnd1           . ":"
+                . $Info{"cpoolKb"} . ":"
+                . $sizeTot         . ":"
+                . $Info{"poolKb"}  . ":"
+                . $Info{"pool4Kb"} . ":"
+                . $Info{"cpool4Kb"}
+            ]);
+     printf("%sRRD updated:"
+          . " date %s; cpoolKb %f; total %f;"
+          . " poolKb %f; pool4Kb %f; cpool4Kb %f\n",
+                $bpc->timeStamp,
+                $NowRnd1, $Info{"cpoolKb"}, $sizeTot,
+                $Info{"poolKb"}, $Info{"pool4Kb"}, $Info{"cpool4Kb"});
+}
+
+#
+# Generate pool size RRDtool graph image
+#
+sub RRDGraph
+{
+    my($weeks) = @_;
+    my($fdOut);
+    my @poolMax;
+
+    #
+    # Get each pool max value from RRD
+    #
+    $bpc->cmdSystemOrEval(
+            [
+                $Conf{RrdToolPath},
+                "graphv", "-",
+                "--end=$NowRnd1", "--start=end-${weeks}w",
+                "DEF:p3kB=$RRDFile:p3kB:LAST",
+                "DEF:c3kB=$RRDFile:c3kB:LAST",
+                "DEF:p4kB=$RRDFile:p4kB:LAST",
+                "DEF:c4kB=$RRDFile:c4kB:LAST",
+                "PRINT:p3kB:LAST:%lf",
+                "PRINT:c3kB:LAST:%lf",
+                "PRINT:p4kB:LAST:%lf",
+                "PRINT:c4kB:LAST:%lf",
+            ], sub {
+                #print $_[0];
+                if ( $_[0] =~ /^print\[([0-3])\] = "([.0-9]+)"$/ ) {
+                    $poolMax[$1] = $2 unless ( $2 == 0 );
+                }
+            });
+
+    my $poolSizeGraph = [
+        "$Conf{RrdToolPath}",
+        "graph", "-",
+        "--end=$NowRnd1", "--start=end-${weeks}w",
+        "--title=BackupPC Pool Size (${weeks} weeks)",
+        "--vertical-label=",
+        "--width=600", "--height=100", "--rigid", "--alt-autoscale-max",
+        "--base=1024", "--logarithmic", "--units=si",
+        "--color", "BACK#FFFFFF", "--slope-mode", "--imgformat=PNG",
+        "--font", "TITLE:10:", "--font", "AXIS:8:", "--font", "LEGEND:8:", "--font", "UNIT:8:",
+        "--font-render-mode", "mono",
+        "DEF:p3kB=$RRDFile:p3kB:LAST",
+        "DEF:c3kB=$RRDFile:c3kB:LAST",
+        "DEF:p4kB=$RRDFile:p4kB:LAST",
+        "DEF:c4kB=$RRDFile:c4kB:LAST",
+        "DEF:tpkB=$RRDFile:tpkB:LAST",
+        "CDEF:p3B=p3kB,1024,*",
+        "CDEF:c3B=c3kB,1024,*",
+        "CDEF:p4B=p4kB,1024,*",
+        "CDEF:c4B=c4kB,1024,*",
+        "CDEF:tpB=tpkB,1024,*"
+    ];
+
+    #
+    # Draw stacked pool graphs (and legend entry) for non empty pools
+    #
+    push(@$poolSizeGraph,
+        'AREA:p3B#FFADA7:Pool  V3 in bytes               ',
+        'GPRINT:p3B:LAST:Current\\:%8.2lf %s',
+        'GPRINT:p3B:AVERAGE:Average\\:%8.2lf %s',
+        'GPRINT:p3B:MAX:Maximum\\:%8.2lf %s\n'
+    ) if $poolMax[0];
+
+    push(@$poolSizeGraph,
+        'AREA:c3B#FFDBA7:CPool V3 in bytes               :STACK',
+        'GPRINT:c3B:LAST:Current\\:%8.2lf %s',
+        'GPRINT:c3B:AVERAGE:Average\\:%8.2lf %s',
+        'GPRINT:c3B:MAX:Maximum\\:%8.2lf %s\n'
+    ) if $poolMax[1];
+
+    push(@$poolSizeGraph,
+        'AREA:p4B#97E7A5:Pool  V4 in bytes               :STACK',
+        'GPRINT:p4B:LAST:Current\\:%8.2lf %s',
+        'GPRINT:p4B:AVERAGE:Average\\:%8.2lf %s',
+        'GPRINT:p4B:MAX:Maximum\\:%8.2lf %s\n'
+    ) if $poolMax[2];
+
+    push(@$poolSizeGraph,
+        'AREA:c4B#95B8DB:CPool V4 in bytes               :STACK',
+        'GPRINT:c4B:LAST:Current\\:%8.2lf %s',
+        'GPRINT:c4B:AVERAGE:Average\\:%8.2lf %s',
+        'GPRINT:c4B:MAX:Maximum\\:%8.2lf %s\n'
+    ) if $poolMax[3];
+
+    #
+    # Draw total line graph
+    #
+    push(@$poolSizeGraph,
+        'LINE1:tpB#FF0000:Prior to pooling and compression',
+        'GPRINT:tpB:LAST:Current\\:%8.2lf %s',
+        'GPRINT:tpB:AVERAGE:Average\\:%8.2lf %s',
+        'GPRINT:tpB:MAX:Maximum\\:%8.2lf %s\\n'
+    );
+
+    if ( !open($fdOut, ">", "$LogDir/poolUsage$weeks.png") ) {
+        print("Can't open/create $LogDir/poolUsage$weeks.png\n");
+        return;
+    }
+    $bpc->cmdSystemOrEval($poolSizeGraph, sub { print $fdOut $_[0] });
+    close($fdOut);
+}

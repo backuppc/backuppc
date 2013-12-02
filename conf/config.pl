@@ -316,7 +316,8 @@ $Conf{BackupPCUser} = '';
 #
 #   TopDir     - where all the backup data is stored
 #   ConfDir    - where the main config and hosts files resides
-#   LogDir     - where log files and other transient information
+#   LogDir     - where log files and other transient information resides
+#   RunDir     - where pid and sock files reside
 #   InstallDir - where the bin, lib and doc installation dirs reside.
 #                Note: you cannot change this value since all the
 #                perl scripts include this path.  You must reinstall
@@ -334,6 +335,7 @@ $Conf{BackupPCUser} = '';
 $Conf{TopDir}      = '';
 $Conf{ConfDir}     = '';
 $Conf{LogDir}      = '';
+$Conf{RunDir}      = '';
 $Conf{InstallDir}  = '';
 $Conf{CgiDir}      = '';
 
@@ -1962,6 +1964,15 @@ $Conf{SCGIServerPort} = -1;
 # for SCGI.  Used for links in email messages.
 #
 $Conf{CgiURL} = undef;
+
+#
+# Full path to the rrdtool command.  If available, graphs of pool usage
+# will be generated.  If empty, then the graphs will be skipped.
+#
+# Security caution: normal users should not allowed to write to this file
+# or directory.
+#
+$Conf{RrdToolPath} = '';
 
 #   
 # Language to use.  See lib/BackupPC/Lang for the list of supported

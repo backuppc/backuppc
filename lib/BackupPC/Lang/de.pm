@@ -113,8 +113,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("Zur Zeit aktive Aufträge")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -130,7 +128,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("Fehler, die näher analysiert werden müssen!")}
 <p>
@@ -166,9 +166,9 @@ $Lang{BackupPC_Summary}=<<EOF;
 <p>
 Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
 <ul>
-<li> \$fullTot Volle Backups, Gesamtgröße \${fullSizeTot}GB
+<li> \$fullTot Volle Backups, Gesamtgröße \${fullSizeTot}GiB
      (vor Pooling und Komprimierung),
-<li> \$incrTot Inkrementelle Backups, Gesamtgröße \${incrSizeTot}GB
+<li> \$incrTot Inkrementelle Backups, Gesamtgröße \${incrSizeTot}GiB
      (vor Pooling und Komprimierung).
 </ul>
 </p>
@@ -177,7 +177,7 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
     <td align="center"> Benutzer </td>
     <td align="center"> #Voll </td>
     <td align="center"> Alter (Tage) </td>
-    <td align="center"> Größe (GB) </td>
+    <td align="center"> Größe (GiB) </td>
     <td align="center"> MB/sek </td>
     <td align="center"> #Inkr </td>
     <td align="center"> Alter (Tage) </td>
@@ -197,7 +197,7 @@ Es gibt \$hostCntNone Computer ohne Backups !!!
     <td align="center"> Benutzer </td>
     <td align="center"> #Voll </td>
     <td align="center"> Alter (Tage) </td>
-    <td align="center"> Größe (GB) </td>
+    <td align="center"> Größe (GiB) </td>
     <td align="center"> MB/sek </td>
     <td align="center"> #Inkr </td>
     <td align="center"> Alter (Tage) </td>
@@ -237,7 +237,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 
 //-->
 </script>
-Es gibt \$hostCntGood Computer die gesichert wurden, mit insgesamt \${fullSizeTot}GB
+Es gibt \$hostCntGood Computer die gesichert wurden, mit insgesamt \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -311,11 +311,11 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>Der Pool hat eine Größe von \${poolSize}GB und enthält \$info->{"\${name}FileCnt"} Dateien und \$info->{"\${name}DirCnt"} Verzeichnisse (Stand \$poolTime).
+        <li>Der Pool hat eine Größe von \${poolSize}GiB und enthält \$info->{"\${name}FileCnt"} Dateien und \$info->{"\${name}DirCnt"} Verzeichnisse (Stand \$poolTime).
         <li>Das "Pool hashing" ergibt \$info->{"\${name}FileCntRep"} wiederholte
             Dateien mit der längsten Verkettung von \$info->{"\${name}FileRepMax"}.
         <li>Die nächtliche Bereinigung entfernte \$info->{"\${name}FileCntRm"} Dateien mit
-            einer Größe von \${poolRmSize}GB (um ca. \$poolTime).
+            einer Größe von \${poolRmSize}GiB (um ca. \$poolTime).
 EOF
 
 # --------------------------------
@@ -1377,7 +1377,7 @@ $Lang{RSS_Doc_Description} = "RSS Feed für BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 #Voll: \$fullCnt;
 Alter/Tagen: \$fullAge;
-Größe/GB: \$fullSize;
+Größe/GiB: \$fullSize;
 MB/sek: \$fullRate;
 #Inkr: \$incrCnt;
 Alter/Tage: \$incrAge;

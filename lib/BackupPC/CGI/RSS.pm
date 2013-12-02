@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -107,7 +107,7 @@ sub action
         }
         $fullTot += $fullCnt;
         $incrTot += $incrCnt;
-        $fullSize = sprintf("%.2f", $fullSize / 1000);
+        $fullSize = sprintf("%.2f", $fullSize / 1024);
 	$incrAge = "&nbsp;" if ( $incrAge eq "" );
 	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
 		      || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
@@ -131,8 +131,8 @@ sub action
                        description => $str);
     }
 
-    $fullSizeTot = sprintf("%.2f", $fullSizeTot / 1000);
-    $incrSizeTot = sprintf("%.2f", $incrSizeTot / 1000);
+    $fullSizeTot = sprintf("%.2f", $fullSizeTot / 1024);
+    $incrSizeTot = sprintf("%.2f", $incrSizeTot / 1024);
     my $now      = timeStamp2(time);
 
     print 'Content-type: text/xml', "\r\n\r\n",

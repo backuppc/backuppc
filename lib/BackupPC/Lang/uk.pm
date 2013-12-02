@@ -105,8 +105,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("Запущені зараз завдання")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -122,7 +120,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("Помилки, що потребують уваги")}
 <p>
@@ -157,9 +157,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <p>
 Загалом \$hostCntGood хостів, що містять:
 <ul>
-<li> \$fullTot загальний розмір повних резервних копій \${fullSizeTot}GB
+<li> \$fullTot загальний розмір повних резервних копій \${fullSizeTot}GiB
      (до об\'єднання та стискання),
-<li> \$incrTot загальний розмір інкрементальних резервних копій \${incrSizeTot}GB
+<li> \$incrTot загальний розмір інкрементальних резервних копій \${incrSizeTot}GiB
      (до об\'єднання та стискання).
 </ul>
 </p>
@@ -168,7 +168,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> Користувач </td>
     <td align="center"> #Кіль-ть повн. копій </td>
     <td align="center"> Вік повн. копій (дні) </td>
-    <td align="center"> Повний розмір (GB) </td>
+    <td align="center"> Повний розмір (GiB) </td>
     <td align="center"> Швидкість (MB/s) </td>
     <td align="center"> #Кіль-ть інкр. копій </td>
     <td align="center"> Вік інкр. копій (дні) </td>
@@ -188,7 +188,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> Користувач </td>
     <td align="center"> #Кіль-ть повн. копій </td>
     <td align="center"> Вік повн. копій (дні) </td>
-    <td align="center"> Повний розмір (GB) </td>
+    <td align="center"> Повний розмір (GiB) </td>
     <td align="center"> Швидкість (MB/s) </td>
     <td align="center"> #Кіль-ть інкр. копій </td>
     <td align="center"> Вік інкр. копій (дні) </td>
@@ -229,7 +229,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 //-->
 </script>
 
-Всього \$hostCntGood хостів, що мають повну резервну копію загальним розміром \${fullSizeTot}GB
+Всього \$hostCntGood хостів, що мають повну резервну копію загальним розміром \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -303,12 +303,12 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>Пул займає \${poolSize}GB в тому числі \$info->{"\${name}FileCnt"} файлів
+        <li>Пул займає \${poolSize}GiB в тому числі \$info->{"\${name}FileCnt"} файлів
             та \$info->{"\${name}DirCnt"} тек (на \$poolTime),
         <li>Під час хешування пулу виявлено \$info->{"\${name}FileCntRep"} файлів що 
             повторюються з найбільшою кількістю повторень \$info->{"\${name}FileRepMax"},
         <li>Під час нічного очищення видалено \$info->{"\${name}FileCntRm"} файлів 
-            загальним розміром \${poolRmSize}GB (близько \$poolTime),
+            загальним розміром \${poolRmSize}GiB (близько \$poolTime),
 EOF
 
 # --------------------------------
@@ -1370,7 +1370,7 @@ $Lang{RSS_Doc_Description} = "RSS feed for BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 Full Count: \$fullCnt;
 Full Age/days: \$fullAge;
-Full Size/GB: \$fullSize;
+Full Size/GiB: \$fullSize;
 Speed MB/sec: \$fullRate;
 Incr Count: \$incrCnt;
 Incr Age/Days: \$incrAge;

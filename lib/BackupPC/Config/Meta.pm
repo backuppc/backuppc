@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -93,6 +93,7 @@ use vars qw(%ConfigMeta);
     CatPath	 	=> {type => "execPath", undefIfEmpty => 1},
     GzipPath	 	=> {type => "execPath", undefIfEmpty => 1},
     Bzip2Path	 	=> {type => "execPath", undefIfEmpty => 1},
+    RrdToolPath	 	=> {type => "execPath", undefIfEmpty => 1},
     DfMaxUsagePct	=> "float",
     DHCPAddressRanges   => {
             type    => "list",
@@ -114,6 +115,7 @@ use vars qw(%ConfigMeta);
     TopDir              => "string",
     ConfDir             => "string",
     LogDir              => "string",
+    RunDir              => "string",
     BackupPCUserVerify  => "boolean",
     HardLinkMax	 	=> "integer",
     PerlModuleLoad 	=> {

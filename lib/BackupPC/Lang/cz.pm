@@ -101,8 +101,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("Probíhající úlohy")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -118,7 +116,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("Selhání, která vyžadují pozornost")}
 <p>
@@ -153,9 +153,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <p>
 \$hostCntGood hostù bylo úspìšnì zálohováno, v celkové velikost:
 <ul>
-<li> \$fullTot úplných záloh v celkové velitosti \${fullSizeTot}GB
+<li> \$fullTot úplných záloh v celkové velitosti \${fullSizeTot}GiB
      (pøed kompresí),
-<li> \$incrTot inkementaèních záloh v celkové velikosti \${incrSizeTot}GB
+<li> \$incrTot inkementaèních záloh v celkové velikosti \${incrSizeTot}GiB
      (pøed kompresí).
 </ul>
 </p>
@@ -164,7 +164,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> Uživatel </td>
     <td align="center"> #Plný </td>
     <td align="center"> Plný Èas (dní) </td>
-    <td align="center"> Plný Velikost (GB) </td>
+    <td align="center"> Plný Velikost (GiB) </td>
     <td align="center"> Rychlost (MB/s) </td>
     <td align="center"> #Inkr </td>
     <td align="center"> Inkr èas (dní) </td>
@@ -184,7 +184,7 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> Uživatel </td>
     <td align="center"> #Plný </td>
     <td align="center"> Plný Èas (dní) </td>
-    <td align="center"> Plný Velikost (GB) </td>
+    <td align="center"> Plný Velikost (GiB) </td>
     <td align="center"> Rychlost (MB/s) </td>
     <td align="center"> #Inkr </td>
     <td align="center"> Inkr èas (dní) </td>
@@ -225,7 +225,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 //-->
 </script>
 
-\$hostCntGood hostù, kteøí byli zálohováni v celkové velikosti \${fullSizeTot}GB
+\$hostCntGood hostù, kteøí byli zálohováni v celkové velikosti \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -299,12 +299,12 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>V úložišti je \${poolSize}GB zahrnujíc \$info->{"\${name}FileCnt"} souborù
+        <li>V úložišti je \${poolSize}GiB zahrnujíc \$info->{"\${name}FileCnt"} souborù
             a \$info->{"\${name}DirCnt"} adresáøù (od \$poolTime),
         <li>Hashování úložištì dává \$info->{"\${name}FileCntRep"} opakujících se
         souborù s nejdelším øetìzem \$info->{"\${name}FileRepMax"},
         <li>Noèní úklid úložištì odstranil \$info->{"\${name}FileCntRm"} souborù
-            velikosti \${poolRmSize}GB (kolem \$poolTime),
+            velikosti \${poolRmSize}GiB (kolem \$poolTime),
 EOF
 
 # --------------------------------
@@ -1363,7 +1363,7 @@ $Lang{RSS_Doc_Description} = "RSS kanál BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
 Poèet plných: \$fullCnt;
 Èas plných/dní: \$fullAge;
-Celková velikost/GB: \$fullSize;
+Celková velikost/GiB: \$fullSize;
 Rychlost MB/sec: \$fullRate;
 Poèet inkr: \$incrCnt;
 Èas inkr/Dní: \$incrAge;

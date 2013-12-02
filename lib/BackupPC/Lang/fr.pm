@@ -102,8 +102,6 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\$generalInfo
-
 \${h2("Travaux en cours d'exécution")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
@@ -119,7 +117,9 @@ $Lang{BackupPC_Server_Status} = <<EOF;
     </tr>
 \$jobStr
 </table>
+
 <p>
+\$generalInfo
 
 \${h2("Échecs qui demandent de l'attention")}
 <p>

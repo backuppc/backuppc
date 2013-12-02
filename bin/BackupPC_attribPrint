@@ -7,8 +7,6 @@
 #  
 #   Usage: BackupPC_attribPrint attribPath
 #
-#   Compression status of attrib path is based on $Conf{CompressLevel}.
-#
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
@@ -30,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -53,7 +51,6 @@ if ( @ARGV != 1 ) {
     print STDERR "Usage: $0 attribPath\n";
     exit(1);
 }
-my $attrib = BackupPC::XS::Attrib::new($Conf{CompressLevel});
 
 my($dir, $file);
 
@@ -74,10 +71,20 @@ if ( !-f "$dir/$file" ) {
     exit(1);
 }
 
+#
+# We don't know if compression is on or off for a particular attrib file, so we try
+# the opposite if the global setting fails.
+#
+my $attrib = BackupPC::XS::Attrib::new($Conf{CompressLevel});
+
 if ( !$attrib->read($dir, $file) ) {
     my $digestStr = sprintf(" (%s)", unpack("H*", $attrib->digest())) if ( length($attrib->digest()) );
-    print STDERR "BackupPC_attribPrint: cannot read attrib file $ARGV[0]$digestStr\n";
-    exit(1);
+    $attrib = BackupPC::XS::Attrib::new(!$Conf{CompressLevel});
+    if ( !$attrib->read($dir, $file) ) {
+        $digestStr = sprintf(" (%s)", unpack("H*", $attrib->digest())) if ( length($attrib->digest()) );
+        print STDERR "BackupPC_attribPrint: cannot read attrib file $ARGV[0]$digestStr\n";
+        exit(1);
+    }
 }
 my $info = $attrib->get();
 #

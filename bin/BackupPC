@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -86,6 +86,7 @@ die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my $LogDir = $bpc->LogDir();
+my $RunDir = $bpc->RunDir();
 my %Conf   = $bpc->Conf();
 
 #
@@ -348,11 +349,11 @@ sub Main_Initialize
     # Write out our initial status and save our PID
     #
     StatusWrite();
-    unlink("$LogDir/BackupPC.pid");
-    if ( open(PID, ">", "$LogDir/BackupPC.pid") ) {
+    unlink("$RunDir/BackupPC.pid");
+    if ( open(PID, ">", "$RunDir/BackupPC.pid") ) {
         print(PID $$);
         close(PID);
-        chmod(0444, "$LogDir/BackupPC.pid");
+        chmod(0444, "$RunDir/BackupPC.pid");
     }
 
     #
@@ -461,8 +462,8 @@ sub Main_TryToRun_nightly
                         $clear = ($i % $Conf{PoolSizeNightlyUpdatePeriod})
                                  == ($Info->{PoolSizeNightlyPhase} % $Conf{PoolSizeNightlyUpdatePeriod});
                     }
-                    print(LOG $bpc->timeStamp, "updating $p size of $i (clear = $clear, phase = $Info->{PoolSizeNightlyPhase},"
-                                             . " \$Conf{PoolSizeNightlyUpdatePeriod} = $Conf{PoolSizeNightlyUpdatePeriod})\n");
+                    #print(LOG $bpc->timeStamp, "updating $p size of $i (clear = $clear, phase = $Info->{PoolSizeNightlyPhase},"
+                    #                         . " \$Conf{PoolSizeNightlyUpdatePeriod} = $Conf{PoolSizeNightlyUpdatePeriod})\n");
 
                     $Info->{pool}{"${p}4"}[$i]{Kb}            = 0 if ( $clear );
                     $Info->{pool}{"${p}4"}[$i]{FileCnt}       = 0;
@@ -1248,6 +1249,17 @@ sub Main_Check_Job_Messages
 				     $Info->{"${p}FileRepMax"},
 				     $Info->{"${p}FileLinkMax"}, $Info->{"${p}DirCnt"});
 			}
+                        #
+                        # Queue bin/BackupPC_rrdUpdate so that the pool size graphs
+                        # can be updated
+                        #
+                        unshift(@CmdQueue, {
+                                host    => $bpc->adminJob(-1),
+                                user    => "BackupPC",
+                                reqTime => time,
+                                cmd     => ["$BinDir/BackupPC_rrdUpdate"],
+                            });
+                        $CmdQueueOn{$bpc->adminJob(-1)} = 1;
                     }
                 } else {
                     $CmdJob = "";
@@ -1858,7 +1870,7 @@ sub catch_signal
         close(LOG);
         LogFileOpen();
         print(LOG "Fatal error: unhandled signal $SigName\n");
-        unlink("$LogDir/BackupPC.pid");
+        unlink("$RunDir/BackupPC.pid");
         confess("Got new signal $SigName... quitting\n");
     } else {
 	$SigName = shift;
@@ -1897,7 +1909,7 @@ sub ServerSocketInit
             print(LOG $bpc->timeStamp, "unix socket() failed: $!\n");
             exit(1);
         }
-        my $sockFile = "$LogDir/BackupPC.sock";
+        my $sockFile = "$RunDir/BackupPC.sock";
         unlink($sockFile);
         if ( !bind(SERVER_UNIX, sockaddr_un($sockFile)) ) {
             print(LOG $bpc->timeStamp, "unix bind() failed: $!\n");
@@ -2002,7 +2014,7 @@ sub ServerShutdown
     }
     delete($Info->{pid});
     StatusWrite();
-    unlink("$LogDir/BackupPC.pid");
+    unlink("$RunDir/BackupPC.pid");
     exit(1);
 }
 

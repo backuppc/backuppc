@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -129,6 +129,21 @@ EOF
     }
     my $generalInfo = eval("qq{$Lang->{BackupPC_Server_Status_General_Info}}")
                                 if ( $Privileged );
+    my $generalInfo = "";
+    if ( $Privileged ) {
+        $generalInfo  = eval("qq{$Lang->{BackupPC_Server_Status_General_Info}}");
+        if ( -r "$LogDir/poolUsage4.png" && -r "$LogDir/poolUsage52.png" ) {
+            $generalInfo .= <<EOF;
+<ul>
+    <ul>
+        <p><img src="$MyURL?action=view&type=poolUsage&num=4">
+        <p><img src="$MyURL?action=view&type=poolUsage&num=52">
+    </ul>
+</ul>
+EOF
+        }
+    }
+
     my $content = eval("qq{$Lang->{BackupPC_Server_Status}}");
     Header($Lang->{H_BackupPC_Server_Status}, $content);
     Trailer();
@@ -137,13 +152,13 @@ EOF
 sub genPoolInfo
 {
     my($name, $name3, $info) = @_;
-    my $poolSize   = sprintf("%.2f", $info->{"${name}Kb"} / (1000 * 1024));
-    my $poolRmSize = sprintf("%.2f", $info->{"${name}KbRm"} / (1000 * 1024));
+    my $poolSize   = sprintf("%.2f", $info->{"${name}Kb"} / (1024 * 1024));
+    my $poolRmSize = sprintf("%.2f", $info->{"${name}KbRm"} / (1024 * 1024));
     my $poolTime   = timeStamp2($info->{"${name}Time"});
     $info->{"${name}FileCntRm"} = $info->{"${name}FileCntRm"} + 0;
     if ( $Conf{PoolV3Enabled} ) {
-        $poolSize   .= sprintf("+%.2f", $info->{"${name3}Kb"} / (1000 * 1024));
-        $poolRmSize .= sprintf("+%.2f", $info->{"${name3}KbRm"} / (1000 * 1024));
+        $poolSize   .= sprintf("+%.2f", $info->{"${name3}Kb"} / (1024 * 1024));
+        $poolRmSize .= sprintf("+%.2f", $info->{"${name3}KbRm"} / (1024 * 1024));
         foreach my $stat ( qw(DirCnt FileCnt FileCntRep FileRepMax FileCntRm) ) {
             $Info{"$name$stat"} = $Info{"$name$stat"} . "+" . $Info{"$name3$stat"};
         }

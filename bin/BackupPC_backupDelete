@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -183,8 +183,8 @@ if ( $Backups[$idx]{version} < 4 ) {
         # deleted files.
         #
         BackupPC::DirOps::RmTreeQuiet($bpc, $DelDir, $DelCompress, \&progressUpdate);
-        BackupPC::XS::PoolRefCnt::DeltaFileFlush();
     }
+    BackupPC::XS::PoolRefCnt::DeltaFileFlush();
 }
 if ( !$opts{l} ) {
     unlink("$HostDir/SmbLOG.$Backups[$idx]{num}")

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -234,14 +234,14 @@ sub RmTreeQuiet
 
     my($cwd) = Cwd::fastcwd();
     $cwd = $1 if ( $cwd =~ /(.*)/ );
-    my $ret = BackupPC::DirOps::RmTreeQuietInner($bpc, $roots, $compress, $progressCB);
+    my $ret = BackupPC::DirOps::RmTreeQuietInner($bpc, $cwd, $roots, $compress, $progressCB);
     chdir($cwd) if ( $cwd );
     return $ret;
 }
 
 sub RmTreeQuietInner
 {
-    my($bpc, $roots, $compress, $progressCB) = @_;
+    my($bpc, $cwd, $roots, $compress, $progressCB) = @_;
     my(@files, $root);
 
     if ( defined($roots) && length($roots) ) {
@@ -257,11 +257,11 @@ sub RmTreeQuietInner
             $path = $1;
             $name = $2;
             if ( !-d $path ) {
-                print(STDERR "RmTreeQuietInner: $path isn't a directory (while removing $root)\n");
+                print(STDERR "RmTreeQuietInner: $cwd/$path isn't a directory (while removing $root)\n");
                 return 1;
             }
             if ( !chdir($path) ) {
-                print(STDERR "RmTreeQuietInner: can't chdir to $path (while removing $root)\n");
+                print(STDERR "RmTreeQuietInner: can't chdir to $cwd/$path (while removing $root)\n");
                 return 1;
             }
         } else {
@@ -276,8 +276,7 @@ sub RmTreeQuietInner
         if ( $compress >= -1 && $name =~ /^attrib/ && -f $name ) {
             my $attr = BackupPC::XS::Attrib::new($compress);
             if ( !$attr->read(".", $name) ) {
-                print(STDERR "Can't read attribute file in $path/$name: " . $attr->errStr() . "\n");
-                return 1;
+                print(STDERR "Can't read attribute file in $cwd/$path/$name: " . $attr->errStr() . "\n");
             }
             my $attrAll = $attr->get();
             my $d = $attr->digest();
@@ -313,10 +312,10 @@ sub RmTreeQuietInner
                 }
                 my $d = BackupPC::DirOps::dirReadNames($bpc, ".");
 		if ( !defined($d) ) {
-		    print(STDERR "Can't read $path/$name: $!\n");
+		    print(STDERR "Can't read $cwd/$path/$name: $!\n");
 		} else {
 		    @files = grep $_ !~ /^\.{1,2}$/, @$d;
-		    BackupPC::DirOps::RmTreeQuietInner($bpc, \@files, $compress, $progressCB);
+		    BackupPC::DirOps::RmTreeQuietInner($bpc, "$cwd/$name", \@files, $compress, $progressCB);
 		    if ( !chdir("..") ) {
                         print(STDERR "RmTreeQuietInner: can't chdir .. (while removing $root)\n");
                         return 1;

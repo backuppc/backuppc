@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -69,7 +69,7 @@ sub action
                 $backupnumber = $Backups[$i]{num};
             }
             $fullSizeTot += $fullSize + $incrSizeTot;
-            $fullSize = sprintf("%.2f", ($fullSize + $incrSizeTot) / 1000);
+            $fullSize = sprintf("%.2f", ($fullSize + $incrSizeTot) / 1024);
             $str = <<EOF;
 <tr>
 <td class="border"><input type="hidden" name="backup$checkBoxCnt" value="$backupnumber"><input type="checkbox" name="fcb$checkBoxCnt" value="$host">&nbsp;${HostLink($host)} </td>
@@ -85,7 +85,7 @@ EOF
                 $strGood .= $str;
             }
         }
-        $fullSizeTot = sprintf("%.2f", $fullSizeTot / 1000);
+        $fullSizeTot = sprintf("%.2f", $fullSizeTot / 1024);
         my $now      = timeStamp2(time);
         my $checkAllHosts = $Lang->{checkAllHosts};
         $strGood .= <<EOF;

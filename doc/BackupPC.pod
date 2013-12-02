@@ -1,7 +1,7 @@
 =head1 BackupPC Introduction
 
-This documentation describes BackupPC version 4.0.0alpha2,
-released on 15 Sep 2013.
+This documentation describes BackupPC version 4.0.0alpha3,
+released on 1 Dec 2013.
 
 =head2 Overview
 
@@ -381,7 +381,7 @@ you have changed (ie: adding a large new tree).
 
 =item *
 
-BackupPC_link is removed since it is not needed any more.
+BackupPC_link is removed since it is no longer used.
 
 =item *
 
@@ -471,30 +471,40 @@ Hopefully downgrading isn't necessary...
 =item *
 
 Optimizations: the C code implementation should give a significant performance
-   advantage, as well as the more flexible.
+advantage, as well as the more flexible.
 
-   Potential V4 optimizations that are planned, but not yet implemented, include:
+Potential V4 optimizations that are planned, but not yet implemented, include:
 
-     - rsync-bpc doesn't support checksum caching.
+=over 4
 
-     - rsync-bpc with --ignore-times actually reads each unchanged file three times,
-       and writes it once (normal rsync reads twice and writes once; the extra one
-       is due to compression).  Some careful optimization can eliminate two reads
-       and the write.  The final read can be eliminated with checksum caching.
+=item *
 
-     - BackupPC_refCountUpdate, BackupPC_fsck, BackupPC_backupDuplicate,
-       BackupPC_backupDelete are all single-threaded.
+rsync-bpc doesn't support checksum caching.
+
+=item *
+
+rsync-bpc with --ignore-times actually reads each unchanged file three times,
+and writes it once (normal rsync reads twice and writes once; the extra one
+is due to compression).  Some careful optimization can eliminate two reads
+and the write.  The final read can be eliminated with checksum caching.
+
+=item *
+
+BackupPC_refCountUpdate, BackupPC_fsck, BackupPC_backupDuplicate,
+BackupPC_backupDelete are all single-threaded.
+
+=back
 
 =item *
 
 Some clever future work: the concepts of full/incr rsync can be completely
-   blurred.  For example, you can now do 100% incrementals.  Also, the
-   rsync whole-file MD5 digest matches the V4 digest, so a full backup
-   could actually just check the whole-file MD5 digest.  Alternatively,
-   a "hybrid" could be to make --ignore-times random per file, based
-   on a certain percentage.  Eg: --ignore-times is on for 10% of the
-   files.  So every backup we fully check 10% of the files randomly,
-   and the other 90% are just based on comparing the meta data.
+blurred.  For example, you can now do 100% incrementals.  Also, the
+rsync whole-file MD5 digest matches the V4 digest, so a full backup
+could actually just check the whole-file MD5 digest.  Alternatively,
+a "hybrid" could be to make --ignore-times random per file, based
+on a certain percentage.  Eg: --ignore-times is on for 10% of the
+files.  So every backup we fully check 10% of the files randomly,
+and the other 90% are just based on comparing the meta data.
 
 =back
 
@@ -774,8 +784,8 @@ see L<http://www.cpan.org>.
 
 =item *
 
-The perl module BackupPC::XS is required, and several others, 
-Archive::Zip, XML::RSS, File::Listing, Net::FTP, Net::FTP::RetrHandle,
+The perl modules BackupPC::XS and File::Listing are required, and several others, 
+Archive::Zip, XML::RSS, Net::FTP, Net::FTP::RetrHandle,
 Net::FTP::AutoReconnect are recommended.
 
 Try "perldoc BackupPC::XS" and "perldoc Archive::Zip" to see if you have these
@@ -815,6 +825,12 @@ the server.
 
 The Apache web server, see L<http://www.apache.org>, preferably built
 with mod_perl support.
+
+=item *
+
+If rrdtool is installed on the BackupPC server, graphs of the pool usage
+will be mainted and displayed.  To enable the graphs, point $Conf{RrdToolPath}
+to the rrdtool executable.
 
 =back
 
@@ -970,29 +986,29 @@ and then run these commands:
 The same sequence of commands can be used for each module.
 
 Now let's move onto BackupPC itself.  After fetching
-BackupPC-4.0.0alpha2.tar.gz, run these commands as root:
+BackupPC-4.0.0alpha3.tar.gz, run these commands as root:
 
-    tar zxf BackupPC-4.0.0alpha2.tar.gz
-    cd BackupPC-4.0.0alpha2
+    tar zxf BackupPC-4.0.0alpha3.tar.gz
+    cd BackupPC-4.0.0alpha3
     perl configure.pl
 
 In the future this release might also have patches available on the
 SourceForge site.  These patch files are text files, with a name of
 the form
 
-    BackupPC-4.0.0alpha2plN.diff
+    BackupPC-4.0.0alpha3plN.diff
 
 where N is the patch level, eg: pl2 is patch-level 2.  These
 patch files are cumulative: you only need apply the last patch
 file, not all the earlier patch files.  If a patch file is
-available, eg: BackupPC-4.0.0alpha2pl2.diff, you should apply
+available, eg: BackupPC-4.0.0alpha3pl2.diff, you should apply
 the patch after extracting the tar file:
 
-     # fetch BackupPC-4.0.0alpha2.tar.gz
-     # fetch BackupPC-4.0.0alpha2pl2.diff
-     tar zxf BackupPC-4.0.0alpha2.tar.gz
-     cd BackupPC-4.0.0alpha2
-     patch -p0 < ../BackupPC-4.0.0alpha2pl2.diff
+     # fetch BackupPC-4.0.0alpha3.tar.gz
+     # fetch BackupPC-4.0.0alpha3pl2.diff
+     tar zxf BackupPC-4.0.0alpha3.tar.gz
+     cd BackupPC-4.0.0alpha3
+     patch -p0 < ../BackupPC-4.0.0alpha3pl2.diff
      perl configure.pl
 
 A patch file includes comments that describe that bug fixes
@@ -3452,6 +3468,8 @@ The BackupPC user.
 
 =item $Conf{LogDir} = '';
 
+=item $Conf{RunDir} = '';
+
 =item $Conf{InstallDir} = '';
 
 =item $Conf{CgiDir} = '';
@@ -3460,7 +3478,8 @@ Important installation directories:
 
   TopDir     - where all the backup data is stored
   ConfDir    - where the main config and hosts files resides
-  LogDir     - where log files and other transient information
+  LogDir     - where log files and other transient information resides
+  RunDir     - where pid and sock files reside
   InstallDir - where the bin, lib and doc installation dirs reside.
                Note: you cannot change this value since all the
                perl scripts include this path.  You must reinstall
@@ -4988,6 +5007,14 @@ configured SCGI securely, then don't enable it!!
 Full URL of the BackupPC_Admin CGI script, or the configured path
 for SCGI.  Used for links in email messages.
 
+=item $Conf{RrdToolPath} = '';
+
+Full path to the rrdtool command.  If available, graphs of pool usage
+will be generated.  If empty, then the graphs will be skipped.
+
+Security caution: normal users should not allowed to write to this file
+or directory.
+
 =item $Conf{Language} = 'en';
 
 Language to use.  See lib/BackupPC/Lang for the list of supported
@@ -5195,6 +5222,8 @@ Rikiya Yamamoto provided the Japanese translation for 3.3.0.
 Yakim provided the Ukrainian translation for 3.3.0.
 
 Sergei Butakov provided the Russian translation for 3.3.0.
+
+Alexander Moisseev provided the rrdtool graphing code in 4.0.0.
 
 Many people have reported bugs, made useful suggestions and helped
 with testing; see the ChangeLog and the mailing lists.

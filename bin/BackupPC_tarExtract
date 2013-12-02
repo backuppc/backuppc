@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -70,9 +70,11 @@ EOF
     exit(1);
 }
 
+select(STDOUT); $| = 1;
+
 my $Full = $opts{f};
 my $FileCnt        = 0;
-my $FileCntPeriod  = 20;
+my $FileCntPeriod  = 100;
 
 print("$0: got Full = $Full\n");
 
@@ -873,10 +875,40 @@ sub exitMesg
     #
     # Flush out remaining attributes.
     #
-    $AttrNew->flush(1) if ( $AttrNew );
-    $AttrOld->flush(1) if ( $AttrOld );
+    if ( $AttrNew ) {
+        #
+        # Make sure the top-level share has an attibute entry.
+        # Normally that is added when any directory appears in the archive.
+        # But if the archive only has files, we'll never add entries for
+        # the parent directories.
+        #
+        if ( !$AttrNew->get("/") ) {
+            print("adding top-level attrib for share $ShareNameUM\n")
+                                 if ( $Conf{XferLogLevel} >= 4 );
+            my $fNew = {
+                        name     => $ShareNameUM,
+                        type     => BPC_FTYPE_DIR,
+                        mode     => 0775,
+                        uid      => 0,
+                        gid      => 0,
+                        size     => 0,
+                        mtime    => time(),
+                        inode    => $Inode++,
+                        nlinks   => 0,
+                        compress => $Compress,
+                   };
+            $AttrNew->set("/", $fNew);
+        }
 
-    BackupPC::XS::PoolRefCnt::DeltaPrint();
+        $AttrNew->flush(1);
+        $bpc->flushXSLibMesgs();
+    }
+    if ( $AttrOld ) {
+        $AttrOld->flush(1);
+        $bpc->flushXSLibMesgs();
+    }
+
+    BackupPC::XS::PoolRefCnt::DeltaPrint() if ( $Conf{XferLogLevel} >= 6 );
     BackupPC::XS::PoolRefCnt::DeltaFileFlush();
 
     if ( $Abort ) {

@@ -11,11 +11,34 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 1 Dec 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
+
+#------------------------------------------------------------------------
+# Version 4.0.0alpha3, 1 Dec 2013
+#------------------------------------------------------------------------
+
+* Added rrdtool support, based on code from Alexander Moisseev.
+
+* Fixed BackupPC_attribPrint to auto-detect the compression status of the
+  attrib file.  Reported by Chris Adamson.
+
+* Fixed bin/BackupPC_tarExtract for case where no subdirectories are in
+  the archive, which caused the top-level attrib file to not be written.
+  Reported by Alexander Moisseev.
+
+* Added recovery/cleanup to bin/BackupPC_dump in case last V4 backup is
+  not filled.
+
+* Tweaked RmTreeQuietInner() in lib/BackupPC/DirOps.pm to improve error
+  messages, and continue on error.
+
+* When FHS is enabled, moved BackupPC.pid and BackupPC.sock files to
+  /var/run/BackupPC (or $Conf{RunDir}), and the documentation to
+  $InstallDir/share/doc/BackupPC.
 
 #------------------------------------------------------------------------
 # Version 4.0.0alpha2, 15 Sep 2013

@@ -1,9 +1,9 @@
 
                               BackupPC
 
-                            Version 4.0.0alpha2
+                            Version 4.0.0alpha3
 
-                            15 Sep 2013
+                            1 Dec 2013
 
          Copyright (C) 2001-2013  Craig Barratt.  All rights reserved.
 
@@ -28,8 +28,8 @@ plus rsync 2.5.6 on the client machines.
 
 To install BackupPC run these commands as root:
 
-    tar zxf BackupPC-4.0.0alpha2.tar.gz
-    cd BackupPC-4.0.0alpha2
+    tar zxf BackupPC-4.0.0alpha3.tar.gz
+    cd BackupPC-4.0.0alpha3
     perl configure.pl
 
 This will automatically determine some system information and prompt you

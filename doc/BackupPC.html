@@ -109,7 +109,7 @@
 <hr />
 <h1 id="BackupPC-Introduction">BackupPC Introduction</h1>
 
-<p>This documentation describes BackupPC version 4.0.0alpha2, released on 15 Sep 2013.</p>
+<p>This documentation describes BackupPC version 4.0.0alpha3, released on 1 Dec 2013.</p>
 
 <h2 id="Overview">Overview</h2>
 
@@ -296,7 +296,7 @@
 <li><p>Progress indication: a simple status that shows the number of files processed so far. It&#39;s hard to convert that to a percentage, since the total isn&#39;t known until the end of the backup. But knowing the number of files is quite helpful, since you can get an idea of the expected total based on the prior backups, or knowing what configuration you have changed (ie: adding a large new tree).</p>
 
 </li>
-<li><p>BackupPC_link is removed since it is not needed any more.</p>
+<li><p>BackupPC_link is removed since it is no longer used.</p>
 
 </li>
 <li><p>Since files are no longer stored in backup trees, browsing the backup trees is even harder than V3 (where you just had to deal with mangling). A new utility BackupPC_ls acts like &quot;ls -l&quot;, showing accurate directory listings of files, together with the MD5 digests.</p>
@@ -341,17 +341,20 @@
 </li>
 <li><p>Optimizations: the C code implementation should give a significant performance advantage, as well as the more flexible.</p>
 
-<pre><code>   Potential V4 optimizations that are planned, but not yet implemented, include:
+<p>Potential V4 optimizations that are planned, but not yet implemented, include:</p>
 
-     - rsync-bpc doesn&#39;t support checksum caching.
+<ul>
 
-     - rsync-bpc with --ignore-times actually reads each unchanged file three times,
-       and writes it once (normal rsync reads twice and writes once; the extra one
-       is due to compression).  Some careful optimization can eliminate two reads
-       and the write.  The final read can be eliminated with checksum caching.
+<li><p>rsync-bpc doesn&#39;t support checksum caching.</p>
 
-     - BackupPC_refCountUpdate, BackupPC_fsck, BackupPC_backupDuplicate,
-       BackupPC_backupDelete are all single-threaded.</code></pre>
+</li>
+<li><p>rsync-bpc with --ignore-times actually reads each unchanged file three times, and writes it once (normal rsync reads twice and writes once; the extra one is due to compression). Some careful optimization can eliminate two reads and the write. The final read can be eliminated with checksum caching.</p>
+
+</li>
+<li><p>BackupPC_refCountUpdate, BackupPC_fsck, BackupPC_backupDuplicate, BackupPC_backupDelete are all single-threaded.</p>
+
+</li>
+</ul>
 
 </li>
 <li><p>Some clever future work: the concepts of full/incr rsync can be completely blurred. For example, you can now do 100% incrementals. Also, the rsync whole-file MD5 digest matches the V4 digest, so a full backup could actually just check the whole-file MD5 digest. Alternatively, a &quot;hybrid&quot; could be to make --ignore-times random per file, based on a certain percentage. Eg: --ignore-times is on for 10% of the files. So every backup we fully check 10% of the files randomly, and the other 90% are just based on comparing the meta data.</p>
@@ -529,7 +532,7 @@
 <li><p>Perl version 5.8.0 or later. If you don&#39;t have perl, please see <a href="http://www.cpan.org">http://www.cpan.org</a>.</p>
 
 </li>
-<li><p>The perl module BackupPC::XS is required, and several others, Archive::Zip, XML::RSS, File::Listing, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect are recommended.</p>
+<li><p>The perl modules BackupPC::XS and File::Listing are required, and several others, Archive::Zip, XML::RSS, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect are recommended.</p>
 
 <p>Try &quot;perldoc BackupPC::XS&quot; and &quot;perldoc Archive::Zip&quot; to see if you have these modules. If not, fetch them from <a href="http://www.cpan.org">http://www.cpan.org</a> and see the instructions below for how to build and install them.</p>
 
@@ -548,6 +551,9 @@
 
 </li>
 <li><p>The Apache web server, see <a href="http://www.apache.org">http://www.apache.org</a>, preferably built with mod_perl support.</p>
+
+</li>
+<li><p>If rrdtool is installed on the BackupPC server, graphs of the pool usage will be mainted and displayed. To enable the graphs, point <a href="#_conf_rrdtoolpath_">$Conf{RrdToolPath}</a> to the rrdtool executable.</p>
 
 </li>
 </ul>
@@ -631,23 +637,23 @@
 
 <p>The same sequence of commands can be used for each module.</p>
 
-<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.0.0alpha2.tar.gz, run these commands as root:</p>
+<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.0.0alpha3.tar.gz, run these commands as root:</p>
 
-<pre><code>    tar zxf BackupPC-4.0.0alpha2.tar.gz
-    cd BackupPC-4.0.0alpha2
+<pre><code>    tar zxf BackupPC-4.0.0alpha3.tar.gz
+    cd BackupPC-4.0.0alpha3
     perl configure.pl</code></pre>
 
 <p>In the future this release might also have patches available on the SourceForge site. These patch files are text files, with a name of the form</p>
 
-<pre><code>    BackupPC-4.0.0alpha2plN.diff</code></pre>
+<pre><code>    BackupPC-4.0.0alpha3plN.diff</code></pre>
 
-<p>where N is the patch level, eg: pl2 is patch-level 2. These patch files are cumulative: you only need apply the last patch file, not all the earlier patch files. If a patch file is available, eg: BackupPC-4.0.0alpha2pl2.diff, you should apply the patch after extracting the tar file:</p>
+<p>where N is the patch level, eg: pl2 is patch-level 2. These patch files are cumulative: you only need apply the last patch file, not all the earlier patch files. If a patch file is available, eg: BackupPC-4.0.0alpha3pl2.diff, you should apply the patch after extracting the tar file:</p>
 
-<pre><code>     # fetch BackupPC-4.0.0alpha2.tar.gz
-     # fetch BackupPC-4.0.0alpha2pl2.diff
-     tar zxf BackupPC-4.0.0alpha2.tar.gz
-     cd BackupPC-4.0.0alpha2
-     patch -p0 &lt; ../BackupPC-4.0.0alpha2pl2.diff
+<pre><code>     # fetch BackupPC-4.0.0alpha3.tar.gz
+     # fetch BackupPC-4.0.0alpha3pl2.diff
+     tar zxf BackupPC-4.0.0alpha3.tar.gz
+     cd BackupPC-4.0.0alpha3
+     patch -p0 &lt; ../BackupPC-4.0.0alpha3pl2.diff
      perl configure.pl</code></pre>
 
 <p>A patch file includes comments that describe that bug fixes and changes. Feel free to review it before you apply the patch.</p>
@@ -2449,6 +2455,10 @@
 <dd>
 
 </dd>
+<strong><dt id="_conf_rundir_">$Conf{RunDir}</a> = &#39;&#39;;</dt></strong>
+<dd>
+
+</dd>
 <strong><dt id="_conf_installdir_">$Conf{InstallDir}</a> = &#39;&#39;;</dt></strong>
 <dd>
 
@@ -2460,7 +2470,8 @@
 
 <pre><code>  TopDir     - where all the backup data is stored
   ConfDir    - where the main config and hosts files resides
-  LogDir     - where log files and other transient information
+  LogDir     - where log files and other transient information resides
+  RunDir     - where pid and sock files reside
   InstallDir - where the bin, lib and doc installation dirs reside.
                Note: you cannot change this value since all the
                perl scripts include this path.  You must reinstall
@@ -3754,6 +3765,14 @@
 <p>Full URL of the BackupPC_Admin CGI script, or the configured path for SCGI. Used for links in email messages.</p>
 
 </dd>
+<strong><dt id="_conf_rrdtoolpath_">$Conf{RrdToolPath}</a> = &#39;&#39;;</dt></strong>
+<dd>
+
+<p>Full path to the rrdtool command. If available, graphs of pool usage will be generated. If empty, then the graphs will be skipped.</p>
+
+<p>Security caution: normal users should not allowed to write to this file or directory.</p>
+
+</dd>
 <strong><dt id="_conf_language_">$Conf{Language}</a> = &#39;en&#39;;</dt></strong>
 <dd>
 
@@ -3934,6 +3953,8 @@
 <p>Yakim provided the Ukrainian translation for 3.3.0.</p>
 
 <p>Sergei Butakov provided the Russian translation for 3.3.0.</p>
+
+<p>Alexander Moisseev provided the rrdtool graphing code in 4.0.0.</p>
 
 <p>Many people have reported bugs, made useful suggestions and helped with testing; see the ChangeLog and the mailing lists.</p>
 

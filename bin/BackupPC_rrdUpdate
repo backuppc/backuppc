@@ -109,7 +109,7 @@ sub RRDUpdate
     }
     $sizeTot = $sizeTot / 1024;
 
-    print $bpc->cmdSystemOrEval(
+    if ( $err = $bpc->cmdSystemOrEval(
             [
                 $Conf{RrdToolPath},
                 "update", $RRDFile,
@@ -119,13 +119,17 @@ sub RRDUpdate
                 . $Info{"poolKb"}  . ":"
                 . $Info{"pool4Kb"} . ":"
                 . $Info{"cpool4Kb"}
-            ]);
-     printf("%sRRD updated:"
+            ]) ) {
+        print "$err";
+    }
+    else {
+        printf("%sRRD updated:"
           . " date %s; cpoolKb %f; total %f;"
           . " poolKb %f; pool4Kb %f; cpool4Kb %f\n",
                 $bpc->timeStamp,
                 $NowRnd1, $Info{"cpoolKb"}, $sizeTot,
                 $Info{"poolKb"}, $Info{"pool4Kb"}, $Info{"cpool4Kb"});
+    }
 }
 
 #

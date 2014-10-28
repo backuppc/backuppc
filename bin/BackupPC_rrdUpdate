@@ -144,7 +144,7 @@ sub RRDGraph
     #
     # Get each pool max value from RRD
     #
-    $bpc->cmdSystemOrEval(
+    $bpc->cmdSystemOrEvalLong(
             [
                 $Conf{RrdToolPath},
                 "graphv", "-",
@@ -162,7 +162,7 @@ sub RRDGraph
                 if ( $_[0] =~ /^print\[([0-3])\] = "([.0-9]+)"$/ ) {
                     $poolMax[$1] = $2 unless ( $2 == 0 );
                 }
-            });
+            }, 1, undef);
 
     my $poolSizeGraph = [
         "$Conf{RrdToolPath}",
@@ -232,6 +232,6 @@ sub RRDGraph
         print("Can't open/create $LogDir/poolUsage$weeks.png\n");
         return;
     }
-    $bpc->cmdSystemOrEval($poolSizeGraph, sub { print $fdOut $_[0] });
+    $bpc->cmdSystemOrEvalLong($poolSizeGraph, sub { print $fdOut $_[0] }, 1, undef);
     close($fdOut);
 }

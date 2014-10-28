@@ -1,3 +1,5 @@
+=encoding ISO8859-1
+
 =head1 BackupPC Introduction
 
 This documentation describes BackupPC version 4.0.0alpha3,

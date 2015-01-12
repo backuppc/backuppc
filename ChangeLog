@@ -21,6 +21,24 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+#------------------------------------------------------------------------
+# Version 3.3.1, 11 Jan 2015
+#------------------------------------------------------------------------
+
+* Added more helpful text (instead of "New Key") for BackupFilesOnly and
+  BackupFilesExclude in the CGI editor.
+
+* Removed deprecated defined(@Backups) from lib/BackupPC/CGI/Browse.pm;
+  patch from Alexander Moisseev.
+
+* Updated Spanish language file lib/BackupPC/Lang/es.pm from Luis Bustamante.
+
+* Updated init.d/debian-backuppc from Eduardo Díaz Rodríguez.
+
+#------------------------------------------------------------------------
+# Version 3.3.0, 14 Apr 2013
+#------------------------------------------------------------------------
+
 * Changed restore file name from restore.{zip|tar} to restore_$host_YYYY-MM-DD.{zip|tar},
   where the date is the start date of the backup.  Originally suggested by Brad Alexander,
   with a healthy debate among Les, Holger, Jeffrey, Adam, Carl and others.
@@ -30,7 +48,7 @@
   and month.
 
 * Made the directory path display (when browsing backups or history) a sequence of links,
-  allowing any parent directory to be quick selected.
+  allowing any parent directory to be quickly selected.
 
 * Added Japanese language file lib/BackupPC/Lang/ja.pm submitted by Rikiya
   Yamamoto.

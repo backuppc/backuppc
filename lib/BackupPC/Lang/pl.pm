@@ -1438,6 +1438,7 @@ $Lang{CfgEdit_Button_Delete}   = "Kasuj";
 $Lang{CfgEdit_Button_Add}      = "Dodaj";
 $Lang{CfgEdit_Button_Override} = "Nadpisz";
 $Lang{CfgEdit_Button_New_Key}  = "Nowy Klucz";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Błąd: Nie zapisano z powodu błędów";

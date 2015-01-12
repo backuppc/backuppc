@@ -1445,6 +1445,7 @@ $Lang{CfgEdit_Button_Delete}   = "Détruire";
 $Lang{CfgEdit_Button_Add}      = "Ajouter";
 $Lang{CfgEdit_Button_Override} = "Écraser";
 $Lang{CfgEdit_Button_New_Key}  = "Nouvelle clé";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Erreur: Pas de sauvegarde à cause d'erreurs.";

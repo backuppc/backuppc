@@ -160,7 +160,8 @@ EOF
 my $ConfigPath = "";
 my $ConfigFileOK = 1;
 while ( 1 ) {
-    if ( $ConfigFileOK && -f "/etc/BackupPC/config.pl" ) {
+    if ( $ConfigFileOK && -f "/etc/BackupPC/config.pl"
+            && (!defined($opts{fhs}) || $opts{fhs}) && !defined($opts{"config-path"}) ) {
         $ConfigPath = "/etc/BackupPC/config.pl";
         $opts{fhs} = 1 if ( !defined($opts{fhs}) );
         print <<EOF;

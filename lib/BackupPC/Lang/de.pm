@@ -1454,6 +1454,7 @@ $Lang{CfgEdit_Button_Delete}   = "Löschen";
 $Lang{CfgEdit_Button_Add}      = "Hinzufügen";
 $Lang{CfgEdit_Button_Override} = "Überschreiben";
 $Lang{CfgEdit_Button_New_Key}  = "Neuer Schlüssel";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Wegen Fehlern nicht gesichert";

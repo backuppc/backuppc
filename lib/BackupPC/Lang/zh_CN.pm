@@ -1418,7 +1418,8 @@ $Lang{CfgEdit_Button_Insert}   = "插入";
 $Lang{CfgEdit_Button_Delete}   = "删除";
 $Lang{CfgEdit_Button_Add}      = "添加";
 $Lang{CfgEdit_Button_Override} = "替换";
-$Lang{CfgEdit_Button_New_Key}  = "文件卷名(Windows Share)";
+$Lang{CfgEdit_Button_New_Key}  = "文件卷名";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "错误：有误，无法保存";

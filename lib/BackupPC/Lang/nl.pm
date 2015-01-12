@@ -1460,6 +1460,7 @@ $Lang{CfgEdit_Button_Delete}   = "Verwijderen";
 $Lang{CfgEdit_Button_Add}      = "Toevoegen";
 $Lang{CfgEdit_Button_Override} = "Overschrijven";
 $Lang{CfgEdit_Button_New_Key}  = "Nieuwe sleutel";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Fout: niet bewaard ten gevolge van fouten";

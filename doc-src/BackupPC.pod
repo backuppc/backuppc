@@ -173,7 +173,7 @@ ownership, and modification time) separately from the file contents.
 
 Based on your site's requirements you need to decide what your backup
 policy is.  BackupPC is not designed to provide exact re-imaging of
-failed disks.  See L<Limitations> for more information.
+failed disks.  See L<Some Limitations> for more information.
 However, the addition of tar transport for linux/unix clients, plus
 full support for special file types and unix attributes in v1.4.0
 likely means an exact image of a linux/unix file system can be made.
@@ -483,7 +483,7 @@ single file, which often becomes huge. Any change to this file requires
 a separate copy of the file to be saved during backup. Outlook is even
 more troublesome, since it keeps this file locked all the time, so it
 cannot be read by smbclient whenever Outlook is running.  See the
-L<Limitations> section for more discussion of this problem.
+L<Some Limitations> section for more discussion of this problem.
 
 In addition to total disk space, you should make sure you have
 plenty of inodes on your BackupPC data partition. Some users have
@@ -2688,10 +2688,10 @@ since it saves attribute meta-data separate from the files.  Since
 BackupPC mostly does reads from disk, maintaining the access time of
 files generates a lot of unnecessary disk writes.  So, provided 
 BackupPC has a dedicated data disk, you should consider mounting
-BackupPC's data directory with the noatime (or, with Linux kernels
->=2.6.20, relatime) attribute (see mount(1)).
+BackupPC's data directory with the noatime (or, with Linux
+kernels >=2.6.20, relatime) attribute (see mount(1)).
 
-=head2 Limitations
+=head2 Some Limitations
 
 BackupPC isn't perfect (but it is getting better). Please see
 L<http://backuppc.sourceforge.net/faq/limitations.html> for a
@@ -2785,7 +2785,7 @@ See L<http://backuppc.sourceforge.net>.
 
 =head1 Copyright
 
-Copyright (C) 2001-2013 Craig Barratt
+Copyright (C) 2001-2015 Craig Barratt
 
 =head1 Credits
 

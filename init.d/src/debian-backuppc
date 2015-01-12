@@ -1,5 +1,16 @@
 #!/bin/sh
-#
+### BEGIN INIT INFO
+# Provides:          backuppc
+# Required-Start:    $syslog $network $remote_fs
+# Required-Stop:     $syslog $network $remote_fs
+# Should-Start:      $local_fs
+# Should-Stop:       $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Launch backuppc server
+# Description:       Launch backuppc server, a high-performance,
+#                    enterprise-grade system for backing up PCs.
+### END INIT INFO
 # DESCRIPTION
 #
 #   Startup init script for BackupPC on Debian.

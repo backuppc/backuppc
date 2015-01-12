@@ -1443,6 +1443,7 @@ $Lang{CfgEdit_Button_Delete}   = "Видалити";
 $Lang{CfgEdit_Button_Add}      = "Додати";
 $Lang{CfgEdit_Button_Override} = "Перезаписати";
 $Lang{CfgEdit_Button_New_Key}  = "Нове значення";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Error: No save due to errors";

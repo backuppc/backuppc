@@ -12,7 +12,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2013  Craig Barratt
+#   Copyright (C) 2004-2015  Craig Barratt
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 3.3.0, released 13 Apr 2013.
+# Version 3.3.1, released 11 Jan 2015.
 #
 # See http://backuppc.sourceforge.net.
 #

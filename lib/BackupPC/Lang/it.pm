@@ -1461,6 +1461,7 @@ $Lang{CfgEdit_Button_Delete}   = "Cancella";
 $Lang{CfgEdit_Button_Add}      = "Aggiungi";
 $Lang{CfgEdit_Button_Override} = "Sovrascrivi";
 $Lang{CfgEdit_Button_New_Key}  = "Nuova chiave";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Errore: Non salvo poich&eacute; sono presenti errori";

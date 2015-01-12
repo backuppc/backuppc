@@ -1451,6 +1451,7 @@ $Lang{CfgEdit_Button_Delete}   = "Excluir";
 $Lang{CfgEdit_Button_Add}      = "Adicionar";
 $Lang{CfgEdit_Button_Override} = "Sobrepor";
 $Lang{CfgEdit_Button_New_Key}  = "New Key";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "ENG Error: No save due to errors";

@@ -571,16 +571,15 @@ sub CheckLangUsage
     my $vars = {};
 
     foreach my $file ( (
-		qw(cgi-bin/BackupPC_Admin bin/BackupPC_sendEmail),
+		qw(cgi-bin/BackupPC_Admin bin/BackupPC_sendEmail lib/BackupPC/Lang/en.pm lib/BackupPC/Config/Meta.pm),
 		<lib/BackupPC/CGI/*pm>,
-		<lib/BackupPC/Lang/en.pm>,
 	    ) ) {
 	open(F, $file) || die("can't open $file");
 	binmode(F);
 	while ( <F> ) {
 	    next if ( /^\s*#/ );
 	    s/\$Lang->{([^}]*)}/$vars->{$1} = 1;/eg;
-	    s/(text|comment)\s*=>\s*"(CfgEdit_.*)"/$vars->{$2} = 1;/eg;
+	    s/(text|comment|keyText)\s*=>\s*"(CfgEdit_.*)"/$vars->{$2} = 1;/eg;
 	}
 	close(F);
     }

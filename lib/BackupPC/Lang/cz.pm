@@ -1438,6 +1438,7 @@ $Lang{CfgEdit_Button_Delete}   = "Smazat";
 $Lang{CfgEdit_Button_Add}      = "Pøidat";
 $Lang{CfgEdit_Button_Override} = "Pøepsat";
 $Lang{CfgEdit_Button_New_Key}  = "Nový klíè";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Chyba: Neuloženo z dùvody chyb";

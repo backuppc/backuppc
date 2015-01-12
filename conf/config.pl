@@ -655,6 +655,11 @@ $Conf{ArchiveInfoKeepCnt} = 10;
 # List of directories or files to backup.  If this is defined, only these
 # directories or files will be backed up.
 #
+# When editing from the web interface, you should add a valid ShareName
+# (based on $Conf{XferMethod}), and then enter the directories specific
+# to that ShareName.  A special ShareName "*" matches any ShareName that
+# doesn't have an explicit entry.
+#
 # For Smb, only one of $Conf{BackupFilesExclude} and $Conf{BackupFilesOnly}
 # can be specified per share. If both are set for a particular share, then
 # $Conf{BackupFilesOnly} takes precedence and $Conf{BackupFilesExclude}
@@ -691,6 +696,11 @@ $Conf{BackupFilesOnly} = undef;
 # can be specified per share.  If both are set for a particular share,
 # then $Conf{BackupFilesOnly} takes precedence and
 # $Conf{BackupFilesExclude} is ignored.
+#
+# When editing from the web interface, you should add a valid ShareName
+# (based on $Conf{XferMethod}), and then enter the directories or files
+# specific to that ShareName.  A special ShareName "*" matches any
+# ShareName that doesn't have an explicit entry.
 #
 # This can be set to a string, an array of strings, or, in the case
 # of multiple shares, a hash of strings or arrays.  A hash is used

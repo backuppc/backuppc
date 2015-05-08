@@ -1366,9 +1366,9 @@ sub BackupFullExpire
 
     #
     # If regular backups are still disabled with $Conf{FullPeriod} < 0,
-    # we still expire backups based on a typical FullPeriod value - weekly.
+    # we still expire backups based on a safe FullPeriod value - daily.
     #
-    $fullPeriod = 7 if ( $fullPeriod <= 0 );
+    $fullPeriod = 1 if ( $fullPeriod <= 0 );
 
     $fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
 

@@ -1352,7 +1352,8 @@ sub BackupFullExpire
     my($client, $Backups) = @_;
     my $fullCnt = 0;
     my $fullPeriod = $Conf{FullPeriod};
-    my $origFullPeriod = $fullPeriod;
+    my $startTimeDeviation = $fullPeriod < 1 ? $fullPeriod / 2 : 0.5;
+    my $nextFull;
     my $fullKeepCnt = $Conf{FullKeepCnt};
     my $fullKeepIdx = 0;
     my(@delete, @fullList);
@@ -1387,9 +1388,9 @@ sub BackupFullExpire
         if ( !$noDelete && 
               ($fullKeepIdx >= @$fullKeepCnt
               || $k > 0
-                 && $fullKeepIdx > 0
-                 && $Backups->[$i]{startTime} - $Backups->[$prevFull]{startTime}
-                             < ($fullPeriod - $origFullPeriod / 2) * 24 * 3600
+                 && defined($nextFull)
+                 && $Backups->[$nextFull]{startTime} - $Backups->[$prevFull]{startTime}
+                             < ($fullPeriod + $startTimeDeviation) * 24 * 3600
                )
             ) {
             #
@@ -1399,6 +1400,7 @@ sub BackupFullExpire
             unshift(@delete, $i);
         } else {
             $fullCnt++;
+            $nextFull = $i;
             while ( $fullKeepIdx < @$fullKeepCnt
                      && $fullCnt >= $fullKeepCnt->[$fullKeepIdx] ) {
                 $fullKeepIdx++;

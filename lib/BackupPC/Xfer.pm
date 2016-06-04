@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 3.2.0beta1, released 24 Jan 2010.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -65,10 +65,8 @@ sub create
 
     } elsif ( $protocol eq 'ftp' ) {
 
-        #$xfer = BackupPC::Xfer::Ftp->new( $bpc, $args );
-        #$errStr = BackupPC::Xfer::Ftp::errStr() if ( !defined($xfer) );
-
-        $errStr = "FTP not implemented in 4.x";
+        $xfer = BackupPC::Xfer::Ftp->new( $bpc, $args );
+        $errStr = BackupPC::Xfer::Ftp::errStr() if ( !defined($xfer) );
         return $xfer;
 
     } elsif ( $protocol eq 'rsync' || $protocol eq 'rsyncd' ) {

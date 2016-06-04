@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_dump: Dump a single client.
@@ -85,7 +85,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -93,7 +93,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::DirOps;
 use BackupPC::Lib;
 use BackupPC::Storage;
@@ -946,7 +946,9 @@ for my $shareName ( @$ShareNames ) {
 	XferMethod        => $Conf{XferMethod},
 	logLevel          => $Conf{XferLogLevel},
         inPlace           => $inPlace,
+        newBkupNum        => $newBkupNum,
         newBkupIdx        => $newBkupIdx,
+        lastBkupNum       => $lastBkupNum,
         lastBkupIdx       => $lastBkupIdx,
         incrBaseBkupNum   => $incrBaseBkupNum,
         incrBaseTime      => $incrBaseTime,

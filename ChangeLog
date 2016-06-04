@@ -11,11 +11,29 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version __VERSION__, released __RELEASEDATE__.
 #
 # See http://backuppc.sourceforge.net.
 #
 #========================================================================
+
+#------------------------------------------------------------------------
+# Version __VERSION__, __RELEASEDATE__
+#------------------------------------------------------------------------
+
+* Initial rewrite of lib/BackupPC/Xfer/Ftp.pm for 4.x, but not yet working.
+
+* Added more helpful text (instead of "New Key") for BackupFilesOnly and
+  BackupFilesExclude in the CGI editor.
+
+* Updated Spanish language file lib/BackupPC/Lang/es.pm from Luis Bustamante.
+
+* Added =encoding ISO8859-1 to top of BackupPC.pod; from Alexander Moisseev. 
+
+* Fixed minor typos in several language files; from Alexander Moisseev.
+
+* Applied a couple of patches to bin/BackupPC_rrdUpdate from Alexander
+  Moisseev.
 
 #------------------------------------------------------------------------
 # Version 4.0.0alpha3, 1 Dec 2013

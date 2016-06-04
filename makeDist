@@ -1,0 +1,733 @@
+#!/usr/bin/env perl
+#
+# makeDist: Build a BackupPC distribution
+#
+# DESCRIPTION
+#
+#   This script should be run with no arguments to build a
+#   distribution.  The $Version and $ReleaseDate should be
+#   edited below to specify the version name and the release
+#   date.  The distribution is createede in the sub-directory
+#   dist.  The dsitribution is in the file name:
+#
+#           dist/BackupPC-$Version.tar.gz.
+#
+#   Often the language files are not up to date, and makeDist
+#   exits after complaining about the lang files being inconsistent.
+#   Use the -nolangCheck option to turn off that behavior.
+#
+# AUTHOR
+#   Craig Barratt <cbarratt@users.sourceforge.net>
+#
+# COPYRIGHT
+#   Copyright (C) 2001-2015  Craig Barratt
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+#========================================================================
+
+use strict;
+use File::Path;
+use File::Copy;
+use Getopt::Long;
+use Data::Dumper;
+
+use lib "./lib";
+use BackupPC::Lib;
+use BackupPC::Config::Meta qw(:all);
+
+my $bpc;
+die("BackupPC::Lib->new failed\n")
+        if ( !($bpc = BackupPC::Lib->new(".", ".", "./conf", 1)) );
+
+umask(0022);
+
+my @PerlSrc = qw(
+    bin/BackupPC
+    bin/BackupPC_Admin_SCGI
+    bin/BackupPC_archive
+    bin/BackupPC_archiveHost
+    bin/BackupPC_archiveStart
+    bin/BackupPC_attribPrint
+    bin/BackupPC_backupDelete
+    bin/BackupPC_backupDuplicate
+    bin/BackupPC_dump
+    bin/BackupPC_fixupBackupSummary
+    bin/BackupPC_fsck
+    bin/BackupPC_ls
+    bin/BackupPC_nightly
+    bin/BackupPC_poolCntPrint
+    bin/BackupPC_refCountUpdate
+    bin/BackupPC_restore
+    bin/BackupPC_rrdUpdate
+    bin/BackupPC_sendEmail
+    bin/BackupPC_serverMesg
+    bin/BackupPC_tarCreate
+    bin/BackupPC_tarExtract
+    bin/BackupPC_zcat
+    bin/BackupPC_zipCreate
+
+    lib/BackupPC/Config/Meta.pm
+    lib/BackupPC/DirOps.pm
+    lib/BackupPC/Lib.pm
+    lib/BackupPC/Storage.pm
+    lib/BackupPC/View.pm
+    lib/BackupPC/Xfer/Archive.pm
+    lib/BackupPC/Xfer/Ftp.pm
+    lib/BackupPC/Xfer/Protocol.pm
+    lib/BackupPC/Xfer/Rsync.pm
+    lib/BackupPC/Xfer/Smb.pm
+    lib/BackupPC/Xfer/Tar.pm
+    lib/BackupPC/Xfer.pm
+    lib/BackupPC/Zip/FileMember.pm
+    lib/Net/FTP/AutoReconnect.pm
+    lib/Net/FTP/RetrHandle.pm
+    lib/BackupPC/CGI/AdminOptions.pm
+    lib/BackupPC/CGI/Archive.pm
+    lib/BackupPC/CGI/ArchiveInfo.pm
+    lib/BackupPC/CGI/Browse.pm
+    lib/BackupPC/CGI/DirHistory.pm
+    lib/BackupPC/CGI/EditConfig.pm
+    lib/BackupPC/CGI/EmailSummary.pm
+    lib/BackupPC/CGI/GeneralInfo.pm
+    lib/BackupPC/CGI/HostInfo.pm
+    lib/BackupPC/CGI/Lib.pm
+    lib/BackupPC/CGI/LOGlist.pm
+    lib/BackupPC/CGI/Queue.pm
+    lib/BackupPC/CGI/ReloadServer.pm
+    lib/BackupPC/CGI/Restore.pm
+    lib/BackupPC/CGI/RestoreFile.pm
+    lib/BackupPC/CGI/RestoreInfo.pm
+    lib/BackupPC/CGI/RSS.pm
+    lib/BackupPC/CGI/StartServer.pm
+    lib/BackupPC/CGI/StartStopBackup.pm
+    lib/BackupPC/CGI/StopServer.pm
+    lib/BackupPC/CGI/Summary.pm
+    lib/BackupPC/CGI/View.pm
+    lib/BackupPC/Lang/cz.pm
+    lib/BackupPC/Lang/de.pm
+    lib/BackupPC/Lang/en.pm
+    lib/BackupPC/Lang/es.pm
+    lib/BackupPC/Lang/fr.pm
+    lib/BackupPC/Lang/it.pm
+    lib/BackupPC/Lang/ja.pm
+    lib/BackupPC/Lang/nl.pm
+    lib/BackupPC/Lang/pl.pm
+    lib/BackupPC/Lang/pt_br.pm
+    lib/BackupPC/Lang/ru.pm
+    lib/BackupPC/Lang/uk.pm
+    lib/BackupPC/Lang/zh_CN.pm
+    lib/BackupPC/Storage/Text.pm
+    cgi-bin/BackupPC_Admin
+);
+
+my %opts;
+$opts{langCheck}   = 1;
+$opts{syntaxCheck} = 1;
+if ( !GetOptions(
+                 \%opts,
+                 "langCheck!",
+                 "syntaxCheck!",
+                 "version=s",
+                 "releasedate=s",
+           ) || @ARGV != 0
+             || !defined($opts{version})
+        ) {
+    print STDERR <<EOF;
+usage: $0 [--nolangCheck] [--nosyntaxCheck] [--releasedate 'DD MMM YYYY'] --version X.Y.Z
+EOF
+    exit(1);
+}
+
+my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime();
+$year += 1900;
+
+my @month_abbr  = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+
+my $Version     = $opts{version} || "3.2.0";
+my $ReleaseDate = $opts{releasedate} || "$mday $month_abbr[$mon] $year";
+my $DistDir     = "dist/BackupPC-$Version";
+
+#
+# Check config parameters
+#
+my $ConfVars = {};
+my $errCnt;
+
+$errCnt += CheckConfigParams("conf/config.pl", $ConfVars, 0);
+
+$errCnt += CheckConfigParams("doc-src/BackupPC.pod", $ConfVars, 1);
+
+$errCnt += CheckMetaDataVsConfig($ConfVars, "lib/BackupPC/Config/Meta.pm");
+
+$errCnt += CheckEditorVsConfig($ConfVars, "lib/BackupPC/CGI/EditConfig.pm");
+
+#
+# These config parameters are not used in the code, so ignore them.
+#
+$ConfVars->{BackupPCUser} = 2;
+$ConfVars->{CgiDir}       = 2;
+$ConfVars->{TopDir}       = 2;
+$ConfVars->{LogDir}       = 2;
+$ConfVars->{RunDir}       = 2;
+$ConfVars->{ConfDir}      = 2;
+$ConfVars->{InstallDir}   = 2;
+$ConfVars->{CgiImageDir}  = 2;
+$ConfVars->{ClientCharsetLegacy}  = 2;      # actually used
+
+#
+# These config parameters are used in the code to be backward compatible,
+# but are not present in the current config file, so ignore them.
+#
+$ConfVars->{BlackoutHourBegin} = 2;
+$ConfVars->{BlackoutHourEnd}   = 2;
+$ConfVars->{BlackoutWeekDays}  = 2;
+$ConfVars->{RsyncLogLevel}     = 2;
+
+if ( $opts{syntaxCheck} ) {
+    system("perl -Ilib -c conf/config.pl >& /dev/null")
+            && die("$0: conf/config.pl contains a syntax error (or someone killed me)\n");
+    system("perl -Ilib -c configure.pl >& /dev/null")
+            && die("$0: configure.pl contains a syntax error (or someone killed me)\n");
+}
+foreach my $file ( @PerlSrc ) {
+    if ( $opts{syntaxCheck} ) {
+        system("perl -Ilib -c $file >& /dev/null")
+            && die("$0: $file contains a syntax error (or someone killed me)\n");
+    }
+    #
+    # Skip checking of bundled libraries not explicitly part of
+    # BackupPC
+    #
+    next if ( $file =~ m/lib\/Net\/FTP/ );
+    $errCnt += CheckConfigParams($file, $ConfVars, 1);
+}
+if ( $opts{langCheck} ) {
+    $errCnt += CheckLangUsage();
+    $errCnt += CheckLangTags(\@PerlSrc);
+}
+if ( $errCnt ) {
+    print("Exiting because of errors\n");
+    exit(1)
+}
+
+$errCnt = 0;
+foreach my $var ( sort(keys(%$ConfVars) ) ) {
+    next if ( $ConfVars->{$var} >= 2 || $var =~ /^\$/ );
+    printf("Unused config parameter $var\n");
+    $errCnt++;
+}
+if ( $errCnt ) {
+    print("Exiting because of errors\n");
+    exit(1)
+}
+
+rmtree($DistDir, 0, 0);
+mkpath($DistDir, 0, 0777);
+
+foreach my $dir ( qw(bin doc conf images init.d/src cgi-bin httpd/src
+		     lib/BackupPC/CGI
+		     lib/BackupPC/Config
+		     lib/BackupPC/Lang
+		     lib/BackupPC/Storage
+		     lib/BackupPC/Xfer
+		     lib/BackupPC/Zip
+		     lib/Net/FTP
+		) ) {
+    mkpath("$DistDir/$dir", 0, 0777);
+}
+
+my %ConfName;
+my $ConfPod = config2pod();
+
+rmtree("doc", 0, 0);
+mkpath("doc", 0, 0777);
+InstallFile("doc-src/BackupPC.pod", "doc/BackupPC.pod");
+
+use Pod::Html;
+pod2html("doc/BackupPC.pod",
+        #"--backlink=Back to Top",
+        "--header",
+        "--title=BackupPC",
+        "--outfile=doc/BackupPC.html");
+
+foreach my $file ( (@PerlSrc,
+	    <images/*.gif>,
+	    <images/*.png>,
+	    <images/*.ico>,
+	    qw(
+		conf/config.pl
+		conf/hosts
+		conf/BackupPC_stnd.css
+		conf/BackupPC_stnd_orig.css
+                conf/sorttable.js
+		init.d/README
+		init.d/src/debian-backuppc
+		init.d/src/freebsd-backuppc
+		init.d/src/freebsd-backuppc2
+		init.d/src/gentoo-backuppc
+		init.d/src/gentoo-backuppc.conf
+		init.d/src/linux-backuppc
+		init.d/src/slackware-backuppc
+		init.d/src/solaris-backuppc
+		init.d/src/suse-backuppc
+		httpd/src/BackupPC.conf
+		doc/BackupPC.pod
+		doc/BackupPC.html
+		README
+		LICENSE
+		ChangeLog
+		configure.pl
+        )) ) {
+    InstallFile("$file", "$DistDir/$file");
+}
+rmtree("doc", 0, 0);
+system("cd dist ; tar zcf BackupPC-$Version.tar.gz BackupPC-$Version");
+print("Distribution written to dist/BackupPC-$Version.tar.gz\n");
+unlink("pod2htmd.x~~");
+unlink("pod2htmi.x~~");
+unlink("pod2htmd.tmp");
+unlink("pod2htmi.tmp");
+
+###########################################################################
+# Subroutines
+###########################################################################
+
+sub InstallFile
+{
+    my($file, $dest) = @_;
+
+    unlink($dest) if ( -d $dest );
+    if ( $file =~ /\.gif/ || $file =~ /\.png/ || $file =~ /\.ico/ ) {
+        die("can't copy($file, $dest)\n") unless copy($file, $dest);
+    } else {
+        my $lineCnt = 0;
+	open(FILE, $file)   || die("can't open $file for reading\n");
+	open(OUT, ">$dest") || die("can't open $dest for writing\n");
+	binmode(FILE);
+	binmode(OUT);
+	while ( <FILE> ) {
+	    s/^([#*\s]+)Version \d+\.\d+[\.\w]*, released \d+ \w+ \d{4}\.?/$1Version __VERSION__, released __RELEASEDATE__./;
+	    s/__VERSION__/$Version/g;
+	    s/__RELEASEDATE__/$ReleaseDate/g;
+	    s/^([#*\s]+)Copyright\s+\(C\)\s+(\d{4})-\d{4}\s+Craig\s+Barratt/$1Copyright (C) $2-$year  Craig Barratt/i;
+	    if ( $file =~ /BackupPC\.html$/ ) {
+		#
+		# fixup for conf links
+		#
+		if ( /<dt id="Conf-/ ) {
+		    s/<dt id=("Conf-.*)>\$Conf{([^}]*)}/
+			defined($ConfName{$2})
+			    ? "\L<dt id=\"$ConfName{$2}\">\E\$Conf{$2}<\/a>"
+			    : "<dt id=$1>\$Conf{$2}"/eg;
+                } else {
+		    s/\$Conf{([^}]*)}/
+			defined($ConfName{$1})
+			    ? "\L<a href=\"#$ConfName{$1}\">\E\$Conf{$1}<\/a>"
+			    : "\$Conf{$1}"/eg;
+		}
+                s{^(<dt id="_conf.*</dt>)}{<strong>$1</strong>};
+		s/^<DD>/<DD><P>/;
+		s/^<li><\/li>/<li>/;
+                #
+                # add diveder lines before <h1>
+                #
+                s{^<h1}{<hr />\n<h1}g;
+
+	    }
+            if ( $lineCnt == 0 && m{^#!/usr/local/bin/perl} ) {
+                #
+                # configure.pl overwrites the perl path on install, but do this to keep the
+                # distribution path backward compatible.
+                #
+                s{/usr/local/bin/perl}{/usr/bin/perl};
+            }
+	    if ( /__CONFIGPOD__/ ) {
+		print OUT $ConfPod;
+	    } elsif ( /^use lib ".*BackupPC4?\/lib";/
+		    || /^use lib "\/home\/pcbackup\/install\/lib";/ ) {
+		print OUT "use lib \"__INSTALLDIR__/lib\";\n";
+	    } elsif ( $file =~ /Lib.pm/ && /^(\s*\$topDir\s*=\s*)'.*'(\s*if\s.*)/ ) {
+		print OUT "$1'__TOPDIR__'$2\n";
+	    } elsif ( $file =~ /Lib.pm/ && /^(\s*\$installDir\s*=\s*)'.*'(\s*if\s.*)/ ) {
+		print OUT "$1'__INSTALLDIR__'$2\n";
+	    } elsif ( $file =~ /Lib.pm/ && /^(\s*ConfDir\s*=\>\s*\$confDir eq.*)'.*'(.*)/ ) {
+		print OUT "$1'__CONFDIR__'$2\n";
+            } elsif ( $file =~ /Lib.pm/ && /^(\s*my \$useFHS\s*=\s*)\d;/ ) {
+                print OUT "${1}0;\n";
+            } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'[\w\d\.]+',/ ) {
+                print OUT "$1'$Version',\n";
+	    } elsif ( $file =~ /configure.pl/ && /__CONFIGURE_BIN_LIST__/ ) {
+		print OUT "        ", join("\n        ", grep(/^bin\//, @PerlSrc)), "\n";
+	    } elsif ( $file =~ /configure.pl/ && /__CONFIGURE_LIB_LIST__/ ) {
+		print OUT "        ", join("\n        ", grep(/^lib\//, @PerlSrc)), "\n";
+	    } elsif ( $file =~ /BackupPC_Admin/ && /(my *\$installDir *= *)'.*'/ ) {
+		print OUT "$1'__INSTALLDIR__/lib';\n";
+	    } else {
+		print OUT;
+	    }
+            $lineCnt++;
+	}
+	close(FILE);
+	close(OUT);
+    }
+    if ( -x $file ) {
+        chmod(0555, $dest);
+    } else {
+        chmod(0444, $dest);
+    }
+}
+
+sub config2pod
+{
+    open(C, "conf/config.pl") || die("can't open conf/config.pl");
+    binmode(C);
+    my($str, $out, $getHdr, @conf);
+    my $first = 1;
+    while ( <C> ) {
+        chomp;
+        s/ +$//;
+        if ( /^#########################/ ) {
+            if ( $getHdr ) {
+                $str =~ s/\n.*//sg;
+                $out .= "=back\n\n" if ( !$first );
+                $out .= "=head2 $str\n\n=over 4\n\n";
+                $str = "";
+                $first = 0;
+            }
+            $getHdr = !$getHdr;
+            next;
+        }
+        if ( /^#/ ) {
+            s/# ?//;
+            next if ( $str eq "" && /^$/ );
+            $str .= $_ . "\n";
+            $str .= "\n" if ( $str =~ /examples?:\n$/i );
+        } elsif ( /^\$Conf{([^}]*)/ ) {
+            my $var = $1;
+            s/  +/ /g;
+            s/;\s*#.*/;/;
+            if ( !s/\[$/[ ... ];/ && !s/<<'EOF'/.../ ) {
+                s/([^;])\s*$/$1 .../;
+            }
+            push(@conf, $_);
+            my $text = "_conf_${var}_";
+            $text =~ s{[\W\s]}{_}g;
+            $ConfName{$var} = "$text";
+        } elsif ( /^$/ ) {
+            if ( $str ne "" && @conf ) {
+                $out .= "=item " . join("\n\n=item ", @conf) . "\n\n";
+                $out .= $str;
+                $out .= "\n" if ( $str !~ /\n$/ );
+            }
+            $str = "";
+            @conf = ();
+        }
+    }
+    if ( $str ne "" && @conf ) {
+        $out .= "=item " . join("\n\n=item ", @conf) . "\n\n";
+        $out .= $str;
+        $out .= "\n" if ( $str !~ /\n$/ );
+    }
+    $out .= "=back\n\n" if ( !$first );
+    return $out;
+}
+
+sub CheckConfigParams
+{
+    my($file, $vars, $check) = @_;
+    my $errors;
+
+    open(F, $file) || die("can't open $file\n");
+    binmode(F);
+    if ( $check ) {
+        while ( <F> ) {
+            s/\$(self|bpc)->{Conf}{([^}\$]+)}/if ( !defined($vars->{$2}) ) {
+                    print("Unexpected Conf var $2 in $file\n");
+                    $errors++;
+                } else {
+                    $vars->{$2}++;
+                }/eg;
+            s/\$[Cc]onf(?:->)?{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
+                    print("Unexpected Conf var $1 in $file\n");
+                    $errors++;
+                } else {
+                    $vars->{$1}++;
+                }/eg;
+            s/UserCommandRun\("([^"]*)"/if ( !defined($vars->{$1}) ) {
+                    print("Unexpected Conf var $1 in $file\n");
+                    $errors++;
+                } else {
+                    $vars->{$1}++;
+                }/eg;
+        }
+    } else {
+        while ( <F> ) {
+            s/^[^#]*\$self->{Conf}{([^}]*)/$vars->{$1} = 1;/eg;
+            s/^[^#]*\$Conf{([^}]*)/$vars->{$1} = 1;/eg;
+        }
+    }
+    close(F);
+    return $errors;
+}
+
+sub CheckMetaDataVsConfig
+{
+    my($confVars, $file) = @_;
+    my $done = {};
+    my $errors;
+
+    #
+    # Check that the meta file mentions all the config
+    # parameters
+    #
+    open(F, $file) || die("can't open $file");
+
+    while ( <F> ) {
+        next if ( !/^\s{4}(\w+)\s+=>/ );
+        if ( $confVars->{$1} ) {
+            $done->{$1} = 1;
+            next;
+        }
+        next if ( $1 eq "Hosts" );
+        print("$file has $1 but missing from conf/config.pl\n");
+        $errors++;
+    }
+    close(F);
+    foreach my $v ( keys(%$confVars) ) {
+        next if ( $done->{$v} );
+        print("$file missing $v from conf/config.pl\n");
+        $errors++;
+    }
+
+    #
+    # Do extra checks that the CgiUserConfigEdit hash in the Meta
+    # file matches the config file
+    #
+    foreach my $p ( keys(%{$ConfigMeta{CgiUserConfigEdit}{child}}) ) {
+        if ( !defined($bpc->{Conf}{CgiUserConfigEdit}{$p}) ) {
+            print("lib/BackupPC/Config/Meta.pm has $p in CgiUserConfigEdit,"
+                . " but conf/config.pl CgiUserConfigEdit does not\n");
+            $errors++;
+        }
+    }
+    foreach my $p ( keys(%{$bpc->{Conf}{CgiUserConfigEdit}}) ) {
+        if ( !defined($ConfigMeta{CgiUserConfigEdit}{child}{$p}) ) {
+            print("conf/config.pl CgiUserConfigEdit has $p, but"
+                . " lib/BackupPC/Config/Meta.pm does not\n");
+            $errors++;
+        }
+    }
+    return $errors;
+}
+
+sub CheckEditorVsConfig
+{
+    my($confVars, $file) = @_;
+    my $done = {};
+    my $errors;
+
+    #
+    # Check that the config editor file mentions all the config
+    # parameters
+    #
+    open(F, $file) || die("can't open $file");
+
+    while ( <F> ) {
+        next if ( !/name\s*=>\s*"(\w+)"/ );
+        if ( $confVars->{$1} ) {
+            $done->{$1} = 1;
+            next;
+        }
+        next if ( $1 eq "Hosts" );
+        print("$file has $1 but missing from conf/config.pl\n");
+        $errors++;
+    }
+    close(F);
+    foreach my $v ( keys(%$confVars) ) {
+        next if ( $done->{$v} );
+        print("$file missing $v from conf/config.pl\n");
+        $errors++;
+    }
+    return $errors;
+}
+
+#
+# Make sure that every lang variable in cgi-bin/BackupPC_Admin matches
+# the strings in each lib/BackupPC/Lang/*.pm file.  This makes sure
+# we didn't miss any translations in any of the languages.
+#
+sub CheckLangUsage
+{
+    my $errors;
+    my $vars = {};
+
+    foreach my $file ( (
+		qw(cgi-bin/BackupPC_Admin bin/BackupPC_sendEmail lib/BackupPC/Lang/en.pm lib/BackupPC/Config/Meta.pm),
+		<lib/BackupPC/CGI/*pm>,
+	    ) ) {
+	open(F, $file) || die("can't open $file");
+	binmode(F);
+	while ( <F> ) {
+	    next if ( /^\s*#/ );
+	    s/\$Lang->{([^}]*)}/$vars->{$1} = 1;/eg;
+	    s/(text|comment|keyText)\s*=>\s*"(CfgEdit_.*)"/$vars->{$2} = 1;/eg;
+	}
+	close(F);
+    }
+
+    foreach my $f ( <lib/BackupPC/Lang/*.pm> ) {
+        my $done = {};
+        open(F, $f) || die("can't open $f\n");
+	binmode(F);
+        while ( <F> ) {
+            s/#.*//g;
+            s/\$Lang{([^}]*)}/
+		    my $var = $1;
+		    next if ( $var =~ m{^(Reason_|Status_|backupType_|Disabled_)} );
+		    next if ( $var eq "Documentation" );
+                    if ( !defined($vars->{$var}) ) {
+                        print("Unexpected Lang var $var in $f\n");
+                        $errors++;
+                    } else {
+                        $done->{$var} = 1;
+                    }/eg;
+        }
+        close(F);
+        foreach my $v ( keys(%$vars) ) {
+	    #
+	    # skip "variables" with "$", since they are like expressions
+	    #
+	    next if ( $v =~ /\$/ );
+            if ( !defined($done->{$v}) ) {
+                print("Lang var $v missing from $f\n");
+                $errors++;
+            }
+        }
+    }
+    return $errors;
+}
+
+#
+# Pedantically check that all the html tags in each language file
+# match.
+#
+sub CheckLangTags
+{
+    my($perlSrc) = @_;
+    my($en, $enVars) = LangParse("lib/BackupPC/Lang/en.pm");
+    my($errors);
+
+    foreach my $srcFile ( @$perlSrc ) {
+        next if ( $srcFile !~ m{lib/BackupPC/Lang/(.*)} );
+        my $lang = $1;
+        next if ( $lang eq "en.pm" );
+
+	my($d, $dVars) = LangParse("lib/BackupPC/Lang/$lang");
+	foreach my $v1 ( @$en ) {
+	    my $v2 = shift(@$d);
+	    if ( $v1->{var} ne $v2->{var} ) {
+		print("Botch: got $lang var $v2->{var} vs en.pm $v1->{var}\n");
+		exit;
+	    }
+	    my $t1 = LangTextStrip($v1->{val});
+	    my $t2 = LangTextStrip($v2->{val});
+	    if ( $t1 ne $t2 ) {
+                my $i;
+                for ( $i = 0 ; $i < length($t1) ; $i++ ) {
+                    last if ( substr($t1, 0, $i) ne substr($t2, 0, $i) );
+                }
+		print("$v1->{var}: ($i) got en.pm $t1\nvs $lang $t2\n\n");
+		$errors++;
+	    }
+	}
+    }
+    return $errors;
+}
+
+sub LangTextStrip
+{
+    my($t) = @_;
+
+    $t = "" if ( $t !~ /<.*>/ );
+    $t =~ s/^[^<]*</</s;
+    $t =~ s/([}>])[^<]*</$1</g;
+    $t =~ s/>[^<]*$/>/;
+    $t =~ s/(value=)"[^"]*"/$1""/sg;
+    $t =~ s/({h[12]\()"[^"]*"/$1""/g;
+    $t =~ s/ENG[\s\n]*//sg;
+    $t =~ s/^(<<EOF;\n)[^<]*/$1/g;
+    return $t;
+}
+
+sub LangParse
+{
+    my($file) = @_;
+    open(C, $file) || die("can't open $file");
+    binmode(C);
+    my($out, @lang, $var);
+    my $comment = 1;
+    my $allVars = {};
+    my $endLine = undef;
+    while ( <C> ) {
+        if ( /^#/ && !defined($endLine) ) {
+            if ( $comment ) {
+                $out .= $_;
+            } else {
+                if ( $out ne "" ) {
+                    $allVars->{$var} = @lang if ( defined($var) );
+                    push(@lang, {
+                        text => $out,
+                        var => $var,
+                    });
+                }
+                $var = undef;
+                $comment = 1;
+                $out = $_;
+            }
+        } elsif ( /^\s*\$Lang\{([^}]*)/ ) {
+            $comment = 0;
+            if ( defined($var) ) {
+                $allVars->{$var} = @lang if ( defined($var) );
+                push(@lang, {
+                    text => $out,
+                    var => $var,
+                });
+                $out = $_;
+            } else {
+                $out .= $_;
+            }
+            $var = $1;
+	    $endLine = $1 if ( /^\s*\$Lang\{[^}]*} *= *<<(.*);/ );
+	    $endLine = $1 if ( /^\s*\$Lang\{[^}]*} *= *<<'(.*)';/ );
+        } else {
+	    $endLine = undef if ( defined($endLine) && /^\Q$endLine[\n\r]*$/ );
+            $out .= $_;
+        }
+    }
+    if ( $out ne "" ) {
+        $allVars->{$var} = @lang if ( defined($var) );
+        push(@lang, {
+            text => $out,
+            var  => $var,
+        });
+    }
+    close(C);
+    foreach my $v ( @lang ) {
+	if ( $v->{text} =~ /\$Lang{$v->{var}}\s*=\s*(.*)/s ) {
+	    $v->{val} = $1;
+	}
+    }
+    return (\@lang, $allVars);
+}

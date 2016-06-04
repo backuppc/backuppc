@@ -4,7 +4,7 @@
 #
 #   Startup init script for BackupPC for solaris.
 #
-# Distributed with BackupPC version 4.0.0alpha3, released 1 Dec 2013.
+# Distributed with BackupPC version __VERSION__, released __RELEASEDATE__.
 #
 # Not tested...
 # 

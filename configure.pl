@@ -36,7 +36,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version __VERSION__, released __RELEASEDATE__.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -87,7 +87,7 @@ BackupPC cannot load the package $pkg, which is included in the
 BackupPC distribution.  This probably means you did not cd to the
 unpacked BackupPC distribution before running configure.pl, eg:
 
-    cd BackupPC-4.0.0alpha3
+    cd BackupPC-__VERSION__
     ./configure.pl
 
 Please try again.
@@ -563,29 +563,7 @@ foreach my $dir ( (
 
 printf("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
 foreach my $prog ( qw(
-        bin/BackupPC
-        bin/BackupPC_Admin_SCGI
-        bin/BackupPC_archive
-        bin/BackupPC_archiveHost
-        bin/BackupPC_archiveStart
-        bin/BackupPC_attribPrint
-        bin/BackupPC_backupDelete
-        bin/BackupPC_backupDuplicate
-        bin/BackupPC_dump
-        bin/BackupPC_fixupBackupSummary
-        bin/BackupPC_fsck
-        bin/BackupPC_ls
-        bin/BackupPC_nightly
-        bin/BackupPC_poolCntPrint
-        bin/BackupPC_refCountUpdate
-        bin/BackupPC_restore
-        bin/BackupPC_rrdUpdate
-        bin/BackupPC_sendEmail
-        bin/BackupPC_serverMesg
-        bin/BackupPC_tarCreate
-        bin/BackupPC_tarExtract
-        bin/BackupPC_zcat
-        bin/BackupPC_zipCreate
+        __CONFIGURE_BIN_LIST__
     ) ) {
     InstallFile($prog, "$DestDir$Conf{InstallDir}/$prog", 0555);
 }
@@ -604,57 +582,7 @@ foreach my $prog ( qw(
 
 printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
 foreach my $lib ( qw(
-        lib/BackupPC/Config/Meta.pm
-        lib/BackupPC/DirOps.pm
-        lib/BackupPC/Lib.pm
-        lib/BackupPC/Storage.pm
-        lib/BackupPC/View.pm
-        lib/BackupPC/Xfer/Archive.pm
-        lib/BackupPC/Xfer/Ftp.pm
-        lib/BackupPC/Xfer/Protocol.pm
-        lib/BackupPC/Xfer/Rsync.pm
-        lib/BackupPC/Xfer/Smb.pm
-        lib/BackupPC/Xfer/Tar.pm
-        lib/BackupPC/Xfer.pm
-        lib/BackupPC/Zip/FileMember.pm
-        lib/Net/FTP/AutoReconnect.pm
-        lib/Net/FTP/RetrHandle.pm
-        lib/BackupPC/CGI/AdminOptions.pm
-        lib/BackupPC/CGI/Archive.pm
-        lib/BackupPC/CGI/ArchiveInfo.pm
-        lib/BackupPC/CGI/Browse.pm
-        lib/BackupPC/CGI/DirHistory.pm
-        lib/BackupPC/CGI/EditConfig.pm
-        lib/BackupPC/CGI/EmailSummary.pm
-        lib/BackupPC/CGI/GeneralInfo.pm
-        lib/BackupPC/CGI/HostInfo.pm
-        lib/BackupPC/CGI/Lib.pm
-        lib/BackupPC/CGI/LOGlist.pm
-        lib/BackupPC/CGI/Queue.pm
-        lib/BackupPC/CGI/ReloadServer.pm
-        lib/BackupPC/CGI/Restore.pm
-        lib/BackupPC/CGI/RestoreFile.pm
-        lib/BackupPC/CGI/RestoreInfo.pm
-        lib/BackupPC/CGI/RSS.pm
-        lib/BackupPC/CGI/StartServer.pm
-        lib/BackupPC/CGI/StartStopBackup.pm
-        lib/BackupPC/CGI/StopServer.pm
-        lib/BackupPC/CGI/Summary.pm
-        lib/BackupPC/CGI/View.pm
-        lib/BackupPC/Lang/cz.pm
-        lib/BackupPC/Lang/de.pm
-        lib/BackupPC/Lang/en.pm
-        lib/BackupPC/Lang/es.pm
-        lib/BackupPC/Lang/fr.pm
-        lib/BackupPC/Lang/it.pm
-        lib/BackupPC/Lang/ja.pm
-        lib/BackupPC/Lang/nl.pm
-        lib/BackupPC/Lang/pl.pm
-        lib/BackupPC/Lang/pt_br.pm
-        lib/BackupPC/Lang/ru.pm
-        lib/BackupPC/Lang/uk.pm
-        lib/BackupPC/Lang/zh_CN.pm
-        lib/BackupPC/Storage/Text.pm
+        __CONFIGURE_LIB_LIST__
     ) ) {
     InstallFile($lib, "$DestDir$Conf{InstallDir}/$lib", 0444);
 }
@@ -690,7 +618,7 @@ if ( $Conf{CgiImageDir} ne "" ) {
     #
     # Install new CSS file, making a backup copy if necessary
     #
-    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-4.0.0alpha3";
+    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-__VERSION__";
     if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
 	rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
     }
@@ -934,7 +862,7 @@ foreach my $param ( keys(%{$opts{"config-override"}}) ) {
 #
 # Now backup and write the config file
 #
-my $confCopy = "$dest.pre-4.0.0alpha3";
+my $confCopy = "$dest.pre-__VERSION__";
 if ( -f $dest && !-f $confCopy ) {
     #
     # Make copy of config file, preserving ownership and modes

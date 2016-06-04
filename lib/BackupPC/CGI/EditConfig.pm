@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1201,9 +1201,10 @@ EOF
         }
 
         if ( !$type->{noKeyEdit} ) {
+            my $keyText = defined($type->{keyText}) ? $Lang->{$type->{keyText}} : $Lang->{CfgEdit_Button_New_Key};
             $content .= <<EOF;
 <tr><td class="border" colspan="2">
-$Lang->{CfgEdit_Button_New_Key}: <input type="text" class="editTextInput" name="addVarKey_$varName" size="20" maxlength="256" value="">
+$keyText: <input type="text" class="editTextInput" name="addVarKey_$varName" size="20" maxlength="256" value="">
 <input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}" onClick="addSubmit('$varName', 1)">
 </td></tr>
 EOF

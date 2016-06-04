@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha2, released 15 Sep 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -149,6 +149,7 @@ use vars qw(%ConfigMeta);
 
     BackupFilesOnly	=> {
             type      => "hash",
+            keyText   => "CfgEdit_Button_New_Share",
             emptyOk   => 1,
             childType => {
                 type      => "list",
@@ -158,6 +159,7 @@ use vars qw(%ConfigMeta);
     },
     BackupFilesExclude	=> {
             type      => "hash",
+            keyText   => "CfgEdit_Button_New_Share",
             emptyOk   => 1,
             childType => {
                 type      => "list",

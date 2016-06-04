@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_rrdUpdate: Nightly pool graph update
@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha1, released 30 Jun 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -37,7 +37,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib qw( :BPC_DT_ALL );
 use File::Path;
 use Data::Dumper;
@@ -109,7 +109,7 @@ sub RRDUpdate
     }
     $sizeTot = $sizeTot / 1024;
 
-    print $bpc->cmdSystemOrEval(
+    if ( ($err = $bpc->cmdSystemOrEval(
             [
                 $Conf{RrdToolPath},
                 "update", $RRDFile,
@@ -119,13 +119,16 @@ sub RRDUpdate
                 . $Info{"poolKb"}  . ":"
                 . $Info{"pool4Kb"} . ":"
                 . $Info{"cpool4Kb"}
-            ]);
-     printf("%sRRD updated:"
-          . " date %s; cpoolKb %f; total %f;"
-          . " poolKb %f; pool4Kb %f; cpool4Kb %f\n",
-                $bpc->timeStamp,
-                $NowRnd1, $Info{"cpoolKb"}, $sizeTot,
-                $Info{"poolKb"}, $Info{"pool4Kb"}, $Info{"cpool4Kb"});
+            ])) ) {
+         print "$err";
+     } else {
+         printf("%sRRD updated:"
+              . " date %s; cpoolKb %f; total %f;"
+              . " poolKb %f; pool4Kb %f; cpool4Kb %f\n",
+                    $bpc->timeStamp,
+                    $NowRnd1, $Info{"cpoolKb"}, $sizeTot,
+                    $Info{"poolKb"}, $Info{"pool4Kb"}, $Info{"cpool4Kb"});
+    }
 }
 
 #
@@ -140,7 +143,7 @@ sub RRDGraph
     #
     # Get each pool max value from RRD
     #
-    $bpc->cmdSystemOrEval(
+    $bpc->cmdSystemOrEvalLong(
             [
                 $Conf{RrdToolPath},
                 "graphv", "-",
@@ -158,7 +161,7 @@ sub RRDGraph
                 if ( $_[0] =~ /^print\[([0-3])\] = "([.0-9]+)"$/ ) {
                     $poolMax[$1] = $2 unless ( $2 == 0 );
                 }
-            });
+            }, 1, undef);
 
     my $poolSizeGraph = [
         "$Conf{RrdToolPath}",
@@ -228,6 +231,6 @@ sub RRDGraph
         print("Can't open/create $LogDir/poolUsage$weeks.png\n");
         return;
     }
-    $bpc->cmdSystemOrEval($poolSizeGraph, sub { print $fdOut $_[0] });
+    $bpc->cmdSystemOrEvalLong($poolSizeGraph, sub { print $fdOut $_[0] }, 1, undef);
     close($fdOut);
 }

@@ -1367,7 +1367,7 @@ EOF
 # Configuration editor strings
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuation settings.";
+$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuration settings.";
 $Lang{CfgEdit_Edit_Config} = "設定の編集";
 $Lang{CfgEdit_Edit_Hosts}  = "ホストの編集";
 
@@ -1441,6 +1441,7 @@ $Lang{CfgEdit_Button_Delete}   = "削除";
 $Lang{CfgEdit_Button_Add}      = "追加";
 $Lang{CfgEdit_Button_Override} = "上書き";
 $Lang{CfgEdit_Button_New_Key}  = "新項目";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "エラー: エラーのために保存されてません";

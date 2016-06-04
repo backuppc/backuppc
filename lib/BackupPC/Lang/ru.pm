@@ -1383,7 +1383,7 @@ EOF
 # Configuration editor strings
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuation settings.";
+$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuration settings.";
 $Lang{CfgEdit_Edit_Config} = "Редактирование Настроек";
 $Lang{CfgEdit_Edit_Hosts}  = "Редактирование Узлов";
 
@@ -1459,6 +1459,7 @@ $Lang{CfgEdit_Button_Delete}   = "Удалить";
 $Lang{CfgEdit_Button_Add}      = "Добавить";
 $Lang{CfgEdit_Button_Override} = "Заменить";
 $Lang{CfgEdit_Button_New_Key}  = "New Key";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Ошибка: не сохранено из-за наличия ошибок";

@@ -1382,7 +1382,7 @@ EOF
 # Configuration editor strings
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuation settings.";
+$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuration settings.";
 $Lang{CfgEdit_Edit_Config} = "Правити конфігурацію";
 $Lang{CfgEdit_Edit_Hosts}  = "Правити хости";
 
@@ -1458,6 +1458,7 @@ $Lang{CfgEdit_Button_Delete}   = "Видалити";
 $Lang{CfgEdit_Button_Add}      = "Додати";
 $Lang{CfgEdit_Button_Override} = "Перезаписати";
 $Lang{CfgEdit_Button_New_Key}  = "Нове значення";
+$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Error: No save due to errors";

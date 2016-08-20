@@ -451,7 +451,7 @@ sub action
         # based on what is enabled.  Admin users can edit all the
         # available per-host settings.
         #
-        foreach my $m ( keys(%ConfigMenu) ) {
+        foreach my $m ( sort(keys(%ConfigMenu)) ) {
             my $enabled = 0;
             my $text = -1;
             my $n = 0;
@@ -492,7 +492,7 @@ sub action
     }
 
     my $groupText;
-    foreach my $m ( keys(%ConfigMenu) ) {
+    foreach my $m ( sort(keys(%ConfigMenu)) ) {
         next if ( $menuDisable{$m}{top} );
 	my $text = eval("qq($Lang->{$ConfigMenu{$m}{text}})");
         if ( $m eq $menu ) {

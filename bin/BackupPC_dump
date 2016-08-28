@@ -1101,6 +1101,8 @@ for my $shareName ( @$ShareNames ) {
     # Merge the xfer status (need to accumulate counts)
     #
     my $newStat = $xfer->getStats;
+    # MAKSYM 14082016: forcing the right file count if some bytes were transferred; ensures compatibility with at least Samba-4.3
+    $newStat->{fileCnt} = $nFilesTotal if ( $useTar && $newStat->{fileCnt} == 0 && $xfer->getStats->{byteCnt} > 0 );
     if ( $newStat->{fileCnt} == 0 ) {
        $noFilesErr ||= "No files dumped for share $shareName";
     }

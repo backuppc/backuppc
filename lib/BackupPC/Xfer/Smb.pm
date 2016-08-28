@@ -216,6 +216,8 @@ sub readOutput
         # This section is highly dependent on the version of smbclient.
         # If you upgrade Samba, make sure that these regexp are still valid.
         #
+        # MAKSYM 14082016: The next regex will never match on Samba-4.3, as
+        # smbclient doesn't produce output required; keeping it for older Sambas
         if ( /^\s*(-?\d+) \(\s*\d+[.,]\d kb\/s\) (.*)$/ ) {
             my $sambaFileSize = $1;
             my $pcFileName    = $2;
@@ -229,8 +231,15 @@ sub readOutput
             $t->{byteCnt} += $2;
             $t->{fileCnt}++;
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
-        } elsif ( /^\s*tar: dumped \d+ files/ ) {
+        } elsif ( /^\s*tar: dumped (\d+) files/) {
+            # MAKSYM 14082016: Updating file count to the likely number
             $t->{xferOK} = 1;
+            $t->{fileCnt} = $1;
+            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
+        } elsif ( /^\s*tar:\d+\s*Total bytes received: (\d+)/) {
+            # MAKSYM 14082016: Updating byte count to the likely number
+            $t->{xferOK} = 1;
+            $t->{byteCnt} = $1;
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
         } elsif ( /^\s*tar: restored \d+ files/ ) {
             $t->{xferOK} = 1;
@@ -269,6 +278,8 @@ sub readOutput
         } elsif ( /^\s*directory \\/i ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 2 );
         } elsif ( /smb: \\>/
+                || /^\s*tar:\d+/ # MAKSYM 14082016: ignoring 2 more Samba-4.3 specific lines
+                || /^\s*WARNING:/i
                 || /^\s*added interface/i
                 || /^\s*tarmode is now/i
                 || /^\s*Total bytes written/i

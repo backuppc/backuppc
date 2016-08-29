@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -131,6 +131,7 @@ sub action
 		$colSpan = 1;
 		$url     = "&nbsp;";
 		$inode   = -3;			# special value for missing
+                $digest  = "";
 		$tdClass = ' class="histViewMis"';
 		next;
 	    }
@@ -159,16 +160,16 @@ EOF
 		$inode = -1 if ( $hist->{$f}[$i]{size} == 0 );
 		if ( length($digest) ) {
                     if ( !defined($digest2name{$digest}) ) {
-                        $thisName = $digest2name{$digest}
-                                  = "$Lang->{DirHistory_fileLink}$nameCnt";
+                        $digest2name{$digest} = "$Lang->{DirHistory_fileLink}$nameCnt";
                         $nameCnt++;
                     }
+                    $thisName = $digest2name{$digest};
                 } else {
                     if ( !defined($inode2name{$inode}) ) {
-                        $thisName = $inode2name{$inode}
-                                  = "$Lang->{DirHistory_fileLink}$nameCnt";
+                        $inode2name{$inode} = "$Lang->{DirHistory_fileLink}$nameCnt";
                         $nameCnt++;
                     }
+                    $thisName = $inode2name{$inode}
 		}
 		$url = <<EOF;
 <a href="$MyURL?action=RestoreFile&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$thisName</a>

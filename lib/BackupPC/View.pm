@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -73,7 +73,7 @@ sub new
 # Check if a directory exists in the given backup.
 # This is only for >= 4.x backups.
 #
-sub dirExists
+sub dirNotDeleted
 {
     my($m, $idx, $share, $dir) = @_;
     my $last = 0;
@@ -104,16 +104,14 @@ sub dirExists
             $file = $share;
             $last = 1;
         }
-        next if ( !-d $p );
+        next if ( !-d $p || !-f "$p/attrib" );
         my $attr = BackupPC::XS::Attrib::new($compress);
-        next if ( !-f "$p/attrib" );
         if ( !$attr->read($p) ) {
             push(@{$m->{error}}, "Can't read attribute file in $p: " . $attr->errStr());
             next;
         }
-        # TODO!!! check this.
         my $a = $attr->get($file);
-        return 0 if ( $a->{type} != BPC_FTYPE_DIR );
+        return 0 if ( defined($a) && $a->{type} != BPC_FTYPE_DIR );
         return 1;
     }
     return 1;
@@ -574,7 +572,7 @@ sub backupList
             # We need to check if this directory or a
             # parent has the delete attribute
             #
-            if ( $m->dirExists($i, $share, $dir) ) {
+            if ( $m->dirNotDeleted($i, $share, $dir) ) {
                 $exist = 1;
                 unshift(@backupList, $i);
             }
@@ -790,7 +788,7 @@ sub dirHistory
             # this directory wasn't deleted.  We need to look up
             # up each level until we find an attrib file that exists.
             #
-            if ( !$m->dirExists($i, $share, $dir) ) {
+            if ( !$m->dirNotDeleted($i, $share, $dir) ) {
                 foreach my $fileUM ( keys(%$files) ) {
                     $files->{$fileUM}[$i] = undef;
                 }

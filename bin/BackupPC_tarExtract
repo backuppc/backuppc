@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -465,6 +465,7 @@ sub TarReadFile
             #
             pathCreate($pathNew, 1);
             my $name = $f->{name};
+            $name = "/$name" if ( $name !~ m{^/} );
             while ( length($name) > 1 ) {
                 if ( $name =~ m{/} ) {
                     $name =~ s{(.*)/.*}{$1};

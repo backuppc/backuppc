@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -121,7 +121,8 @@ sub printDir
         my @type2suffixChar = ("",  "",  "@", "%", "%", "/", "|", "=", "",  "");
         my $attr = $info->{$file};
 
-        if ( $attr->{type} == BPC_FTYPE_SYMLINK || $attr->{type} == BPC_FTYPE_CHARDEV || $attr->{type} == BPC_FTYPE_BLOCKDEV ) {
+        if ( ($attr->{type} == BPC_FTYPE_SYMLINK || $attr->{type} == BPC_FTYPE_CHARDEV || $attr->{type} == BPC_FTYPE_BLOCKDEV)
+                    && $attr->{digest} ne "" ) {
             #
             # read the file
             # TODO - handle v3 backups
@@ -154,7 +155,8 @@ sub printDir
         $str .= defined($attr->{xattr}) ? "+" : " ";
         $s = sprintf("%d/%d", $attr->{uid}, $attr->{gid});
         $str .= sprintf(" %8s", $s);
-        if ( $attr->{type} == BPC_FTYPE_CHARDEV || $attr->{type} == BPC_FTYPE_BLOCKDEV ) {
+        if ( ($attr->{type} == BPC_FTYPE_CHARDEV || $attr->{type} == BPC_FTYPE_BLOCKDEV)
+                    && $fileData ne "" ) {
             $str .= sprintf(" %10s", $fileData);
         } else {
             $str .= sprintf(" %10llu", $attr->{size});
@@ -164,7 +166,7 @@ sub printDir
         $nameStr =~ s{//+}{/}g;
         $str .= " " . $nameStr;
         $str .= $type2suffixChar[$attr->{type}];
-        if ( $attr->{type} == BPC_FTYPE_SYMLINK ) {
+        if ( $attr->{type} == BPC_FTYPE_SYMLINK && $fileData ne "" ) {
             $str .= " -> " . $fileData;
         }
         if ( length($attr->{digest}) ) {

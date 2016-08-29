@@ -974,7 +974,7 @@ for my $shareName ( @$ShareNames ) {
 	}
 	UserCommandRun("DumpPostShareCmd", $shareName) if ( $NeedPostCmd );
 	UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
-        $XferLOG->write(\"xfer start failed: $errStr\n");
+        $XferLOG->write(\$errStr);
         $stat{hostError} = $errStr;
         BackupFailCleanup();
     }

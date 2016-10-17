@@ -269,6 +269,7 @@ my %Programs = (
     nmblookup      => "NmbLookupPath",
     rsync          => "RsyncClientPath",
     ping           => "PingPath",
+    'ping6/ping'   => "PingPath6",
     df             => "DfPath",
     'ssh/ssh2'     => "SshPath",
     sendmail       => "SendmailPath",

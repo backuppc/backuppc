@@ -269,6 +269,9 @@ sub ConnectData
     PingPath                     => {struct => 'SCALAR',
                                      type   => 'STRING', },
 
+    PingPath6                    => {struct => 'SCALAR',
+                                     type   => 'STRING', },
+
     PingArgs                     => {struct => 'SCALAR',
                                      type   => 'STRING', },
 

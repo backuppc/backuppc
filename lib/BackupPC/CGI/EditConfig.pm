@@ -86,6 +86,7 @@ our %ConfigMenu = (
 	    {name => "SshPath"},
 	    {name => "NmbLookupPath"},
 	    {name => "PingPath"},
+	    {name => "PingPath6"},
 	    {name => "DfPath"},
 	    {name => "SplitPath"},
 	    {name => "ParPath"},

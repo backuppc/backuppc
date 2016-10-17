@@ -818,7 +818,7 @@ sub CheckHostAlive
     }
 
     my $args = {
-	pingPath => $bpc->{Conf}{PingPath},
+	pingPath => $bpc->getPingPathByAddressType( $host ),
 	host     => $host,
     };
     $pingCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{PingCmd}, $args);
@@ -1386,6 +1386,29 @@ sub flushXSLibMesgs()
     foreach my $m ( @$msg ) {
         print($m);
     }
+}
+
+#
+# Attempts to resolve a hostname.
+# Return 4 if it resolves to an IPv4 address, 6 if it resolves to an IPv6
+# address or undef if it can not be resolved.
+#
+sub resolve
+{
+    my ( $bpc, $host ) = @_;
+    my ( $err, @addrs ) = Socket::getaddrinfo($host);
+    return undef if ( $err );
+    return (($addrs[0])->{'family'} == Socket::AF_INET6) ? 6 : 4;
+}
+
+#
+# Return pingPath depending on address type of target.
+#
+sub getPingPathByAddressType
+{
+    my ( $bpc, $host ) = @_;
+    my $at = $bpc->resolve( $host ) || 4;
+    return ($at == 6) ? $bpc->{Conf}{PingPath6} : $bpc->{Conf}{PingPath};
 }
 
 1;

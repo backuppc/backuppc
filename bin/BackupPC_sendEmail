@@ -46,7 +46,7 @@ use Encode;
 use Data::Dumper;
 use Getopt::Std;
 use DirHandle ();
-use vars qw($Lang $TopDir $BinDir $LogDir %Conf $Hosts);
+use vars qw($Lang $TopDir $BinDir $LogDir %Conf %HostConf $Hosts);
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 $TopDir = $bpc->TopDir();
@@ -175,6 +175,7 @@ EOF
 ###########################################################################
 # Generate per-host warning messages sent to each user
 ###########################################################################
+my @AdminBadHostsEmail = ();
 my @AdminBadHosts = ();
 
 foreach my $host ( sort(keys(%Status)) ) {
@@ -182,7 +183,7 @@ foreach my $host ( sort(keys(%Status)) ) {
     # read any per-PC config settings (allowing per-PC email settings)
     #
     $bpc->ConfigRead($host);
-    %Conf = $bpc->Conf();
+    %HostConf = $bpc->Conf();
     my $user = $Hosts->{$host}{user};
 
     #
@@ -191,26 +192,27 @@ foreach my $host ( sort(keys(%Status)) ) {
     if ( ($Status{$host}{reason} eq "Reason_backup_failed"
                || $Status{$host}{reason} eq "Reason_restore_failed")
            && $Status{$host}{error} !~ /^lost network connection to host/
-           && !$Conf{BackupsDisable}
+           && !$HostConf{BackupsDisable}
        ) {
+        push(@AdminBadHostsEmail, $HostConf{EMailAdminUserName});
         push(@AdminBadHosts, "$host ($Status{$host}{error})");
     }
 
     next if ( time - $UserEmailInfo{$user}{$host}{lastTime}
-                        < $Conf{EMailNotifyMinDays} * 24*3600
-              || $Conf{XferMethod} eq "archive"
-              || $Conf{BackupsDisable}
+                        < $HostConf{EMailNotifyMinDays} * 24*3600
+              || $HostConf{XferMethod} eq "archive"
+              || $HostConf{BackupsDisable}
               || $Hosts->{$host}{user} eq ""
               || $user eq ""
           );
     my @Backups = $bpc->BackupInfoRead($host);
     my $numBackups = @Backups;
     if ( $numBackups == 0 ) {
-        my $subj = defined($Conf{EMailNoBackupEverSubj})
-			? $Conf{EMailNoBackupEverSubj}
+        my $subj = defined($HostConf{EMailNoBackupEverSubj})
+			? $HostConf{EMailNoBackupEverSubj}
 			: $Lang->{EMailNoBackupEverSubj};
-        my $mesg = defined($Conf{EMailNoBackupEverMesg})
-		        ? $Conf{EMailNoBackupEverMesg}
+        my $mesg = defined($HostConf{EMailNoBackupEverMesg})
+		        ? $HostConf{EMailNoBackupEverMesg}
 			: $Lang->{EMailNoBackupEverMesg};
         sendUserEmail($user, $host, $mesg, $subj, {
                             userName => user2name($user)
@@ -267,12 +269,12 @@ foreach my $host ( sort(keys(%Status)) ) {
                     if ( $lastGoodOutlook < $Backups[$i]{startTime} );
         }
     }
-    if ( time - $last > $Conf{EMailNotifyOldBackupDays} * 24*3600 ) {
-        my $subj = defined($Conf{EMailNoBackupRecentSubj})
-			? $Conf{EMailNoBackupRecentSubj}
+    if ( time - $last > $HostConf{EMailNotifyOldBackupDays} * 24*3600 ) {
+        my $subj = defined($HostConf{EMailNoBackupRecentSubj})
+			? $HostConf{EMailNoBackupRecentSubj}
 			: $Lang->{EMailNoBackupRecentSubj};
-        my $mesg = defined($Conf{EMailNoBackupRecentMesg})
-			? $Conf{EMailNoBackupRecentMesg}
+        my $mesg = defined($HostConf{EMailNoBackupRecentMesg})
+			? $HostConf{EMailNoBackupRecentMesg}
 			: $Lang->{EMailNoBackupRecentMesg};
         my $firstTime = sprintf("%.1f",
                         (time - $Backups[0]{startTime}) / (24*3600));
@@ -286,7 +288,7 @@ foreach my $host ( sort(keys(%Status)) ) {
         next;
     }
     if ( $numBadOutlook > 0
-          && time - $lastGoodOutlook > $Conf{EMailNotifyOldOutlookDays}
+          && time - $lastGoodOutlook > $HostConf{EMailNotifyOldOutlookDays}
                                              * 24 * 3600 ) {
         my($days, $howLong);
         if ( $lastGoodOutlook == 0 ) {
@@ -295,11 +297,11 @@ foreach my $host ( sort(keys(%Status)) ) {
             $days = sprintf("%.1f", (time - $lastGoodOutlook) / (24*3600));
             $howLong = eval("qq{$Lang->{howLong_not_been_backed_up_for_days_days}}");
         }
-        my $subj = defined($Conf{EMailOutlookBackupSubj})
-			? $Conf{EMailOutlookBackupSubj}
+        my $subj = defined($HostConf{EMailOutlookBackupSubj})
+			? $HostConf{EMailOutlookBackupSubj}
 			: $Lang->{EMailOutlookBackupSubj};
-        my $mesg = defined($Conf{EMailOutlookBackupMesg})
-			? $Conf{EMailOutlookBackupMesg}
+        my $mesg = defined($HostConf{EMailOutlookBackupMesg})
+			? $HostConf{EMailOutlookBackupMesg}
 			: $Lang->{EMailOutlookBackupMesg};
         my $firstTime = sprintf("%.1f",
                         (time - $Backups[0]{startTime}) / (24*3600));
@@ -312,8 +314,35 @@ foreach my $host ( sort(keys(%Status)) ) {
                             numBackups => $numBackups,
                             userName   => user2name($user),
                             howLong    => $howLong,
-                            serverHost => $Conf{ServerHost},
+                            serverHost => $HostConf{ServerHost},
                         }) if ( !defined($Jobs{$host}) );
+    }
+}
+
+#
+# Send per-host errors to per-host admin email
+#
+if ( @AdminBadHosts ) {
+    for my $i (0 .. $#AdminBadHosts) {
+        my $badHost = $AdminBadHosts[$i];
+        if ( $AdminBadHostsEmail[$i] ne "" ) {
+            my $badHostMesg .= <<EOF;
+The following host had an error that is probably caused by a
+misconfiguration.  Please fix this host:
+  - $badHost
+
+EOF
+            my $headers = $Conf{EMailHeaders};
+            $headers .= "\n" if ( $headers !~ /\n$/ );
+            $badHostMesg = <<EOF;
+To: $AdminBadHostsEmail[$i]
+Subject: BackupPC administrative attention needed
+$headers
+${badHostMesg}Regards,
+PC Backup Genie
+EOF
+            SendMail($badHostMesg);
+        }
     }
 }
 
@@ -321,16 +350,6 @@ foreach my $host ( sort(keys(%Status)) ) {
 # Generate sysadmin warning message
 ###########################################################################
 my $adminMesg = "";
-
-if ( @AdminBadHosts ) {
-    my $badHosts = join("\n  - ", sort(@AdminBadHosts));
-    $adminMesg .= <<EOF;
-The following hosts had an error that is probably caused by a
-misconfiguration.  Please fix these hosts:
-  - $badHosts
-
-EOF
-}
 
 #
 # Report if we skipped backups because the disk was too full

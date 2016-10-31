@@ -1261,10 +1261,7 @@ BackupExpire($client);
 #
 # Update reference counts - first apply the deltas.
 #
-# Then, as a sanity/debig check, run a full fsck and check.
-#
 RefCountUpdate(0, 0);
-RefCountUpdate(1, 1);
 
 if ( $XferLOG ) {
     $XferLOG->close();

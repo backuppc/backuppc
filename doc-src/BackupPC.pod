@@ -379,6 +379,9 @@ Compress::Zlib" and "perldoc Archive::Zip" to see if you have these
 modules.  If not, fetch them from L<http://www.cpan.org> and see the
 instructions below for how to build and install them.
 
+The CGI Perl module is required for the http/cgi user interface. CGI was a core
+module, but from version 5.22 Perl no longer ships with it.
+
 The File::RsyncP module is available from L<http://perlrsync.sourceforge.net>
 or CPAN.  You'll need to install the File::RsyncP module if you want to use
 Rsync as a transport method.

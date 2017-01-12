@@ -1368,7 +1368,7 @@ EOF
 # Configuration editor strings
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuation settings.";
+$Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuration settings.";
 $Lang{CfgEdit_Edit_Config} = "Edit Config";
 $Lang{CfgEdit_Edit_Hosts}  = "Edit Hosts";
 

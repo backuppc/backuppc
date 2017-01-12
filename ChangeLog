@@ -21,6 +21,17 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Fixed typo in lib/BackupPC/Lang/en.pm in $Lang{Only_privileged_users_can_edit_config_files}
+  from 
+
+* Updates to bin/BackupPC_sendEmail to avoid per-host settings overwrite,
+  from Derrick Dominic
+
+* Updated deprecated syntax (defined(@array) and "{" in regexps) from
+  Alexander Moisseev.
+
+* Documentation updates from Alexander Moisseev.
+
 #------------------------------------------------------------------------
 # Version 3.3.1, 11 Jan 2015
 #------------------------------------------------------------------------

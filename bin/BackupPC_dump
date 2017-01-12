@@ -491,7 +491,7 @@ if ( !$opts{d} ) {
     } else {
         $host = $client;
     }
-    if ( !defined(gethostbyname($host)) ) {
+    if ( !defined($bpc->resolve($host)) ) {
         #
         # Ok, NS doesn't know about it.  Maybe it is a NetBios name
         # instead.

@@ -1559,9 +1559,24 @@ $Conf{FixedIPNetBiosNameCheck} = 0;
 $Conf{PingPath} = '';
 
 #
+# Like PingPath, but for IPv6.  Security caution: normal users
+# should not be allowed to write to this file or directory.
+# In some environments, this is something like '/usr/bin/ping6'.
+# In modern environments, the regular ping command can handle both
+# IPv4 and IPv6. In the latter case, just set it to  $Conf{PingPath}
+#
+# If you want to disable ping checking for IPv6 hosts, set this to
+# some program that exits with 0 status, eg:
+#
+#     $Conf{PingPath6} = '/bin/echo';
+#
+$Conf{PingPath6} = '';
+
+#
 # Ping command.  The following variables are substituted at run-time:
 #
-#   $pingPath      path to ping ($Conf{PingPath})
+#   $pingPath      path to ping ($Conf{PingPath} or $Conf{PingPath6})
+#                  depending on the address type of $host.
 #   $host          host name
 #
 # Wade Brown reports that on solaris 2.6 and 2.7 ping -s returns the wrong

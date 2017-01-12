@@ -86,6 +86,7 @@ use vars qw(%ConfigMeta);
     SshPath	 	=> {type => "execPath", undefIfEmpty => 1},
     NmbLookupPath 	=> {type => "execPath", undefIfEmpty => 1},
     PingPath	 	=> {type => "execPath", undefIfEmpty => 1},
+    PingPath6	 	=> {type => "execPath", undefIfEmpty => 1},
     DfPath	 	=> {type => "execPath", undefIfEmpty => 1},
     DfCmd	 	=> "string",
     SplitPath	 	=> {type => "execPath", undefIfEmpty => 1},

@@ -35,6 +35,14 @@
 * Applied a couple of patches to bin/BackupPC_rrdUpdate from Alexander
   Moisseev.
 
+* Updates to bin/BackupPC_sendEmail to avoid per-host settings overwrite,
+  from Derrick Dominic
+
+* Updated deprecated syntax (defined(@array) and "{" in regexps) from
+  Alexander Moisseev.
+
+* Documentation updates from Alexander Moisseev.
+
 #------------------------------------------------------------------------
 # Version 4.0.0alpha3, 1 Dec 2013
 #------------------------------------------------------------------------

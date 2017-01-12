@@ -1609,11 +1609,13 @@ sub BackupExpire
         my $cntIncrDel = 1;
         my $earliestIncr = $oldestIncr;
 
-	for ( my $i = $firstIncr + 1 ; $i < @Backups ; $i++ ) {
-            last if ( !$Backups[$i]{preV4} || $Backups[$i]{level} <= $Backups[$firstIncr]{level}
-                          || !$Backups[$i]{noFill} );
-            $cntIncrDel++;
-            $earliestIncr = (time - $Backups[$i]{startTime}) / (24 * 3600);
+        if ( defined($firstIncr) ) {
+            for ( my $i = $firstIncr + 1 ; $i < @Backups ; $i++ ) {
+                last if ( !$Backups[$i]{preV4} || $Backups[$i]{level} <= $Backups[$firstIncr]{level}
+                              || !$Backups[$i]{noFill} );
+                $cntIncrDel++;
+                $earliestIncr = (time - $Backups[$i]{startTime}) / (24 * 3600);
+            }
         }
 
 	if ( $cntIncr >= $Conf{IncrKeepCnt} + $cntIncrDel

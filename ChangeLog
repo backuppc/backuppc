@@ -21,8 +21,17 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Updates to bin/BackupPC_dump and lib/BackupPC/Xfer/Smb.pm from maksyms to fix
+  incompatabilities with Samba 4.3 (#22)
+
+* Sort hash of config editor tabs in lib/BackupPC/CGI/EditConfig.pm from
+  polo (#23)
+
+* Fixes to bin/BackupPC_sendEmail to avoid per-host overwrite of EMailAdminUserName
+  from derrickdominic (#30)
+
 * Fixed typo in lib/BackupPC/Lang/en.pm in $Lang{Only_privileged_users_can_edit_config_files}
-  from 
+  from Alexander Moisseev.
 
 * Updates to bin/BackupPC_sendEmail to avoid per-host settings overwrite,
   from Derrick Dominic

@@ -21,27 +21,39 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+Closed pull requests include: #6, #7, #9, #11, #13, #22, #23, #29, #30, #34, #36, #37
+
 * Initial rewrite of lib/BackupPC/Xfer/Ftp.pm for 4.x, but not yet working.
+
+* Sort hash of config editor tabs in lib/BackupPC/CGI/EditConfig.pm from
+  polo (#23)
+
+* Updates to bin/BackupPC_dump and lib/BackupPC/Xfer/Smb.pm from maksyms to fix
+  incompatabilities with Samba 4.3 (#22)
+
+* Applied IPv6 support (ping6) from felfert (#29).
+
+* Fixes to bin/BackupPC_sendEmail to avoid per-host overwrite of EMailAdminUserName
+  from Derrick Dominic (#30)
+
+* Remove full fsck at the end of every backup, from ngharo (#34)
 
 * Added more helpful text (instead of "New Key") for BackupFilesOnly and
   BackupFilesExclude in the CGI editor.
 
-* Updated Spanish language file lib/BackupPC/Lang/es.pm from Luis Bustamante.
+* Added =encoding ISO8859-1 to top of BackupPC.pod; from Alexander Moisseev
 
-* Added =encoding ISO8859-1 to top of BackupPC.pod; from Alexander Moisseev. 
-
-* Fixed minor typos in several language files; from Alexander Moisseev.
+* Fixed minor typos in several language files; from Alexander Moisseev
 
 * Applied a couple of patches to bin/BackupPC_rrdUpdate from Alexander
-  Moisseev.
+  Moisseev (#13)
 
-* Updates to bin/BackupPC_sendEmail to avoid per-host settings overwrite,
-  from Derrick Dominic
+* Updated Spanish language file lib/BackupPC/Lang/es.pm from Luis Bustamante.
 
 * Updated deprecated syntax (defined(@array) and "{" in regexps) from
-  Alexander Moisseev.
+  Alexander Moisseev (#36)
 
-* Documentation updates from Alexander Moisseev.
+* Documentation updates from Alexander Moisseev (#37)
 
 #------------------------------------------------------------------------
 # Version 4.0.0alpha3, 1 Dec 2013

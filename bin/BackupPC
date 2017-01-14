@@ -256,13 +256,22 @@ sub Main_Initialize
         exit(1);
     }
 
-    if ( !$bpc->HardlinkTest("$TopDir/pc", "$TopDir/cpool") ) {
-        print(STDERR $bpc->timeStamp, "Can't create a test hardlink between a file"
-                   . " in $TopDir/pc and $TopDir/cpool.  Either these are different"
+    #
+    # Create $RunDir if it doesn't exist
+    #
+    if ( !-d $RunDir && !mkdir($RunDir, 0755) ) {
+        print(STDERR $bpc->timeStamp, "Can't create $RunDir... quitting\n");
+        exit(1);
+    }
+
+    if ( $Conf{PoolV3Enabled} && !$bpc->HardlinkTest("$TopDir/pc", "$TopDir/cpool") ) {
+        print(STDERR $bpc->timeStamp,
+                     "PoolV3Enabled is set, and can't create a test hardlink between a"
+                   . " file in $TopDir/pc and $TopDir/cpool.  Either these are different"
                    . " file systems, or this file system doesn't support hardlinks,"
                    . " or these directories don't exist, or there is a permissions"
                    . " problem, or the file system is out of inodes or full.  Use"
-                   . " df, df -i, and ls -ld to check each of these possibilities."  
+                   . " df, df -i, and ls -ld to check each of these possibilities."
                    . " Quitting...\n");
         exit(1);
     }

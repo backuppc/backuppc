@@ -66,7 +66,7 @@ my %opts;
 
 if ( !getopts("ph:", \%opts) || @ARGV >= 1 ) {
     print STDERR <<EOF;
-usage: BackupPC_backupDuplicate [options] files/directories...
+usage: BackupPC_backupDuplicate [options]
   Required options:
      -h host         host name
      -p              don't print progress information

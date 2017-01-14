@@ -413,7 +413,7 @@ sub config2pod
             next if ( $str eq "" && /^$/ );
             $str .= $_ . "\n";
             $str .= "\n" if ( $str =~ /examples?:\n$/i );
-        } elsif ( /^\$Conf{([^}]*)/ ) {
+        } elsif ( /^\$Conf\{([^}]*)/ ) {
             my $var = $1;
             s/  +/ /g;
             s/;\s*#.*/;/;

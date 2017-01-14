@@ -195,13 +195,15 @@ $ConfVars->{BlackoutWeekDays}  = 2;
 $ConfVars->{RsyncLogLevel}     = 2;
 
 if ( $opts{syntaxCheck} ) {
-    system("perl -Ilib -c conf/config.pl >& /dev/null")
-            && die("$0: conf/config.pl contains a syntax error (or someone killed me)\n");
+    system("perl -Ilib -c conf/config.pl 2> /dev/null")
+            && die("$0: conf/config.pl contains an error (or someone killed me)\n");
+    system("perl -Ilib -c configure.pl 2> /dev/null")
+            && die("$0: configure.pl contains an error (or someone killed me)\n");
 }
 foreach my $file ( @PerlSrc ) {
     if ( $opts{syntaxCheck} ) {
-        system("perl -Ilib -c $file >& /dev/null")
-            && die("$0: $file contains a syntax error (or someone killed me)\n");
+        system("perl -Ilib -c $file 2> /dev/null")
+            && die("$0: $file contains an error (or someone killed me)\n");
     }
     #
     # Skip checking of bundled libraries not explicitly part of
@@ -324,12 +326,12 @@ sub InstallFile
 		# fixup for conf links
 		#
 		if ( /<dt id="Conf-/ ) {
-		    s/<dt id=("Conf-.*)>\$Conf{([^}]*)}/
+		    s/<dt id=("Conf-.*)>\$Conf\{([^}]*)}/
 			defined($ConfName{$2})
 			    ? "\L<dt id=\"$ConfName{$2}\">\E\$Conf{$2}<\/a>"
 			    : "<dt id=$1>\$Conf{$2}"/eg;
                 } else {
-		    s/\$Conf{([^}]*)}/
+		    s/\$Conf\{([^}]*)}/
 			defined($ConfName{$1})
 			    ? "\L<a href=\"#$ConfName{$1}\">\E\$Conf{$1}<\/a>"
 			    : "\$Conf{$1}"/eg;
@@ -450,13 +452,13 @@ sub CheckConfigParams
     binmode(F);
     if ( $check ) {
         while ( <F> ) {
-            s/\$(self|bpc)->{Conf}{([^}\$]+)}/if ( !defined($vars->{$2}) ) {
+            s/\$(self|bpc)->\{Conf}\{([^}\$]+)}/if ( !defined($vars->{$2}) ) {
                     print("Unexpected Conf var $2 in $file\n");
                     $errors++;
                 } else {
                     $vars->{$2}++;
                 }/eg;
-            s/\$[Cc]onf(?:->)?{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
+	    s/\$(?:HostConf|Conf|conf)(?:->)?\{([^}\$]+)}/if ( !defined($vars->{$1}) ) {
                     print("Unexpected Conf var $1 in $file\n");
                     $errors++;
                 } else {
@@ -471,8 +473,8 @@ sub CheckConfigParams
         }
     } else {
         while ( <F> ) {
-            s/^[^#]*\$self->{Conf}{([^}]*)/$vars->{$1} = 1;/eg;
-            s/^[^#]*\$Conf{([^}]*)/$vars->{$1} = 1;/eg;
+            s/^[^#]*\$self->\{Conf}\{([^}]*)/$vars->{$1} = 1;/eg;
+            s/^[^#]*\$Conf\{([^}]*)/$vars->{$1} = 1;/eg;
         }
     }
     close(F);
@@ -578,7 +580,7 @@ sub CheckLangUsage
 	binmode(F);
 	while ( <F> ) {
 	    next if ( /^\s*#/ );
-	    s/\$Lang->{([^}]*)}/$vars->{$1} = 1;/eg;
+	    s/\$Lang->\{([^}]*)}/$vars->{$1} = 1;/eg;
 	    s/(text|comment|keyText)\s*=>\s*"(CfgEdit_.*)"/$vars->{$2} = 1;/eg;
 	}
 	close(F);
@@ -590,7 +592,7 @@ sub CheckLangUsage
 	binmode(F);
         while ( <F> ) {
             s/#.*//g;
-            s/\$Lang{([^}]*)}/
+            s/\$Lang\{([^}]*)}/
 		    my $var = $1;
 		    next if ( $var =~ m{^(Reason_|Status_|backupType_|Disabled_)} );
 		    next if ( $var eq "Documentation" );
@@ -662,7 +664,7 @@ sub LangTextStrip
     $t =~ s/([}>])[^<]*</$1</g;
     $t =~ s/>[^<]*$/>/;
     $t =~ s/(value=)"[^"]*"/$1""/sg;
-    $t =~ s/({h[12]\()"[^"]*"/$1""/g;
+    $t =~ s/(\{h[12]\()"[^"]*"/$1""/g;
     $t =~ s/ENG[\s\n]*//sg;
     $t =~ s/^(<<EOF;\n)[^<]*/$1/g;
     return $t;
@@ -722,7 +724,7 @@ sub LangParse
     }
     close(C);
     foreach my $v ( @lang ) {
-	if ( $v->{text} =~ /\$Lang{$v->{var}}\s*=\s*(.*)/s ) {
+	if ( $v->{text} =~ /\$Lang\{$v->\{var}}\s*=\s*(.*)/s ) {
 	    $v->{val} = $1;
 	}
     }

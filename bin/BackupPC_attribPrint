@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -36,7 +36,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 
 use BackupPC::Lib;
 use BackupPC::XS;
@@ -62,13 +62,12 @@ if ( $ARGV[0] =~ m{(.*/inode)/(\d+)$} ) {
 } elsif ( $ARGV[0] =~ m{(.+)/(.+)} ) {
     $dir  = $1;
     $file = $2;
+} elsif ( -f $ARGV[0] || $ARGV[0] eq "attrib" ) {
+    $dir = ".";
+    $file = $ARGV[0];
 } else {
     $dir = $ARGV[0];
-}
-
-if ( !-f "$dir/$file" ) {
-    print STDERR "BackupPC_attribPrint: $dir/$file does not exist\n";
-    exit(1);
+    $file = "attrib";
 }
 
 #

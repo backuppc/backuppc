@@ -70,6 +70,20 @@ sub new
 }
 
 #
+# Check if a directory contains an attrib file.
+# Returns the attrib file name, or undef if none present.
+#
+sub dirContainsAttrib
+{
+    my($m, $dir) = @_;
+
+    my $entries = BackupPC::DirOps::dirRead($m->{bpc}, $dir);
+    foreach my $e ( @$entries ) {
+        return $e->{name} if ( $e->{name} =~ /^attrib/ );
+    }
+}
+
+#
 # Check if a directory exists in the given backup.
 # This is only for >= 4.x backups.
 #
@@ -104,7 +118,7 @@ sub dirNotDeleted
             $file = $share;
             $last = 1;
         }
-        next if ( !-d $p || !-f "$p/attrib" );
+        next if ( !-d $p || !defined($m->dirContainsAttrib($dir)) );
         my $attr = BackupPC::XS::Attrib::new($compress);
         if ( !$attr->read($p) ) {
             push(@{$m->{error}}, "Can't read attribute file in $p: " . $attr->errStr());
@@ -368,37 +382,37 @@ sub dirCache
 
             my $attr = BackupPC::XS::Attrib::new($compress);
             my $attrAll;
-            if ( -f "$path/attrib" ) {
-                if ( !$attr->read($path, "attrib") ) {
+            if ( !$attr->read($path, "attrib") ) {
+                if ( -f "$path/attrib" ) {
                     push(@{$m->{error}}, "Can't read attribute file in $path\n");
-                } else {
-                    #print(STDERR "Got attr\n");
-                    $attrAll = $attr->get();
-                    foreach my $fileUM ( keys(%$attrAll) ) {
-                        my $a = $attrAll->{$fileUM};
-                        if ( $a->{type} == BPC_FTYPE_DELETED ) {
-                            #print("deleting $fileUM\n");
-                            delete($m->{files}{$fileUM});
-                            delete($hardlinks->{$fileUM});
-                            next;
-                        }
-                        if ( $a->{nlinks} > 0 ) {
-                            $a = $m->hardLinkGet($a, $i);
-                            $hardlinks->{$fileUM} = 1;
-                        }
-
-                        $m->{files}{$fileUM}               = $a;
-                        ($m->{files}{$fileUM}{relPath}     = "$dir/$fileUM") =~ s{//+}{/}g;
-                        if ( length($a->{digest}) ) {
-                            $m->{files}{$fileUM}{fullPath} = $m->{bpc}->MD52Path($a->{digest},
-                                                                                 $compress);
-                        } else {
-                            $m->{files}{$fileUM}{fullPath} = "/dev/null";
-                        }
-                        $m->{files}{$fileUM}{backupNum}    = $backupNum;
-                        $m->{files}{$fileUM}{compress}     = $compress;
-                        $m->{files}{$fileUM}{inode}        = $a->{inode};
+                }
+            } else {
+                #print(STDERR "Got attr\n");
+                $attrAll = $attr->get();
+                foreach my $fileUM ( keys(%$attrAll) ) {
+                    my $a = $attrAll->{$fileUM};
+                    if ( $a->{type} == BPC_FTYPE_DELETED ) {
+                        #print("deleting $fileUM\n");
+                        delete($m->{files}{$fileUM});
+                        delete($hardlinks->{$fileUM});
+                        next;
                     }
+                    if ( $a->{nlinks} > 0 ) {
+                        $a = $m->hardLinkGet($a, $i);
+                        $hardlinks->{$fileUM} = 1;
+                    }
+
+                    $m->{files}{$fileUM}               = $a;
+                    ($m->{files}{$fileUM}{relPath}     = "$dir/$fileUM") =~ s{//+}{/}g;
+                    if ( length($a->{digest}) ) {
+                        $m->{files}{$fileUM}{fullPath} = $m->{bpc}->MD52Path($a->{digest},
+                                                                             $compress);
+                    } else {
+                        $m->{files}{$fileUM}{fullPath} = "/dev/null";
+                    }
+                    $m->{files}{$fileUM}{backupNum}    = $backupNum;
+                    $m->{files}{$fileUM}{compress}     = $compress;
+                    $m->{files}{$fileUM}{inode}        = $a->{inode};
                 }
             }
 
@@ -441,7 +455,7 @@ sub shareList
         closedir(DIR);
         foreach my $file ( @dir ) {
             $file = $1 if ( $file =~ /(.*)/s );
-            next if ( $file eq "attrib" && $mangle
+            next if ( $file =~ /^attrib/ && $mangle
                    || $file eq "."
                    || $file eq ".."
                    || $file eq "backupInfo"

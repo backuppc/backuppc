@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,7 +38,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 
 use Getopt::Std;
 use Fcntl qw(:mode);
@@ -52,18 +52,23 @@ use BackupPC::DirOps qw( :BPC_DT_ALL );
 select(STDOUT); $| = 1;
 
 my %opts;
-if ( !getopts("cfnmpsvh:r:P:", \%opts) || @ARGV != 0 || !(defined($opts{h}) || $opts{m}) ) {
+if ( !getopts("cFfnmpsvh:r:P:", \%opts) || @ARGV != 0 || !(defined($opts{h}) || $opts{m}) ) {
     print <<EOF;
 Usage:
-  BackupPC_refCountUpdate -h HOST [-c] [-f] [-p] [-v]
-      With no other args, updates count db with poolCntDelta files
-        -f     - do an fsck on this HOST, ignoring poolCntDelta files,
-                 and replacing count db.  Also forces fsck if requested by
-                 needFsck flag files in TopDir/pc/HOST/refCnt.
-        -c     - compare current count db to new fsck db before replacing
-                 (only applies if -f specified)
+  BackupPC_refCountUpdate -h HOST [-c] [-f] [-F] [-p] [-v]
+      With no other args, updates count db with poolCntDelta files in last
+      two backups.  Also builds refCnt for >=4.0 backups without any.
+        -f     - do an fsck on this HOST, which involves a rebuild of the
+                 last two backup refCnts.  poolCntDelta files are ignored.
+                 Also forces fsck if requested by needFsck flag files
+                 in TopDir/pc/HOST/refCnt.
+        -F     - rebuild all the >=4.0 per-backup refCnt files for this
+                 host.
+        -c     - compare current count db to new db before replacing
         -p     - don't show progress
         -v     - verbose
+    Notes: in case there are legacy (ie: <=4.0.0alpha3) unapplied poolCntDelta
+    files in TopDir/pc/HOST/refCnt then the -f flag is turned on.
 
   BackupPC_refCountUpdate -m [-f] [-p] [-c] [-r N-M] [-s] [-v] [-P phase]
         -m       Updates main count db, based on each HOST, then removes
@@ -71,6 +76,7 @@ Usage:
         -f     - do an fsck on all the hosts, ignoring poolCntDelta files,
                  and replacing each host's count db.  Will wait for backups
                  to finish if any are running.
+        -F     - rebuild all the >=4.0 per-backup refCnt files.
         -p     - don't show progress
         -c     - clean pool files
         -r N-M - process a subset of the main count db, 0 <= N <= M <= 255
@@ -105,12 +111,37 @@ if ( $opts{h} ne "" ) {
 my %Conf = $bpc->Conf();
 my $PoolStats = {};
 
-$Conf{XferLogLevel} = 10 if ( $opts{v} );
+if ( $Conf{RsyncBackupPCPath} ne "" && -x $Conf{RsyncBackupPCPath} ) {
+    my $output = $bpc->cmdSystemOrEval([$Conf{RsyncBackupPCPath}, "--version"]);
+    if ( $? ) {
+        print(STDERR "BackupPC: can't run $Conf{RsyncBackupPCPath} for version check; ($output) existing in 30s\n");
+        sleep(30);
+        exit(1);
+    }
+    my $version = "unknown";
+    $version = $1 if ( $output =~ /rsync_bpc\s+version\s+([\d.]+)\s+protocol/ );
+    if ( $version eq "unknown" || version->parse($1) < version->parse('3.0.9.5') ) {
+        print(STDERR "BackupPC: rsync_bpc at $Conf{RsyncBackupPCPath} needs to be upgraded (got version $1; need >= 3.0.9.5); exiting in 30s\n");
+        sleep(30);
+        exit(1);
+    }
+}
+
+if ( $opts{v} ) {
+    $Conf{XferLogLevel} = 10;
+    BackupPC::XS::Lib::logLevelSet(10);
+}
+#
+# Write new-style attrib files (<= 4.0.0beta3 uses old-style), which are 0-length
+# files with the digest encoded in the file name (eg: attrib_md5HexDigest). We
+# can still read the old-style files, and we upgrade them as we go.
+#
+BackupPC::XS::Attrib::backwardCompat(0, 0);
 
 print("xferPids $$\n") if ( !$opts{p} );
 
 if ( defined($opts{h}) ) {
-    updateHostPoolCnt($opts{h}, $opts{f}, $opts{c});
+    updateHostPoolCnt($opts{h}, $opts{f}, $opts{F}, $opts{c});
 } elsif ( $opts{m} ) {
     if ( $opts{r} =~ /^(\d+)-(\d+)$/ && 0 <= $1 && $1 <= $2 && $2 <= 255 ) {
         $refCntStart = int($1 / 2);
@@ -124,14 +155,14 @@ if ( defined($opts{h}) ) {
     #
     # update all the pool count changes for each host
     #
-    if ( $opts{f} ) {
-        updateAllHostPoolCnt(1);
+    if ( $opts{f} || $opts{F} ) {
+        updateAllHostPoolCnt($opts{f}, $opts{F});
     }
 
     #
     # rebuild the overall pool count database
     #
-    updateRefCnt();
+    updateTotalRefCnt();
 
     #
     # clean files from the pool that are no longer referenced,
@@ -146,7 +177,7 @@ if ( defined($opts{h}) ) {
     }
 }
 
-print("BackupPC_refCountPrint: total errors: $ErrorCnt\n");
+print("BackupPC_refCountUpdate total errors: $ErrorCnt\n");
 print("xferPids\n") if ( !$opts{p} );
 exit($ErrorCnt ? 1 : 0);
 
@@ -156,11 +187,13 @@ exit($ErrorCnt ? 1 : 0);
 #
 sub updateHostPoolCnt
 {
-    my($host, $forceFsck, $checkHostPool) = @_;
-    my $dir = "$TopDir/pc/$host";
-    my $refCntDir = "$dir/refCnt";
+    my($host, $forceLast2Fsck, $forceFullFsck, $compareCurr) = @_;
+    my $pcDir = "$TopDir/pc/$host";
+    my $refCntDir = "$pcDir/refCnt";
     my $errorCntSave = $ErrorCnt;
     my @fsckFiles;
+    my @Backups = $bpc->BackupInfoRead($host);
+    my $startClock = time;
 
     mkdir($refCntDir, 0770) if ( !-d $refCntDir );
 
@@ -179,206 +212,291 @@ sub updateHostPoolCnt
         return;
     }
 
-    my $entries = BackupPC::DirOps::dirRead($bpc, $refCntDir);
-    foreach my $e ( @$entries ) {
-        next if ( $e->{name} !~ /^needFsck/ );
-        push(@fsckFiles, "$refCntDir/$e->{name}");
-    }
-    foreach my $e ( @$entries ) {
+    #
+    # Clean up the HOST/refCnt directory to see if an fsck is needed
+    #
+    foreach my $e ( @{BackupPC::DirOps::dirRead($bpc, $refCntDir)} ) {
         unlink("$refCntDir/$e->{name}") if ( $e->{name} =~ /^poolCntNew/ );
+        if ( $e->{name} =~ /^t?poolCntDelta/ ) {
+            #
+            # legacy <= 4.0.0beta3 code left poolCntDelta files in the host's refCnt
+            # directory, so remove them and do a last2Fsck
+            #
+            unlink("$refCntDir/$e->{name}");
+            $forceLast2Fsck = 1;
+        }
+        next if ( $e->{name} !~ /^needFsck/ );
+        unlink("$refCntDir/$e->{name}");
+        $forceLast2Fsck = 1;
     }
-    if ( $forceFsck || @fsckFiles ) {
-        $forceFsck = 1;
 
-        #
-        # Remove all the poolCntDelta files - we don't need them since we
-        # are starting all over.
-        #
+    #
+    # Figure out which backups to rebuild or apply to deltas
+    #
+    my $bkupList = [];
+    for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+        next if ( $Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./ );
+        my $bkupNum       = $Backups[$i]{num};
+        my $compress      = $Backups[$i]{compress};
+        my $bkupRefCntDir = "$pcDir/$bkupNum/refCnt";
+        my($gotFsck, $gotDelta);
+
+        if ( !-d $bkupRefCntDir ) {
+            mkdir($bkupRefCntDir, 0770);
+            push(@$bkupList, {bkupNum => $bkupNum, fsck => 1, compress => $compress});
+            next;
+        }
+        my $entries = BackupPC::DirOps::dirRead($bpc, $bkupRefCntDir);
         foreach my $e ( @$entries ) {
-            unlink("$refCntDir/$e->{name}") if ( $e->{name} =~ /^poolCntDelta/ );
+            unlink("$bkupRefCntDir/$e->{name}") if ( $e->{name} =~ /^poolCntNew/ );
+            if ( $e->{name} =~ /^needFsck/ || $e->{name} =~ /^tpoolCntDelta/ ) {
+                unlink("$bkupRefCntDir/$e->{name}");
+                $gotFsck  = 1;
+            }
+            $gotDelta = 1 if ( $e->{name} =~ /^poolCntDelta/ );
         }
-
-        #
-        # Generate a new set of poolCntDelta files
-        #
-        BackupPC::XS::PoolRefCnt::DeltaFileInit($dir);
-        my @Backups = $bpc->BackupInfoRead($host);
-        for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-            my $preV4 = ($Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./) ? 1 : 0;
-            next if ( $preV4 );
-            print("Processing $dir/$Backups[$i]{num}\n") if ( $Conf{XferLogLevel} >= 2 );
-            print("__bpc_progress_state__ fsck #$Backups[$i]{num}\n") if ( !$opts{p} );
-            $ErrorCnt += BackupPC::XS::DirOps::refCountAll("$dir/$Backups[$i]{num}", $Backups[$i]{compress});
-            $bpc->flushXSLibMesgs();
+        if ( $forceFullFsck || ($forceLast2Fsck && $i >= @Backups - 2) || $gotFsck ) {
+            push(@$bkupList, {bkupNum => $bkupNum, fsck => 1, compress => $compress});
+            #
+            # Remove any delta files since we are rebuilding
+            #
+            foreach my $e ( @$entries ) {
+                unlink("$bkupRefCntDir/$e->{name}") if ( $e->{name} =~ /^t?poolCntDelta/ );
+            }
+        } elsif ( $gotDelta ) {
+            push(@$bkupList, {bkupNum => $bkupNum, fsck => 0, compress => $compress});
         }
-        BackupPC::XS::PoolRefCnt::DeltaFileFlush();
-        $bpc->flushXSLibMesgs();
+    }
 
-    } else {
+    foreach my $b ( @$bkupList ) {
+        my $bkupNum  = $b->{bkupNum};
+        my $fsck     = $b->{fsck};
+        my $compress = $b->{compress};
+        my $bkupRefCntDir = "$pcDir/$bkupNum/refCnt";
+        my $errorCntSave0 = $ErrorCnt;
         my $fd;
+
         #
         # add a placeholder fsck request, in case we die unexpectedly
         #
-        open($fd, ">", "$refCntDir/needFsck.refCountUpdate") && close($fd);
+        open($fd, ">", "$bkupRefCntDir/needFsck.refCountUpdate") && close($fd);
+
+        print("BackupPC_refCountUpdate: processing host $host #$bkupNum (fsck = $fsck, compareCurr = $compareCurr)\n") if ( $Conf{XferLogLevel} >= 2 );
+
+        if ( $fsck ) {
+            my $deltaInfo = BackupPC::XS::DeltaRefCnt::new("$pcDir/$bkupNum");
+            print("__bpc_progress_state__ refCnt #$bkupNum\n") if ( !$opts{p} );
+            $ErrorCnt += BackupPC::XS::DirOps::refCountAll("$pcDir/$bkupNum", $compress, 1, $deltaInfo);
+            $deltaInfo->flush();
+            $bpc->flushXSLibMesgs();
+        }
+        print("__bpc_progress_state__ cntUpdate #$bkupNum\n") if ( !$opts{p} );
+        updateHostDelta2Cnt($host, $bkupRefCntDir, $fsck, 0, $bkupNum);
+        $bpc->flushXSLibMesgs();
+
+        if ( $errorCntSave0 == $ErrorCnt ) {
+            unlink("$bkupRefCntDir/needFsck.refCountUpdate");
+        }
     }
 
     #
-    # Now read all the poolCntDelta files, and update the host's poolCnt files
+    # Now add up all the per-backup counts to get the per-host totals
     #
-    $entries = BackupPC::DirOps::dirRead($bpc, $refCntDir);
-    my($deltaFileTotal, $deltaFileCnt); 
+    print("BackupPC_refCountUpdate: computing totals for host $host\n") if ( $Conf{XferLogLevel} >= 2 );
+    updateHostRefCounts($host);
+
+    #
+    # and rename the new count files to replace the current ones
+    #
+    renameNewCntFiles($host, $refCntDir, $compareCurr, "total");
+
+    #
+    # Now give the lock back
+    #
+    BackupPC::XS::DirOps::unlockRangeFile($lockFd);
+    printf("BackupPC_refCountUpdate: host %s got %d errors (took %d secs)\n",
+                    $host, $ErrorCnt - $errorCntSave, time - $startClock);
+    $bpc->flushXSLibMesgs();
+}
+
+#
+# Process all the per-backup ref counts to create the total ref count for the host
+#
+sub updateHostRefCounts
+{
+    my($host) = @_;
+
+    my @Backups = $bpc->BackupInfoRead($host);
+    my $refCntDestDir = "$TopDir/pc/$host/refCnt";
+    
+    for ( my $refCntFile = 0 ; $refCntFile < 128 ; $refCntFile++ ) {
+        print("__bpc_progress_state__ sumUpdate $refCntFile/128\n") if ( !$opts{p} && ($refCntFile & 0x7) == 0);
+        for ( my $compress = 0 ; $compress < 2 ; $compress++ ) {
+            my $count = BackupPC::XS::PoolRefCnt::new();
+            my $countDirty;
+            my $poolCntFileNew = sprintf("%s/poolCntNew.%d.%02x",
+                                         $refCntDestDir, $compress, $refCntFile * 2);
+            for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+                next if ( $Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./ );   # skip pre-V4
+                my $bkupNum = $Backups[$i]{num};
+                my $refCntBkupDir = "$TopDir/pc/$host/$bkupNum/refCnt";
+                my $poolCntHostFile = sprintf("%s/poolCnt.%d.%02x", $refCntBkupDir, $compress, $refCntFile * 2);
+                next if ( !-f $poolCntHostFile );
+
+                my $countHost = BackupPC::XS::PoolRefCnt::new();
+                if ( $countHost->read($poolCntHostFile) ) {
+                    print("Can't open pool count file $poolCntHostFile\n");
+                    $ErrorCnt++;
+                    next;
+                }
+
+                my($d, $c);
+                my $idx = 0;
+                while ( 1 ) {
+                    ($d, $c, $idx) = $countHost->iterate($idx);
+                    last if ( !defined($d) );
+                    $count->incr($d, $c);
+                    $countDirty = 1;
+                }
+            }
+            if ( $countDirty && $count->write($poolCntFileNew) ) {
+                print("Can't write new host pool count file $poolCntFileNew\n");
+                $ErrorCnt++;
+            }
+            $count = undef;
+            $bpc->flushXSLibMesgs();
+        }
+    }
+}
+
+#
+# Process all the delta files in the given directory and update the poolCnt files
+#
+sub updateHostDelta2Cnt
+{
+    my($host, $refCntDir, $forceFsck, $compareCurr, $bkupNum) = @_;
+    my $gotDeltas;
+
+    #
+    # Read all the poolCntDelta files, and update the host's poolCnt files
+    # (or overwrite them if $forceFsck)
+    #
+    my $entries = BackupPC::DirOps::dirRead($bpc, $refCntDir);
     foreach my $e ( @$entries ) {
-        next if ( $e->{name} !~ /^poolCntDelta/ );
-        $deltaFileTotal++;
+        unlink("$refCntDir/$e->{name}") if ( $e->{name} =~ /^poolCntNew/ );
     }
     foreach my $e ( @$entries ) {
         next if ( $e->{name} !~ /^poolCntDelta/ );
-        $deltaFileCnt++;
         my $deltaFileName = "$refCntDir/$e->{name}";
         my $compress = 1;
         $compress = $1 if ( $deltaFileName =~ m{/poolCntDelta_(\d)_} );
-        updateHostPoolDeltaFile($host, $refCntDir, $deltaFileName, !$forceFsck,
-                                $compress, "#$deltaFileCnt/$deltaFileTotal");
+        $gotDeltas++;
+        updateHostPoolOneDelta2Cnt($host, $refCntDir, $deltaFileName, !$forceFsck, $compress, $bkupNum);
     }
+    renameNewCntFiles($host, $refCntDir, $compareCurr, "#$bkupNum") if ( $gotDeltas );
+}
+
+#
+# Rename all the new pool files, replacing the old ones
+#
+sub renameNewCntFiles
+{
+    my($host, $refCntDir, $compareCurr, $statusText) = @_;
+
+    print("__bpc_progress_state__ rename $statusText\n") if ( !$opts{p} );
     for ( my $refCntFile = 0 ; $refCntFile < 128 ; $refCntFile++ ) {
         for ( my $compress = 0 ; $compress < 2 ; $compress++ ) {
             my $poolCntFileNew = sprintf("%s/poolCntNew.%d.%02x", $refCntDir,
                                          $compress, $refCntFile * 2);
             my $poolCntFileCur = sprintf("%s/poolCnt.%d.%02x", $refCntDir,
                                          $compress, $refCntFile * 2);
-            if ( $forceFsck && $checkHostPool ) {
+            if ( $compareCurr ) {
                 $ErrorCnt += poolCountHostNewCompare($host, $compress, $poolCntFileCur, $poolCntFileNew);
             }
             if ( -f $poolCntFileNew ) {
                 if ( !rename($poolCntFileNew, $poolCntFileCur) ) {
-                    print("Can't rename $poolCntFileNew to $poolCntFileCur ($!)\n");
+                    print("BackupPC_refCountUpdate: can't rename $poolCntFileNew to $poolCntFileCur ($!)\n");
                     unlink($poolCntFileNew);
                     $ErrorCnt++;
                     next;
                 }
-            } else {
-                if ( $forceFsck && -f $poolCntFileCur && !unlink($poolCntFileCur) ) {
-                    print("Can't unlink $poolCntFileCur ($!)\n");
-                    $ErrorCnt++;
-                    next;
-                }
+            } elsif ( -f $poolCntFileCur && !unlink($poolCntFileCur) ) {
+                print("BackupPC_refCountUpdate: can't unlink $poolCntFileCur ($!)\n");
+                $ErrorCnt++;
+                next;
             }
         }
     }
-    if ( $forceFsck ) {
-        #
-        # remove all the original fsck files
-        #
-        foreach my $f ( @fsckFiles ) { 
-            unlink($f);
-        }
-    } elsif ( $errorCntSave == $ErrorCnt ) {
-        #
-        # Ok to remove our temporary fsck request
-        #
-        unlink("$refCntDir/needFsck.refCountUpdate");
-    }
-    #
-    # Now give the lock back
-    #
-    BackupPC::XS::DirOps::unlockRangeFile($lockFd);
-    printf("BackupPC_refCountUpdate: host %s got %d errors\n", $host, $ErrorCnt - $errorCntSave);
-    $bpc->flushXSLibMesgs();
 }
 
 #
 # Apply a single pool delta file to the host's new count database.
 #
-sub updateHostPoolDeltaFile
+sub updateHostPoolOneDelta2Cnt
 {
-    my($host, $refCntDir, $deltaFileName, $accumCurr, $compress, $progressText) = @_;
+    my($host, $refCntDir, $deltaFileName, $accumCurr, $compress, $bkupNum) = @_;
 
-    print("__bpc_progress_state__ count update $progressText\n") if ( !$opts{p} );
     my $count = BackupPC::XS::PoolRefCnt::new();
     if ( $count->read($deltaFileName) ) {
-        print("Can't read pool count delta file $deltaFileName\n");
+        print("BackupPC_refCountUpdate: can't read pool count delta file $deltaFileName\n");
         $ErrorCnt++;
         return;
     }
-    my($delta, $d, $c);
+    my($delta, $d, $c, $entryCnt);
     my $idx = 0;
-
     while ( 1 ) {
         ($d, $c, $idx) = $count->iterate($idx);
         last if ( !defined($d) );
         $delta->[vec($d, 0, 8) >> 1]{$d} = $c;
+        $entryCnt++;
     }
     $count = undef;
+    print("BackupPC_refCountUpdate: processing host $host #$bkupNum deltaFile $deltaFileName with $entryCnt entries\n")
+                                        if ( $Conf{XferLogLevel} >= 1 );
+
     for ( my $refCntFile = 0 ; $refCntFile < 128 ; $refCntFile++ ) {
         my $poolCntFileNew = sprintf("%s/poolCntNew.%d.%02x", $refCntDir,
                                      $compress, $refCntFile * 2);
         my $poolCntFileCur = sprintf("%s/poolCnt.%d.%02x", $refCntDir,
                                      $compress, $refCntFile * 2);
-        if ( !keys(%{$delta->[$refCntFile]}) ) {
+        if ( !defined($delta->[$refCntFile]) || !%{$delta->[$refCntFile]} ) {
             next if ( -f $poolCntFileNew || !-f $poolCntFileCur );
         }
         #
         # Read the existing count
         #
-        print("__bpc_progress_fileCnt__ $refCntFile/128\n") if ( !$opts{p} );
         my $count = BackupPC::XS::PoolRefCnt::new();
         if ( -f $poolCntFileNew ) {
             if ( $count->read($poolCntFileNew) ) {
-                print("Can't open new pool count file $poolCntFileNew\n");
+                print("BackupPC_refCountUpdate: can't open new pool count file $poolCntFileNew\n");
                 $ErrorCnt++;
                 next;
             }
         } else {
             #
-            # if we are rebuilding the count database then we still need to
-            # read the current counts, so we can maintain the zero-count
-            # entries.
+            # Read in the existing counts if we are accumulating.
             #
-            if ( -f $poolCntFileCur && $count->read($poolCntFileCur) ) {
-                print("Can't open cur pool count file $poolCntFileCur\n");
+            if ( $accumCurr && -f $poolCntFileCur && $count->read($poolCntFileCur) ) {
+                print("BackupPC_refCountUpdate: can't open cur pool count file $poolCntFileCur\n");
                 $ErrorCnt++;
                 next;
             }
-            if ( !$accumCurr ) {
-                #
-                # remove all but the zero-count entries since we are doing
-                # a full rebuild.
-                #
-                my($d, $cnt);
-                my $idx = 0;
-
-                while ( 1 ) {
-                    ($d, $cnt, $idx) = $count->iterate($idx);
-                    last if ( !defined($d) );
-                    $count->delete($d) if ( $cnt != 0 );
-                }
-            }
         }
+	#
+        # Apply the deltas and write the file back
+        #
         foreach my $d ( keys(%{$delta->[$refCntFile]}) ) {
             $count->incr($d, $delta->[$refCntFile]{$d});
         }
-
-        #
-        # make sure the pool file exists for any zero entries
-        #
-        my($d, $cnt);
-        my $idx = 0;
-
-        while ( 1 ) {
-            ($d, $cnt, $idx) = $count->iterate($idx);
-            last if ( !defined($d) );
-            next if ( $cnt != 0 );
-            $count->delete($d) if ( !-f $bpc->MD52Path($d, $compress) );
-        }
         if ( $count->write($poolCntFileNew) ) {
-            print("Can't write new pool count file $poolCntFileNew\n");
+            print("BackupPC_refCountUpdate: can't write new pool count file $poolCntFileNew\n");
             $ErrorCnt++;
             next;
         }
     }
     $delta = {};
     if ( unlink($deltaFileName) != 1 ) {
-        print("Can't unlink $deltaFileName ($!)\n");
+        print("BackupPC_refCountUpdate: can't unlink $deltaFileName ($!)\n");
         $ErrorCnt++;
     }
 }
@@ -397,11 +515,11 @@ sub poolCountHostNewCompare
     my $count          = BackupPC::XS::PoolRefCnt::new();
 
     if ( -f $poolCntFileNew && $countNew->read($poolCntFileNew) ) {
-        print("Can't open new pool count file $poolCntFileNew\n");
+        print("BackupPC_refCountUpdate: can't open new pool count file $poolCntFileNew\n");
         $errorCnt++;
     }
     if ( -f $poolCntFileCur && $count->read($poolCntFileCur) ) {
-        print("Can't open current pool count file $poolCntFileCur\n");
+        print("BackupPC_refCountUpdate: can't open current pool count file $poolCntFileCur\n");
         $errorCnt++;
     }
 
@@ -416,13 +534,13 @@ sub poolCountHostNewCompare
         last if ( !defined($digest) );
 
         if ( !defined($countNew->get($digest)) && $cnt > 0 ) {
-            printf("Host %s digest.%d %s count is %d, but should be 0\n",
+            printf("BackupPC_refCountUpdate: host %s digest.%d %s count is %d, but should be 0\n",
                         $host, $compress, unpack("H*", $digest), $cnt);
             $errorCnt++;
             next;
         }
         if ( $cnt != $countNew->get($digest) ) {
-            printf("Host %s digest.%d %s count is %d, but should be %d\n",
+            printf("BackupPC_refCountUpdate: host %s digest.%d %s count is %d, but should be %d\n",
                         $host, $compress, unpack("H*", $digest),
                         $cnt, $countNew->get($digest));
             $errorCnt++;
@@ -434,7 +552,7 @@ sub poolCountHostNewCompare
     while ( 1 ) {
         ($digest, $cnt, $idx) = $countNew->iterate($idx);
         last if ( !defined($digest) );
-        printf("Host %s digest.%d %s count missing, but should be %d\n",
+        printf("BackupPC_refCountUpdate: host %s digest.%d %s count missing, but should be %d\n",
                         $host, $compress, unpack("H*", $digest), $countNew->get($digest));
         $errorCnt++;
     }
@@ -444,10 +562,10 @@ sub poolCountHostNewCompare
 
 sub updateAllHostPoolCnt
 {
-    my($forceFsck) = @_;
+    my($forceLast2Fsck, $forceFullFsck) = @_;
 
     foreach my $host ( @Hosts ) {
-        updateHostPoolCnt($host, $forceFsck, 0);
+        updateHostPoolCnt($host, $forceLast2Fsck, $forceFullFsck, 0);
     }
 }
 
@@ -455,18 +573,17 @@ sub updateAllHostPoolCnt
 # Accumulate all the host poolRefCnt files to create the
 # overall pool reference counts
 #
-sub updateRefCnt
+sub updateTotalRefCnt
 {
     return if ( $ErrorCnt );
 
     for ( my $compress = 0 ; $compress < 2 ; $compress++ ) {
         my $poolName = $compress ? "cpool4" : "pool4";
-        print("__bpc_progress_state__ $poolName count update\n") if ( !$opts{p} );
         for ( my $refCntFile = $refCntStart ; $refCntFile <= $refCntEnd ; $refCntFile++ ) {
             #
             # Count the number of pool directories
             #
-            print("__bpc_progress_fileCnt__ $refCntFile/$refCntEnd\n") if ( !$opts{p} );
+            print("__bpc_progress_fileCnt__ cntUpdate $refCntFile/$refCntEnd\n") if ( !$opts{p} );
             my $poolDir = sprintf("%s/%02x",
                                   $compress ? $bpc->{CPoolDir} : $bpc->{PoolDir},
                                   $refCntFile * 2);
@@ -511,7 +628,7 @@ sub updateRefCnt
                             $PoolStats->{$poolName}[$refCntFile]{blkCnt} += $nBlks;
                             if ( $c > 0 ) {
                                 if ( ($s[2] & S_IXOTH) && chmod(0444, $poolFile) != 1 ) {
-                                    print("Can't chmod 0444 $poolFile\n");
+                                    print("BackupPC_refCountUpdate: can't chmod 0444 $poolFile\n");
                                     $ErrorCnt++;
                                 }
                             }
@@ -524,7 +641,7 @@ sub updateRefCnt
                         my @s = stat($poolFile);
                         if ( @s ) {
                             if ( ($s[2] & S_IXOTH) && chmod(0444, $poolFile) != 1 ) {
-                                print("Can't chmod 0444 $poolFile\n");
+                                print("BackupPC_refCountUpdate: can't chmod 0444 $poolFile\n");
                                 $ErrorCnt++;
                             }
                         }
@@ -560,20 +677,20 @@ sub updateRefCnt
                 foreach my $e ( @$entries ) {
                     next if ( $e->{name} eq "." || $e->{name} eq ".." );
                     if ( $e->{name} !~ /^[\da-f]{32,48}$/ && $e->{name} !~ /lock/i ) {
-                        print("Unknown pool file $poolSubDir/$e->{name} removed\n");
+                        print("BackupPC_refCountUpdate: unknown pool file $poolSubDir/$e->{name} removed\n");
                         unlink("$poolSubDir/$e->{name}");
                         next;
                     }
                     my $d = pack("H*", $e->{name});
                     my $b2 = vec($d, 0, 16);
                     if ( $refCntFile != (($b2 >> 8) & 0xfe) / 2 || $subDir != (($b2 >> 0) & 0xfe) / 2 ) {
-                        print("Unexpected pool file $poolSubDir/$e->{name} removed\n");
+                        print("BackupPC_refCountUpdate: unexpected pool file $poolSubDir/$e->{name} removed\n");
                         unlink("$poolSubDir/$e->{name}");
                         next;
                     }
                     if ( !defined($count->get($d)) ) {
                         my @s = stat("$poolSubDir/$e->{name}");
-                        print("Adding pool file $e->{name} with count 0 (size $s[7])\n")
+                        print("BackupPC_refCountUpdate: adding pool file $e->{name} with count 0 (size $s[7])\n")
                                         if ( $Conf{XferLogLevel} >= 3 );
                         #
                         # add stats for new pool file
@@ -603,7 +720,7 @@ sub updateRefCnt
                 $fullPoolScan = (int($refCntFile / 8) % $Conf{PoolSizeNightlyUpdatePeriod})
                                    == ($opts{P} % $Conf{PoolSizeNightlyUpdatePeriod});
             }
-#            print("Computing full $poolName size for $refCntFile (phase = $opts{P},"
+#            print("BackupPC_refCountUpdate: computing full $poolName size for $refCntFile (phase = $opts{P},"
 #                . " \$Conf{PoolSizeNightlyUpdatePeriod} = $Conf{PoolSizeNightlyUpdatePeriod})\n")
 #                                if ( $fullPoolScan );
 
@@ -655,18 +772,18 @@ sub updateRefCnt
                 }
                 next if ( $digest eq $EmptyMD5 );
                 my $digestStr = unpack("H*", $digest);
-                print("Missing pool file $digestStr count $cnt\n");
+                print("BackupPC_refCountUpdate: missing pool file $digestStr count $cnt\n");
                 $ErrorCnt++;
             }
 
 
             if ( $count->write("$poolCntFile.$$") ) {
-                print("Can't write new pool count file $poolCntFile.$$\n");
+                print("BackupPC_refCountUpdate: can't write new pool count file $poolCntFile.$$\n");
                 unlink("$poolCntFile.$$");
                 $ErrorCnt++;
                 return;
             } elsif ( !rename("$poolCntFile.$$", $poolCntFile) ) {
-                print("Can't rename $poolCntFile.$$ to $poolCntFile ($!)\n");
+                print("BackupPC_refCountUpdate: can't rename $poolCntFile.$$ to $poolCntFile ($!)\n");
                 unlink("$poolCntFile.$$");
                 $ErrorCnt++;
                 return;
@@ -696,7 +813,7 @@ sub cleanPoolFiles
             #
             my $lockFd = BackupPC::XS::DirOps::lockRangeFile("$poolDir/LOCK", 0, 1, 1);
             if ( -f $poolCntFile && $count->read($poolCntFile) ) {
-                print("Can't read pool count file $poolCntFile\n");
+                print("BackupPC_refCountUpdate: can't read pool count file $poolCntFile\n");
                 $dirty = 1;
                 $ErrorCnt++;
             }
@@ -723,9 +840,9 @@ sub cleanPoolFiles
                         #
                         # last in the chain (or no chain) - just delete it
                         #
-                        print("Removing pool file $poolFile\n") if ( $Conf{XferLogLevel} >= 2 );
+                        print("BackupPC_refCountUpdate: removing pool file $poolFile\n") if ( $Conf{XferLogLevel} >= 2 );
                         if ( unlink($poolFile) != 1 ) {
-                            print("Can't remove $poolFile\n");
+                            print("BackupPC_refCountUpdate: can't remove $poolFile\n");
                             $ErrorCnt++;
                             next;
                         }
@@ -735,15 +852,15 @@ sub cleanPoolFiles
                         # we replace the file with an empty file.
                         # first remove S_IXOTH mode
                         #
-                        print("Zeroing pool file $poolFile (next $nextPoolFile exists)\n") if ( $Conf{XferLogLevel} >= 2 );
+                        print("BackupPC_refCountUpdate: zeroing pool file $poolFile (next $nextPoolFile exists)\n") if ( $Conf{XferLogLevel} >= 2 );
                         if ( chmod(0644, $poolFile) != 1 ) {
-                            print("Can't chmod 0644 $poolFile\n");
+                            print("BackupPC_refCountUpdate: can't chmod 0644 $poolFile\n");
                             $ErrorCnt++;
                         }
                         if ( open(my $fh, ">", $poolFile) ) {
                             close($fh);
                         } else {
-                            print("Can't truncate $poolFile\n");
+                            print("BackupPC_refCountUpdate: can't truncate $poolFile\n");
                             $ErrorCnt++;
                             next;
                         }
@@ -761,9 +878,9 @@ sub cleanPoolFiles
                     #
                     # mark the pool file so no one links to it
                     #
-                    print("Marking pool file $poolFile\n") if ( $Conf{XferLogLevel} >= 2 );
+                    print("BackupPC_refCountUpdate: marking pool file $poolFile\n") if ( $Conf{XferLogLevel} >= 2 );
                     if ( chmod(0445, $poolFile) != 1 ) {
-                        print("Can't chmod 0445 $poolFile\n");
+                        print("BackupPC_refCountUpdate: can't chmod 0445 $poolFile\n");
                         $ErrorCnt++;
                     }
                 }
@@ -773,10 +890,10 @@ sub cleanPoolFiles
                 # rewrite the poolCnt file
                 #
                 if ( $count->write("$poolCntFile.$$") ) {
-                    print("Can't write new pool count file $poolCntFile.$$\n");
+                    print("BackupPC_refCountUpdate: can't write new pool count file $poolCntFile.$$\n");
                     $ErrorCnt++;
                 } elsif ( !rename("$poolCntFile.$$", $poolCntFile) ) {
-                    print("Can't rename $poolCntFile.$$ to $poolCntFile ($!)\n");
+                    print("BackupPC_refCountUpdate: can't rename $poolCntFile.$$ to $poolCntFile ($!)\n");
                     $ErrorCnt++;
                 }
             }

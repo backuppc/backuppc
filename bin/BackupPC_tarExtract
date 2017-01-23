@@ -34,7 +34,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use Encode qw/from_to/;
 use BackupPC::Lib;
 use BackupPC::XS qw( :all );
@@ -119,9 +119,13 @@ my $Compress = $Backups[$newBkupIdx]{compress};
 # the previous one
 #
 my($AttrNew, $AttrOld);
+my($DeltaNew, $DeltaOld);
 
-$AttrNew = BackupPC::XS::AttribCache::new($client, $newBkupNum, $ShareNameUM,
-                                      $Backups[$newBkupIdx]{compress});
+$AttrNew  = BackupPC::XS::AttribCache::new($client, $newBkupNum, $ShareNameUM,
+                                           $Backups[$newBkupIdx]{compress});
+$DeltaNew = BackupPC::XS::DeltaRefCnt::new("$TopDir/pc/$client/$newBkupNum");
+$AttrNew->setDeltaInfo($DeltaNew);
+
 $Inode = $Inode0 = $Backups[$newBkupIdx]{inodeLast};
 
 my $Inplace = $opts{p};
@@ -132,11 +136,11 @@ if ( !$Inplace ) {
         exit(1);
     }
     $lastBkupNum = $Backups[$lastBkupIdx]{num};
-    $AttrOld = BackupPC::XS::AttribCache::new($client, $lastBkupNum, $ShareNameUM,
-                                      $Backups[$lastBkupIdx]{compress});
+    $AttrOld  = BackupPC::XS::AttribCache::new($client, $lastBkupNum, $ShareNameUM,
+                                               $Backups[$lastBkupIdx]{compress});
+    $DeltaOld = BackupPC::XS::DeltaRefCnt::new("$TopDir/pc/$client/$lastBkupNum");
+    $AttrOld->setDeltaInfo($DeltaOld);
 }
-
-BackupPC::XS::PoolRefCnt::DeltaFileInit("$TopDir/pc/$client");
 
 #
 # This constant and the line of code below that uses it is borrowed
@@ -376,12 +380,12 @@ sub moveFileToOld
             $a->{nlinks}--;
             if ( $a->{nlinks} <= 0 ) {
                 $AttrNew->deleteInode($a->{inode});
-                BackupPC::XS::PoolRefCnt::DeltaUpdate($a->{compress}, $a->{digest}, -1);
+                $DeltaNew->update($a->{compress}, $a->{digest}, -1);
             } else {
                 $AttrNew->setInode($a->{inode}, $a);
             }
         } else {
-            BackupPC::XS::PoolRefCnt::DeltaUpdate($a->{compress}, $a->{digest}, -1)
+            $DeltaNew->update($a->{compress}, $a->{digest}, -1)
                                             if ( length($a->{digest}) );
         }
         $AttrNew->delete($f->{name});
@@ -390,7 +394,9 @@ sub moveFileToOld
             # Delete the directory tree, including updating reference counts
             #
             my $pathNew = $AttrNew->getFullMangledPath($f->{name});
-            BackupPC::DirOps::RmTreeQuiet($bpc, $pathNew, $a->{compress});
+            print("moveFileToOld(..., $f->{name}): deleting $pathNew\n")
+                                         if ( $Conf{XferLogLevel} >= 3 );
+            BackupPC::DirOps::RmTreeQuiet($bpc, $pathNew, $a->{compress}, $DeltaNew);
         }
         return;
     }
@@ -401,22 +407,27 @@ sub moveFileToOld
         # in that case, increase the pool reference count
         #
         if ( $AttrOld->set($f->{name}, $a, 1) ) {
-            BackupPC::XS::PoolRefCnt::DeltaUpdate($a->{compress}, $a->{digest}, 1);
+            $DeltaOld->update($a->{compress}, $a->{digest}, 1);
         }
     } else {
         $AttrOld->set($f->{name}, $a);
+        $DeltaOld->update($a->{compress}, $a->{digest}, 1);
     }
     $AttrNew->delete($f->{name});
+    $DeltaNew->update($a->{compress}, $a->{digest}, -1);
     if ( $a->{type} == BPC_FTYPE_DIR ) {
         #
         # For a directory we need to move it to old, and copy
         # any inodes that are referenced below this directory.
+        # Also update the reference counts for the moved files.
         #
         my $pathNew = $AttrNew->getFullMangledPath($f->{name});
         my $pathOld = $AttrOld->getFullMangledPath($f->{name});
         print("moveFileToOld(..., $f->{name}): renaming $pathNew to $pathOld\n")
                                  if ( $Conf{XferLogLevel} >= 3 );
         $AttrNew->flush(0, $f->{name});
+        BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress}, -1, $DeltaNew);
+        BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress},  1, $DeltaOld);
         copyInodes($f->{name});
         pathCreate($pathOld);
         if ( !rename($pathNew, $pathOld) ) {
@@ -567,7 +578,7 @@ sub TarReadFile
                 $aTarget->{nlinks} = 2;
                 $AttrNew->set($target,    $aTarget);
                 $AttrNew->set($f->{name}, $aTarget);
-                BackupPC::XS::PoolRefCnt::DeltaUpdate($aTarget->{compress}, $aTarget->{digest}, 1)
+                $DeltaNew->update($aTarget->{compress}, $aTarget->{digest}, 1)
                                                     if ( length($aTarget->{digest}) );
                 logFileAction("link", $f)
                             if ( $Conf{XferLogLevel} >= 1 );
@@ -617,8 +628,7 @@ sub TarReadFile
                     #
                     if ( $AttrOld && !$AttrOld->getInode($aTarget->{inode}) ) {
                         $AttrOld->setInode($aTarget->{inode}, $aTarget);
-                        BackupPC::XS::PoolRefCnt::DeltaUpdate($aTarget->{compress},
-                                                            $aTarget->{digest}, 1);
+                        $DeltaOld->update($aTarget->{compress}, $aTarget->{digest}, 1);
                     }
                     $f->{nlinks}++;
                     $AttrNew->set($f->{name}, $f);
@@ -737,7 +747,7 @@ sub TarReadFile
             #
             if ( $AttrOld && !$AttrOld->get($f->{name}) ) {
                 if ( $AttrOld->set($f->{name}, $a, 1) ) {
-                    BackupPC::XS::PoolRefCnt::DeltaUpdate($newCompress, $digest, 1);
+                    $DeltaOld->update($newCompress, $digest, 1);
                 }
             }
             $f->{inode}  = $a->{inode};
@@ -747,7 +757,7 @@ sub TarReadFile
         #
         # file is new or changed; update ref counts
         #
-        BackupPC::XS::PoolRefCnt::DeltaUpdate($newCompress, $digest, 1)
+        $DeltaNew->update($newCompress, $digest, 1)
                                                 if ( $digest ne "" );
     }
 
@@ -909,8 +919,16 @@ sub exitMesg
         $bpc->flushXSLibMesgs();
     }
 
-    BackupPC::XS::PoolRefCnt::DeltaPrint() if ( $Conf{XferLogLevel} >= 6 );
-    BackupPC::XS::PoolRefCnt::DeltaFileFlush();
+    if ( $Conf{XferLogLevel} >= 6 ) {
+        print("RefCnt Deltas for new #$newBkupNum:\n");
+        $DeltaNew->print();
+        if ( $DeltaOld ) {
+            print("RefCnt Deltas for old #$lastBkupNum\n");
+            $DeltaOld->print();
+        }
+    }
+    $DeltaNew->flush();
+    $DeltaOld->flush() if ( $DeltaOld );
 
     if ( $Abort ) {
         print("BackupPC_tarExtact aborting ($AbortReason)\n");
@@ -1048,7 +1066,7 @@ sub dirCacheFlush
                     print("dirCacheFlush(): unlink($name) -> setting old inode (nlinks = $a->{nlinks})\n")
                                                     if ( $Conf{XferLogLevel} >= 3 );
                     $AttrOld->setInode($a->{inode}, $a);
-                    BackupPC::XS::PoolRefCnt::DeltaUpdate($a->{compress}, $a->{digest}, 1);
+                    $DeltaOld->update($a->{compress}, $a->{digest}, 1);
                 }
                 #
                 # If this file is older than this backup, then move it
@@ -1067,7 +1085,7 @@ sub dirCacheFlush
                 $a->{nlinks}--;
                 if ( $a->{nlinks} <= 0 ) {
                     $AttrNew->deleteInode($a->{inode});
-                    BackupPC::XS::PoolRefCnt::DeltaUpdate($a->{compress}, $a->{digest}, -1);
+                    $DeltaNew->update($a->{compress}, $a->{digest}, -1);
                 } else {
                     $AttrNew->setInode($a->{inode}, $a);
                 }
@@ -1133,7 +1151,7 @@ sub copyInodes
         if ( !defined($AttrOld->getInode($a->{inode})) ) {
             print("copyInodes($dirName): $fileUM moving inode $a->{inode} to old\n") if ( $Conf{XferLogLevel} >= 5 );
             $AttrOld->setInode($a->{inode}, $aInode);
-            BackupPC::XS::PoolRefCnt::DeltaUpdate($Compress, $aInode->{digest}, 1);
+            $DeltaOld->update($Compress, $aInode->{digest}, 1);
         }
 
         #
@@ -1143,7 +1161,7 @@ sub copyInodes
         if ( $aInode->{nlinks} == 0 ) {
             $AttrNew->deleteInode($a->{inode});
             print("copyInodes($dirName): $fileUM deleting inode $a->{inode} in new\n") if ( $Conf{XferLogLevel} >= 5 );
-            BackupPC::XS::PoolRefCnt::DeltaUpdate($aInode->{compress}, $aInode->{digest}, -1);
+            $DeltaNew->update($aInode->{compress}, $aInode->{digest}, -1);
         } else {
             $AttrNew->setInode($a->{inode}, $aInode);
         }

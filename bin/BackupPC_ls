@@ -37,7 +37,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 
 use BackupPC::Lib;
 use BackupPC::XS qw ( :all );
@@ -180,4 +180,5 @@ sub printDir
             printDir("$dir/$file");
         }
     }
+    $bpc->flushXSLibMesgs();
 }

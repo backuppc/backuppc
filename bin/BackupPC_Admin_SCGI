@@ -48,7 +48,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -56,7 +56,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 
 use IO::Socket;
 use Data::Dumper;
@@ -128,11 +128,6 @@ BEGIN {
     eval "use BackupPC::CGI::RSS;";
     if ( !$@ ) {
         $ActionDispatch{rss} = "RSS";
-    }
-    if ( $BackupPC::XS::VERSION < 0.20 ) {
-        print("BackupPC_Admin_SCGI: old verison $BackupPC::XS::VERSION of BackupPC::XS: need >= 0.20; exiting in 60 seconds\n");
-        sleep(60);
-        exit(1);
     }
 }
 

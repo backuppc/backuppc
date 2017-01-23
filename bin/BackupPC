@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -53,7 +53,7 @@
 use strict;
 no  utf8;
 use vars qw($Hosts);
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::XS;
 use Encode qw/decode_utf8/;
@@ -63,6 +63,7 @@ use Data::Dumper;
 use Getopt::Std;
 use Socket;
 use Carp;
+use version;
 use Digest::MD5;
 use POSIX qw(setsid);
 
@@ -71,7 +72,7 @@ use POSIX qw(setsid);
 ###########################################################################
 my %opts;
 if ( !getopts("d", \%opts) || @ARGV != 0 ) {
-    print("usage: $0 [-d]\n");
+    print(STDERR "usage: $0 [-d]\n");
     exit(1);
 }
 
@@ -94,7 +95,33 @@ my %Conf   = $bpc->Conf();
 #
 if ( $Conf{BackupPCUserVerify}
         && $> != (my $uid = (getpwnam($Conf{BackupPCUser}))[2]) ) {
-    die "Wrong user: my userid is $>, instead of $uid ($Conf{BackupPCUser})\n";
+    print(STDERR "Wrong user: my userid is $>, instead of $uid ($Conf{BackupPCUser}); exiting in 30s\n");
+    sleep(30);
+    exit(1);
+}
+
+###########################################################################
+# Ensure we don't have old versions of key libraries and executables
+###########################################################################
+if ( $BackupPC::XS::VERSION < 0.50 ) {
+    print(STDERR "BackupPC: old verison $BackupPC::XS::VERSION of BackupPC::XS: need >= 0.50; exiting in 30s\n");
+    sleep(30);
+    exit(1);
+}
+if ( $Conf{RsyncBackupPCPath} ne "" && -x $Conf{RsyncBackupPCPath} ) {
+    my $output = $bpc->cmdSystemOrEval([$Conf{RsyncBackupPCPath}, "--version"]);
+    if ( $? ) {
+        print(STDERR "BackupPC: can't run $Conf{RsyncBackupPCPath} for version check; ($output) exiting in 30s\n");
+        sleep(30);
+        exit(1);
+    }
+    my $version = "unknown";
+    $version = $1 if ( $output =~ /rsync_bpc\s+version\s+([\d.]+)\s+protocol/ );
+    if ( $version eq "unknown" || version->parse($1) < version->parse('3.0.9.5') ) {
+        print(STDERR "BackupPC: rsync_bpc at $Conf{RsyncBackupPCPath} needs to be upgraded (got version $1; need >= 3.0.9.5); exiting in 30s\n");
+        sleep(30);
+        exit(1);
+    }
 }
 
 #
@@ -255,7 +282,7 @@ sub Main_Initialize
                    . " valid executable program\n");
         exit(1);
     }
-
+ 
     #
     # Create $RunDir if it doesn't exist
     #
@@ -271,7 +298,7 @@ sub Main_Initialize
                    . " file systems, or this file system doesn't support hardlinks,"
                    . " or these directories don't exist, or there is a permissions"
                    . " problem, or the file system is out of inodes or full.  Use"
-                   . " df, df -i, and ls -ld to check each of these possibilities."
+                   . " df, df -i, and ls -ld to check each of these possibilities."  
                    . " Quitting...\n");
         exit(1);
     }

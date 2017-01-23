@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -210,9 +210,9 @@ sub find
 # didn't always completely remove a directory tree on a NetApp.
 #
 # This routine updates the reference counts every time it
-# encounters an attrib file (unless $compress < 0).
-# So you must have called BackupPC::XS::PoolRefCnt::DeltaFileInit()
-# first.
+# encounters an attrib file (unless $compress < 0), assuming
+# $deltaInfo is passed as a BackupPC::XS::DeltaRefCnt::new()
+# object.
 #
 # The $compress argument has three values:
 #  >0   compression is on; reference counts will be updated
@@ -230,18 +230,18 @@ sub find
 #
 sub RmTreeQuiet
 {
-    my($bpc, $roots, $compress, $progressCB) = @_;
+    my($bpc, $roots, $compress, $deltaInfo, $progressCB) = @_;
 
     my($cwd) = Cwd::fastcwd();
     $cwd = $1 if ( $cwd =~ /(.*)/ );
-    my $ret = BackupPC::DirOps::RmTreeQuietInner($bpc, $cwd, $roots, $compress, $progressCB);
+    my $ret = BackupPC::DirOps::RmTreeQuietInner($bpc, $cwd, $roots, $compress, $deltaInfo, $progressCB);
     chdir($cwd) if ( $cwd );
     return $ret;
 }
 
 sub RmTreeQuietInner
 {
-    my($bpc, $cwd, $roots, $compress, $progressCB) = @_;
+    my($bpc, $cwd, $roots, $compress, $deltaInfo, $progressCB) = @_;
     my(@files, $root);
 
     if ( defined($roots) && length($roots) ) {
@@ -271,31 +271,40 @@ sub RmTreeQuietInner
 
         #
         # If this is an attrib file then we need to open it to
-        # update the reference counts
+        # update the reference counts if the caller wants us to
         #
         if ( $compress >= -1 && $name =~ /^attrib/ && -f $name ) {
-            my $attr = BackupPC::XS::Attrib::new($compress);
-            if ( !$attr->read(".", $name) ) {
-                print(STDERR "Can't read attribute file in $cwd/$path/$name: " . $attr->errStr() . "\n");
-            }
-            my $attrAll = $attr->get();
-            my $d = $attr->digest();
-
-            BackupPC::XS::PoolRefCnt::DeltaUpdate($compress, $d, -1) if ( length($d) );
-            if ( $compress >= 0 ) {
-                foreach my $fileUM ( keys(%$attrAll) ) {
-                    my $a = $attrAll->{$fileUM};
-                    BackupPC::XS::PoolRefCnt::DeltaUpdate($compress, $a->{digest}, -1)
-                                                    if ( length($a->{digest}) );
+            if ( $deltaInfo ) {
+                my $attr = BackupPC::XS::Attrib::new($compress);
+                if ( !$attr->read(".", $name) ) {
+                    print(STDERR "Can't read attribute file in $cwd/$path/$name: " . $attr->errStr() . "\n");
                 }
+                my $attrAll = $attr->get();
+                my $d = $attr->digest();
+
+                $deltaInfo->update($compress, $d, -1) if ( $deltaInfo && length($d) );
+                if ( $compress >= 0 ) {
+                    foreach my $fileUM ( keys(%$attrAll) ) {
+                        my $a = $attrAll->{$fileUM};
+                        $deltaInfo->update($compress, $a->{digest}, -1)
+                                                        if ( $deltaInfo && length($a->{digest}) );
+                    }
+                }
+                &$progressCB(scalar(keys(%$attrAll))) if ( ref($progressCB) eq 'CODE' );
+            } else {
+                #
+                # the callback should know it's directories, not files in the non-ref
+                # counting case
+                #
+                &$progressCB(1) if ( ref($progressCB) eq 'CODE' );
             }
-            &$progressCB(scalar(keys(%$attrAll))) if ( ref($progressCB) eq 'CODE' );
         }
         if ( $compress < -1 && ref($progressCB) eq 'CODE' ) {
             #
             # Do progress counting in the non-ref count case
+            # (the callback should know it's directories, not files)
             #
-            &$progressCB(1);
+            &$progressCB(1) if ( ref($progressCB) eq 'CODE' );
         }
 
 	#
@@ -315,7 +324,7 @@ sub RmTreeQuietInner
 		    print(STDERR "Can't read $cwd/$path/$name: $!\n");
 		} else {
 		    @files = grep $_ !~ /^\.{1,2}$/, @$d;
-		    BackupPC::DirOps::RmTreeQuietInner($bpc, "$cwd/$name", \@files, $compress, $progressCB);
+		    BackupPC::DirOps::RmTreeQuietInner($bpc, "$cwd/$name", \@files, $compress, $deltaInfo, $progressCB);
 		    if ( !chdir("..") ) {
                         print(STDERR "RmTreeQuietInner: can't chdir .. (while removing $root)\n");
                         return 1;

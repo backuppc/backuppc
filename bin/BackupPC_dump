@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_dump: Dump a single client.
@@ -85,7 +85,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha2, released 15 Sep 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -194,6 +194,12 @@ if ( defined(my $error = $bpc->ConfigRead($client)) ) {
 %Conf = $bpc->Conf();
 BackupPC::XS::Lib::logLevelSet($Conf{XferLogLevel});
 flushLibMessages();
+#
+# Write new-style attrib files (<= 4.0.0beta3 uses old-style), which are 0-length
+# files with the digest encoded in the file name (eg: attrib_md5HexDigest). We
+# can still read the old-style files, and we upgrade them as we go.
+#
+BackupPC::XS::Attrib::backwardCompat(0, 0);
 
 #
 # Catch various signals
@@ -491,7 +497,7 @@ if ( !$opts{d} ) {
     } else {
         $host = $client;
     }
-    if ( !defined($bpc->resolve($host)) ) {
+    if ( !defined($bpc->getHostAddrInfo($host)) ) {
         #
         # Ok, NS doesn't know about it.  Maybe it is a NetBios name
         # instead.
@@ -721,7 +727,7 @@ if ( $Conf{XferLogLevel} >= 1 || $opts{v} ) {
 # See if this client needs an fsck.
 #
 my $needFsck    = 0;
-my $refCntFiles = BackupPC::DirOps::dirRead($bpc, "$Dir/refCnt");
+my $refCntFiles = BackupPC::DirOps::dirRead($bpc, "$Dir/$newBkupNum/refCnt");
 foreach my $file ( @$refCntFiles ) {
     next if ( $file !~ /^needFsck/ );
     $needFsck = 1;
@@ -946,9 +952,7 @@ for my $shareName ( @$ShareNames ) {
 	XferMethod        => $Conf{XferMethod},
 	logLevel          => $Conf{XferLogLevel},
         inPlace           => $inPlace,
-        newBkupNum        => $newBkupNum,
         newBkupIdx        => $newBkupIdx,
-        lastBkupNum       => $lastBkupNum,
         lastBkupIdx       => $lastBkupIdx,
         incrBaseBkupNum   => $incrBaseBkupNum,
         incrBaseTime      => $incrBaseTime,
@@ -1259,7 +1263,7 @@ $XferLOG->write(\"$type backup $newNum complete, $stat{fileCnt} files,"
 BackupExpire($client);
 
 #
-# Update reference counts - first apply the deltas.
+# Update reference counts - apply the deltas.
 #
 RefCountUpdate(0, 0);
 

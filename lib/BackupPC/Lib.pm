@@ -818,7 +818,7 @@ sub CheckHostAlive
     }
 
     my $args = {
-	pingPath => $bpc->getPingPathByAddressType( $host ),
+	pingPath => $bpc->getPingPathByAddressType($host),
 	host     => $host,
     };
     $pingCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{PingCmd}, $args);
@@ -1393,7 +1393,7 @@ sub flushXSLibMesgs()
 # Return 4 if it resolves to an IPv4 address, 6 if it resolves to an IPv6
 # address or undef if it can not be resolved.
 #
-sub resolve
+sub getHostAddrInfo
 {
     my ( $bpc, $host ) = @_;
     my ( $err, @addrs ) = Socket::getaddrinfo($host);
@@ -1407,7 +1407,7 @@ sub resolve
 sub getPingPathByAddressType
 {
     my ( $bpc, $host ) = @_;
-    my $at = $bpc->resolve( $host ) || 4;
+    my $at = $bpc->getHostAddrInfo($host) || 4;
     return ($at == 6) ? $bpc->{Conf}{PingPath6} : $bpc->{Conf}{PingPath};
 }
 

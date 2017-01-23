@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -36,7 +36,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::XS;
 use BackupPC::Xfer;
@@ -170,7 +170,7 @@ if ( $Conf{ClientNameAlias} ne "" ) {
 # Find its IP address
 #
 if ( $hostIP !~ /\d+\.\d+\.\d+\.\d+/ ) {
-    if ( !defined($bpc->resolve($host)) ) {
+    if ( !defined($bpc->getHostAddrInfo($host)) ) {
 	#
 	# Ok, NS doesn't know about it.  Maybe it is a NetBios name
 	# instead.

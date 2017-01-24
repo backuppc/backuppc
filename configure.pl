@@ -46,34 +46,49 @@ use strict;
 no  utf8;
 use vars qw(%Conf %OrigConf);
 use lib "./lib";
-use Encode;
 
-my $EncodeVersion = eval($Encode::VERSION);
-if ( $EncodeVersion < 1.99 ) {
-    print("Error: you need to upgrade perl's Encode package.\n"
-        . "I found $EncodeVersion and BackupPC needs >= 1.99\n"
-        . "Please go to www.cpan.org or use the cpan command.\n");
-    exit(1);
+#
+# The two strings below are replaced with the full list of BackupPC executables
+# and libraries by makeDist.
+#
+my @ConfigureBinList = qw(
+        __CONFIGURE_BIN_LIST__
+    );
+my @ConfigureLibList = qw(
+        __CONFIGURE_BIN_LIST__
+    );
+
+#
+# Check that makeDist has been run; need to avoid having the magic string
+# appear exactly (otherwise makeDist will replace it), so compute it instead
+#
+if ( $ConfigureBinList[0] eq "__" . "CONFIGURE_BIN_LIST__" ) {
+    die <<EOF;
+You need to run makeDist first to create a tarball release that includes an
+updated configure.pl.  After you unpack the tarball, run configure.pl from
+there.
+EOF
 }
 
-my @Packages = qw(File::Path File::Spec File::Copy DirHandle Digest::MD5
-                  Data::Dumper Getopt::Std Getopt::Long Pod::Usage
-                  BackupPC::Lib BackupPC::XS);
+my @Packages = qw(version Encode File::Path File::Spec File::Copy DirHandle
+                  Digest::MD5 Data::Dumper Getopt::Std Getopt::Long Pod::Usage
+                  BackupPC::XS BackupPC::Lib);
 
 my $PackageVersion = {
-        "BackupPC::XS" => "0.30",
+        "Encode"       => "1.99",
+        "BackupPC::XS" => "0.50",
     };
 
 foreach my $pkg ( @Packages ) {
     eval "use $pkg";
     if ( !$@ ) {
         next if ( !defined($PackageVersion->{$pkg}) );
-        my $version = eval "\$${pkg}::VERSION";
-        next if ( $version >= $PackageVersion->{$pkg} );
+        my $ver = eval "\$${pkg}::VERSION";
+        next if ( version->parse($ver) >= version->parse($PackageVersion->{$pkg}) );
         die <<EOF;
 
 Package $pkg needs to be at least version $PackageVersion->{$pkg}.
-The currently installed $pkg is version $version.
+The currently installed $pkg is version $ver.
 
 Please upgrade package $pkg to the latest version and then re-run
 this script.
@@ -563,9 +578,7 @@ foreach my $dir ( (
 }
 
 printf("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
-foreach my $prog ( qw(
-        __CONFIGURE_BIN_LIST__
-    ) ) {
+foreach my $prog ( @ConfigureBinList ) {
     InstallFile($prog, "$DestDir$Conf{InstallDir}/$prog", 0555);
 }
 
@@ -582,9 +595,7 @@ foreach my $prog ( qw(
 }
 
 printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
-foreach my $lib ( qw(
-        __CONFIGURE_LIB_LIST__
-    ) ) {
+foreach my $lib ( @ConfigureLibList ) {
     InstallFile($lib, "$DestDir$Conf{InstallDir}/$lib", 0444);
 }
 

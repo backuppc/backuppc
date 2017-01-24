@@ -30,11 +30,7 @@
 * Fixes to bin/BackupPC_sendEmail to avoid per-host overwrite of EMailAdminUserName
   from derrickdominic (#30)
 
-* Fixed typo in lib/BackupPC/Lang/en.pm in $Lang{Only_privileged_users_can_edit_config_files}
-  from Alexander Moisseev.
-
-* Updates to bin/BackupPC_sendEmail to avoid per-host settings overwrite,
-  from Derrick Dominic
+* Fixed minor typos in several language files; from Alexander Moisseev
 
 * Updated deprecated syntax (defined(@array) and "{" in regexps) from
   Alexander Moisseev.

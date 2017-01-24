@@ -5,7 +5,7 @@
 
                             __RELEASEDATE__
 
-         Copyright (C) 2001-2013 Craig Barratt.  All rights reserved.
+         Copyright (C) 2001-2017 Craig Barratt.  All rights reserved.
 
       This program is free software; you can redistribute it and/or
       modify it under the terms of the GNU General Public License.
@@ -16,15 +16,18 @@ QUICK START:
 
 The latest version of BackupPC can be fetched from:
 
-    http://backuppc.sourceforge.net
+    https://github.com/backuppc/backuppc/releases
+
+You'll need to install the perl module BackupPC::XS, available from:
+
+    https://github.com/backuppc/backuppc-xs/releases
+
+and the server-side rsync from:
+
+    https://github.com/backuppc/rsync-bpc/releases
 
 If you will use SMB for WinXX clients, you will need smbclient and
-nmblookup from the Samba distribution.  Version >= 2.2.0 of Samba is
-recommended (smbclient's tar feature in 2.0.7 has bugs for certain
-path lengths).  See www.samba.org for source and binaries.
-
-If you use rsync you will need File::RsyncP on SourceForge or www.cpan.org,
-plus rsync 2.5.6 on the client machines.
+nmblookup from the Samba distribution.
 
 To install BackupPC run these commands as root:
 
@@ -116,9 +119,19 @@ and general information at:
 
     http://backuppc.sourceforge.net
 
-The SourceForge project resides at:
+The source code is available on Github at:
 
-    http://sourceforge.net/projects/backuppc
+    https://github.com/backuppc
+
+and binary releases are available on github:
+
+    https://github.com/backuppc/backuppc/releases
+    https://github.com/backuppc/backuppc-xs/releases
+    https://github.com/backuppc/rsync-bpc/releases
+
+or SourceForge:
+
+    https://sourceforge.net/projects/backuppc/files
 
 You are encouraged to subscribe to any of the mail lists available
 on sourceforge.net:

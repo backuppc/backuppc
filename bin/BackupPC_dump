@@ -791,6 +791,23 @@ if ( defined($newBkupNum) && !-d "$Dir/$newBkupNum" ) {
         exit(1);
     }
 }
+if ( defined($newBkupNum) && !-d "$Dir/$newBkupNum/refCnt" ) {
+    #
+    # Create the new refCnt directory and force an fsck since
+    # it's a new directory.
+    #
+    eval { mkpath("$Dir/$newBkupNum/refCnt", 0, 0777) };
+    if ( $@ ) {
+        print(LOG $bpc->timeStamp, "Can't create $Dir/$newBkupNum/refCnt\n");
+        print(STDERR "Can't create backup directory $Dir/$newBkupNum/refCnt")
+                                            if ( $opts{v} );
+        exit(1);
+    }
+    my $needFsckFH;
+    if ( !(open($needFsckFH, ">", "$Dir/$newBkupNum/refCnt/needFsck.newDir") && close($needFsckFH)) ) {
+        $XferLOG->write(\"Can't create $Dir/$newBkupNum/refCnt/needFsck.newDir ($?)\n");
+    }
+}
 
 #
 # Save backupInfo and backups

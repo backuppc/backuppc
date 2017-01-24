@@ -239,7 +239,7 @@ sub updateHostPoolCnt
         my $bkupNum       = $Backups[$i]{num};
         my $compress      = $Backups[$i]{compress};
         my $bkupRefCntDir = "$pcDir/$bkupNum/refCnt";
-        my($gotFsck, $gotDelta);
+        my($gotFsck, $gotDelta, $gotPoolCnt);
 
         if ( !-d $bkupRefCntDir ) {
             mkdir($bkupRefCntDir, 0770);
@@ -253,7 +253,15 @@ sub updateHostPoolCnt
                 unlink("$bkupRefCntDir/$e->{name}");
                 $gotFsck  = 1;
             }
-            $gotDelta = 1 if ( $e->{name} =~ /^poolCntDelta/ );
+            $gotDelta = 1   if ( $e->{name} =~ /^poolCntDelta/ );
+            $gotPoolCnt = 1 if ( $e->{name} =~ /^poolCnt\./ );
+        }
+        if ( !$gotPoolCnt && !$gotFsck ) {
+            #
+            # This shouldn't happen - we should have some pool files, so force an fsck
+            #
+            print("BackupPC_refCountUpdate: doing fsck on $host #$bkupNum since there are no poolCnt files\n");
+            $gotFsck = 1;
         }
         if ( $forceFullFsck || ($forceLast2Fsck && $i >= @Backups - 2) || $gotFsck ) {
             push(@$bkupList, {bkupNum => $bkupNum, fsck => 1, compress => $compress});
@@ -268,7 +276,7 @@ sub updateHostPoolCnt
         }
     }
 
-    foreach my $b ( @$bkupList ) {
+    while ( (my $b = shift(@$bkupList)) ) {
         my $bkupNum  = $b->{bkupNum};
         my $fsck     = $b->{fsck};
         my $compress = $b->{compress};
@@ -281,7 +289,7 @@ sub updateHostPoolCnt
         #
         open($fd, ">", "$bkupRefCntDir/needFsck.refCountUpdate") && close($fd);
 
-        print("BackupPC_refCountUpdate: processing host $host #$bkupNum (fsck = $fsck, compareCurr = $compareCurr)\n") if ( $Conf{XferLogLevel} >= 2 );
+        print("BackupPC_refCountUpdate: processing host $host #$bkupNum (fsck = $fsck, compareCurr = $compareCurr)\n") if ( $Conf{XferLogLevel} >= 1 );
 
         if ( $fsck ) {
             my $deltaInfo = BackupPC::XS::DeltaRefCnt::new("$pcDir/$bkupNum");
@@ -294,7 +302,13 @@ sub updateHostPoolCnt
         updateHostDelta2Cnt($host, $bkupRefCntDir, $fsck, 0, $bkupNum);
         $bpc->flushXSLibMesgs();
 
-        if ( $errorCntSave0 == $ErrorCnt ) {
+        if ( $errorCntSave0 != $ErrorCnt ) {
+            if ( !$fsck ) {
+                print("BackupPC_refCountUpdate: given errors, redoing host $host #$bkupNum with fsck\n");
+                $ErrorCnt = $errorCntSave0;
+                unshift(@$bkupList, {bkupNum => $bkupNum, fsck => 1, compress => $compress});
+            }
+        } else {
             unlink("$bkupRefCntDir/needFsck.refCountUpdate");
         }
     }
@@ -483,10 +497,16 @@ sub updateHostPoolOneDelta2Cnt
             }
         }
 	#
-        # Apply the deltas and write the file back
+        # Apply the deltas and write the file back; it's an error for any count to
+        # be negative.
         #
         foreach my $d ( keys(%{$delta->[$refCntFile]}) ) {
-            $count->incr($d, $delta->[$refCntFile]{$d});
+            my $c = $count->incr($d, $delta->[$refCntFile]{$d});
+            next if ( $c >= 0 );
+            printf("BackupPC_refCountUpdate: got a negative count for %s processing %s; redoing #%d\n",
+                            unpack("H*", $d), $deltaFileName, $bkupNum);
+            $ErrorCnt++;
+            last;
         }
         if ( $count->write($poolCntFileNew) ) {
             print("BackupPC_refCountUpdate: can't write new pool count file $poolCntFileNew\n");

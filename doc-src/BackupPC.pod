@@ -210,30 +210,34 @@ offsite.
 
 =item BackupPC home page
 
-The BackupPC Open Source project is hosted on SourceForge.  The
-home page can be found at:
+The BackupPC Open Source project is hosted on Github and SourceForge.
+The project home page can be found at:
 
     http://backuppc.sourceforge.net
 
-This page has links to the current documentation, the SourceForge
-project page and general information.
+This page has links to the current documentation, the Github and SourceForge
+project pages and general information.
 
-=item SourceForge project
+=item Github and SourceForge locations
+
+The Github project page is at:
+
+    https://github.com/backuppc/backuppc
 
 The SourceForge project page is at:
 
     http://sourceforge.net/projects/backuppc
 
+Generally use of SourceForge has been deprecated in favor of Github.  All source
+code and development has moved to Github starting in 2016.  Releases will continue
+to be available on both Github and SourceForge.
+
 This page has links to the current releases of BackupPC.
 
 =item BackupPC Wiki
 
-BackupPC has a Wiki at L<http://backuppc.wiki.sourceforge.net>.
-Everyone is encouraged to contribute to the Wiki.  Anyone with
-a SourceForge account can edit the Wiki.
-
-The old FAQ is at L<http://backuppc.sourceforge.net/faq>, but
-is deprecated in favor of the Wiki.
+BackupPC has a Wiki at L<https://github.com/backuppc/backuppc/wiki>.
+Everyone is encouraged to contribute to the Wiki.
 
 =item Mailing lists
 

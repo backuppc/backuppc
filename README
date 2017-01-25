@@ -16,15 +16,18 @@ QUICK START:
 
 The latest version of BackupPC can be fetched from:
 
-    http://backuppc.sourceforge.net
+    https://github.com/backuppc/backuppc/releases
+
+If you use rsync you will need to install the per module File::RsyncP
+from SourceForge or www.cpan.org, plus at least rsync 2.5.6 on the client
+machines.  A pre-built windows rsync client with an installer is available
+at:
+
+    https://sourceforge.net/projects/backuppc/files/cygwin-rsyncd/
 
 If you will use SMB for WinXX clients, you will need smbclient and
 nmblookup from the Samba distribution.  Version >= 2.2.0 of Samba is
-recommended (smbclient's tar feature in 2.0.7 has bugs for certain
-path lengths).  See www.samba.org for source and binaries.
-
-If you use rsync you will need File::RsyncP on SourceForge or www.cpan.org,
-plus rsync 2.5.6 on the client machines.
+recommended.  See www.samba.org for source and binaries.
 
 To install BackupPC run these commands as root:
 
@@ -116,9 +119,17 @@ and general information at:
 
     http://backuppc.sourceforge.net
 
-The SourceForge project resides at:
+The source code is available on Github at:
 
-    http://sourceforge.net/projects/backuppc
+    https://github.com/backuppc
+
+and releases are available on github:
+
+    https://github.com/backuppc/backuppc/releases
+
+or SourceForge:
+
+    https://sourceforge.net/projects/backuppc/files
 
 You are encouraged to subscribe to any of the mail lists available
 on sourceforge.net:

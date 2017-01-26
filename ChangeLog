@@ -21,8 +21,12 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+#------------------------------------------------------------------------
+# Version 3.3.2, 25 Jan 2017
+#------------------------------------------------------------------------
+
 * Updates to bin/BackupPC_dump and lib/BackupPC/Xfer/Smb.pm from maksyms to fix
-  incompatabilities with Samba 4.3 (#22)
+  incompatibilities with Samba 4.3 (#22)
 
 * Sort hash of config editor tabs in lib/BackupPC/CGI/EditConfig.pm from
   polo (#23)

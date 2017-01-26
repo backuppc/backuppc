@@ -2057,12 +2057,16 @@ $Conf{CgiNavBarLinks} = [
         lname => "Documentation",    # actually displays $Lang->{Documentation}
     },
     {
-        link  => "http://backuppc.wiki.sourceforge.net",
+        link  => "http://backuppc.sourceforge.net",
+        name  => "Homepage",      # displays literal "Homepage"
+    },
+    {
+        link  => "https://github.com/backuppc/backuppc/wiki",
         name  => "Wiki",              # displays literal "Wiki"
     },
     {
-        link  => "http://backuppc.sourceforge.net",
-        name  => "SourceForge",      # displays literal "SourceForge"
+        link  => "https://github.com/backuppc/backuppc",
+        name  => "Source Code",      # displays literal "Source Code"
     },
 ];
 

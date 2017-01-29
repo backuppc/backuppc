@@ -680,12 +680,26 @@ if ( !defined($lastBkupNum) ) {
             exit(1);
         }
         $Backups[$lastBkupIdx]{noFill} = 1;
-        eval { mkpath("$Dir/$lastBkupNum", 0, 0777) };
+        #
+        # Create the lastBkupNum and refCnt directory and flag it needing an fsck
+        # in case we exit without cleanup. Also add a flag that it's ok not
+        # having any current poolCnt files.
+        #
+        eval { mkpath("$Dir/$lastBkupNum/refCnt", 0, 0777) };
         if ( $@ ) {
-            print(LOG $bpc->timeStamp, "Can't create $Dir/$lastBkupNum\n");
-            print(STDERR "Can't create backup directory $Dir/$lastBkupNum")
+            print(LOG $bpc->timeStamp, "Can't create $Dir/$lastBkupNum/refCnt\n");
+            print(STDERR "Can't create backup directory $Dir/$lastBkupNum/refCnt")
                                                 if ( $opts{v} );
             exit(1);
+        }
+        my $newFH;
+        if ( !(open($newFH, ">", "$Dir/$lastBkupNum/refCnt/needFsck.newDir") && close($newFH)) ) {
+            print(LOG $bpc->timeStamp, "Can't create $Dir/$lastBkupNum/refCnt/needFsck.newDir ($?)\n");
+            print(STDERR "Can't create $Dir/$lastBkupNum/refCnt/needFsck.newDir ($?)\n");
+        }
+        if ( !(open($newFH, ">", "$Dir/$lastBkupNum/refCnt/noPoolCntOk") && close($newFH)) ) {
+            print(LOG $bpc->timeStamp, "Can't create $Dir/$lastBkupNum/refCnt/noPoolCntOk ($?)\n");
+            print(STDERR "Can't create $Dir/$lastBkupNum/refCnt/noPoolCntOk ($?)\n");
         }
         BackupPC::Storage->backupInfoWrite($Dir, $lastBkupNum, $Backups[$lastBkupIdx]);
         if ( $lastBkupType eq "partial" || $lastBkupType eq "active" ) {
@@ -739,6 +753,7 @@ RefCountUpdate(1, 0) if ( $needFsck );
 # Duplicate the most recent backup, if required
 #
 if ( $doDuplicate ) {
+    my $t = time;
     #
     # Run BackupPC_backupDuplicate, then re-read the backups file.
     #
@@ -753,6 +768,8 @@ if ( $doDuplicate ) {
                 }
 	    },
 	    {}, \%Conf);
+    $t = time - $t;
+    $XferLOG->write(\"Finished BackupPC_backupDuplicate (running time: $t sec)\n");
     @Backups = $bpc->BackupInfoRead($client);
 }
 
@@ -793,8 +810,8 @@ if ( defined($newBkupNum) && !-d "$Dir/$newBkupNum" ) {
 }
 if ( defined($newBkupNum) && !-d "$Dir/$newBkupNum/refCnt" ) {
     #
-    # Create the new refCnt directory and force an fsck since
-    # it's a new directory.
+    # Create the new refCnt directory and flag it needing an fsck
+    # in case we exit without cleanup.
     #
     eval { mkpath("$Dir/$newBkupNum/refCnt", 0, 0777) };
     if ( $@ ) {
@@ -1005,8 +1022,8 @@ for my $shareName ( @$ShareNames ) {
     # make sure an fsck is run next time.
     #
     my $needFsckFH;
-    if ( !(open($needFsckFH, ">", "$Dir/refCnt/needFsck.dump") && close($needFsckFH)) ) {
-        $XferLOG->write(\"Can't create $Dir/refCnt/needFsck.dump ($?)\n");
+    if ( !(open($needFsckFH, ">", "$Dir/$newBkupNum/refCnt/needFsck.dump") && close($needFsckFH)) ) {
+        $XferLOG->write(\"Can't create $Dir/$newBkupNum/refCnt/needFsck.dump ($?)\n");
     }
 
     #
@@ -1181,7 +1198,7 @@ for my $shareName ( @$ShareNames ) {
     #
     1 while ( wait() >= 0 );
 
-    unlink("$Dir/refCnt/needFsck.dump");
+    unlink("$Dir/$newBkupNum/refCnt/needFsck.dump");
     BackupPC::XS::DirOps::unlockRangeFile($LockFd);
     $LockFd = undef;
 }
@@ -1276,6 +1293,13 @@ $XferLOG->write(\"$type backup $newNum complete, $stat{fileCnt} files,"
         . " $stat{xferErrCnt} xferErrs ($stat{xferBadFileCnt} bad files,"
         . " $stat{xferBadShareCnt} bad shares, $otherCount other)\n")
                     if ( $XferLOG && $Conf{XferLogLevel} >= 1 );
+
+if ( $stat{xferOK} && $BackupCase == 4 && -f "$Dir/$lastBkupNum/refCnt/needFsck.newDir" ) {
+    #
+    # remove temporary needFsck file on previous backup since backup succeeded ok
+    #
+    unlink("$Dir/$lastBkupNum/refCnt/needFsck.newDir");
+}
 
 BackupExpire($client);
 
@@ -1854,6 +1878,7 @@ sub BackupSave
 sub BackupRemove
 {
     my($client, $idx, $removeXferLOG) = @_;
+    my $t = time;
 
     my $fileExt = $Backups[$idx]{compress} > 0 ? ".z" : "";
     my $bkupNum = $Backups[$idx]{num};
@@ -1877,6 +1902,12 @@ sub BackupRemove
         },
         {}, \%Conf);
     my $ret = $?;
+    $t = time - $t;
+    if ( !defined($XferLOG) ) {
+        print(STDERR "Finished BackupPC_backupDelete, status = $ret (running time: $t sec)\n");
+    } else {
+        $XferLOG->write(\"Finished BackupPC_backupDelete, status = $ret (running time: $t sec)\n");
+    }
     splice(@Backups, $idx, 1);
     return $ret;
 }

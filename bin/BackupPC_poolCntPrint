@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -37,7 +37,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 
 use BackupPC::Lib;
 use BackupPC::XS;
@@ -48,6 +48,7 @@ my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
 my $s      = $bpc->{storage};
+my $digest;
 
 if ( @ARGV == 0 ) {
     print STDERR "Usage: $0 poolCntFilePath...\n";
@@ -55,8 +56,19 @@ if ( @ARGV == 0 ) {
 }
 while ( my $poolCntFile = shift(@ARGV) ) {
     if ( !-f $poolCntFile ) {
-        print STDERR "$poolCntFile does not exist\n";
-        exit(1);
+        if ( $poolCntFile =~ /^[\da-f]{16,}$/i ) {
+            #
+            # Print a specific digest count instead
+            #
+            $digest = pack("H*", $poolCntFile);
+            $poolCntFile = sprintf("%s/%02x/poolCnt",
+				   $Conf{CompressLevel} ? $bpc->{CPoolDir} : $bpc->{PoolDir},
+				   vec($digest, 0, 8) & 0xfe);
+        }
+        if ( !-f $poolCntFile ) {
+            print STDERR "$poolCntFile does not exist\n";
+            exit(1);
+        }
     }
 
     my $count = BackupPC::XS::PoolRefCnt::new();
@@ -71,6 +83,7 @@ while ( my $poolCntFile = shift(@ARGV) ) {
     while ( 1 ) {
         ($d, $c, $idx) = $count->iterate($idx);
         last if ( !defined($d) );
+        next if ( defined($digest) && $d ne $digest );
         printf("    %-20s => %d\n", unpack("H*", $d), $c);
     }
 }

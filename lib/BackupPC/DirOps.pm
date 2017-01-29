@@ -190,6 +190,20 @@ sub dirReadNames
     return \@names;
 }
 
+#
+# Check if a directory contains an attrib file.
+# Returns the attrib file name, or undef if none present.
+#
+sub dirContainsAttrib
+{
+    my($bpc, $dir) = @_;
+
+    my $entries = BackupPC::DirOps::dirRead($bpc, $dir);
+    foreach my $e ( @$entries ) {
+        return $e->{name} if ( $e->{name} =~ /^attrib/ );
+    }
+}
+
 sub find
 {
     my($bpc, $param, $dir, $dontDoCwd) = @_;

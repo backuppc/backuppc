@@ -70,20 +70,6 @@ sub new
 }
 
 #
-# Check if a directory contains an attrib file.
-# Returns the attrib file name, or undef if none present.
-#
-sub dirContainsAttrib
-{
-    my($m, $dir) = @_;
-
-    my $entries = BackupPC::DirOps::dirRead($m->{bpc}, $dir);
-    foreach my $e ( @$entries ) {
-        return $e->{name} if ( $e->{name} =~ /^attrib/ );
-    }
-}
-
-#
 # Check if a directory exists in the given backup.
 # This is only for >= 4.x backups.
 #
@@ -118,7 +104,7 @@ sub dirNotDeleted
             $file = $share;
             $last = 1;
         }
-        next if ( !-d $p || !defined($m->dirContainsAttrib($dir)) );
+        next if ( !-d $p || !defined(BackupPC::DirOps::dirContainsAttrib($m->{bpc}, $dir)) );
         my $attr = BackupPC::XS::Attrib::new($compress);
         if ( !$attr->read($p) ) {
             push(@{$m->{error}}, "Can't read attribute file in $p: " . $attr->errStr());
@@ -767,7 +753,7 @@ sub dirHistory
     # some part of the backup has changed.
     #
     for ( $i = @{$m->{backups}} - 1 ; $i >= 0 ; $i-- ) {
-        #print(STDERR "Do $i ($m->{backups}[$i]{noFill},$m->{backups}[$i]{level})\n");
+        #print(STDERR "Do $i (num = $m->{backups}[$i]{num}, fill = $m->{backups}[$i]{noFill}, level = $m->{backups}[$i]{level})\n");
 
         last if ( $m->{backups}[$i]{version} < 4 );
 
@@ -810,7 +796,7 @@ sub dirHistory
         }
 
         my $attr = BackupPC::XS::Attrib::new($compress);
-        if ( -f "$path/attrib" ) {
+        if ( BackupPC::DirOps::dirContainsAttrib($m->{bpc}, $path) ) {
             if ( !$attr->read($path) ) {
                 push(@{$m->{error}}, "Can't read attribute file in $path\n");
             } else {

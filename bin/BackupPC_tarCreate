@@ -54,7 +54,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -62,7 +62,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use File::Path;
 use Getopt::Std;
 use Encode qw/from_to/;
@@ -485,7 +485,7 @@ sub TarWriteFile
         #
         my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
-            print(STDERR "Unable to open file $hdr->{fullPath}\n");
+            print(STDERR "Unable to open file $hdr->{fullPath} (for $hdr->{name})\n");
             $ErrorCnt++;
 	    return;
         }
@@ -544,7 +544,7 @@ sub TarWriteFile
         #
         my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
-            print(STDERR "Unable to open file $hdr->{fullPath}\n");
+            print(STDERR "Unable to open file $hdr->{fullPath} (for $hdr->{name})\n");
             $ErrorCnt++;
             return;
         }
@@ -597,7 +597,7 @@ sub TarWriteFile
         #
         my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
-            print(STDERR "Unable to open symlink file $hdr->{fullPath}\n");
+            print(STDERR "Unable to open symlink file $hdr->{fullPath} (for $hdr->{name})\n");
             $ErrorCnt++;
             return;
         }
@@ -622,7 +622,7 @@ sub TarWriteFile
             my $data;
             if ( !defined($f) || $f->read(\$data, $BufSize) < 0 ) {
                 print(STDERR "Unable to open/read char/block special file"
-                           . " $hdr->{fullPath}\n");
+                           . " $hdr->{fullPath} (for $hdr->{name})\n");
 		$f->close if ( defined($f) );
 		$ErrorCnt++;
 		return;

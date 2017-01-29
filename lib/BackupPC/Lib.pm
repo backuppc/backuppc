@@ -50,6 +50,8 @@ use Encode qw/from_to encode_utf8/;
 use BackupPC::Storage;
 use BackupPC::XS;
 
+use constant ZeroLengthMD5Digest => pack("H*", "d41d8cd98f00b204e9800998ecf8427e");
+
 sub new
 {
     my $class = shift;
@@ -579,8 +581,9 @@ sub MD52Path
 {
     my($bpc, $d, $compress, $poolDir) = @_;
 
-    my $b2 = vec($d, 0, 16);
+    return "/dev/null" if ( $d eq ZeroLengthMD5Digest );
 
+    my $b2 = vec($d, 0, 16);
     $poolDir = ($compress ? $bpc->{CPoolDir} : $bpc->{PoolDir})
 		    if ( !defined($poolDir) );
     return sprintf("%s/%02x/%02x/%s", $poolDir,

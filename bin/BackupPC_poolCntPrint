@@ -51,7 +51,7 @@ my $s      = $bpc->{storage};
 my $digest;
 
 if ( @ARGV == 0 ) {
-    print STDERR "Usage: $0 poolCntFilePath...\n";
+    print STDERR "Usage: $0 [poolCntFilePath|hexDigest]...\n";
     exit(1);
 }
 while ( my $poolCntFile = shift(@ARGV) ) {

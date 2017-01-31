@@ -49,16 +49,21 @@ my %Conf   = $bpc->Conf();
 
 if ( @ARGV != 1 ) {
     print STDERR "Usage: $0 attribPath\n";
+    print STDERR "       $0 inodePath/inodeNum\n";
     exit(1);
 }
 
-my($dir, $file);
+my($dir, $file, $specificInode, $specificInodeHexStr);
 
 if ( $ARGV[0] =~ m{(.*/inode)/(\d+)$} ) {
-    my $base = $2 & 0x3fff;
-    $dir  = sprintf("%s/%02x", $1, $base >> 7);
-    $file = sprintf("attrib%02x", $base & 0x7f);
-    print("Reading inode attrib file $dir/$file\n");
+    $specificInode = $2;
+    $dir  = sprintf("%s/%02x", $1, ($specificInode >> 17) & 0x7f);
+    $file = sprintf("attrib%02x", ($specificInode >> 10) & 0x7f);
+    do {
+        $specificInodeHexStr .= sprintf("%02x", $specificInode & 0xff);
+        $specificInode = $specificInode >> 8;
+    } while ( $specificInode > 0 );
+    print("Reading inode attrib file $dir/$file; inodeName = $specificInodeHexStr\n");
 } elsif ( $ARGV[0] =~ m{(.+)/(.+)} ) {
     $dir  = $1;
     $file = $2;
@@ -98,4 +103,8 @@ if ( length($attrib->digest()) ) {
 }
 $Data::Dumper::Indent   = 1;
 $Data::Dumper::Sortkeys = 1;
-print Dumper($info);
+if ( defined($specificInode) ) {
+    print Dumper($info->{$specificInodeHexStr});
+} else {
+    print Dumper($info);
+}

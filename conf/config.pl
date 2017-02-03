@@ -2179,6 +2179,7 @@ $Conf{CgiUserConfigEdit} = {
         BackupZeroFilesIsFatal    => 1,
         ClientCharset             => 1,
         ClientCharsetLegacy       => 1,
+        RefCntFsck                => 1,
         XferMethod                => 1,
         XferLogLevel              => 1,
         SmbShareName              => 1,

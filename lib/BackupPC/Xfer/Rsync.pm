@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0alpha3, released 30 Nov 2013.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -435,6 +435,7 @@ sub run
 {
     my($t) = @_;
     my $conf = $t->{conf};
+    my $bpc  = $t->{bpc};
 
     alarm($conf->{ClientTimeout});
     while ( 1 ) {
@@ -569,6 +570,17 @@ sub run
     unlink($t->{filesFrom}) if ( length($t->{filesFrom}) && -f $t->{filesFrom} );
     $t->logSaveFlush(1);
     $t->{lastOutputLine} = $t->{lastErrorLine} if ( defined($t->{lastErrorLine}) );
+
+    #
+    # Remove any rsyncTmp files in the backup directory
+    #
+    my $bkupDir = "$conf->{TopDir}/pc/$t->{client}/$t->{backups}[$t->{newBkupIdx}]{num}";
+    foreach my $e ( @{BackupPC::DirOps::dirRead($bpc, $bkupDir)} ) {
+	if ( $e->{name} =~ /^rsyncTmp\.\d+\.[.\d]+$/ ) {
+            $t->{XferLOG}->write(\"Removing rsync temporary file $bkupDir/$e->{name}\n");
+	    unlink("$bkupDir/$e->{name}");
+	}
+    }
 
     if ( $t->{type} eq "restore" ) {
         if ( $t->{xferOK} ) {

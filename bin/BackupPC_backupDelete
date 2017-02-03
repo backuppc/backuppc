@@ -14,7 +14,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.0.0, released 02 Feb 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -89,9 +89,9 @@ if ( defined(my $error = $bpc->ConfigRead($Host)) ) {
 }
 %Conf = $bpc->Conf();
 
-$Conf{XferLogLevel} = 10;
 BackupPC::XS::Lib::logLevelSet($Conf{XferLogLevel});
 my $LogLevel = $Conf{XferLogLevel};
+
 #
 # Write new-style attrib files (<= 4.0.0beta3 uses old-style), which are 0-length
 # files with the digest encoded in the file name (eg: attrib_md5HexDigest). We
@@ -236,7 +236,7 @@ sub copyInodes
 {
     my($name, $path) = @_;
 
-    print("copyInodes: name = $name, path = $path\n") if ( $LogLevel >= 5 );
+    print("copyInodes: name = $name, path = $path\n") if ( $LogLevel >= 6 );
     return if ( $path !~ m{(.*)/(attrib.*)$} );
 
     $path = $1;

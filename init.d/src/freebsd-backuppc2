@@ -21,6 +21,6 @@ load_rc_config $name
 : ${backuppc_user:="__BACKUPPCUSER__"}
 command_interpreter="/usr/bin/perl"
 command=$backuppc_program
-pidfile="__LOGDIR__/BackupPC.pid"
+pidfile="__RUNDIR__/BackupPC.pid"
 
 run_rc_command "$1"

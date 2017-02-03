@@ -647,7 +647,7 @@ foreach my $init ( qw(gentoo-backuppc gentoo-backuppc.conf linux-backuppc
 		      solaris-backuppc debian-backuppc freebsd-backuppc
                       freebsd-backuppc2 suse-backuppc slackware-backuppc
                       ubuntu-backuppc ) ) {
-    InstallFile("init.d/src/$init", "init.d/$init", 0444);
+    InstallFile("init.d/src/$init", "init.d/$init", 0755);
 }
 
 printf("Making Apache configuration file for suid-perl\n");

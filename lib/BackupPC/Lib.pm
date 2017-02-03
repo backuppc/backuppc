@@ -1398,8 +1398,8 @@ sub flushXSLibMesgs()
 #
 sub getHostAddrInfo
 {
-    my ( $bpc, $host ) = @_;
-    my ( $err, @addrs ) = Socket::getaddrinfo($host);
+    my($bpc, $host) = @_;
+    my($err, @addrs) = Socket::getaddrinfo($host);
     return undef if ( $err );
     return (($addrs[0])->{'family'} == Socket::AF_INET6) ? 6 : 4;
 }
@@ -1409,9 +1409,9 @@ sub getHostAddrInfo
 #
 sub getPingPathByAddressType
 {
-    my ( $bpc, $host ) = @_;
+    my($bpc, $host) = @_;
     my $at = $bpc->getHostAddrInfo($host) || 4;
-    return ($at == 6) ? $bpc->{Conf}{PingPath6} : $bpc->{Conf}{PingPath};
+    return ($at == 6) ? $bpc->{Conf}{Ping6Path} : $bpc->{Conf}{PingPath};
 }
 
 1;

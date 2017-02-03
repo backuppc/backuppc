@@ -1563,19 +1563,19 @@ $Conf{PingPath} = '';
 # should not be allowed to write to this file or directory.
 # In some environments, this is something like '/usr/bin/ping6'.
 # In modern environments, the regular ping command can handle both
-# IPv4 and IPv6. In the latter case, just set it to  $Conf{PingPath}
+# IPv4 and IPv6. In the latter case, just set it to $Conf{PingPath}
 #
 # If you want to disable ping checking for IPv6 hosts, set this to
 # some program that exits with 0 status, eg:
 #
-#     $Conf{PingPath6} = '/bin/echo';
+#     $Conf{Ping6Path} = '/bin/echo';
 #
-$Conf{PingPath6} = '';
+$Conf{Ping6Path} = '';
 
 #
 # Ping command.  The following variables are substituted at run-time:
 #
-#   $pingPath      path to ping ($Conf{PingPath} or $Conf{PingPath6})
+#   $pingPath      path to ping ($Conf{PingPath} or $Conf{Ping6Path})
 #                  depending on the address type of $host.
 #   $host          host name
 #

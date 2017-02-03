@@ -284,7 +284,7 @@ my %Programs = (
     nmblookup      => "NmbLookupPath",
     rsync          => "RsyncClientPath",
     ping           => "PingPath",
-    'ping6/ping'   => "PingPath6",
+    ping6          => "Ping6Path",
     df             => "DfPath",
     'ssh/ssh2'     => "SshPath",
     sendmail       => "SendmailPath",
@@ -825,6 +825,7 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
     my $d = Data::Dumper->new([$new], [*value]);
     $d->Indent(1);
     $d->Terse(1);
+    $d->Sortkeys(1);
     my $value = $d->Dump;
     $value =~ s/(.*)\n/$1;\n/s;
     $newConf->[$newVars->{CgiUserConfigEdit}]{text}

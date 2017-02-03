@@ -645,7 +645,8 @@ if ( $Conf{CgiImageDir} ne "" ) {
 printf("Making init.d scripts\n");
 foreach my $init ( qw(gentoo-backuppc gentoo-backuppc.conf linux-backuppc
 		      solaris-backuppc debian-backuppc freebsd-backuppc
-                      freebsd-backuppc2 suse-backuppc slackware-backuppc ) ) {
+                      freebsd-backuppc2 suse-backuppc slackware-backuppc
+                      ubuntu-backuppc ) ) {
     InstallFile("init.d/src/$init", "init.d/$init", 0444);
 }
 

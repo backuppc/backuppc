@@ -294,6 +294,7 @@ foreach my $file ( (@PerlSrc,
 		init.d/src/slackware-backuppc
 		init.d/src/solaris-backuppc
 		init.d/src/suse-backuppc
+                init.d/src/ubuntu-backuppc
 		httpd/src/BackupPC.conf
 		doc/BackupPC.pod
 		doc/BackupPC.html

@@ -55,7 +55,7 @@ my @ConfigureBinList = qw(
         __CONFIGURE_BIN_LIST__
     );
 my @ConfigureLibList = qw(
-        __CONFIGURE_BIN_LIST__
+        __CONFIGURE_LIB_LIST__
     );
 
 #

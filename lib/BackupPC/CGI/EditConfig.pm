@@ -178,6 +178,7 @@ our %ConfigMenu = (
             {name => "XferLogLevel"},
             {name => "ClientCharset"},
             {name => "ClientCharsetLegacy"},
+            {name => "RefCntFsck"},
 
             ### Smb Settings
             {text => "CfgEdit_Title_Smb_Settings",

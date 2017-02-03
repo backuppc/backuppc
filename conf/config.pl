@@ -225,6 +225,22 @@ $Conf{BackupPCNightlyPeriod} = 1;
 $Conf{PoolSizeNightlyUpdatePeriod} = 16;
 
 #
+# Reference counts of pool files are computed per backup by accumulating
+# the relative changes.  That means, however, that any error will never be
+# corrected.  To be more conservative, we do a periodic full-redo of the
+# backup reference counts (called an "fsck").  $Conf{RefCntFsck} controls
+# how often this is done:
+#
+#   0: no additional fsck
+#   1: do an fsck on the last backup if it is from a full backup
+#   2: do an fsck on the last two backups always
+#   3: do a full fsck on all the backups
+#
+# $Conf{RefCntFsck} = 1 is the recommended setting.
+#
+$Conf{RefCntFsck} = 1;
+
+#
 # Maximum number of log files we keep around in log directory.
 # These files are aged nightly.  A setting of 14 means the log
 # directory will contain about 2 weeks of old log files, in

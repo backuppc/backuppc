@@ -201,6 +201,7 @@ use vars qw(%ConfigMeta);
 
     ClientCharset       => "string",
     ClientCharsetLegacy => "string",
+    RefCntFsck          => "integer",
 
     ######################################################################
     # Smb Configuration
@@ -428,6 +429,7 @@ use vars qw(%ConfigMeta);
                 XferLogLevel              => "boolean",
                 ClientCharset             => "boolean",
                 ClientCharsetLegacy       => "boolean",
+                RefCntFsck                => "boolean",
                 SmbShareName              => "boolean",
                 SmbShareUserName          => "boolean",
                 SmbSharePasswd            => "boolean",

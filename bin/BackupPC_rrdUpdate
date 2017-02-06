@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!/usr/bin/perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_rrdUpdate: Nightly pool graph update

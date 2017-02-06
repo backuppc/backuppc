@@ -241,7 +241,8 @@ sub readOutput
             $t->{xferOK} = 1;
             $t->{byteCnt} = $1;
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
-        } elsif ( /^\s*tar: restored \d+ files/ ) {
+        } elsif ( /^\s*tar: restored \d+ files/
+                    || /^\s*tar:\d+\s*tar_process done, err = 0/ ) {
             $t->{xferOK} = 1;
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
         } elsif ( /^\s*read_socket_with_timeout: timeout read. /i ) {

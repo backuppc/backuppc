@@ -580,6 +580,16 @@ sub Buffer2MD5
 sub MD52Path
 {
     my($bpc, $d, $compress, $poolDir) = @_;
+ 
+    #
+    # Injected fixed digest for collision testing on zero-sized file.
+    # If you uncomment this line, you also need to rebuild rsync_bpc
+    # and BackupPC::XS with the test code in bpc_digest_md52path()
+    # enabled, and also force the match in bpc_poolWrite_write to
+    # true.
+    #
+    # substr($d, 0, 16) = pack("H*", "d41d8cd98f00b204e9800998ecf8427e");
+    #
 
     return "/dev/null" if ( $d eq ZeroLengthMD5Digest );
 

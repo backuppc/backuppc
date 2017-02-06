@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.0.0, released 3 Feb 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -215,6 +215,21 @@ sub updateHostPoolCnt
     }
 
     #
+    # Apply policy in $Conf{RefCntFsck}:
+    #   0: no additional fsck
+    #   1: do an fsck on the last backup if it is from a full backup (handled below)
+    #   2: do an fsck on the last two backups always
+    #   3: do a full fsck on all the backups
+    #
+    if ( $Conf{RefCntFsck} == 2 ) {
+        print("BackupPC_refCountUpdate: doing fsck on last two backups on $host since \$Conf{RefCntFsck} == 2\n");
+        $forceLast2Fsck = 1;
+    } elsif ( $Conf{RefCntFsck} == 3 ) {
+        print("BackupPC_refCountUpdate: doing fsck on all backups on $host since \$Conf{RefCntFsck} == 3\n");
+        $forceFullFsck = 1;
+    }
+
+    #
     # Figure out which backups to rebuild or apply to deltas
     #
     my $bkupList = [];
@@ -226,6 +241,7 @@ sub updateHostPoolCnt
         my($gotFsck, $gotDelta, $gotPoolCnt, $gotNoPoolCntOk);
 
         if ( !-d $bkupRefCntDir ) {
+            print("BackupPC_refCountUpdate: doing fsck on $host #$bkupNum since $bkupRefCntDir doesn't exist\n");
             mkdir($bkupRefCntDir, 0770);
             push(@$bkupList, {bkupNum => $bkupNum, fsck => 1, compress => $compress});
             next;
@@ -241,13 +257,20 @@ sub updateHostPoolCnt
             $gotPoolCnt = 1     if ( $e->{name} =~ /^poolCnt\./ );
             $gotNoPoolCntOk = 1 if ( $e->{name} =~ /^noPoolCntOk/ );
         }
+        print("BackupPC_refCountUpdate: host $host #$bkupNum: gotFsck = $gotFsck, gotDelta = $gotDelta,"
+                                                          . " gotPoolCnt = $gotPoolCnt, gotNoPoolCntOk = $gotNoPoolCntOk\n")
+                                        if ( $Conf{XferLogLevel} >= 2 );
         #
         # Apply policy in $Conf{RefCntFsck}:
         #   0: no additional fsck
         #   1: do an fsck on the last backup if it is from a full backup
-        #   2: do an fsck on the last two backups always
-        #   3: do a full fsck on all the backups
+        #   2: do an fsck on the last two backups always (handled above)
+        #   3: do a full fsck on all the backups (handled above)
         #
+        if ( $Conf{RefCntFsck} == 1 && $i == @Backups - 1 && $Backups[$i]{type} eq "full" ) {
+            print("BackupPC_refCountUpdate: doing fsck on $host #$bkupNum (full) since \$Conf{RefCntFsck} == 1\n");
+            $gotFsck = 1;
+        }
 
         if ( !$gotPoolCnt && !$gotFsck && !$gotNoPoolCntOk ) {
             #
@@ -745,7 +768,7 @@ sub updateTotalRefCnt
                     if ( !defined($count->get($d)) ) {
                         my @s = stat("$poolSubDir/$e->{name}");
                         print("BackupPC_refCountUpdate: adding pool file $e->{name} with count 0 (size $s[7])\n")
-                                        if ( $Conf{XferLogLevel} >= 3 );
+                                        if ( $Conf{XferLogLevel} >= 4 );
                         #
                         # add stats for new pool file
                         #
@@ -894,7 +917,7 @@ sub cleanPoolFiles
                         #
                         # last in the chain (or no chain) - just delete it
                         #
-                        print("BackupPC_refCountUpdate: removing pool file $poolFile\n") if ( $Conf{XferLogLevel} >= 2 );
+                        print("BackupPC_refCountUpdate: removing pool file $poolFile\n") if ( $Conf{XferLogLevel} >= 4 );
                         if ( unlink($poolFile) != 1 ) {
                             print("BackupPC_refCountUpdate: can't remove $poolFile\n");
                             $ErrorCnt++;
@@ -906,7 +929,7 @@ sub cleanPoolFiles
                         # we replace the file with an empty file.
                         # first remove S_IXOTH mode
                         #
-                        print("BackupPC_refCountUpdate: zeroing pool file $poolFile (next $nextPoolFile exists)\n") if ( $Conf{XferLogLevel} >= 2 );
+                        print("BackupPC_refCountUpdate: zeroing pool file $poolFile (next $nextPoolFile exists)\n") if ( $Conf{XferLogLevel} >= 4 );
                         if ( chmod(0644, $poolFile) != 1 ) {
                             print("BackupPC_refCountUpdate: can't chmod 0644 $poolFile\n");
                             $ErrorCnt++;
@@ -932,7 +955,7 @@ sub cleanPoolFiles
                     #
                     # mark the pool file so no one links to it
                     #
-                    print("BackupPC_refCountUpdate: marking pool file $poolFile\n") if ( $Conf{XferLogLevel} >= 2 );
+                    print("BackupPC_refCountUpdate: marking pool file $poolFile\n") if ( $Conf{XferLogLevel} >= 4 );
                     if ( chmod(0445, $poolFile) != 1 ) {
                         print("BackupPC_refCountUpdate: can't chmod 0445 $poolFile\n");
                         $ErrorCnt++;

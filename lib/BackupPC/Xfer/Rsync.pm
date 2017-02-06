@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2013  Craig Barratt
+#   Copyright (C) 2002-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.0.0, released 3 Feb 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -205,6 +205,7 @@ sub start
             '--bpc-bkup-num',       $t->{backups}[$srcIdx]{num},
             '--bpc-bkup-comp',      $t->{backups}[$srcIdx]{compress},
             '--bpc-bkup-merge',     $mergeInfo,
+            '--bpc-attrib-new',
             '--bpc-log-level',      $conf->{XferLogLevel},
         );
 
@@ -385,6 +386,7 @@ sub start
             '--bpc-bkup-prevnum',   defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{num} : -1,
             '--bpc-bkup-prevcomp',  defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{compress} : -1,
             '--bpc-bkup-inode0',    $t->{backups}[$t->{newBkupIdx}]{inodeLast} || 1,
+            '--bpc-attrib-new',
             '--bpc-log-level',      $conf->{XferLogLevel},
         );
     }

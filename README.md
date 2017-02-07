@@ -2,7 +2,7 @@
 
 BackupPC is a high-performance, enterprise-grade system for backing up to a server's disk.
 
-## QUICK START
+## Quick Start
 
 The latest version of BackupPC can be fetched from:
 
@@ -31,7 +31,7 @@ that configure.pl provides.
 
 
 
-## INTRODUCTION
+## Introduction
 
 BackupPC is a high-performance, enterprise-grade system for backing
 up Linux, WinXX, and MacOS PCs and laptops to a server's disk.
@@ -51,7 +51,7 @@ and freely available as Open Source on SourceForge.
 
 
 
-## FEATURES
+## Features
 
 - A clever pooling scheme minimizes disk storage and disk IO. Identical
   files across multiple backups of the same or different PCs are stored
@@ -103,7 +103,7 @@ and freely available as Open Source on SourceForge.
 
 
 
-## RESOURCES
+## Resources
 
 Complete documentation is available in this release in doc/BackupPC.pod
 or doc/BackupPC.html. You can read doc/BackupPC.pod with perldoc and

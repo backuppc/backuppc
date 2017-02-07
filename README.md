@@ -1,18 +1,8 @@
+# BackupPC
 
-                              BackupPC
+BackupPC is a high-performance, enterprise-grade system for backing up to a server's disk.
 
-                            Version __VERSION__
-
-                            __RELEASEDATE__
-
-         Copyright (C) 2001-2017 Craig Barratt.  All rights reserved.
-
-      This program is free software; you can redistribute it and/or
-      modify it under the terms of the GNU General Public License.
-                        See the LICENSE file.
-
-QUICK START:
------------
+## QUICK START
 
 The latest version of BackupPC can be fetched from:
 
@@ -36,11 +26,12 @@ To install BackupPC run these commands as root:
     perl configure.pl
 
 This will automatically determine some system information and prompt you
-for install paths.  Do "perldoc configure.pl" to see the various options
+for install paths.  Do `perldoc configure.pl` to see the various options
 that configure.pl provides.
 
-INTRODUCTION:
-------------
+
+
+## INTRODUCTION
 
 BackupPC is a high-performance, enterprise-grade system for backing
 up Linux, WinXX, and MacOS PCs and laptops to a server's disk.
@@ -58,59 +49,61 @@ BackupPC is written in Perl and extracts backup data via SMB (using Samba),
 rsync, or tar over ssh/rsh/nfs.  It is robust, reliable, well documented
 and freely available as Open Source on SourceForge.
 
-FEATURES:
---------
 
-  - A clever pooling scheme minimizes disk storage and disk IO. Identical
-    files across multiple backups of the same or different PCs are stored
-    only once resulting in substantial savings in disk storage.
 
-  - One example of disk use: 95 latops with each full backup averaging
-    3.6GB each, and each incremental averaging about 0.3GB.  Storing
-    three weekly full backups and six incremental backups per laptop
-    is around 1200GB of raw data, but because of pooling and compression
-    only 150GB is needed.
+## FEATURES
 
-  - No client-side software is needed.  The standard smb protocol is used
-    to extract backup data on WinXX clients.  On *nix clients, either rsync
-    or tar over ssh/rsh/nfs is used to backup the data.  Various alternatives
-    are possible: rsync can also be used with WinXX by running rsyncd/cygwin.
-    Similarly, smb could be used to backup *nix file systems if they are
-    exported as smb shares.
+- A clever pooling scheme minimizes disk storage and disk IO. Identical
+  files across multiple backups of the same or different PCs are stored
+  only once resulting in substantial savings in disk storage.
 
-  - A powerful http/cgi user interface allows administrators to view log
-    files, configuration, current status and allows users to initiate and
-    cancel backups and browse and restore files from backups.
+- One example of disk use: 95 latops with each full backup averaging
+  3.6GB each, and each incremental averaging about 0.3GB.  Storing
+  three weekly full backups and six incremental backups per laptop
+  is around 1200GB of raw data, but because of pooling and compression
+  only 150GB is needed.
 
-  - Flexible restore options.  Single files can be downloaded from
-    any backup directly from the CGI interface.  Zip or Tar archives
-    for selected files or directories from any backup can also be
-    downloaded from the CGI interface.  Finally, direct restore to
-    the client machine (using SMB, rsync or tar) for selected files
-    or directories is also supported from the CGI interface.
+- No client-side software is needed.  The standard smb protocol is used
+  to extract backup data on WinXX clients.  On *nix clients, either rsync
+  or tar over ssh/rsh/nfs is used to backup the data.  Various alternatives
+  are possible: rsync can also be used with WinXX by running rsyncd/cygwin.
+  Similarly, smb could be used to backup *nix file systems if they are
+  exported as smb shares.
 
-  - Supports mobile environments where laptops are only intermittently
-    connected to the network and have dynamic IP addresses (DHCP).
+- A powerful http/cgi user interface allows administrators to view log
+  files, configuration, current status and allows users to initiate and
+  cancel backups and browse and restore files from backups.
 
-  - Flexible configuration parameters allow multiple backups to be performed
-    in parallel, specification of which shares to backup, which directories
-    to backup or not backup, various schedules for full and incremental
-    backups, schedules for email reminders to users and so on.  Configuration
-    parameters can be set system-wide or also on a per-PC basis.
+- Flexible restore options.  Single files can be downloaded from
+  any backup directly from the CGI interface.  Zip or Tar archives
+  for selected files or directories from any backup can also be
+  downloaded from the CGI interface.  Finally, direct restore to
+  the client machine (using SMB, rsync or tar) for selected files
+  or directories is also supported from the CGI interface.
 
-  - Users are sent periodic email reminders if their PC has not
-    recently been backed up.  Email content, timing and policies
-    are configurable.
+- Supports mobile environments where laptops are only intermittently
+  connected to the network and have dynamic IP addresses (DHCP).
 
-  - Tested on Linux and Solaris hosts, and Linux, Win95, Win98, Win2000
-    and WinXP clients.
+- Flexible configuration parameters allow multiple backups to be performed
+  in parallel, specification of which shares to backup, which directories
+  to backup or not backup, various schedules for full and incremental
+  backups, schedules for email reminders to users and so on.  Configuration
+  parameters can be set system-wide or also on a per-PC basis.
 
-  - Detailed documentation.
+- Users are sent periodic email reminders if their PC has not
+  recently been backed up.  Email content, timing and policies
+  are configurable.
 
-  - Open Source hosted by SourceForge and freely available under GPL.
+- Tested on Linux and Solaris hosts, and Linux, Win95, Win98, Win2000
+  and WinXP clients.
 
-RESOURCES:
----------
+- Detailed documentation.
+
+- Open Source hosted by SourceForge and freely available under GPL.
+
+
+
+## RESOURCES
 
 Complete documentation is available in this release in doc/BackupPC.pod
 or doc/BackupPC.html. You can read doc/BackupPC.pod with perldoc and
@@ -152,5 +145,14 @@ discussions should happen on this list.
 To post a message to the backuppc-users list, send an email to
 
     backuppc-users@lists.sourceforge.net
-
 Do not send subscription requests to this address!
+
+
+
+## Copyright
+
+Copyright (C) 2001-2017 Craig Barratt.  All rights reserved.
+
+This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
+
+ See the LICENSE file.

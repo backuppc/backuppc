@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2013  Craig Barratt
+#   Copyright (C) 2002-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.0.0, released 3 Feb 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -224,7 +224,6 @@ sub dirCache
                 my $file = $1 if ( $entry->{name} =~ /(.*)/s );
                 my $fileUM = $file;
                 $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
-                #print(STDERR "Doing $fileUM\n");
                 #
                 # skip special files
                 #
@@ -235,14 +234,16 @@ sub dirCache
                         || $mangle && $file eq "attrib" );
 
                 if ( defined($attr) && defined(my $a = $attr->get($fileUM)) ) {
-                    $m->{files}{$fileUM} = $a;
                     #
-                    # skip directories in earlier backups (each backup always
-                    # has the complete directory tree).
+                    # skip directories in earlier backups (in V3 each backup
+                    # always has the complete directory tree).
                     #
                     next if ( $i < $m->{idx} && $a->{type} == BPC_FTYPE_DIR );
+                    #print(STDERR "Adding $fileUM with type $a->{type}\n");
+                    $m->{files}{$fileUM} ||= $a;
                     $attr->delete($fileUM);
                 } else {
+                    #print(STDERR "No attrib; determining attribs of $fileUM\n");
                     #
                     # Very expensive in the non-attribute case when compresseion
                     # is on.  We have to stat the file and read compressed files
@@ -378,7 +379,7 @@ sub dirCache
                 foreach my $fileUM ( keys(%$attrAll) ) {
                     my $a = $attrAll->{$fileUM};
                     if ( $a->{type} == BPC_FTYPE_DELETED ) {
-                        #print("deleting $fileUM\n");
+                        #print(STDERR "deleting $fileUM\n");
                         delete($m->{files}{$fileUM});
                         delete($hardlinks->{$fileUM});
                         next;
@@ -899,7 +900,7 @@ sub findRecurse
         #
         # For non-depth, recurse directories after we finish current dir
         #
-        foreach my $file ( keys(%{$attr}) ) {
+        foreach my $file ( sort(keys(%{$attr})) ) {
             next if ( $attr->{$file}{type} != BPC_FTYPE_DIR );
             $m->findRecurse($backupNum, $share, "$path/$file", $depth,
 			    $callback, @callbackArgs);

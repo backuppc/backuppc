@@ -369,12 +369,10 @@ sub copy_v3_file
         if ( $fileSize == 0 ) {
             $found = 1;
             print("$a->{relPath}: empty file in pool by default\n") if ( $LogLevel >= 4 );
-        } elsif ( (@s = stat($path4)) ) {
-            if ( $s[1] == $inode ) {
-                $found = 1;
-                print("$a->{relPath}: already in pool4 $path4\n") if ( $LogLevel >= 4 );
-            }
-        } else {
+        } elsif ( (@s = stat($path4)) && $s[1] == $inode ) {
+            $found = 1;
+            print("$a->{relPath}: already in pool4 $path4\n") if ( $LogLevel >= 4 );
+        } elsif ( !-f $path4 ) {
             #
             # look in v3 pool for match
             #
@@ -436,7 +434,7 @@ sub copy_v3_file
                 $Backups[$newIdx]{sizeExist}     += $fileSize;
                 $Backups[$newIdx]{sizeExistComp} += $s[7];
             }
-        } elsif ( 0 ) {
+        } else {
             #
             # fall back on copying it to the new pool
             #
@@ -450,7 +448,7 @@ sub copy_v3_file
             my($match, $digest, $poolSize, $errorCnt) = $pw->close();
             if ( $LogLevel >= 5 ) {
                 my $digestStr = unpack("H*", $digest);
-                print("poolWrite->close $fileName returned match $match, digest $digestStr, poolSize $poolSize, errCnt $errorCnt\n");
+                print("poolWrite->close $fileName: returned match $match, digest $digestStr, poolSize $poolSize, errCnt $errorCnt\n");
             }
             $ErrorCnt += $errorCnt;
             $a->{digest} = $digest;
@@ -477,7 +475,7 @@ sub copy_v3_file
         $Backups[$newIdx]{nFiles}++;
         $Backups[$newIdx]{nFilesExist}++;
     }
-    print("setting $a->{relPath} (inode $a->{inode}, nlinks $a->{nlinks})\n") if ( $LogLevel >= 5 );
+    print("setting $a->{relPath} attrib (type $a->{type}, inode $a->{inode}, nlinks $a->{nlinks})\n") if ( $LogLevel >= 5 );
     $ac->set($a->{relPath}, $a);
     $bpc->flushXSLibMesgs();
 }

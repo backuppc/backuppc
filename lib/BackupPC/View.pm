@@ -591,7 +591,7 @@ sub findRecurse
         #
         # For non-depth, recurse directories after we finish current dir
         #
-        foreach my $file ( keys(%{$attr}) ) {
+        foreach my $file ( sort(keys(%{$attr})) ) {
             next if ( $attr->{$file}{type} != BPC_FTYPE_DIR );
             $m->findRecurse($backupNum, $share, "$path/$file", $depth,
 			    $callback, @callbackArgs);

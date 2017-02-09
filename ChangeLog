@@ -21,6 +21,9 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Added sort() to BackupPC::View::findRecurse() so things like
+  BackupPC_tarCreate produce repeatable file ordering.
+
 #------------------------------------------------------------------------
 # Version 3.3.2, 25 Jan 2017
 #------------------------------------------------------------------------

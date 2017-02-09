@@ -580,7 +580,7 @@ sub Buffer2MD5
 sub MD52Path
 {
     my($bpc, $d, $compress, $poolDir) = @_;
- 
+
     #
     # Injected fixed digest for collision testing on zero-sized file.
     # If you uncomment this line, you also need to rebuild rsync_bpc

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 3.2.0beta1, released 24 Jan 2010.
+# Version 4.0.0, released 3 Feb 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -809,7 +809,13 @@ sub handleDir
         #
         $t->pathCreate($pathNew, 1);
         my $name = $f->{name};
-        while ( length($name) ) {
+        $name = "/$name" if ( $name !~ m{^/} );
+        while ( length($name) > 1 ) {
+	    if ( $name =~ m{/} ) {
+		$name =~ s{(.*)/.*}{$1};
+	    } else {
+		$name = "/";
+	    }
             my $a = $AttrNew->get($name);
             last if ( defined($a) && $a->{type} == BPC_FTYPE_DIR );
             $t->logWrite("handleDir: adding BPC_FTYPE_DIR attrib entry for $name\n", 3);
@@ -827,15 +833,13 @@ sub handleDir
                        };
             $AttrNew->set($name, $fNew);
             $t->moveFileToOld($a, $fNew);
-            if ( $name =~ m{/} ) {
-                $name =~ s{(.*)/.*}{$1};
-            } elsif ( $name ne "/" ) {
-                $name = "/";
-            } else {
-                $name = "";
-            }
         }
     }
+
+    #
+    # Update attribs
+    #
+    $t->attribUpdate($a, $f, $same);
 
     $t->logWrite("handleDir: name = $f->{name}, pathNew = $pathNew\n", 4);
 
@@ -941,6 +945,7 @@ sub handleFile
                 && $f->{size}  == $a->{size}
                 && $f->{uid}   == $a->{uid}
                 && $f->{gid}   == $a->{gid} ) {
+            $t->logWrite("handleFile: $f->{name} has same attribs\n", 5);
             return 1;
         }
     }
@@ -1077,12 +1082,12 @@ sub moveFileToOld
         # A new file will be created, so add delete attribute to old
         #
         if ( $AttrOld ) {
-            $t->logWrite("moveFileToOld $a->{name} (add delete attribute to old)\n", 5);
+            $t->logWrite("moveFileToOld $f->{name} (add delete attribute to old)\n", 5);
             $AttrOld->set($f->{name}, { type => BPC_FTYPE_DELETED });
         }
         return;
     }
-    $t->logWrite("moveFileToOld $a->{name}, links = $a->{nlinks}, type = $a->{type}\n", 5);
+    $t->logWrite("moveFileToOld $a->{name}, $f->{name}, links = $a->{nlinks}, type = $a->{type}\n", 5);
     if ( !$AttrOld || $AttrOld->get($f->{name}) ) {
         if ( $a->{nlinks} > 0 ) {
             $a->{nlinks}--;
@@ -1117,8 +1122,10 @@ sub moveFileToOld
         }
     } else {
         $AttrOld->set($f->{name}, $a);
+        $DeltaOld->update($a->{compress}, $a->{digest}, 1);
     }
     $AttrNew->delete($f->{name});
+    $DeltaNew->update($a->{compress}, $a->{digest}, -1);
     if ( $a->{type} == BPC_FTYPE_DIR && $AttrOld ) {
         #
         # For a directory we need to move it to old, and copy

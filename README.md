@@ -47,7 +47,7 @@ available for doing backup to tape.
 
 BackupPC is written in Perl and extracts backup data via SMB (using Samba),
 rsync, or tar over ssh/rsh/nfs. It is robust, reliable, well documented
-and freely available as Open Source on SourceForge.
+and freely available as Open Source on [GitHub](https://github.com/backuppc/backuppc/).
 
 
 
@@ -99,7 +99,7 @@ and freely available as Open Source on SourceForge.
 
 - Detailed documentation.
 
-- Open Source hosted by SourceForge and freely available under GPL.
+- Open Source hosted by GitHub and freely available under GPL.
 
 
 

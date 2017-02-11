@@ -298,7 +298,7 @@ foreach my $file ( (@PerlSrc,
 		httpd/src/BackupPC.conf
 		doc/BackupPC.pod
 		doc/BackupPC.html
-		README
+		README.md
 		LICENSE
 		ChangeLog
 		configure.pl

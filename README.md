@@ -6,15 +6,15 @@ BackupPC is a high-performance, enterprise-grade system for backing up to a serv
 
 The latest version of BackupPC can be fetched from:
 
-  [github.com/backuppc/backuppc/releases](https://github.com/backuppc/backuppc/releases)
+* [github.com/backuppc/backuppc/releases](https://github.com/backuppc/backuppc/releases)
 
 You'll need to install the perl module BackupPC::XS, available from:
 
-  [github.com/backuppc/backuppc-xs/releases](https://github.com/backuppc/backuppc-xs/releases)
+* [github.com/backuppc/backuppc-xs/releases](https://github.com/backuppc/backuppc-xs/releases)
 
 and the server-side rsync from:
 
-  [github.com/backuppc/rsync-bpc/releases](https://github.com/backuppc/rsync-bpc/releases)
+* [github.com/backuppc/rsync-bpc/releases](https://github.com/backuppc/rsync-bpc/releases)
 
 
 If you will use SMB for WinXX clients, you will need smbclient and
@@ -111,28 +111,28 @@ or doc/BackupPC.html. You can read doc/BackupPC.pod with perldoc and
 doc/BackupPC.html with any browser. You can also see the documentation
 and general information at:
 
-  [backuppc.sourceforge.net](http://backuppc.sourceforge.net)
+* [backuppc.sourceforge.net](http://backuppc.sourceforge.net)
 
 The source code is available on Github at:
 
-  [github.com/backuppc](https://github.com/backuppc)
+* [github.com/backuppc](https://github.com/backuppc)
 
 and releases are available on github:
 
-  [github.com/backuppc/backuppc/releases](https://github.com/backuppc/backuppc/releases)
-  [github.com/backuppc/backuppc-xs/releases](https://github.com/backuppc/backuppc-xs/releases)
-  [github.com/backuppc/rsync-bpc/releases](https://github.com/backuppc/rsync-bpc/releases)
+* [github.com/backuppc/backuppc/releases](https://github.com/backuppc/backuppc/releases)
+* [github.com/backuppc/backuppc-xs/releases](https://github.com/backuppc/backuppc-xs/releases)
+* [github.com/backuppc/rsync-bpc/releases](https://github.com/backuppc/rsync-bpc/releases)
 
 or SourceForge:
 
-  [sourceforge.net/projects/backuppc/files](https://sourceforge.net/projects/backuppc/files)
+* [sourceforge.net/projects/backuppc/files](https://sourceforge.net/projects/backuppc/files)
 
 You are encouraged to subscribe to any of the mail lists available
 on sourceforge.net:
 
-  [lists.sourceforge.net/lists/listinfo/backuppc-announce](http://lists.sourceforge.net/lists/listinfo/backuppc-announce)
-  [lists.sourceforge.net/lists/listinfo/backuppc-users](http://lists.sourceforge.net/lists/listinfo/backuppc-users)
-  [lists.sourceforge.net/lists/listinfo/backuppc-devel](http://lists.sourceforge.net/lists/listinfo/backuppc-devel)
+* [lists.sourceforge.net/lists/listinfo/backuppc-announce](http://lists.sourceforge.net/lists/listinfo/backuppc-announce)
+* [lists.sourceforge.net/lists/listinfo/backuppc-users](http://lists.sourceforge.net/lists/listinfo/backuppc-users)
+* [lists.sourceforge.net/lists/listinfo/backuppc-devel](http://lists.sourceforge.net/lists/listinfo/backuppc-devel)
 
 The backuppc-announce list is moderated and is used only for
 important announcements (eg: new versions). It is low traffic.
@@ -145,7 +145,7 @@ discussions should happen on this list.
 
 To post a message to the backuppc-users list, send an email to
 
-  backuppc-users@lists.sourceforge.net
+* backuppc-users@lists.sourceforge.net
 
 Do not send subscription requests to this address!
 

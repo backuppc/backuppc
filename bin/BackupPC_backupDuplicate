@@ -202,7 +202,7 @@ BackupPC::Storage->backupInfoWrite("$TopDir/pc/$Host",
 $ErrorCnt += BackupPC::XS::Lib::logErrorCntGet();
 $bpc->flushXSLibMesgs();
 unlink("$DestDir/refCnt/needFsck.dup") if ( $ErrorCnt == 0 );
-$ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host") != 0 );
+$ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0") != 0 );
 print("BackupPC_backupDuplicate: got $ErrorCnt errors and $FileErrorCnt file open errors\n");
 exit($ErrorCnt ? 1 : 0);
 

@@ -65,14 +65,15 @@ my $doRefCountUpdate;
 
 my %opts;
 
-if ( !getopts("lph:n:", \%opts) || @ARGV >= 1 || !defined($opts{h}) || !defined($opts{n}) ) {
+if ( !getopts("lprh:n:", \%opts) || @ARGV >= 1 || !defined($opts{h}) || !defined($opts{n}) ) {
     print STDERR <<EOF;
-usage: BackupPC_backupDelete -h host -n num [-p] [-l]
+usage: BackupPC_backupDelete -h host -n num [-p] [-l] [-r]
   Options:
      -h host         host name
      -n num          backup number to delete
      -p              don't print progress information
      -l              don't remove XferLOG files
+     -r              do a ref count update (default: none)
 EOF
     exit(1);
 }
@@ -226,8 +227,8 @@ $bpc->BackupInfoWrite($Host, @Backups);
 
 unlink("$MergeDir/refCnt/needFsck.del") if ( $Errors == 0 );
 
-if ( $doRefCountUpdate ) {
-    $Errors++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host") != 0 );
+if ( $doRefCountUpdate || $opts{r} ) {
+    $Errors++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0") != 0 );
 }
 
 print("BackupPC_backupDelete: got $Errors errors\n");

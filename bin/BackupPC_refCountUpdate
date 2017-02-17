@@ -52,19 +52,21 @@ use BackupPC::DirOps qw( :BPC_DT_ALL );
 select(STDOUT); $| = 1;
 
 my %opts;
-if ( !getopts("cFfnmpsvh:r:P:", \%opts) || @ARGV != 0 || !(defined($opts{h}) || $opts{m}) ) {
+if ( !getopts("cFfnmpsvh:r:P:o:", \%opts) || @ARGV != 0 || !(defined($opts{h}) || $opts{m}) ) {
     print <<EOF;
 Usage:
-  BackupPC_refCountUpdate -h HOST [-c] [-f] [-F] [-p] [-v]
-      With no other args, updates count db with poolCntDelta files in last
-      two backups.  Also builds refCnt for >=4.0 backups without any.
+  BackupPC_refCountUpdate -h HOST [-c] [-f] [-F] [-o N] [-p] [-v] 
+      With no other args, updates count db on backups with poolCntDelta files
+      and computers the host's total reference counts.  Also builds refCnt for
+      any >=4.0 backups without refCnts.
         -f     - do an fsck on this HOST, which involves a rebuild of the
                  last two backup refCnts.  poolCntDelta files are ignored.
                  Also forces fsck if requested by needFsck flag files
-                 in TopDir/pc/HOST/refCnt.
+                 in TopDir/pc/HOST/refCnt.  Equivalent to -o 2.
         -F     - rebuild all the >=4.0 per-backup refCnt files for this
-                 host.
+                 host.  Equivalent to -o 3.
         -c     - compare current count db to new db before replacing
+        -o N   - override \$Conf{RefCntFsck}.
         -p     - don't show progress
         -v     - verbose
     Notes: in case there are legacy (ie: <=4.0.0alpha3) unapplied poolCntDelta
@@ -215,17 +217,18 @@ sub updateHostPoolCnt
     }
 
     #
-    # Apply policy in $Conf{RefCntFsck}:
+    # Apply policy in $Conf{RefCntFsck} (potentially overridden by -o N)
     #   0: no additional fsck
     #   1: do an fsck on the last backup if it is from a full backup (handled below)
     #   2: do an fsck on the last two backups always
     #   3: do a full fsck on all the backups
     #
-    if ( $Conf{RefCntFsck} == 2 ) {
-        print("BackupPC_refCountUpdate: doing fsck on last two backups on $host since \$Conf{RefCntFsck} == 2\n");
+    my $ConfRefCntFsck = $opts{o} =~ /^\d+$/ ? $opts{o} : $Conf{RefCntFsck};
+    if ( $ConfRefCntFsck == 2 ) {
+        print("BackupPC_refCountUpdate: doing fsck on last two backups on $host since \$ConfRefCntFsck == 2\n");
         $forceLast2Fsck = 1;
-    } elsif ( $Conf{RefCntFsck} == 3 ) {
-        print("BackupPC_refCountUpdate: doing fsck on all backups on $host since \$Conf{RefCntFsck} == 3\n");
+    } elsif ( $ConfRefCntFsck == 3 ) {
+        print("BackupPC_refCountUpdate: doing fsck on all backups on $host since \$ConfRefCntFsck == 3\n");
         $forceFullFsck = 1;
     }
 
@@ -261,14 +264,14 @@ sub updateHostPoolCnt
                                                           . " gotPoolCnt = $gotPoolCnt, gotNoPoolCntOk = $gotNoPoolCntOk\n")
                                         if ( $Conf{XferLogLevel} >= 2 );
         #
-        # Apply policy in $Conf{RefCntFsck}:
+        # Apply policy in $ConfRefCntFsck:
         #   0: no additional fsck
         #   1: do an fsck on the last backup if it is from a full backup
         #   2: do an fsck on the last two backups always (handled above)
         #   3: do a full fsck on all the backups (handled above)
         #
-        if ( $Conf{RefCntFsck} == 1 && $i == @Backups - 1 && $Backups[$i]{type} eq "full" ) {
-            print("BackupPC_refCountUpdate: doing fsck on $host #$bkupNum (full) since \$Conf{RefCntFsck} == 1\n");
+        if ( $ConfRefCntFsck == 1 && $i == @Backups - 1 && $Backups[$i]{type} eq "full" ) {
+            print("BackupPC_refCountUpdate: doing fsck on $host #$bkupNum (full) since \$ConfRefCntFsck == 1\n");
             $gotFsck = 1;
         }
 

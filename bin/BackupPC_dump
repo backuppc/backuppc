@@ -68,7 +68,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -85,7 +85,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.0.0, released 3 Feb 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -668,11 +668,11 @@ if ( !defined($lastBkupNum) ) {
         $BackupCase  = 4;
         $inPlace     = 0;
         $doDuplicate = 0;
-        $newBkupNum  = $lastBkupNum + 1;
+        $newBkupNum  = $lastBkupNum;
         $newBkupIdx  = @Backups;
         do { 
-            $newBkupNum  = $lastBkupNum + 1;
-        } while ( -d "$Dir/newBkupNum" );
+            $newBkupNum++;
+        } while ( -d "$Dir/$newBkupNum" );
         if ( !rename("$Dir/$lastBkupNum", "$Dir/$newBkupNum") ) {
             print(LOG $bpc->timeStamp, "Can't rename $Dir/$lastBkupNum to $Dir/$newBkupNum\n");
             print(STDERR "Exiting because rename $Dir/$lastBkupNum to $Dir/$newBkupNum failed\n")
@@ -710,6 +710,16 @@ if ( !defined($lastBkupNum) ) {
             my $fileExt = $lastBkupCompressLevel > 0 ? ".z" : "";
             $copyXferLOG = ["$Dir/XferLOG.$lastBkupNum$fileExt", $lastBkupCompressLevel, 0];
         }
+    }
+}
+
+if ( $doDuplicate ) {
+    #
+    # make sure the new backup number doesn't have an existing directory
+    # (BackupPC_backupDuplicate will do the same thing)
+    #
+    while ( -d "$Dir/$newBkupNum" ) {
+        $newBkupNum++;
     }
 }
 
@@ -779,7 +789,6 @@ if ( $doDuplicate ) {
 if ( $newBkupIdx >= @Backups ) {
     $Backups[$newBkupIdx]{num}        = $newBkupNum;
     $Backups[$newBkupIdx]{level}      = $type eq "incr" ? 1 : 0;
-    $Backups[$newBkupIdx]{startTime}  = time;
     $Backups[$newBkupIdx]{noFill}     = 0;
     $Backups[$newBkupIdx]{mangle}     = 1;     # name mangling always on for v1.04+
     $Backups[$newBkupIdx]{xferMethod} = $Conf{XferMethod};
@@ -791,7 +800,8 @@ if ( $newBkupIdx >= @Backups ) {
 #
 # New backup shows as "active" while running
 #
-$Backups[$newBkupIdx]{type} = "active";
+$Backups[$newBkupIdx]{type}      = "active";
+$Backups[$newBkupIdx]{startTime} = time();
 
 #
 # Create new directory

@@ -398,7 +398,7 @@ sub moveFileToOld
             my $pathNew = $AttrNew->getFullMangledPath($f->{name});
             print("moveFileToOld(..., $f->{name}): deleting $pathNew\n")
                                          if ( $Conf{XferLogLevel} >= 3 );
-            BackupPC::DirOps::RmTreeQuiet($bpc, $pathNew, $a->{compress}, $DeltaNew);
+            BackupPC::DirOps::RmTreeQuiet($bpc, $pathNew, $a->{compress}, $DeltaNew, $AttrNew);
         }
         return;
     }

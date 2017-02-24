@@ -65,15 +65,19 @@ my $doRefCountUpdate;
 
 my %opts;
 
-if ( !getopts("lprh:n:", \%opts) || @ARGV >= 1 || !defined($opts{h}) || !defined($opts{n}) ) {
+if ( !getopts("lprh:n:s:", \%opts) || !defined($opts{h}) || !defined($opts{n}) || (!defined($opts{s}) && @ARGV >= 1) ) {
     print STDERR <<EOF;
-usage: BackupPC_backupDelete -h host -n num [-p] [-l] [-r]
+usage: BackupPC_backupDelete -h host -n num [-p] [-l] [-r] [-s shareName [dirs...]]
   Options:
      -h host         host name
      -n num          backup number to delete
+     -s shareName    don't delete the backup; delete just this share
+                     (or only dirs below this share if specified)
      -p              don't print progress information
      -l              don't remove XferLOG files
      -r              do a ref count update (default: none)
+  If a shareName is specified, just that share (or share/dirs) are deleted.
+  The backup itself is not deleted, nor is the log file removed.
 EOF
     exit(1);
 }
@@ -121,109 +125,173 @@ if ( !defined($idx) ) {
     exit(1);
 }
 
+my($MergeCompress, $MergeDir);
+my($AttrDel, $DeltaDel, $AttrMerge, $DeltaMerge);
 my $HostDir       = "$TopDir/pc/$Host";
 my $DelCompress   = $Backups[$idx]{compress};
-my $DelDir        = "$HostDir/$Backups[$idx]{num}";
-my($MergeCompress, $MergeDir);
-my($AttrDel, $AttrMerge, $DeltaInfo);
+my $DelTopDir     = "$HostDir/$Backups[$idx]{num}";
+my $DelPaths      = @ARGV ? [@ARGV] : [undef];
+my $ShareName     = $opts{s};
+my $ShareNameM    = $bpc->fileNameEltMangle($ShareName);
 
 if ( $Backups[$idx]{version} < 4 ) {
-    print("BackupPC_backupDelete: removing pre-v4 backup #$Backups[$idx]{num}\n") if ( $LogLevel >= 1 );
-    if ( !$opts{p} ) {
-        print("__bpc_progress_state__ delete #$Backups[$idx]{num}\n");
-    }
-    #
-    # no reference counting - just remove the whole tree
-    #
-    BackupPC::DirOps::RmTreeQuiet($bpc, $DelDir, -2, undef, \&progressUpdateDirs);
-} else {
-    print("BackupPC_backupDelete: removing #$Backups[$idx]{num}\n") if ( $LogLevel >= 1 );
-    if ( !defined($idxMerge)
-            || $Backups[$idxMerge]{version} < 4
-            || !$Backups[$idxMerge]{noFill} )  {
-        #
-        # Either this is oldest backup or prior is non-V4 or prior
-        # is filled.  There is no need to merge into the prior backup,
-        # so just delete the tree, and no need to update reference
-        # counts since we remove the refCnt files for this backup
-        # when we delete it.
-        #
+    if ( defined($ShareName) ) {
+        foreach my $delPath ( @$DelPaths ) {
+            print("BackupPC_backupDelete: removing pre-v4 path #$Backups[$idx]{num}/$ShareName/$delPath\n") if ( $LogLevel >= 1 );
+            if ( !$opts{p} ) {
+                print("__bpc_progress_state__ delete #$Backups[$idx]{num}/$ShareName/$delPath\n");
+            }
+            #
+            # no reference counting for pre V4 - just remove the tree(s)
+            #
+            my $delPathM = $bpc->fileNameMangle($delPath);
+            BackupPC::DirOps::RmTreeQuiet($bpc, "$DelTopDir/$ShareNameM/$delPathM", -2, undef, undef, \&progressUpdateDirs);
+        }
+    } else {
+        print("BackupPC_backupDelete: removing pre-v4 backup #$Backups[$idx]{num}\n") if ( $LogLevel >= 1 );
         if ( !$opts{p} ) {
             print("__bpc_progress_state__ delete #$Backups[$idx]{num}\n");
         }
-        print("BackupPC_backupDelete: No prior backup for merge\n") if ( $LogLevel >= 1 );
-        BackupPC::DirOps::RmTreeQuiet($bpc, $DelDir, $DelCompress, undef, \&progressUpdateDirs);
-    } else {
-        if ( !$opts{p} ) {
-            print("__bpc_progress_state__ merge #$Backups[$idx]{num} -> $Backups[$idxMerge]{num}\n");
-        }
-        print("BackupPC_backupDelete: Merge into backup $Backups[$idxMerge]{num}\n") if ( $LogLevel >= 1 );
-        $Backups[$idxMerge]{noFill} = $Backups[$idx]{noFill};
-
-        if ( ($Backups[$idx]{compress} == 0 && $Backups[$idxMerge]{compress} != 0)
-                || ($Backups[$idx]{compress} != 0 && $Backups[$idxMerge]{compress} == 0) ) {
-            printf(STDERR "BackupPC_backupDelete: backups #%d and #%d have different compression - cannot merge\n",
-                        $Backups[$idx]{num}, $Backups[$idxMerge]{num});
-            exit(1);
-        }
-        $MergeCompress = $Backups[$idxMerge]{compress};
-        $MergeDir      = "$HostDir/$Backups[$idxMerge]{num}";
         #
+        # no reference counting for pre V4 - just remove the tree(s)
         #
-        # Create a needFsck file, so if we are killed and can't recover, we can
-        # make sure an fsck is run next time.
-        #
-        mkdir("$MergeDir/refCnt", 0770) if ( !-d "$MergeDir/refCnt" );
-        my $needFsckFH;
-        if ( !(open($needFsckFH, ">", "$MergeDir/refCnt/needFsck.del") && close($needFsckFH)) ) {
-            print("BackupPC_backupDelete: can't create $MergeDir/refCnt/needFsck.del ($?)\n");
-        }
-
-        if ( !chdir($MergeDir) ) {
-            print(STDERR "BackupPC_backupDelete: cannot chdir to $MergeDir\n");
-            exit(1);
-        }
-        $AttrDel   = BackupPC::XS::AttribCache::new($Host, $Backups[$idx]{num}, "",
-                                                $Backups[$idx]{compress});
-        $AttrMerge = BackupPC::XS::AttribCache::new($Host, $Backups[$idxMerge]{num}, "",
-                                                $Backups[$idxMerge]{compress});
-        $DeltaInfo = BackupPC::XS::DeltaRefCnt::new($MergeDir);
-        $AttrMerge->setDeltaInfo($DeltaInfo);
-
-        mergeDir(".", ".");
-        BackupPC::DirOps::find($bpc, {wanted => \&mergeDir}, ".", 1);
-
-        $AttrDel->flush(1);
-        $AttrMerge->flush(1);
-        $bpc->flushXSLibMesgs();
-        print("Deltas for $Backups[$idxMerge]{num}:\n");
-        $DeltaInfo->print();
-        $DeltaInfo->flush();
-        #
-        # Now delete any remnants of the Del backup, including remaining
-        # inodes.  No need to update the ref counts since we remove
-        # the refCnt files for this backup when we delete it.
-        #
-        BackupPC::DirOps::RmTreeQuiet($bpc, $DelDir, $DelCompress, undef, \&progressUpdateDirs);
-        #
-        # Make sure we update the reference counts below since there are (likely)
-        # deltas in the merge backup
-        #
-        $doRefCountUpdate = 1;
+        BackupPC::DirOps::RmTreeQuiet($bpc, $DelTopDir, -2, undef, undef, \&progressUpdateDirs);
     }
+} else {
+    if ( defined($ShareName) ) {
+        #
+        # Since we are only deleting portions of the backup tree, we
+        # need to update reference counts
+        #
+        $DeltaDel = BackupPC::XS::DeltaRefCnt::new($DelTopDir);
+        $AttrDel = BackupPC::XS::AttribCache::new($Host, $Backups[$idx]{num}, $ShareName, $Backups[$idx]{compress});
+        $AttrDel->setDeltaInfo($DeltaDel);
+    } else {
+        $AttrDel = BackupPC::XS::AttribCache::new($Host, $Backups[$idx]{num}, "", $Backups[$idx]{compress});
+    }
+    foreach my $delPath ( @$DelPaths ) {
+        my($delPathM, $fullDelPath);
+        if ( defined($delPath) ) {
+            $fullDelPath = "/$delPath" if ( $delPath !~ m{^/} );
+            $delPathM    = $bpc->fileNameMangle($delPath);
+            $fullDelPath = "/$ShareName$fullDelPath";
+            $delPathM    = "/$ShareNameM$delPathM";
+            $fullDelPath =~ s{//+}{/};
+            $delPathM    =~ s{//+}{/};
+        }
+        print("BackupPC_backupDelete: removing #$Backups[$idx]{num}$fullDelPath\n") if ( $LogLevel >= 1 );
+        if ( !defined($idxMerge)
+                || $Backups[$idxMerge]{version} < 4
+                || !$Backups[$idxMerge]{noFill} )  {
+            #
+            # Either this is oldest backup or prior is non-V4 or prior
+            # is filled.  There is no need to merge into the prior backup,
+            # so just delete the tree.
+            #
+            if ( !$opts{p} ) {
+                print("__bpc_progress_state__ delete #$Backups[$idx]{num}$fullDelPath\n");
+            }
+            print("BackupPC_backupDelete: No prior backup for merge\n") if ( $LogLevel >= 1 );
+            BackupPC::DirOps::RmTreeQuiet($bpc, "$DelTopDir$delPathM", $DelCompress, $DeltaDel, $AttrDel, \&progressUpdateDirs);
+            if ( defined($delPath) ) {
+                my $ret = $AttrDel->delete($delPath);
+                print("AttrDel($delPath) returns $ret\n") if ( $LogLevel >= 5 );
+                $AttrDel->flush(1);
+                $bpc->flushXSLibMesgs();
+            }
+            if ( $DeltaDel ) {
+                print("Deltas for $Backups[$idx]{num}:\n");
+                $DeltaDel->print();
+                $DeltaDel->flush();
+            }
+        } else {
+            if ( !$opts{p} ) {
+                print("__bpc_progress_state__ merge #$Backups[$idx]{num}$fullDelPath -> #$Backups[$idxMerge]{num}$fullDelPath\n");
+            }
+            print("BackupPC_backupDelete: Merge into backup $Backups[$idxMerge]{num}$fullDelPath\n") if ( $LogLevel >= 1 );
+            $Backups[$idxMerge]{noFill} = $Backups[$idx]{noFill};
+
+            if ( ($Backups[$idx]{compress} == 0 && $Backups[$idxMerge]{compress} != 0)
+                    || ($Backups[$idx]{compress} != 0 && $Backups[$idxMerge]{compress} == 0) ) {
+                printf(STDERR "BackupPC_backupDelete: backups #%d and #%d have different compression - cannot merge\n",
+                            $Backups[$idx]{num}, $Backups[$idxMerge]{num});
+                exit(1);
+            }
+            $MergeCompress = $Backups[$idxMerge]{compress};
+            $MergeDir      = "$HostDir/$Backups[$idxMerge]{num}";
+            #
+            # Create a needFsck file, so if we are killed and can't recover, we can
+            # make sure an fsck is run next time.
+            #
+            mkdir("$MergeDir/refCnt", 0770) if ( !-d "$MergeDir/refCnt" );
+            my $needFsckFH;
+            if ( !(open($needFsckFH, ">", "$MergeDir/refCnt/needFsck.del") && close($needFsckFH)) ) {
+                print("BackupPC_backupDelete: can't create $MergeDir/refCnt/needFsck.del ($?)\n");
+            }
+
+            if ( !chdir($DelTopDir) ) {
+                print(STDERR "BackupPC_backupDelete: cannot chdir to $DelTopDir\n");
+                exit(1);
+            }
+            $AttrMerge  = BackupPC::XS::AttribCache::new($Host, $Backups[$idxMerge]{num},
+                                                         $ShareName, $Backups[$idxMerge]{compress});
+            $DeltaMerge = BackupPC::XS::DeltaRefCnt::new($MergeDir);
+            $AttrMerge->setDeltaInfo($DeltaMerge);
+
+            my $dir = defined($delPath) ? ".$delPathM" : ".";
+            mergeDir(".", $dir);
+            BackupPC::DirOps::find($bpc, {wanted => \&mergeDir}, $dir, 1);
+
+            $AttrDel->flush(1);
+            $bpc->flushXSLibMesgs();
+
+            #
+            # Now delete the Del backup tree
+            #
+            print("removing remaining directory tree $DelTopDir$delPathM\n") if ( $LogLevel >= 5 );
+            BackupPC::DirOps::RmTreeQuiet($bpc, "$DelTopDir$delPathM", $DelCompress, $DeltaDel, $AttrDel, \&progressUpdateDirs);
+            if ( defined($delPath) ) {
+                if ( defined(my $attr = $AttrDel->get($delPath)) && !defined($AttrMerge->get($delPath)) ) {
+                    $AttrMerge->set($delPath, $attr);
+                }
+                my $ret = $AttrDel->delete($delPath);
+                print("AttrDel($delPath) returns $ret\n") if ( $LogLevel >= 5 );
+            }
+
+            $AttrDel->flush(1);
+            $bpc->flushXSLibMesgs();
+            if ( $DeltaDel ) {
+                print("Deltas for $Backups[$idx]{num}:\n");
+                $DeltaDel->print();
+                $DeltaDel->flush();
+            }
+            $AttrMerge->flush(1);
+            $bpc->flushXSLibMesgs();
+            print("Deltas for $Backups[$idxMerge]{num}:\n");
+            $DeltaMerge->print();
+            $DeltaMerge->flush();
+        }
+    }
+    #
+    # Make sure we update the reference counts below since there are (likely)
+    # deltas in the merge backup and/or original backup (if $DelPaths)
+    #
+    $doRefCountUpdate = 1;
 }
-if ( !$opts{l} ) {
-    unlink("$HostDir/SmbLOG.$Backups[$idx]{num}")
-                if ( -f "$HostDir/SmbLOG.$Backups[$idx]{num}" );
-    unlink("$HostDir/SmbLOG.$Backups[$idx]{num}.z")
-                if ( -f "$HostDir/SmbLOG.$Backups[$idx]{num}.z" );
-    unlink("$HostDir/XferLOG.$Backups[$idx]{num}")
-                if ( -f "$HostDir/XferLOG.$Backups[$idx]{num}" );
-    unlink("$HostDir/XferLOG.$Backups[$idx]{num}.z")
-                if ( -f "$HostDir/XferLOG.$Backups[$idx]{num}.z" );
+if ( !defined($ShareName) ) {
+    if ( !$opts{l} ) {
+        unlink("$HostDir/SmbLOG.$Backups[$idx]{num}")
+                    if ( -f "$HostDir/SmbLOG.$Backups[$idx]{num}" );
+        unlink("$HostDir/SmbLOG.$Backups[$idx]{num}.z")
+                    if ( -f "$HostDir/SmbLOG.$Backups[$idx]{num}.z" );
+        unlink("$HostDir/XferLOG.$Backups[$idx]{num}")
+                    if ( -f "$HostDir/XferLOG.$Backups[$idx]{num}" );
+        unlink("$HostDir/XferLOG.$Backups[$idx]{num}.z")
+                    if ( -f "$HostDir/XferLOG.$Backups[$idx]{num}.z" );
+    }
+    splice(@Backups, $idx, 1);
+    $bpc->BackupInfoWrite($Host, @Backups);
 }
-splice(@Backups, $idx, 1);
-$bpc->BackupInfoWrite($Host, @Backups);
 
 unlink("$MergeDir/refCnt/needFsck.del") if ( $Errors == 0 );
 
@@ -239,32 +307,56 @@ sub copyInodes
     my($name, $path) = @_;
 
     print("copyInodes: name = $name, path = $path\n") if ( $LogLevel >= 6 );
-    return if ( $path !~ m{(.*)/(attrib.*)$} );
+    return if ( $path !~ m{(.*)/(attrib[^/]*)$} );
 
     $path = $1;
     $name = $2;
 
     my $attr = BackupPC::XS::Attrib::new($MergeCompress);
     if ( -f "$path/$name" && !$attr->read($path, $name) ) {
-        print(STDERR "Can't read attribute file $path/$name: " . $attr->errStr() . "\n");
+        print("Can't read attribute file $path/$name\n");
         $Errors++;
         return;
     }
-    $DeltaInfo->update($MergeCompress, $attr->digest(), 1) if ( length($attr->digest()) );
+    my $digest = $attr->digest();
+    if ( length($digest) ) {
+        $DeltaMerge->update($MergeCompress, $digest, 1);
+        $DeltaDel->update($DelCompress, $digest, -1) if ( $DeltaDel );
+    }
     my $attrAll = $attr->get();
     foreach my $fileUM ( keys(%$attrAll) ) {
         my $a = $attrAll->{$fileUM};
         $FileCnt++;
-        $DeltaInfo->update($a->{compress}, $a->{digest}, 1) if ( length($a->{digest}) );
+        $DeltaMerge->update($a->{compress}, $a->{digest}, 1) if ( length($a->{digest}) );
+        $DeltaDel->update($a->{compress}, $a->{digest}, -1) if ( $DeltaDel && length($a->{digest}) );
         next if ( $a->{nlinks} == 0 );
         #
-        # Copy the inode if it doesn't exist in Merge.
+        # Update inode link count in del backup, and copy/update inode in merge
         #
-        if ( !$AttrMerge->getInode($a->{inode}) ) {
-            my $aInode = $AttrDel->getInode($a->{inode});
+        my $aInode = $AttrDel->getInode($a->{inode});
+        if ( $DeltaDel && $aInode ) {
+            $aInode->{nlinks}--;
+            if ( $aInode->{nlinks} <= 0 ) {
+                $DeltaDel->update($DelCompress, $aInode->{digest}, -1) if ( $DeltaDel && length($aInode->{digest}) );
+                $AttrDel->deleteInode($a->{inode});
+            } else {
+                $AttrDel->setInode($a->{inode}, $aInode);
+            }
+        }
+        if ( !(my $inodeMerge = $AttrMerge->getInode($a->{inode})) ) {
+            #
+            # Copy the inode if it doesn't exist in Merge.
+            #
+            $aInode->{nlinks} = 1;
             $AttrMerge->setInode($a->{inode}, $aInode);
-            $DeltaInfo->update($aInode->{compress}, $aInode->{digest}, 1)
-                        if ( length($aInode->{digest}) );
+            $DeltaMerge->update($aInode->{compress}, $aInode->{digest}, 1)
+                                                if ( length($aInode->{digest}) );
+        } else {
+            #
+            # increase link count on exiting inode
+            #
+            $inodeMerge->{nlinks}++;
+            $AttrMerge->setInode($a->{inode}, $inodeMerge);
         }
     }
     printProgress() if ( $FileCnt >= $FileCntNext );
@@ -274,14 +366,17 @@ sub mergeDir
 {
     my($name, $path) = @_;
 
-    print("mergeDir: name = $name, path = $path\n") if ( $LogLevel >= 5 );
-
-    return if ( !-d $path );
+    if ( !-d $path || $path =~ m{^\./refCnt} || $path =~ m{^\./inode} ) {
+        print("mergeDir: skipping name = $name, path = $path\n") if ( $LogLevel >= 5 );
+        return;
+    }
     $name = "attrib";
 
+    print("mergeDir: name = $name, path = $path\n") if ( $LogLevel >= 5 );
+
     my $d = $path;
-    $d =~ s{^\./}{};
-    my $delDir   = "$DelDir/$d";
+    $d =~ s{^\./+}{};
+    my $delDir   = "$DelTopDir/$d";
     my $mergeDir = "$MergeDir/$d";
 
     print("mergeDir: delDir = $delDir, mergeDir = $mergeDir\n") if ( $LogLevel >= 6 );
@@ -296,7 +391,9 @@ sub mergeDir
     if ( -d $delDir ) {
         $attrDel->read($delDir, $name);
         $attrDelAll = $attrDel->get();
+        $DeltaDel->update($DelCompress, $attrDel->digest(), -1) if ( $DeltaDel && length($attrDel->digest()) );
     }
+    $bpc->flushXSLibMesgs();
 
     #
     # Add non-attrib directories (ie: directories that were created
@@ -307,14 +404,22 @@ sub mergeDir
         foreach my $e ( @$entries ) {
             next if ( $e->{name} eq "."
                    || $e->{name} eq ".."
-                   || $e->{name} eq "inode"
-                   || !-d "$delDir/$e->{name}" );
-            my $fileUM = $bpc->fileNameUnmangle($e->{name});
-            next if ( $attrDelAll && defined($attrDelAll->{$fileUM}) );
-            $attrDelAll->{$fileUM} = {
-                type     => BPC_FTYPE_DIR,
-                noAttrib => 1,
-            };
+                   || $e->{name} eq "inode" );
+            if ( $e->{name} =~ /^attrib/ ) {
+                if ( $e->{name} =~ /attrib_(.{16,})/ ) {
+                    my $digest = pack("H*", $1);
+                    $DeltaDel->update($DelCompress, $digest, -1) if ( $DeltaDel && $attrDel->digest() ne $digest );
+                }
+                print("Removing attrib file $delDir/$e->{name}\n") if ( $LogLevel >= 5 );
+                unlink("$delDir/$e->{name}");
+            } elsif ( -d "$delDir/$e->{name}" ) {
+                my $fileUM = $bpc->fileNameUnmangle($e->{name});
+                next if ( $attrDelAll && defined($attrDelAll->{$fileUM}) );
+                $attrDelAll->{$fileUM} = {
+                    type     => BPC_FTYPE_DIR,
+                    noAttrib => 1,
+                };
+            }
         }
     }
     if ( defined(my $entries = BackupPC::DirOps::dirRead($bpc, $mergeDir)) ) {
@@ -332,7 +437,7 @@ sub mergeDir
         }
     }
     #print "MergeDir $mergeDir contents:\n", Dumper($attrAll);
-    #print "DelDir $delDir contents:\n", Dumper($attrDelAll);
+    #print "DelTopDir $delDir contents:\n", Dumper($attrDelAll);
 
     foreach my $fileUM ( keys(%$attrDelAll) ) {
         my $a = $attrDelAll->{$fileUM};
@@ -364,16 +469,26 @@ sub mergeDir
             # The deleted version will get deleted.
             #
             print("removing $delDir/$fileUM\n") if ( $LogLevel >= 7 );
+            if ( $DeltaDel ) {
+                $DeltaDel->update($a->{compress}, $a->{digest}, -1);
+                if ( $a->{nlinks} > 0 && (my $aInode = $AttrDel->getInode($a->{inode})) ) {
+                    $aInode->{nlinks}--;
+                    if ( $aInode->{nlinks} <= 0 ) {
+                        $DeltaDel->update($DelCompress, $aInode->{digest}, -1) if ( $DeltaDel );
+                        $AttrDel->deleteInode($a->{inode});
+                    } else {
+                        $AttrDel->setInode($a->{inode}, $aInode);
+                    }
+                }
+            }
             next if ( $a->{type} != BPC_FTYPE_DIR );
             #
             # Since this is a directory and the merge file is not,
-            # we need to remove the tree, but no need to udpate
-            # reference counts since we remove the refCnt files
-            # for this backup when we delete it.
+            # we need to remove the tree.
             #
             my $file = $bpc->fileNameMangle($fileUM);
-            print("removing directory tree $delDir/$fileUM\n") if ( $LogLevel >= 7 );
-            BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, undef, \&progressUpdateDirs);
+            print("removing directory tree $delDir/$fileUM\n") if ( $LogLevel >= 5 );
+            BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, $DeltaDel, $AttrDel, \&progressUpdateDirs);
             next;
         }
         print("Got del file $delDir/$fileUM, type $a->{type}; mergeDir doesn't exist\n") if ( $LogLevel >= 7 );
@@ -385,16 +500,59 @@ sub mergeDir
         #
         if ( !$a->{noAttrib} ) {
             $attr->set($fileUM, $a);
-            $DeltaInfo->update($a->{compress}, $a->{digest}, 1) if ( length($a->{digest}) );
+            if ( length($a->{digest}) ) {
+                $DeltaMerge->update($a->{compress}, $a->{digest}, 1);
+                $DeltaDel->update($a->{compress}, $a->{digest}, -1) if ( $DeltaDel );
+            }
+            if ( $LogLevel >= 7 ) {
+                my $digestStr = unpack("H*", $a->{digest});
+                print("set $fileUM attrib (type = $a->{type}, size = $a->{size}, nlinks = $a->{nlinks}, inode = $a->{inode}, digest = $digestStr)\n")
+            }
             if ( $a->{nlinks} > 0 ) {
-                #
-                # Copy the inode if it doesn't exist in Merge.
-                #
-                if ( !$AttrMerge->getInode($a->{inode}) ) {
-                    my $aInode = $AttrDel->getInode($a->{inode});
+                my $aInode = $AttrDel->getInode($a->{inode});
+                if ( $LogLevel >= 7 ) {
+                    my $digestStr = unpack("H*", $aInode->{digest});
+                    print("got del $fileUM inode $a->{inode} (type = $aInode->{type}, size = $aInode->{size}, nlinks = $aInode->{nlinks}, digest = $digestStr)\n")
+                }
+                if ( $DeltaDel && $aInode ) {
+                    $aInode->{nlinks}--;
+                    if ( $aInode->{nlinks} <= 0 ) {
+                        $DeltaDel->update($DelCompress, $aInode->{digest}, -1) if ( $DeltaDel );
+                        $AttrDel->deleteInode($a->{inode});
+                        if ( $LogLevel >= 7 ) {
+                            my $digestStr = unpack("H*", $aInode->{digest});
+                            print("deleted del inode $a->{inode} (type = $aInode->{type}, size = $aInode->{size}, nlinks = $aInode->{nlinks}, digest = $digestStr)\n")
+                        }
+                    } else {
+                        $AttrDel->setInode($a->{inode}, $aInode);
+                        if ( $LogLevel >= 7 ) {
+                            my $digestStr = unpack("H*", $aInode->{digest});
+                            print("updated del inode $a->{inode} (type = $aInode->{type}, size = $aInode->{size}, nlinks = $aInode->{nlinks}, digest = $digestStr)\n")
+                        }
+                    }
+                }
+                if ( !(my $inodeMerge = $AttrMerge->getInode($a->{inode})) ) {
+                    #
+                    # Copy the inode if it doesn't exist in Merge.
+                    #
+                    $aInode->{nlinks} = 1;
                     $AttrMerge->setInode($a->{inode}, $aInode);
-                    $DeltaInfo->update($aInode->{compress}, $aInode->{digest}, 1)
+                    $DeltaMerge->update($aInode->{compress}, $aInode->{digest}, 1)
                                 if ( length($aInode->{digest}) );
+                    if ( $LogLevel >= 7 ) {
+                        my $digestStr = unpack("H*", $aInode->{digest});
+                        print("setting merge inode $a->{inode} (type = $aInode->{type}, size = $aInode->{size}, nlinks = $aInode->{nlinks}, digest = $digestStr)\n")
+                    }
+                } else {
+                    #
+                    # increase link count on exiting inode
+                    #
+                    $inodeMerge->{nlinks}++;
+                    $AttrMerge->setInode($a->{inode}, $inodeMerge);
+                    if ( $LogLevel >= 7 ) {
+                        my $digestStr = unpack("H*", $inodeMerge->{digest});
+                        print("updating merge inode $a->{inode} (type = $inodeMerge->{type}, size = $inodeMerge->{size}, nlinks = $inodeMerge->{nlinks}, digest = $digestStr)\n")
+                    }
                 }
             }
             $dirty = 1;
@@ -414,38 +572,29 @@ sub mergeDir
             #
             mkpath($mergeDir, 0, 0777) if ( !-d $mergeDir );
             if ( !rename("$delDir/$file", "$mergeDir/$file") ) {
-                print(STDERR "Can't move $delDir/$file to $mergeDir/$file\n");
+                print("Can't move $delDir/$file to $mergeDir/$file; removing tree\n");
                 #
-                # need to remove this tree; no need to update reference counts
-                # since we remove the refCnt files for this backup when
-                # we delete it.
+                # need to remove this tree.
                 #
-                BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, undef, \&progressUpdateDirs);
+                BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, $DeltaDel, \&progressUpdateDirs);
                 $Errors++;
+                next;
             }
-        } else {
-            BackupPC::DirOps::find($bpc, {wanted => \&copyInodes}, "$mergeDir/$file", 1);
         }
+        BackupPC::DirOps::find($bpc, {wanted => \&copyInodes}, "$mergeDir/$file", 1);
     }
     printProgress() if ( $FileCnt >= $FileCntNext );
 
-    #
-    # Delete the attrib file
-    #
-    if ( -f "$delDir/$name" ) {
-        if ( !unlink("$delDir/$name") ) {
-            print(STDERR "Can't unlink $delDir/$name\n");
-            $Errors++;
-        }
-    }
     if ( $dirty ) {
         my $oldDigest = $attr->digest();
-        #print("rewriting attrib file $d/$name; ");
-        if ( !$attr->write($d, $name, $oldDigest, $DeltaInfo) ) {
-            print(STDERR $attr->errStr());
+        print("rewriting attrib file $mergeDir/$name; ") if ( $LogLevel >= 5 );
+        if ( !$attr->write($mergeDir, $name, $oldDigest, $DeltaMerge) ) {
+            my $digestStr = unpack("H*", $oldDigest);
+            print("mergeDir: attr write to $mergeDir/$name failed (digest was $digestStr)\n");
         }
-        #printf("digest now %s, was %s\n", unpack("H*", $attr->digest()), unpack("H*", $oldDigest));
+        printf("digest now %s, was %s\n", unpack("H*", $attr->digest()), unpack("H*", $oldDigest)) if ( $LogLevel >= 5 );
     }
+    $bpc->flushXSLibMesgs();
 }
 
 sub progressUpdateDirs

@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.0.0, released 3 Feb 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -244,18 +244,18 @@ sub find
 #
 sub RmTreeQuiet
 {
-    my($bpc, $roots, $compress, $deltaInfo, $progressCB) = @_;
+    my($bpc, $roots, $compress, $deltaInfo, $attrCache, $progressCB) = @_;
 
     my($cwd) = Cwd::fastcwd();
     $cwd = $1 if ( $cwd =~ /(.*)/ );
-    my $ret = BackupPC::DirOps::RmTreeQuietInner($bpc, $cwd, $roots, $compress, $deltaInfo, $progressCB);
+    my $ret = BackupPC::DirOps::RmTreeQuietInner($bpc, $cwd, $roots, $compress, $deltaInfo, $attrCache, $progressCB);
     chdir($cwd) if ( $cwd );
     return $ret;
 }
 
 sub RmTreeQuietInner
 {
-    my($bpc, $cwd, $roots, $compress, $deltaInfo, $progressCB) = @_;
+    my($bpc, $cwd, $roots, $compress, $deltaInfo, $attrCache, $progressCB) = @_;
     my(@files, $root);
 
     if ( defined($roots) && length($roots) ) {
@@ -291,7 +291,7 @@ sub RmTreeQuietInner
             if ( $deltaInfo ) {
                 my $attr = BackupPC::XS::Attrib::new($compress);
                 if ( !$attr->read(".", $name) ) {
-                    print(STDERR "Can't read attribute file in $cwd/$path/$name: " . $attr->errStr() . "\n");
+                    print(STDERR "Can't read attribute file in $cwd/$path/$name\n");
                 }
                 my $attrAll = $attr->get();
                 my $d = $attr->digest();
@@ -302,6 +302,18 @@ sub RmTreeQuietInner
                         my $a = $attrAll->{$fileUM};
                         $deltaInfo->update($compress, $a->{digest}, -1)
                                                         if ( $deltaInfo && length($a->{digest}) );
+			next if ( $a->{nlinks} == 0 || !$deltaInfo || !$attrCache );
+                        #
+                        # If caller supplied deltaInfo and attrCache then updated the inodes too
+                        #
+			my $aInode = $attrCache->getInode($a->{inode});
+			$aInode->{nlinks}--;
+			if ( $aInode->{nlinks} <= 0 ) {
+			    $deltaInfo->update($compress, $aInode->{digest}, -1);
+			    $attrCache->deleteInode($a->{inode});
+			} else {
+			    $attrCache->setInode($a->{inode}, $aInode);
+			}
                     }
                 }
                 &$progressCB(scalar(keys(%$attrAll))) if ( ref($progressCB) eq 'CODE' );
@@ -338,7 +350,7 @@ sub RmTreeQuietInner
 		    print(STDERR "Can't read $cwd/$path/$name: $!\n");
 		} else {
 		    @files = grep $_ !~ /^\.{1,2}$/, @$d;
-		    BackupPC::DirOps::RmTreeQuietInner($bpc, "$cwd/$name", \@files, $compress, $deltaInfo, $progressCB);
+		    BackupPC::DirOps::RmTreeQuietInner($bpc, "$cwd/$name", \@files, $compress, $deltaInfo, $attrCache, $progressCB);
 		    if ( !chdir("..") ) {
                         print(STDERR "RmTreeQuietInner: can't chdir .. (while removing $root)\n");
                         return 1;

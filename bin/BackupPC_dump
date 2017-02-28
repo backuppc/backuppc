@@ -1234,6 +1234,13 @@ if ( $stat{xferOK} && (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
     $stat{xferOK} = 0;
 }
 
+#
+# Remove any shares that exist in the backup, but aren't in $ShareNames
+#
+if ( $stat{xferOK} ) {
+    OrphanShareNameClean("$Dir/$newBkupNum", $ShareNames, $Backups[$newBkupIdx]{compress});
+}
+
 UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
 if ( $? && $Conf{UserCmdCheckStatus} ) {
     print(LOG $bpc->timeStamp,
@@ -1883,26 +1890,28 @@ sub BackupSave
 }
 
 #
-# Removes a specific backup
+# Removes a specific backup, or a sharename within a backup
 #
 sub BackupRemove
 {
-    my($client, $idx, $removeXferLOG) = @_;
+    my($client, $idx, $removeXferLOG, $shareName) = @_;
     my $t = time;
 
     my $fileExt = $Backups[$idx]{compress} > 0 ? ".z" : "";
     my $bkupNum = $Backups[$idx]{num};
+    my @args    = ("-h", $client, "-n", $Backups[$idx]{num}, "-l");
 
-    print("__bpc_progress_state__ delete #$bkupNum\n");
+    if ( defined($shareName) ) {
+        push(@args, "-s", $shareName, "/");
+        print("__bpc_progress_state__ delete share #$bkupNum/$shareName\n");
+    } else {
+        print("__bpc_progress_state__ delete #$bkupNum\n");
+    }
 
-    unlink("$Dir/XferLOG.$bkupNum$fileExt") if ( $removeXferLOG );
+    unlink("$Dir/XferLOG.$bkupNum$fileExt") if ( !defined($shareName) && $removeXferLOG );
 
     $bpc->cmdSystemOrEval(
-        ["$BinDir/BackupPC_backupDelete",
-         "-h", $client,
-         "-n", $Backups[$idx]{num},
-         "-l",
-        ],
+        ["$BinDir/BackupPC_backupDelete", @args],
         sub {
             if ( $_[0] =~ /^__bpc_progress_/ || !defined($XferLOG) ) {
                 print(STDERR $_[0]);
@@ -1918,7 +1927,9 @@ sub BackupRemove
     } else {
         $XferLOG->write(\"Finished BackupPC_backupDelete, status = $ret (running time: $t sec)\n");
     }
-    splice(@Backups, $idx, 1);
+    if ( !defined($shareName) ) {
+        splice(@Backups, $idx, 1);
+    }
     return $ret;
 }
 
@@ -1932,6 +1943,35 @@ sub CorrectHostCheck
 		if ( lc($netBiosHost) ne lc(substr($host, 0, 15)) );
     return;
 }
+
+#
+# Check the top-level directory in backupDir and remove any directory trees
+# that aren't in the listref of share names in $shareNames
+#
+sub OrphanShareNameClean
+{
+    my($backupDir, $shareNames, $compress) = @_;
+    my $goodShares = {};
+
+    foreach my $shareName ( @$shareNames ) {
+        $shareName = encode("utf8", $shareName);
+        $goodShares->{$shareName} = 1;
+    }
+    my $attr = BackupPC::XS::Attrib::new($compress);
+    if ( !$attr->read($backupDir) ) {
+        $XferLOG->write(\"OrphanShareNameClean: can't read attribute file in $backupDir\n");
+        return;
+    }
+    my $attrAll = $attr->get();
+
+    foreach my $fileUM ( keys(%$attrAll) ) {
+        my $a = $attrAll->{$fileUM};
+        next if ( $goodShares->{$fileUM} );
+        $XferLOG->write(\"OrphanShareNameClean: removing orphan share $fileUM from $backupDir\n");
+        BackupRemove($client, $newBkupIdx, 0, $fileUM);
+    }
+}
+
 
 #
 # Run BackupPC_refCountUpdate on this client

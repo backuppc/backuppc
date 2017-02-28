@@ -145,7 +145,7 @@ if ( $Backups[$idx]{version} < 4 ) {
             # no reference counting for pre V4 - just remove the tree(s)
             #
             my $delPathM = $bpc->fileNameMangle($delPath);
-            BackupPC::DirOps::RmTreeQuiet($bpc, "$DelTopDir/$ShareNameM/$delPathM", -2, undef, undef, \&progressUpdateDirs);
+            BackupPC::DirOps::RmTreeQuiet($bpc, "$DelTopDir/$ShareNameM/$delPathM", -2, undef, undef, \&progressUpdate);
         }
     } else {
         print("BackupPC_backupDelete: removing pre-v4 backup #$Backups[$idx]{num}\n") if ( $LogLevel >= 1 );
@@ -155,7 +155,7 @@ if ( $Backups[$idx]{version} < 4 ) {
         #
         # no reference counting for pre V4 - just remove the tree(s)
         #
-        BackupPC::DirOps::RmTreeQuiet($bpc, $DelTopDir, -2, undef, undef, \&progressUpdateDirs);
+        BackupPC::DirOps::RmTreeQuiet($bpc, $DelTopDir, -2, undef, undef, \&progressUpdate);
     }
 } else {
     if ( defined($ShareName) ) {
@@ -192,7 +192,7 @@ if ( $Backups[$idx]{version} < 4 ) {
                 print("__bpc_progress_state__ delete #$Backups[$idx]{num}$fullDelPath\n");
             }
             print("BackupPC_backupDelete: No prior backup for merge\n") if ( $LogLevel >= 1 );
-            BackupPC::DirOps::RmTreeQuiet($bpc, "$DelTopDir$delPathM", $DelCompress, $DeltaDel, $AttrDel, \&progressUpdateDirs);
+            BackupPC::DirOps::RmTreeQuiet($bpc, "$DelTopDir$delPathM", $DelCompress, $DeltaDel, $AttrDel, \&progressUpdate);
             if ( defined($delPath) ) {
                 my $ret = $AttrDel->delete($delPath);
                 print("AttrDel($delPath) returns $ret\n") if ( $LogLevel >= 5 );
@@ -249,7 +249,7 @@ if ( $Backups[$idx]{version} < 4 ) {
             # Now delete the Del backup tree
             #
             print("removing remaining directory tree $DelTopDir$delPathM\n") if ( $LogLevel >= 5 );
-            BackupPC::DirOps::RmTreeQuiet($bpc, "$DelTopDir$delPathM", $DelCompress, $DeltaDel, $AttrDel, \&progressUpdateDirs);
+            BackupPC::DirOps::RmTreeQuiet($bpc, "$DelTopDir$delPathM", $DelCompress, $DeltaDel, $AttrDel, \&progressUpdate);
             if ( defined($delPath) ) {
                 if ( defined(my $attr = $AttrDel->get($delPath)) && !defined($AttrMerge->get($delPath)) ) {
                     $AttrMerge->set($delPath, $attr);
@@ -488,7 +488,7 @@ sub mergeDir
             #
             my $file = $bpc->fileNameMangle($fileUM);
             print("removing directory tree $delDir/$fileUM\n") if ( $LogLevel >= 5 );
-            BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, $DeltaDel, $AttrDel, \&progressUpdateDirs);
+            BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, $DeltaDel, $AttrDel, \&progressUpdate);
             next;
         }
         print("Got del file $delDir/$fileUM, type $a->{type}; mergeDir doesn't exist\n") if ( $LogLevel >= 7 );
@@ -576,7 +576,7 @@ sub mergeDir
                 #
                 # need to remove this tree.
                 #
-                BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, $DeltaDel, \&progressUpdateDirs);
+                BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, $DeltaDel, \&progressUpdate);
                 $Errors++;
                 next;
             }
@@ -597,14 +597,19 @@ sub mergeDir
     $bpc->flushXSLibMesgs();
 }
 
-sub progressUpdateDirs
+sub progressUpdate
 {
-    my($newDirCnt) = @_;
+    my($newCnt) = @_;
 
-    $DirCnt += $newDirCnt;
-    if ( $DirCnt >= $DirCntNext ) {
-        printProgress();
-        $DirCntNext += 20;
+    if ( $DeltaDel ) {
+        $FileCnt += $newCnt;
+        printProgress() if ( $FileCnt >= $FileCntNext );
+    } else {
+        $DirCnt += $newCnt;
+        if ( $DirCnt >= $DirCntNext ) {
+            printProgress();
+            $DirCntNext += 20;
+        }
     }
 }
 

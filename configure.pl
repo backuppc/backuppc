@@ -72,7 +72,7 @@ EOF
 
 my @Packages = qw(version Encode File::Path File::Spec File::Copy DirHandle
                   Digest::MD5 Data::Dumper Getopt::Std Getopt::Long Pod::Usage
-                  BackupPC::XS BackupPC::Lib);
+                  File::Listing CGI BackupPC::XS BackupPC::Lib);
 
 my $PackageVersion = {
         "Encode"       => "1.99",

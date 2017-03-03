@@ -27,7 +27,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1023,7 +1023,7 @@ sub Main_Check_Job_Messages
                 $Status->{$host}{aliveCnt}++;
                 $Status->{$host}{dhcpCheckCnt}--
                                 if ( $Status->{$host}{dhcpCheckCnt} > 0 );
-            } elsif ( $mesg =~ /^xferPids (.*)/ ) {
+            } elsif ( $mesg =~ /^xferPids *(.*)/ ) {
                 $Jobs{$host}{xferPid} = $1;
             } elsif ( $mesg =~ /^__bpc_progress_state__ (.*)/ ) {
                 $Jobs{$host}{xferState}   = $1;

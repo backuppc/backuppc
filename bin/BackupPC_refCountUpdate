@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Feb 2017.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -113,8 +113,8 @@ my %Conf = $bpc->Conf();
 my $PoolStats = {};
 
 if ( $opts{v} ) {
-    $Conf{XferLogLevel} = 10;
-    BackupPC::XS::Lib::logLevelSet(10);
+    $Conf{XferLogLevel} = 8;
+    BackupPC::XS::Lib::logLevelSet(8);
 }
 
 #
@@ -163,7 +163,7 @@ if ( defined($opts{h}) ) {
     }
 }
 
-print("BackupPC_refCountUpdate total errors: $ErrorCnt\n");
+print("BackupPC_refCountUpdate total errors: $ErrorCnt\n") if ( $ErrorCnt > 0 || $Conf{XferLogLevel} >= 2 );
 print("xferPids\n") if ( !$opts{p} );
 exit($ErrorCnt ? 1 : 0);
 
@@ -262,7 +262,7 @@ sub updateHostPoolCnt
         }
         print("BackupPC_refCountUpdate: host $host #$bkupNum: gotFsck = $gotFsck, gotDelta = $gotDelta,"
                                                           . " gotPoolCnt = $gotPoolCnt, gotNoPoolCntOk = $gotNoPoolCntOk\n")
-                                        if ( $Conf{XferLogLevel} >= 2 );
+                                        if ( $Conf{XferLogLevel} >= 4 );
         #
         # Apply policy in $ConfRefCntFsck:
         #   0: no additional fsck
@@ -351,7 +351,7 @@ sub processOneHostBackup
     #
     open($fd, ">", "$bkupRefCntDir/needFsck.refCountUpdate") && close($fd);
 
-    print("BackupPC_refCountUpdate: processing host $host #$bkupNum (fsck = $fsck)\n") if ( $Conf{XferLogLevel} >= 1 );
+    print("BackupPC_refCountUpdate: processing host $host #$bkupNum (fsck = $fsck)\n") if ( $Conf{XferLogLevel} >= 2 );
 
     if ( $fsck ) {
         my $entries = BackupPC::DirOps::dirRead($bpc, $bkupRefCntDir);
@@ -521,7 +521,7 @@ sub updateHostPoolOneDelta2Cnt
     }
     $count = undef;
     print("BackupPC_refCountUpdate: processing host $host #$bkupNum deltaFile $deltaFileName with $entryCnt entries\n")
-                                        if ( $Conf{XferLogLevel} >= 1 );
+                                        if ( $Conf{XferLogLevel} >= 2 );
 
     for ( my $refCntFile = 0 ; $refCntFile < 128 ; $refCntFile++ ) {
         my $poolCntFileNew = sprintf("%s/poolCntNew.%d.%02x", $refCntDir,
@@ -771,7 +771,7 @@ sub updateTotalRefCnt
                     if ( !defined($count->get($d)) ) {
                         my @s = stat("$poolSubDir/$e->{name}");
                         print("BackupPC_refCountUpdate: adding pool file $e->{name} with count 0 (size $s[7])\n")
-                                        if ( $Conf{XferLogLevel} >= 4 );
+                                        if ( $Conf{XferLogLevel} >= 5 );
                         #
                         # add stats for new pool file
                         #

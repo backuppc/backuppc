@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Feb 2017.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -299,7 +299,7 @@ if ( $doRefCountUpdate || $opts{r} ) {
     $Errors++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0") != 0 );
 }
 
-print("BackupPC_backupDelete: got $Errors errors\n");
+print("BackupPC_backupDelete: got $Errors errors\n") if ( $Errors > 0 || $LogLevel >= 2 );
 exit($Errors ? 1 : 0);
 
 sub copyInodes

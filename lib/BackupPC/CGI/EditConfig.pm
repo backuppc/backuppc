@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2005-2013  Craig Barratt
+#   Copyright (C) 2005-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -736,7 +736,7 @@ EOF
             }
             foreach my $entry ( @{$newConf->{Hosts}} ) {
                 next if ( $entry->{host} eq ""
-                           || defined($hostsNew->{$entry->{host}}) );
+                           || defined($hostsNew->{lc($entry->{host})}) );
                 if ( $entry->{host} =~ /(.+?)\s*=\s*(.+)/ ) {
                     if ( defined($allHosts->{$2}) ) {
                         $entry->{host} = $1;
@@ -748,7 +748,7 @@ EOF
                     }
                 }
                 push(@$hostsSave, $entry);
-                $hostsNew->{$entry->{host}} = $entry;
+                $hostsNew->{lc($entry->{host})} = $entry;
             }
             ($mesg, my $hostChange) = hostsDiffMesg($hostsNew);
             $bpc->HostInfoWrite($hostsNew) if ( $hostChange );

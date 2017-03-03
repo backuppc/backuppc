@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.0, released 3 Feb 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,7 +38,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::XS;
 use BackupPC::Storage;
@@ -109,7 +109,7 @@ if ( $opts{f} ) {
     #
     foreach my $host ( sort(keys(%$Hosts)) ) {
         print("BackupPC_fsck: Rebuilding count database for host $host\n");
-        system("$BinDir/BackupPC_refCountUpdate -h $host -f -p");
+        $ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -h $host -f -p") );
     }
 } else {
     #
@@ -117,14 +117,14 @@ if ( $opts{f} ) {
     # (ie: process any delta files)
     #
     foreach my $host ( sort(keys(%$Hosts)) ) {
-        system("$BinDir/BackupPC_refCountUpdate -h $host -p");
+        $ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -o 0 -h $host -p") );
     }
 }
 
 CheckIfServerRunning();
 
 print("BackupPC_fsck: building main count database\n");
-system("$BinDir/BackupPC_refCountUpdate -m -p");
+$ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -m -p") );
 
 CheckIfServerRunning();
 

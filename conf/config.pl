@@ -202,7 +202,7 @@ $Conf{BackupPCNightlyPeriod} = 1;
 # The total size of the files in the new V4 pool is updated every
 # night when BackupPC_nightly runs BackupPC_refCountUpdate.  Instead
 # of adding up the size of every pool file, it just updates the pool
-# size total when files are added to or removed form the pool. 
+# size total when files are added to or removed from the pool. 
 #
 # To make sure these cumulative pool file sizes stay accurate, we
 # recompute the V4 pool size for a portion of the pool each night
@@ -378,7 +378,7 @@ $Conf{HardLinkMax} = 31999;
 
 #
 # Advanced option for asking BackupPC to load additional perl modules.
-# Can be a list (array ref) of module names to load at startup.
+# Can be a list (arrayref) of module names to load at startup.
 #
 $Conf{PerlModuleLoad}     = undef;
 
@@ -666,7 +666,7 @@ $Conf{BackupFilesOnly} = undef;
 # the setting is assumed to apply to all shares.
 #
 # The exact behavior is determined by the underlying transport program,
-# smbclient or tar.  For smbclient the exlclude file list is passed into
+# smbclient or tar.  For smbclient the exclude file list is passed into
 # the X option.  Simple shell wild-cards using "*" or "?" are allowed.
 #
 # For tar, if the exclude file contains a "/" it is assumed to be anchored
@@ -742,7 +742,7 @@ $Conf{BlackoutGoodCnt}      = 7;
 # One or more blackout periods can be specified.  If a client is
 # subject to blackout then no regular (non-manual) backups will
 # be started during any of these periods.  hourBegin and hourEnd
-# specify hours fro midnight and weekDays is a list of days of
+# specify hours from midnight and weekDays is a list of days of
 # the week where 0 is Sunday, 1 is Monday etc.
 #
 # For example:
@@ -839,7 +839,7 @@ $Conf{XferLogLevel} = 1;
 # If set to a different encoding then filenames will converted
 # to/from utf8 automatically during backup and restore.
 #
-# If the file names displayed in the browser (eg: accents or special
+# If the filenames displayed in the browser (eg: accents or special
 # characters) don't look right then it is likely you haven't set
 # $Conf{ClientCharset} correctly.
 #
@@ -865,12 +865,12 @@ $Conf{ClientCharset} = '';
 
 #
 # Prior to 3.x no charset conversion was done by BackupPC.  Backups were
-# stored in what ever charset the XferMethod provided - typically utf8
+# stored in whatever charset the XferMethod provided - typically utf8
 # for smbclient and the client's locale settings for rsync and tar (eg:
 # cp1252 for rsync on WinXX and perhaps iso-8859-1 with rsync on linux).
-# This setting tells BackupPC the charset that was used to store file
-# names in old backups taken with BackupPC 2.x, so that non-ascii file
-# names in old backups can be viewed and restored.
+# This setting tells BackupPC the charset that was used to store filenames
+# in old backups taken with BackupPC 2.x, so that non-ascii filenames in
+# old backups can be viewed and restored.
 #
 $Conf{ClientCharsetLegacy} = 'iso-8859-1';
 
@@ -891,7 +891,7 @@ $Conf{ClientCharsetLegacy} = 'iso-8859-1';
 $Conf{SmbShareName} = 'C$';
 
 #
-# Smbclient share user name.  This is passed to smbclient's -U argument.
+# Smbclient share username.  This is passed to smbclient's -U argument.
 #
 # This setting only matters if $Conf{XferMethod} = 'smb'.
 #
@@ -931,7 +931,7 @@ $Conf{SmbClientPath} = '';
 #    $host            host to backup/restore
 #    $hostIP          host IP address
 #    $shareName       share name
-#    $userName        user name
+#    $userName        username
 #    $fileList        list of files to backup (based on exclude/include)
 #    $I_option        optional -I option to smbclient
 #    $X_option        exclude option (if $fileList is an exclude list)
@@ -1036,7 +1036,7 @@ $Conf{TarShareName} = '/';
 #
 # The following variables are substituted at run-time:
 #
-#   $host        host name
+#   $host        hostname
 #   $hostIP      host's IP address
 #   $incrDate    newer-than date for incremental backups
 #   $shareName   share name to backup (ie: top-level directory path)
@@ -1138,6 +1138,11 @@ $Conf{TarClientPath} = '';
 #
 #       $Conf{RsyncClientPath} = 'sudo /usr/bin/rsync';
 #
+# For OSX laptop clients, you can use caffeinate to make sure the laptop
+# stays awake during the backup, eg:
+#
+#       $Conf{RsyncClientPath} = '/usr/bin/sudo /usr/bin/caffeinate -ism /usr/bin/rsync';
+#
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
 $Conf{RsyncClientPath} = '';
@@ -1150,7 +1155,7 @@ $Conf{RsyncClientPath} = '';
 $Conf{RsyncBackupPCPath} = "";
 
 #
-# Ssh srguments for rsync to run ssh to connec to the client.
+# Ssh arguments for rsync to run ssh to connect to the client.
 # Rather than permit root ssh on the client, it is more secure
 # to just allow ssh via a low-privileged user, and use sudo
 # in $Conf{RsyncClientPath}.
@@ -1184,16 +1189,16 @@ $Conf{RsyncShareName} = '/';
 $Conf{RsyncdClientPort} = 873;
 
 #
-# Rsync daemon user name on client, for $Conf{XferMethod} = "rsyncd".
-# The user name and password are stored on the client in whatever file
+# Rsync daemon username on client, for $Conf{XferMethod} = "rsyncd".
+# The username and password are stored on the client in whatever file
 # the "secrets file" parameter in rsyncd.conf points to
 # (eg: /etc/rsyncd.secrets).
 #
 $Conf{RsyncdUserName} = '';
 
 #
-# Rsync daemon user name on client, for $Conf{XferMethod} = "rsyncd".
-# The user name and password are stored on the client in whatever file
+# Rsync daemon username on client, for $Conf{XferMethod} = "rsyncd".
+# The username and password are stored on the client in whatever file
 # the "secrets file" parameter in rsyncd.conf points to
 # (eg: /etc/rsyncd.secrets).
 #
@@ -1247,7 +1252,7 @@ $Conf{RsyncArgs} = [
 
 #
 # Additional arguments added to RsyncArgs.  This can be used in
-# conbination with $Conf{RsyncArgs} to allow customization of
+# combination with $Conf{RsyncArgs} to allow customization of
 # the rsync arguments on a part-client basis.  The standard
 # arguments go in $Conf{RsyncArgs} and $Conf{RsyncArgsExtra}
 # can be set on a per-client basis.
@@ -1266,7 +1271,7 @@ $Conf{RsyncArgs} = [
 # to the following variable substitutions:
 #
 #        $client       client name being backed up
-#        $host         host name (could be different from client name if
+#        $host         hostname (could be different from client name if
 #                                 $Conf{ClientNameAlias} is set)
 #        $hostIP       IP address of host
 #        $confDir      configuration directory path
@@ -1291,7 +1296,7 @@ $Conf{RsyncArgsExtra} = [];
 # substitutions:
 #
 #        $client       client name being backed up
-#        $host         host name (could be different from client name if
+#        $host         hostname (could be different from client name if
 #                                 $Conf{ClientNameAlias} is set)
 #        $hostIP       IP address of host
 #        $confDir      configuration directory path
@@ -1359,7 +1364,7 @@ $Conf{RsyncRestoreArgs} = [
 $Conf{FtpShareName} = '';
 
 #
-# FTP user name.  This is used to log into the server.
+# FTP username.  This is used to log into the server.
 #
 # This setting is used only if $Conf{XferMethod} = 'ftp'.
 #
@@ -1409,7 +1414,7 @@ $Conf{FtpTimeout} = 120;
 #
 # Symlinks cannot be restored via FTP, so the desired behaviour will
 # be different depending on the setup of the share. The default for
-# this behavor is 1.  Directory shares with more complicated directory
+# this behavior is 1.  Directory shares with more complicated directory
 # structures should consider other protocols.
 #
 $Conf{FtpFollowSymlinks} = 0;
@@ -1444,7 +1449,7 @@ $Conf{ArchiveComp} = 'gzip';
 #
 # The amount of Parity data to generate, as a percentage
 # of the archive size.
-# Uses the commandline par2 (par2cmdline) available from
+# Uses the command line par2 (par2cmdline) available from
 # http://parchive.sourceforge.net
 #
 # Only useful for file dumps.
@@ -1555,11 +1560,11 @@ $Conf{NmbLookupFindHostCmd} = '$nmbLookupPath $host';
 
 #
 # For fixed IP address hosts, BackupPC_dump can also verify the netbios
-# name to ensure it matches the host name.  An error is generated if
+# name to ensure it matches the hostname.  An error is generated if
 # they do not match.  Typically this flag is off.  But if you are going
 # to transition a bunch of machines from fixed host addresses to DHCP,
 # setting this flag is a great way to verify that the machines have
-# their netbios name set correctly before turning on DCHP.
+# their netbios name set correctly before turning on DHCP.
 #
 $Conf{FixedIPNetBiosNameCheck} = 0;
 
@@ -1593,7 +1598,7 @@ $Conf{Ping6Path} = '';
 #
 #   $pingPath      path to ping ($Conf{PingPath} or $Conf{Ping6Path})
 #                  depending on the address type of $host.
-#   $host          host name
+#   $host          hostname
 #
 # Wade Brown reports that on solaris 2.6 and 2.7 ping -s returns the wrong
 # exit status (0 even on failure).  Replace with "ping $host 1", which
@@ -1663,7 +1668,7 @@ $Conf{ClientTimeout} = 72000;
 # Maximum number of log files we keep around in each PC's directory
 # (ie: pc/$host).  These files are aged monthly.  A setting of 12
 # means there will be at most the files LOG, LOG.0, LOG.1, ... LOG.11
-# in the pc/$host directory (ie: about a years worth).  (Except this
+# in the pc/$host directory (ie: about a year's worth).  (Except this
 # month's LOG, these files will have a .z extension if compression
 # is on).
 #
@@ -1691,10 +1696,10 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #        $type         type of dump (incr or full)
 #        $xferOK       1 if the dump succeeded, 0 if it didn't
 #        $client       client name being backed up
-#        $host         host name (could be different from client name if
+#        $host         hostname (could be different from client name if
 #                                 $Conf{ClientNameAlias} is set)
 #        $hostIP       IP address of host
-#        $user         user name from the hosts file
+#        $user         username from the hosts file
 #        $moreUsers    list of additional users from the hosts file
 #        $share        the first share name (or current share for
 #                        $Conf{DumpPreShareCmd} and $Conf{DumpPostShareCmd})
@@ -1708,16 +1713,16 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #
 #        $client       client name being backed up
 #        $xferOK       1 if the restore succeeded, 0 if it didn't
-#        $host         host name (could be different from client name if
+#        $host         hostname (could be different from client name if
 #                                 $Conf{ClientNameAlias} is set)
 #        $hostIP       IP address of host
-#        $user         user name from the hosts file
+#        $user         username from the hosts file
 #        $moreUsers    list of additional users from the hosts file
 #        $share        the first share name
 #        $XferMethod   value of $Conf{XferMethod} (eg: tar, rsync, smb)
 #        $sshPath      value of $Conf{SshPath},
 #        $type         set to "restore"
-#        $bkupSrcHost  host name of the restore source
+#        $bkupSrcHost  hostname of the restore source
 #        $bkupSrcShare share name of the restore source
 #        $bkupSrcNum   backup number of the restore source
 #        $pathHdrSrc   common starting path of restore source
@@ -1731,7 +1736,7 @@ $Conf{MaxOldPerPCLogFiles} = 12;
 #        $client       client name being backed up
 #        $xferOK       1 if the archive succeeded, 0 if it didn't
 #        $host         Name of the archive host
-#        $user         user name from the hosts file
+#        $user         username from the hosts file
 #        $share        the first share name
 #        $XferMethod   value of $Conf{XferMethod} (eg: tar, rsync, smb)
 #        $HostList     list of hosts being archived
@@ -1782,12 +1787,12 @@ $Conf{ArchivePostUserCmd} = undef;
 $Conf{UserCmdCheckStatus} = 0;
 
 #
-# Override the client's host name.  This allows multiple clients
+# Override the client's hostname.  This allows multiple clients
 # to all refer to the same physical host.  This should only be
 # set in the per-PC config file and is only used by BackupPC at
 # the last moment prior to generating the command used to backup
 # that machine (ie: the value of $Conf{ClientNameAlias} is invisible
-# everywhere else in BackupPC).  The setting can be a host name or
+# everywhere else in BackupPC).  The setting can be a hostname or
 # IP address, eg:
 #
 #         $Conf{ClientNameAlias} = 'realHostName';
@@ -1838,7 +1843,7 @@ $Conf{EMailAdminUserName} = '';
 #
 # Destination domain name for email sent to users.  By default
 # this is empty, meaning email is sent to plain, unqualified
-# addresses.  Otherwise, set it to the destintation domain, eg:
+# addresses.  Otherwise, set it to the destination domain, eg:
 #
 #    $Cong{EMailUserDestDomain} = '@mydomain.com';
 #
@@ -1985,7 +1990,7 @@ $Conf{CgiAdminUsers}     = '';
 # accessible by anyone untrusted.  That means you can't allow
 # untrusted users access to the BackupPC server, and you should
 # block the SCGIServerPort TCP port on the BackupPC server.  If you
-# don't understaand what that means, or can't confirm you have
+# don't understand what that means, or can't confirm you have
 # configured SCGI securely, then don't enable it!!
 #
 $Conf{SCGIServerPort} = -1;
@@ -2009,7 +2014,7 @@ $Conf{RrdToolPath} = '';
 # Language to use.  See lib/BackupPC/Lang for the list of supported
 # languages, which include English (en), French (fr), Spanish (es),
 # German (de), Italian (it), Dutch (nl), Polish (pl), Portuguese
-# Brazillian (pt_br) and Chinese (zh_CH).
+# Brazilian (pt_br) and Chinese (zh_CH).
 #
 # Currently the Language setting applies to the CGI interface and email
 # messages sent to users.  Log files and other text are still in English.
@@ -2029,7 +2034,7 @@ $Conf{Language} = 'en';
 #
 # $Conf{CgiUserUrlCreate} should be a full URL that points to the
 # user's home page.  Set this to undef or an empty string to turn
-# off generation of URLs for user names.
+# off generation of URLs for usernames.
 #
 # Example:
 #    $Conf{CgiUserHomePageCheck} = '/var/www/html/users/%s.html';
@@ -2111,7 +2116,7 @@ $Conf{CgiHeaders} = '<meta http-equiv="pragma" content="no-cache">';
 $Conf{CgiImageDir} = '';
 
 #
-# Additional mappings of file name extenions to Content-Type for
+# Additional mappings of filename extensions to Content-Type for
 # individual file restore.  See $Ext2ContentType in BackupPC_Admin
 # for the default setting.  You can add additional settings here,
 # or override any default settings.  Example:

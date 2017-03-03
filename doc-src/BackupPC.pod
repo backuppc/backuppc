@@ -99,8 +99,7 @@ BackupPC is Open Source software hosted by SourceForge.
 =head2 BackupPC 4.0
 
 This is the first release of 4.0, which is a significant rewrite of
-BackupPC.  Significant portions of this documentation have not been
-updated.  This section provides a short overview of the changes and
+BackupPC.  This section provides a short overview of the changes and
 features in 4.0.
 
 Here's a short summary of what has changed in V4:
@@ -115,7 +114,7 @@ is handled at the application level in a batch manner.
 =item *
 
 Backups are stored as "reverse deltas" - the most recent backup is always filled
-and older backups are reconstitued by merging all the deltas starting with the
+and older backups are reconstituted by merging all the deltas starting with the
 nearest future filled backup and working backwards.
 
 This is the opposite of V3 where incrementals are stored as "forward deltas"
@@ -125,20 +124,23 @@ incremental backup, or the last full in the case of rsync).
 =item *
 
 Since the most recent backup is filled, viewing/restoring that backup (which is
-the most common backup used) doesn't require mergning any deltas from other backups.
+the most common backup used) doesn't require merging any deltas from other backups.
 
 =item *
 
-The concepts of incr/full backups and unfilled/filled storage are decoupled.
+The concepts of incr/full backups and unfilled/filled storage are decoupled.  The most
+recent backup is always filled.  By default, for the remaining backups, full backups
+are filled and incremental backups are unfilled, but that is configurable.
 
 =item *
 
 Uses full-file MD5 digests, which are stored in the directory attrib files.
-Each backup directory only contains an attrib file.
+Each backup directory only contains an empty attrib file whose name includes
+the MD5 digest, which is used to look up the file in the pool.
 
 =item *
 
-The Pool layout still support chains to handle md5 collisions.  While collisions
+The Pool layout still supports chains to handle md5 collisions.  While collisions
 can be constructed and are now well-known, they are highly unlikely in the wild.
 Pool files are never renamed or moved, unlike V3.
 
@@ -149,9 +151,9 @@ not filled).
 
 =item *
 
-The reverse deltas allow "infinte incrementals" - no need for a full backup
+The reverse deltas allow "infinite incrementals" - no need for a full backup
 if you are willing to trade speed for the risk that a file change will
-not be detected if the mtime or size don't change.
+not be detected if the metadata (eg, mtime or size) doesn't change.
 
 =item *
 
@@ -171,9 +173,10 @@ is identical.
 
 =item *
 
-Uses rsync-3.0.9 on the server side (in place of File::RsyncP), with
-C code layer to interface to the BackupPC storage.  So the whole data
-path for rsync is now in compiled C code, which is much faster than perl.
+Uses a modified rsync called rsync_bpc (currently based on rsync-3.0.9)
+on the server side (in place of File::RsyncP), with C code layer to interface
+to the BackupPC storage.  So the whole data path for rsync is now in compiled
+C code, which is much faster than perl.
 
 =item *
 
@@ -189,10 +192,6 @@ as easily as an mtime on the server side.
 Significant portions of the BackupPC code are now compiled C code in a
 new module called BackupPC::XS that is dynamically linked to perl.
 
-=item *
-
-FTP Xfer method isn't supported yet.
-
 =back
 
 Here is a more detailed discussion:
@@ -201,19 +200,19 @@ Here is a more detailed discussion:
 
 =item *
 
-Completely new backup storage.  No hardlinks!  Backups are stored as
-reverse deltas, with the most recent backup always filled.  Prior
-backup "n" contains the changes relative to prior backup "n+1".
+Completely new backup storage.  No hardlinks!  Backups are stored as reverse deltas,
+with the most recent backup always filled.  Prior backup "n" contains the changes
+relative to prior backup "n+1".
 
 =item *
 
-Since every backup is based on the last filled backup, the concept of
-incremental levels is removed.
+Since every backup is based on the last filled backup, the concept of incremental
+levels is removed.
 
 =item *
 
-Example: let's assume backup #4 is the most recent, and therefore filled,
-and backups #0..3 are not filled.
+Example: let's assume backup #4 is the most recent, and therefore filled, and
+backups #0..3 are not filled.
 
 Backups #0..3 store just the necessary reverse changes needed to
 reconstruct those backups, relative to the next backup.
@@ -223,64 +222,99 @@ reconstruct those backups, relative to the next backup.
    - To view/restore backup #2, backup #4 (the filled one), is merged with the deltas in #3 and #2
    - etc.
 
-When a new backup is started (#5), we begin by renaming backup
-#4 to #5.  At that instant, backup #4 storage is now empty (which
-means backups #4 and #5 are currently identical).  As the backup
-runs, changes are made to #5 with the changed/new files in place,
-and the opposite changes are added to backup #4, to keep the "view"
-of backup #4 unchanged.
+When a new backup is started (#5), we begin by renaming backup #4 to #5.
+At that instant, backup #4 storage is now empty (which means backups #4
+and #5 are currently identical).  As the backup runs, changes are made
+to #5 with the changed/new files in place, and the opposite changes are
+added to backup #4, to keep the "view" of backup #4 unchanged.
 
-After the backup is done, #5 is now the filled version of the
-latest backup, and #4 are the changes necessary to turn #5 
-back into the state when backup #4 was done.  If there are no
-changes detected in the new backup, the storage tree for #4 will
-be empty.  If just one file changed, the new file will be below
-#5, and the prior file will be below #4 (well, technically not
-quite true, since files aren't stored below the backup trees;
-more correctly, the attrib file in #5 will point to the new pool
+After the backup is done, #5 is now the filled version of the latest
+backup, and #4 contains the changes necessary to turn #5 back into the state
+when backup #4 was done.  If there are no changes detected in the new
+backup, the storage tree for #4 will be empty.  If just one file changed,
+the new file will be below #5, and the prior file will be below #4 (well,
+technically not quite true, since files aren't stored below the backup
+trees; more correctly, the attrib file in #5 will point to the new pool
 file, and the attrib file in #4 will point to the old pool file).
 
 =item *
 
 The concepts of incr/full backups and unfilled/filled storage are now
-decoupled.  The most recent backups is always filled (whether or not
-the last backup was a full or incr).  Certain older backups
-can be filled for convenience to make restoring old backups
-faster (because fewer backups need to be merged), and are used
-to specify expiry schedules.
+decoupled.  The most recent backup is always filled (whether or not the
+last backup was a full or incr).  Certain older backups can be filled
+for convenience to make restoring old backups faster (because fewer
+backups need to be merged), and are used to specify expiry schedules.
 
 =item *
 
-The treatment of a "Partial" backup has changed.  To understand this,
-let's assume that when the backup starts, the last backup #n is renumbered
-to #n+1, and an empty tree #n is created to hold the reverse deltas.
+When a backup starts, there are several different cases that determine
+how the backups are stored and whether prior deltas are stored:
 
-If the backup fails, if no files have been backed up, the emtpy backup
-#n is removed.
+=over 4
 
-If some files were backed up, the last backup is marked "partial".
-When the next backup starts, as usual the new backup is numbered #n+2
-and an empty delta is created at #n+1.  Once the backup finishes
-(whether successfully or not), backup #n+1 is deleted, which means
-the two sets of deltas in #n and #n+1 are merged into #n.
+=item 1
+
+No existing backups: create a new backup #0 and do a full backup in place
+(ie: no prior deltas are stored).
+
+=item 2
+
+V3 backups exist, but no V4 backups.  The last V3 backup is duplicated into
+V4 format, and a full backup is done in place (ie: no prior deltas are stored).
+
+=item 3
+
+Last V4 backup is a full, or more than $Conf{FillCycle} since last filled
+backup.  The last backup is duplicated to create a new filled backup, and
+the new backup is done in place (ie: no prior deltas are stored).
+
+=item 4
+
+There are V4 backups and it's less than $Conf{FillCycle} since last one is
+filled.  Renumber the last backup to #n+1, and put the reverse deltas in
+initially empty backup tree #n.
+
+=item 5
+
+CompressLevel has toggled on/off between backups.  This isn't well tested and
+it's very hard to support efficiently.  We treat this as a brand new (empty) backup
+in place, that is therefore filled.  That way we won't need to merge between
+backups with compress on/off.
+
+=item 6
+
+Last backup was a V4 partial.  If prior V4 backup is filled (and not partial),
+then just do another in-place backup.  Otherwise, treat as case 4.  When complete
+(whether successful or another partial), delete the prior deltas in #n, which
+merges the cumulative changes into #n-1.
+
+=back
+
+=item *
+
+The treatment of a "Partial" backup has changed.  Unlike in V3 where partials are
+removed prior to the next backup, in V4 partials are kept and are used as the starting
+point for the next backup.  See case 6 above.  If the new backup fails, if no files
+have been backed up, the empty backup #n is removed.
 
 =item *
 
 Backups are stored as mangled directory trees, but each directory only
-contains an "attrib" file.  The attrib file comprises a header and
-the MD5 digest of the real attribute file contents in the pool.
+contains an "attrib" file.  The attrib file is zero-length, and its name
+includes the MD5 digest so the contents can be looked up in the pool.
 
-The real attrib file in the pool contains the directory contents: for each,
-file, that means the meta data, xattrs and the MD5 digest of the file
+The attrib contents in the pool contains the directory contents: for each
+file, that means the metadata, xattrs and the MD5 digest of the file
 contents.
 
 =item *
 
-A modified rsync 3.0.9, called rsync_bpc, is used on the server side, with a
-C code layer that emulates all the file-system OS calls to be compatible with
-the BackupPC store.  That means for rsync, the data path is now fully in
-complied C, which should mean a significant speedup.  It also means many
-(but not all) of the rsync options are supported natively.
+A modified rsync called rsync_bpc, based on rsync 3.0.9, is used on
+the server side, with a C code layer that emulates all the file-system
+OS calls to be compatible with the BackupPC store.  That means for
+rsync, the data path is now fully in compiled C, which should mean a
+significant speedup.  It also means many (but not all) of the rsync
+options are supported natively.
 
 =item *
 
@@ -296,8 +330,9 @@ meaning both acls and xattrs are supported.
 
 =item *
 
-infinite incrementals with rsync are supported.  The most recent backup is always
-filled, so an incremental will still leave the most recent backup filled.
+infinite incrementals with rsync are supported.  The most recent backup
+is always filled, so an incremental will still leave the most recent
+backup filled.
 
 =item *
 
@@ -307,9 +342,9 @@ if it isn't already filled.
 =item *
 
 file digests are full-file MD5.  Collisions are much more unlikely than V3,
-but still possibles.  Duplicates are implemented with an extension to the
+but still possible.  Duplicates are implemented with an extension to the
 16 byte MD5 digest (ie: 16 bytes for plain file, 17 bytes for next
-256 duplicates etc).
+255 duplicates etc).
 
 =item *
 
@@ -334,13 +369,14 @@ zero-sized files or empty attribute files don't get written or pooled.
 =item *
 
 the elimination of hardlinks means that reference counting has to be maintained by
-all the BackupPC code.  This is one of the riskiest area in terms of development
-and testing.  Reference counts are maintained per-host, and for the whole pool.
+the BackupPC code.  This is one of the riskiest area in terms of development
+and testing.  Reference counts are maintained per-backup, per-host, and for the
+whole pool.
 
 Each operation that changes reference counts (eg: doing a new backup, deleting
 a backup, or duplicating (filling) a backup) creates one or more poolRefDelta
-files in the client's backup directory (ie: TopDir/pc/HOST).  These files are
-lists of MD5 digests, and corresponding counts deltas.
+files in that client's backup directory (ie: TopDir/pc/HOST/NNN).  These files
+are lists of MD5 digests, and corresponding counts deltas.
 
 Each night, BackupPC_nightly runs BackupPC_refCountUpdate, which, for each
 host, updates the per-host reference count database with the new deltas.
@@ -365,12 +401,13 @@ BackupPC_fsck cannot run when BackupPC is.
 
 =item *
 
-BackupPC_refCountUpdate removes pool files that have a reference count
-of zero.  To avoid race conditions, it uses a two-phase process.  It
-first flags files that have zero reference counts.  The next time
-it runs (typically 24 hours later), any flagged files that still
-have zero reference count are then removed.  The rest of the code
-knows not to use flagged pool files to avoid race conditions.
+When BackupPC_refCountUpdate updates the overall reference counts, it
+removes pool files that have a reference count of zero.  To avoid race
+conditions, it uses a two-phase process.  It first flags files that have
+zero reference counts using one of the file attributes.  The next time
+it runs (typically 24 hours later), any flagged files that still have
+zero reference count are then removed.  The rest of the code knows not
+to use flagged pool files to avoid race conditions.
 
 =item *
 
@@ -389,10 +426,10 @@ BackupPC_link is removed since it is no longer used.
 
 Since files are no longer stored in backup trees, browsing the backup
 trees is even harder than V3 (where you just had to deal with mangling).
-A new utility BackupPC_ls acts like "ls -l", showing accurate
-directory listings of files, together with the MD5 digests.
+A new utility BackupPC_ls acts like "ls -l", showing accurate directory
+listings of files, together with the MD5 digests.
 
-BackupPC_ls can be given either an explicit host name, number,
+BackupPC_ls can be given either an explicit hostname, number,
 and unmangled path, or can be given the full (mangled) path,
 which makes it easier to use directory completion.  It should
 be possible to configure tcsh and bash, together with some new
@@ -406,12 +443,12 @@ that should be easy to rectify.
 
 =item *
 
-Configuration for expiry: since full/incr are decoupled from
-filled/unfilled, expiry is a bit trickier.
+Configuration for expiry: since full/incr are decoupled from filled/unfilled,
+expiry is a bit trickier.
 
 The convention for expiry parameters is "FullKeepPeriod/FullKeepCnt"
-etc refer to *Filled* backups, and "IncrKeepPeriod/IncrKeepCnt" refer
-to "Unfilled" backups.
+etc refer to B<Filled> backups, and "IncrKeepPeriod/IncrKeepCnt" refer
+to B<Unfilled> backups.
 
 =item *
 
@@ -431,7 +468,7 @@ you should be sure to check that.
 =item *
 
 When a V4 backups is first done, BackupPC_backupDuplicate is
-run to duplicate that most recent V3 backup into a new V4 backup.
+run to duplicate the most recent V3 backup to create a new V4 backup.
 A "filled" view of the most recent V3 backup is used to create
 a "filled" V4 backup tree.
 
@@ -497,17 +534,6 @@ BackupPC_backupDelete are all single-threaded.
 
 =back
 
-=item *
-
-Some clever future work: the concepts of full/incr rsync can be completely
-blurred.  For example, you can now do 100% incrementals.  Also, the
-rsync whole-file MD5 digest matches the V4 digest, so a full backup
-could actually just check the whole-file MD5 digest.  Alternatively,
-a "hybrid" could be to make --ignore-times random per file, based
-on a certain percentage.  Eg: --ignore-times is on for 10% of the
-files.  So every backup we fully check 10% of the files randomly,
-and the other 90% are just based on comparing the meta data.
-
 =back
 
 =head2 Backup basics
@@ -516,28 +542,28 @@ and the other 90% are just based on comparing the meta data.
 
 =item Full Backup
 
-A full backup is a complete backup of a share. BackupPC can be
-configured to do a full backup at a regular interval (typically
-weekly).  BackupPC can be configured to keep a certain number
-of full backups.  Exponential expiry is also supported, allowing
-full backups with various vintages to be kept (for example, a
-settable number of most recent weekly fulls, plus a settable
-number of older fulls that are 2, 4, 8, or 16 weeks apart).
+A full backup is a complete backup of a share. BackupPC can be configured
+to do a full backup at a regular interval (typically weekly).  BackupPC
+can be configured to keep a certain number of full backups.  Exponential
+expiry is also supported, allowing full backups with various vintages to
+be kept (for example, a settable number of most recent weekly fulls, plus
+a settable number of older fulls that are 2, 4, 8, or 16 weeks apart).
 
 =item Incremental Backup
 
-An incremental backup is a backup of files that have changed
-since the last successful backup.
+An incremental backup is a backup of files that have changed since the
+last successful backup.
+
+Rsync is the best option for BackupPC.  Any files whose attributes
+have changed (ie: uid, gid, mtime, modes, size) since the last full
+are backed up.  Deleted, new files and renamed files are detected by
+rsync incrementals.
 
 For SMB and tar, BackupPC uses the modification time (mtime) to
 determine which files have changed since the last backup.  That
 means SMB and tar incrementals are not able to detect deleted files,
 renamed files or new files whose modification time is prior to the
 last lower-level backup.
-
-Rsync is more clever: any files whose attributes have changed (ie: uid,
-gid, mtime, modes, size) since the last full are backed up.  Deleted,
-new files and renamed files are detected by Rsync incrementals.
 
 BackupPC can also be configured to keep a certain number of incremental
 backups, and to keep a smaller number of very old incremental backups.
@@ -554,10 +580,11 @@ When a full or incremental backup fails or is canceled, the most
 recent backup is labeled "partial".  Prior to V4, that backup was
 incomplete, and would be deleted when the next backup completed.
 
-In V4 a partial backup still denotes that the last backup is incomplete.
-However, since V4 does backup updating inplace, it represents the best
+In V4 a partial backup denotes that the last backup is incomplete.
+However, since V4 does backup updating in place, it represents the best
 and latest backup.  A partial backup can be browsed or used to restore
-files just like a successful full or incremental backup.
+files just like a successful full or incremental backup.  And it will
+be used as the starting point for the next backup attempt.
 
 =item Identical Files
 
@@ -566,7 +593,7 @@ with identical contents, not necessary the same permissions, ownership
 or modification time.  Two files might have different permissions,
 ownership, or modification time but will still be pooled whenever
 the contents are identical.  This is possible since BackupPC stores
-the file meta-data (permissions, ownership, and modification time)
+the file metadata (permissions, ownership, and modification time)
 separately from the file contents.
 
 Prior to V4, identical files were stored using hardlinks.  In V4+,
@@ -583,7 +610,7 @@ full support for special file types, extended attributes etc,
 likely means an exact image of a linux/unix file system can be made.
 
 BackupPC saves backups onto disk. Because of pooling you can relatively
-economically keep several weeks of old backups.
+economically keep several weeks or months of old backups.
 
 At some sites the disk-based backup will be adequate, without a
 secondary offsite cloud, disk or tape backup. This system is robust
@@ -616,33 +643,34 @@ is much easier, allowing remote copying of the pool.
 
 =item BackupPC home page
 
-The BackupPC Open Source project is hosted on SourceForge.  The
-home page can be found at:
+The BackupPC project page is at:
 
     http://backuppc.sourceforge.net
 
-This page has links to the current documentation, the SourceForge
-project page and general information.
+This page has links to the current documentation, github and general information.
 
-=item SourceForge project
+=item Github
 
-The SourceForge project page is at:
+BackupPC development is hosted on github:
 
-    http://sourceforge.net/projects/backuppc
+    https://github.com/backuppc
 
-This page has links to the current releases of BackupPC.
+Releases for BackupPC and the required packages BackupPC-XS and rsync-bpc are
+available at:
+
+    https://github.com/backuppc/backuppc/releases
+    https://github.com/backuppc/backuppc-xs/releases
+    https://github.com/backuppc/rsync-bpc/releases
+
+or on SourceForge:
+
+    https://sourceforge.net/projects/backuppc/files
 
 =item BackupPC Wiki
 
-BackupPC has a Wiki at L<http://backuppc.wiki.sourceforge.net>.
-Everyone is encouraged to contribute to the Wiki.  Anyone with
-a SourceForge account can edit the Wiki.
-
-The old FAQ is at L<http://backuppc.sourceforge.net/faq>, but
-is deprecated in favor of the Wiki.
-
-As of 2013, the Wiki is quite disorganized, and SourceForge has moved
-away from MediaWiki.  Volunteers to clean it up would be much appreciated!
+BackupPC has a Wiki at L<https://github.com/backuppc/backuppc/wiki>.
+Everyone is encouraged to contribute to the Wiki.  Anyone with a
+Github account can edit the Wiki.
 
 =item Mailing lists
 
@@ -650,12 +678,9 @@ Three BackupPC mailing lists exist for announcements (backuppc-announce),
 developers (backuppc-devel), and a general user list for support, asking
 questions or any other topic relevant to BackupPC (backuppc-users).
 
-The lists are archived on SourceForge and Gmane.  The SourceForge lists
-are not always up to date and the searching is limited, so Gmane is
-a good alternative.  See:
+The lists are archived on SourceForge:
 
-    http://news.gmane.org/index.php?prefix=gmane.comp.sysutils.backup.backuppc
-    http://sourceforge.net/mailarchive/forum.php?forum=backuppc-users
+    https://sourceforge.net/p/backuppc/mailman/backuppc-users/
 
 You can subscribe to these lists by visiting:
 
@@ -693,16 +718,13 @@ and Bacula (L<http://www.bacula.org>).
 These packages can be used as complete solutions, or also as back
 ends to BackupPC to backup the BackupPC server data to tape.
 
+Avery Pennarun's bup (L<https://github.com/bup/bup>) uses the git packfile format to
+do efficient incrementals and deduplication.
 Various programs and scripts use rsync to provide hardlinked backups.
 See, for example, Mike Rubel's site (L<http://www.mikerubel.org/computers/rsync_snapshots>),
 JW Schultz's dirvish (L<http://www.dirvish.org/>),
 Ben Escoto's rdiff-backup (L<http://www.nongnu.org/rdiff-backup>),
 and John Bowman's rlbackup (L<http://www.math.ualberta.ca/imaging/rlbackup>).
-
-Unison is a utility that can do two-way, interactive, synchronization.
-See L<http://freshmeat.net/projects/unison>.  An external wrapper around
-rsync that maintains transfer data to enable two-way synchronization is
-drsync; see L<http://freshmeat.net/projects/drsync>.
 
 BackupPC provides many additional features, such as compressed storage,
 deduplicating any matching files (rather than just files with the same name),
@@ -729,14 +751,6 @@ main compensation for continuing to work on BackupPC is knowing that
 more and more people find it useful.  So feedback is certainly
 appreciated, both positive and negative.
 
-Beyond being a satisfied user and telling other people about it, everyone
-is encouraged to add links to L<http://backuppc.sourceforge.net>
-(I'll see them via Google) or otherwise publicize BackupPC.  Unlike
-the commercial products in this space, I have a zero budget (in both
-time and money) for marketing, PR and advertising, so it's up to
-all of you!  Feel free to vote for BackupPC at
-L<http://freshmeat.net/projects/backuppc>.
-
 Also, everyone is encouraged to contribute patches, bug reports,
 feature and design suggestions, new code, Wiki additions (you can
 do those directly) and documentation corrections or improvements.
@@ -758,26 +772,8 @@ performance on this server will determine how many simultaneous backups
 you can run. You should be able to run 4-8 simultaneous backups on a
 moderately configured server.
 
-Several users have reported significantly better performance using
-reiserfs compared to ext3 for the BackupPC data file system.  It is
-also recommended you consider either an LVM or RAID setup (either
-in HW or SW; eg: 3Ware RAID10 or RAID5) so that you can expand the
-file system as necessary.
-
-When BackupPC starts with an empty pool, all the backup data will be
-written to the pool on disk. After more backups are done, a higher
-percentage of incoming files will already be in the pool. BackupPC is
-able to avoid writing to disk new files that are already in the pool.
-So over time disk writes will reduce significantly (by perhaps a factor
-of 20 or more), since eventually 95% or more of incoming backup files
-are typically in the pool. Disk reads from the pool are still needed to
-do file compares to verify files are an exact match. So, with a mature
-pool, if a relatively fast client generates data at say 1MB/sec, and you
-run 4 simultaneous backups, there will be an average server disk load of
-about 4MB/sec reads and 0.2MB/sec writes (assuming 95% of the incoming
-files are in the pool). These rates will be perhaps 40% lower if
-compression is on.  (Note: these numbers are circa 2002.  With V4 and
-modern hardware you should get much faster transfer rates.)
+It is also recommended you consider either an LVM or RAID setup so that
+you can expand the file system as necessary.
 
 =item *
 
@@ -786,23 +782,32 @@ see L<http://www.cpan.org>.
 
 =item *
 
-The perl modules BackupPC::XS and File::Listing are required, and several others, 
-Archive::Zip, XML::RSS, Net::FTP, Net::FTP::RetrHandle,
-Net::FTP::AutoReconnect are recommended.
+The perl modules BackupPC::XS (version >= 0.50) is required, and
+several others, File::Listing, Archive::Zip, XML::RSS, Net::FTP,
+Net::FTP::RetrHandle, Net::FTP::AutoReconnect are recommended.
 
 Try "perldoc BackupPC::XS" and "perldoc Archive::Zip" to see if you have these
 modules.  If not, fetch them from L<http://www.cpan.org> and see the
 instructions below for how to build and install them.
 
-The CGI Perl module is required for the http/cgi user interface. CGI was a core
-module, but from version 5.22 Perl no longer ships with it.
+The CGI Perl module is required for the http/cgi user interface. CGI was a core module,
+but from version 5.22 Perl no longer ships with it.
+
+=item *
+
+If you are using rsync to backup linux/unix machines you should have
+rsync on each client machine.  Version 3+ is strongly recommended, but
+earlier versions will work too. See L<http://rsync.samba.org>.
+Use "rsync --version" to check your version.
+
+For BackupPC to use Rsync you will also need to install rsync-bpc on 
+the server.
 
 =item *
 
 If you are using smb to backup WinXX machines you need smbclient and
 nmblookup from the samba package.  You will also need nmblookup if
 you are backing up linux/unix DHCP machines.  See L<http://www.samba.org>.
-Samba versions 3.x are stable and now recommended instead of 2.x.
 
 See L<http://www.samba.org> for source and binaries.  It's pretty easy to
 fetch and compile samba, and just grab smbclient and nmblookup, without
@@ -812,19 +817,9 @@ distributions for most platforms.
 =item *
 
 If you are using tar to backup linux/unix machines, those machines should have
-version 1.13.7 at a minimum, with version 1.13.20 or higher recommended.  Use
-"tar --version" to check your version.  Various GNU mirrors have the newest
-versions of tar; see L<http://www.gnu.org/software/tar/>.
-
-=item *
-
-If you are using rsync to backup linux/unix machines you should have
-rsync on each client machine.  Version 3+ is strongly recommended, but
-earlier versions will work too. See L<http://rsync.samba.org>.
-Use "rsync --version" to check your version.
-
-For BackupPC to use Rsync you will also need to install rsync_bpc on 
-the server.
+version 1.13.20 or higher recommended.  Use "tar --version" to check your version.
+Various GNU mirrors have the newest versions of tar;
+see L<http://www.gnu.org/software/tar/>.
 
 =item *
 
@@ -834,32 +829,35 @@ with mod_perl support.
 =item *
 
 If rrdtool is installed on the BackupPC server, graphs of the pool usage
-will be mainted and displayed.  To enable the graphs, point $Conf{RrdToolPath}
+will be maintained and displayed.  To enable the graphs, point $Conf{RrdToolPath}
 to the rrdtool executable.
 
 =back
 
 =head2 What type of storage space do I need?
 
-BackupPC uses hardlinks to pool files common to different backups.
-Therefore BackupPC's data store (__TOPDIR__) must point to a single
-file system that supports hardlinks.  You cannot split this file
-system with multiple mount points or using symbolic links to point a
-sub-directory to a different file system (it is ok to use a single
-symbolic link at the top-level directory (__TOPDIR__) to point the
-entire data store somewhere else).  You can of course use any kind of
-RAID system or logical volume manager that combines the capacity of
-multiple disks into a single, larger, file system. Such approaches
-have the advantage that the file system can be expanded without having
-to copy it.
+Starting with 4.0.0, BackupPC no longer uses hardlinks for storage of
+deduplicated files.  However, hardlinks are still used temporarily in
+a few places for doing atomic renames, with a fallback doing a file copy
+if the hardlink fails, and files are moved (renamed) across various paths
+that turn into expensive file copies if they span multiple file systems.
+
+So ideally BackupPC's data store (__TOPDIR__) is a single file system that
+supports hardlinks.  It is ok to use a single symbolic link at the top-level
+directory (__TOPDIR__) to point the entire data store somewhere else).
+You can of course use any kind of RAID system or logical volume manager
+that combines the capacity of multiple disks into a single, larger,
+file system. Such approaches have the advantage that the file system can
+be expanded without having to copy it.
 
 Any standard linux or unix file system supports hardlinks.  NFS mounted
 file systems work too (provided the underlying file system supports
 hardlinks).  But windows based FAT and NTFS file systems will not work.
 
-Starting with BackupPC 3.1.0, run-time checks are done at startup and
-at the start of each backup to ensure that the file system can support
-hardlinks, since this is a common area of configuration problems.
+In BackupPC 3.x, hardlinks are fundamental to deduplication, so a startup
+check is done ensure that the file system can support hardlinks, since
+this is a common area of configuration problems in v3.  In 4.x, that check
+is only done if the pool still contains v3 backups and pool files.
 
 =head2 How much disk space do I need?
 
@@ -887,23 +885,6 @@ Your actual mileage will depend upon the types of clients, operating
 systems and applications you have. The more uniform the clients and
 applications the bigger the benefit from pooling common files.
 
-For example, the Eudora email tool stores each mail folder in a separate
-file, and attachments are extracted as separate files. So in the sadly
-common case of a large attachment emailed to many recipients, Eudora
-will extract the attachment into a new file. When these machines are
-backed up, only one copy of the file will be stored on the server, even
-though the file appears in many different full or incremental backups. In
-this sense Eudora is a "friendly" application from the point of view of
-backup storage requirements.
-
-An example at the other end of the spectrum is Outlook. Everything
-(email bodies, attachments, calendar, contact lists) is stored in a
-single file, which often becomes huge. Any change to this file requires
-a separate copy of the file to be saved during backup. Outlook is even
-more troublesome, since it keeps this file locked all the time, so it
-cannot be read by smbclient whenever Outlook is running.  See the
-L<Some Limitations> section for more discussion of this problem.
-
 In addition to total disk space, you should make sure you have
 plenty of inodes on your BackupPC data partition. Some users have
 reported running out of inodes on their BackupPC data partition.
@@ -915,23 +896,30 @@ inode usage.
 
 =head2 Step 1: Getting BackupPC
 
-Some linux distributions now include BackupPC.  The Debian
-distribution, supported by Ludovic Drolez, can be found at
-L<http://packages.debian.org/backuppc> and is included
-in the current stable Debian release.  On Debian, BackupPC can
-be installed with the command:
+Many linux distributions now include BackupPC, so installing
+BackupPC via your package manager is the best approach.
+
+For example, for Debian, supported by Ludovic Drolez, can be found at
+L<http://packages.debian.org/backuppc> and is included in the current
+stable Debian release.  On Debian, BackupPC can be installed with
+the command:
 
     apt-get install backuppc
 
-In the future there might be packages for Gentoo and other
-linux flavors.  If the packaged version is older than the
-released version then you may want to install the
-latest version as described below.
+You should also install rsync-bpc; the BackupPC package might include
+it already, but if not:
 
-Otherwise, manually fetching and installing BackupPC is easy.
+    apt-get install rsync-bpc
+
+If those commands work, you can skip to Step 3.
+
+Alternatively, manually fetching and installing BackupPC is easy.
 Start by downloading the latest version from
-L<http://backuppc.sourceforge.net>.  Hit the "Code" button,
-then select the "backuppc" or "backuppc-beta" package and
+
+    https://github.com/backuppc/backuppc/releases
+
+You can also download the distribution from L<http://backuppc.sourceforge.net>.
+Hit the "Code" button, then select the "backuppc" or "backuppc-beta" package and
 download the latest version.
 
 =head2 Step 2: Installing the distribution
@@ -943,16 +931,22 @@ any needed dependencies.
 
 First off, there are several perl modules you should install.  The
 first one, BackupPC::XS, is required.  The others are optional
-but highly recommended:
+but highly recommended.  Use either your linux package manager,
+or the cpan command, or follow the instructions in the README files
+to install these packages:
 
 =over 4
 
 =item BackupPC::XS
 
-Significant portions of BackupPC are implemented in C code contained
-in this module.  You can run "perldoc BackupPC::XS" to see if this module
-is installed.
-BackupPC::XS is available from L<http://backuppc.sourceforge.net> and CPAN.
+Significant portions of BackupPC are implemented in C code contained in
+this module.  You can run "perldoc BackupPC::XS" to see if this module
+is installed.  You need to have version >= 0.50.  BackupPC::XS is
+available from:
+
+    https://github.com/backuppc/backuppc-xs/releases
+
+and also CPAN and L<http://backuppc.sourceforge.net>.
 
 =item Archive::Zip
 
@@ -967,6 +961,12 @@ L<http://www.cpan.org>.  There is not need to install this module if you
 don't plan on using RSS. You can run "perldoc XML::RSS" to see if this
 module is installed.
 
+=item CGI
+
+The CGI Perl module is required for the http/cgi user interface. CGI was a core module,
+but from version 5.22 Perl no longer ships with it so you'll need to install it if you
+are using a recent version of perl.
+
 =item File::Listing, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect
 
 To use ftp with BackupPC you will need four libraries, but actually
@@ -977,12 +977,16 @@ Net::FTP::AutoReconnect included in BackupPC distribution.
 
 =back
 
-To build and install these packages you should use the cpan program.
-Alternatively, you can fetch the tar.gz file from L<http://www.cpan.org>
-and then run these commands:
+To build and install these packages you should use the cpan command.  At
+the prompt, type
 
-    tar zxvf Archive-Zip-1.26.tar.gz
-    cd Archive-Zip-1.26
+    install BackupPC::XS
+
+Alternatively, if you want to install these manually, you can fetch the tarball
+from L<http://www.cpan.org> and then run these commands:
+
+    tar zxvf BackupPC-XS-0.50.tar.gz
+    cd BackupPC-XS-0.50
     perl Makefile.PL
     make
     make test
@@ -990,34 +994,26 @@ and then run these commands:
 
 The same sequence of commands can be used for each module.
 
-Now let's move onto BackupPC itself.  After fetching
-BackupPC-__VERSION__.tar.gz, run these commands as root:
+Next, you should install rsync_bpc if you want to use rsync to backup clients
+(which is the recommended approach for all client types).  If you don't use
+your package manager, fetch the release from:
+
+    https://github.com/backuppc/rsync-bpc/releases
+
+Then run these commands (updating the version number as appropriate):
+
+    tar zxf rsync-bpc-3.0.9.5.tar.gz
+    cd rsync-bpc-3.0.9.5
+    ./configure
+    make
+    make install
+
+Now let's move onto BackupPC itself.  After fetching BackupPC-__VERSION__.tar.gz,
+run these commands as root:
 
     tar zxf BackupPC-__VERSION__.tar.gz
     cd BackupPC-__VERSION__
     perl configure.pl
-
-In the future this release might also have patches available on the
-SourceForge site.  These patch files are text files, with a name of
-the form
-
-    BackupPC-__VERSION__plN.diff
-
-where N is the patch level, eg: pl2 is patch-level 2.  These
-patch files are cumulative: you only need apply the last patch
-file, not all the earlier patch files.  If a patch file is
-available, eg: BackupPC-__VERSION__pl2.diff, you should apply
-the patch after extracting the tar file:
-
-     # fetch BackupPC-__VERSION__.tar.gz
-     # fetch BackupPC-__VERSION__pl2.diff
-     tar zxf BackupPC-__VERSION__.tar.gz
-     cd BackupPC-__VERSION__
-     patch -p0 < ../BackupPC-__VERSION__pl2.diff
-     perl configure.pl
-
-A patch file includes comments that describe that bug fixes
-and changes.  Feel free to review it before you apply the patch.
 
 The configure.pl script also accepts command-line options if you
 wish to run it in a non-interactive manner.  It has self-contained
@@ -1051,7 +1047,7 @@ information.
 
 It is best if BackupPC runs as a special user, eg backuppc, that has
 limited privileges. It is preferred that backuppc belongs to a system
-administrator group so that sys admin members can browse BackupPC files,
+administrator group so that sysadmin members can browse BackupPC files,
 edit the configuration files and so on. Although configurable, the
 default settings leave group read permission on pool files, so make
 sure the BackupPC user's group is chosen restrictively.
@@ -1088,7 +1084,7 @@ You should decide where the BackupPC CGI script resides.  This will
 usually be below Apache's cgi-bin directory.
 
 It is also possible to use a different directory and use Apache's
-``<Directory>'' directive to specifiy that location.  See the Apache
+``<Directory>'' directive to specify that location.  See the Apache
 HTTP Server documentation for additional information.
 
 On this installation, this is __CGIDIR__.
@@ -1152,14 +1148,14 @@ either do a kill -HUP BackupPC_pid or simply wait until the next regular
 wakeup period.
 
 Each line in the hosts file contains three fields, separated
-by white space:
+by whitespace:
 
 =over 4
 
 =item Host name
 
-This is typically the host name or NetBios name of the client machine
-and should be in lower case.  The host name can contain spaces (escape
+This is typically the hostname or NetBios name of the client machine
+and should be in lowercase.  The hostname can contain spaces (escape
 with a backslash), but it is not recommended.
 
 Please read the section L<How BackupPC Finds Hosts>.
@@ -1172,7 +1168,7 @@ But you also want to backup the rest of the machine while the database
 is still running.  In the case you can specify two different clients in
 the host file, using any mnemonic name (eg: myhost_mysql and myhost), and
 use $Conf{ClientNameAlias} in myhost_mysql's config.pl to specify the
-real host name of the machine.
+real hostname of the machine.
 
 =item DHCP flag
 
@@ -1208,7 +1204,7 @@ for this host.  Administrators will still have full permissions.
 
 =item More users
 
-Additional user names, separate by commas and with no white space,
+Additional usernames, separated by commas and with no whitespace,
 can be specified.  These users will also have full permission in
 the CGI interface to stop/start/browse/restore backups for this host.
 These users will not be sent email about this host.
@@ -1258,7 +1254,7 @@ minimal set of cygwin libraries for everything to run.  The README file
 contains instructions for running rsync as a service, so it starts
 automatically everytime you boot your machine.  If you use rsync
 to backup WinXX machines, be sure to set $Conf{ClientCharset}
-correctly (eg: 'cp1252') so that the WinXX file name encoding is
+correctly (eg: 'cp1252') so that the WinXX filename encoding is
 correctly converted to utf8.
 
 Otherwise, to use SMB, you can either create shares for the data you want
@@ -1292,8 +1288,8 @@ $Conf{SmbShareUserName}, $Conf{SmbSharePasswd}, $Conf{SmbClientPath},
 $Conf{SmbClientFullCmd}, $Conf{SmbClientIncrCmd} and
 $Conf{SmbClientRestoreCmd}.
 
-BackupPC needs to know the smb share user name and password for a
-client machine that uses smb.  The user name is specified in
+BackupPC needs to know the smb share username and password for a
+client machine that uses smb.  The username is specified in
 $Conf{SmbShareUserName}. There are four ways to tell BackupPC the
 smb share password:
 
@@ -1331,8 +1327,8 @@ is not world (other) readable.
 
 =back
 
-Placement and protection of the smb share password is a possible
-security risk, so please double-check the file and directory
+Placement and protection of the smb share password is a significant
+security issue, so please double-check the file and directory
 permissions.  In a future version there might be support for
 encryption of this password, but a private key will still have to
 be stored in a protected place.  Suggestions are welcome.
@@ -1343,7 +1339,7 @@ ksmbfs or similar) on your linux/unix server to mount the share,
 and then set $Conf{XferMethod} to "tar" (use tar on the network
 mounted file system).
 
-Also, to make sure that file names with special characters are correctly
+Also, to make sure that filenames with special characters are correctly
 transferred by smbclient you should make sure that the smb.conf file
 has (for samba 3.x):
 
@@ -1351,8 +1347,8 @@ has (for samba 3.x):
 	unix charset = UTF8
 
 UTF8 is the default setting, so if the parameter is missing then it
-is ok.  With this setting $Conf{ClientCharset} should be emtpy,
-since smbclient has already converted the file names to utf8.
+is ok.  With this setting $Conf{ClientCharset} should be empty,
+since smbclient has already converted the filenames to utf8.
 
 =item Linux/Unix
 
@@ -1369,28 +1365,20 @@ symbolic link points to the current or parent directory. If you really
 need to use Samba shares for linux/unix backups you should turn off the
 "follow symlinks" samba config setting. See the smb.conf manual page.)
 
+Important note: many linux systems use sparse files for /var/log/lastlog,
+and have large special files below /proc and /run.  Make sure you
+exclude those directories and files when you configure your client.
+
 The requirements for each Xfer Method are:
 
 =over 4
 
-=item tar
-
-You must have GNU tar on the client machine.  Use "tar --version"
-or "gtar --version" to verify.  The version should be at least
-1.13.7, and 1.13.20 or greater is recommended.  Tar is run on
-the client machine via rsh or ssh.
-
-The relevant configuration settings are $Conf{TarClientPath},
-$Conf{TarShareName}, $Conf{TarClientCmd}, $Conf{TarFullArgs},
-$Conf{TarIncrArgs}, and $Conf{TarClientRestoreCmd}.
-
 =item rsync
 
-To use rsync, you need rsync_bpc installed on the BackupPC server.
+To use rsync, you need rsync-bpc installed on the BackupPC server.
 
-On the client, you should have at least rsync 2.6.3, and the latest
-version 3+ is strongly recommended.  Rsync is run on the remote client
-via ssh.
+On the client, you should have at least rsync 3.x.  Rsync is run on
+the remote client via ssh.
 
 The relevant configuration settings are $Conf{RsyncClientPath},
 $Conf{RsyncSshArgs}, $Conf{RsyncShareName}, $Conf{RsyncArgs},
@@ -1398,11 +1386,11 @@ $Conf{RsyncArgsExtra}, $Conf{RsyncFullArgsExtra}, and $Conf{RsyncRestoreArgs}.
 
 =item rsyncd
 
-To use rsync, you need rsync_bpc installed on the BackupPC server.
+To use rsync, you need rsync-bpc installed on the BackupPC server.
 
-On the client, you should have at least rsync 2.6.3, and the latest version
-is recommended.  In this case the rsync daemon should be running on
-the client machine and BackupPC connects directly to it.
+On the client, you should have at least rsync 3.x. In this case the
+rsync daemon should be running on the client machine and BackupPC
+connects directly to it.
 
 The relevant configuration settings are $Conf{RsyncBackupPCPath},
 $Conf{RsyncdClientPort}, $Conf{RsyncdUserName}, $Conf{RsyncdPasswd},
@@ -1415,9 +1403,21 @@ Be aware that rsyncd will remove the leading '/' from path names in
 symbolic links if you specify "use chroot = no" in the rsynd.conf file.
 See the rsyncd.conf manual page for more information.
 
+=item tar
+
+You must have GNU tar on the client machine.  Use "tar --version"
+or "gtar --version" to verify.  The version should be at least
+1.13.20.  Tar is run on the client machine via rsh or ssh.
+
+The relevant configuration settings are $Conf{TarClientPath},
+$Conf{TarShareName}, $Conf{TarClientCmd}, $Conf{TarFullArgs},
+$Conf{TarIncrArgs}, and $Conf{TarClientRestoreCmd}.
+
 =item ftp
 
-FTP Xfer Method is not yet supported in V4.
+FTP Xfer Method is supported in V4 but not recommended since it only
+handles minimal metadata, it doesn't support hardlinks or special
+files, and can only restore regular files (not symbolic links etc).
 
 You need to be running an ftp server on the client machine.
 The relevant configuration settings are $Conf{FtpShareName},
@@ -1427,7 +1427,7 @@ $Conf{FtpPort}, $Conf{FtpTimeout}, and $Conf{FtpFollowSymlinks}.
 =back
 
 You need to set $Conf{ClientCharset} to the client's charset so that
-file names are correctly converted to utf8.  Use "locale charmap"
+filenames are correctly converted to utf8.  Use "locale charmap"
 on the client to see its charset.  Note, however, that modern versions
 of smbclient and rsync handle this conversion automatically, so in
 most cases you won't need to set $Conf{ClientCharset}.
@@ -1436,10 +1436,12 @@ For linux/unix machines you should not backup "/proc".  This directory
 contains a variety of files that look like regular files but they are
 special files that don't need to be backed up (eg: /proc/kcore is a
 regular file that contains physical memory).  See $Conf{BackupFilesExclude}.
-It is safe to back up /dev since it contains mostly character-special
+It is safe to backup /dev since it contains mostly character-special
 and block-special files, which are correctly handed by BackupPC
 (eg: backing up /dev/hda5 just saves the block-special file information,
-not the contents of the disk).
+not the contents of the disk).  Similarly, on many linux systems,
+/var/log/lastlog is a sparse file, with a very large apparent size,
+so you should exclude that too.
 
 Alternatively, rather than backup all the file systems as a single
 share ("/"), it is easier to restore a single file system if you backup
@@ -1449,19 +1451,13 @@ mount point in $Conf{TarShareName} or $Conf{RsyncShareName}, and add the
 In this case there is no need to exclude /proc explicitly since it looks
 like a different file system.
 
-Next you should decide whether to run tar over ssh or nfs. Ssh is
-the preferred method. Rsh is not secure and not recommended.
-Nfs will work, but you need to make sure that the BackupPC user (running
-on the server) has sufficient permissions to read all the files below
-the nfs mount.
-
 Ssh allows BackupPC to run as a privileged user on the client (eg:
 root), since it needs sufficient permissions to read all the backup
 files.  Ssh is setup so that BackupPC on the server (an otherwise low
 privileged user) can ssh as root on the client, without being prompted
 for a password.  However, directly enabled ssh root logins is not
 good practice.  A better approach is the ssh as a regular user, and
-then configure sudo to allow just rsync to be exectued.
+then configure sudo to allow just rsync to be executed.
 
 There are two common versions of ssh: v1 and v2. Here are some
 instructions for one way to setup ssh.  (Check which version of SSH
@@ -1488,27 +1484,27 @@ is no encryption of network data.  If you want encryption of
 network data you can use ssh to create a tunnel, or use a
 program like stunnel.
 
-Setup instructions for ssh can be found at
-L<http://backuppc.sourceforge.net/faq/ssh.html> or on the Wiki.
+Setup instructions for ssh can be found on the
+Wiki at L<https://github.com/backuppc/backuppc/wiki>
 
 =item Clients that use DHCP
 
 If a client machine uses DHCP BackupPC needs some way to find the
-IP address given the host name.  One alternative is to set dhcp
+IP address given the hostname.  One alternative is to set dhcp
 to 1 in the hosts file, and BackupPC will search a pool of IP
 addresses looking for hosts.  More efficiently, it is better to
 set dhcp = 0 and provide a mechanism for BackupPC to find the
-IP address given the host name.
+IP address given the hostname.
 
 For WinXX machines BackupPC uses the NetBios name server to determine
-the IP address given the host name.
+the IP address given the hostname.
 For unix machines you can run nmbd (the NetBios name server) from
 the Samba distribution so that the machine responds to a NetBios
 name request. See the manual page and Samba documentation for more
 information.
 
 Alternatively, you can set $Conf{NmbLookupFindHostCmd} to any command
-that returns the IP address given the host name.
+that returns the IP address given the hostname.
 
 Please read the section L<How BackupPC Finds Hosts>
 for more details.
@@ -1561,7 +1557,7 @@ the -l option.
 
 You can request status information and start and stop backups using this
 interface. This socket interface is mainly provided for the CGI interface
-(and some of the BackupPC sub-programs use it too).  But right now we just
+(and some of the BackupPC subprograms use it too).  But right now we just
 want to make sure BackupPC is happy.  Each of these commands should
 produce some status output:
 
@@ -1637,7 +1633,7 @@ data directories.
 =item standard
 
 The standard mode, which is significantly slower than SCGI or
-mod_perl, is where Apache runs BackupPC_Admin as a seperate process
+mod_perl, is where Apache runs BackupPC_Admin as a separate process
 for every request.  This adds significant startup overhead for every
 request, and also requires that BackupPC_Admin be run as setuid to
 the BackupPC user (__BACKUPPCUSER__), if Apache isn't being run as
@@ -1685,7 +1681,7 @@ Important security warning!!  The SCGIServerPort must not be
 accessible by anyone untrusted.  That means you can't allow
 untrusted users access to the BackupPC server, and you should
 block the SCGIServerPort TCP port on the BackupPC server.  If you
-don't understaand what that means, or can't confirm you have
+don't understand what that means, or can't confirm you have
 configured SCGI securely, then don't enable SCGI - use one of
 the following two methods!!
 
@@ -1816,7 +1812,7 @@ One alternative is to use LDAP.  In Apache's http.conf add these lines:
     AddModule auth_ldap.c
 
     # cgi-bin - auth via LDAP (for BackupPC)
-    <Location /cgi-binBackupPC/BackupPC_Admin>    # <--- change path as needed
+    <Location /cgi-bin/BackupPC/BackupPC_Admin>    # <--- change path as needed
       AuthType Basic
       AuthName "BackupPC login"
       # replace MYDOMAIN, PORT, ORG and CO as needed
@@ -1829,8 +1825,8 @@ $Conf{CgiAdminUsers} to '*', which allows any user to have
 full access to all hosts and backups.  In this case the REMOTE_USER
 environment variable does not have to be set by Apache.
 
-Alternatively, you can force a particular user name by getting Apache
-to set REMOTE_USER, eg, to hardcode the user to www you could add
+Alternatively, you can force a particular username by getting Apache
+to set REMOTE_USER, eg, to hard code the user to www you could add
 this to Apache's httpd.conf:
 
     <Location /cgi-bin/BackupPC/BackupPC_Admin>   # <--- change path as needed
@@ -1980,11 +1976,11 @@ data directory to a new (bigger) file system.  Hopefully you are lucky
 enough to avoid this by having the data directory on a RAID file system
 or LVM that allows the capacity to be grown in place by adding disks.
 
-Backups prior to V4 make use of hardlinks.  So unless you have a virgin
-V4 installation, your file system will contain large numbers of hardlinks.
-This makes it hard to copy.
+Backups prior to V4 make extensive use of hardlinks.  So unless you have
+a virgin V4 installation, your file system will contain large numbers
+of hardlinks.  This makes it hard to copy.
 
-Prior to V4 (or a V4 upgrade to a V3 installation, the backup data
+Prior to V4 (or a V4 upgrade to a V3 installation), the backup data
 directories contain large numbers of hardlinks.  If you try to copy
 the pool the target directory will occupy a lot more space if the
 hardlinks aren't re-established.
@@ -1992,21 +1988,20 @@ hardlinks aren't re-established.
 Unless you have a pure V4 installation, the best way to copy a pool
 file system, if possible, is by copying the raw device at the block
 level (eg: using dd).  Application level programs that understand
-hardlinks include the GNU cp program with the -a option and rsync
--H.  However, the large number of hardlinks in the pool will make
-the memory usage large and the copy very slow.  Don't forget to
-stop BackupPC while the copy runs.
+hardlinks include the GNU cp program with the -a option and rsync -H.
+However, the large number of hardlinks in the pool will make the
+memory usage large and the copy very slow.  Don't forget to stop
+BackupPC while the copy runs.
 
 If you have a pure V4 installation, copying the pool and PC backup
-directories should be quite easy.  Rsync 3.X should work well.
+directories should be quite easy.  Rsync 3.x should work well.
 
 =back
 
 =head2 Fixing installation problems
 
-Please see the Wiki at L<http://backuppc.wiki.sourceforge.net> for
-debugging suggestions.  If you find a solution to your problem that
-could help other users please add it to the Wiki!
+If you find a solution to your problem that could help other users
+please add it to the Wiki at L<https://github.com/backuppc/backuppc/wiki>
 
 =head1 Restore functions
 
@@ -2028,7 +2023,7 @@ the hard work for you.  You simply select the files and directories
 you want from the correct backup vintage in one step.
 
 You can download a single backup file at any time simply by selecting
-it.  Your browser should prompt you with the file name and ask you
+it.  Your browser should prompt you with the filename and ask you
 whether to open the file or save it to disk.
 
 Alternatively, you can select one or more files or directories in
@@ -2048,7 +2043,7 @@ with a screen that has three options:
 With this option the selected files and directories are restored
 directly back onto the host, by default in their original location.
 Any old files with the same name will be overwritten, so use caution.
-You can optionally change the target host name, target share name,
+You can optionally change the target hostname, target share name,
 and target path prefix for the restore, allowing you to restore the
 files to a different location.
 
@@ -2109,15 +2104,15 @@ be used:
 
 =item BackupPC_zcat
 
-For each file name argument it inflates (uncompresses) the file and
+For each filename argument it inflates (uncompresses) the file and
 writes it to stdout.  To use BackupPC_zcat you could give it the
-full file name, eg:
+full filename, eg:
 
     __INSTALLDIR__/bin/BackupPC_zcat __TOPDIR__/pc/host/5/fc/fcraig/fexample.txt > example.txt
 
 It's your responsibility to make sure the file is really compressed:
 BackupPC_zcat doesn't check which backup the requested file is from.
-BackupPC_zcat returns a non-zero status if it fails to uncompress
+BackupPC_zcat returns a nonzero status if it fails to uncompress
 a file.
 
 In V4, BackupPC_zcat can be invoked in several other ways:
@@ -2165,7 +2160,7 @@ The usage is:
        -p pathAdd      new path prefix
        -b BLOCKS       BLOCKS x 512 bytes per record (default 20; same as tar)
        -w writeBufSz   write buffer size (default 1048576 = 1MB)
-       -e charset      charset for encoding file names (default: value of
+       -e charset      charset for encoding filenames (default: value of
                        $Conf{ClientCharset} when backup was done)
        -l              just print a file listing; don't generate an archive
        -L              just print a detailed file listing; don't generate an archive
@@ -2200,7 +2195,7 @@ The usage is:
        -r pathRemove   path prefix that will be replaced with pathAdd
        -p pathAdd      new path prefix
        -c level        compression level (default is 0, no compression)
-       -e charset      charset for encoding file names (default: utf8)
+       -e charset      charset for encoding filenames (default: utf8)
 
 The command-line files and directories are relative to the specified
 shareName.  The zip file is written to stdout. The -h, -n and -s
@@ -2223,12 +2218,12 @@ A new utility BackupPC_ls (like "ls") can be used to view PC backup trees.  It s
 which can be pasted to BackupPC_zipCreate if you want to view the file contents.  The arguments
 are similar to BackupPC_zcat.  The usage is:
 
-    BackupPC_ls [-iR] [-h host] [-n bkupNum] [-s shareName] dirs/files...\n")
+    BackupPC_ls [-iR] [-h host] [-n bkupNum] [-s shareName] dirs/files...
 
 The -i option will show inodes (inode number and number of links).  The -R option recurses into
 directories.
 
-If you don't specify -h, -n and -s, then can use the real file system path instead.
+If you don't specify -h, -n and -s, then you can specify the real file system path instead.
 For example, the following three commands are equivalent:
 
     BackupPC_ls -h HOST -n 10 -s cDrive /home/craig/file
@@ -2240,9 +2235,9 @@ be either mangled or not.  Note that using the mangled form allows directory-nam
 completion via the shell, since those directories actually exist.
 
 It would be great if someone would like to volunteer to add features to BackupPC_ls
-to make file and directory completion work with unmanged names via the shell.  In
+to make file and directory completion work with unmangled names via the shell.  In
 tcsh you can specify a completion program to run - BackupPC_ls could be given special
-arguments to spit out the potential (unmangled) completions.  I'm not sure about bash
+arguments to spit out the potential (unmangled) completions.  I'm not sure how bash
 does this.
 
 =back
@@ -2311,7 +2306,119 @@ the command line (or cron etc).  The usage is:
 
 This creates an archive of the most recent backup of each of
 the specified hosts.  The first two arguments are the archive
-host and the user name making the request.
+host and the username making the request.
+
+=head1 Other Command Line Utilities
+
+These utilities are automatically run by BackupPC when needed.  You don't
+need to manually run these utilities.
+
+=over
+
+=item BackupPC_attribPrint
+
+BackupPC_attribPrint prints the contents of an attrib file.  Usage:
+
+	BackupPC_attribPrint attribPath
+	BackupPC_attribPrint inodePath/inodeNum
+
+=item BackupPC_backupDelete
+
+BackupPC_backupDelete deletes an entire backup, or a directory path within a backup.  Usage:
+
+    BackupPC_backupDelete -h host -n num [-p] [-l] [-r] [-s shareName [dirs...]]
+    Options:
+       -h host         hostname
+       -n num          backup number to delete
+       -s shareName    don't delete the backup; delete just this share
+                       (or only dirs below this share if specified)
+       -p              don't print progress information
+       -l              don't remove XferLOG files
+       -r              do a ref count update (default: none)
+    If a shareName is specified, just that share (or share/dirs) are deleted.
+    The backup itself is not deleted, nor is the log file removed.
+
+=item BackupPC_backupDuplicate
+
+BackupPC_backupDuplicate duplicates the last backup, which is used to create a filled backup
+copy, and also to convert a V3 backup to a new V4 starting point.  Usage:
+
+    BackupPC_backupDuplicate -h host [-p]
+    Options:
+       -h host         hostname
+       -p              don't print progress information
+
+=item BackupPC_fixupBackupSummary
+
+BackupPC_fixupBackupSummary is used to re-create the backups file for all the hosts if it
+is damaged or deleted.  Usage:
+
+    BackupPC_fixupBackupSummary [-l]
+    Options:
+      -l    legacy mode: try to reconstruct backups from LOG
+            files for backups prior to BackupPC v3.0.
+
+=item BackupPC_fsck
+
+BackupPC_fsck can only be run manually, and only while BackupPC isn't running.  It updates
+the host reference counts, the overall pool reference counts and stats.  Usage:
+
+    BackupPC_fsck [options]
+    Options:
+       -f              force regeneration of per-host reference counts
+       -n              don't remove zero count pool files - print only
+       -s              recompute pool stats
+
+=item BackupPC_poolCntPrint
+
+BackupPC_poolCntPrint is used to print reference count information, either per-backup,
+per-host or for the entire pool depending on the file path you use.
+
+If you provide a hex md5 digest, the entire pool count for that digest is printed.
+Usage:
+
+    BackupPC_poolCntPrint [poolCntFilePath|hexDigest]...
+
+=item BackupPC_refCountUpdate
+
+BackupPC_refCountUpdate is used to either update the per-backup and
+per-host reference counts, or the system-wide reference counts. It
+is used by BackupPC_dump, BackupPC_nightly, BackupPC_backupDelete,
+BackupPC_backupDuplicate and BackupPC_fsck.  Usage:
+
+    BackupPC_refCountUpdate -h HOST [-c] [-f] [-F] [-o N] [-p] [-v]
+        With no other args, updates count db on backups with poolCntDelta files
+        and computers the host's total reference counts.  Also builds refCnt for
+        any >=4.0 backups without refCnts.
+          -f     - do an fsck on this HOST, which involves a rebuild of the
+                   last two backup refCnts.  poolCntDelta files are ignored.
+                   Also forces fsck if requested by needFsck flag files
+                   in TopDir/pc/HOST/refCnt.  Equivalent to -o 2.
+          -F     - rebuild all the >=4.0 per-backup refCnt files for this
+                   host.  Equivalent to -o 3.
+          -c     - compare current count db to new db before replacing
+          -o N   - override $Conf{RefCntFsck}.
+          -p     - don't show progress
+          -v     - verbose
+      Notes: in case there are legacy (ie: <=4.0.0alpha3) unapplied poolCntDelta
+      files in TopDir/pc/HOST/refCnt then the -f flag is turned on.
+  
+    BackupPC_refCountUpdate -m [-f] [-p] [-c] [-r N-M] [-s] [-v] [-P phase]
+          -m       Updates main count db, based on each HOST
+          -f     - do an fsck on all the hosts, ignoring poolCntDelta files,
+                   and replacing each host's count db.  Will wait for backups
+                   to finish if any are running.
+          -F     - rebuild all the >=4.0 per-backup refCnt files.
+          -p     - don't show progress
+          -c     - clean pool files
+          -r N-M - process a subset of the main count db, 0 <= N <= M <= 255
+          -s     - prints stats
+          -v     - verbose
+          -P phase Phase from 0..15 each time we run BackupPC_nightly.  Used
+                   to compute exact pool size for portions of the pool based
+                   on the phase and $Conf{PoolSizeNightlyUpdatePeriod}.
+
+=back
 
 =head1 Other CGI Functions
 
@@ -2334,7 +2441,7 @@ configuration settings.
 When editing the host-specific configuration, each parameter has
 an "override" setting that denotes the value is host-specific,
 meaning that it overrides the setting in the main configuration.
-If you unselect "override" then the setting is removed from
+If you deselect "override" then the setting is removed from
 the host-specific configuration, and the main configuration
 file is displayed.
 
@@ -2382,7 +2489,7 @@ unused files from the pool.
 
 In V4+, hardlinks are not used and reference counting is done at the
 application level.  It is done in a batch manner, which simplifies
-the implemtnation.
+the implementation.
 
 For the computer-science majors among you, you can think of the pooling
 system used by BackupPC as just a chained hash table stored on a (big)
@@ -2456,9 +2563,9 @@ background command queue.
 For each PC, BackupPC_dump is forked. Several of these may be run in
 parallel, based on the configuration. First a ping is done to see if
 the machine is alive. If this is a DHCP address, nmblookup is run to
-get the netbios name, which is used as the host name. If DNS lookup
+get the netbios name, which is used as the hostname. If DNS lookup
 fails, $Conf{NmbLookupFindHostCmd} is run to find the IP address from
-the host name.  The file __TOPDIR__/pc/$host/backups is read to decide
+the hostname.  The file __TOPDIR__/pc/$host/backups is read to decide
 whether a full or incremental backup needs to be run. If no backup is
 scheduled, or the ping to $host fails, then BackupPC_dump exits.
 
@@ -2574,7 +2681,7 @@ Hosts file, which lists all the PCs to backup.
 
 The directory __CONFDIR__/pc contains per-client configuration files
 that override settings in the main configuration file.  Each file
-is named __CONFDIR__/pc/HOST.pl, where HOST is the host name.
+is named __CONFDIR__/pc/HOST.pl, where HOST is the hostname.
 
 In pre-FHS versions of BackupPC these files were located in
 __TOPDIR__/pc/HOST/config.pl.
@@ -2597,10 +2704,6 @@ Current (today's) log file output from BackupPC.
 Yesterday's log file output.  Log files are aged daily and compressed
 (if compression is enabled), and old LOG files are deleted.
 
-=item BackupPC.pid
-
-Contains BackupPC's process id.
-
 =item status.pl
 
 A summary of BackupPC's status written periodically by BackupPC so
@@ -2611,6 +2714,23 @@ restarted.  Should not be edited.
 
 A summary of what email was last sent to each user, and when the
 last email was sent.  Should not be edited.
+
+=back
+
+=item __RUNDIR__
+
+The directory __RUNDIR__ (__TOPDIR__/log on pre-FHS versions
+of BackupPC) contains:
+
+=over 4
+
+=item BackupPC.pid
+
+Contains BackupPC's process id.
+
+=item BackupPC.sock
+
+A unix domain socket for communicating to the BackupPC server.
 
 =back
 
@@ -2654,16 +2774,16 @@ and the first and eighth 128K chunks for the file are used.
 
 Both BackupPC_dump (actually, BackupPC_tarExtract or rsync_bpc) are
 responsible for checking newly backed up files against the pool. For
-each file, the MD5 digest is used to generate a file name in the pool
+each file, the MD5 digest is used to generate a filename in the pool
 directory.
 
 If the file exists in the pool, the contents are compared.
 If there is no match, additional files in the chain are checked (if any).
-(Actually, multiple candidate files are compated in parallel.)
+(Actually, multiple candidate files are compared in parallel.)
 
 If $Conf{PoolV3Enabled} is set, then the V3 pool is checked
 if there are no matches in the V4 pool.  If a V3 file matches, it is
-simply moved (renamed) the the V4 pool with it's new file name based on
+simply moved (renamed) the the V4 pool with it's new filename based on
 the V4 digest.  That still allows the V3 backups to be browsed etc, since
 those backups are still based on hardlinks.
 
@@ -2732,11 +2852,13 @@ for the current backup.
 
 =item nnn (an integer)
 
-Backups are in directories numbered sequentially starting at 0.
+Backups are in directories numbered sequentially starting at 0.  Below
+each backup directory are the inodes (in nnn/inode) and the reference
+counts for this backup are in nnn/refCnt.
 
 =item refCnt
 
-The host's reference count databased is stored below the refCnt directory.
+The host's reference count database is stored below the refCnt directory.
 
 =item XferLOG.nnn or XferLOG.nnn.z
 
@@ -2869,7 +2991,7 @@ number of the backup that it was filled from
 
 =item mangle
 
-Set if this backup has mangled file names and attributes.  Always
+Set if this backup has mangled filenames and attributes.  Always
 true for backups in v1.4.0 and above.  False for all backups prior
 to v1.4.0.
 
@@ -2992,16 +3114,20 @@ storage cost of flushing is negligible.
 
 To easily decompress a BackupPC compressed file, the script
 BackupPC_zcat can be found in __INSTALLDIR__/bin.  For each
-file name argument it inflates the file and writes it to stdout.
+filename argument it inflates the file and writes it to stdout.
 
 =head2 Rsync checksum caching
 
-Rsync checksum caching is not implemented in V4.  This section
-needs to be updated.
+Rsync checksum caching is not implemented in V4. That's because a full
+backup with rsync in V4 uses client-side whole-file checksums during a full
+backup, meaning that the server doesn't need to send block-level digests on
+every full backup.
+
+The rest of this section applies to V3.
 
 An incremental backup with rsync compares attributes on the client
 with the last full backup.  Any files with identical attributes
-are skipped.  A full backup with rsync sets the --ignore-times
+are skipped.  In V3, a full backup with rsync sets the --ignore-times
 option, which causes every file to be examined independent of
 attributes.
 
@@ -3022,27 +3148,25 @@ prior to 2.1.0, BackupPC had to read and uncompress the file twice,
 once to compute the block checksums and later to verify the whole-file
 checksum.
 
-=head2 File name mangling
+=head2 Filename mangling
 
-Backup file names are stored in "mangled" form. Each node of
+Backup filenames are stored in "mangled" form. Each node of
 a path is preceded by "f" (mnemonic: file), and special characters
 (\n, \r, % and /) are URI-encoded as "%xx", where xx is the ascii
 character's hex value.  So c:/craig/example.txt is now stored as
 fc/fcraig/fexample.txt.
 
-This was done mainly so meta-data could be stored alongside the backup
+This was done mainly so metadata could be stored alongside the backup
 files without name collisions. In particular, the attributes for the
 files in a directory are stored in a file called "attrib", and mangling
-avoids file name collisions (I discarded the idea of having a duplicate
+avoids filename collisions (I discarded the idea of having a duplicate
 directory tree for every backup just to store the attributes). Other
-meta-data (eg: rsync checksums) could be stored in file names preceded
+metadata (eg: rsync checksums) could be stored in filenames preceded
 by, eg, "c". There are two other benefits to mangling: the share name
 might contain "/" (eg: "/home/craig" for tar transport), and I wanted
 that represented as a single level in the storage tree.
 
 The CGI script undoes the mangling, so it is invisible to the user.
-Old (unmangled) backups are still supported by the CGI
-interface.
 
 =head2 Special files
 
@@ -3061,13 +3185,24 @@ pooled like any normal file. Fifo files are stored as empty plain files
 original file type is stored in the attrib file so it can be correctly
 restored.
 
-Hardlinks are also supported.  When GNU tar first encounters a file with
-more than one link (ie: hardlinks) it dumps it as a regular file.  When
-it sees the second and subsequent hardlinks to the same file, it dumps
-just the hardlink information.  BackupPC correctly recognizes these
-hardlinks and stores them just like symlinks: a regular text file
-whose contents is the path of the file linked to.  The CGI script
-will download the original file when you click on a hardlink.
+Hardlinks are supported.  In V4, file metadata include an inode number
+and a link count.  Any file with more than one link points at the inode
+information stored below the backup directory in the inode directory.
+That directory contains a tree of up to 16K attrib files based on bits
+10-23 of the inode number.  In particular, the directory name uses bits
+17-23, and the attrib filename includes bits 10-16.  The key (index) in
+the attrib file is the hex inode number.  The original file metadata's
+link count might not be accurate; it's more a flag (>1) for when to look
+up the inode information.  The correct link count is stored in the inode.
+
+In V3, hardlinks are stored in a similar manner to symlinks.  When GNU
+tar first encounters a file with more than one link (ie: hardlinks)
+it dumps it as a regular file.  When it sees the second and subsequent
+hardlinks to the same file, it dumps just the hardlink information.
+BackupPC correctly recognizes these hardlinks and stores them just like
+symlinks: a regular text file whose contents is the path of the file
+linked to.  The CGI script will download the original file when you
+click on a hardlink.
 
 Also, BackupPC_tarCreate has enough magic to re-create the hardlinks
 dynamically based on whether or not the original file and hardlinks
@@ -3079,8 +3214,58 @@ tar file will include a/c/y as the original file, not a hardlink.
 
 =head2 Attribute file format
 
-The attribute file format has been changed in V4.  This section describes
-the old format.
+=over 4
+
+=item V4 attrib files
+
+The attribute file format is new in V4.  Every backup directory contains
+an attrib file, which is zero length and its name includes the MD5 pool
+digest, eg:
+
+    attrib_33fe8f9ae2f5cedbea63b9d3ea767ac0
+
+The digest is used to look up the contents in the V4 cpool, eg:
+
+    __TOPDIR__/cpool/32/fe/33fe8f9ae2f5cedbea63b9d3ea767ac0
+
+For inode attrib files, bits 17-23 (XX in hex) of the inode number are used for the
+directory name, and the attrib filename includes bits 10-16 (YY in hex), so
+relative to the backup directory:
+
+    inode/XX/attribYY_33fe8f9ae2f5cedbea63b9d3ea767ac0
+
+An empty attrib file has the name "attrib_0" (or "attribYY_0" for inodes).
+
+The attrib file starts with a magic number, followed by the concatenation
+of the following information for each file (all integers are stored in
+perl's pack "w" format (variable length base 128)):
+
+=over 4
+
+=item *
+
+Filename length, followed by the filename
+
+=item *
+
+Count of extended attributes
+
+=item *
+
+The unix file type, mtime, mode, uid, gid, size, inode number, compress,
+number of links
+
+=item *
+
+MD5 digest length, followed by the digest contents
+
+=item *
+
+Each extended attribute (length of xattr name, length of xattr value, name, value)
+
+=back
+
+=item V3 attrib files
 
 The unix attributes for the contents of a directory (all the files and
 directories in that directory) are stored in a file called attrib.
@@ -3098,11 +3283,11 @@ concatenation of the following information for each file:
 
 =item *
 
-File name length in perl's pack "w" format (variable length base 128).
+Filename length in perl's pack "w" format (variable length base 128).
 
 =item *
 
-File name.
+Filename.
 
 =item *
 
@@ -3123,10 +3308,12 @@ Attribute files are pooled just like normal backup files.  This saves
 space if all the files in a directory have the same attributes across
 multiple backups, which is common.
 
+=back
+
 =head2 Optimizations
 
 BackupPC doesn't care about the access time of files in the pool
-since it saves attribute meta-data separate from the files.  Since
+since it saves attribute metadata separate from the files.  Since
 BackupPC mostly does reads from disk, maintaining the access time of
 files generates a lot of unnecessary disk writes.  So, provided 
 BackupPC has a dedicated data disk, you should consider mounting
@@ -3138,11 +3325,13 @@ BackupPC's data directory with the noatime (or, with Linux kernels
 BackupPC isn't perfect (but it is getting better). Please see
 L<http://backuppc.sourceforge.net/faq/limitations.html> for a
 discussion of some of BackupPC's limitations.
+(Note, we should move this to the Github Wiki.)
 
 =head2 Security issues
 
 Please see L<http://backuppc.sourceforge.net/faq/security.html> for a
 discussion of some of various security issues.
+(Note, we should move this to the Github Wiki.)
 
 =head1 Configuration File
 
@@ -3208,16 +3397,9 @@ __CONFIGPOD__
 
 =head1 Version Numbers
 
-Starting with v1.4.0 BackupPC uses a X.Y.Z version numbering system,
-instead of X.0Y. The first digit is for major new releases, the middle
-digit is for significant feature releases and improvements (most of
-the releases have been in this category), and the last digit is for
-bug fixes. You should think of the old 1.00, 1.01, 1.02 and 1.03 as
-1.0.0, 1.1.0, 1.2.0 and 1.3.0.
-
-Additionally, patches might be made available.  A patched version
-number is of the form X.Y.ZplN (eg: 2.1.0pl2), where N is the
-patch level.
+BackupPC uses a X.Y.Z version numbering system.  The first digit is for
+major new releases, the middle digit is for significant feature releases
+and improvements (most of the releases have been in this category).
 
 =head1 Author
 
@@ -3227,7 +3409,7 @@ See L<http://backuppc.sourceforge.net>.
 
 =head1 Copyright
 
-Copyright (C) 2001-2013 Craig Barratt
+Copyright (C) 2001-2017 Craig Barratt
 
 =head1 Credits
 
@@ -3261,7 +3443,7 @@ Giuseppe Iuculano and Vittorio Macchi updated it for 3.0.0.
 Lieven Bridts provided the Dutch translation, nl.pm, for v2.1.0,
 with some tweaks from Guus Houtzager, and updates for 3.0.0.
 
-Reginaldo Ferreira provided the Portuguese Brazillian translation
+Reginaldo Ferreira provided the Portuguese Brazilian translation
 pt_br.pm for v2.2.0.
 
 Rich Duzenbury provided the RSS feed option to the CGI interface.
@@ -3286,25 +3468,26 @@ Yakim provided the Ukrainian translation for 3.3.0.
 
 Sergei Butakov provided the Russian translation for 3.3.0.
 
-Alexander Moisseev provided the rrdtool graphing code in 4.0.0.
+Alexander Moisseev provided the rrdtool graphing code in 4.0.0 and has provided
+many fixes and improvements in 3.x and 4.x.
 
-Many people have reported bugs, made useful suggestions and helped
-with testing; see the ChangeLog and the mailing lists.
+Many people have provided user support on the mail lists, reported bugs,
+made useful suggestions, and helped with testing; see the ChangeLog
+and the mailing lists.
 
 Your name could appear here in the next version!
 
 =head1 License
 
-This program is free software; you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation; either version 2 of the License, or (at your
-option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
-General Public License for more details.
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License in the
-LICENSE file along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.

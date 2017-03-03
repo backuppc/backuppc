@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ sub new
     # Whether to use filesystem hierarchy standard for file layout.
     # If set, text config files are below /etc/BackupPC.
     #
-    my $useFHS = 0;
+    my $useFHS = 1;
     my $paths;
 
     #

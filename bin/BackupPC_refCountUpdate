@@ -124,7 +124,7 @@ if ( $opts{v} ) {
 #
 BackupPC::XS::Attrib::backwardCompat(0, 0);
 
-print("xferPids $$\n") if ( !$opts{p} );
+print("__bpc_pidStart__ $$\n") if ( !$opts{p} );
 
 if ( defined($opts{h}) ) {
     updateHostPoolCnt($opts{h}, $opts{f}, $opts{F}, $opts{c});
@@ -134,7 +134,7 @@ if ( defined($opts{h}) ) {
         $refCntEnd   = int($2 / 2);
     } elsif ( defined($opts{r}) ) {
         print(STDERR "BackupPC_refCountUpdate: -r arguments should be N-M where 0 <= N <= M <= 255\n");
-        print("xferPids\n") if ( !$opts{p} );
+        print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
         exit(1);
     }
 
@@ -164,7 +164,7 @@ if ( defined($opts{h}) ) {
 }
 
 print("BackupPC_refCountUpdate total errors: $ErrorCnt\n") if ( $ErrorCnt > 0 || $Conf{XferLogLevel} >= 2 );
-print("xferPids\n") if ( !$opts{p} );
+print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
 exit($ErrorCnt ? 1 : 0);
 
 #

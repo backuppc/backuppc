@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Feb 2017.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -128,6 +128,8 @@ $Backups[$newIdx]{noFill}   = 0;
 $Backups[$newIdx]{compress} = $Compress;
 $Backups[$newIdx]{version}  = $bpc->Version();
 
+print("__bpc_pidStart__ $$\n") if ( !$opts{p} );
+
 createFsckFile($DestDir);
 $bpc->flushXSLibMesgs();
 
@@ -141,6 +143,7 @@ if ( $Backups[$lastIdx]{version} >= 4 ) {
     }
     if ( !chdir($SrcDir) ) {
         print(STDERR "BackupPC_backupDuplicate: cannot chdir to $SrcDir\n");
+        print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
         exit(1);
     }
     #
@@ -204,6 +207,7 @@ $bpc->flushXSLibMesgs();
 unlink("$DestDir/refCnt/needFsck.dup") if ( $ErrorCnt == 0 );
 $ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0") != 0 );
 print("BackupPC_backupDuplicate: got $ErrorCnt errors and $FileErrorCnt file open errors\n");
+print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
 exit($ErrorCnt ? 1 : 0);
 
 sub copy_v4_file

@@ -125,6 +125,8 @@ if ( !defined($idx) ) {
     exit(1);
 }
 
+print("__bpc_pidStart__ $$\n") if ( !$opts{p} );
+
 my($MergeCompress, $MergeDir);
 my($AttrDel, $DeltaDel, $AttrMerge, $DeltaMerge);
 my $HostDir       = "$TopDir/pc/$Host";
@@ -215,6 +217,7 @@ if ( $Backups[$idx]{version} < 4 ) {
                     || ($Backups[$idx]{compress} != 0 && $Backups[$idxMerge]{compress} == 0) ) {
                 printf(STDERR "BackupPC_backupDelete: backups #%d and #%d have different compression - cannot merge\n",
                             $Backups[$idx]{num}, $Backups[$idxMerge]{num});
+                print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
                 exit(1);
             }
             $MergeCompress = $Backups[$idxMerge]{compress};
@@ -231,6 +234,7 @@ if ( $Backups[$idx]{version} < 4 ) {
 
             if ( !chdir($DelTopDir) ) {
                 print(STDERR "BackupPC_backupDelete: cannot chdir to $DelTopDir\n");
+                print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
                 exit(1);
             }
             $AttrMerge  = BackupPC::XS::AttribCache::new($Host, $Backups[$idxMerge]{num},
@@ -300,6 +304,7 @@ if ( $doRefCountUpdate || $opts{r} ) {
 }
 
 print("BackupPC_backupDelete: got $Errors errors\n") if ( $Errors > 0 || $LogLevel >= 2 );
+print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
 exit($Errors ? 1 : 0);
 
 sub copyInodes

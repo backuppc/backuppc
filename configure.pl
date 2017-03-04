@@ -1217,8 +1217,8 @@ The format is:
 
     --bin-path PROG=PATH
 
-where PROG is one of perl, tar, smbclient, nmblookup, rsync, ping,
-df, ssh, sendmail, hostname, split, par2, cat, gzip, bzip2 and
+where PROG is one of perl, tar, smbclient, nmblookup, rsync, rsync_bpc,
+ping, df, ssh, sendmail, hostname, split, par2, cat, gzip, bzip2 and
 PATH is that full path to that program.
 
 Examples

@@ -19,7 +19,7 @@
 #   Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -231,7 +231,6 @@ EOF
     $ConfigFileOK = 0;
 }
 $opts{fhs} = 1 if ( !defined($opts{fhs}) && $ConfigPath eq "" );
-$opts{fhs} = 0 if ( !defined($opts{fhs}) );
 
 my $bpc;
 if ( $ConfigPath ne "" && -r $ConfigPath ) {
@@ -240,6 +239,13 @@ if ( $ConfigPath ne "" && -r $ConfigPath ) {
             if ( !($bpc = BackupPC::Lib->new(".", ".", $confDir, 1)) );
     %Conf = $bpc->Conf();
     %OrigConf = %Conf;
+    if ( !defined($opts{fhs}) ) {
+        if ( $ConfigPath eq "$Conf{TopDir}/conf/config.pl" ) {
+            $opts{fhs} = 0;
+        } else {
+            $opts{fhs} = 1;
+        }
+    }
     if ( !$opts{fhs} ) {
         ($Conf{TopDir} = $ConfigPath) =~ s{/[^/]+/[^/]+$}{}
                     if ( $Conf{TopDir} eq '' );

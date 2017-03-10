@@ -108,8 +108,9 @@ Here's a short summary of what has changed in V4:
 
 =item *
 
-No use of hardlinks (except temporarily to do atomic renames).  Reference counting
-is handled at the application level in a batch manner.
+No use of hardlinks (except temporarily to do atomic renames).  Reference
+counting is handled at the application level in a batch manner (hardlinks
+will still remain for any legacy V3 backups).
 
 =item *
 
@@ -134,9 +135,11 @@ are filled and incremental backups are unfilled, but that is configurable.
 
 =item *
 
-Uses full-file MD5 digests, which are stored in the directory attrib files.
-Each backup directory only contains an empty attrib file whose name includes
-the MD5 digest, which is used to look up the file in the pool.
+Uses full-file MD5 digests, which are stored in the directory attrib
+files.  Each backup directory only contains an empty attrib file whose
+name includes its own MD5 digest, which is used to look up the attrib
+file's contents in the pool.  In turn, that file contains the metadata
+for every file in that directory, including each files's MD5 digest.
 
 =item *
 
@@ -174,7 +177,7 @@ is identical.
 =item *
 
 Uses a modified rsync called rsync_bpc (currently based on rsync-3.0.9)
-on the server side (in place of File::RsyncP), with C code layer to interface
+on the server side (in place of File::RsyncP), with a C code interface
 to the BackupPC storage.  So the whole data path for rsync is now in compiled
 C code, which is much faster than perl.
 
@@ -467,7 +470,7 @@ you should be sure to check that.
 
 =item *
 
-When a V4 backups is first done, BackupPC_backupDuplicate is
+When a V4 backup is first done, BackupPC_backupDuplicate is
 run to duplicate the most recent V3 backup to create a new V4 backup.
 A "filled" view of the most recent V3 backup is used to create
 a "filled" V4 backup tree.
@@ -737,7 +740,7 @@ consideration.
 =head2 Road map
 
 The new features planned for future releases of BackupPC
-are on the Wiki at L<http://backuppc.wiki.sourceforge.net>.
+are on the Wiki at L<https://github.com/backuppc/backuppc/wiki>.
 
 Comments and suggestions are welcome.
 
@@ -946,7 +949,7 @@ available from:
 
     https://github.com/backuppc/backuppc-xs/releases
 
-and also CPAN and L<http://backuppc.sourceforge.net>.
+and also CPAN.
 
 =item Archive::Zip
 
@@ -1485,7 +1488,7 @@ network data you can use ssh to create a tunnel, or use a
 program like stunnel.
 
 Setup instructions for ssh can be found on the
-Wiki at L<https://github.com/backuppc/backuppc/wiki>
+Wiki at L<https://github.com/backuppc/backuppc/wiki>.
 
 =item Clients that use DHCP
 
@@ -2001,7 +2004,7 @@ directories should be quite easy.  Rsync 3.x should work well.
 =head2 Fixing installation problems
 
 If you find a solution to your problem that could help other users
-please add it to the Wiki at L<https://github.com/backuppc/backuppc/wiki>
+please add it to the Wiki at L<https://github.com/backuppc/backuppc/wiki>.
 
 =head1 Restore functions
 
@@ -2215,7 +2218,7 @@ in the PC backup tree, so the directory contents aren't visible without looking 
 the attrib file.
 
 A new utility BackupPC_ls (like "ls") can be used to view PC backup trees.  It shows file digests,
-which can be pasted to BackupPC_zipCreate if you want to view the file contents.  The arguments
+which can be pasted to BackupPC_zcat if you want to view the file contents.  The arguments
 are similar to BackupPC_zcat.  The usage is:
 
     BackupPC_ls [-iR] [-h host] [-n bkupNum] [-s shareName] dirs/files...

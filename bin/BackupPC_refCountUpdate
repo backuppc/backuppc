@@ -237,11 +237,12 @@ sub updateHostPoolCnt
     #
     my $bkupList = [];
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-        next if ( $Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./ );
         my $bkupNum       = $Backups[$i]{num};
         my $compress      = $Backups[$i]{compress};
         my $bkupRefCntDir = "$pcDir/$bkupNum/refCnt";
         my($gotFsck, $gotDelta, $gotPoolCnt, $gotNoPoolCntOk);
+
+        next if ( $Backups[$i]{version} eq "" || ($Backups[$i]{version} =~ /^[23]\./ && !-d $bkupRefCntDir) );
 
         if ( !-d $bkupRefCntDir ) {
             print("BackupPC_refCountUpdate: doing fsck on $host #$bkupNum since $bkupRefCntDir doesn't exist\n");
@@ -371,8 +372,21 @@ sub processOneHostBackup
     updateHostDelta2Cnt($host, $bkupRefCntDir, $fsck, 0, $bkupNum);
     $bpc->flushXSLibMesgs();
 
+    #
+    # delete the noPoolCntOk if there are pool files, or create one
+    # if there are none
+    #
+    my($gotNoPoolCntOk, $gotPoolCnt);
+    foreach my $e ( @{BackupPC::DirOps::dirRead($bpc, $bkupRefCntDir)} ) {
+        $gotPoolCnt = 1     if ( $e->{name} =~ /^poolCnt\./ );
+        $gotNoPoolCntOk = 1 if ( $e->{name} =~ /^noPoolCntOk/ );
+    }
+    if ( $gotPoolCnt && $gotNoPoolCntOk ) {
+        unlink("$bkupRefCntDir/noPoolCntOk");
+    } elsif ( !$gotPoolCnt ) {
+        open(my $fd, ">", "$bkupRefCntDir/noPoolCntOk") && close($fd);
+    }
     unlink("$bkupRefCntDir/needFsck.refCountUpdate");
-    unlink("$bkupRefCntDir/noPoolCntOk");
     return 1 if ( $errorCntSave0 != $ErrorCnt );
 }
 

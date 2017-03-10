@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Feb 2017.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -67,7 +67,7 @@ require DynaLoader;
 %EXPORT_TAGS = ('BPC_DT_ALL' => [@EXPORT, @EXPORT_OK]);
 
 BEGIN {
-    eval "use IO::Dirent qw( readdirent DT_DIR );";
+    eval "use IO::Dirent qw( readdirent );";
     $IODirentLoaded = 1 if ( !$@ );
 };
 
@@ -114,21 +114,38 @@ sub dirRead
         #
         # Make sure the IO::Dirent really works - some installs
         # on certain file systems (eg: XFS) don't return a valid type.
+        # and some fail to return valid inode numbers.
         #
+        # Also create a temporary file to make sure the inode matches.
+        #
+        my $tempTestFile = ".TestFileDirent.$$";
+        my $fullTempTestFile = $bpc->{TopDir} . "/$tempTestFile";
+        if ( open(my $fh, ">", $fullTempTestFile) ) {
+            close($fh);
+        }
         if ( opendir(my $fh, $bpc->{TopDir}) ) {
-            my $dt_dir = eval("DT_DIR");
             foreach my $e ( readdirent($fh) ) {
-                if ( $e->{name} eq "." && $e->{type} == $dt_dir ) {
-                    $IODirentOk = 1;
-                    last;
+                if ( $e->{name} eq "."
+                        && $e->{type} == BPC_DT_DIR
+                        && $e->{inode} == (stat($bpc->{TopDir}))[1] ) {
+                    $IODirentOk |= 0x1;
+                }
+                if ( $e->{name} eq $tempTestFile
+                        && $e->{type} == BPC_DT_REG
+                        && $e->{inode} == (stat($fullTempTestFile))[1] ) {
+                    $IODirentOk |= 0x2;
                 }
             }
             closedir($fh);
         }
+        unlink($fullTempTestFile) if ( -f $fullTempTestFile );
         #
         # if it isn't ok then don't check again.
         #
-        $IODirentLoaded = 0 if ( !$IODirentOk );
+        if ( $IODirentOk != 0x3 ) {
+            $IODirentLoaded = 0;
+            $IODirentOk     = 0;
+        }
     }
     if ( $IODirentOk ) {
         @entries = sort({ $a->{inode} <=> $b->{inode} } readdirent($fh));

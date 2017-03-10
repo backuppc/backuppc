@@ -21,6 +21,17 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Updated lib/BackupPC/DirOps.pm with more robust checking that IO::Dirent
+  works.  Matches similar changes to 3.x that didn't make it into 4.x.
+  Fixes issue #56.
+
+* BackupPC_refCountUpdate handles case of empty backups better.  It creates
+  a noPoolCntOk file if there are legitimately no poolCnt files after
+  running.  Reported by Alexander Kobel.
+
+* Fixed umask() in child processes (issue #58) reported by Alexander
+  Moisseev.
+
 #------------------------------------------------------------------------
 # Version 4.0.0, 3 Mar 2017
 #------------------------------------------------------------------------

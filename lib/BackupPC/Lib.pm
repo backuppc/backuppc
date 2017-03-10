@@ -532,6 +532,7 @@ sub ChildInit
     select(STDERR); $| = 1;
     select(STDOUT); $| = 1;
     $ENV{PATH} = $bpc->{Conf}{MyPath};
+    umask($bpc->{Conf}{UmaskMode});
 }
 
 #

@@ -269,15 +269,10 @@ EOF
 }
 
 #
-# Create defaults for FHS setup
+# Create filesystem hierarchy defaults
 #
-if ( $opts{fhs} ) {
-    $Conf{TopDir}       ||= $opts{"data-dir"}    || "/data/BackupPC";
-    $Conf{InstallDir}   ||= $opts{"install-dir"} || "/usr/local/BackupPC";
-} else {
-    $Conf{TopDir}       ||= $opts{"data-dir"}    || "/data/BackupPC";
-    $Conf{InstallDir}   ||= $opts{"install-dir"} || "/usr/local/BackupPC";
-}
+$Conf{TopDir}       ||= $opts{"data-dir"}    || "/data/BackupPC";
+$Conf{InstallDir}   ||= $opts{"install-dir"} || "/usr/local/BackupPC";
 
 #
 # These are the programs whose paths we need to find

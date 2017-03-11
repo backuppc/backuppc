@@ -21,6 +21,14 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Applied pull requests: #59, #60
+
+* Renamed init.d to systemd, added systemd/src/backuppc.service template
+
+* Replaced CSS file with new BackupPC_stnd.css from Ernesto Carrea (#59).
+  Renamed old ones to conf/BackupPC_retro_v2.css and
+  conf/BackupPC_retro_v3.css.
+
 * Updated lib/BackupPC/DirOps.pm with more robust checking that IO::Dirent
   works.  Matches similar changes to 3.x that didn't make it into 4.x.
   Fixes issue #56.

@@ -1,16 +1,44 @@
-This directory contains some scripts for auto-starting BackupPC
-on boot.
+#################################################################################
+# Systemd configuration to auto-start BackupPC
+#################################################################################
+
+This directory contains some scripts for auto-starting BackupPC on boot.
+The preferred method is using systemd.
+
+To install the systemd service:
+
+ - check/modify the configuration in the backuppc.service file in this directory
+
+ - as root, run these commands:
+     cp backuppc.service /lib/systemd/system   # (or /usr/lib/systemd/system)
+     systemctl daemon-reload
+     systemctl enable backuppc.service         # should create a link in /etc/systemd/system/multi-user.target.wants/backuppc.service
+
+ - to start/stop or get status, run these commands:
+     systemctl start backuppc.service
+     systemctl status backuppc.service
+     systemctl stop backuppc.service
+
+Also, be sure to remove any old /etc/init.d/BackupPC or /etc/init.d/backuppc scripts.
+
+#################################################################################
+# Old style /etc/init.d scripts
+#################################################################################
+
+The rest of this README file describes old init.d scripts that can be
+used in place of the systemd scripts described above.
 
 The subdirectory src contains source versions of these scripts (before
-various absolute paths have been filled in).
+various absolute paths have been filled in), and the subdirectory init.d
+contains updated scripts with your settings merged in.
 
-Here are instrcutions for different OSs.  Please submit additions
+Here are init.d instrcutions for different OSs.  Please submit additions
 or improvements to this list!
 
 RedHat Linux:
 ============
 
-When configure.pl is run, the script linux-backuppc is created. It
+When configure.pl is run, the script init.d/linux-backuppc is created. It
 should be copied to /etc/init.d/backuppc:
 
     cp linux-backuppc /etc/init.d/backuppc
@@ -32,7 +60,7 @@ This will auto-start backuppc at run levels 3, 4 and 5.
 Debian Linux:
 ============
 
-When configure.pl is run, the script debian-backuppc is created.
+When configure.pl is run, the script init.d/debian-backuppc is created.
 
 Copy the debian startup script:
 
@@ -51,7 +79,7 @@ Usage: /etc/init.d/backuppc {start|stop|restart|reload}
 Suse Linux:
 ==========
 
-When configure.pl is run, the script suse-backuppc is created.
+When configure.pl is run, the script init.d/suse-backuppc is created.
 
 Using Suse 9.0 "chkconfig --level" doesn't work, so you should run:
 
@@ -61,9 +89,9 @@ Using Suse 9.0 "chkconfig --level" doesn't work, so you should run:
 Gentoo Linux:
 ============
 
-When configure.pl is run, the script gentoo-backuppc and the init conf files
-gentoo-backuppc.conf are created. They should be copied to the following
-locations:
+When configure.pl is run, the script init.d/gentoo-backuppc and the init
+conf files gentoo-backuppc.conf are created. They should be copied to
+the following locations:
 
     cp gentoo-backuppc /etc/init.d/backuppc
     cp gentoo-backuppc.conf /etc/conf.d/backuppc
@@ -82,7 +110,7 @@ start automatically at boot (at the default run level):
 FreeBSD:
 =======
 
-When configure.pl is run, the script freebsd-backuppc is created.
+When configure.pl is run, the script init.d/freebsd-backuppc is created.
 An alternative more compact script is freebsd-backuppc2, submitted
 by Dan Niles.
 
@@ -103,7 +131,7 @@ The script accepts: start, stop, restart, reload, status
 Slackware:
 =========
 
-When configure.pl is run, the script slackware-backuppc is created.
+When configure.pl is run, the script init.d/slackware-backuppc is created.
 
 Install it by running these commands as root:
 
@@ -115,7 +143,7 @@ then use an editor to add /etc/rc.d/rc.backuppc to /etc/rc.d/rc.local
 Solaris:
 =======
 
-When configure.pl is run the shell script solaris-backuppc is created.
+When configure.pl is run the shell script init.d/solaris-backuppc is created.
 This should be copied to /etc/init.d and links made in /etc/rc3.d
 and /etc/rc0.d.
 

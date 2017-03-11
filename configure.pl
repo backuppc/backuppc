@@ -259,9 +259,10 @@ if ( $ConfigPath ne "" && -r $ConfigPath ) {
     if ( $err eq "" ) {
         print <<EOF;
 
-BackupPC is running on $Conf{ServerHost}.  You need to stop BackupPC
-before you can upgrade the code.  Depending upon your installation,
-you could run "/etc/init.d/backuppc stop".
+BackupPC is running on $Conf{ServerHost}.  You need to stop BackupPC before
+you can upgrade the code.  Depending upon your installation, you could
+run "systemctl stop backuppc.service" if you use systemd,
+or "/etc/init.d/backuppc stop" if you use init.d.
 
 EOF
         exit(1);
@@ -650,12 +651,12 @@ if ( $Conf{CgiImageDir} ne "" ) {
                 "$DestDir$Conf{CgiImageDir}/sorttable.js", 0444, 0);
 }
 
-printf("Making init.d scripts\n");
-foreach my $init ( qw(gentoo-backuppc gentoo-backuppc.conf linux-backuppc
-		      solaris-backuppc debian-backuppc freebsd-backuppc
-                      freebsd-backuppc2 suse-backuppc slackware-backuppc
-                      ubuntu-backuppc ) ) {
-    InstallFile("init.d/src/$init", "init.d/$init", 0755);
+printf("Making systemd and init.d scripts\n");
+foreach my $init ( qw(backuppc.service init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
+                      init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc
+                      init.d/freebsd-backuppc init.d/freebsd-backuppc2 init.d/suse-backuppc
+                      init.d/slackware-backuppc init.d/ubuntu-backuppc ) ) {
+    InstallFile("systemd/src/$init", "systemd/$init", 0755);
 }
 
 printf("Making Apache configuration file for suid-perl\n");
@@ -952,11 +953,11 @@ will need to do:
     to restart Apache.  Otherwise it will have stale code.
 
   - BackupPC should be ready to start.  Don't forget to run it
-    as user $Conf{BackupPCUser}!  The installation also contains an
-    init.d/backuppc script that can be copied to /etc/init.d
-    so that BackupPC can auto-start on boot.  This will also enable
+    as user $Conf{BackupPCUser}!  The installation also contains
+    a systemd/backuppc.service script that can be installed so
+    that BackupPC can auto-start on boot.  This will also enable
     administrative users to start the server from the CGI interface.
-    See init.d/README.
+    See systemd/README.
 
 Enjoy!
 EOF

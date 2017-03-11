@@ -248,7 +248,7 @@ if ( $errCnt ) {
 rmtree($DistDir, 0, 0);
 mkpath($DistDir, 0, 0777);
 
-foreach my $dir ( qw(bin doc conf images init.d/src cgi-bin httpd/src
+foreach my $dir ( qw(bin doc conf images systemd/src/init.d cgi-bin httpd/src
 		     lib/BackupPC/CGI
 		     lib/BackupPC/Config
 		     lib/BackupPC/Lang
@@ -285,17 +285,18 @@ foreach my $file ( (@PerlSrc,
                 conf/BackupPC_retro_v2.css
                 conf/BackupPC_retro_v3.css
                 conf/sorttable.js
-		init.d/README
-		init.d/src/debian-backuppc
-		init.d/src/freebsd-backuppc
-		init.d/src/freebsd-backuppc2
-		init.d/src/gentoo-backuppc
-		init.d/src/gentoo-backuppc.conf
-		init.d/src/linux-backuppc
-		init.d/src/slackware-backuppc
-		init.d/src/solaris-backuppc
-		init.d/src/suse-backuppc
-                init.d/src/ubuntu-backuppc
+		systemd/README
+		systemd/src/backuppc.service
+		systemd/src/init.d/debian-backuppc
+		systemd/src/init.d/freebsd-backuppc
+		systemd/src/init.d/freebsd-backuppc2
+		systemd/src/init.d/gentoo-backuppc
+		systemd/src/init.d/gentoo-backuppc.conf
+		systemd/src/init.d/linux-backuppc
+		systemd/src/init.d/slackware-backuppc
+		systemd/src/init.d/solaris-backuppc
+		systemd/src/init.d/suse-backuppc
+                systemd/src/init.d/ubuntu-backuppc
 		httpd/src/BackupPC.conf
 		doc/BackupPC.pod
 		doc/BackupPC.html

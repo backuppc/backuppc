@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Feb 2017.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -377,6 +377,12 @@ sub start
                     '--bpc-v3pool-used',   $conf->{PoolV3Enabled},
             );
         }
+
+	my $inode0 = 1;
+        for ( my $i = 0 ; $i < @{$t->{backups}} ; $i++ ) {
+            $inode0 = $t->{backups}[$i]{inodeLast} + 1 if ( $inode0 <= $t->{backups}[$i]{inodeLast} );
+        }
+
         unshift(@$rsyncArgs,
             '--bpc-top-dir',        $conf->{TopDir},
             '--bpc-host-name',      $t->{client},
@@ -385,7 +391,7 @@ sub start
             '--bpc-bkup-comp',      $t->{backups}[$t->{newBkupIdx}]{compress},
             '--bpc-bkup-prevnum',   defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{num} : -1,
             '--bpc-bkup-prevcomp',  defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{compress} : -1,
-            '--bpc-bkup-inode0',    $t->{backups}[$t->{newBkupIdx}]{inodeLast} || 1,
+            '--bpc-bkup-inode0',    $inode0,
             '--bpc-attrib-new',
             '--bpc-log-level',      $conf->{XferLogLevel},
         );

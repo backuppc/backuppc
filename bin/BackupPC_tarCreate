@@ -37,7 +37,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -496,7 +496,7 @@ sub TarWriteFile
             while ( $f->read(\$data, $BufSize) > 0 ) {
                 if ( $size + length($data) > $hdr->{size} ) {
                     print(STDERR "Error: truncating $hdr->{fullPath} to"
-                               . " $hdr->{size} bytes\n");
+                               . " $hdr->{size} bytes (for $hdr->{name})\n");
                     $data = substr($data, 0, $hdr->{size} - $size);
                     $ErrorCnt++;
                 }
@@ -506,7 +506,7 @@ sub TarWriteFile
             $f->close;
             if ( $size != $hdr->{size} ) {
                 print(STDERR "Error: padding $hdr->{fullPath} to $hdr->{size}"
-                           . " bytes from $size bytes\n");
+                           . " bytes from $size bytes (for $hdr->{name})\n");
                 $ErrorCnt++;
                 while ( $size < $hdr->{size} ) {
                     my $len = $hdr->{size} - $size;

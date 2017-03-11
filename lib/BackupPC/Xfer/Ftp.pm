@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Feb 2017.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -267,7 +267,13 @@ sub start
                                                            $t->{compress});
         $t->{DeltaNew}    = BackupPC::XS::DeltaRefCnt::new("$TopDir/pc/$t->{client}/$t->{newBkupNum}");
         $t->{AttrNew}->setDeltaInfo($t->{DeltaNew});
-        $t->{Inode} = $t->{Inode0} = $t->{backups}[$t->{newBkupIdx}]{inodeLast};
+
+        $t->{Inode} = 1;
+	for ( my $i = 0 ; $i < @{$t->{backups}} ; $i++ ) {
+	    $t->{Inode} = $t->{backups}[$i]{inodeLast} + 1 if ( $t->{Inode} <= $t->{backups}[$i]{inodeLast} );
+	}
+        $t->{Inode0} = $t->{Inode};
+
         if ( !$t->{inPlace} ) {
             $t->{AttrOld}  = BackupPC::XS::AttribCache::new($t->{client}, $t->{lastBkupNum}, $t->{shareName},
                                                            $t->{compress});

@@ -21,7 +21,7 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Applied pull requests: #59, #60
+* Applied pull requests: #59, #60, #61
 
 * Renamed init.d to systemd, added systemd/src/backuppc.service template
 

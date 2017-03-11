@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Feb 2017.
+# Version 4.0.0, released 3 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -108,7 +108,6 @@ BackupPC::XS::Lib::logLevelSet($Conf{XferLogLevel});
 my @Backups = $bpc->BackupInfoRead($client);
 
 my($lastBkupIdx, $lastBkupNum, $newBkupNum, $newBkupIdx);
-my($Inode, $Inode0);
 
 $newBkupIdx  = @Backups - 1;
 $newBkupNum  = $Backups[$newBkupIdx]{num};
@@ -126,7 +125,11 @@ $AttrNew  = BackupPC::XS::AttribCache::new($client, $newBkupNum, $ShareNameUM,
 $DeltaNew = BackupPC::XS::DeltaRefCnt::new("$TopDir/pc/$client/$newBkupNum");
 $AttrNew->setDeltaInfo($DeltaNew);
 
-$Inode = $Inode0 = $Backups[$newBkupIdx]{inodeLast};
+my $Inode = 1;
+for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+    $Inode = $Backups[$i]{inodeLast} + 1 if ( $Inode <= $Backups[$i]{inodeLast} );
+}
+my $Inode0 = $Inode;
 
 my $Inplace = $opts{p};
 if ( !$Inplace ) {

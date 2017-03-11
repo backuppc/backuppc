@@ -113,7 +113,7 @@ if ( @Backups == 0 || !defined($lastIdx) ) {
 }
 my $Compress = $Backups[$lastIdx]{compress};
 my $SrcDir   = "$TopDir/pc/$Host/$lastNum";
-my $Inode = 1;
+my $Inode    = 1;
 my $DestDir;
 $newIdx = @Backups;
 $newNum = $lastNum;
@@ -121,6 +121,10 @@ do {
     $newNum++;
     $DestDir = "$TopDir/pc/$Host/$newNum";
 } while ( -d $DestDir );
+
+for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+    $Inode = $Backups[$i]{inodeLast} + 1 if ( $Inode <= $Backups[$i]{inodeLast} );
+}
 
 %{$Backups[$newIdx]}        = %{$Backups[$lastIdx]};
 $Backups[$newIdx]{num}      = $newNum;

@@ -642,10 +642,10 @@ if ( $Conf{CgiImageDir} ne "" ) {
     }
     InstallFile("conf/BackupPC_stnd.css",
 	        "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", 0444, 0);
-    InstallFile("conf/BackupPC_retro_v2.cs",
-	        "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v2.cs", 0444, 0);
-    InstallFile("conf/BackupPC_retro_v3.cs",
-	        "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v3.cs", 0444, 0);
+    InstallFile("conf/BackupPC_retro_v2.css",
+	        "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v2.css", 0444, 0);
+    InstallFile("conf/BackupPC_retro_v3.css",
+	        "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v3.css", 0444, 0);
     InstallFile("conf/sorttable.js",
                 "$DestDir$Conf{CgiImageDir}/sorttable.js", 0444, 0);
 }

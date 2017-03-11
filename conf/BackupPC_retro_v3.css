@@ -1,0 +1,249 @@
+/*
+ * BackupPC standard CSS definitions
+ *
+ * Version 4.0.0alpha3, released 1 Dec 2013.
+ *
+ * See http://backuppc.sourceforge.net.
+ *
+ * AUTHOR
+ *   Craig Barratt  <cbarratt@users.sourceforge.net>
+ *
+ * COPYRIGHT
+ *   Copyright (C) 2004-2013  Craig Barratt
+ */
+
+body {
+    font-family:tahoma,arial,sans-serif,helvetica;
+    font-size:10pt;
+    background-color:#ffffff;
+    margin:2px 5px 0px 2px;
+    height:100%
+}
+
+
+table {
+    border-collapse: collapse;
+    color: #000000;
+    padding: 2px;
+}
+
+h1 {
+    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    font-size:16pt;
+    color:#000000
+}
+
+h2 {
+    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    font-size:12pt;
+    color:#000000
+}
+
+a {
+    font-family:tahoma,arial,sans-serif,helvetica;
+    color:#3333ff
+}
+
+dt {
+    color:#3333ff
+}
+
+pre {
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}
+
+a:hover {
+    color:#cc0000;
+    text-decoration:none
+}
+
+a.NavCurrent {
+    font-weight:bold;
+}
+
+a.navbar {
+    padding-left:5px;
+    padding-right:5px;
+}
+
+.h1 {
+    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    font-size:16pt;
+    color:#000000;
+    font-weight:bold;
+    background-color:#95B8DB;
+    padding:3px;
+    padding-left:6px;
+    margin-bottom:5px;
+}
+
+.h2 {
+    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    font-size:12pt;
+    color:#000000;
+    font-weight:bold;
+    background-color:#eeeeee;
+    padding:3px;
+    padding-left:6px;
+    margin-top:3px;
+    margin-bottom:1px;
+}
+
+.tableStnd {
+    font-size:10pt;
+}
+
+.tableheader {
+    font-size:10pt;
+    font-weight:bold;
+    background-color:#eeeeee;
+}
+
+table.sortable a.sortheader {
+    background-color:#eeeeee;
+    font-weight: bold;
+    text-decoration: none;
+    display: block;
+}
+
+.border {
+    font-size:10pt;
+}
+
+.editHeader {
+    font-family:arial,sans-serif;
+    font-size:12pt;
+    color:#000000;
+    font-weight:bold;
+    background-color:#95B8DB;
+}
+
+.editTabSel {
+    font-family:arial,sans-serif;
+    font-size:14pt;
+    color:#000000;
+    font-weight:bold;
+    background-color:#95B8DB;
+    padding:3px;
+    padding-left:6px;
+    margin-bottom:5px;
+}
+
+.editTabNoSel {
+    font-family:arial,sans-serif;
+    font-size:14pt;
+    color:#000000;
+    font-weight:bold;
+    padding:3px;
+    padding-left:6px;
+    margin-bottom:5px;
+}
+
+.editSaveButton {
+    color:#c0c0c0;
+    font-size:14pt;
+    font-weight:bold;
+}
+
+.editError {
+    color:#ff0000;
+    font-weight:bold;
+}
+
+.editComment {
+    font-size:10pt;
+}
+
+.editTextInput {
+    font-family:courier;
+    font-size:10pt;
+}
+
+.fviewheader {
+    font-weight:bold;
+    font-size:9pt;
+    color:#ffffff;
+    background-color:#999999;
+}
+
+.fviewborder {
+    border-left:1px solid #666666;
+    border-bottom:1px solid #000000;
+    border-right:1px solid #666666;
+    background-color:#eeeeee;
+    font-size:9pt;
+}
+
+.fviewon {
+    background-color:#cccccc;
+}
+
+.fviewoff {
+    background-color:#ffffff;
+}
+
+.fview {
+    font-size:9pt;
+    font-family:tahoma,arial,sans-serif,helvetica;
+    text-decoration:none;
+    line-height:15px;
+}
+
+.fviewbold {
+    font-size:9pt;
+    font-family:tahoma,arial,sans-serif,helvetica;
+    text-decoration:none;
+    line-height:15px;
+    font-weight:bold;
+}
+
+.histView {
+    border-bottom:1px solid #000000;
+    border-left:1px solid #000000;
+    background-color:#eeeeee;
+    font-size:10pt;
+}
+
+.histViewMis {
+    border-bottom:1px solid #000000;
+    border-left:1px solid #000000;
+    background-color:#ffdddd;
+}
+
+div.NavMenu {
+    width:18%;
+    margin:0px;
+    font-size:9pt;
+    background-color:#eeeeee;
+}
+
+div.NavMenu a {
+    font-size:9pt;
+    font-family:arial,sans-serif;
+    display:block;
+    margin-left:8px;
+    padding:2px;
+}
+
+div.NavTitle {
+    font-size:12pt;
+    padding-left:10px;
+    background-color:#95B8DB;
+    font-family:Trebuchet MS,Trebuchet,tahoma,arial,sans-serif,helvetica;
+    color:#000000;
+    font-weight:bold;
+    margin-bottom:2px;
+}
+
+#Content {
+    float:right;
+    width:79%;
+    left:20%;
+    top:10px;
+    right:10px;
+    position:absolute;
+}

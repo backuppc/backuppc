@@ -2141,9 +2141,8 @@ $Conf{CgiImageDirURL} = '';
 # in the $Conf{CgiImageDir} directory and accessed via the
 # $Conf{CgiImageDirURL} URL.
 #
-# For BackupPC v3.x several color, layout and font changes were made.
-# The previous v2.x version is available as BackupPC_stnd_orig.css, so
-# if you prefer the old skin, change this to BackupPC_stnd_orig.css.
+# For BackupPC v3 and v2 the prior css versions are available
+# as BackupPC_retro_v3.css and BackupPC_retro_v2.css
 #
 $Conf{CgiCSSFile} = 'BackupPC_stnd.css';
 

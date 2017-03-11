@@ -282,7 +282,8 @@ foreach my $file ( (@PerlSrc,
 		conf/config.pl
 		conf/hosts
 		conf/BackupPC_stnd.css
-		conf/BackupPC_stnd_orig.css
+                conf/BackupPC_retro_v2.css
+                conf/BackupPC_retro_v3.css
                 conf/sorttable.js
 		init.d/README
 		init.d/src/debian-backuppc

@@ -1,0 +1,182 @@
+<html>
+<head>
+<title>BackupPC: Open Source Backup to disk</title>
+<meta name="KEYWORDS" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, WinXP, linux, windows">
+<meta name="DESCRIPTION" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, WinXP, linux, windows">
+<link rel=icon href="images/logos/favicon.ico" type="image/x-icon">
+</head>
+
+<body bgcolor="#ffffff">
+
+<script language="JavaScript">
+
+<!--//
+// Browser Detection
+browser_name = navigator.appName;
+browser_version = parseFloat(navigator.appVersion); 
+
+if (browser_name == "Netscape" && browser_version >= 3.0) { 
+    roll = 'true'; }
+else if (browser_name == "Microsoft Internet Explorer" 
+       && browser_version >= 4.0) { 
+    roll = 'true'; 
+}
+else { 
+    roll = 'false'; 
+}
+
+// Preload images, if browser supports mouseovers
+if (roll == 'true') {
+    var imglist = new Array (
+ 	"images/buttons/green/small/home.gif",
+ 	"images/buttons/green/small/info.gif",
+ 	"images/buttons/green/small/news.gif",
+ 	"images/buttons/green/small/code.gif",
+ 	"images/buttons/green/small/docs.gif"
+    );
+
+    var imgs = new Array();
+    var count;
+    if (document.images)
+	for (count=0; count<imglist.length; count++) {
+	    imgs[count]=new Image(); 
+	    imgs[count].src=imglist[count];
+	}
+}
+
+function msover(img,ref) { 
+    if (roll == 'true') { 
+	document.images[img].src = ref; 
+    } 
+}
+
+function msout(img,ref) { 
+    if (roll == 'true') { 
+	document.images[img].src = ref; 
+    } 
+}
+
+//-->
+</script>
+
+<table width="80%" border=0 align=center>
+<tr>
+  <td align="center">
+  <p>
+   <img src="images/icons/BackupPC/mid/logo.gif">
+   <br>  
+   <table border="0" width="60%">
+    <tr><td align="center">
+    BackupPC is a high-performance, enterprise-grade system for backing up
+    Linux, WinXX and MacOSX PCs and laptops to a server's disk.  BackupPC is
+    highly configurable and easy to install and maintain.
+    <p>
+    <a href="https://github.com/backuppc/backuppc/releases/tag/v3_3_2">Version 3.3.2</a> released on January 25th, 2017
+    <br>
+    <a href="https://github.com/backuppc/backuppc/releases/tag/v4_0_0">Version 4.0.0</a> released on March 3rd, 2017
+    <!-- <br> 2.1.2pl2 (patch level 2) released on June 18th, 2006 -->
+    </td></tr>
+    </table>
+  </p>
+  </td>
+</tr>
+</table>
+
+<table border=0 width="75%" align="center">
+
+<tr><td colspan=3><hr noshade width="100%" size=1></td></tr>
+<tr valign=top>
+  <td align=left width=50>
+  <a href="info.html"             
+    onMouseOver="window.status='Information about BackupPC';
+	       msover('img_info',
+			'images/buttons/green/small/info.gif');"
+    onMouseOut="msout('img_info',
+			'images/buttons/blue/small/info.gif');"><img
+    src="images/buttons/blue/small/info.gif" 
+    name="img_info"
+    width=70 height=25 border=0></a>
+  </td>
+
+  <td align=left width="99%">
+    
+General information about BackupPC.  What to use it for, why to use it,
+where to find it, and where to go for help.  
+  
+  </td>
+</tr>
+
+
+<tr><td colspan=3><hr noshade width="100%" size=1></td></tr>
+<tr valign=top>
+  <td align=left width=50>
+  <a href="https://github.com/backuppc/backuppc"             
+    onMouseOver="window.status='Download BackupPC';
+	       msover('img_code',
+			'images/buttons/green/small/code.gif');"
+    onMouseOut="msout('img_code',
+			'images/buttons/blue/small/code.gif');"><img
+    src="images/buttons/blue/small/code.gif" 
+    name="img_code"
+    width=70 height=25 border=0></a>
+  </td>
+  <td align=left width="99%">
+
+Most linux distros include BackupPC packages.  Alternatively, you can download
+the latest version of BackupPC from the
+<a href="https://github.com/backuppc/backuppc/releases">Github releases</a> page.
+Source code is on <a href="https://github.com/backuppc/backuppc">Github</a>.
+  
+  </td>
+</tr>
+
+<tr><td colspan=3><hr noshade width="100%" size=1></td></tr>
+<tr valign=top>
+  <td align=left width=50>
+  <a href="BackupPC.html"
+    onMouseOver="window.status='BackupPC Documentation';
+	       msover('img_docs',
+			'images/buttons/green/small/docs.gif');"
+    onMouseOut="msout('img_docs',
+			'images/buttons/blue/small/docs.gif');"><img
+    src="images/buttons/blue/small/docs.gif" 
+    name="img_docs"
+    width=70 height=25 border=0></a>
+  </td>
+  <td align=left width="99%">
+     Online documentation for BackupPC 4.0.0.  Documentation for <a href="BackupPC-3.3.2.html">3.3.2 is here</a>.
+  
+  </td>
+</tr>
+
+<tr><td colspan=3><hr noshade width="100%" size=1></td></tr>
+<tr valign=top>
+  <td align=left width=50>
+  <a href="info.html#screenShots"             
+    onMouseOver="window.status='BackupPC Documentation';
+	       msover('img_shots',
+			'images/thumbs/tn_BackupPCServerStatusBorderSel.jpeg');"
+    onMouseOut="msout('img_shots',
+			'images/thumbs/tn_BackupPCServerStatusBorder.jpeg');"><img
+    src="images/thumbs/tn_BackupPCServerStatusBorder.jpeg" 
+    name="img_shots"
+    width=65 height=57 border=0></a>
+  </td>
+  <td align=left width="99%">
+     View screen shots of BackupPC's web interface.  An easy way to
+     preview various features.
+  </td>
+</tr>
+
+</table>
+
+<p>
+<center>
+<a href="https://github.com/backuppc/backuppc"><img src="images/logos/GitHub_Logo.png" width="120" alt="Get BackupPC at Github"></a>
+
+<br clear=all>
+<font size="-1" color="#666666">BackupPC is hosted on <a href="https://github.com/backuppc/backuppc">Github</a>, and is distributed under a GPL license.  BackupPC is &copy; Copyright 2001-2017 Craig Barratt.</font>
+
+</center>
+</body>
+</html>

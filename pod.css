@@ -1,0 +1,85 @@
+ a:link { color: teal; }
+ a:visited { color: green; }
+ a:active { color: red; }
+ body { font: 12pt Verdana,arial,sans-serif; color: black;  }
+ p { font: 12pt Verdana,arial,sans-serif; color: black;  }
+ ol { font: 12pt Verdana,arial,sans-serif; color: black;  }
+ ul { font: 12pt Verdana,arial,sans-serif; color: black;  }
+ li { font: 12pt Verdana,arial,sans-serif; color: black;  }
+ dl { font: 12pt Verdana,arial,sans-serif; color: black;  }
+ dt { font: 12pt Verdana,arial,sans-serif; color: black;  }
+ dd { font: 12pt Verdana,arial,sans-serif; color: black;  }
+ pre { font: 12pt monospace; color: #333333;
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	}
+ h1 { font: 18pt Verdana,arial,sans-serif; color: teal;
+        border: 1px solid black; background-color: #e8e8e8;
+        padding-left: .5em; padding-right: .5em; }
+ h2 { font: 16pt Verdana,arial,sans-serif; color: teal;
+        border: 1px solid black; background-color: #e8e8e8;
+        padding-left: .5em; padding-right: .5em; }
+ h3 { font: 15pt Verdana,arial,sans-serif; color: teal;
+        border: 1px solid black; background-color: #e8e8e8;
+        padding-left: .5em; padding-right: .5em; }
+ h4 { font: 14pt Verdana,arial,sans-serif; color: teal;
+        border: 1px solid black; background-color: #e8e8e8;
+        padding-left: .5em; padding-right: .5em; }
+ h5 { font: 13pt Verdana,arial,sans-serif; color: teal;
+        border: 1px solid black; background-color: #e8e8e8;
+        padding-left: .5em; padding-right: .5em; }
+ h6 { font: 12pt Verdana,arial,sans-serif; color: teal;
+        border: 1px solid black; background-color: #e8e8e8;
+        padding-left: .5em; padding-right: .5em; }
+ b { font-weight: bold;  }
+ em { font-style: italic;  }
+ .hdrtable {
+	 background-color: #e8e8e8;
+	font: 20pt Verdana,arial,sans-serif; color: teal;
+	border: 1px solid black;
+	padding-left: .5em;
+	padding-right: .5em;
+	}
+ .ref_back_color { color: #666666 }
+ .h1table {
+	font: 20pt Verdana,arial,sans-serif; color: teal;
+	background-color: #e8e8e8;
+	border: 1px solid black;
+	padding-left: .5em;
+	padding-right: .5em;
+	}
+ .h2table {
+	font: 18pt Verdana,arial,sans-serif; color: teal;
+	background-color: #f0f0f0;
+	border: 1px solid #999999;
+	padding-left: .5em;
+	padding-right: .5em;
+	}
+ .h3table {
+	font: 16pt Verdana,arial,sans-serif; color: teal;
+	background-color: #f0f0f0;
+	border: 1px solid #999999;
+	padding-left: .5em;
+	padding-right: .5em;
+	}
+ .h4table {
+	font: 15pt Verdana,arial,sans-serif; color: teal;
+	background-color: #f0f0f0;
+	border: 1px solid #999999;
+	padding-left: .5em;
+	padding-right: .5em;
+	}
+ .h5table {
+	font: 14pt Verdana,arial,sans-serif; color: teal;
+	background-color: #f0f0f0;
+	border: 1px solid #999999;
+	padding-left: .5em;
+	padding-right: .5em;
+	}
+ .h6table {
+	font: 13pt Verdana,arial,sans-serif; color: teal;
+	background-color: #f0f0f0;
+	border: 1px solid #999999;
+	padding-left: .5em;
+	padding-right: .5em;
+	}

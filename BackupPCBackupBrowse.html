@@ -1,0 +1,142 @@
+<html>
+<head>
+<title>BackupPC Information</title>
+<link rel=icon href="images/logos/favicon.ico" type="image/x-icon">
+</head>
+
+<body bgcolor="#ffffff">
+
+<script language="JavaScript">
+
+<!--//
+// Browser Detection
+browser_name = navigator.appName;
+browser_version = parseFloat(navigator.appVersion); 
+
+if (browser_name == "Netscape" && browser_version >= 3.0) { 
+    roll = 'true'; }
+else if (browser_name == "Microsoft Internet Explorer" 
+       && browser_version >= 4.0) { 
+    roll = 'true'; 
+}
+else { 
+    roll = 'false'; 
+}
+
+// Preload images, if browser supports mouseovers
+if (roll == 'true') {
+    var imglist = new Array (
+ 	"images/buttons/green/small/home.gif",
+ 	"images/buttons/green/small/info.gif",
+ 	"images/buttons/green/small/code.gif",
+ 	"images/buttons/green/small/docs.gif"
+    );
+
+    var imgs = new Array();
+    var count;
+    if (document.images)
+	for (count=0; count<imglist.length; count++) {
+	    imgs[count]=new Image(); 
+	    imgs[count].src=imglist[count];
+	}
+}
+
+function msover(img,ref) { 
+    if (roll == 'true') { 
+	document.images[img].src = ref; 
+    }
+}
+
+function msout(img,ref) { 
+    if (roll == 'true') { 
+	document.images[img].src = ref; 
+    } 
+}
+
+//-->
+</script>
+
+<p>
+<table border=0 width="100%" cellpadding=0 cellspacing=0 valign=top>
+<tr valign=top>
+  <td align=left>
+  <img src="images/icons/BackupPC/mid/logo.gif">
+  </td>
+
+  <td align=right colspan=2>
+  <a href="index.html"             
+    onMouseOver="window.status='BackupPC Home Page';
+	       msover('img_home',
+			'images/buttons/green/small/home.gif');"
+    onMouseOut="msout('img_home',
+			'images/buttons/blue/small/home.gif');"><img
+    src="images/buttons/blue/small/home.gif" 
+    name="img_home"
+    width=70 height=25 border=0></a>
+
+  <a href="info.html"             
+    onMouseOver="window.status='Information about the BackupPC';
+	       msover('img_info',
+			'images/buttons/green/small/info.gif');"
+    onMouseOut="msout('img_info',
+			'images/buttons/red/small/info.gif');"><img
+    src="images/buttons/red/small/info.gif" 
+    name="img_info"
+    width=70 height=25 border=0></a>
+
+  <a href="https://github.com/backuppc/backuppc"             
+    onMouseOver="window.status='Download BackupPC';
+	       msover('img_code',
+			'images/buttons/green/small/code.gif');"
+    onMouseOut="msout('img_code',
+			'images/buttons/blue/small/code.gif');"><img
+    src="images/buttons/blue/small/code.gif" 
+    name="img_code"
+    width=70 height=25 border=0></a>
+
+  <a href="BackupPC.html"
+    onMouseOver="window.status='BackupPC Documentation';
+	       msover('img_docs',
+			'images/buttons/green/small/docs.gif');"
+    onMouseOut="msout('img_docs',
+			'images/buttons/blue/small/docs.gif');"><img
+    src="images/buttons/blue/small/docs.gif" 
+    name="img_docs"
+    width=70 height=25 border=0></a>
+
+  </td>
+</tr>
+<tr>
+   <td>&nbsp;<td>&nbsp;
+<tr>
+   <td align=left>
+  <img src="images/icons/red/small/next.gif" height=20 width=25><font size="+2"><b>Browse Backup Screen Shot</b></font> 
+   </td>
+   <td colspan=2 align=right>
+      <a href="BackupPCBackupSummary.html"><font size="+2"><b>Previous</b></font><img src="images/icons/red/small/prev.gif" height=20 width=25 border=0></a>
+      5 of 8
+      <a href="BackupPCRestoreOptions.html"><img src="images/icons/red/small/next.gif" height=20 width=25 border=0><font size="+2"><b>Next</b></font></a>
+   </td>
+</tr>
+</table>
+</p>
+This screen shows the backup #85 for client "accounts" being browsed.
+The directory tree allows a particular directory to be selected.
+The contents of the directory are shown to the right.  Individual
+files can be opened/downloaded at any time by selecting the file
+link.  Several or all files can be selected and restored using
+the check boxes.
+<p>
+
+<img src="images/screens/BackupPCBackupBrowse.png">
+<hr>
+<p>
+<center>
+<a href="https://github.com/backuppc/backuppc"><img src="images/logos/GitHub_Logo.png" width="120" alt="Get BackupPC at Github"></a>
+
+<br clear=all>
+<font size="-1" color="#666666">BackupPC is hosted on <a href="https://github.com/backuppc/backuppc">Github</a>, and is distributed under a GPL license.  BackupPC is &copy; Copyright 2001-2017 Craig Barratt.</font>
+
+</center>
+</body>
+</html>

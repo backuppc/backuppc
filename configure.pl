@@ -647,6 +647,7 @@ if ( $Conf{CgiImageDir} ne "" ) {
 }
 
 printf("Making systemd and init.d scripts\n");
+mkpath("systemd/init.d", 0, 0755);
 foreach my $init ( qw(backuppc.service init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
                       init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc
                       init.d/freebsd-backuppc init.d/freebsd-backuppc2 init.d/suse-backuppc
@@ -847,15 +848,21 @@ if ( $Conf{RsyncClientCmd} =~ /(\$sshPath.* +-l +\S+)/ && defined($newVars->{Rsy
 }
 
 #
-# Overwrite $Conf{RsyncArgs} and $Conf{RsyncRestoreArgs}.
+# If this is an upgrade from V3, then set $Conf{PoolV3Enabled}
+# and update $Conf{RsyncArgs} and $Conf{RsyncRestoreArgs}.
 #
-$newConf->[$newVars->{RsyncArgs}]{text}        = $distConf->[$distVars->{RsyncArgs}]{text};
-$newConf->[$newVars->{RsyncRestoreArgs}]{text} = $distConf->[$distVars->{RsyncRestoreArgs}]{text};
+if ( defined($Conf{ServerHost}) && !defined($Conf{PoolV3Enabled}) ) {
+    $Conf{PoolV3Enabled} = 1;
+    $newConf->[$newVars->{RsyncArgs}]{text}        = $distConf->[$distVars->{RsyncArgs}]{text};
+    $newConf->[$newVars->{RsyncRestoreArgs}]{text} = $distConf->[$distVars->{RsyncRestoreArgs}]{text};
+}
 
 #
-# If this is an upgrade from V3, then set $Conf{PoolV3Enabled}
+# Update $Conf{CgiNavBarLinks} with github URLs
 #
-$Conf{PoolV3Enabled} = 1 if ( defined($Conf{ServerHost}) && !defined($Conf{PoolV3Enabled}) );
+$newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{http://backuppc.wiki.sourceforge.net}{https://github.com/backuppc/backuppc/wiki}g;
+$newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{http://backuppc.sourceforge.net}{https://backuppc.github.io/backuppc}g;
+$newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{SourceForge}{Github}g;
 
 #
 # Apply any command-line configuration parameter settings

@@ -468,7 +468,7 @@ sub Header
 $Conf{CgiHeaders}
 <script src="$Conf{CgiImageDirURL}/sorttable.js"></script>
 </head><body onLoad="document.getElementById('NavMenu').style.height=document.body.scrollHeight">
-<a href="http://backuppc.sourceforge.net"><img src="$Conf{CgiImageDirURL}/logo.gif" hspace="5" vspace="7" border="0"></a><br>
+<a href="/"><img src="$Conf{CgiImageDirURL}/logo.gif" hspace="5" vspace="7" border="0"></a><br>
 EOF
 
     if ( defined($Hosts) && defined($host) && defined($Hosts->{$host}) ) {

@@ -1,0 +1,139 @@
+<html>
+<head>
+<title>BackupPC Information</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<script language="JavaScript">
+
+<!--//
+// Browser Detection
+browser_name = navigator.appName;
+browser_version = parseFloat(navigator.appVersion); 
+
+if (browser_name == "Netscape" && browser_version >= 3.0) { 
+    roll = 'true'; }
+else if (browser_name == "Microsoft Internet Explorer" 
+       && browser_version >= 4.0) { 
+    roll = 'true'; 
+}
+else { 
+    roll = 'false'; 
+}
+
+// Preload images, if browser supports mouseovers
+if (roll == 'true') {
+    var imglist = new Array (
+ 	"images/buttons/green/small/home.gif",
+ 	"images/buttons/green/small/info.gif",
+ 	"images/buttons/green/small/code.gif",
+ 	"images/buttons/green/small/docs.gif"
+    );
+
+    var imgs = new Array();
+    var count;
+    if (document.images)
+	for (count=0; count<imglist.length; count++) {
+	    imgs[count]=new Image(); 
+	    imgs[count].src=imglist[count];
+	}
+}
+
+function msover(img,ref) { 
+    if (roll == 'true') { 
+	document.images[img].src = ref; 
+    }
+}
+
+function msout(img,ref) { 
+    if (roll == 'true') { 
+	document.images[img].src = ref; 
+    } 
+}
+
+//-->
+</script>
+
+<p>
+<table border=0 width="100%" cellpadding=0 cellspacing=0 valign=top>
+<tr valign=top>
+  <td align=left>
+  <img src="images/icons/BackupPC/mid/logo.gif">
+  </td>
+
+  <td align=right colspan=2>
+  <a href="index.html"             
+    onMouseOver="window.status='BackupPC Home Page';
+	       msover('img_home',
+			'images/buttons/green/small/home.gif');"
+    onMouseOut="msout('img_home',
+			'images/buttons/blue/small/home.gif');"><img
+    src="images/buttons/blue/small/home.gif" 
+    name="img_home"
+    width=70 height=25 border=0></a>
+
+  <a href="info.html"             
+    onMouseOver="window.status='Information about the BackupPC';
+	       msover('img_info',
+			'images/buttons/green/small/info.gif');"
+    onMouseOut="msout('img_info',
+			'images/buttons/red/small/info.gif');"><img
+    src="images/buttons/red/small/info.gif" 
+    name="img_info"
+    width=70 height=25 border=0></a>
+
+  <a href="http://sourceforge.net/projects/backuppc/"             
+    onMouseOver="window.status='Download BackupPC';
+	       msover('img_code',
+			'images/buttons/green/small/code.gif');"
+    onMouseOut="msout('img_code',
+			'images/buttons/blue/small/code.gif');"><img
+    src="images/buttons/blue/small/code.gif" 
+    name="img_code"
+    width=70 height=25 border=0></a>
+
+  <a href="faq/BackupPC.html"
+    onMouseOver="window.status='BackupPC Documentation';
+	       msover('img_docs',
+			'images/buttons/green/small/docs.gif');"
+    onMouseOut="msout('img_docs',
+			'images/buttons/blue/small/docs.gif');"><img
+    src="images/buttons/blue/small/docs.gif" 
+    name="img_docs"
+    width=70 height=25 border=0></a>
+
+  </td>
+</tr>
+<tr>
+   <td>&nbsp;<td>&nbsp;
+<tr>
+   <td align=left>
+  <img src="images/icons/red/small/next.gif" height=20 width=25><font size="+2"><b>Restore Options Screen Shot</b></font> 
+   </td>
+   <td colspan=2 align=right>
+      <a href="BackupPCBackupBrowse.html"><font size="+2"><b>Previous</b></font><img src="images/icons/red/small/prev.gif" height=20 width=25 border=0></a>
+      6 of 8
+      <a href="BackupPCEditConfig.html"><img src="images/icons/red/small/next.gif" height=20 width=25 border=0><font size="+2"><b>Next</b></font></a>
+   </td>
+</tr>
+</table>
+</p>
+After the user has checked files to restore and selected "Restore Selected
+Files" the user is presented with this screen.  It summarizes the selected
+files and the user is given three restore options: restore the files directly
+onto the client (optionally changing the target host/share/directory),
+download a zip file or download a tar file.
+<p>
+
+<img src="images/screens/BackupPCRestoreOptions.png">
+<hr>
+<p>
+<center>
+<a href="http://sourceforge.net/projects/backuppc"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=34854&amp;type=12" width="120" height="30" alt="Get BackupPC at SourceForge.net. Fast, secure and Free Open Source software downloads" /></a>
+
+<br clear=all>
+<font size="-1" color="#666666">&copy; Copyright 2001-2017 Craig Barratt.  BackupPC is hosted by <a href="https://github.com/backuppc/backuppc">Github</a> and SourceForge, and is distributed under a GPL license.</font>
+
+</center>
+</html>

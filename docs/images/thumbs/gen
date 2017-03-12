@@ -1,0 +1,12 @@
+#!/usr/bin/perl
+
+use strict;
+
+my @files = <../screens/*.png>;
+
+foreach my $f ( @files ) {
+    my $dest = $1 if ( $f =~ m{([^/]*)\.png} );
+    print("convert $f -quality 70 -resize 150 tn_$dest.jpeg\n");
+    system("convert $f -quality 70 -resize 150 tn_$dest.jpeg");
+}
+

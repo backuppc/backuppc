@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.0.1, released 12 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -678,17 +678,17 @@ sub dirHistory
             my $attrAll = $attr->get();
             foreach my $fileUM ( keys(%$attrAll) ) {
                 my $a = $attrAll->{$fileUM};
-                $m->{files}{$fileUM}[$i]               = $a;
+                $files->{$fileUM}[$i]               = $a;
                 $attr->delete($fileUM);
-                ($m->{files}{$fileUM}[$i]{relPath}     = "$dir/$fileUM") =~ s{//+}{/}g;
+                ($files->{$fileUM}[$i]{relPath}     = "$dir/$fileUM") =~ s{//+}{/}g;
                 if ( length($a->{digest}) ) {
-                    $m->{files}{$fileUM}[$i]{fullPath} = $m->{bpc}->MD52Path($a->{digest},
+                    $files->{$fileUM}[$i]{fullPath} = $m->{bpc}->MD52Path($a->{digest},
                                                                          $compress);
                 } else {
-                    $m->{files}{$fileUM}[$i]{fullPath} = "/dev/null";
+                    $files->{$fileUM}[$i]{fullPath} = "/dev/null";
                 }
-                $m->{files}{$fileUM}[$i]{backupNum}    = $backupNum;
-                $m->{files}{$fileUM}[$i]{compress}     = $compress;
+                $files->{$fileUM}[$i]{backupNum}    = $backupNum;
+                $files->{$fileUM}[$i]{compress}     = $compress;
             }
         } else {
             foreach my $entry ( @$dirInfo ) {
@@ -701,7 +701,7 @@ sub dirHistory
                 #
                 next if (  $file eq ".."
                         || $file eq "."
-                        || $mangle && $file eq "attrib"
+                        || $mangle && $file =~ /^attrib/
                         || defined($files->{$fileUM}[$i]) );
 
                 my $realPath = "$path/$file";

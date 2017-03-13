@@ -90,7 +90,7 @@ if ( defined($opts{h}) ) {
 }
 $bpc->ChildInit();
 
-my($Host, $LogLevel, $Compress, $SrcDir, $BkupNum, $Inode, $DeltaInfo, $Inode2MD5Digest);
+my($Host, $LogLevel, $Compress, $SrcDir, $DestDir, $BkupNum, $Inode, $DeltaInfo, $Inode2MD5Digest);
 
 foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
     $Host = $h;
@@ -139,26 +139,35 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
         $BkupNum  = $Backups[$i]{num};
         $Compress = $Backups[$i]{compress};
         $SrcDir   = "$TopDir/pc/$Host/$BkupNum";
+        $DestDir  = "$TopDir/pc/$Host/$BkupNum.v4";
         $FileCnt  = 0;
         $FileCntNext = 1;
         $FileCntTotal = $Backups[$i]{nFiles};
         $FileCntIncr  = int($FileCntTotal / 500);
         $FileCntIncr  = 2 if ( $FileCntIncr < 2 );
 
+        if ( -d $DestDir ) {
+            print("BackupPC_migrateV3toV4: removing temp target directory $DestDir\n");
+            BackupPC::DirOps::RmTreeQuiet($bpc, $DestDir, -2);
+            if ( -d $DestDir ) {
+                print("BackupPC_migrateV3toV4: failed to remove temp target directory $DestDir; skipping this backup\n");
+                next;
+            }
+        }
         if ( -d "$SrcDir/refCnt" ) {
-            print("BackupPC_migrateV3toV4: backup $Backups[$i]{num} for host $Host already has a refCnt directory; skipping\n");
+            print("BackupPC_migrateV3toV4: backup $Backups[$i]{num} for host $Host already has a refCnt directory; skipping this backup\n");
             next;
         }
 
-        createFsckFile($SrcDir);
+        createFsckFile($DestDir);
         $bpc->flushXSLibMesgs();
 
         #
-        # Migrate the V3 backup in $SrcDir
+        # Migrate the V3 backup from $SrcDir to $DestDir
         #
         print("BackupPC_migrateV3toV4: migrating host $Host backup #$BkupNum to V4 (approx $FileCntTotal files)\n") if ( !$opts{p} );
 
-        $DeltaInfo = BackupPC::XS::DeltaRefCnt::new($SrcDir);
+        $DeltaInfo = BackupPC::XS::DeltaRefCnt::new($DestDir);
 	if ( !chdir($SrcDir) ) {
 	    print("BackupPC_migrateV3toV4: cannot chdir to $SrcDir; skipping this backup\n");
 	    next;
@@ -174,8 +183,36 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
             $ErrorCnt += $errCnt;
         }
         $bpc->flushXSLibMesgs();
-        unlink("$SrcDir/refCnt/needFsck.mig") if ( $ErrorCnt == 0 );
+        unlink("$DestDir/refCnt/needFsck.mig") if ( $ErrorCnt == 0 );
         $bkupNum2LastInode->{$Backups[$i]{num}} = $Inode;
+        #
+        # move $DestDir to $SrcDir and then remove $SrcDir
+        #
+        if ( -e "$SrcDir.old" ) {
+            if ( -d "$SrcDir.old" ) {
+                BackupPC::DirOps::RmTreeQuiet($bpc, "$SrcDir.old", -2);
+            } else {
+                unlink("$SrcDir.old");
+            }
+        }
+        if ( !rename($SrcDir, "$SrcDir.old") ) {
+            print("BackupPC_migrateV3toV4: unable to rename $SrcDir to $SrcDir.old; cleaning up by removing $DestDir\n");
+            BackupPC::DirOps::RmTreeQuiet($bpc, $DestDir, -2);
+            $ErrorCnt++;
+            next;
+        }
+        if ( !rename($DestDir, $SrcDir) ) {
+            $ErrorCnt++;
+            print("BackupPC_migrateV3toV4: unable to rename $DestDir to $SrcDir; moving $SrcDir.old back to $SrcDir and removing $DestDir\n");
+            if ( !rename("$SrcDir.old", $SrcDir) ) {
+                print("BackupPC_migrateV3toV4: unable to rename $SrcDir.old back to $SrcDir\n");
+                $ErrorCnt++;
+                next;
+            }
+            BackupPC::DirOps::RmTreeQuiet($bpc, $DestDir, -2);
+        }
+        print("BackupPC_migrateV3toV4: converted backup in $SrcDir; removing $SrcDir.old\n");
+        BackupPC::DirOps::RmTreeQuiet($bpc, "$SrcDir.old", -2);
     }
     if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0") != 0 ) {
         print("BackupPC_migrateV3toV4: BackupPC_refCountUpdate exited with errors\n");
@@ -198,24 +235,6 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
 
 print("BackupPC_migrateV3toV4: got $ErrorCnt error" . $ErrorCnt == 1 ? "\n" : "s\n");
 exit($ErrorCnt ? 1 : 0);
-
-#
-# Read a modest-sized file
-#
-sub readFile
-{
-    my($path) = @_;
-    my $f = BackupPC::XS::FileZIO::open($path, 0, $Compress);
-    my $data;
-    if ( !defined($f) || $f->read(\$data, 65536) < 0 ) {
-        print("BackupPC_migrateV3toV4: unable to open/read file $path\n");
-        $f->close() if ( defined($f) );
-        $ErrorCnt++;
-        return;
-    }
-    $f->close();
-    return $data;
-}
 
 sub update_v3_dir
 {
@@ -443,19 +462,14 @@ sub update_v3_dir
         $Inode2MD5Digest->{$inode} = $digest4;
         $DeltaInfo->update($Compress, $digest4, 1) if ( length($digest4) );
     }
-    if ( !$attr->write($path, $name, undef, $DeltaInfo) ) {
-	print("BackupPC_migrateV3toV4: write to $path/$name failed\n");
-	$ErrorCnt++;
-        return;
+    eval { mkpath("$DestDir/$path", 0, 0777) };
+    if ( $@ ) {
+        print("BackupPC_migrateV3toV4: can't mkpath $DestDir/$path\n");
+        $ErrorCnt++;
     }
-    foreach my $e ( @$dirEntries ) {
-	next if ( !-f "$path/$e->{name}" || ($e->{name} !~ /^f/ && $e->{name} ne "attrib") );
-	if ( unlink("$path/$e->{name}") != 1 ) {
-            print("BackupPC_migrateV3toV4: failed to unlink $path/$e->{name}\n");
-            $ErrorCnt++;
-        } else {
-            print("update_v3_dir: removed $path/$e->{name}\n") if ( $LogLevel >= 7 );
-        }
+    if ( !$attr->write("$DestDir/$path", $name, undef, $DeltaInfo) ) {
+	print("BackupPC_migrateV3toV4: write to $DestDir/$path/$name failed\n");
+	$ErrorCnt++;
     }
     printProgress() if ( $FileCnt >= $FileCntNext );
     $bpc->flushXSLibMesgs();

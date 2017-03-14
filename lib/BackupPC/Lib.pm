@@ -1212,7 +1212,6 @@ sub cmdSystemOrEvalLong
 	    return $err        if ( !defined($stdoutCB) );
 	    return;
 	}
-	binmode(CHILD);
 	if ( !$pid ) {
 	    #
 	    # This is the child
@@ -1241,6 +1240,7 @@ sub cmdSystemOrEvalLong
 	#
 	# The parent gathers the output from the child
 	#
+	binmode(CHILD);
 	while ( <CHILD> ) {
 	    $$stdoutCB .= $_ if ( ref($stdoutCB) eq 'SCALAR' );
 	    &$stdoutCB($_)   if ( ref($stdoutCB) eq 'CODE' );

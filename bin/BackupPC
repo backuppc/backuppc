@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.0.1, released 12 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1347,7 +1347,7 @@ sub Main_Check_Client_Messages
                         . " nothing to read from $client.  Debug dump:\n");
             my($dump) = Data::Dumper->new(
                          [  \%Clients, \%Jobs, \$FDread, \$fdRead],
-                         [qw(*Clients,  *Jobs   *FDread,  *fdRead)]);
+                         [qw(*Clients   *Jobs   *FDread   *fdRead)]);
             $dump->Indent(1);
             print(LOG $dump->Dump);
             next;

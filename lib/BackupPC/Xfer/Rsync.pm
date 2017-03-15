@@ -122,7 +122,7 @@ sub start
                             if ( $conf->{RsyncClientPath} ne "" );
             unshift(@$rsyncArgs, @{$conf->{RsyncSshArgs}})
                             if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' );
-            push(@$rsyncArgs, @$srcList, "$t->{host}:$remoteDir");
+            push(@$rsyncArgs, @$srcList, "$t->{hostIP}:$remoteDir");
         } else {
             my $pwFd;
             $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
@@ -144,7 +144,7 @@ sub start
             }
             push(@$rsyncArgs,
                     @$srcList,
-                    "$conf->{RsyncdUserName}\@$t->{host}::$remoteDir");
+                    "$conf->{RsyncdUserName}\@$t->{hostIP}::$remoteDir");
         }
 
         #
@@ -352,7 +352,7 @@ sub start
             #                    if ( $conf->{ClientCharset} ne "" );
 
             push(@$rsyncArgs, @fileList) if ( @fileList );
-            push(@$rsyncArgs, "$t->{host}:$shareNameSlash", "/");
+            push(@$rsyncArgs, "$t->{hostIP}:$shareNameSlash", "/");
         } else {
             my $pwFd;
             $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
@@ -368,7 +368,7 @@ sub start
             #                    if ( $conf->{ClientCharset} ne "" );
             push(@$rsyncArgs, @fileList) if ( @fileList );
             push(@$rsyncArgs,
-                    "$conf->{RsyncdUserName}\@$t->{host}::$shareName",
+                    "$conf->{RsyncdUserName}\@$t->{hostIP}::$shareName",
                     "/");
         }
         if ( $bpc->{PoolV3} ) {

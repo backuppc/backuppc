@@ -1649,6 +1649,7 @@ sub UserCommandRun
 {
     my($cmdType, $sharename) = @_;
 
+    $? = 0;
     return if ( !defined($Conf{$cmdType}) );
     my $vars = {
         xfer       => $xfer,

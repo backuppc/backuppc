@@ -21,6 +21,11 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Ensure $? is 0 in bin/BackupPC_dump UserCommandRun() if no command is run,
+  reported and proposed fix by stirab (issue #67)
+
+* Fix result for restore using Samba4 from Alexander Moisseev (#51)
+
 * Added sort() to BackupPC::View::findRecurse() so things like
   BackupPC_tarCreate produce repeatable file ordering.
 

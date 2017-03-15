@@ -129,6 +129,7 @@ if ( !GetOptions(
             "config-path=s",
             "config-override=s%",
             "config-dir=s",
+            "config-only",
             "data-dir=s",
             "dest-dir=s",
             "fhs!",
@@ -235,8 +236,13 @@ $opts{fhs} = 1 if ( !defined($opts{fhs}) && $ConfigPath eq "" );
 my $bpc;
 if ( $ConfigPath ne "" && -r $ConfigPath ) {
     (my $confDir = $ConfigPath) =~ s{/[^/]+$}{};
+
+    # In config-only mode use installed BackupPC if distribution files are not available.
+    my $libPath = $opts{"config-only"}
+      && ( $INC{"BackupPC/Lib.pm"} ne "lib/BackupPC/Lib.pm" ) ? "" : ".";
+
     die("BackupPC::Lib->new failed\n")
-            if ( !($bpc = BackupPC::Lib->new(".", ".", $confDir, 1)) );
+            if ( !($bpc = BackupPC::Lib->new(".", $libPath, $confDir, 1)) );
     %Conf = $bpc->Conf();
     %OrigConf = %Conf;
     if ( !defined($opts{fhs}) ) {
@@ -514,165 +520,33 @@ print <<EOF;
 
 Ok, we're about to:
 
-  - install the binaries, lib and docs in $Conf{InstallDir},
-  - create the data directory $Conf{TopDir},
-  - create/update the config.pl file $Conf{ConfDir}/config.pl,
-  - optionally install the cgi-bin interface.
+EOF
+
+unless ( $opts{"config-only"} ) {
+print <<EOF;
+  - install the binaries, lib and docs in $Conf{InstallDir}
+  - create the data directory $Conf{TopDir}
+  - optionally install the cgi-bin interface
+EOF
+
+}
+print <<EOF;
+  - create/update the config.pl file $Conf{ConfDir}/config.pl
 
 EOF
 
 exit unless prompt("--> Do you want to continue?", "y") =~ /y/i;
 
-#
-# Create install directories
-#
-foreach my $dir ( qw(bin share/doc/BackupPC
-		     lib/BackupPC/CGI
-		     lib/BackupPC/Config
-		     lib/BackupPC/Lang
-		     lib/BackupPC/Storage
-		     lib/BackupPC/Xfer
-		     lib/BackupPC/Zip
-                     lib/Net/FTP
-		 ) ) {
-    next if ( -d "$DestDir$Conf{InstallDir}/$dir" );
-    mkpath("$DestDir$Conf{InstallDir}/$dir", 0, 0755);
-    if ( !-d "$DestDir$Conf{InstallDir}/$dir"
-            || !my_chown($Uid, $Gid, "$DestDir$Conf{InstallDir}/$dir") ) {
-        die("Failed to create or chown $DestDir$Conf{InstallDir}/$dir\n");
-    } else {
-        print("Created $DestDir$Conf{InstallDir}/$dir\n");
-    }
-}
+CleanPidSock();
 
-#
-# Create CGI image directory
-#
-foreach my $dir ( ($Conf{CgiImageDir}) ) {
-    next if ( $dir eq "" || -d "$DestDir$dir" );
-    mkpath("$DestDir$dir", 0, 0755);
-    if ( !-d "$DestDir$dir" || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
-        die("Failed to create or chown $DestDir$dir");
-    } else {
-        print("Created $DestDir$dir\n");
-    }
-}
-
-#
-# Create other directories
-#
-foreach my $dir ( (
-            "$Conf{TopDir}",
-            "$Conf{TopDir}/pool",
-            "$Conf{TopDir}/cpool",
-            "$Conf{TopDir}/pc",
-            "$Conf{ConfDir}",
-            "$Conf{LogDir}",
-            "$Conf{RunDir}",
-        ) ) {
-    mkpath("$DestDir$dir", 0, 0750) if ( !-d "$DestDir$dir" );
-    if ( !-d "$DestDir$dir"
-            || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
-        die("Failed to create or chown $DestDir$dir\n");
-    } else {
-        print("Created $DestDir$dir\n");
-    }
-}
-
-printf("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
-foreach my $prog ( @ConfigureBinList ) {
-    InstallFile($prog, "$DestDir$Conf{InstallDir}/$prog", 0555);
-}
-
-#
-# remove old pre-v4 programs
-#
-foreach my $prog ( qw(
-        bin/BackupPC_link
-        bin/BackupPC_tarPCCopy
-        bin/BackupPC_trashClean
-        bin/BackupPC_compressPool
-    ) ) {
-    unlink("$DestDir$Conf{InstallDir}/$prog");
-}
-
-printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
-foreach my $lib ( @ConfigureLibList ) {
-    InstallFile($lib, "$DestDir$Conf{InstallDir}/$lib", 0444);
-}
-
-#
-# remove old pre-v4 libraries
-#
-foreach my $lib ( qw(
-        lib/BackupPC/Attrib.pm
-        lib/BackupPC/Config.pm
-        lib/BackupPC/FileZIO.pm
-        lib/BackupPC/PoolWrite.pm
-        lib/BackupPC/Xfer/RsyncDigest.pm
-        lib/BackupPC/Xfer/RsyncFileIO.pm
-    ) ) {
-    unlink("$DestDir$Conf{InstallDir}/$lib");
-}
-
-#
-# clean pid and sock files from old location (they are now in $Conf{RunDir}, and they
-# get re-created each time BackupPC starts, so it's ok if RunDir eq LogDir).
-#
-unlink("$DestDir$Conf{LogDir}/BackupPC.pid")  if ( -f "$DestDir$Conf{LogDir}/BackupPC.pid" );
-unlink("$DestDir$Conf{LogDir}/BackupPC.sock") if ( -e "$DestDir$Conf{LogDir}/BackupPC.sock" );
-
-if ( $Conf{CgiImageDir} ne "" ) {
-    printf("Installing images in $DestDir$Conf{CgiImageDir}\n");
-    foreach my $img ( <images/*> ) {
-	(my $destImg = $img) =~ s{^images/}{};
-	InstallFile($img, "$DestDir$Conf{CgiImageDir}/$destImg", 0444, 1);
-    }
-
-    #
-    # Install new CSS file, making a backup copy if necessary
-    #
-    my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-__VERSION__";
-    if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
-	rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
-    }
-    InstallFile("conf/BackupPC_stnd.css",
-	        "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", 0444, 0);
-    InstallFile("conf/BackupPC_retro_v2.css",
-	        "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v2.css", 0444, 0);
-    InstallFile("conf/BackupPC_retro_v3.css",
-	        "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v3.css", 0444, 0);
-    InstallFile("conf/sorttable.js",
-                "$DestDir$Conf{CgiImageDir}/sorttable.js", 0444, 0);
-}
-
-printf("Making systemd and init.d scripts\n");
-mkpath("systemd/init.d", 0, 0755);
-foreach my $init ( qw(backuppc.service init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
-                      init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc
-                      init.d/freebsd-backuppc init.d/freebsd-backuppc2 init.d/suse-backuppc
-                      init.d/slackware-backuppc init.d/ubuntu-backuppc ) ) {
-    InstallFile("systemd/src/$init", "systemd/$init", 0755);
-}
-
-printf("Making Apache configuration file for suid-perl\n");
-InstallFile("httpd/src/BackupPC.conf", "httpd/BackupPC.conf", 0644);
-
-printf("Installing docs in $DestDir$Conf{InstallDir}/share/doc/BackupPC\n");
-foreach my $doc ( qw(BackupPC.pod BackupPC.html) ) {
-    InstallFile("doc/$doc", "$DestDir$Conf{InstallDir}/share/doc/BackupPC/$doc", 0444);
-    #
-    # clean up files from old directory
-    #
-    unlink("$DestDir$Conf{InstallDir}/doc/$doc") if ( -f "$DestDir$Conf{InstallDir}/doc/$doc" );
-}
-#
-# clean up old directory (ok if it quietly fails if there are other files in that directory)
-#
-rmdir("$DestDir$Conf{InstallDir}/doc") if ( -d "$DestDir$Conf{InstallDir}/doc" );
+DoInstall()
+  unless $opts{"config-only"};
 
 printf("Installing config.pl and hosts in $DestDir$Conf{ConfDir}\n");
-InstallFile("conf/hosts", "$DestDir$Conf{ConfDir}/hosts", 0644)
+InstallFile("conf/hosts", "$DestDir$Conf{ConfDir}/hosts.sample", 0644)
+  unless $opts{"config-only"};
+my $hostsSample = $opts{"config-only"} ? "$DestDir$Conf{ConfDir}/hosts.sample" : "conf/hosts";
+InstallFile($hostsSample, "$DestDir$Conf{ConfDir}/hosts", 0644)
                     if ( !-f "$DestDir$Conf{ConfDir}/hosts" );
 
 #
@@ -681,7 +555,8 @@ InstallFile("conf/hosts", "$DestDir$Conf{ConfDir}/hosts", 0644)
 # parameters and deleting ones that are no longer needed.
 #
 my $dest = "$DestDir$Conf{ConfDir}/config.pl";
-my ($distConf, $distVars) = ConfigParse("conf/config.pl");
+my $configSample = $opts{"config-only"} ? "$DestDir$Conf{ConfDir}/config.pl.sample" : "conf/config.pl";
+my ($distConf, $distVars) = ConfigParse($configSample);
 my ($oldConf, $oldVars);
 my ($newConf, $newVars) = ($distConf, $distVars);
 if ( -f $dest ) {
@@ -927,12 +802,8 @@ if ( !defined($oldConf) ) {
     die("can't chown $Uid, $Gid $dest\n") unless my_chown($Uid, $Gid, $dest);
 }
 
-if ( $Conf{CgiDir} ne "" ) {
-    printf("Installing cgi script BackupPC_Admin in $DestDir$Conf{CgiDir}\n");
-    mkpath("$DestDir$Conf{CgiDir}", 0, 0755);
-    InstallFile("cgi-bin/BackupPC_Admin", "$DestDir$Conf{CgiDir}/BackupPC_Admin",
-                04554);
-}
+InstallFile($dest, "$DestDir$Conf{ConfDir}/config.pl.sample", 0644)
+  unless $opts{"config-only"};
 
 print <<EOF;
 
@@ -983,6 +854,167 @@ exit(0);
 ###########################################################################
 # Subroutines
 ###########################################################################
+
+sub DoInstall
+{
+    #
+    # Create install directories
+    #
+    foreach my $dir ( qw(bin share/doc/BackupPC
+                         lib/BackupPC/CGI
+                         lib/BackupPC/Config
+                         lib/BackupPC/Lang
+                         lib/BackupPC/Storage
+                         lib/BackupPC/Xfer
+                         lib/BackupPC/Zip
+                         lib/Net/FTP
+                     ) ) {
+        next if ( -d "$DestDir$Conf{InstallDir}/$dir" );
+        mkpath("$DestDir$Conf{InstallDir}/$dir", 0, 0755);
+        if ( !-d "$DestDir$Conf{InstallDir}/$dir"
+                || !my_chown($Uid, $Gid, "$DestDir$Conf{InstallDir}/$dir") ) {
+            die("Failed to create or chown $DestDir$Conf{InstallDir}/$dir\n");
+        } else {
+            print("Created $DestDir$Conf{InstallDir}/$dir\n");
+        }
+    }
+
+    #
+    # Create CGI image directory
+    #
+    foreach my $dir ( ($Conf{CgiImageDir}) ) {
+        next if ( $dir eq "" || -d "$DestDir$dir" );
+        mkpath("$DestDir$dir", 0, 0755);
+        if ( !-d "$DestDir$dir" || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
+            die("Failed to create or chown $DestDir$dir");
+        } else {
+            print("Created $DestDir$dir\n");
+        }
+    }
+
+    #
+    # Create other directories
+    #
+    foreach my $dir ( (
+                "$Conf{TopDir}",
+                "$Conf{TopDir}/pool",
+                "$Conf{TopDir}/cpool",
+                "$Conf{TopDir}/pc",
+                "$Conf{ConfDir}",
+                "$Conf{LogDir}",
+                "$Conf{RunDir}",
+            ) ) {
+        mkpath("$DestDir$dir", 0, 0750) if ( !-d "$DestDir$dir" );
+        if ( !-d "$DestDir$dir"
+                || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
+            die("Failed to create or chown $DestDir$dir\n");
+        } else {
+            print("Created $DestDir$dir\n");
+        }
+    }
+
+    printf("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
+    foreach my $prog ( @ConfigureBinList ) {
+        InstallFile($prog, "$DestDir$Conf{InstallDir}/$prog", 0555);
+    }
+
+    #
+    # remove old pre-v4 programs
+    #
+    foreach my $prog ( qw(
+            bin/BackupPC_link
+            bin/BackupPC_tarPCCopy
+            bin/BackupPC_trashClean
+            bin/BackupPC_compressPool
+        ) ) {
+        unlink("$DestDir$Conf{InstallDir}/$prog");
+    }
+
+    printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
+    foreach my $lib ( @ConfigureLibList ) {
+        InstallFile($lib, "$DestDir$Conf{InstallDir}/$lib", 0444);
+    }
+
+    #
+    # remove old pre-v4 libraries
+    #
+    foreach my $lib ( qw(
+            lib/BackupPC/Attrib.pm
+            lib/BackupPC/Config.pm
+            lib/BackupPC/FileZIO.pm
+            lib/BackupPC/PoolWrite.pm
+            lib/BackupPC/Xfer/RsyncDigest.pm
+            lib/BackupPC/Xfer/RsyncFileIO.pm
+        ) ) {
+        unlink("$DestDir$Conf{InstallDir}/$lib");
+    }
+
+    if ( $Conf{CgiImageDir} ne "" ) {
+        printf("Installing images in $DestDir$Conf{CgiImageDir}\n");
+        foreach my $img ( <images/*> ) {
+            (my $destImg = $img) =~ s{^images/}{};
+            InstallFile($img, "$DestDir$Conf{CgiImageDir}/$destImg", 0444, 1);
+        }
+
+        #
+        # Install new CSS file, making a backup copy if necessary
+        #
+        my $cssBackup = "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css.pre-__VERSION__";
+        if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
+            rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
+        }
+        InstallFile("conf/BackupPC_stnd.css",
+                    "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", 0444, 0);
+        InstallFile("conf/BackupPC_retro_v2.css",
+                    "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v2.css", 0444, 0);
+        InstallFile("conf/BackupPC_retro_v3.css",
+                    "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v3.css", 0444, 0);
+        InstallFile("conf/sorttable.js",
+                    "$DestDir$Conf{CgiImageDir}/sorttable.js", 0444, 0);
+    }
+
+    printf("Making systemd and init.d scripts\n");
+    mkpath("systemd/init.d", 0, 0755);
+    foreach my $init ( qw(backuppc.service init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
+                          init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc
+                          init.d/freebsd-backuppc init.d/freebsd-backuppc2 init.d/suse-backuppc
+                          init.d/slackware-backuppc init.d/ubuntu-backuppc ) ) {
+        InstallFile("systemd/src/$init", "systemd/$init", 0755);
+    }
+
+    printf("Making Apache configuration file for suid-perl\n");
+    InstallFile("httpd/src/BackupPC.conf", "httpd/BackupPC.conf", 0644);
+
+    printf("Installing docs in $DestDir$Conf{InstallDir}/share/doc/BackupPC\n");
+    foreach my $doc ( qw(BackupPC.pod BackupPC.html) ) {
+        InstallFile("doc/$doc", "$DestDir$Conf{InstallDir}/share/doc/BackupPC/$doc", 0444);
+        #
+        # clean up files from old directory
+        #
+        unlink("$DestDir$Conf{InstallDir}/doc/$doc") if ( -f "$DestDir$Conf{InstallDir}/doc/$doc" );
+    }
+    #
+    # clean up old directory (ok if it quietly fails if there are other files in that directory)
+    #
+    rmdir("$DestDir$Conf{InstallDir}/doc") if ( -d "$DestDir$Conf{InstallDir}/doc" );
+
+    if ( $Conf{CgiDir} ne "" ) {
+        printf("Installing cgi script BackupPC_Admin in $DestDir$Conf{CgiDir}\n");
+        mkpath("$DestDir$Conf{CgiDir}", 0, 0755);
+        InstallFile("cgi-bin/BackupPC_Admin", "$DestDir$Conf{CgiDir}/BackupPC_Admin",
+                    04554);
+    }
+}
+
+sub CleanPidSock
+{
+    #
+    # clean pid and sock files from old location (they are now in $Conf{RunDir}, and they
+    # get re-created each time BackupPC starts, so it's ok if RunDir eq LogDir).
+    #
+    unlink("$DestDir$Conf{LogDir}/BackupPC.pid")  if ( -f "$DestDir$Conf{LogDir}/BackupPC.pid" );
+    unlink("$DestDir$Conf{LogDir}/BackupPC.sock") if ( -e "$DestDir$Conf{LogDir}/BackupPC.sock" );
+}
 
 sub InstallFile
 {
@@ -1249,6 +1281,25 @@ For example, to override $Conf{ServerHost} you would specify:
 
     --config-override ServerHost=\"myhost\"
 
+=item B<--config-only>
+
+Do not install anything else, just create or update the config.pl and hosts
+configuration files. This option can be used for automatic update of the
+configuration after upgrading BackupPC using a package. With this option enabled
+the configure.pl can be used separately from the rest of BackupPC distribution
+files. In this case you should tell it where to look for installed BackupPC
+files.
+
+So you will need to define the PERL5LIB environmental variable, for example for
+Bourne shell:
+
+    PERL5LIB=/usr/local/lib
+    configure.pl --config-only
+
+or specify the path via Perl -I flag:
+
+    perl -I /usr/local/lib configure.pl
+
 =item B<--config-path CONFIG_PATH>
 
 Path to the existing config.pl configuration file for BackupPC.
@@ -1362,6 +1413,8 @@ configure.pl verifies that the script is being run as the super user
 exit with an error if not run as the super user, and in interactive mode
 the user will be prompted.  Specifying this option will cause the script
 to continue even if the user id is not root.
+
+=back
 
 =head1 EXAMPLES
 

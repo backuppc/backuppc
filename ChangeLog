@@ -21,7 +21,12 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Applied pull requests: #44, #59, #60, #61
+* Applied pull requests: #44, #59, #60, #61, #62
+
+* Added --config-only option to configure.pl, from Alexander Moisseev (#62).
+
+* Ensure $? is 0 in bin/BackupPC_dump UserCommandRun() if no command is run,
+  reported and proposed fix by stirab (issue #67)
 
 * configure.pl replaces SourceForge links in $Conf{CgiNavBarLinks} with
   new Github links.

@@ -522,14 +522,12 @@ Ok, we're about to:
 
 EOF
 
-unless ( $opts{"config-only"} ) {
-print <<EOF;
+print <<EOF if ( !$opts{"config-only"} );
   - install the binaries, lib and docs in $Conf{InstallDir}
   - create the data directory $Conf{TopDir}
   - optionally install the cgi-bin interface
 EOF
 
-}
 print <<EOF;
   - create/update the config.pl file $Conf{ConfDir}/config.pl
 
@@ -539,12 +537,11 @@ exit unless prompt("--> Do you want to continue?", "y") =~ /y/i;
 
 CleanPidSock();
 
-DoInstall()
-  unless $opts{"config-only"};
+DoInstall() if ( !$opts{"config-only"} );
 
-printf("Installing config.pl and hosts in $DestDir$Conf{ConfDir}\n");
+print("Installing config.pl and hosts in $DestDir$Conf{ConfDir}\n");
 InstallFile("conf/hosts", "$DestDir$Conf{ConfDir}/hosts.sample", 0644)
-  unless $opts{"config-only"};
+                    if ( !$opts{"config-only"} );
 my $hostsSample = $opts{"config-only"} ? "$DestDir$Conf{ConfDir}/hosts.sample" : "conf/hosts";
 InstallFile($hostsSample, "$DestDir$Conf{ConfDir}/hosts", 0644)
                     if ( !-f "$DestDir$Conf{ConfDir}/hosts" );
@@ -714,15 +711,6 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
 }
 
 #
-# If it exists, use $Conf{RsyncClientCmd} to create the default $Conf{RsyncSshArgs}.
-#
-if ( $Conf{RsyncClientCmd} =~ /(\$sshPath.* +-l +\S+)/ && defined($newVars->{RsyncSshArgs}) ) {
-    my $value = "[\n    '-e', '$1',\n];\n\n";
-    $newConf->[$newVars->{RsyncSshArgs}]{text}
-            =~ s/(\s*\$Conf\{RsyncSshArgs}\s*=\s*).*/$1$value/s;
-}
-
-#
 # If this is an upgrade from V3, then set $Conf{PoolV3Enabled}
 # and update $Conf{RsyncArgs} and $Conf{RsyncRestoreArgs}.
 #
@@ -730,6 +718,14 @@ if ( defined($Conf{ServerHost}) && !defined($Conf{PoolV3Enabled}) ) {
     $Conf{PoolV3Enabled} = 1;
     $newConf->[$newVars->{RsyncArgs}]{text}        = $distConf->[$distVars->{RsyncArgs}]{text};
     $newConf->[$newVars->{RsyncRestoreArgs}]{text} = $distConf->[$distVars->{RsyncRestoreArgs}]{text};
+    #
+    # If it exists, use $Conf{RsyncClientCmd} to create the default $Conf{RsyncSshArgs}.
+    #
+    if ( $Conf{RsyncClientCmd} =~ /(\$sshPath.* +-l +\S+)/ && defined($newVars->{RsyncSshArgs}) ) {
+        my $value = "[\n    '-e', '$1',\n];\n\n";
+        $newConf->[$newVars->{RsyncSshArgs}]{text}
+                =~ s/(\s*\$Conf\{RsyncSshArgs}\s*=\s*).*/$1$value/s;
+    }
 }
 
 #
@@ -767,7 +763,7 @@ if ( -f $dest && !-f $confCopy ) {
     #
     # Make copy of config file, preserving ownership and modes
     #
-    printf("Making backup copy of $dest -> $confCopy\n");
+    print("Making backup copy of $dest -> $confCopy\n");
     my @stat = stat($dest);
     my $mode = $stat[2];
     my $uid  = $stat[4];
@@ -803,7 +799,7 @@ if ( !defined($oldConf) ) {
 }
 
 InstallFile($dest, "$DestDir$Conf{ConfDir}/config.pl.sample", 0644)
-  unless $opts{"config-only"};
+            if ( !$opts{"config-only"} );
 
 print <<EOF;
 
@@ -913,7 +909,7 @@ sub DoInstall
         }
     }
 
-    printf("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
+    print("Installing binaries in $DestDir$Conf{InstallDir}/bin\n");
     foreach my $prog ( @ConfigureBinList ) {
         InstallFile($prog, "$DestDir$Conf{InstallDir}/$prog", 0555);
     }
@@ -930,7 +926,7 @@ sub DoInstall
         unlink("$DestDir$Conf{InstallDir}/$prog");
     }
 
-    printf("Installing library in $DestDir$Conf{InstallDir}/lib\n");
+    print("Installing library in $DestDir$Conf{InstallDir}/lib\n");
     foreach my $lib ( @ConfigureLibList ) {
         InstallFile($lib, "$DestDir$Conf{InstallDir}/$lib", 0444);
     }
@@ -950,7 +946,7 @@ sub DoInstall
     }
 
     if ( $Conf{CgiImageDir} ne "" ) {
-        printf("Installing images in $DestDir$Conf{CgiImageDir}\n");
+        print("Installing images in $DestDir$Conf{CgiImageDir}\n");
         foreach my $img ( <images/*> ) {
             (my $destImg = $img) =~ s{^images/}{};
             InstallFile($img, "$DestDir$Conf{CgiImageDir}/$destImg", 0444, 1);
@@ -973,7 +969,7 @@ sub DoInstall
                     "$DestDir$Conf{CgiImageDir}/sorttable.js", 0444, 0);
     }
 
-    printf("Making systemd and init.d scripts\n");
+    print("Making systemd and init.d scripts\n");
     mkpath("systemd/init.d", 0, 0755);
     foreach my $init ( qw(backuppc.service init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
                           init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc
@@ -982,10 +978,10 @@ sub DoInstall
         InstallFile("systemd/src/$init", "systemd/$init", 0755);
     }
 
-    printf("Making Apache configuration file for suid-perl\n");
+    print("Making Apache configuration file for suid-perl\n");
     InstallFile("httpd/src/BackupPC.conf", "httpd/BackupPC.conf", 0644);
 
-    printf("Installing docs in $DestDir$Conf{InstallDir}/share/doc/BackupPC\n");
+    print("Installing docs in $DestDir$Conf{InstallDir}/share/doc/BackupPC\n");
     foreach my $doc ( qw(BackupPC.pod BackupPC.html) ) {
         InstallFile("doc/$doc", "$DestDir$Conf{InstallDir}/share/doc/BackupPC/$doc", 0444);
         #
@@ -999,7 +995,7 @@ sub DoInstall
     rmdir("$DestDir$Conf{InstallDir}/doc") if ( -d "$DestDir$Conf{InstallDir}/doc" );
 
     if ( $Conf{CgiDir} ne "" ) {
-        printf("Installing cgi script BackupPC_Admin in $DestDir$Conf{CgiDir}\n");
+        print("Installing cgi script BackupPC_Admin in $DestDir$Conf{CgiDir}\n");
         mkpath("$DestDir$Conf{CgiDir}", 0, 0755);
         InstallFile("cgi-bin/BackupPC_Admin", "$DestDir$Conf{CgiDir}/BackupPC_Admin",
                     04554);

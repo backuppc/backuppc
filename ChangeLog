@@ -21,7 +21,10 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Applied pull requests: #44, #59, #60, #61, #62
+* Applied pull requests: #17, #44, #59, #60, #61, #62
+
+* Fixed exponential backup expiry algorithm, submitted by Alexander
+  Moisseev (#15)
 
 * Added --config-only option to configure.pl, from Alexander Moisseev (#62).
 

@@ -1785,8 +1785,7 @@ sub BackupFullExpire
 
     $fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
     my $startTimeDeviation = $fullPeriod < 1 ? $fullPeriod / 2 : 0.5;
-    my $keepPeriod =
-      ( $fullPeriod * $fullKeepCnt->[0] - $startTimeDeviation ) * 24 * 3600;
+    my $keepPeriod = ($fullPeriod * $fullKeepCnt->[0] - $startTimeDeviation) * 24 * 3600;
 
     for ( my $i = 0 ; $i < @$Backups ; $i++ ) {
         if ( $Backups[$i]{preV4} ) {
@@ -1818,9 +1817,10 @@ sub BackupFullExpire
             #
             # Delete the full backup
             #
-            #print("Deleting backup $i ($prevFull)\n");
+            #print("Deleting backup $Backups->[$i]{num} (i = $i, k = $k, nextFull = $nextFull, prevFull = $prevFull, fullKeepIdx = $fullKeepIdx, fullCnt = $fullCnt)\n");
             unshift(@delete, $i);
         } else {
+            #printf("Keeping backup $Backups->[$i]{num} (i = $i, k = $k, nextFull = $nextFull, prevFull = $prevFull, fullKeepIdx = $fullKeepIdx, fullCnt = $fullCnt, keepPeriod = %.3g, delta = %.3g)\n", $keepPeriod / (24 * 3600), (time - $Backups->[$i]{startTime}) / (24 * 3600));
             $fullCnt++;
             $nextFull = $i;
             while ( $fullKeepIdx < @$fullKeepCnt
@@ -1831,6 +1831,7 @@ sub BackupFullExpire
                 $fullCnt = 0;
                 $fullPeriod = 2 * $fullPeriod;
             }
+            #print("    (now nextFull = $nextFull, prevFull = $prevFull, fullKeepIdx = $fullKeepIdx, fullCnt = $fullCnt, fullPeriod = $fullPeriod, fullKeepCnt[idx] = $fullKeepCnt->[$fullKeepIdx])\n");
         }
     }
     #

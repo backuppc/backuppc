@@ -1289,7 +1289,7 @@ files.
 So you will need to define the PERL5LIB environmental variable, for example for
 Bourne shell:
 
-    PERL5LIB=/usr/local/lib
+    PERL5LIB=/usr/local/lib; export PERL5LIB
     configure.pl --config-only
 
 or specify the path via Perl -I flag:

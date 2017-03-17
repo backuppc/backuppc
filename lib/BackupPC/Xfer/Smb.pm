@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.0.1, released 14 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -170,10 +170,10 @@ sub start
         $t->{_errStr} = "Can't exec $conf->{SmbClientPath}";
         return;
     }
-    my $str = "Running: " . $bpc->execCmd2ShellCmd(@$smbClientCmd) . "\n";
+    my $str = $bpc->execCmd2ShellCmd(@$smbClientCmd);
     from_to($str, $conf->{ClientCharset}, "utf8")
                             if ( $conf->{ClientCharset} ne "" );
-    $t->{XferLOG}->write(\$str);
+    $t->{XferLOG}->write(\"Running: $str\n");
     alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
     return $logMsg;

@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.0.1, released 14 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -430,10 +430,10 @@ sub start
         $t->{_errStr} = "Can't exec @$rsyncCmd)";
         return;
     }
-    my $str = "Running: " . $bpc->execCmd2ShellCmd(@$rsyncCmd) . "\n";
+    my $str = $bpc->execCmd2ShellCmd(@$rsyncCmd);
     #from_to($str, $conf->{ClientCharset}, "utf8")
     #                        if ( $conf->{ClientCharset} ne "" );
-    $t->{XferLOG}->write(\"Running: @$rsyncCmd\n");
+    $t->{XferLOG}->write(\"Running: $str\n");
     alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
     return $logMsg;

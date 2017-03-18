@@ -1,13 +1,15 @@
 [Unit]
-Description= BackupPC server
+Description=BackupPC server
 After=syslog.target local-fs.target
 
 [Service]
-Type=forking
+Type=simple
 User=__BACKUPPCUSER__
-ExecStart=__INSTALLDIR__/bin/BackupPC -d
+ExecStart=__INSTALLDIR__/bin/BackupPC
 PIDFile=__RUNDIR__/BackupPC.pid
-ExecStop=/usr/bin/kill -HUP $MAINPID
+KillSignal=SIGTERM
+Restart=always
+RestartSec=1
 
 [Install]
 WantedBy=multi-user.target

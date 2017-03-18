@@ -971,7 +971,8 @@ sub DoInstall
 
     print("Making systemd and init.d scripts\n");
     mkpath("systemd/init.d", 0, 0755);
-    foreach my $init ( qw(backuppc.service init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
+    InstallFile("systemd/src/backuppc.service", "systemd/backuppc.service", 0644);
+    foreach my $init ( qw(init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
                           init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc
                           init.d/freebsd-backuppc init.d/freebsd-backuppc2 init.d/suse-backuppc
                           init.d/slackware-backuppc init.d/ubuntu-backuppc ) ) {

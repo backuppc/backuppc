@@ -862,7 +862,7 @@ sub Main_Process_Signal
     if ( $SigName eq "HUP" ) {
         ServerReload("Re-read config file because of a SIG_HUP");
     } elsif ( $SigName ) {
-        ServerShutdown("Got signal $SigName... cleaning up");
+        ServerShutdown("Got signal $SigName... cleaning up", $SigName eq "TERM" ? 0 : 1);
     }
     $SigName = "";
 }
@@ -1616,7 +1616,7 @@ sub Main_Check_Client_Messages
                 } elsif ( $type eq 'shutdown' ) {
                     $reply = "Shutting down...\n";
                     syswrite($Clients{$client}{fh}, $reply, length($reply));
-                    ServerShutdown("Server shutting down...");
+                    ServerShutdown("Server shutting down...", 0);
                 }
             } elsif ( $cmd =~ /^quit/ || $cmd =~ /^exit/ ) {
                 $nbytes = 0;
@@ -2036,8 +2036,8 @@ sub SCGIStopStart
 #
 sub ServerShutdown
 {
-    my($mesg) = @_;
-    print(LOG $bpc->timeStamp, "$mesg\n");
+    my($mesg, $exitCode) = @_;
+    print(LOG $bpc->timeStamp, "$mesg (exit code = $exitCode)\n");
     if ( keys(%Jobs) ) {
         foreach my $host ( keys(%Jobs) ) {
             kill($bpc->sigName2num("INT"), $Jobs{$host}{pid});
@@ -2051,6 +2051,5 @@ sub ServerShutdown
     delete($Info->{pid});
     StatusWrite();
     unlink("$RunDir/BackupPC.pid");
-    exit(1);
+    exit($exitCode);
 }
-

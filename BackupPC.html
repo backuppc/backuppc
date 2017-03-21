@@ -1,108 +1,51 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html lang="en">
 <head>
-<title>BackupPC Documentation</title>
-<link rel="stylesheet" href="http://backuppc.github.io/backuppc/pod.css" type="text/css" />
-<link rev="made" href="mailto:root@localhost.com" />
-<link rel=icon href="images/logos/favicon.ico" type="image/x-icon">
+  <title>BackupPC: Open Source Backup to disk</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, Windows, linux, windows">
+  <meta name="description" content="BackupPC is a high-performance, enterprise-grade system for backing up Linux, Windows and macOS PCs and laptops to a server's disk.">
+
+  <link rel="icon" href="images/logos/favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="backuppc.css">
+
+  <meta property="og:url" content="https://backuppc.github.io/backuppc/">
+  <meta property="og:title" content="BackupPC: Open Source Backup to disk">
+  <meta property="og:description" content="BackupPC is a high-performance, enterprise-grade system for backing up Linux, Windows and macOS PCs and laptops to a server's disk.">
+  <meta property="og:site_name" content="BackupPC">
+  <meta property="og:type" content="website">
 </head>
 
 <body>
-<script language="JavaScript">
 
-<!--//
-// Browser Detection
-browser_name = navigator.appName;
-browser_version = parseFloat(navigator.appVersion); 
+<div id="layout">
 
-if (browser_name == "Netscape" && browser_version >= 3.0) { 
-    roll = 'true'; }
-else if (browser_name == "Microsoft Internet Explorer" 
-       && browser_version >= 4.0) { 
-    roll = 'true'; 
-}
-else { 
-    roll = 'false'; 
-}
+  <div id="layout">
+    <div class="nav">
+      <div class="menu nav-menu menu-fixed">
+        <div class="nav-logo"><a href="index.html">
+          <svg width="112" height="26">
+              <image xlink:href="images/logos/logo.svg" src="images/logos/logo320.png" width="112" height="26" />
+          </svg>
+        </a></div>
+        <ul>
+            <li class="menu-item"><a href="index.html" class="pure-menu-link">Home</a></li>
+            <li class="menu-item"><a href="info.html" class="pure-menu-link">About</a></li>
+            <li class="menu-item active"><a href="BackupPC.html" class="pure-menu-link">Documentation</a></li>
+            <li class="menu-item"><a target="_blank" href="https://github.com/backuppc/backuppc" class="pure-menu-link"><img src="images/logos/GitHub-Mark-32px.png" width="16" alt="Github logo"></a></li>
+        </ul>
+      </div>
+    </div>
 
-// Preload images, if browser supports mouseovers
-if (roll == 'true') {
-    var imglist = new Array (
-	"http://backuppc.github.io/backuppc/images/buttons/green/small/home.gif",
-	"http://backuppc.github.io/backuppc/images/buttons/green/small/info.gif",
-	"http://backuppc.github.io/backuppc/images/buttons/green/small/code.gif",
-	"http://backuppc.github.io/backuppc/images/buttons/green/small/docs.gif"
-    );
+  <div id="main">
+    <div class="header">
+        <h1>BackupPC Documentation</h1>
+    </div>
 
-    var imgs = new Array();
-    var count;
-    if (document.images)
-    for (count=0; count<imglist.length; count++) {
-        imgs[count]=new Image(); 
-        imgs[count].src=imglist[count];
-    }
-}
-
-function msover(img,ref) { 
-    if (roll == 'true') { 
-	document.images[img].src = ref; 
-    }
-}
-
-function msout(img,ref) { 
-    if (roll == 'true') { 
-	document.images[img].src = ref; 
-    } 
-}
-
-//-->
-</script>
-
-<p>
-<table border=0 width="100%" cellpadding=0 cellspacing=0 valign=top>
-<tr valign=top>
-  <td align=left rowspan=2>
-  <img src="http://backuppc.github.io/backuppc/images/icons/BackupPC/small/logo.gif">
-  </td>
-
-  <td align=right colspan=2>
-  <a href="http://backuppc.github.io/backuppc/index.html"             
-    onMouseOver="window.status='BackupPC Home Page';
-           msover('img_home', 'http://backuppc.github.io/backuppc/images/buttons/green/small/home.gif');"
-    onMouseOut="msout('img_home',
-            'http://backuppc.github.io/backuppc/images/buttons/blue/small/home.gif');"><img src="http://backuppc.github.io/backuppc/images/buttons/blue/small/home.gif" 
-    name="img_home"
-    width=70 height=25 border=0></a>
-
-  <a href="http://backuppc.github.io/backuppc/info.html"             
-    onMouseOver="window.status='Information about the BackupPC';
-           msover('img_info', 'http://backuppc.github.io/backuppc/images/buttons/green/small/info.gif');"
-    onMouseOut="msout('img_info',
-	    'http://backuppc.github.io/backuppc/images/buttons/blue/small/info.gif');"><img src="http://backuppc.github.io/backuppc/images/buttons/blue/small/info.gif" 
-    name="img_info"
-    width=70 height=25 border=0></a>
-
-  <a href="https://github.com/backuppc/backuppc"             
-    onMouseOver="window.status='Download BackupPC';
-           msover('img_code', 'http://backuppc.github.io/backuppc/images/buttons/green/small/code.gif');"
-    onMouseOut="msout('img_code',
-            'http://backuppc.github.io/backuppc/images/buttons/blue/small/code.gif');"><img src="http://backuppc.github.io/backuppc/images/buttons/blue/small/code.gif" 
-    name="img_code"
-    width=70 height=25 border=0></a>
-
-  <a href="BackupPC.html"
-    onMouseOver="window.status='BackupPC Documentation';
-           msover('img_docs', 'http://backuppc.github.io/backuppc/images/buttons/green/small/docs.gif');"
-    onMouseOut="msout('img_docs',
-            'http://backuppc.github.io/backuppc/images/buttons/red/small/docs.gif');"><img src="http://backuppc.github.io/backuppc/images/buttons/red/small/docs.gif" 
-    name="img_docs"
-    width=70 height=25 border=0></a>
-
-  </td>
-</tr>
-</table>
-</p>
-<h1>BackupPC Documentation</h1>
+    <div class="content">
 
 <!-- CUT HERE -->
 
@@ -198,13 +141,14 @@ function msout(img,ref) {
 </ul>
 
 <hr />
+
 <h1 id="BackupPC-Introduction">BackupPC Introduction</h1>
 
 <p>This documentation describes BackupPC version 4.0.0, released on 3 Mar 2017.</p>
 
 <h2 id="Overview">Overview</h2>
 
-<p>BackupPC is a high-performance, enterprise-grade system for backing up Unix, Linux, WinXX, and MacOSX PCs, desktops and laptops to a server&#39;s disk. BackupPC is highly configurable and easy to install and maintain.</p>
+<p>BackupPC is a high-performance, enterprise-grade system for backing up Unix, Linux, Windows, and macOS PCs, desktops and laptops to a server&#39;s disk. BackupPC is highly configurable and easy to install and maintain.</p>
 
 <p>Given the ever decreasing cost of disks and raid systems, it is now practical and cost effective to backup a large number of machines onto a server&#39;s local disk or network storage. For some sites this might be the complete backup solution. For other sites additional permanent archives could be created by periodically backing up the server to tape.</p>
 
@@ -224,7 +168,7 @@ function msout(img,ref) {
 <li><p>The http/cgi user interface has internationalization (i18n) support, currently providing English, French, German, Spanish, Italian, Dutch, Polish, Portuguese-Brazilian, Chinese, Polish, Czech, Japanese, Ukrainian, and Russian.</p>
 
 </li>
-<li><p>No client-side software is needed. On WinXX the standard smb protocol is used to extract backup data. On linux, unix or MacOSX clients, rsync, tar (over ssh/rsh/nfs) or ftp is used to extract backup data. Alternatively, rsync can also be used on WinXX (using cygwin), since rsync provides for efficient transfers and allows incremental backups to detect almost all changes.</p>
+<li><p>No client-side software is needed. On Windows the standard smb protocol is used to extract backup data. On linux, unix or macOS clients, rsync, tar (over ssh/rsh/nfs) or ftp is used to extract backup data. Alternatively, rsync can also be used on Windows (using cygwin), since rsync provides for efficient transfers and allows incremental backups to detect almost all changes.</p>
 
 </li>
 <li><p>Flexible restore options. Single files can be downloaded from any backup directly from the CGI interface. Zip or Tar archives for selected files or directories from any backup can also be downloaded from the CGI interface. Finally, direct restore to the client machine (using smb or tar) for selected files or directories is also supported from the CGI interface.</p>
@@ -647,7 +591,7 @@ function msout(img,ref) {
 <p>For BackupPC to use Rsync you will also need to install rsync-bpc on the server.</p>
 
 </li>
-<li><p>If you are using smb to backup WinXX machines you need smbclient and nmblookup from the samba package. You will also need nmblookup if you are backing up linux/unix DHCP machines. See <a href="http://www.samba.org">http://www.samba.org</a>.</p>
+<li><p>If you are using smb to backup Windows machines you need smbclient and nmblookup from the samba package. You will also need nmblookup if you are backing up linux/unix DHCP machines. See <a href="http://www.samba.org">http://www.samba.org</a>.</p>
 
 <p>See <a href="http://www.samba.org">http://www.samba.org</a> for source and binaries. It&#39;s pretty easy to fetch and compile samba, and just grab smbclient and nmblookup, without doing the installation. Alternatively, <a href="http://www.samba.org">http://www.samba.org</a> has binary distributions for most platforms.</p>
 
@@ -936,26 +880,26 @@ function msout(img,ref) {
 
 <h2 id="Step-5:-Client-Setup">Step 5: Client Setup</h2>
 
-<p>Four methods for getting backup data from a client are supported: smb, tar, rsync and ftp. Smb or rsync are the preferred methods for WinXX clients and rsync or tar are the preferred methods for linux/unix/MacOSX clients.</p>
+<p>Four methods for getting backup data from a client are supported: smb, tar, rsync and ftp. Smb or rsync are the preferred methods for Windows clients and rsync or tar are the preferred methods for linux/unix/macOS clients.</p>
 
-<p>The transfer method is set using the <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> configuration setting. If you have a mixed environment (ie: you will use smb for some clients and tar for others), you will need to pick the most common choice for <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> for the main config.pl file, and then override it in the per-PC config file for those hosts that will use the other method. (Or you could run two completely separate instances of BackupPC, with different data directories, one for WinXX and the other for linux/unix, but then common files between the different machine types will duplicated.)</p>
+<p>The transfer method is set using the <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> configuration setting. If you have a mixed environment (ie: you will use smb for some clients and tar for others), you will need to pick the most common choice for <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> for the main config.pl file, and then override it in the per-PC config file for those hosts that will use the other method. (Or you could run two completely separate instances of BackupPC, with different data directories, one for Windows and the other for linux/unix, but then common files between the different machine types will duplicated.)</p>
 
 <p>Here are some brief client setup notes:</p>
 
 <dl>
 
-<dt id="WinXX">WinXX</dt>
+<dt id="Windows">Windows</dt>
 <dd>
 
-<p>One setup for WinXX clients is to set <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;smb&quot;. Actually, rsyncd is the better method for WinXX if you are prepared to run rsync/cygwin on your WinXX client.</p>
+<p>One setup for Windows clients is to set <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;smb&quot;. Actually, rsyncd is the better method for Windows if you are prepared to run rsync/cygwin on your Windows client.</p>
 
-<p>If you want to use rsyncd for WinXX clients you can find a pre-packaged zip file on <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>. The package is called cygwin-rsync. It contains rsync.exe, template setup files and the minimal set of cygwin libraries for everything to run. The README file contains instructions for running rsync as a service, so it starts automatically everytime you boot your machine. If you use rsync to backup WinXX machines, be sure to set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> correctly (eg: &#39;cp1252&#39;) so that the WinXX filename encoding is correctly converted to utf8.</p>
+<p>If you want to use rsyncd for Windows clients you can find a pre-packaged zip file on <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>. The package is called cygwin-rsync. It contains rsync.exe, template setup files and the minimal set of cygwin libraries for everything to run. The README file contains instructions for running rsync as a service, so it starts automatically everytime you boot your machine. If you use rsync to backup Windows machines, be sure to set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> correctly (eg: &#39;cp1252&#39;) so that the Windows filename encoding is correctly converted to utf8.</p>
 
 <p>Otherwise, to use SMB, you can either create shares for the data you want to backup or your can use the existing C$ share. To create a new share, open &quot;My Computer&quot;, right click on the drive (eg: C), and select &quot;Sharing...&quot; (or select &quot;Properties&quot; and select the &quot;Sharing&quot; tab). In this dialog box you can enable sharing, select the share name and permissions.</p>
 
 <p>All Windows NT based OS (NT, 2000, XP Pro), are configured by default to share the entire C drive as C$. This is a special share used for various administration functions, one of which is to grant access to backup operators. All you need to do is create a new domain user, specifically for backup. Then add the new backup user to the built in &quot;Backup Operators&quot; group. You now have backup capability for any directory on any computer in the domain in one easy step. This avoids using administrator accounts and only grants permission to do exactly what you want for the given user, i.e.: backup. Also, for additional security, you may wish to deny the ability for this user to logon to computers in the default domain policy.</p>
 
-<p>If this machine uses DHCP you will also need to make sure the NetBios name is set. Go to Control Panel|System|Network Identification (on Win2K) or Control Panel|System|Computer Name (on WinXP). Also, you should go to Control Panel|Network Connections|Local Area Connection|Properties|Internet Protocol (TCP/IP)|Properties|Advanced|WINS and verify that NetBios is not disabled.</p>
+<p>If this machine uses DHCP you will also need to make sure the NetBios name is set. Go to Control Panel|System|Network Identification (on Windows 2000) or Control Panel|System|Computer Name (on Windows XP). Also, you should go to Control Panel|Network Connections|Local Area Connection|Properties|Internet Protocol (TCP/IP)|Properties|Advanced|WINS and verify that NetBios is not disabled.</p>
 
 <p>The relevant configuration settings are <a href="#_conf_smbsharename_">$Conf{SmbShareName}</a>, <a href="#_conf_smbshareusername_">$Conf{SmbShareUserName}</a>, <a href="#_conf_smbsharepasswd_">$Conf{SmbSharePasswd}</a>, <a href="#_conf_smbclientpath_">$Conf{SmbClientPath}</a>, <a href="#_conf_smbclientfullcmd_">$Conf{SmbClientFullCmd}</a>, <a href="#_conf_smbclientincrcmd_">$Conf{SmbClientIncrCmd}</a> and <a href="#_conf_smbclientrestorecmd_">$Conf{SmbClientRestoreCmd}</a>.</p>
 
@@ -979,7 +923,7 @@ function msout(img,ref) {
 
 <p>Placement and protection of the smb share password is a significant security issue, so please double-check the file and directory permissions. In a future version there might be support for encryption of this password, but a private key will still have to be stored in a protected place. Suggestions are welcome.</p>
 
-<p>As an alternative to setting <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;smb&quot; (using smbclient) for WinXX clients, you can use an smb network filesystem (eg: ksmbfs or similar) on your linux/unix server to mount the share, and then set <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;tar&quot; (use tar on the network mounted file system).</p>
+<p>As an alternative to setting <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;smb&quot; (using smbclient) for Windows clients, you can use an smb network filesystem (eg: ksmbfs or similar) on your linux/unix server to mount the share, and then set <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;tar&quot; (use tar on the network mounted file system).</p>
 
 <p>Also, to make sure that filenames with special characters are correctly transferred by smbclient you should make sure that the smb.conf file has (for samba 3.x):</p>
 
@@ -1053,10 +997,10 @@ function msout(img,ref) {
 <p>There are two common versions of ssh: v1 and v2. Here are some instructions for one way to setup ssh. (Check which version of SSH you have by typing &quot;ssh&quot; or &quot;man ssh&quot;.)</p>
 
 </dd>
-<dt id="MacOSX">MacOSX</dt>
+<dt id="macOS">macOS</dt>
 <dd>
 
-<p>In general this should be similar to Linux/Unix machines. In versions 10.4 and later, the native MacOSX tar works, and also supports resource forks. xtar is another option, and rsync works too (although the MacOSX-supplied rsync has an extension for extended attributes that is not compatible with standard rsync).</p>
+<p>In general this should be similar to Linux/Unix machines. In versions 10.4 and later, the native macOS tar works, and also supports resource forks. xtar is another option, and rsync works too (although the macOS-supplied rsync has an extension for extended attributes that is not compatible with standard rsync).</p>
 
 </dd>
 <dt id="SSH-Setup">SSH Setup</dt>
@@ -1074,7 +1018,7 @@ function msout(img,ref) {
 
 <p>If a client machine uses DHCP BackupPC needs some way to find the IP address given the hostname. One alternative is to set dhcp to 1 in the hosts file, and BackupPC will search a pool of IP addresses looking for hosts. More efficiently, it is better to set dhcp = 0 and provide a mechanism for BackupPC to find the IP address given the hostname.</p>
 
-<p>For WinXX machines BackupPC uses the NetBios name server to determine the IP address given the hostname. For unix machines you can run nmbd (the NetBios name server) from the Samba distribution so that the machine responds to a NetBios name request. See the manual page and Samba documentation for more information.</p>
+<p>For Windows machines BackupPC uses the NetBios name server to determine the IP address given the hostname. For unix machines you can run nmbd (the NetBios name server) from the Samba distribution so that the machine responds to a NetBios name request. See the manual page and Samba documentation for more information.</p>
 
 <p>Alternatively, you can set <a href="#_conf_nmblookupfindhostcmd_">$Conf{NmbLookupFindHostCmd}</a> to any command that returns the IP address given the hostname.</p>
 
@@ -1241,7 +1185,7 @@ function msout(img,ref) {
         Options +ExecCGI
         Order deny,allow
         Deny from all
-        Allow from 192.168.0  
+        Allow from 192.168.0
         AuthName &quot;Backup Admin&quot;
         AuthType Basic
         AuthUserFile /path/to/user_file
@@ -1511,7 +1455,7 @@ function msout(img,ref) {
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the tar archive is created
-  
+
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -1542,7 +1486,7 @@ function msout(img,ref) {
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the zip archive is created
-  
+
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -1721,7 +1665,7 @@ function msout(img,ref) {
           -v     - verbose
       Notes: in case there are legacy (ie: &lt;=4.0.0alpha3) unapplied poolCntDelta
       files in TopDir/pc/HOST/refCnt then the -f flag is turned on.
-  
+
     BackupPC_refCountUpdate -m [-f] [-p] [-c] [-r N-M] [-s] [-v] [-P phase]
           -m       Updates main count db, based on each HOST
           -f     - do an fsck on all the hosts, ignoring poolCntDelta files,
@@ -3133,19 +3077,19 @@ function msout(img,ref) {
 <strong><dt id="_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;smb&#39;;</dt></strong>
 <dd>
 
-<p>What transport method to use to backup each host. If you have a mixed set of WinXX and linux/unix hosts you will need to override this in the per-PC config.pl.</p>
+<p>What transport method to use to backup each host. If you have a mixed set of Windows and linux/unix hosts you will need to override this in the per-PC config.pl.</p>
 
 <p>The valid values are:</p>
 
 <pre><code>  - &#39;smb&#39;:     backup and restore via smbclient and the SMB protocol.
-               Easiest choice for WinXX.
+               Easiest choice for Windows.
 
   - &#39;rsync&#39;:   backup and restore via rsync (via rsh or ssh).
-               Best choice for linux/unix.  Good choice also for WinXX.
+               Best choice for linux/unix.  Good choice also for Windows.
 
   - &#39;rsyncd&#39;:  backup and restore via rsync daemon on the client.
                Best choice for linux/unix if you have rsyncd running on
-               the client.  Good choice also for WinXX.
+               the client.  Good choice also for Windows.
 
   - &#39;tar&#39;:    backup and restore via tar, tar over ssh, rsh or nfs.
               Good choice for linux/unix.
@@ -3168,9 +3112,9 @@ function msout(img,ref) {
 
 <p>If the filenames displayed in the browser (eg: accents or special characters) don&#39;t look right then it is likely you haven&#39;t set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> correctly.</p>
 
-<p>If you are using smbclient on a WinXX machine, smbclient will convert to the &quot;unix charset&quot; setting in smb.conf. The default is utf8, in which case leave <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> empty since smbclient does the right conversion.</p>
+<p>If you are using smbclient on a Windows machine, smbclient will convert to the &quot;unix charset&quot; setting in smb.conf. The default is utf8, in which case leave <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> empty since smbclient does the right conversion.</p>
 
-<p>If you are using rsync on a WinXX machine then it does no conversion. A typical WinXX encoding for latin1/western europe is &#39;cp1252&#39;, so in this case set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> to &#39;cp1252&#39;.</p>
+<p>If you are using rsync on a Windows machine then it does no conversion. A typical Windows encoding for latin1/western europe is &#39;cp1252&#39;, so in this case set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> to &#39;cp1252&#39;.</p>
 
 <p>On a linux or unix client, run &quot;locale charmap&quot; to see the client&#39;s charset. Set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> to this value. A typical value for english/US is &#39;ISO-8859-1&#39;.</p>
 
@@ -3180,7 +3124,7 @@ function msout(img,ref) {
 <strong><dt id="_conf_clientcharsetlegacy_">$Conf{ClientCharsetLegacy}</a> = &#39;iso-8859-1&#39;;</dt></strong>
 <dd>
 
-<p>Prior to 3.x no charset conversion was done by BackupPC. Backups were stored in whatever charset the XferMethod provided - typically utf8 for smbclient and the client&#39;s locale settings for rsync and tar (eg: cp1252 for rsync on WinXX and perhaps iso-8859-1 with rsync on linux). This setting tells BackupPC the charset that was used to store filenames in old backups taken with BackupPC 2.x, so that non-ascii filenames in old backups can be viewed and restored.</p>
+<p>Prior to 3.x no charset conversion was done by BackupPC. Backups were stored in whatever charset the XferMethod provided - typically utf8 for smbclient and the client&#39;s locale settings for rsync and tar (eg: cp1252 for rsync on Windows and perhaps iso-8859-1 with rsync on linux). This setting tells BackupPC the charset that was used to store filenames in old backups taken with BackupPC 2.x, so that non-ascii filenames in old backups can be viewed and restored.</p>
 
 </dd>
 </dl>
@@ -4237,7 +4181,7 @@ function msout(img,ref) {
 
 <p>Craig Barratt &lt;cbarratt@users.sourceforge.net&gt;</p>
 
-<p>See <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>.</p>
+<p>See <a href="https://backuppc.github.io/backuppc/">https://backuppc.github.io/backuppc/</a>.</p>
 
 <hr />
 <h1 id="Copyright">Copyright</h1>
@@ -4304,14 +4248,8 @@ function msout(img,ref) {
 
 <!-- CUT HERE -->
 
-<p>
-<hr>
-<center>
-<a href="https://github.com/backuppc/backuppc"><img src="images/logos/GitHub_Logo.png" width="120" alt="Get BackupPC at Github"></a>
+</div>
 
-<br clear=all>
-<font size="-1" color="#666666">BackupPC is hosted on <a href="https://github.com/backuppc/backuppc">Github</a>, and is distributed under a GPL license.  BackupPC is &copy; Copyright 2001-2017 Craig Barratt.</font>
-
-</center>
+</div>
 </body>
 </html>

@@ -21,10 +21,14 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Applied pull requests: #17, #44, #59, #60, #61, #62
+* Merged pull requests: #17, #44, #59, #60, #61, #62,#68, #69
+
+* Fixed rsync restores, based on patch from Stephen Joyce
+
+* Improvements to Gentoo init.d script (#69) from sigmoidal.
 
 * Fixed exponential backup expiry algorithm, submitted by Alexander
-  Moisseev (#15)
+  Moisseev (#17)
 
 * Added --config-only option to configure.pl, from Alexander Moisseev (#62).
 
@@ -35,9 +39,9 @@
   new Github links.
 
 * Added BackupPC_migrateV3toV4 that migrates old V3 backup storage to
-  V4, eliminating hardlinks.  The forward merging of V3 incrementals
-  is not changed; just the backup tree is updated to use V4 attrib files,
-  and the linked V3 files are removed.
+  V4, eliminating hardlinks.  The forward merging of V3 incrementals is
+  not changed; just the backup tree is updated to use V4 attrib files, and
+  the linked V3 files are removed.  Thanks to Michael Huntley for testing.
 
 * Renamed init.d to systemd, added systemd/src/backuppc.service template
 

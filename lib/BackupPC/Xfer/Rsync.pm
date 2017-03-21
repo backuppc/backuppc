@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.1, released 14 Mar 2017.
+# Version 4.0.2, released 18 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -93,15 +93,16 @@ sub start
         # Otherwise, we remove $t->{pathHdrSrc} from each of fileList,
         # and it's the user's responsibility to make sure the target
         # directory exists.
-        # 
-
+        #
         if ( $remoteDir =~ m{(.*)\Q$t->{pathHdrSrc}\E(/*)$} ) {
             $remoteDir = "$1$2";
             $t->{XferLOG}->write(\"Trimming $t->{pathHdrSrc} from remoteDir -> $remoteDir\n");
         } else {
             for ( my $i = 0 ; $i < @{$t->{fileList}} ; $i++ ) {
                 $t->{fileList}[$i] = substr($t->{fileList}[$i], length($t->{pathHdrSrc}));
+                $t->{fileList}[$i] = "." if ( $t->{fileList}[$i] eq "" );
             }
+            $srcDir = $t->{pathHdrSrc} if ($t->{pathHdrSrc});
             $t->{XferLOG}->write(\"Trimming $t->{pathHdrSrc} from filesList\n");
         }
 

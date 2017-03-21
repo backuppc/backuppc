@@ -410,9 +410,9 @@ sub updateHostRefCounts
             my $poolCntFileNew = sprintf("%s/poolCntNew.%d.%02x",
                                          $refCntDestDir, $compress, $refCntFile * 2);
             for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-                next if ( $Backups[$i]{version} eq "" || ($Backups[$i]{version} =~ /^[23]\./ && !-d $bkupRefCntDir) );
                 my $bkupNum = $Backups[$i]{num};
                 my $refCntBkupDir = "$TopDir/pc/$host/$bkupNum/refCnt";
+                next if ( $Backups[$i]{version} eq "" || ($Backups[$i]{version} =~ /^[23]\./ && !-d $refCntBkupDir) );
                 my $poolCntHostFile = sprintf("%s/poolCnt.%d.%02x", $refCntBkupDir, $compress, $refCntFile * 2);
                 next if ( !-f $poolCntHostFile );
 

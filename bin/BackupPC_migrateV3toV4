@@ -63,13 +63,18 @@ my $Hosts  = $bpc->HostInfoRead();
 
 my %opts;
 
-if ( !getopts("pvh:n:", \%opts) || @ARGV >= 1 || (!defined($opts{h}) && defined($opts{n})) ) {
+if ( !getopts("ampvh:n:", \%opts) || @ARGV >= 1
+        || !(defined($opts{a}) xor defined($opts{h}))
+        || (!defined($opts{h}) && defined($opts{n})) ) {
     print STDERR <<EOF;
-usage: BackupPC_migrateV3toV4 [-h host [-n V3backupNum]] [-p]
+usage: BackupPC_migrateV3toV4 -a [-m] [-p] [-v]
+       BackupPC_migrateV3toV4 -h host [-n V3backupNum] [-m] [-p] [-v]
   Options:
-     -h host         host name; does all hosts if not specified
-     -n V3backupNum  migrate specific backup; does all V3 backups
-                     if not specified
+     -a              migrate all hosts and all backups
+     -h host         migrate just a specific host
+     -n V3backupNum  migrate specific host backup; does all V3 backups
+                     for that host if not specified
+     -m              don't migrate anything; just print what would be done
      -p              don't print progress information
      -v              verbose
 EOF
@@ -145,6 +150,16 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
         $FileCntTotal = $Backups[$i]{nFiles};
         $FileCntIncr  = int($FileCntTotal / 500);
         $FileCntIncr  = 2 if ( $FileCntIncr < 2 );
+        #
+        #
+        # Migrate the V3 backup from $SrcDir to $DestDir
+        #
+        if ( -d "$SrcDir/refCnt" ) {
+            print("BackupPC_migrateV3toV4: backup $Backups[$i]{num} for host $Host already has a refCnt directory; skipping this backup\n");
+            next;
+        }
+        print("BackupPC_migrateV3toV4: migrating host $Host backup #$BkupNum to V4 (approx $FileCntTotal files)\n") if ( !$opts{p} );
+        next if ( $opts{m} );
 
         if ( -d $DestDir ) {
             print("BackupPC_migrateV3toV4: removing temp target directory $DestDir\n");
@@ -154,18 +169,9 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
                 next;
             }
         }
-        if ( -d "$SrcDir/refCnt" ) {
-            print("BackupPC_migrateV3toV4: backup $Backups[$i]{num} for host $Host already has a refCnt directory; skipping this backup\n");
-            next;
-        }
 
         createFsckFile($DestDir);
         $bpc->flushXSLibMesgs();
-
-        #
-        # Migrate the V3 backup from $SrcDir to $DestDir
-        #
-        print("BackupPC_migrateV3toV4: migrating host $Host backup #$BkupNum to V4 (approx $FileCntTotal files)\n") if ( !$opts{p} );
 
         $DeltaInfo = BackupPC::XS::DeltaRefCnt::new($DestDir);
 	if ( !chdir($SrcDir) ) {
@@ -214,6 +220,7 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
         print("BackupPC_migrateV3toV4: converted backup in $SrcDir; removing $SrcDir.old\n");
         BackupPC::DirOps::RmTreeQuiet($bpc, "$SrcDir.old", -2);
     }
+    next if ( $opts{m} );
     if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0") != 0 ) {
         print("BackupPC_migrateV3toV4: BackupPC_refCountUpdate exited with errors\n");
         $ErrorCnt++
@@ -233,7 +240,7 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
     $bpc->BackupInfoWrite($Host, @Backups) if ( $updateBackups );
 }
 
-print("BackupPC_migrateV3toV4: got $ErrorCnt error" . $ErrorCnt == 1 ? "\n" : "s\n");
+print("BackupPC_migrateV3toV4: got $ErrorCnt error" . ($ErrorCnt == 1 ? "\n" : "s\n"));
 exit($ErrorCnt ? 1 : 0);
 
 sub update_v3_dir

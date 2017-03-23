@@ -92,7 +92,7 @@ are configurable.
 
 =item *
 
-BackupPC is Open Source software hosted by SourceForge.
+BackupPC is Open Source software hosted by GitHub.
 
 =back
 
@@ -648,9 +648,10 @@ is much easier, allowing remote copying of the pool.
 
 The BackupPC project page is at:
 
-    http://backuppc.sourceforge.net
+    https://backuppc.github.io/backuppc
 
-This page has links to the current documentation, github and general information.
+This page has links to the current documentation, github project source
+and general information.
 
 =item Github
 
@@ -921,9 +922,7 @@ Start by downloading the latest version from
 
     https://github.com/backuppc/backuppc/releases
 
-You can also download the distribution from L<http://backuppc.sourceforge.net>.
-Hit the "Code" button, then select the "backuppc" or "backuppc-beta" package and
-download the latest version.
+You can also download the distribution from L<https://sourceforge.net/projects/backuppc/files>.
 
 =head2 Step 2: Installing the distribution
 
@@ -2371,6 +2370,52 @@ the host reference counts, the overall pool reference counts and stats.  Usage:
        -f              force regeneration of per-host reference counts
        -n              don't remove zero count pool files - print only
        -s              recompute pool stats
+
+=item BackupPC_migrateV3toV4
+
+If you upgraded an existing 3.x installation, BackupPC 4.x is backward compatible with 3.x backups:
+it can browse, view and restore files.  However, the existing 3.x backups will still use hardlinks
+for storage, and until those 3.x backups eventually expire, hardlinks will still be used for 3.x
+backups.
+
+BackupPC_migrateV3toV4 is an optional utility that can migrate existing 3.x backups to 4.x stoage
+format, eliminating hardlinks.  This allows you to eliminate the old V3 pool and you can then
+set $Conf{PoolV3Enabled} to 0.
+
+    BackupPC_migrateV3toV4 -a [-m] [-p] [-v]
+    BackupPC_migrateV3toV4 -h host [-n V3backupNum] [-m] [-p] [-v]
+    Options:
+       -a              migrate all hosts and all backups
+       -h host         migrate just a specific host
+       -n V3backupNum  migrate specific host backup; does all V3 backups
+      		       for that host if not specified
+       -m              don't migrate anything; just print what would be done
+       -p              don't print progress information
+       -v              verbose
+
+If you want to test BackupPC_migrateV3toV4, a cautious approach is to make
+backup copies of the V3 backups, allowing you to restore them if there is
+any issue.  For example, if exampleHost has three 3.x backups numbered 5,
+6, 7, you can use cp -prl (preserving hardlinks) to make copies:
+
+    cd /data/BackupPC/pc/exampleHost
+    mv 5 5.orig ; cp -prl 5.orig 5
+    mv 6 6.orig ; cp -prl 6.orig 6
+    mv 7 7.orig ; cp -prl 7.orig 7
+    cp backups backups.save
+
+    BackupPC_migrateV3toV4 -h exampleHost -n 5
+    BackupPC_migrateV3toV4 -h exampleHost -n 6
+    BackupPC_migrateV3toV4 -h exampleHost -n 7
+
+If you want to put things back the way they were:
+
+    rm -rf 5 ; mv 5.orig 5
+    rm -rf 6 ; mv 6.orig 6
+    rm -rf 7 ; mv 7.orig 7
+    # copy the [567] lines from backups.save into backups;
+    # only do "cp backups.save backups" if you are sure no
+    # new backups have been done
 
 =item BackupPC_poolCntPrint
 

@@ -70,7 +70,7 @@ there.
 EOF
 }
 
-my @Packages = qw(version Encode File::Path File::Spec File::Copy DirHandle
+my @Packages = qw(version Encode Socket File::Path File::Spec File::Copy DirHandle
                   Digest::MD5 Data::Dumper Getopt::Std Getopt::Long Pod::Usage
                   File::Listing CGI BackupPC::XS BackupPC::Lib);
 

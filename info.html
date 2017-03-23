@@ -18,6 +18,36 @@
   <meta property="og:description" content="BackupPC is a high-performance, enterprise-grade system for backing up Linux, Windows and macOS PCs and laptops to a server's disk.">
   <meta property="og:site_name" content="BackupPC">
   <meta property="og:type" content="website">
+
+  <script>
+  var ScreenshotsImages = [
+    'images/screens/BackupPCServerStatus.png',
+    'images/screens/BackupPCServerSummary.png',
+    'images/screens/BackupPCServerLog.png',
+    'images/screens/BackupPCBackupSummary.png',
+    'images/screens/BackupPCBackupBrowse.png',
+    'images/screens/BackupPCRestoreOptions.png',
+    'images/screens/BackupPCEditConfig.png',
+    'images/screens/BackupPCBackupLog.png'
+  ];
+  var ScreenshotsCurrent = 0;
+  function backuppc_thumbnail_remove() {
+    //document.getElementById('screenshot').style.display = 'none';
+    remove();
+  }
+  function backuppc_thumbnail(number) {
+    document.getElementById('screenshot-img').src = ScreenshotsImages[number];
+    document.getElementById('button_prev').disabled = !(number > 0);
+    document.getElementById('button_next').disabled = !(number < (ScreenshotsImages.length - 1));
+    ScreenshotsCurrent = number;
+    remove();
+    uglipop( {
+      class: 'thumnail-pop',
+      source: 'div',
+      content: 'screenshot'
+    } );
+  }
+  </script>
 </head>
 
 <body>
@@ -110,81 +140,33 @@
 Here are some screen shots of BackupPC's web interface that provide
 an overview of various BackupPC features.</p>
 
-<style>
-.thumbnail {
-  cursor: pointer;
-}
-.thumnail-pop {
-  border-radius: 6px;
-  background-color: #f0f0f0;
-  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.4);
-  color: black;
-  margin: 64px;
-  text-align: center;
-  padding: 16px;
-
-}
-.thumnail-pop > img {
-  border: 1px solid gray;
-  margin: 6px;
-  width: 800px;
-  padding-bottom: 4px;
-}
-</style>
-
-<script>
-var ScreenshotsImages = [
-  'images/screens/BackupPCServerStatus.png',
-  'images/screens/BackupPCServerSummary.png',
-  'images/screens/BackupPCServerLog.png',
-  'images/screens/BackupPCBackupSummary.png',
-  'images/screens/BackupPCBackupBrowse.png',
-  'images/screens/BackupPCRestoreOptions.png',
-  'images/screens/BackupPCEditConfig.png',
-  'images/screens/BackupPCBackupLog.png'
-];
-var ScreenshotsCurrent = 0;
-function backuppc_thumbnail(number) {
-  document.getElementById('screenshot-img').src = ScreenshotsImages[number];
-  document.getElementById('button_prev').disabled = !(number > 0);
-  document.getElementById('button_next').disabled = !(number < (ScreenshotsImages.length - 1));
-  ScreenshotsCurrent = number;
-  remove();
-  uglipop( {
-    class: 'thumnail-pop',
-    source: 'div',
-    content: 'screenshot'
-  } );
-}
-</script>
-
 <div id="screenshot" style="display: none;">
   <img id="screenshot-img" src=\"images/screens/BackupPCServerStatus.png\"></img>
 
-  <button id="button_prev" onclick="backuppc_thumbnail(ScreenshotsCurrent - 1);" type="button">&lt; Previous</button>
-  <button onclick="remove();" type="button">Close</button>
-  <button id="button_next" onclick="backuppc_thumbnail(ScreenshotsCurrent + 1);" type="button">Next &gt;</button>
+  <button id="button_prev" onclick="backuppc_thumbnail(ScreenshotsCurrent - 1); return false;" type="button">&lt; Previous</button>
+  <button onclick="backuppc_thumbnail_remove(); return false;" type="button">Close</button>
+  <button id="button_next" onclick="backuppc_thumbnail(ScreenshotsCurrent + 1); return false;" type="button">Next &gt;</button>
 </div>
 
 <table>
   <tr>
-    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(0);"><img src="images/thumbs/tn_BackupPCServerStatus.jpeg" width=128 height=60></a>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(0); return false;"><img src="images/thumbs/tn_BackupPCServerStatus.jpeg" width=128 height=60></a>
     <br />Server summary</td>
-    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(1);"><img src="images/thumbs/tn_BackupPCServerSummary.jpeg" width=128 height=60></a>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(1); return false;"><img src="images/thumbs/tn_BackupPCServerSummary.jpeg" width=128 height=60></a>
     <br />Hosts summary</td>
-    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(2);"><img src="images/thumbs/tn_BackupPCServerLog.jpeg" width=128 height=60></a>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(2); return false;"><img src="images/thumbs/tn_BackupPCServerLog.jpeg" width=128 height=60></a>
     <br />Main log file</td>
-    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(3);"><img src="images/thumbs/tn_BackupPCBackupSummary.jpeg" width=128 height=60></a>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(3); return false;"><img src="images/thumbs/tn_BackupPCBackupSummary.jpeg" width=128 height=60></a>
     <br />Host detail</td>
   </tr>
   <tr>
-    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(4);"><img src="images/thumbs/tn_BackupPCBackupBrowse.jpeg" width=128 height=60></a>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(4); return false;"><img src="images/thumbs/tn_BackupPCBackupBrowse.jpeg" width=128 height=60></a>
     <br />Backup browsing</td>
-    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(5);"><img src="images/thumbs/tn_BackupPCRestoreOptions.jpeg" width=128 height=60></a>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(5); return false;"><img src="images/thumbs/tn_BackupPCRestoreOptions.jpeg" width=128 height=60></a>
     <br />Restore</td>
-    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(6);"><img src="images/thumbs/tn_BackupPCEditConfig.jpeg" width=128 height=60></a>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(6); return false;"><img src="images/thumbs/tn_BackupPCEditConfig.jpeg" width=128 height=60></a>
     <br />Config edit</td>
-    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(7);"><img src="images/thumbs/tn_BackupPCBackupLog.jpeg" width=128 height=60></a>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(7); return false;"><img src="images/thumbs/tn_BackupPCBackupLog.jpeg" width=128 height=60></a>
     <br />Host log file</td>
   </tr>
 </table>

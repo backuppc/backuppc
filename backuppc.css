@@ -125,3 +125,22 @@ svg, image {
 .menu li a:hover {
   color: #AECFE5;
 }
+.thumbnail {
+  cursor: pointer;
+}
+.thumnail-pop {
+  border-radius: 6px;
+  background-color: #f0f0f0;
+  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.4);
+  color: black;
+  margin: 64px;
+  text-align: center;
+  padding: 16px;
+
+}
+.thumnail-pop > img {
+  border: 1px solid gray;
+  margin: 6px;
+  width: 800px;
+  padding-bottom: 4px;
+}

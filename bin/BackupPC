@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.0.1, released 12 Mar 2017.
+# Version 4.0.2, released 18 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -111,7 +111,7 @@ if ( $BackupPC::XS::VERSION < 0.50 ) {
 if ( $Conf{RsyncBackupPCPath} ne "" && -x $Conf{RsyncBackupPCPath} ) {
     my $output = $bpc->cmdSystemOrEval([$Conf{RsyncBackupPCPath}, "--version"]);
     if ( $? ) {
-        print(STDERR "BackupPC: can't run $Conf{RsyncBackupPCPath} for version check; ($output) exiting in 30s\n");
+        print(STDERR "BackupPC: can't run $Conf{RsyncBackupPCPath} for rsync_bpc version check; ($output) exiting in 30s\n");
         sleep(30);
         exit(1);
     }

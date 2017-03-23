@@ -2276,7 +2276,7 @@ the Archive Hosts's pc directory, adding the following line:
 
 $Conf{XferMethod} = 'archive';
 
-To further customise the archive's parameters you can adding the changed
+To further customise the archive's parameters you can add the changed
 parameters in the host's config.pl file. The parameters are explained in
 the config.pl file.  Parameters may be fixed or the user can be allowed 
 to change them (eg: output device).
@@ -3438,7 +3438,7 @@ Javier Gonzalez provided the Spanish translation, es.pm for v2.0.0.
 
 Manfred Herrmann provided the German translation, de.pm for v2.0.0.
 Manfred continues to support de.pm updates for each new version,
-together with some help from Ralph Paﬂgang.
+together with some help from Ralph Pa√ügang.
 
 Lorenzo Cappelletti provided the Italian translation, it.pm for v2.1.0.
 Giuseppe Iuculano and Vittorio Macchi updated it for 3.0.0.

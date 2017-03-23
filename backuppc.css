@@ -1,0 +1,146 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Roboto', sans-serif;
+}
+
+footer {
+  text-align: center;
+  color: gray;
+}
+
+h1 {
+    font-size: 2em;
+    margin: .67em 0;
+}
+h2 {
+    margin: 50px 0 20px 0;
+    font-weight: 300;
+    color: #888;
+}
+
+a, a:visited {
+  color: #0074C7;
+}
+
+#layout {
+  position: relative;
+  left: 0;
+  padding-left: 0;
+}
+
+.content {
+    margin: 0 auto;
+    padding: 0 2em;
+    max-width: 800px;
+    margin-bottom: 50px;
+    line-height: 1.6em;
+}
+
+.header {
+     margin: 0;
+     color: #333;
+     text-align: center;
+     padding: 2.5em 2em 0;
+     disabled-border-bottom: 1px solid #eee;
+ }
+
+.header h1 {
+    margin: 0.2em 0;
+    font-size: 3em;
+    font-weight: 300;
+}
+
+.header h2 {
+    font-weight: 300;
+    color: #aaa;
+    padding: 0;
+    margin-top: 0;
+}
+
+.content-subhead {
+    margin: 50px 0 20px 0;
+    font-weight: 300;
+    color: #888;
+}
+
+
+/*
+ * Navigation and menu
+ */
+.nav {
+  margin-bottom: 16px;
+  padding: 12px 32px 12px 32px;
+}
+
+.nav-logo {
+  float: left;
+}
+
+svg, image {
+  border: none;
+  border-width: 0;
+}
+
+.nav-menu {
+  padding: 1.2em;
+  box-shadow: 0 1px 1px rgba(0,0,0, 0.10);
+  d-background-color: #37527D;
+  background-color: white;
+}
+
+.menu-fixed {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: 100%;
+}
+
+.menu ul {
+  display: inline;
+  float: right;
+  line-height: 1;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  white-space: nowrap;
+}
+.menu ul > li {
+  display: inline-block;
+  float: left;
+}
+.menu ul > li a {
+  padding: 4px 8px;
+  color: #0074C7;
+}
+.menu li a {
+  display: block;
+  text-decoration: none;
+}
+.menu li.active a {
+  text-decoration: underline;
+}
+.menu li a:hover {
+  color: #AECFE5;
+}
+.thumbnail {
+  cursor: pointer;
+}
+.thumnail-pop {
+  border-radius: 6px;
+  background-color: #f0f0f0;
+  box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.4);
+  color: black;
+  margin: 64px;
+  text-align: center;
+  padding: 16px;
+
+}
+.thumnail-pop > img {
+  border: 1px solid gray;
+  margin: 6px;
+  width: 800px;
+  padding-bottom: 4px;
+}

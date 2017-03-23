@@ -1,108 +1,50 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html lang="en">
 <head>
-<title>BackupPC Documentation</title>
-<link rel="stylesheet" href="http://backuppc.github.io/backuppc/pod.css" type="text/css" />
-<link rev="made" href="mailto:root@localhost.com" />
-<link rel=icon href="images/logos/favicon.ico" type="image/x-icon">
+  <title>BackupPC: Open Source Backup to disk</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, Windows, linux, windows">
+  <meta name="description" content="BackupPC is a high-performance, enterprise-grade system for backing up Linux, Windows and macOS PCs and laptops to a server's disk.">
+
+  <link rel="icon" href="images/logos/favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="backuppc.css">
+
+  <meta property="og:url" content="https://backuppc.github.io/backuppc/">
+  <meta property="og:title" content="BackupPC: Open Source Backup to disk">
+  <meta property="og:description" content="BackupPC is a high-performance, enterprise-grade system for backing up Linux, Windows and macOS PCs and laptops to a server's disk.">
+  <meta property="og:site_name" content="BackupPC">
+  <meta property="og:type" content="website">
 </head>
 
 <body>
-<script language="JavaScript">
 
-<!--//
-// Browser Detection
-browser_name = navigator.appName;
-browser_version = parseFloat(navigator.appVersion); 
+<div id="layout">
 
-if (browser_name == "Netscape" && browser_version >= 3.0) { 
-    roll = 'true'; }
-else if (browser_name == "Microsoft Internet Explorer" 
-       && browser_version >= 4.0) { 
-    roll = 'true'; 
-}
-else { 
-    roll = 'false'; 
-}
+  <div class="nav">
+    <div class="menu nav-menu menu-fixed">
+      <div class="nav-logo"><a href="index.html">
+        <svg width="112" height="26">
+            <image xlink:href="images/logos/logo.svg" src="images/logos/logo320.png" width="112" height="26" />
+        </svg>
+      </a></div>
+      <ul>
+          <li class="menu-item"><a href="index.html" class="pure-menu-link">Home</a></li>
+          <li class="menu-item"><a href="info.html" class="pure-menu-link">About</a></li>
+          <li class="menu-item"><a href="BackupPC.html" class="pure-menu-link">Documentation</a></li>
+          <li class="menu-item"><a target="_blank" href="https://github.com/backuppc/backuppc" class="pure-menu-link"><img src="images/logos/GitHub-Mark-32px.png" width="16" alt="Github logo"></a></li>
+      </ul>
+    </div>
+  </div>
 
-// Preload images, if browser supports mouseovers
-if (roll == 'true') {
-    var imglist = new Array (
-	"http://backuppc.github.io/backuppc/images/buttons/green/small/home.gif",
-	"http://backuppc.github.io/backuppc/images/buttons/green/small/info.gif",
-	"http://backuppc.github.io/backuppc/images/buttons/green/small/code.gif",
-	"http://backuppc.github.io/backuppc/images/buttons/green/small/docs.gif"
-    );
+  <div id="main">
+    <div class="header">
+        <h1>BackupPC 3.x Documentation</h1>
+    </div>
 
-    var imgs = new Array();
-    var count;
-    if (document.images)
-    for (count=0; count<imglist.length; count++) {
-        imgs[count]=new Image(); 
-        imgs[count].src=imglist[count];
-    }
-}
-
-function msover(img,ref) { 
-    if (roll == 'true') { 
-	document.images[img].src = ref; 
-    }
-}
-
-function msout(img,ref) { 
-    if (roll == 'true') { 
-	document.images[img].src = ref; 
-    } 
-}
-
-//-->
-</script>
-
-<p>
-<table border=0 width="100%" cellpadding=0 cellspacing=0 valign=top>
-<tr valign=top>
-  <td align=left rowspan=2>
-  <img src="http://backuppc.github.io/backuppc/images/icons/BackupPC/small/logo.gif">
-  </td>
-
-  <td align=right colspan=2>
-  <a href="http://backuppc.github.io/backuppc/index.html"             
-    onMouseOver="window.status='BackupPC Home Page';
-           msover('img_home', 'http://backuppc.github.io/backuppc/images/buttons/green/small/home.gif');"
-    onMouseOut="msout('img_home',
-            'http://backuppc.github.io/backuppc/images/buttons/blue/small/home.gif');"><img src="http://backuppc.github.io/backuppc/images/buttons/blue/small/home.gif" 
-    name="img_home"
-    width=70 height=25 border=0></a>
-
-  <a href="http://backuppc.github.io/backuppc/info.html"             
-    onMouseOver="window.status='Information about the BackupPC';
-           msover('img_info', 'http://backuppc.github.io/backuppc/images/buttons/green/small/info.gif');"
-    onMouseOut="msout('img_info',
-	    'http://backuppc.github.io/backuppc/images/buttons/blue/small/info.gif');"><img src="http://backuppc.github.io/backuppc/images/buttons/blue/small/info.gif" 
-    name="img_info"
-    width=70 height=25 border=0></a>
-
-  <a href="https://github.com/backuppc/backuppc"             
-    onMouseOver="window.status='Download BackupPC';
-           msover('img_code', 'http://backuppc.github.io/backuppc/images/buttons/green/small/code.gif');"
-    onMouseOut="msout('img_code',
-            'http://backuppc.github.io/backuppc/images/buttons/blue/small/code.gif');"><img src="http://backuppc.github.io/backuppc/images/buttons/blue/small/code.gif" 
-    name="img_code"
-    width=70 height=25 border=0></a>
-
-  <a href="BackupPC.html"
-    onMouseOver="window.status='BackupPC Documentation';
-           msover('img_docs', 'http://backuppc.github.io/backuppc/images/buttons/green/small/docs.gif');"
-    onMouseOut="msout('img_docs',
-            'http://backuppc.github.io/backuppc/images/buttons/red/small/docs.gif');"><img src="http://backuppc.github.io/backuppc/images/buttons/red/small/docs.gif" 
-    name="img_docs"
-    width=70 height=25 border=0></a>
-
-  </td>
-</tr>
-</table>
-</p>
-<h1>BackupPC Documentation</h1>
+    <div class="content">
 
 <!-- CUT HERE -->
 
@@ -199,6 +141,8 @@ function msout(img,ref) {
 <h1 id="BackupPC-Introduction">BackupPC Introduction</h1>
 
 <p>This documentation describes BackupPC version 3.3.2, released on 25 Jan 2017.</p>
+<p>BackupPC 4.0 has been released on March 2017, and you can find the documentation
+  for the <a href="BackupPC.html">new version here</a>.</p>
 
 <h2 id="Overview">Overview</h2>
 
@@ -970,7 +914,7 @@ function msout(img,ref) {
         Options +ExecCGI
         Order deny,allow
         Deny from all
-        Allow from 192.168.0  
+        Allow from 192.168.0
         AuthName &quot;Backup Admin&quot;
         AuthType Basic
         AuthUserFile /path/to/user_file
@@ -1224,7 +1168,7 @@ function msout(img,ref) {
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the tar archive is created
-  
+
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -1255,7 +1199,7 @@ function msout(img,ref) {
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the zip archive is created
-  
+
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -3820,14 +3764,8 @@ function msout(img,ref) {
 
 <!-- CUT HERE -->
 
-<p>
-<hr>
-<center>
-<a href="https://github.com/backuppc/backuppc"><img src="images/logos/GitHub_Logo.png" width="120" alt="Get BackupPC at Github"></a>
+</div>
 
-<br clear=all>
-<font size="-1" color="#666666">BackupPC is hosted on <a href="https://github.com/backuppc/backuppc">Github</a>, and is distributed under a GPL license.  BackupPC is &copy; Copyright 2001-2017 Craig Barratt.</font>
-
-</center>
+</div>
 </body>
 </html>

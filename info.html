@@ -1,167 +1,82 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>BackupPC Information</title>
-<meta name="KEYWORDS" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, rsync_bpc, WinXP, linux, windows">
-<meta name="DESCRIPTION" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, rsync_bpc, WinXP, linux, windows">
-<link rel=icon href="images/logos/favicon.ico" type="image/x-icon">
+  <title>BackupPC: Open Source Backup to disk</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, WinXP, linux, windows">
+  <meta name="description" content="BackupPC is a high-performance, enterprise-grade system for backing up Linux, Windows and macOS PCs and laptops to a server's disk.">
+
+  <link rel="icon" href="images/logos/favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="backuppc.css">
+  <script type="text/javascript" src="uglipop.js"></script>
+
+  <meta property="og:url" content="https://backuppc.github.io/backuppc/">
+  <meta property="og:title" content="BackupPC: Open Source Backup to disk">
+  <meta property="og:description" content="BackupPC is a high-performance, enterprise-grade system for backing up Linux, Windows and macOS PCs and laptops to a server's disk.">
+  <meta property="og:site_name" content="BackupPC">
+  <meta property="og:type" content="website">
+
+  <script>
+  var ScreenshotsImages = [
+    'images/screens/BackupPCServerStatus.png',
+    'images/screens/BackupPCServerSummary.png',
+    'images/screens/BackupPCServerLog.png',
+    'images/screens/BackupPCBackupSummary.png',
+    'images/screens/BackupPCBackupBrowse.png',
+    'images/screens/BackupPCRestoreOptions.png',
+    'images/screens/BackupPCEditConfig.png',
+    'images/screens/BackupPCBackupLog.png'
+  ];
+  var ScreenshotsCurrent = 0;
+  function backuppc_thumbnail_remove() {
+    //document.getElementById('screenshot').style.display = 'none';
+    remove();
+  }
+  function backuppc_thumbnail(number) {
+    document.getElementById('screenshot-img').src = ScreenshotsImages[number];
+    document.getElementById('button_prev').disabled = !(number > 0);
+    document.getElementById('button_next').disabled = !(number < (ScreenshotsImages.length - 1));
+    ScreenshotsCurrent = number;
+    remove();
+    uglipop( {
+      class: 'thumnail-pop',
+      source: 'div',
+      content: 'screenshot'
+    } );
+  }
+  </script>
 </head>
 
-<body bgcolor="#ffffff">
+<body>
 
-<script language="JavaScript">
+<div id="layout">
 
-<!--//
-// Browser Detection
-browser_name = navigator.appName;
-browser_version = parseFloat(navigator.appVersion); 
+  <div class="nav">
+    <div class="menu nav-menu menu-fixed">
+      <div class="nav-logo"><a href="index.html">
+        <svg width="112" height="26">
+            <image xlink:href="images/logos/logo.svg" src="images/logos/logo320.png" width="112" height="26" />
+        </svg>
+      </a></div>
+      <ul>
+          <li class="menu-item"><a href="index.html" class="pure-menu-link">Home</a></li>
+          <li class="menu-item active"><a href="info.html" class="pure-menu-link">About</a></li>
+          <li class="menu-item"><a href="BackupPC.html" class="pure-menu-link">Documentation</a></li>
+          <li class="menu-item"><a target="_blank" href="https://github.com/backuppc/backuppc" class="pure-menu-link"><img src="images/logos/GitHub-Mark-32px.png" width="16" alt="Github logo"></a></li>
+      </ul>
+    </div>
+  </div>
 
-if (browser_name == "Netscape" && browser_version >= 3.0) { 
-    roll = 'true'; }
-else if (browser_name == "Microsoft Internet Explorer" 
-       && browser_version >= 4.0) { 
-    roll = 'true'; 
-}
-else { 
-    roll = 'false'; 
-}
+  <div id="main">
+    <div class="header">
+        <h1>About BackupPC</h1>
+    </div>
 
-// Preload images, if browser supports mouseovers
-if (roll == 'true') {
-    var imglist = new Array (
- 	"images/buttons/green/small/home.gif",
- 	"images/buttons/green/small/info.gif",
- 	"images/buttons/green/small/code.gif",
- 	"images/buttons/green/small/docs.gif"
-    );
+    <div class="content">
 
-    var imgs = new Array();
-    var count;
-    if (document.images)
-	for (count=0; count<imglist.length; count++) {
-	    imgs[count]=new Image(); 
-	    imgs[count].src=imglist[count];
-	}
-}
-
-function msover(img,ref) { 
-    if (roll == 'true') { 
-	document.images[img].src = ref; 
-    }
-}
-
-function msout(img,ref) { 
-    if (roll == 'true') { 
-	document.images[img].src = ref; 
-    } 
-}
-
-//-->
-</script>
-
-<p>
-<table border=0 width="100%" cellpadding=0 cellspacing=0 valign=top>
-<tr valign=top>
-  <td align=left rowspan=2>
-  <img src="images/icons/BackupPC/mid/logo.gif">
-  </td>
-
-  <td align=right colspan=2>
-  <a href="index.html"             
-    onMouseOver="window.status='BackupPC Home Page';
-	       msover('img_home',
-			'images/buttons/green/small/home.gif');"
-    onMouseOut="msout('img_home',
-			'images/buttons/blue/small/home.gif');"><img
-    src="images/buttons/blue/small/home.gif" 
-    name="img_home"
-    width=70 height=25 border=0></a>
-
-  <a href="info.html"             
-    onMouseOver="window.status='Information about the BackupPC';
-	       msover('img_info',
-			'images/buttons/green/small/info.gif');"
-    onMouseOut="msout('img_info',
-			'images/buttons/red/small/info.gif');"><img
-    src="images/buttons/red/small/info.gif" 
-    name="img_info"
-    width=70 height=25 border=0></a>
-
-  <a href="https://github.com/backuppc/backuppc"             
-    onMouseOver="window.status='Download BackupPC';
-	       msover('img_code',
-			'images/buttons/green/small/code.gif');"
-    onMouseOut="msout('img_code',
-			'images/buttons/blue/small/code.gif');"><img
-    src="images/buttons/blue/small/code.gif" 
-    name="img_code"
-    width=70 height=25 border=0></a>
-
-  <a href="BackupPC.html"
-    onMouseOver="window.status='BackupPC Documentation';
-	       msover('img_docs',
-			'images/buttons/green/small/docs.gif');"
-    onMouseOut="msout('img_docs',
-			'images/buttons/blue/small/docs.gif');"><img
-    src="images/buttons/blue/small/docs.gif" 
-    name="img_docs"
-    width=70 height=25 border=0></a>
-
-  </td>
-</tr>
-
-<tr valign=middle>
-   <td align=left width=150>
-      <img src="images/icons/red/mid/next.gif" height=40 width=50><img 
-   src="images/text/red/big/info.gif" height=43>
-   
-   </td>
-
-   <td align=right>
-   <font size="-1">[&nbsp;<a href="#intro">Introduction</a>&nbsp;]</font>
-
-<font size="-1">[&nbsp;<a href="#features">Features</a>&nbsp;]</font>
-
-<font size="-1">[&nbsp;<a href="#screenShots">Screen Shots</a>&nbsp;]</font>
-
-<font size="-1">[&nbsp;<a href="#download">Download</a>&nbsp;]</font>
-
-<font size="-1">[&nbsp;<a href="#wiki">Wiki</a>&nbsp;]</font>
-
-<font size="-1">[&nbsp;<a href="#lists">Mailing Lists</a>&nbsp;]</font>
-
-
-   </td>
-</tr>
-</table>
-</p>
-
-<div align="center">
-<table border="0" width="100%">
-
-<tr valign=top>
-  <td width="10%" align=right>
-    <img src="images/icons/red/small/next.gif" 
-    width=25 height=20 border=0>
-  </td>
-
-  <td width="80%">
-  <a name="intro">
-  <font size="+2"><b>Introduction</b></font>
-  </td>
-
-  <td width="10%" align="left">
-  
-  </td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td>
-
-<p>
-  <b>BackupPC</b> is a high-performance, enterprise-grade system for
-  backing up Linux and WinXX PCs and laptops to a server's disk.
-  BackupPC is highly configurable and easy to install and maintain.
 <p>
   Given the ever decreasing cost of disks and raid systems, it is now
   practical and cost effective to backup a large number of machines onto
@@ -169,45 +84,15 @@ function msout(img,ref) {
   For some sites, this might be the complete backup solution. For other
   sites, additional permanent archives could be created by periodically
   backing up the server to tape.  A variety of Open Source systems are
-  available for doing backup to tape.
+  available for doing backup to tape.</p>
 <p>
   BackupPC is written in <a href="http://www.cpan.org">Perl</a> and extracts
   backup data via SMB using <a href="http://www.samba.org">Samba</a>,
   tar over ssh/rsh/nfs, or <a href="http://rsync.samba.org">rsync</a>.
   It is robust, reliable, well documented and freely available as
-  Open Source on <a href="https://github.com/backuppc/backuppc">Github</a>.
+  Open Source on <a href="https://github.com/backuppc/backuppc">Github</a>.</p>
 
-  </td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td><hr noshade=1></td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr valign=top>
-  <td width="10%" align=right>
-    <img src="images/icons/red/small/next.gif" 
-    width=25 height=20 border=0>
-  </td>
-
-  <td width="80%">
-  <a name="features">
-  <font size="+2"><b>BackupPC Features</b></font>
-  </td>
-
-  <td width="10%" align="left">
-  
-  <font size="-1">[&nbsp;<a href="#top">Top</a></a>&nbsp;]</font>
-  
-  </td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td>
+  <h2>BackupPC Features</h2>
 
 <ul>
 <li>A clever pooling scheme minimizes disk storage and disk I/O. Identical
@@ -222,7 +107,7 @@ function msout(img,ref) {
     new files (not already pooled) need to be compressed, there is only a
     modest impact on CPU time.
 <li>No client-side software is needed.  The standard smb protocol is used
-    to extract backup data on WinXX clients.  On linux clients, tar
+    to extract backup data on Windows clients.  On Linux clients, tar
     over ssh/rsh/nfs is used to backup the data.  With version 2.0.0,
     rsync is also supported on any client that has rsync or rysncd.
 <li>A powerful web (http/cgi) user interface allows administrators to view log
@@ -242,103 +127,51 @@ function msout(img,ref) {
 <li>Users are sent periodic email reminders if their PC has not
     recently been backed up.  Email content, timing and policies
     are configurable.
-<li>Tested on Linux, Freenix and Solaris hosts, and Linux, Win95, Win98,
-    Win2000 and WinXP clients.
+<li>Tested on Linux, Freenix and Solaris hosts, and Linux, Windows 95, 98,
+    2000 and XP clients.
 <li>Detailed documentation.
-<li>Open Source hosted by SourceForge and freely availble under GPL.
+<li>Open Source hosted on <a href="https://github.com/backuppc/backuppc">Github</a>
+  and freely availble under GPL.
 </li>
 </ul>
 
-  </td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td><hr noshade=1></td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr valign=top>
-  <td width="10%" align=right>
-    <img src="images/icons/red/small/next.gif" 
-    width=25 height=20 border=0>
-  </td>
-
-  <td width="80%">
-  <a name="screenShots">
-  <font size="+2"><b>Screen Shots</b></font>
-  </td>
-
-  <td width="10%" align="left">
-  
-  <font size="-1">[&nbsp;<a href="#top">Top</a></a>&nbsp;]</font>
-  
-  </td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td>
-
+  <h2>Screen Shots</h2>
 <p>
 Here are some screen shots of BackupPC's web interface that provide
-an overview of various BackupPC features.
+an overview of various BackupPC features.</p>
+
+<div id="screenshot" style="display: none;">
+  <img id="screenshot-img" src=\"images/screens/BackupPCServerStatus.png\"></img>
+
+  <button id="button_prev" onclick="backuppc_thumbnail(ScreenshotsCurrent - 1); return false;" type="button">&lt; Previous</button>
+  <button onclick="backuppc_thumbnail_remove(); return false;" type="button">Close</button>
+  <button id="button_next" onclick="backuppc_thumbnail(ScreenshotsCurrent + 1); return false;" type="button">Next &gt;</button>
+</div>
+
 <table>
   <tr>
-    <td><a href="BackupPCServerStatus.html"><img src="images/thumbs/tn_BackupPCServerStatus.jpeg" width=90 height=90></a></td>
-    <td><a href="BackupPCServerSummary.html"><img src="images/thumbs/tn_BackupPCServerSummary.jpeg" width=90 height=90></a></td>
-    <td><a href="BackupPCServerLog.html"><img src="images/thumbs/tn_BackupPCServerLog.jpeg" width=90 height=90></a></td>
-    <td><a href="BackupPCBackupSummary.html"><img src="images/thumbs/tn_BackupPCBackupSummary.jpeg" width=90 height=90></a></td>
-    <td><a href="BackupPCBackupBrowse.html"><img src="images/thumbs/tn_BackupPCBackupBrowse.jpeg" width=90 height=90></a></td>
-    <td><a href="BackupPCRestoreOptions.html"><img src="images/thumbs/tn_BackupPCRestoreOptions.jpeg" width=90 height=90></a></td>
-    <td><a href="BackupPCEditConfig.html"><img src="images/thumbs/tn_BackupPCEditConfig.jpeg" width=90 height=90></a></td>
-    <td><a href="BackupPCBackupLog.html"><img src="images/thumbs/tn_BackupPCBackupLog.jpeg" width=90 height=90></a></td>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(0); return false;"><img src="images/thumbs/tn_BackupPCServerStatus.jpeg" width=128 height=60></a>
+    <br />Server summary</td>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(1); return false;"><img src="images/thumbs/tn_BackupPCServerSummary.jpeg" width=128 height=60></a>
+    <br />Hosts summary</td>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(2); return false;"><img src="images/thumbs/tn_BackupPCServerLog.jpeg" width=128 height=60></a>
+    <br />Main log file</td>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(3); return false;"><img src="images/thumbs/tn_BackupPCBackupSummary.jpeg" width=128 height=60></a>
+    <br />Host detail</td>
   </tr>
   <tr>
-    <td align="center"><font size="-1">Server Summary</font></td>
-    <td align="center"><font size="-1">Hosts Summary</font></td>
-    <td align="center"><font size="-1">Main log file</font></td>
-    <td align="center"><font size="-1">Host detail</font></td>
-    <td align="center"><font size="-1">Backup browsing</font></td>
-    <td align="center"><font size="-1">Restore</font></td>
-    <td align="center"><font size="-1">Config Edit</font></td>
-    <td align="center"><font size="-1">Host log file</font></td>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(4); return false;"><img src="images/thumbs/tn_BackupPCBackupBrowse.jpeg" width=128 height=60></a>
+    <br />Backup browsing</td>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(5); return false;"><img src="images/thumbs/tn_BackupPCRestoreOptions.jpeg" width=128 height=60></a>
+    <br />Restore</td>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(6); return false;"><img src="images/thumbs/tn_BackupPCEditConfig.jpeg" width=128 height=60></a>
+    <br />Config edit</td>
+    <td><a href="#" class="thumbnail" onclick="backuppc_thumbnail(7); return false;"><img src="images/thumbs/tn_BackupPCBackupLog.jpeg" width=128 height=60></a>
+    <br />Host log file</td>
   </tr>
 </table>
-</p>
 
-  </td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td><hr noshade=1></td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr valign=top>
-  <td width="10%" align=right>
-    <img src="images/icons/red/small/next.gif" 
-    width=25 height=20 border=0>
-  </td>
-
-  <td width="80%">
-  <a name="download">
-  <font size="+2"><b>Download</b></font>
-  </td>
-
-  <td width="10%" align="left">
-  
-  <font size="-1">[&nbsp;<a href="#top">Top</a></a>&nbsp;]</font>
-  
-  </td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td>
+<h2>Download</h2>
 
 <p>
 BackupPC can be downloaded from
@@ -352,89 +185,32 @@ and
 <a href="https://github.com/backuppc/rsync-bpc/releases">github.com/backuppc/rsync-bpc/releases</a>.
 </p>
 
-  </td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td><hr noshade=1></td>
-  <td>&nbsp;</td>
-</tr>
-<tr valign=top>
-  <td width="10%" align=right>
-    <img src="images/icons/red/small/next.gif" 
-    width=25 height=20 border=0>
-  </td>
-
-  <td width="80%">
-  <a name="wiki">
-  <font size="+2"><b>Wiki</b></font>
-  </td>
-
-  <td width="10%" align="left">
-  
-  <font size="-1">[&nbsp;<a href="#top">Top</a></a>&nbsp;]</font>
-  
-  </td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td>
-
+<h2>Wiki</h2>
 <p>
 Please visit and contribute to the <a href="https://github.com/backuppc/backuppc/wiki">BackupPC Wiki</a>.
 </p>
 
-  </td>
-  <td>&nbsp;</td>
-</tr>
 
-<tr>
-  <td>&nbsp;</td>
-  <td><hr noshade=1></td>
-  <td>&nbsp;</td>
-</tr>
-
-<tr valign=top>
-  <td width="10%" align=right>
-    <img src="images/icons/red/small/next.gif" 
-    width=25 height=20 border=0>
-  </td>
-
-  <td width="80%">
-  <a name="lists">
-  <font size="+2"><b>Mailing Lists</b></font>
-  </td>
-
-  <td width="10%" align="left">
-  
-  <font size="-1">[&nbsp;<a href="#top">Top</a></a>&nbsp;]</font>
-  
-  </td>
-</tr>
-
-<tr>
-  <td>&nbsp;</td>
-  <td>
+<h2>Mailing Lists</h2>
 
 <p>
 Three BackupPC mailing lists exist for announcements (backuppc-announce),
 support, asking questions or any other topic relevant to BackupPC
 (backuppc-users), and a developers-only list (backuppc-devel).
 </p>
+
 <p>
 The backuppc-announce list is moderated and is used only for
 important announcements (eg: new versions).  It is low traffic.
 You only need to subscribe to one list: backuppc-users also
 receives any messages on backuppc-announce.
 </p>
+
 <p>
 You are encouraged to subscribe to either the backuppc-announce
 or backuppc-users mail list on sourceforge.net, by going to
 <a href="http://lists.sourceforge.net/lists/listinfo/backuppc-announce">BackupPC-announce</a>,
-or 
+or
 <a href="http://lists.sourceforge.net/lists/listinfo/backuppc-users">BackupPC-users</a>.
 You can subscribe to the developer's email list by going to
 <a href="http://lists.sourceforge.net/lists/listinfo/backuppc-devel">BackupPC-devel</a>.
@@ -450,27 +226,9 @@ or
 You can send email to the BackupPC-users list at <a href="mailto:backuppc-users@lists.sourceforge.net"><tt>backuppc-users@lists.sourceforge.net</tt></a>.
 Please don't send support questions to the developer's list.
 </p>
-  </td>
-  <td>&nbsp;</td>
-</tr>
 
-<tr>
-  <td>&nbsp;</td>
-  <td><hr noshade=1></td>
-  <td>&nbsp;</td>
-</tr>
+  </div>
 
-
-</table>
 </div>
-
-<p>
-<center>
-<a href="https://github.com/backuppc/backuppc"><img src="images/logos/GitHub_Logo.png" width="120" alt="Get BackupPC at Github"></a>
-
-<br clear=all>
-<font size="-1" color="#666666">BackupPC is hosted on <a href="https://github.com/backuppc/backuppc">Github</a>, and is distributed under a GPL license.  BackupPC is &copy; Copyright 2001-2017 Craig Barratt.</font>
-
-</center>
 </body>
 </html>

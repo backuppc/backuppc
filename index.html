@@ -1,182 +1,88 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-<title>BackupPC: Open Source Backup to disk</title>
-<meta name="KEYWORDS" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, WinXP, linux, windows">
-<meta name="DESCRIPTION" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, WinXP, linux, windows">
-<link rel=icon href="images/logos/favicon.ico" type="image/x-icon">
+  <title>BackupPC: Open Source Backup to disk</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="keywords" content="backuppc, backup, open source, perl, enterprise, disk, samba, SMB, rsync, WinXP, linux, windows">
+  <meta name="description" content="BackupPC is a high-performance, enterprise-grade system for backing up Linux, Windows and macOS PCs and laptops to a server's disk.">
+
+  <link rel="icon" href="images/logos/favicon.ico" type="image/x-icon">
+
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
+  <link rel="stylesheet" href="backuppc.css">
+
+  <meta property="og:url" content="https://backuppc.github.io/backuppc/">
+  <meta property="og:title" content="BackupPC: Open Source Backup to disk">
+  <meta property="og:description" content="BackupPC is a high-performance, enterprise-grade system for backing up Linux, Windows and MacOS PCs and laptops to a server's disk.">
+  <meta property="og:site_name" content="BackupPC">
+  <meta property="og:type" content="website">
 </head>
 
-<body bgcolor="#ffffff">
+<body>
 
-<script language="JavaScript">
+<div id="layout">
 
-<!--//
-// Browser Detection
-browser_name = navigator.appName;
-browser_version = parseFloat(navigator.appVersion); 
+  <div class="nav">
+    <div class="menu nav-menu menu-fixed">
+      <div class="nav-logo"><a href="index.html">
+        <svg width="112" height="26">
+            <image xlink:href="images/logos/logo.svg" src="images/logos/logo320.png" width="112" height="26" />
+        </svg>
+      </a></div>
+      <ul>
+          <li class="menu-item active"><a href="index.html" class="pure-menu-link">Home</a></li>
+          <li class="menu-item"><a href="info.html" class="pure-menu-link">About</a></li>
+          <li class="menu-item"><a href="BackupPC.html" class="pure-menu-link">Documentation</a></li>
+          <li class="menu-item"><a target="_blank" href="https://github.com/backuppc/backuppc" class="pure-menu-link"><img src="images/logos/GitHub-Mark-32px.png" width="16" alt="Github logo"></a></li>
+      </ul>
+    </div>
+  </div>
 
-if (browser_name == "Netscape" && browser_version >= 3.0) { 
-    roll = 'true'; }
-else if (browser_name == "Microsoft Internet Explorer" 
-       && browser_version >= 4.0) { 
-    roll = 'true'; 
-}
-else { 
-    roll = 'false'; 
-}
+  <div id="main">
 
-// Preload images, if browser supports mouseovers
-if (roll == 'true') {
-    var imglist = new Array (
- 	"images/buttons/green/small/home.gif",
- 	"images/buttons/green/small/info.gif",
- 	"images/buttons/green/small/news.gif",
- 	"images/buttons/green/small/code.gif",
- 	"images/buttons/green/small/docs.gif"
-    );
+    <div class="header">
+        <h1><svg width="320" height="72">
+            <image xlink:href="images/logos/logo.svg" src="images/logos/logo320.png" width="320" height="72" />
+          </svg></h1>
+        <h2>High-performance, enterprise-grade backup</h2>
+    </div>
 
-    var imgs = new Array();
-    var count;
-    if (document.images)
-	for (count=0; count<imglist.length; count++) {
-	    imgs[count]=new Image(); 
-	    imgs[count].src=imglist[count];
-	}
-}
+    <div class="content">
 
-function msover(img,ref) { 
-    if (roll == 'true') { 
-	document.images[img].src = ref; 
-    } 
-}
+      <p>BackupPC is a high-performance, enterprise-grade system for backing up
+      Linux, Windows and macOS PCs and laptops to a server's disk. BackupPC is
+      highly configurable and easy to install and maintain.</p>
 
-function msout(img,ref) { 
-    if (roll == 'true') { 
-	document.images[img].src = ref; 
-    } 
-}
+      <h2>Features</h2>
+        <ul>
+          <li><strong>Web interface</strong> allows administrators to view log files,
+            configuration, current status and allows users to initiate and
+            cancel backups and browse and restore files from backups.</li>
+          <li><strong>Data deduplication</strong>: Identical files across multiple backups of the same
+            or different PCs are stored only once resulting in substantial
+            savings in disk storage and disk I/O.</li>
+          <li><strong>Compression</strong>: Since only new files (not already pooled) need to be
+            compressed, there is only a modest impact on CPU time.</li>
+          <li><strong>Open-source</strong>: BackupPC is hosted on
+            <a href="https://github.com/backuppc/backuppc">Github</a>, and is distributed under a GPL license.</li>
+          <li>No client-side software is needed.</li>
+          <li><a href="info.html">And more...</a></li>
+        </ul>
 
-//-->
-</script>
+      <h2>Documentation</h2>
 
-<table width="80%" border=0 align=center>
-<tr>
-  <td align="center">
-  <p>
-   <img src="images/icons/BackupPC/mid/logo.gif">
-   <br>  
-   <table border="0" width="60%">
-    <tr><td align="center">
-    BackupPC is a high-performance, enterprise-grade system for backing up
-    Linux, WinXX and MacOSX PCs and laptops to a server's disk.  BackupPC is
-    highly configurable and easy to install and maintain.
-    <p>
-    <a href="https://github.com/backuppc/backuppc/releases/tag/v3_3_2">Version 3.3.2</a> released on January 25th, 2017
-    <br>
-    <a href="https://github.com/backuppc/backuppc/releases/tag/v4_0_0">Version 4.0.0</a> released on March 3rd, 2017
-    <!-- <br> 2.1.2pl2 (patch level 2) released on June 18th, 2006 -->
-    </td></tr>
-    </table>
-  </p>
-  </td>
-</tr>
-</table>
+        <p>BackupPC has extensive <a href="BackupPC.html">online documentation</a>.
+          Documentation for version <a href="BackupPC-3.3.2.html">3.3.2 is here</a>.</p>
 
-<table border=0 width="75%" align="center">
+   </div>
+ </div>
 
-<tr><td colspan=3><hr noshade width="100%" size=1></td></tr>
-<tr valign=top>
-  <td align=left width=50>
-  <a href="info.html"             
-    onMouseOver="window.status='Information about BackupPC';
-	       msover('img_info',
-			'images/buttons/green/small/info.gif');"
-    onMouseOut="msout('img_info',
-			'images/buttons/blue/small/info.gif');"><img
-    src="images/buttons/blue/small/info.gif" 
-    name="img_info"
-    width=70 height=25 border=0></a>
-  </td>
+<footer>
+  BackupPC is &copy; Copyright 2001-2017 Craig Barratt.
+</footer>
 
-  <td align=left width="99%">
-    
-General information about BackupPC.  What to use it for, why to use it,
-where to find it, and where to go for help.  
-  
-  </td>
-</tr>
+</div>
 
-
-<tr><td colspan=3><hr noshade width="100%" size=1></td></tr>
-<tr valign=top>
-  <td align=left width=50>
-  <a href="https://github.com/backuppc/backuppc"             
-    onMouseOver="window.status='Download BackupPC';
-	       msover('img_code',
-			'images/buttons/green/small/code.gif');"
-    onMouseOut="msout('img_code',
-			'images/buttons/blue/small/code.gif');"><img
-    src="images/buttons/blue/small/code.gif" 
-    name="img_code"
-    width=70 height=25 border=0></a>
-  </td>
-  <td align=left width="99%">
-
-Most linux distros include BackupPC packages.  Alternatively, you can download
-the latest version of BackupPC from the
-<a href="https://github.com/backuppc/backuppc/releases">Github releases</a> page.
-Source code is on <a href="https://github.com/backuppc/backuppc">Github</a>.
-  
-  </td>
-</tr>
-
-<tr><td colspan=3><hr noshade width="100%" size=1></td></tr>
-<tr valign=top>
-  <td align=left width=50>
-  <a href="BackupPC.html"
-    onMouseOver="window.status='BackupPC Documentation';
-	       msover('img_docs',
-			'images/buttons/green/small/docs.gif');"
-    onMouseOut="msout('img_docs',
-			'images/buttons/blue/small/docs.gif');"><img
-    src="images/buttons/blue/small/docs.gif" 
-    name="img_docs"
-    width=70 height=25 border=0></a>
-  </td>
-  <td align=left width="99%">
-     Online documentation for BackupPC 4.0.0.  Documentation for <a href="BackupPC-3.3.2.html">3.3.2 is here</a>.
-  
-  </td>
-</tr>
-
-<tr><td colspan=3><hr noshade width="100%" size=1></td></tr>
-<tr valign=top>
-  <td align=left width=50>
-  <a href="info.html#screenShots"             
-    onMouseOver="window.status='BackupPC Documentation';
-	       msover('img_shots',
-			'images/thumbs/tn_BackupPCServerStatusBorderSel.jpeg');"
-    onMouseOut="msout('img_shots',
-			'images/thumbs/tn_BackupPCServerStatusBorder.jpeg');"><img
-    src="images/thumbs/tn_BackupPCServerStatusBorder.jpeg" 
-    name="img_shots"
-    width=65 height=57 border=0></a>
-  </td>
-  <td align=left width="99%">
-     View screen shots of BackupPC's web interface.  An easy way to
-     preview various features.
-  </td>
-</tr>
-
-</table>
-
-<p>
-<center>
-<a href="https://github.com/backuppc/backuppc"><img src="images/logos/GitHub_Logo.png" width="120" alt="Get BackupPC at Github"></a>
-
-<br clear=all>
-<font size="-1" color="#666666">BackupPC is hosted on <a href="https://github.com/backuppc/backuppc">Github</a>, and is distributed under a GPL license.  BackupPC is &copy; Copyright 2001-2017 Craig Barratt.</font>
-
-</center>
 </body>
 </html>

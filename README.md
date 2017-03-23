@@ -111,7 +111,7 @@ or doc/BackupPC.html. You can read doc/BackupPC.pod with perldoc and
 doc/BackupPC.html with any browser. You can also see the documentation
 and general information at:
 
-* [backuppc.sourceforge.net](http://backuppc.sourceforge.net)
+* [backuppc.github.io/backuppc](https://backuppc.github.io/backuppc)
 
 The source code is available on Github at:
 

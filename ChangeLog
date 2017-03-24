@@ -21,19 +21,19 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Merged pull requests: #17, #44, #59, #60, #61, #62,#68, #69
+* Merged pull requests: #17, #44, #59, #60, #61, #62,#68, #69, #73, #74
 
-* Fixed rsync restores, based on patch from Stephen Joyce
+* Fixed certain rsync restores, based on patch from Stephen Joyce.
 
 * Improvements to Gentoo init.d script (#69) from sigmoidal.
 
 * Fixed exponential backup expiry algorithm, submitted by Alexander
-  Moisseev (#17)
+  Moisseev (#17).
 
 * Added --config-only option to configure.pl, from Alexander Moisseev (#62).
 
 * Ensure $? is 0 in bin/BackupPC_dump UserCommandRun() if no command is run,
-  reported and proposed fix by stirab (issue #67)
+  reported and proposed fix by stirab (issue #67).
 
 * configure.pl replaces SourceForge links in $Conf{CgiNavBarLinks} with
   new Github links.
@@ -45,9 +45,8 @@
 
 * Renamed init.d to systemd, added systemd/src/backuppc.service template
 
-* Replaced CSS file with new BackupPC_stnd.css from Ernesto Carrea (#59).
-  Renamed old ones to conf/BackupPC_retro_v2.css and
-  conf/BackupPC_retro_v3.css.
+* Replaced CSS file with new BackupPC_stnd.css from Ernesto Carrea (#59,#73).
+  Renamed old ones to conf/BackupPC_retro_v2.css and conf/BackupPC_retro_v3.css.
 
 * Updated lib/BackupPC/DirOps.pm with more robust checking that IO::Dirent
   works.  Matches similar changes to 3.x that didn't make it into 4.x.

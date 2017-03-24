@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.2, released 18 Mar 2017.
+# Version 4.1.0, released 23 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -127,12 +127,21 @@ sub start
         } else {
             my $pwFd;
             $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
+            if ( !length($conf->{RsyncdPasswd}) ) {
+                $t->{XferLOG}->write(\"\$Conf{RsyncdPasswd} is empty; host's rsyncd auth will fail\n");
+                $t->{_errStr} = "\$Conf{RsyncdPasswd} is empty; host's rsyncd auth will fail";
+                return;
+            }
             if ( open($pwFd, ">", $t->{pwFile}) ) {
                 chmod(0400, $t->{pwFile});
                 binmode($pwFd);
                 syswrite($pwFd, $conf->{RsyncdPasswd});
                 close($pwFd);
                 push(@$rsyncArgs, "--password-file=$t->{pwFile}");
+            } else {
+                $t->{XferLOG}->write(\"Failed to open/create rsynd pw file $t->{pwFile}\n");
+                $t->{_errStr} = "Failed to open/create rsynd pw file $t->{pwFile}";
+                return;
             }
             my $shareName = $t->{shareName};
             #from_to($shareName, "utf8", $conf->{ClientCharset})
@@ -357,12 +366,21 @@ sub start
         } else {
             my $pwFd;
             $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
+            if ( !length($conf->{RsyncdPasswd}) ) {
+                $t->{XferLOG}->write(\"\$Conf{RsyncdPasswd} is empty; host's rsyncd auth will fail\n");
+                $t->{_errStr} = "\$Conf{RsyncdPasswd} is empty; host's rsyncd auth will fail";
+                return;
+            }
             if ( open($pwFd, ">", $t->{pwFile}) ) {
                 chmod(0400, $t->{pwFile});
                 binmode($pwFd);
                 syswrite($pwFd, $conf->{RsyncdPasswd});
                 close($pwFd);
                 push(@$rsyncArgs, "--password-file=$t->{pwFile}");
+            } else {
+                $t->{XferLOG}->write(\"Failed to open/create rsynd pw file $t->{pwFile}\n");
+                $t->{_errStr} = "Failed to open/create rsynd pw file $t->{pwFile}";
+                return;
             }
             my $shareName = $t->{shareName};
             #from_to($shareName, "utf8", $conf->{ClientCharset})

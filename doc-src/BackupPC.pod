@@ -1066,6 +1066,11 @@ a shell, eg:
 
 Depending upon your configuration you might also need the -l option.
 
+If the -s option is not available on your operating system, you can
+specify the -m option to use your login shell as invoked shell:
+
+    su -m __BACKUPPCUSER__
+
 =item Data Directory
 
 You need to decide where to put the data directory, below which
@@ -1556,6 +1561,11 @@ option to su to explicitly run a shell, eg:
 
 Depending upon your configuration you might also need
 the -l option.
+
+If the -s option is not available on your operating system, you can
+specify the -m option to use your login shell as invoked shell:
+
+    su -m __BACKUPPCUSER__
 
 You can request status information and start and stop backups using this
 interface. This socket interface is mainly provided for the CGI interface

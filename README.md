@@ -1,4 +1,4 @@
-# BackupPC
+[![BackupPC](images/logo320.png)](https://backuppc.github.io/backuppc/)
 
 BackupPC is a high-performance, enterprise-grade system for backing up to a server's disk.
 

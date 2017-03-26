@@ -505,7 +505,7 @@ sub printProgress
 {
     $FileCntNext = $FileCnt + $FileCntIncr;
     return if ( $opts{p} );
-    my $pctText = sprintf("%.1f", 100 * $FileCnt / $FileCntTotal);
+    my $pctText = sprintf("%.1f", 100 * $FileCnt / ($FileCntTotal > 0 ? $FileCntTotal : 1));
     return if ( $pctText eq $FileCntPctTextLast );
     print("$Host #$BkupNum: $pctText%\n");
     $FileCntPctTextLast = $pctText;

@@ -130,7 +130,7 @@ sub new
 	    && $> != (my $uid = (getpwnam($bpc->{Conf}{BackupPCUser}))[2]) ) {
 	print(STDERR "$0: Wrong user: my userid is $>, instead of $uid"
 	    . " ($bpc->{Conf}{BackupPCUser})\n");
-	print(STDERR "Please su $bpc->{Conf}{BackupPCUser} first\n");
+	print(STDERR "Please `su [-m | -s shell] $bpc->{Conf}{BackupPCUser}` first\n");
 	return;
     }
 

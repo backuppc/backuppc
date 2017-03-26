@@ -78,6 +78,7 @@ my @PerlSrc = qw(
     bin/BackupPC_fixupBackupSummary
     bin/BackupPC_fsck
     bin/BackupPC_ls
+    bin/BackupPC_migrateV3toV4
     bin/BackupPC_nightly
     bin/BackupPC_poolCntPrint
     bin/BackupPC_refCountUpdate

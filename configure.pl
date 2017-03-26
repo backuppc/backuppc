@@ -190,16 +190,17 @@ EOF
 # Check if this is an upgrade, in which case read the existing
 # config file to get all the defaults.
 #
+my $ConfigDir = $opts{"config-dir"} || "/etc/BackupPC";
 my $ConfigPath = "";
 my $ConfigFileOK = 1;
 while ( 1 ) {
-    if ( $ConfigFileOK && -f "/etc/BackupPC/config.pl"
+    if ( $ConfigFileOK && -f "$ConfigDir/config.pl"
             && (!defined($opts{fhs}) || $opts{fhs}) && !defined($opts{"config-path"}) ) {
-        $ConfigPath = "/etc/BackupPC/config.pl";
+        $ConfigPath = "$ConfigDir/config.pl";
         $opts{fhs} = 1 if ( !defined($opts{fhs}) );
         print <<EOF;
 
-Found /etc/BackupPC/config.pl, so this is an upgrade of an
+Found $ConfigDir/config.pl, so this is an upgrade of an
 existing BackupPC installation.  We will verify some existing
 information, but you will probably not need to make any
 changes - just hit ENTER to each question.
@@ -209,7 +210,7 @@ EOF
 
 Is this a new installation or upgrade for BackupPC?  If this is
 an upgrade please tell me the full path of the existing BackupPC
-configuration file (eg: /etc/BackupPC/config.pl).  Otherwise, just
+configuration file (eg: $ConfigDir/config.pl).  Otherwise, just
 hit return.
 
 EOF
@@ -1265,7 +1266,7 @@ Set the configuration compression level to N.  Default is 3.
 
 =item B<--config-dir CONFIG_DIR>
 
-Configuration directory for new installations.  Defaults
+Configuration directory.  Defaults
 to /etc/BackupPC with FHS.  Automatically extracted
 from --config-path for existing installations.
 

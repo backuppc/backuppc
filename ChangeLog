@@ -21,6 +21,15 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Merged pull requests: #80
+
+* Removed extra quotes in $Conf{CgiURL} setting in configure.pl (#80)
+  from Alexander Moisseev
+
+#------------------------------------------------------------------------
+# Version 4.1.0, 23 Mar 2017
+#------------------------------------------------------------------------
+
 * Merged pull requests: #17, #44, #59, #60, #61, #62,#68, #69, #73, #74
 
 * Fixed certain rsync restores, based on patch from Stephen Joyce.

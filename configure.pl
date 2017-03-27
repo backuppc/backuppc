@@ -44,7 +44,7 @@
 
 use strict;
 no  utf8;
-use vars qw(%Conf %OrigConf);
+use vars qw(%Conf %OrigConf $Upgrade);
 use lib "./lib";
 
 #
@@ -76,7 +76,7 @@ my @Packages = qw(version Encode Socket File::Path File::Spec File::Copy DirHand
 
 my $PackageVersion = {
         "Encode"       => "1.99",
-        "BackupPC::XS" => "0.50",
+        "BackupPC::XS" => "0.53",
     };
 
 foreach my $pkg ( @Packages ) {
@@ -194,13 +194,13 @@ my $ConfigDir = $opts{"config-dir"} || "/etc/BackupPC";
 my $ConfigPath = "";
 my $ConfigFileOK = 1;
 while ( 1 ) {
-    if ( $ConfigFileOK && -f "$ConfigDir/config.pl"
+    if ( $ConfigFileOK && -f "$DestDir$ConfigDir/config.pl"
             && (!defined($opts{fhs}) || $opts{fhs}) && !defined($opts{"config-path"}) ) {
         $ConfigPath = "$ConfigDir/config.pl";
         $opts{fhs} = 1 if ( !defined($opts{fhs}) );
         print <<EOF;
 
-Found $ConfigDir/config.pl, so this is an upgrade of an
+Found $DestDir$ConfigDir/config.pl, so this is an upgrade of an
 existing BackupPC installation.  We will verify some existing
 information, but you will probably not need to make any
 changes - just hit ENTER to each question.
@@ -219,13 +219,13 @@ EOF
                              "config-path");
     }
     last if ( $ConfigPath eq ""
-            || ($ConfigPath =~ /^\// && -f $ConfigPath && -w $ConfigPath) );
+            || ($ConfigPath =~ /^\// && -f "$DestDir$ConfigPath" && -w "$DestDir$ConfigPath") );
     my $problem = "is not an absolute path";
     $problem = "is not writable"        if ( !-w $ConfigPath );
     $problem = "is not readable"        if ( !-r $ConfigPath );
     $problem = "is not a regular file"  if ( !-f $ConfigPath );
     $problem = "doesn't exist"          if ( !-e $ConfigPath );
-    print("The file '$ConfigPath' $problem.\n");
+    print("The file '$DestDir$ConfigPath' $problem.\n");
     if ( $opts{batch} ) {
         print("Need to specify a valid --config-path for upgrade\n");
         exit(1);
@@ -235,17 +235,18 @@ EOF
 $opts{fhs} = 1 if ( !defined($opts{fhs}) && $ConfigPath eq "" );
 
 my $bpc;
-if ( $ConfigPath ne "" && -r $ConfigPath ) {
-    (my $confDir = $ConfigPath) =~ s{/[^/]+$}{};
+if ( $ConfigPath ne "" && -r "$DestDir$ConfigPath" ) {
+    ($ConfigDir = $ConfigPath) =~ s{/[^/]+$}{};
 
     # In config-only mode use installed BackupPC if distribution files are not available.
-    my $libPath = $opts{"config-only"}
-      && ( $INC{"BackupPC/Lib.pm"} ne "lib/BackupPC/Lib.pm" ) ? "" : ".";
+    my $libPath = ($opts{"config-only"} && ($INC{"BackupPC/Lib.pm"} ne "lib/BackupPC/Lib.pm"))
+                        ? "" : ".";
 
     die("BackupPC::Lib->new failed\n")
-            if ( !($bpc = BackupPC::Lib->new(".", $libPath, $confDir, 1)) );
+            if ( !($bpc = BackupPC::Lib->new(".", $libPath, "$DestDir$ConfigDir", 1)) );
     %Conf = $bpc->Conf();
     %OrigConf = %Conf;
+    $Upgrade = 1;
     if ( !defined($opts{fhs}) ) {
         if ( $ConfigPath eq "$Conf{TopDir}/conf/config.pl" ) {
             $opts{fhs} = 0;
@@ -261,10 +262,11 @@ if ( $ConfigPath ne "" && -r $ConfigPath ) {
         $bpc->{RunDir} = $Conf{RunDir}  = "$Conf{TopDir}/log"
                     if ( $Conf{RunDir} eq '' );
     }
-    $bpc->{ConfDir} = $Conf{ConfDir} = $confDir;
-    my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}, 1);
-    if ( $err eq "" ) {
-        print <<EOF;
+    $bpc->{ConfDir} = $Conf{ConfDir} = $ConfigDir;
+    if ( !length($DestDir) ) {
+        my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}, 1);
+        if ( $err eq "" ) {
+            print <<EOF;
 
 BackupPC is running on $Conf{ServerHost}.  You need to stop BackupPC before
 you can upgrade the code.  Depending upon your installation, you could
@@ -272,7 +274,8 @@ run "systemctl stop backuppc.service" if you use systemd,
 or "/etc/init.d/backuppc stop" if you use init.d.
 
 EOF
-        exit(1);
+            exit(1);
+        }
     }
 }
 
@@ -428,11 +431,11 @@ while ( 1 ) {
 }
 
 if ( $opts{fhs} ) {
-    $Conf{ConfDir}      ||= $opts{"config-dir"}  || "/etc/BackupPC";
+    $Conf{ConfDir}      ||= $ConfigDir           || "/etc/BackupPC";
     $Conf{LogDir}       ||= $opts{"log-dir"}     || "/var/log/BackupPC";
     $Conf{RunDir}       ||= $opts{"run-dir"}     || "/var/run/BackupPC";
 } else {
-    $Conf{ConfDir}      ||= $opts{"config-dir"}  || "$Conf{TopDir}/conf";
+    $Conf{ConfDir}      ||= $ConfigDir           || "$Conf{TopDir}/conf";
     $Conf{LogDir}       ||= $opts{"log-dir"}     || "$Conf{TopDir}/log";
     $Conf{RunDir}       ||= $opts{"run-dir"}     || "$Conf{TopDir}/log";
 }
@@ -643,7 +646,8 @@ $Conf{ParPath} = '' if ( $Conf{ParPath} ne '' && !-x $Conf{ParPath} );
 #
 if ( defined($Conf{PingArgs}) ) {
     $Conf{PingCmd} = '$pingPath ' . $Conf{PingArgs};
-} elsif ( !defined($Conf{PingCmd}) ) {
+    delete($Conf{PingArgs});
+} elsif ( $Upgrade && !defined($Conf{PingCmd}) ) {
     if ( $^O eq "solaris" || $^O eq "sunos" ) {
 	$Conf{PingCmd} = '$pingPath -s $host 56 1';
     } elsif ( ($^O eq "linux" || $^O eq "openbsd" || $^O eq "netbsd")
@@ -652,7 +656,6 @@ if ( defined($Conf{PingArgs}) ) {
     } else {
 	$Conf{PingCmd} = '$pingPath -c 1 $host';
     }
-    delete($Conf{PingArgs});
 }
 
 #
@@ -708,14 +711,14 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
     my $value = $d->Dump;
     $value =~ s/(.*)\n/$1;\n/s;
     $newConf->[$newVars->{CgiUserConfigEdit}]{text}
-            =~ s/(\s*\$Conf\{.*?\}\s*=\s*).*/$1$value/s;
+            =~ s/^(\s*\$Conf\{.*?\}\s*=\s*).*/$1$value/ms;
 }
 
 #
 # If this is an upgrade from V3, then set $Conf{PoolV3Enabled}
 # and update $Conf{RsyncArgs} and $Conf{RsyncRestoreArgs}.
 #
-if ( defined($Conf{ServerHost}) && !defined($Conf{PoolV3Enabled}) ) {
+if ( $Upgrade && !defined($Conf{PoolV3Enabled}) ) {
     $Conf{PoolV3Enabled} = 1;
     $newConf->[$newVars->{RsyncArgs}]{text}        = $distConf->[$distVars->{RsyncArgs}]{text};
     $newConf->[$newVars->{RsyncRestoreArgs}]{text} = $distConf->[$distVars->{RsyncRestoreArgs}]{text};
@@ -725,7 +728,7 @@ if ( defined($Conf{ServerHost}) && !defined($Conf{PoolV3Enabled}) ) {
     if ( $Conf{RsyncClientCmd} =~ /(\$sshPath.* +-l +\S+)/ && defined($newVars->{RsyncSshArgs}) ) {
         my $value = "[\n    '-e', '$1',\n];\n\n";
         $newConf->[$newVars->{RsyncSshArgs}]{text}
-                =~ s/(\s*\$Conf\{RsyncSshArgs}\s*=\s*).*/$1$value/s;
+                =~ s/^(\s*\$Conf\{RsyncSshArgs}\s*=\s*).*/$1$value/ms;
     }
 }
 
@@ -753,7 +756,7 @@ foreach my $param ( keys(%{$opts{"config-override"}}) ) {
     }
     $value .= ";\n\n";
     $newConf->[$newVars->{$param}]{text}
-            =~ s/(\s*\$Conf\{$param}\s*=\s*).*/$1$value/s;
+            =~ s/^(\s*\$Conf\{$param}\s*=\s*).*/$1$value/ms;
 }
 
 #
@@ -788,6 +791,7 @@ foreach my $var ( @$newConf ) {
     $blockComment = $1 if ( $var->{text} =~ /^([\s\n]*#{70}.*#{70}[\s\n]+)/s );
     $var->{text} =~ s/^\s*\$Conf\{(.*?)\}(\s*=\s*['"]?)(.*?)(['"]?\s*;)/
                 defined($Conf{$1}) && ref($Conf{$1}) eq ""
+                                   && !defined($opts{"config-override"}{$1})
                                    && $Conf{$1} ne $OrigConf{$1}
                                    ? "\$Conf{$1}$2$Conf{$1}$4"
                                    : "\$Conf{$1}$2$3$4"/emg;
@@ -1266,9 +1270,8 @@ Set the configuration compression level to N.  Default is 3.
 
 =item B<--config-dir CONFIG_DIR>
 
-Configuration directory.  Defaults
-to /etc/BackupPC with FHS.  Automatically extracted
-from --config-path for existing installations.
+Configuration directory.  Defaults to /etc/BackupPC with FHS.
+Automatically extracted from --config-path for existing installations.
 
 =item B<--config-override name=value>
 
@@ -1328,15 +1331,14 @@ Example:
 
 =item B<--dest-dir DEST_DIR>
 
-An optional prefix to apply to all installation directories.
-Usually this is not needed, but certain auto-installers like
-to stage an install in a temporary directory, and then copy
-the files to their real destination.  This option can be used
-to specify the temporary directory prefix.  Note that if you
-specify this option, BackupPC won't run correctly if you try
-to run it from below the --dest-dir directory, since all the
-paths are set assuming BackupPC is installed in the intended
-final locations.
+An optional prefix to apply to all installation directories.  Usually this
+is not needed, but is used by package creators, or certain auto-installers
+that like to stage an install in a temporary directory, and then copy
+the files to their real destination.  This option can be used to specify
+the target directory prefix.  If you specify this option any existing
+installation should be ignored.  Note that BackupPC won't run correctly if
+you try to run it from below the --dest-dir directory, since all the paths
+are set assuming BackupPC is installed in the intended final locations.
 
 =item B<--fhs>
 

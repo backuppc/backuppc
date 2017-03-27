@@ -21,18 +21,23 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Merged pull requests: #80, #82
-
-* Minor changes to systemd/src/init.d/gentoo-backuppc from sigmoidal (#82).
-
-* Removed extra quotes in $Conf{CgiURL} setting in configure.pl (#80)
-  from Alexander Moisseev
+* Merged pull requests: #79, #80, #82
 
 * Added missing BackupPC_migrateV3toV4 to makeDist (issue #75) reported
   by spikebike.
 
 * Fixed divide-by-zero in progress % report in BackupPC_migrateV3toV4
   (issue #75) reported by spikebike.
+
+* Updates to configure.pl to make config-path default be based on
+  config-dir (#79), prepended config-path with dest-dir, fixing a
+  config.pl merge bug affecting $Conf{PingPath} reported by Richard Shaw,
+  and a few other fixes.
+
+* Removed extra quotes in $Conf{CgiURL} setting in configure.pl (#80)
+  from Alexander Moisseev
+
+* Minor changes to systemd/src/init.d/gentoo-backuppc from sigmoidal (#82).
 
 #------------------------------------------------------------------------
 # Version 4.1.0, 23 Mar 2017

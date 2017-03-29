@@ -842,7 +842,8 @@ sub CheckHostAlive
     #
     $s = $bpc->cmdSystemOrEval($pingCmd, undef, $args);
     if ( $? ) {
-	print(STDERR "CheckHostAlive: first ping failed ($?, $!)\n")
+        my $str = $bpc->execCmd2ShellCmd(@$pingCmd);
+	print(STDERR "CheckHostAlive: first ping ($str) failed ($?, $!)\n")
 			if ( $bpc->{verbose} );
 	return -1;
     }
@@ -852,7 +853,8 @@ sub CheckHostAlive
     #
     $s = $bpc->cmdSystemOrEval($pingCmd, undef, $args);
     if ( $? ) {
-	print(STDERR "CheckHostAlive: second ping failed ($?, $!)\n")
+        my $str = $bpc->execCmd2ShellCmd(@$pingCmd);
+	print(STDERR "CheckHostAlive: second ping ($str) failed ($?, $!)\n")
 			if ( $bpc->{verbose} );
 	return -1;
     }
@@ -867,7 +869,10 @@ sub CheckHostAlive
 	           . " (not fatal)\n") if ( $bpc->{verbose} );
 	$ret = 0;
     }
-    print(STDERR "CheckHostAlive: returning $ret\n") if ( $bpc->{verbose} );
+    if ( $bpc->{verbose} ) {
+        my $str = $bpc->execCmd2ShellCmd(@$pingCmd);
+        print(STDERR "CheckHostAlive: ran '$str'; returning $ret\n")
+    }
     return $ret;
 }
 
@@ -1410,8 +1415,9 @@ sub flushXSLibMesgs()
 sub getHostAddrInfo
 {
     my($bpc, $host) = @_;
-    my($err, @addrs) = Socket::getaddrinfo($host);
-    return undef if ( $err );
+    my($err, @addrs);
+    eval { ($err, @addrs) = Socket::getaddrinfo($host) };
+    return 4 if ( $@ || $err || !@addrs );
     return (($addrs[0])->{'family'} == Socket::AF_INET6) ? 6 : 4;
 }
 

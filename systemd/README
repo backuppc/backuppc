@@ -7,7 +7,9 @@ The preferred method is using systemd.
 
 To install the systemd service:
 
- - check/modify the configuration in the backuppc.service file in this directory
+ - check/modify the configuration in the backuppc.service file in this directory.
+   Uncomment the Group= line if your group name is the same as the BackupPC user
+   (or change the group name as necessary).
 
  - as root, run these commands:
      cp backuppc.service /lib/systemd/system   # (or /usr/lib/systemd/system)

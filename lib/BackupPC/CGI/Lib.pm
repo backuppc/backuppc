@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2013  Craig Barratt
+#   Copyright (C) 2003-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.1.1, released 27 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -143,7 +143,7 @@ sub NewRequest
     # Verify we are running as the correct user
     #
     if ( $Conf{BackupPCUserVerify}
-	    && $> != (my $uid = (getpwnam($Conf{BackupPCUser}))[2]) ) {
+	    && $> != (my $uid = getpwnam($Conf{BackupPCUser})) ) {
 	ErrorExit(eval("qq{$Lang->{Wrong_user__my_userid_is___}}"), <<EOF);
 This script needs to run as the user specified in \$Conf{BackupPCUser},
 which is set to $Conf{BackupPCUser}.

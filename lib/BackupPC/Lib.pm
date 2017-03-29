@@ -127,7 +127,7 @@ sub new
     #
     if ( !$noUserCheck
 	    && $bpc->{Conf}{BackupPCUserVerify}
-	    && $> != (my $uid = (getpwnam($bpc->{Conf}{BackupPCUser}))[2]) ) {
+	    && $> != (my $uid = getpwnam($bpc->{Conf}{BackupPCUser})) ) {
 	print(STDERR "$0: Wrong user: my userid is $>, instead of $uid"
 	    . " ($bpc->{Conf}{BackupPCUser})\n");
 	print(STDERR "Please 'su [-m | -s shell] $bpc->{Conf}{BackupPCUser}' first\n");

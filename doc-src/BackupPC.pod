@@ -2427,6 +2427,24 @@ If you want to put things back the way they were:
     # only do "cp backups.save backups" if you are sure no
     # new backups have been done
 
+Two important things to note with BackupPC_migrateV3toV4.  First, V4
+storage does use more filesystem inodes than V3 (that's the small cost
+of getting rid of hardlinks).  In particular, each directory in a backup
+tree uses two inodes in V4 (one for the directory, and one for the (empty)
+attrib file), and only one inode in V3 (one for the directory, and the
+attrib and all other files are hardlinked to the pool).  So before you run
+BackupPC_migrateV3toV4, make sure you have enough inodes in __TOPDIR__;
+use df -i to make sure you are under 45% inode usage.
+
+Secondly, if you run BackupPC_migrateV3toV4 on all your backups, the
+old V3 pool should be empty, except for old-style attrib files, which
+should all have only one link since no backups should reference them any
+longer.  Before you turn off the V3 pool by setting $Conf{PoolV3Enabled}
+to 0, make sure BackupPC_nightly has run enough times (specifically,
+$Conf{PoolSizeNightlyUpdatePeriod} times) so that the V3 pool can be
+emptied.  You could do this manually, but only if you are very careful
+to check that the remaining files only have one link.
+
 =item BackupPC_poolCntPrint
 
 BackupPC_poolCntPrint is used to print reference count information, either per-backup,

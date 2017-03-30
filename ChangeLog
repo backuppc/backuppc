@@ -21,7 +21,7 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-* Merged pull requests: #79, #80, #82
+* Merged pull requests: #77, #78, #79, #82
 
 * Added missing BackupPC_migrateV3toV4 to makeDist (issue #75) reported
   by spikebike.
@@ -29,15 +29,23 @@
 * Fixed divide-by-zero in progress % report in BackupPC_migrateV3toV4
   (issue #75) reported by spikebike.
 
+* In lib/BackupPC/Lib.pm, if Socket::getaddrinfo() doesn't exist (ie,
+  an old version of Socket.pm), then default to ipv4 ping.
+
 * Updates to configure.pl to make config-path default be based on
   config-dir (#79), prepended config-path with dest-dir, fixing a
   config.pl merge bug affecting $Conf{PingPath} reported by Richard Shaw,
   and a few other fixes.
 
-* Removed extra quotes in $Conf{CgiURL} setting in configure.pl (#80)
-  from Alexander Moisseev
+* Updated required version of BackupPC::XS to 0.53 and rsync_bpc to
+  3.0.9.6.
 
 * Minor changes to systemd/src/init.d/gentoo-backuppc from sigmoidal (#82).
+
+* Added RuntimeDirectory to systemd/src/backuppc.service.
+
+* Use the scalar form of getpwnam() in lib/BackupPC/CGI/Lib.pm and
+  lib/BackupPC/Lib.pm
 
 #------------------------------------------------------------------------
 # Version 4.1.0, 23 Mar 2017

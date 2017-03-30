@@ -905,10 +905,14 @@ sub DoInstall
                 "$Conf{LogDir}",
                 "$Conf{RunDir}",
             ) ) {
-        mkpath("$DestDir$dir", 0, 0750) if ( !-d "$DestDir$dir" );
-        if ( !-d "$DestDir$dir"
+        eval { mkpath("$DestDir$dir", 0, 0750) } if ( !-d "$DestDir$dir" );
+        if ( $@ || !-d "$DestDir$dir"
                 || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
-            die("Failed to create or chown $DestDir$dir\n");
+            if ( $dir eq $Conf{RunDir} ) {
+                print("Failed to create or chown $DestDir$dir... continuing\n");
+            } else {
+                die("Failed to create or chown $DestDir$dir\n");
+            }
         } else {
             print("Created $DestDir$dir\n");
         }

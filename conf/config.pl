@@ -457,9 +457,9 @@ $Conf{IncrPeriod} = 0.97;
 #     efficient to view or restore older backups.
 #
 #   - more importantly, in V4+, deleting backups is done based on Fill/Unfilled,
-#     not whether the original backup was full/incremental.  If there aren't
-#     any filled backups (other than the most recent), then the FillKeepPeriod
-#     settings won't have any effect.
+#     not whether the original backup was full/incremental.  If there aren't any
+#     filled backups (other than the most recent), then the $Conf{FullKeepCnt}
+#     and related settings won't have any effect.
 #
 $Conf{FillCycle} = 0;
 
@@ -467,9 +467,9 @@ $Conf{FillCycle} = 0;
 # Number of filled backups to keep.  Must be >= 1.
 #
 # Note: Starting in V4+, deleting backups is done based on Fill/Unfilled,
-# not whether the original backup was full/incremental.  
-# reasons these parameters continue to be called FullKeepCnt, rather than
-# FilledKeepCnt.  If $Conf{FillCycle} is 0, then full backups continue
+# not whether the original backup was full/incremental. For backward
+# compatibility, these parameters continue to be called FullKeepCnt, rather
+# than FilledKeepCnt.  If $Conf{FillCycle} is 0, then full backups continue
 # to be filled, so the terms are interchangeable.  For V3 backups,
 # the expiry settings have their original meanings.
 #

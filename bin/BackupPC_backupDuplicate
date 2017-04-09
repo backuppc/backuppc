@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.1.1, released 29 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -209,7 +209,8 @@ BackupPC::Storage->backupInfoWrite("$TopDir/pc/$Host",
 $ErrorCnt += BackupPC::XS::Lib::logErrorCntGet();
 $bpc->flushXSLibMesgs();
 unlink("$DestDir/refCnt/needFsck.dup") if ( $ErrorCnt == 0 );
-$ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0") != 0 );
+my $optsp = " -p" if ( $opts{p} );
+$ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0$optsp") != 0 );
 print("BackupPC_backupDuplicate: got $ErrorCnt errors and $FileErrorCnt file open errors\n");
 print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
 exit($ErrorCnt ? 1 : 0);

@@ -31,6 +31,8 @@
 #          dhcp hosts that are no longer on the network will not expire
 #          old backups.
 #
+#     -p   don't show progress
+#
 #     -v   verbose.  for manual usage: prints failure reasons in more detail.
 #
 #   BackupPC_dump is run periodically by BackupPC to backup $client.
@@ -85,7 +87,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.1.1, released 29 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -124,8 +126,8 @@ my $LockFd;
 $bpc->ChildInit();
 
 my %opts;
-if ( !getopts("defivFI", \%opts) || @ARGV != 1 ) {
-    print("usage: $0 [-d] [-e] [-f] [-i] [-F] [-I] [-v] <client>\n");
+if ( !getopts("defivpFI", \%opts) || @ARGV != 1 ) {
+    print("usage: $0 [-d] [-e] [-f] [-i] [-F] [-I] [-p] [-v] <client>\n");
     exit(1);
 }
 if ( $ARGV[0] !~ /^([\w\.\s-]+)$/ ) {
@@ -594,7 +596,7 @@ my $BackupCase;
 
 if ( !defined($lastBkupNum) ) {
     #
-    # case 1: no backups.  Create a new empty backup and do inPLace.
+    # case 1: no backups.  Create a new empty backup and do inPlace.
     #
     $BackupCase  = 1;
     $inPlace     = 1;
@@ -769,6 +771,7 @@ if ( $doDuplicate ) {
     # Run BackupPC_backupDuplicate, then re-read the backups file.
     #
     my $cmd = ["$BinDir/BackupPC_backupDuplicate", "-h", $client];
+    push(@$cmd, "-p") if ( $opts{p} );
     $XferLOG->write(\"Executing @$cmd\n");
     $bpc->cmdSystemOrEval($cmd,
 	    sub {
@@ -910,7 +913,7 @@ for my $shareName ( @$ShareNames ) {
         BackupFailCleanup();
     }
 
-    print("__bpc_progress_state__ backup $shareName\n");
+    print("__bpc_progress_state__ backup $shareName\n") if ( !$opts{p} );
 
     $xfer = BackupPC::Xfer::create($Conf{XferMethod}, $bpc);
     if ( !defined($xfer) ) {
@@ -975,7 +978,8 @@ for my $shareName ( @$ShareNames ) {
 	    alarm(0);
             my @tarOpts = ("-h", $client, "-s", $shareName);
             push(@tarOpts, "-f") if ( $type eq "full" );
-            push(@tarOpts, "-p") if ( $inPlace );
+            push(@tarOpts, "-P") if ( $inPlace );
+            push(@tarOpts, "-p") if ( $opts{p} );
 	    exec("$BinDir/BackupPC_tarExtract", @tarOpts);
 	    print(LOG $bpc->timeStamp, "can't exec $BinDir/BackupPC_tarExtract\n");
 	    exit(0);
@@ -1005,6 +1009,7 @@ for my $shareName ( @$ShareNames ) {
         incrBaseBkupNum   => $incrBaseBkupNum,
         incrBaseTime      => $incrBaseTime,
 	pidHandler        => \&pidHandler,
+        noProgressPrint   => $opts{p},
     });
 
     if ( !defined($logMsg = $xfer->start()) ) {
@@ -1474,7 +1479,7 @@ sub BackupFailCleanup
     BackupPC::XS::DirOps::unlockRangeFile($LockFd) if ( defined($LockFd) );
     $LockFd = undef;
 
-    print("__bpc_progress_state__ fail cleanup\n");
+    print("__bpc_progress_state__ fail cleanup\n") if ( !$opts{p} );
     #
     # There are six cases listed above that we have to clean up,
     # based on whether any files were actually backed up.
@@ -1724,10 +1729,10 @@ sub BackupExpire
 	}
 	$fullAgeMax += $fullPeriod;	# add some buffer
 
-        if ( $cntFull > $Conf{FullKeepCntMin}
+        if ( $cntFull > $Conf{FullKeepCntMin} + 1
                && $oldestFull > $Conf{FullAgeMax}
                && $oldestFull > $fullAgeMax
-	       && $Conf{FullKeepCntMin} > 0
+	       && $Conf{FullKeepCntMin} >= 0
 	       && $Conf{FullAgeMax} > 0 ) {
             #
             # Only delete a full backup if the Conf settings are satisfied.
@@ -1919,10 +1924,11 @@ sub BackupRemove
 
     if ( defined($shareName) ) {
         push(@args, "-s", $shareName, "/");
-        print("__bpc_progress_state__ delete share #$bkupNum/$shareName\n");
+        print("__bpc_progress_state__ delete share #$bkupNum/$shareName\n") if ( !$opts{p} );
     } else {
-        print("__bpc_progress_state__ delete #$bkupNum\n");
+        print("__bpc_progress_state__ delete #$bkupNum\n") if ( !$opts{p} );
     }
+    push(@args, "-p") if ( $opts{p} );
 
     unlink("$Dir/XferLOG.$bkupNum$fileExt") if ( !defined($shareName) && $removeXferLOG );
 
@@ -2016,7 +2022,8 @@ sub RefCountUpdate
     my $args = ["-h", $client];
     push(@$args, "-f") if ( $doFsck  );
     push(@$args, "-c") if ( $doCheck );
-    print("__bpc_progress_state__ fsck\n");
+    push(@$args, "-p") if ( $opts{p} );
+    print("__bpc_progress_state__ fsck\n") if ( !$opts{p} );
     $XferLOG->write(\"Running BackupPC_refCountUpdate @$args on $client\n");
     $bpc->cmdSystemOrEval(["$BinDir/BackupPC_refCountUpdate", @$args],
             sub {
@@ -2086,15 +2093,15 @@ sub UserCommandRun
     if ($cmdType eq 'DumpPreShareCmd' || $cmdType eq 'DumpPostShareCmd') {
 	$vars->{share} = $sharename;
         if ( $cmdType =~ /Post/ ) {
-            print("__bpc_progress_state__ post-cmd $sharename\n");
+            print("__bpc_progress_state__ post-cmd $sharename\n") if ( !$opts{p} );
         } else {
-            print("__bpc_progress_state__ pre-cmd $sharename\n");
+            print("__bpc_progress_state__ pre-cmd $sharename\n") if ( !$opts{p} );
         }
     } else {
         if ( $cmdType =~ /Post/ ) {
-            print("__bpc_progress_state__ post-cmd\n");
+            print("__bpc_progress_state__ post-cmd\n") if ( !$opts{p} );
         } else {
-            print("__bpc_progress_state__ pre-cmd\n");
+            print("__bpc_progress_state__ pre-cmd\n") if ( !$opts{p} );
         }
     }
 

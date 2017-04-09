@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.1.1, released 29 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -300,7 +300,8 @@ if ( !defined($ShareName) ) {
 unlink("$MergeDir/refCnt/needFsck.del") if ( $Errors == 0 );
 
 if ( $doRefCountUpdate || $opts{r} ) {
-    $Errors++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0") != 0 );
+    my $optsp = " -p" if ( $opts{p} );
+    $Errors++ if ( system("$BinDir/BackupPC_refCountUpdate -h $Host -o 0$optsp") != 0 );
 }
 
 print("BackupPC_backupDelete: got $Errors errors\n") if ( $Errors > 0 || $LogLevel >= 2 );

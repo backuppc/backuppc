@@ -532,7 +532,7 @@ sub run
                 next;
             }
             if ( /^__bpc_progress_fileCnt__ \d+/ ) {
-                print("$_\n");
+                print("$_\n") if ( !$t->{noProgressPrint} );
                 $t->{XferLOG}->write(\"$_\n") if ( $conf->{XferLogLevel} >= 6 );
                 next;
             }

@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.1.1, released 29 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -55,17 +55,18 @@ my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
 
 my %opts;
-if ( !getopts("fph:s:", \%opts) || @ARGV > 0 ) {
+if ( !getopts("fPph:s:", \%opts) || @ARGV > 0 ) {
     print <<EOF;
 usage: $0 [options] files/directories...
   Required options:
-     -h host           host where the tar file will be extracted
-     -s shareName      share name where the tar file will be extracted
+     -h host         host where the tar file will be extracted
+     -s shareName    share name where the tar file will be extracted
 
   Other options:
-     -f                this is a full tar archive
-     -p                inplace - don't put reverse deltas into 2nd most
-                       recent backup
+     -f              this is a full tar archive
+     -P              inplace - don't put reverse deltas into 2nd most
+                     recent backup
+     -p              don't show progress
 EOF
     exit(1);
 }
@@ -131,7 +132,7 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
 }
 my $Inode0 = $Inode;
 
-my $Inplace = $opts{p};
+my $Inplace = $opts{P};
 if ( !$Inplace ) {
     $lastBkupIdx = $newBkupIdx - 1;
     if ( $lastBkupIdx < 0 ) {
@@ -1176,5 +1177,5 @@ sub copyInodes
 
 sub printProgress
 {
-    print("__bpc_progress_fileCnt__ $FileCnt\n");
+    print("__bpc_progress_fileCnt__ $FileCnt\n") if ( !$opts{p} );
 }

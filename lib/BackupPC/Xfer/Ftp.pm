@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.1.1, released 29 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1064,7 +1064,7 @@ sub logFileAction
         $owner, $attrib->{size}, $attrib->{name}
     );
 
-    if ( ($t->{stats}{TotalFileCnt} % 20) == 0 ) {
+    if ( ($t->{stats}{TotalFileCnt} % 20) == 0 && !$t->{noProgressPrint} ) {
         printf("__bpc_progress_fileCnt__ %d\n", $t->{stats}{TotalFileCnt});
     }
 

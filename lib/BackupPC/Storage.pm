@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2013  Craig Barratt
+#   Copyright (C) 2004-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.1.1, released 29 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -70,6 +70,9 @@ sub new
 # file to allow later recovery of the pc/backups file in
 # cases when it is corrupted.
 #
+# Also updates the directory mtime to reflect the backup
+# finish time.
+#
 sub backupInfoWrite
 {
     my($class, $pcDir, $bkupNum, $bkupInfo, $force) = @_;
@@ -86,6 +89,8 @@ sub backupInfoWrite
     } else {
         print("backupInfoWrite: can't open/create $pcDir/$bkupNum/backupInfo\n");
     }
+    utime($bkupInfo->{endTime}, $bkupInfo->{endTime}, "$pcDir/$bkupNum")
+                if ( defined($bkupInfo->{endTime}) );
 }
 
 1;

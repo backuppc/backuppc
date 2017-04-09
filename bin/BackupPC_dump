@@ -1340,6 +1340,14 @@ if ( $XferLOG ) {
     $XferLOG = undef;
 }
 
+#
+# Touch the new and last backup directories with their backup end times
+#
+foreach my $idx ( ($lastBkupIdx, $newBkupIdx) ) {
+    next if ( !defined($idx) || !defined($Backups[$idx]{endTime}) );
+    utime($Backups[$idx]{endTime}, $Backups[$idx]{endTime}, "$Dir/$Backups[$idx]{num}");
+}
+
 print("$type backup complete\n");
 exit(0);
 

@@ -1417,7 +1417,9 @@ sub getHostAddrInfo
     my($bpc, $host) = @_;
     my($err, @addrs);
     eval { ($err, @addrs) = Socket::getaddrinfo($host) };
-    return 4 if ( $@ || $err || !@addrs );
+    if ( $@ || $err || !@addrs ) {
+        return defined(gethostbyname($host)) ? 4 : undef;
+    }
     return (($addrs[0])->{'family'} == Socket::AF_INET6) ? 6 : 4;
 }
 

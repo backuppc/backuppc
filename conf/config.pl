@@ -466,6 +466,11 @@ $Conf{FillCycle} = 0;
 #
 # Number of filled backups to keep.  Must be >= 1.
 #
+# The most recent backup (which is always filled) doesn't count when
+# checking $Conf{FullKeepCnt}.  So if you specify $Conf{FullKeepCnt} = 1
+# then that means keep one full backup in addition to the most recent
+# backup (which might be a filled incr or full).
+#
 # Note: Starting in V4+, deleting backups is done based on Fill/Unfilled,
 # not whether the original backup was full/incremental. For backward
 # compatibility, these parameters continue to be called FullKeepCnt, rather
@@ -552,7 +557,7 @@ $Conf{FullKeepCnt} = 1;
 # full backups to exceed $Conf{FullAgeMax}.
 #
 $Conf{FullKeepCntMin} = 1;
-$Conf{FullAgeMax}     = 90;
+$Conf{FullAgeMax}     = 180;
 
 #
 # Number of incremental backups to keep.  Must be >= 1.

@@ -1728,6 +1728,15 @@ sub BackupExpire
         #
 	my $fullKeepCnt = $Conf{FullKeepCnt};
 	$fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
+
+        #
+        # Always save one more than what the user configured to account for the most
+        # recent backup which is always filled (whether incr or full); also copy the
+        # array so we don't update $Conf{FullKeepCnt}.
+        #
+        $fullKeepCnt = [@$fullKeepCnt];
+        $fullKeepCnt->[0]++;
+
 	my $fullAgeMax;
 	my $fullPeriod = int(0.5 + $Conf{FullPeriod});
         $fullPeriod = 7 if ( $fullPeriod <= 0 );
@@ -1791,6 +1800,14 @@ sub BackupFullExpire
                                            || !defined($Conf{FullKeepCnt}) );
 
     #
+    # Always save one more than what the user configured to account for the most
+    # recent backup which is always filled (whether incr or full); also copy the
+    # array so we don't update $Conf{FullKeepCnt}.
+    #
+    $fullKeepCnt = [@$fullKeepCnt];
+    $fullKeepCnt->[0]++;
+
+    #
     # If regular backups are still disabled with $Conf{FullPeriod} < 0,
     # we still expire backups based on a safe FullPeriod value - daily.
     #
@@ -1798,7 +1815,7 @@ sub BackupFullExpire
 
     $fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
     my $startTimeDeviation = $fullPeriod < 1 ? $fullPeriod / 2 : 0.5;
-    my $keepPeriod = ($fullPeriod * $fullKeepCnt->[0] - $startTimeDeviation) * 24 * 3600;
+    my $keepPeriod = ($fullPeriod * ($fullKeepCnt->[0] - 1) - $startTimeDeviation) * 24 * 3600;
 
     for ( my $i = 0 ; $i < @$Backups ; $i++ ) {
         if ( $Backups[$i]{preV4} ) {

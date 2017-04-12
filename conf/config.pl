@@ -1805,6 +1805,23 @@ $Conf{UserCmdCheckStatus} = 0;
 #
 $Conf{ClientNameAlias} = undef;
 
+#
+# Provide an alternative alias for machine that have both
+# wired and wifi connections. This allows to backup the same machine
+# over lan or wifi without too much extra configuration. As
+# ClientNameAlias, this should only be set in the per-PC config file.
+# The setting can be a hostname or IP address, eg:
+#
+#         $Conf{ClientWifiAlias} = 'realHostName-wifi';
+#         $Conf{ClientWifiAlias} = '192.1.1.15';
+#
+# will cause the relevant smb/tar/rsync backup/restore commands to be
+# directed to realHostName, not the client name.
+#
+# Note: this setting doesn't work for hosts with DHCP set to 1.
+#
+$Conf{ClientWifiAlias} = undef;
+
 ###########################################################################
 # Email reminders, status and messages
 # (can be overridden in the per-PC config.pl)

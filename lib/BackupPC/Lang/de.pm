@@ -187,7 +187,6 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
     <td align="center"> Letzte Aktion </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Computer ohne Backups")}
 <p>
 Es gibt \$hostCntNone Computer ohne Backups !!!
@@ -703,9 +702,7 @@ Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wi
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Xfer Fehler Übersicht - bitte kontrollieren")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
@@ -717,7 +714,6 @@ Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wi
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Datei Größe/Anzahl Wiederverwendungsübersicht")}
 <p>
@@ -744,7 +740,6 @@ Leere Dateien und eventuelle Dateifehler sind nicht in den Summen enthalten.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Kompressions Übersicht")}
 <p>
@@ -767,7 +762,6 @@ Kompressionsergebnisse für bereits im Backup-Pool vorhandene und für neu komprim
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archivübersicht";

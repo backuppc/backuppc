@@ -175,7 +175,6 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> 最后一次备份结果 </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("未备份过的客户机")}
 <p>
 有 \$hostCntNone 台客户机从未被备份过。
@@ -681,9 +680,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("传输错误报告")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 备份序列号＃ </td>
     <td align="center"> 类型 </td>
@@ -695,7 +692,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("文件大小／数目统计")}
 <p>
@@ -721,7 +717,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("压缩报告")}
 <p>
@@ -744,7 +739,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: 客户机 \$host 备档报告";

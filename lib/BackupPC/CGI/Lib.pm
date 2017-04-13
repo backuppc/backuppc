@@ -436,7 +436,7 @@ sub Header
 {
     my($title, $content, $noBrowse, $contentSub, $contentPost) = @_;
     my @adminLinks = (
-        { link => "",                      name => $Lang->{Status}},
+        { link => "?action=status",        name => $Lang->{Status}},
         { link => "?action=summary",       name => $Lang->{PC_Summary}},
         { link => "?action=editConfig",    name => $Lang->{CfgEdit_Edit_Config},
                                            priv => 1},
@@ -468,15 +468,19 @@ sub Header
 $Conf{CgiHeaders}
 <script src="$Conf{CgiImageDirURL}/sorttable.js"></script>
 </head><body onLoad="document.getElementById('NavMenu').style.height=document.body.scrollHeight">
-<a href="/"><img src="$Conf{CgiImageDirURL}/logo.gif" hspace="5" vspace="7" border="0"></a><br>
+
+<div id="navigation-container">
+	<div id="logo-container">
+		<a href="/"><img src="$Conf{CgiImageDirURL}/logo.gif"></a>
+	</div>
 EOF
 
     if ( defined($Hosts) && defined($host) && defined($Hosts->{$host}) ) {
-	print "<div class=\"NavMenu\">";
+	print "<div class=\"NavMenu section-title\">";
 	NavSectionTitle("${EscHTML($host)}");
 	print <<EOF;
 </div>
-<div class="NavMenu">
+<div class="NavMenu host">
 EOF
 	NavLink("?host=${EscURI($host)}",
 		"$host $Lang->{Home}", " class=\"navbar\"");
@@ -506,17 +510,8 @@ EOF
         }
 	print "</div>\n";
     }
-    print("<div id=\"Content\">\n$content\n");
-    if ( defined($contentSub) && ref($contentSub) eq "CODE" ) {
-	while ( (my $s = &$contentSub()) ne "" ) {
-	    print($s);
-	}
-    }
-    print($contentPost) if ( defined($contentPost) );
     print <<EOF;
-<br><br><br>
-</div>
-<div class="NavMenu" id="NavMenu" style="height:100%">
+<div class="NavMenu" id="NavMenu">
 EOF
     my $hostSelectbox = "<option value=\"#\">$Lang->{Select_a_host}</option>";
     my @hosts = GetUserHosts($Conf{CgiNavBarAdminAllHosts});
@@ -532,11 +527,9 @@ EOF
     }
     if ( @hosts >= $Conf{CgiNavBarAdminAllHosts} ) {
         print <<EOF;
-<br>
 <select onChange="document.location=this.value">
 $hostSelectbox
 </select>
-<br><br>
 EOF
     }
     if ( $Conf{CgiSearchBoxEnable} ) {
@@ -556,9 +549,17 @@ EOF
     }
 
     print <<EOF;
-<br><br><br>
 </div>
+</div> <!-- end #navigation-container -->
 EOF
+
+    print("<div id=\"Content\">\n$content\n");
+    if ( defined($contentSub) && ref($contentSub) eq "CODE" ) {
+	while ( (my $s = &$contentSub()) ne "" ) {
+	    print($s);
+	}
+    }
+    print($contentPost) if ( defined($contentPost) );
 }
 
 sub Trailer
@@ -573,7 +574,7 @@ sub NavSectionTitle
 {
     my($head) = @_;
     print <<EOF;
-<div class="NavTitle">$head</div>
+<h2 class="NavTitle">$head</h2>
 EOF
 }
 
@@ -608,7 +609,7 @@ sub h1
 {
     my($str) = @_;
     return \<<EOF;
-<div class="h1">$str</div>
+    <h1>$str</h1>
 EOF
 }
 
@@ -616,6 +617,6 @@ sub h2
 {
     my($str) = @_;
     return \<<EOF;
-<div class="h2">$str</div>
+    <h2>$str</h2>
 EOF
 }

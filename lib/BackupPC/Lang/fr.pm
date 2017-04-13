@@ -175,7 +175,6 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
     <td align="center"> Dernière tentative </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hôtes sans sauvegardes")}
 <p>
 Il y a \$hostCntNone hôtes sans sauvegardes.
@@ -692,9 +691,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Résumé des erreurs de transfert")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
@@ -706,7 +703,6 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Récapitulatif de la taille des fichier et du nombre de réutilisations")}
 <p>
@@ -733,7 +729,6 @@ Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés dans les fich
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Résumé de la compression")}
 <p>
@@ -757,7 +752,6 @@ récemment compressés.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Résumé de l'archivage pour l'hôte \$host";

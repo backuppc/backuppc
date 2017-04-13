@@ -176,7 +176,6 @@ Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
     <td align="center"> Laatste poging</td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hosts zonder backups")}
 <p>
 Er zijn \$hostCntNone hosts zonder backup.
@@ -696,9 +695,7 @@ Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Overzicht van fouten tijdens overdracht")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> backup nr. </td>
     <td align="center"> Type </td>
@@ -710,7 +707,6 @@ Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Overzicht bestandsgrootte en hergebruik")}
 <p>
@@ -737,7 +733,6 @@ Lege bestanden en SMB-fouten worden niet geteld in de aantallen \'hergebruik\' e
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Overzicht compressie")}
 <p>
@@ -761,7 +756,6 @@ gecomprimeerde bestanden.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Overzicht archivering machine \$host";

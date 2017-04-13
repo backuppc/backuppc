@@ -176,7 +176,6 @@ Hay \$hostCntGood hosts que tienen copia de seguridad, de un total de :
     <td align="center"> Ultimo Intento </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hosts Sin Copias de Seguridad")}
 <p>
 Hay \$hostCntNone hosts sin copias de seguridad.
@@ -694,9 +693,7 @@ Haga click en el n&uacute;mero de copia de seguridad para revisar y restaurar ar
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Resumen de Errores de Transferencia")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Copia N&deg; </td>
     <td align="center"> Tipo </td>
@@ -708,7 +705,6 @@ Haga click en el n&uacute;mero de copia de seguridad para revisar y restaurar ar
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Resumen de Total/Tama&ntilde;o de Archivos Reutilizados")}
 <p>
@@ -736,7 +732,6 @@ ni en la de nuevos.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Resumen de Compresi&oacute;n")}
 <p>
@@ -760,7 +755,6 @@ archivos nuevos comprimidos.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";

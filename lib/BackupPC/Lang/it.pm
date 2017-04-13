@@ -186,7 +186,6 @@ Ci sono \$hostCntGood host sottoposti a backup per un totale di:
     <td align="center"> Ultimo tentativo </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Host senza backup")}
 <p>
 Ci sono \$hostCntNone host senza alcun backup.
@@ -706,9 +705,7 @@ Cliccare sul numero di backup per sfogliare e ripristinare i file di backup.
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Prospetto errori trasferimento")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
@@ -720,7 +717,6 @@ Cliccare sul numero di backup per sfogliare e ripristinare i file di backup.
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Prospetto dimensioni file/contatore riutilizzo")}
 <p>
@@ -748,7 +744,6 @@ riutilizzo e file nuovi.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Prospetto compressione")}
 <p>
@@ -772,7 +767,6 @@ nuovi.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: prospetto archivi host \$host";

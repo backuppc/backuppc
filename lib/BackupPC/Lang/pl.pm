@@ -177,7 +177,6 @@ Jest \$hostCntGood hostów które zostaly zabezpieczone, na całkowita liczbę:
     <td align="center"> Ostatnia próba </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hosty bez wykonanej kopii bezpieczeństwa")}
 <p>
 Jest \$hostCntNone hostów bez kopii bezpieczeństwa.
@@ -695,9 +694,7 @@ Kliknij na numer kopii aby przeglądać i przywracać wybrane pliki/katalogi.
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Podsumowanie błędów Xfer")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
@@ -709,7 +706,6 @@ Kliknij na numer kopii aby przeglądać i przywracać wybrane pliki/katalogi.
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Ilość/wielkość użytych ponownie plików")}
 <p>
@@ -736,7 +732,6 @@ Puste pliki i błędy SMB nie są liczone.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Podsumowanie Kompresji")}
 <p>
@@ -759,7 +754,6 @@ Wydajność kompresji dla plików będących w puli oraz tych świeżo skompreso
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Podsumowanie Archiwizacji hosta \$host";

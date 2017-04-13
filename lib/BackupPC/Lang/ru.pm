@@ -179,7 +179,6 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center">Последнее действие</td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Узлы, не имеющие резервные копии")}
 <p>
 Всего \$hostCntNone узлов, не имеющих резервных копий.
@@ -696,9 +695,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Сводка Ошибок при Копировании")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> № </td>
     <td align="center"> Тип </td>
@@ -710,7 +707,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Сводка по Файлам")}
 <p>
@@ -738,7 +734,6 @@ Empty files and SMB errors aren\'t counted in the reuse and new counts.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Сводка по Сжатию")}
 <p>
@@ -761,7 +756,6 @@ Empty files and SMB errors aren\'t counted in the reuse and new counts.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";

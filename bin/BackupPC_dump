@@ -491,37 +491,32 @@ foreach my $dir ( (
 #
 # Build the list of IP the check
 #
-my @validIPs = ();
+my %validIPs = ();
 
 if ( !$opts{d} ) {
     #
     # In the non-DHCP case, make sure the host can be looked up
     # via NS, or otherwise find the IP address via NetBios.
     #
-    if ( $Conf{ClientNameAlias} ne "" ) {
-        $host = $Conf{ClientNameAlias};
+    my @hostsToCheck = ();
+    if ( ref($Conf{ClientNameAlias}) eq 'ARRAY' ) {
+        push(@hostsToCheck, @{ $Conf{ClientNameAlias} });
+    } elsif ( $Conf{ClientNameAlias} ne "" ) {
+        push(@hostsToCheck, $Conf{ClientNameAlias});
     } else {
-        $host = $client;
+        push(@hostsToCheck, $client);
     }
 
-    $hostIP = FetchHostIP($host);
-    if ($hostIP) {
-        push(@validIPs, $hostIP);
-    }
-
-    if ( $Conf{ClientWifiAlias} ne "" ) {
-        #
-        # If ClientWifiAlias is set, do the same
-        #
-        $host = $Conf{ClientWifiAlias};
-        $hostIP = FetchHostIP($host);
+    foreach my $hostToCheck (@hostsToCheck) {
+        $hostIP = FetchHostIP($hostToCheck);
         if ($hostIP) {
-            push(@validIPs, $hostIP);
+            $validIPs{$hostToCheck} = $hostIP;
         }
     }
+
 } else {
     # In DHCP case the conversation was already made
-    push(@validIPs, $hostIP);
+    $validIPs{$host} = $hostIP;
 }
 
 #
@@ -530,7 +525,9 @@ if ( !$opts{d} ) {
 my $validIP;
 my $errMsg;
 
-foreach my $testIP (@validIPs) {
+foreach my $hostToCheck (keys(%validIPs)) {
+    my $testIP = $validIPs{$hostToCheck};
+
     my $delay = $bpc->CheckHostAlive($testIP);
     if ( $delay < 0 ) {
         print(LOG $bpc->timeStamp, "no ping response from $testIP\n");
@@ -547,6 +544,7 @@ foreach my $testIP (@validIPs) {
         next;
     }
     $validIP = $testIP;
+    $host = $hostToCheck;
     last;
 }
 
@@ -1987,7 +1985,10 @@ sub CorrectHostCheck
 {
     my($hostIP, $host) = @_;
     return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck}
-		|| $Conf{NmbLookupCmd} eq "" || $hostIP eq $Conf{ClientWifiAlias});
+		|| $Conf{NmbLookupCmd} eq "" );
+    if (ref($Conf{ClientNameAlias}) eq 'ARRAY') {
+        return if ( grep /^$hostIP$/, @{ $Conf{ClientNameAlias} } );
+    }
     my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($hostIP);
     return "host $host has mismatching netbios name $netBiosHost"
 		if ( lc($netBiosHost) ne lc(substr($host, 0, 15)) );

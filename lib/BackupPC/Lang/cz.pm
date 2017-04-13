@@ -174,7 +174,6 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> Poslední pokus </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hosté s žádnými provedenými zálohami")}
 <p>
 \$hostCntNone hostù s žádnými zálohani.
@@ -691,9 +690,7 @@ Kliknìte na èíslo zálohy pro prohlížení a obnovení zálohy.
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Pøehled Xfer chyb")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
@@ -705,7 +702,6 @@ Kliknìte na èíslo zálohy pro prohlížení a obnovení zálohy.
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("File Size/Count Reuse Summary")}
 <p>
@@ -732,7 +728,6 @@ Prázné soubory a SMB chyby nejsou poèítány.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Pøehled kompresí")}
 <p>
@@ -756,7 +751,6 @@ zkomprimované soubory.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Pøehled archivù hosta \$host ";

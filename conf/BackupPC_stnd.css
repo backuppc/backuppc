@@ -224,25 +224,21 @@ table tr td.border input[type="button"] {
     padding: 16px 8px 8px 24px;
 }
 
-.NavMenu {
-    position: relative;
-    left: 0;
+#navigation-container {
+    position: fixed;
     width: 240px;
     background-color: #f8f8f6;
-    margin: 0;
+    padding-left: 10px;
+}
+
+.NavMenu {
     disabled-border-bottom: 1px solid silver;
     disabled-margin-bottom: 4px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    z-index:9999;
-    padding-left: 12px;
 }
 
 .NavMenu a {
-    font-size: 11pt;
-    font-family: 'Open Sans',Trebuchet MS,Trebuchet,arial,sans-serif;
     display: block;
+    font-size: 11pt;
     padding: 6px 0px 6px 12px;
     text-decoration: none;
     color: #0088ce;
@@ -276,21 +272,19 @@ table tr td.border input[type="button"] {
     border-bottom: 1px solid #E0E0D7;
 }
 
-.BpcTableTabsTab, .editTabNoSel {
-    font-family: 'Open Sans',Trebuchet MS,Trebuchet,arial,sans-serif,helvetica;
-    font-size: 11pt;
+.BpcTableTabsTab, .editTabSel, .editTabNoSel {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
     padding: 6px 12px;
     min-height: 32px;
 }
+
 .BpcTableTabsTab:hover, .editTabNoSel:hover {
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
     background-color: #def3ff;
     cursor: pointer;
 }
 
 .BpcTableTabsTab a, .editTabNoSel a {
-    color: #676767;
     display: block;
     min-height: 24px;
 }
@@ -358,15 +352,5 @@ table tr td.border input[type="button"] {
 }
 
 #Content, BpcContentWrapper {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    aborder: 1px solid red;
-    position: absolute;
-    width: 100%;
-    left: 0px;
-    top: 12px;
-    padding-left: 256px;
-    padding-right: 16px;
-    z-index:0;
+    margin-left: 260px;
 }

@@ -175,7 +175,6 @@ There are \$hostCntGood hosts that have been backed up, for a total of:
     <td align="center"> Last attempt </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hosts with no Backups")}
 <p>
 There are \$hostCntNone hosts with no backups.
@@ -694,9 +693,7 @@ Click on the backup number to browse and restore backup files.
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Xfer Error Summary")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
@@ -708,7 +705,6 @@ Click on the backup number to browse and restore backup files.
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("File Size/Count Reuse Summary")}
 <p>
@@ -735,7 +731,6 @@ Empty files and SMB errors aren\'t counted in the reuse and new counts.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Compression Summary")}
 <p>
@@ -759,7 +754,6 @@ compressed files.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";

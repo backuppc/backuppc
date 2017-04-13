@@ -178,7 +178,6 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> Остання дія </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Хости без резервних копій")}
 <p>
 Загалом \$hostCntNone хостів без резервних копій.
@@ -695,9 +694,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Зведена інформація про помилки Xfer")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Тип </td>
@@ -709,7 +706,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Зведена інформація по файлах")}
 <p>
@@ -736,7 +732,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Зведена інформація про стискання")}
 <p>
@@ -759,7 +754,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";

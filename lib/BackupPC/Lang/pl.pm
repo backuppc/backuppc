@@ -373,7 +373,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Podsumowanie kolejki";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Podsumowanie kolejki kopii bezpieczeństwa")}
-<br><br>
 \${h2("Podsumowanie kolejki uzytkownika")}
 <p>
 Następujący użytkonicy są w kolejce:
@@ -384,7 +383,6 @@ Następujący użytkonicy są w kolejce:
     <td> Użytkownik </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Podsumowanie kolejki w tle")}
 <p>
@@ -396,7 +394,6 @@ Następujące kolejki będące w tle czekają na wykonanie :
     <td> uzytkownik </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Podsumowanie kolejki poleceń")}
 <p>
 Następujące kolejki poleceń czekają na wykonanie :

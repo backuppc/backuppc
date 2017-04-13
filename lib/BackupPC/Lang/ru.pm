@@ -375,7 +375,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Queue Summary";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Сводка по Очередям")}
-<br><br>
 \${h2("Очередь Пользовательских Задач")}
 <p>
 Следующие запросы находятся в очереди:
@@ -386,7 +385,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> Пользователь </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Очередь Фоновых Задач")}
 <p>
@@ -398,7 +396,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> Пользователь </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Очередь Команд")}
 <p>
 Следующие команды находятся в очереди:

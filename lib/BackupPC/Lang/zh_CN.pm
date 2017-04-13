@@ -58,7 +58,6 @@ $Lang{Unable_to_connect_to_BackupPC_server} = "无法连接到 BackupPC 服务�
 $Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
 CGI 脚本程序 (\$MyURL) 无法连接到 BackupPC 服务器 \$Conf{ServerHost} 端口 \$Conf{ServerPort}。错误信息：\$err。
 可能 BackupPC 服务器没有运行，或者服务器配置不正确。请通知网络系统管理员。
-<br><br>
 EOF
 
 $Lang{Admin_Start_Server} = <<EOF;
@@ -371,7 +370,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: 队列报告";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("备份请求队列报告")}
-<br><br>
 \${h2("用户队列报告")}
 <p>
 下列用户请求排在队列中：
@@ -382,7 +380,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> 用户 </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("后台请求队列报告")}
 <p>
@@ -394,7 +391,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> 用户 </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("命令队列报告")}
 <p>
 下列命令请求排在队列中：

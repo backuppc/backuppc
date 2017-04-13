@@ -372,7 +372,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Resumen de la Cola";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Resumen de la Cola de Copias de Seguridad")}
-<br><br>
 \${h2("Resumen de la Cola de Usuarios")}
 <p>
 Las siguientes solicitudes de usuarios est&aacute;n actualmente en cola:
@@ -383,7 +382,6 @@ Las siguientes solicitudes de usuarios est&aacute;n actualmente en cola:
     <td> Usuario </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Resumen de Cola en Segundo Plano")}
 <p>
@@ -395,7 +393,6 @@ Las siguientes solicitudes en segundo plano est&aacute;n actualmente en cola:
     <td> Usuario </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Resumen de Cola de Comandos")}
 <p>
 Los siguientes comandos est&aacute;n actualmente en cola:

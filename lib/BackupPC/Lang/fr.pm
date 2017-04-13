@@ -371,7 +371,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Résumé de la file";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Résumé de la file")}
-<br><br>
 \${h2("Résumé des files des utilisateurs")}
 <p>
 Les demandes utilisateurs suivantes sont actuellement en attente :
@@ -382,7 +381,6 @@ Les demandes utilisateurs suivantes sont actuellement en attente :
     <td> Utilisateur </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Résumé de la file en arrière plan")}
 <p>
@@ -394,7 +392,6 @@ Les demandes en arrière plan suivantes sont actuellement en attente :
     <td> Utilisateur </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Résumé de la file d\'attente des commandes")}
 <p>
 Les demandes de commande suivantes sont actuellement en attente :

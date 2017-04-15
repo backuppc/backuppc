@@ -527,13 +527,13 @@ Ok, we're about to:
 EOF
 
 print <<EOF if ( !$opts{"config-only"} );
-  - install the binaries, lib and docs in $Conf{InstallDir}
-  - create the data directory $Conf{TopDir}
+  - install the binaries, lib and docs in $DestDir$Conf{InstallDir}
+  - create the data directory $DestDir$Conf{TopDir}
   - optionally install the cgi-bin interface
 EOF
 
 print <<EOF;
-  - create/update the config.pl file $Conf{ConfDir}/config.pl
+  - create/update the config.pl file $DestDir$Conf{ConfDir}/config.pl
 
 EOF
 

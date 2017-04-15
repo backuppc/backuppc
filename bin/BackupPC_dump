@@ -489,47 +489,74 @@ foreach my $dir ( (
     }
 }
 
+#
+#
+# Build the list of IP the check
+#
+my %validIPs = ();
+
 if ( !$opts{d} ) {
     #
     # In the non-DHCP case, make sure the host can be looked up
     # via NS, or otherwise find the IP address via NetBios.
     #
-    if ( $Conf{ClientNameAlias} ne "" ) {
-        $host = $Conf{ClientNameAlias};
+    my @hostsToCheck = ();
+    if ( ref($Conf{ClientNameAlias}) eq 'ARRAY' ) {
+        push(@hostsToCheck, @{ $Conf{ClientNameAlias} });
+    } elsif ( $Conf{ClientNameAlias} ne "" ) {
+        push(@hostsToCheck, $Conf{ClientNameAlias});
     } else {
-        $host = $client;
+        push(@hostsToCheck, $client);
     }
-    if ( !defined($bpc->getHostAddrInfo($host)) ) {
-        #
-        # Ok, NS doesn't know about it.  Maybe it is a NetBios name
-        # instead.
-        #
-	print("Name server doesn't know about $host; trying NetBios\n")
-			if ( $opts{v} );
-        if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
-	    print(LOG $bpc->timeStamp, "Can't find host $host via netbios\n");
-            print("host not found\n");
-            exit(1);
+
+    foreach my $hostToCheck (@hostsToCheck) {
+        $hostIP = FetchHostIP($hostToCheck);
+        if ($hostIP) {
+            $validIPs{$hostToCheck} = $hostIP;
         }
-    } else {
-        $hostIP = $host;
     }
+
+} else {
+    # In DHCP case the conversation was already made
+    $validIPs{$host} = $hostIP;
 }
 
 #
 # Check if $host is alive
 #
-my $delay = $bpc->CheckHostAlive($hostIP);
-if ( $delay < 0 ) {
-    print(LOG $bpc->timeStamp, "no ping response\n");
-    print("no ping response\n");
-    exit(1);
-} elsif ( $delay > $Conf{PingMaxMsec} ) {
-    printf(LOG "%sping too slow: %.4gmsec\n", $bpc->timeStamp, $delay);
-    printf("ping too slow: %.4gmsec (threshold is %gmsec)\n",
-                    $delay, $Conf{PingMaxMsec});
+my $validIP;
+my $errMsg;
+
+foreach my $hostToCheck (keys(%validIPs)) {
+    my $testIP = $validIPs{$hostToCheck};
+
+    my $delay = $bpc->CheckHostAlive($testIP);
+    if ( $delay < 0 ) {
+        print(LOG $bpc->timeStamp, "no ping response from $testIP\n");
+        print("no ping response from $testIP\n");
+        $errMsg = "no ping response\n";
+        next;
+        
+    } elsif ( $delay > $Conf{PingMaxMsec} ) {
+        printf(LOG "%sping too slow on $testIP %.4gmsec\n", $bpc->timeStamp, $delay);
+        printf("ping too slow on $testIP: %.4gmsec (threshold is %gmsec)\n",
+                        $delay, $Conf{PingMaxMsec});
+        $errMsg = sprintf("ping too slow: %.4gmsec (threshold is %gmsec)\n",
+                        $delay, $Conf{PingMaxMsec});
+        next;
+    }
+    $validIP = $testIP;
+    $host = $hostToCheck;
+    last;
+}
+
+if ( !$validIP ) {
+    print(LOG $bpc->timeStamp, $errMsg);
+    print($errMsg);
     exit(1);
 }
+
+$hostIP = $validIP;
 
 #
 # Make sure it is really the machine we expect (only for fixed addresses,
@@ -1990,10 +2017,36 @@ sub CorrectHostCheck
     my($hostIP, $host) = @_;
     return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck}
 		|| $Conf{NmbLookupCmd} eq "" );
+    if (ref($Conf{ClientNameAlias}) eq 'ARRAY') {
+        return if ( grep /^$hostIP$/, @{ $Conf{ClientNameAlias} } );
+    }
     my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($hostIP);
     return "host $host has mismatching netbios name $netBiosHost"
 		if ( lc($netBiosHost) ne lc(substr($host, 0, 15)) );
     return;
+}
+
+sub FetchHostIP
+{
+    my($host) = @_;
+    my $hostIP;
+
+    if ( !defined($bpc->getHostAddrInfo($host)) ) {
+        #
+        # Ok, NS doesn't know about it.  Maybe it is a NetBios name
+        # instead.
+        #
+	print("Name server doesn't know about $host; trying NetBios\n")
+			if ( $opts{v} );
+        if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
+	    print(LOG $bpc->timeStamp, "Can't find host $host via netbios\n");
+            print("host $host not found\n");
+        }
+    } else {
+        $hostIP = $host;
+    }
+
+    return $hostIP;
 }
 
 #

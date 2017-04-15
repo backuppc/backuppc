@@ -1803,6 +1803,11 @@ $Conf{UserCmdCheckStatus} = 0;
 #         $Conf{ClientNameAlias} = 'realHostName';
 #         $Conf{ClientNameAlias} = '192.1.1.15';
 #
+# It can also be an array, to allow backup of several IP addresses 
+# that refers to the same host (wired or wireless connection) eg:
+#
+#         $Conf{ClientNameAlias} = ['hostname-lan', 'hostname-wifi'];
+#
 # will cause the relevant smb/tar/rsync backup/restore commands to be
 # directed to realHostName, not the client name.
 #

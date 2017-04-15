@@ -160,42 +160,60 @@ alarm($Conf{ClientTimeout});
 #
 # See if the host name is aliased
 #
-if ( $Conf{ClientNameAlias} ne "" ) {
-    $host = $Conf{ClientNameAlias};
+my @hostsToCheck = ();
+if ( ref($Conf{ClientNameAlias}) eq 'ARRAY' ) {
+    push(@hostsToCheck, @{ $Conf{ClientNameAlias} });
+} elsif ( $Conf{ClientNameAlias} ne "" ) {
+    push(@hostsToCheck, $Conf{ClientNameAlias});
 } else {
-    $host = $client;
+    push(@hostsToCheck, $client);
 }
 
 #
 # Find its IP address
 #
+my %validIPs = ();
+
 if ( $hostIP !~ /\d+\.\d+\.\d+\.\d+/ ) {
-    if ( !defined($bpc->getHostAddrInfo($host)) ) {
-	#
-	# Ok, NS doesn't know about it.  Maybe it is a NetBios name
-	# instead.
-	#
-	if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
-	    $stat{hostError} = "Can't find host $host";
-	    exit(RestoreCleanup($client));
-	}
-    } else {
-	$hostIP = $host;
+
+    foreach my $hostToCheck (@hostsToCheck) {
+        $hostIP = FetchHostIP($hostToCheck);
+        if ($hostIP) {
+            $validIPs{$hostToCheck} = $hostIP;
+        }
     }
 }
+
 
 #
 # Check if $host is alive
 #
-my $delay = $bpc->CheckHostAlive($hostIP);
-if ( $delay < 0 ) {
-    $stat{hostError} = "no ping response from $host ($hostIP)";
-    exit(RestoreCleanup($client));
-} elsif ( $delay > $Conf{PingMaxMsec} ) {
-    $stat{hostError} = sprintf("ping too slow: %.4gmsec (max is %gmsec)\n",
-                    $delay, $Conf{PingMaxMsec});
+my $validIP;
+my $errMsg;
+
+foreach my $hostToCheck (keys(%validIPs)) {
+    my $testIP = $validIPs{$hostToCheck};
+
+    my $delay = $bpc->CheckHostAlive($testIP);
+    if ( $delay < 0 ) {
+        $errMsg = "no ping response from $host ($hostIP)";
+        next;
+    } elsif ( $delay > $Conf{PingMaxMsec} ) {
+        $errMsg = sprintf("ping too slow: %.4gmsec (max is %gmsec)\n",
+                        $delay, $Conf{PingMaxMsec});
+        next;
+    }
+    $validIP = $testIP;
+    $host = $hostToCheck;
+    last;
+}
+
+if ( !$validIP ) {
+    $stat{hostError} = $errMsg;
     exit(RestoreCleanup($client));
 }
+
+$hostIP = $validIP;
 
 #
 # Make sure it is really the machine we expect
@@ -462,12 +480,33 @@ exit(RestoreCleanup($client));
 ###########################################################################
 # Subroutines
 ###########################################################################
+sub FetchHostIP
+{
+    my($host) = @_;
+    my $hostIP;
+
+    if ( !defined($bpc->getHostAddrInfo($host)) ) {
+        #
+        # Ok, NS doesn't know about it.  Maybe it is a NetBios name
+        # instead.
+        #
+        if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
+        }
+    } else {
+        $hostIP = $host;
+    }
+
+    return $hostIP;
+}
 
 sub CorrectHostCheck
 {
     my($hostIP, $host) = @_;
     return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck}
 		|| $Conf{NmbLookupCmd} eq "" );
+    if (ref($Conf{ClientNameAlias}) eq 'ARRAY') {
+        return if ( grep /^$hostIP$/, @{ $Conf{ClientNameAlias} } );
+    }
     my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($hostIP);
     return "host $host has mismatching netbios name $netBiosHost"
             if ( lc($netBiosHost) ne lc(substr($host, 0, 15)) );

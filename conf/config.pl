@@ -1795,21 +1795,25 @@ $Conf{UserCmdCheckStatus} = 0;
 # Override the client's hostname.  This allows multiple clients
 # to all refer to the same physical host.  This should only be
 # set in the per-PC config file and is only used by BackupPC at
-# the last moment prior to generating the command used to backup
-# that machine (ie: the value of $Conf{ClientNameAlias} is invisible
-# everywhere else in BackupPC).  The setting can be a hostname or
-# IP address, eg:
+# the last moment prior to checking the host is alive, and generating
+# the command used to backup # that machine (ie: the value of
+# $Conf{ClientNameAlias} is invisible everywhere else in BackupPC).
+# The setting can be a hostname or IP address, eg:
 #
 #         $Conf{ClientNameAlias} = 'realHostName';
 #         $Conf{ClientNameAlias} = '192.1.1.15';
 #
-# It can also be an array, to allow backup of several IP addresses 
-# that refers to the same host (wired or wireless connection) eg:
+# which will cause the relevant smb/tar/rsync backup/restore commands
+# to be directed to realHostName or the IP address, not the client name.
+#
+# It can also be an array, to allow checking (in order) of several
+# host names or IP addresses that refer to the same host.  For example,
+# if your client has a wired and wireless connection you could set:
 #
 #         $Conf{ClientNameAlias} = ['hostname-lan', 'hostname-wifi'];
 #
-# will cause the relevant smb/tar/rsync backup/restore commands to be
-# directed to realHostName, not the client name.
+# If hostname-lan is alive, it will be used for the backup/restore.
+# If not, the next name (hostname-wifi) is tested.
 #
 # Note: this setting doesn't work for hosts with DHCP set to 1.
 #

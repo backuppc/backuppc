@@ -175,7 +175,6 @@ Il y a \$hostCntGood hôtes ayant été sauvegardés, pour un total de :
     <td align="center"> Dernière tentative </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hôtes sans sauvegardes")}
 <p>
 Il y a \$hostCntNone hôtes sans sauvegardes.
@@ -372,7 +371,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Résumé de la file";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Résumé de la file")}
-<br><br>
 \${h2("Résumé des files des utilisateurs")}
 <p>
 Les demandes utilisateurs suivantes sont actuellement en attente :
@@ -383,7 +381,6 @@ Les demandes utilisateurs suivantes sont actuellement en attente :
     <td> Utilisateur </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Résumé de la file en arrière plan")}
 <p>
@@ -395,7 +392,6 @@ Les demandes en arrière plan suivantes sont actuellement en attente :
     <td> Utilisateur </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Résumé de la file d\'attente des commandes")}
 <p>
 Les demandes de commande suivantes sont actuellement en attente :
@@ -692,9 +688,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Résumé des erreurs de transfert")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
@@ -706,7 +700,6 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Récapitulatif de la taille des fichier et du nombre de réutilisations")}
 <p>
@@ -733,7 +726,6 @@ Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés dans les fich
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Résumé de la compression")}
 <p>
@@ -757,7 +749,6 @@ récemment compressés.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Résumé de l'archivage pour l'hôte \$host";

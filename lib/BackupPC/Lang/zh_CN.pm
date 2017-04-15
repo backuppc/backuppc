@@ -58,7 +58,6 @@ $Lang{Unable_to_connect_to_BackupPC_server} = "无法连接到 BackupPC 服务�
 $Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
 CGI 脚本程序 (\$MyURL) 无法连接到 BackupPC 服务器 \$Conf{ServerHost} 端口 \$Conf{ServerPort}。错误信息：\$err。
 可能 BackupPC 服务器没有运行，或者服务器配置不正确。请通知网络系统管理员。
-<br><br>
 EOF
 
 $Lang{Admin_Start_Server} = <<EOF;
@@ -175,7 +174,6 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> 最后一次备份结果 </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("未备份过的客户机")}
 <p>
 有 \$hostCntNone 台客户机从未被备份过。
@@ -372,7 +370,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: 队列报告";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("备份请求队列报告")}
-<br><br>
 \${h2("用户队列报告")}
 <p>
 下列用户请求排在队列中：
@@ -383,7 +380,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> 用户 </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("后台请求队列报告")}
 <p>
@@ -395,7 +391,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> 用户 </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("命令队列报告")}
 <p>
 下列命令请求排在队列中：
@@ -681,9 +676,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("传输错误报告")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 备份序列号＃ </td>
     <td align="center"> 类型 </td>
@@ -695,7 +688,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("文件大小／数目统计")}
 <p>
@@ -721,7 +713,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("压缩报告")}
 <p>
@@ -744,7 +735,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: 客户机 \$host 备档报告";

@@ -176,7 +176,6 @@ Hay \$hostCntGood hosts que tienen copia de seguridad, de un total de :
     <td align="center"> Ultimo Intento </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hosts Sin Copias de Seguridad")}
 <p>
 Hay \$hostCntNone hosts sin copias de seguridad.
@@ -373,7 +372,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Resumen de la Cola";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Resumen de la Cola de Copias de Seguridad")}
-<br><br>
 \${h2("Resumen de la Cola de Usuarios")}
 <p>
 Las siguientes solicitudes de usuarios est&aacute;n actualmente en cola:
@@ -384,7 +382,6 @@ Las siguientes solicitudes de usuarios est&aacute;n actualmente en cola:
     <td> Usuario </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Resumen de Cola en Segundo Plano")}
 <p>
@@ -396,7 +393,6 @@ Las siguientes solicitudes en segundo plano est&aacute;n actualmente en cola:
     <td> Usuario </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Resumen de Cola de Comandos")}
 <p>
 Los siguientes comandos est&aacute;n actualmente en cola:
@@ -694,9 +690,7 @@ Haga click en el n&uacute;mero de copia de seguridad para revisar y restaurar ar
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Resumen de Errores de Transferencia")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Copia N&deg; </td>
     <td align="center"> Tipo </td>
@@ -708,7 +702,6 @@ Haga click en el n&uacute;mero de copia de seguridad para revisar y restaurar ar
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("Resumen de Total/Tama&ntilde;o de Archivos Reutilizados")}
 <p>
@@ -736,7 +729,6 @@ ni en la de nuevos.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Resumen de Compresi&oacute;n")}
 <p>
@@ -760,7 +752,6 @@ archivos nuevos comprimidos.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";

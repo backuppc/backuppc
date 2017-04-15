@@ -174,7 +174,6 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> Poslední pokus </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hosté s žádnými provedenými zálohami")}
 <p>
 \$hostCntNone hostù s žádnými zálohani.
@@ -371,7 +370,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Pøehled front";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Pøehled fronty zálohování")}
-<br><br>
 \${h2("Pøehled fronty uživatelù")}
 <p>
 Následující uživatelé jsou momentálnì ve frontì:
@@ -382,7 +380,6 @@ Následující uživatelé jsou momentálnì ve frontì:
     <td> Uživatel </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Souhrn fronty v pozadí")}
 <p>
@@ -394,7 +391,6 @@ Následující žádosti v pozadí jsou momentálnì ve frontì:
     <td> Uživatel </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Souhrn fronty pøíkazù")}
 <p>
 Následující pøíkazy jsou momentálnì ve frontì:
@@ -691,9 +687,7 @@ Kliknìte na èíslo zálohy pro prohlížení a obnovení zálohy.
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Pøehled Xfer chyb")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
@@ -705,7 +699,6 @@ Kliknìte na èíslo zálohy pro prohlížení a obnovení zálohy.
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("File Size/Count Reuse Summary")}
 <p>
@@ -732,7 +725,6 @@ Prázné soubory a SMB chyby nejsou poèítány.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Pøehled kompresí")}
 <p>
@@ -756,7 +748,6 @@ zkomprimované soubory.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Pøehled archivù hosta \$host ";

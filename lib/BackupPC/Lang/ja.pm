@@ -177,7 +177,6 @@ $Lang{BackupPC_Summary} = <<EOF;
     <td align="center"> 最終試行 </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("バックアップが存在しないホスト")}
 <p>
 \$hostCntNone 個のホストのバックアップが存在しません。
@@ -371,7 +370,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: キューサマリ";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("バックアップキューサマリ")}
-<br><br>
 \${h2("ユーザキューサマリ")}
 <p>
 現在キューイングされているユーザ要求は次のとおりです。
@@ -382,7 +380,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> ユーザ </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("バックグラウンドキューサマリ")}
 <p>
@@ -393,7 +390,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> ユーザ </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("コマンドキューサマリ")}
 <p>
 現在キューイングされているコマンド要求は次のとおりです。
@@ -686,9 +682,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("転送エラーサマリ")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> バックアップ番号 </td>
     <td align="center"> 種別 </td>
@@ -700,7 +694,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("ファイルサイズ/カウント 再利用サマリ")}
 <p>
@@ -726,7 +719,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("圧縮サマリ")}
 <p>
@@ -749,7 +741,6 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: ホスト \$host アーカイブサマリ";

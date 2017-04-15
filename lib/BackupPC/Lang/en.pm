@@ -175,7 +175,6 @@ There are \$hostCntGood hosts that have been backed up, for a total of:
     <td align="center"> Last attempt </td></tr>
 \$strGood
 </table>
-<br><br>
 \${h2("Hosts with no Backups")}
 <p>
 There are \$hostCntNone hosts with no backups.
@@ -372,7 +371,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Queue Summary";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Backup Queue Summary")}
-<br><br>
 \${h2("User Queue Summary")}
 <p>
 The following user requests are currently queued:
@@ -383,7 +381,6 @@ The following user requests are currently queued:
     <td> User </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Background Queue Summary")}
 <p>
@@ -395,7 +392,6 @@ The following background requests are currently queued:
     <td> User </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Command Queue Summary")}
 <p>
 The following command requests are currently queued:
@@ -694,9 +690,7 @@ Click on the backup number to browse and restore backup files.
 
 \$restoreStr
 </p>
-<br><br>
 \${h2("Xfer Error Summary")}
-<br><br>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
@@ -708,7 +702,6 @@ Click on the backup number to browse and restore backup files.
 </tr>
 \$errStr
 </table>
-<br><br>
 
 \${h2("File Size/Count Reuse Summary")}
 <p>
@@ -735,7 +728,6 @@ Empty files and SMB errors aren\'t counted in the reuse and new counts.
 </tr>
 \$sizeStr
 </table>
-<br><br>
 
 \${h2("Compression Summary")}
 <p>
@@ -759,7 +751,6 @@ compressed files.
 </tr>
 \$compStr
 </table>
-<br><br>
 EOF
 
 $Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";

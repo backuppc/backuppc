@@ -2004,7 +2004,7 @@ $Conf{SCGIServerPort} = -1;
 # Full URL of the BackupPC_Admin CGI script, or the configured path
 # for SCGI.  Used for links in email messages.
 #
-$Conf{CgiURL} = undef;
+$Conf{CgiURL} = '';
 
 #
 # Full path to the rrdtool command.  If available, graphs of pool usage

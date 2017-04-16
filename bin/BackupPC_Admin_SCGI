@@ -48,7 +48,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.1.1, released 29 Mar 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -210,7 +210,7 @@ for ( my $i = 0 ; $i < $MaxChild ; $i++ ) {
 # lock file.  If we succeed in getting the lock, it means all the children are busy
 # servicing requests, so we need to spawn another child to service new requests.
 #
-if ( !open(my $LockFd, "+<", $LockFile) ) {
+if ( !open($LockFd, "+<", $LockFile) ) {
     print("BackupPC_Admin_SCGI: can't open $LockFile; exiting in 60 seconds\n");
     sleep(60);
     exit(1);
@@ -303,7 +303,7 @@ sub childRun
     close($fhRead);
     close($LockFd);
     print("BackupPC_Admin_SCGI: child $childNum starting (pid $$)\n") if ( $LogLevel >= 3 );
-    if ( !open(my $LockFd, "+<", $LockFile) ) {
+    if ( !open($LockFd, "+<", $LockFile) ) {
         print("BackupPC_Admin_SCGI: child $childNum can't open $LockFile; exiting\n");
         exit(1);
     }

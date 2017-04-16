@@ -490,10 +490,9 @@ foreach my $dir ( (
 }
 
 #
+# Build the list of hosts to check
 #
-# Build the list of IP the check
-#
-my %validIPs = ();
+my @validHosts = ();
 
 if ( !$opts{d} ) {
     #
@@ -501,62 +500,48 @@ if ( !$opts{d} ) {
     # via NS, or otherwise find the IP address via NetBios.
     #
     my @hostsToCheck = ();
-    if ( ref($Conf{ClientNameAlias}) eq 'ARRAY' ) {
-        push(@hostsToCheck, @{ $Conf{ClientNameAlias} });
+    if ( ref($Conf{ClientNameAlias}) eq "ARRAY" ) {
+        push(@hostsToCheck, @{$Conf{ClientNameAlias}});
     } elsif ( $Conf{ClientNameAlias} ne "" ) {
         push(@hostsToCheck, $Conf{ClientNameAlias});
     } else {
         push(@hostsToCheck, $client);
     }
-
-    foreach my $hostToCheck (@hostsToCheck) {
-        $hostIP = FetchHostIP($hostToCheck);
-        if ($hostIP) {
-            $validIPs{$hostToCheck} = $hostIP;
-        }
+    foreach my $hostToCheck ( @hostsToCheck ) {
+        $hostIP = HostLookupCheck($hostToCheck);
+        push(@validHosts, [$hostToCheck, $hostIP]) if ( defined($hostIP) );
     }
-
 } else {
-    # In DHCP case the conversation was already made
-    $validIPs{$host} = $hostIP;
+    # In DHCP case we've already found $hostIP
+    push(@validHosts, [$host, $hostIP]);
 }
 
 #
-# Check if $host is alive
+# Find the first entry in @validHosts that we can ping
 #
-my $validIP;
-my $errMsg;
-
-foreach my $hostToCheck (keys(%validIPs)) {
-    my $testIP = $validIPs{$hostToCheck};
-
-    my $delay = $bpc->CheckHostAlive($testIP);
+foreach my $h ( @validHosts ) {
+    ($host, $hostIP) = @$h;
+    my $delay = $bpc->CheckHostAlive($hostIP);
     if ( $delay < 0 ) {
-        print(LOG $bpc->timeStamp, "no ping response from $testIP\n");
-        print("no ping response from $testIP\n");
-        $errMsg = "no ping response\n";
+        print(LOG $bpc->timeStamp, "no ping response from $hostIP\n");
+        print("no ping response from $hostIP\n");
+        $hostIP = undef;
         next;
-        
     } elsif ( $delay > $Conf{PingMaxMsec} ) {
-        printf(LOG "%sping too slow on $testIP %.4gmsec\n", $bpc->timeStamp, $delay);
-        printf("ping too slow on $testIP: %.4gmsec (threshold is %gmsec)\n",
+        printf(LOG "%sping too slow on $hostIP %.4gmsec\n", $bpc->timeStamp, $delay);
+        printf("ping too slow on $hostIP %.4gmsec (threshold is %gmsec)\n",
                         $delay, $Conf{PingMaxMsec});
-        $errMsg = sprintf("ping too slow: %.4gmsec (threshold is %gmsec)\n",
-                        $delay, $Conf{PingMaxMsec});
+        $hostIP = undef;
         next;
     }
-    $validIP = $testIP;
-    $host = $hostToCheck;
     last;
 }
 
-if ( !$validIP ) {
-    print(LOG $bpc->timeStamp, $errMsg);
-    print($errMsg);
+if ( !defined($hostIP) ) {
+    print(LOG $bpc->timeStamp, "can't ping $host (client = $client); exiting\n");
+    print("can't ping $host (client = $client); exiting\n");
     exit(1);
 }
-
-$hostIP = $validIP;
 
 #
 # Make sure it is really the machine we expect (only for fixed addresses,
@@ -1665,7 +1650,7 @@ sub BackupExpire
        $oldestFull, $changes);
 
     @Backups = $bpc->BackupInfoRead($client);
-    if ( $Conf{FullKeepCnt} <= 0 ) {
+    if ( (ref($Conf{FullKeepCnt}) eq "ARRAY" ? @{$Conf{FullKeepCnt}} : $Conf{FullKeepCnt}) <= 0 ) {
         print(LOG $bpc->timeStamp,
                   "Invalid value for \$Conf{FullKeepCnt}=$Conf{FullKeepCnt}; not expiring any backups\n");
 	print("Invalid value for \$Conf{FullKeepCnt}=$Conf{FullKeepCnt}; not expiring any backups\n")
@@ -1831,6 +1816,7 @@ sub BackupFullExpire
     # recent backup which is always filled (whether incr or full); also copy the
     # array so we don't update $Conf{FullKeepCnt}.
     #
+    $fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
     $fullKeepCnt = [@$fullKeepCnt];
     $fullKeepCnt->[0]++;
 
@@ -1840,7 +1826,6 @@ sub BackupFullExpire
     #
     $fullPeriod = 1 if ( $fullPeriod <= 0 );
 
-    $fullKeepCnt = [$fullKeepCnt] if ( ref($fullKeepCnt) ne "ARRAY" );
     my $startTimeDeviation = $fullPeriod < 1 ? $fullPeriod / 2 : 0.5;
     my $keepPeriod = ($fullPeriod * ($fullKeepCnt->[0] - 1) - $startTimeDeviation) * 24 * 3600;
 
@@ -2017,7 +2002,7 @@ sub CorrectHostCheck
     my($hostIP, $host) = @_;
     return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck}
 		|| $Conf{NmbLookupCmd} eq "" );
-    if (ref($Conf{ClientNameAlias}) eq 'ARRAY') {
+    if (ref($Conf{ClientNameAlias}) eq "ARRAY") {
         return if ( grep /^$hostIP$/, @{ $Conf{ClientNameAlias} } );
     }
     my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($hostIP);
@@ -2026,26 +2011,28 @@ sub CorrectHostCheck
     return;
 }
 
-sub FetchHostIP
+#
+# Returns $host if $bpc->getHostAddrInfo() knows about it.
+# Otherwise tries to find the hostIP via NetBios, and returns
+# the hostIP if successful.
+#
+# Returns undef if both $bpc->getHostAddrInfo() and NetBios fail
+#
+sub HostLookupCheck
 {
     my($host) = @_;
     my $hostIP;
 
-    if ( !defined($bpc->getHostAddrInfo($host)) ) {
-        #
-        # Ok, NS doesn't know about it.  Maybe it is a NetBios name
-        # instead.
-        #
-	print("Name server doesn't know about $host; trying NetBios\n")
-			if ( $opts{v} );
-        if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
-	    print(LOG $bpc->timeStamp, "Can't find host $host via netbios\n");
-            print("host $host not found\n");
-        }
-    } else {
-        $hostIP = $host;
+    return $host if ( defined($bpc->getHostAddrInfo($host)) );
+    #
+    # Ok, NS doesn't know about it.  Maybe it is a NetBios name
+    # instead.
+    #
+    print("Name server doesn't know about $host; trying NetBios\n") if ( $opts{v} );
+    if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
+        print(LOG $bpc->timeStamp, "Can't find host $host via NS and netbios\n");
+        print("host $host not found\n");
     }
-
     return $hostIP;
 }
 

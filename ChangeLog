@@ -21,6 +21,32 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+Merged pull requests: #92, #93, #94
+
+* Fixed NetBios lookup of hosts, reported by Doug Lytle.
+
+* Fixed SCGI when BackupPC is run in non-daemon mode (which is the systemd
+  default starting in 4.1.1).
+
+* $Conf{ClientNameAlias} can now be an array of hostnames; the first one
+  that succeeds ping is used for the backup or restore.  From martintamare
+  (#94).
+
+* Increased $Conf{FullKeepCnt}[0] by 1 in expiry calculations, so the most
+  recent filled backup effectively isn't counted for expiry.  This improves
+  the behavior, particularly when $Conf{FullKeepCnt} = 1.
+
+* Removed extra quotes from $Conf{CgiURL} in configure.pl (#93) from
+  Alexander Moisseev (#93).  Also added $DestDir to some print messages
+  in configure.pl.
+
+* Fixed status link in SCGI server, from Nicholas Hall (#96).
+
+* BackupPC_dump and BackupPC_restore now support the -p option to turn off
+  progress reports.
+
+* Updated FSF address in cgi-bin/BackupPC_Admin, reported by TomCat42 (#91).
+
 #------------------------------------------------------------------------
 # Version 4.1.1, 29 Mar 2017
 #------------------------------------------------------------------------

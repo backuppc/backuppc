@@ -62,8 +62,8 @@ my($hostIP, $host, $client, $reqFileName, %stat);
 $bpc->ChildInit();
 
 my %opts;
-if ( !getopts("v", \%opts) || @ARGV != 3 ) {
-    print("usage: $0 [-v] <hostIP> <client> <reqFileName>\n");
+if ( !getopts("pv", \%opts) || @ARGV != 3 ) {
+    print("usage: $0 [-p] [-v] <hostIP> <client> <reqFileName>\n");
     exit(1);
 }
 
@@ -242,7 +242,7 @@ if ( $? && $Conf{UserCmdCheckStatus} ) {
 }
 $NeedPostCmd = 1;
 
-print("__bpc_progress_state__ restore\n");
+print("__bpc_progress_state__ restore\n") if ( !$opts{p} );
 
 $xfer = BackupPC::Xfer::create($Conf{XferMethod}, $bpc);
 if ( !defined($xfer) ) {
@@ -298,6 +298,7 @@ my $xferArgs = {
     pathHdrDest  => $RestoreReq{pathHdrDest},
     fileList     => $RestoreReq{fileList},
     pidHandler   => \&pidHandler,
+    noProgressPrint => $opts{p},
 };
 
 $xfer->args($xferArgs);
@@ -709,9 +710,9 @@ sub UserCommandRun
 	cmdType	     => $cmdType,
     };
     if ( $cmdType eq "RestorePostUserCmd" ) {
-        print("__bpc_progress_state__ post-cmd\n");
+        print("__bpc_progress_state__ post-cmd\n") if ( !$opts{p} );
     } else {
-        print("__bpc_progress_state__ pre-cmd\n");
+        print("__bpc_progress_state__ pre-cmd\n") if ( !$opts{p} );
     }
     my $cmd = $bpc->cmdVarSubstitute($Conf{$cmdType}, $vars);
     $RestoreLOG->write(\"Executing $cmdType: @$cmd\n");

@@ -948,7 +948,7 @@ $Conf{SmbClientPath} = '';
 #
 $Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
 	    . ' $I_option -U $userName -E -d 1'
-            . ' -c tarmode\\ full -Tc$X_option - $fileList';
+            . ' -c tarmode\\ full -mSMB3 -Tc$X_option - $fileList';
 
 #
 # Command to run smbclient for an incremental dump.
@@ -962,7 +962,7 @@ $Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
 #
 $Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
 	    . ' $I_option -U $userName -E -d 1'
-	    . ' -c tarmode\\ full -TcN$X_option $timeStampFile - $fileList';
+	    . ' -c tarmode\\ full -mSMB3 -TcN$X_option $timeStampFile - $fileList';
 
 #
 # Command to run smbclient for a restore.
@@ -980,7 +980,7 @@ $Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
 #
 $Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
             . ' $I_option -U $userName -E -d 1'
-            . ' -c tarmode\\ full -Tx -';
+            . ' -c tarmode\\ full -mSMB3 -Tx -';
 
 ###########################################################################
 # Tar Configuration

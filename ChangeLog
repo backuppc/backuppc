@@ -32,6 +32,9 @@ Merged pull requests: #92, #93, #94
   that succeeds ping is used for the backup or restore.  From martintamare
   (#94).
 
+* Fixed status link in SCGI server, improved the navigation tab (now
+  it doesn't scroll) and some css/html cleanup; from Nicholas Hall (#96).
+
 * Increased $Conf{FullKeepCnt}[0] by 1 in expiry calculations, so the most
   recent filled backup effectively isn't counted for expiry.  This improves
   the behavior, particularly when $Conf{FullKeepCnt} = 1.
@@ -40,10 +43,11 @@ Merged pull requests: #92, #93, #94
   Alexander Moisseev (#93).  Also added $DestDir to some print messages
   in configure.pl.
 
-* Fixed status link in SCGI server, from Nicholas Hall (#96).
-
 * BackupPC_dump and BackupPC_restore now support the -p option to turn off
-  progress reports.
+  progress reports.  The old -p (inplace) option to BackupPC_tarExtract
+  is now -P.
+
+* Backup directory mtime is now set to the backup endTime.
 
 * Updated FSF address in cgi-bin/BackupPC_Admin, reported by TomCat42 (#91).
 

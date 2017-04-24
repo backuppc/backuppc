@@ -3,10 +3,10 @@ Description=BackupPC server
 After=syslog.target local-fs.target
 
 [Service]
-Type=forking
+Type=simple
 User=__BACKUPPCUSER__
 #Group=__BACKUPPCUSER__
-ExecStart=__INSTALLDIR__/bin/BackupPC -d
+ExecStart=__INSTALLDIR__/bin/BackupPC
 RuntimeDirectory=BackupPC
 PIDFile=__RUNDIR__/BackupPC.pid
 KillSignal=SIGTERM

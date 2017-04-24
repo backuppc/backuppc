@@ -2000,7 +2000,7 @@ sub BackupRemove
 sub CorrectHostCheck
 {
     my($hostIP, $host) = @_;
-    return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck}
+    return if ( $hostIP eq $host || !$Conf{FixedIPNetBiosNameCheck}
 		|| $Conf{NmbLookupCmd} eq "" );
     if (ref($Conf{ClientNameAlias}) eq "ARRAY") {
         return if ( grep /^$hostIP$/, @{ $Conf{ClientNameAlias} } );

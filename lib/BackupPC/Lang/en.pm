@@ -371,7 +371,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Queue Summary";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Backup Queue Summary")}
-<br><br>
 \${h2("User Queue Summary")}
 <p>
 The following user requests are currently queued:
@@ -382,7 +381,6 @@ The following user requests are currently queued:
     <td> User </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Background Queue Summary")}
 <p>
@@ -394,7 +392,6 @@ The following background requests are currently queued:
     <td> User </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Command Queue Summary")}
 <p>
 The following command requests are currently queued:

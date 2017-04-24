@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.1, released 27 Mar 2017.
+# Version 4.1.2, released 15 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -593,6 +593,7 @@ sub NavLink
         my($class);
         $class = " class=\"NavCurrent\""
                 if ( length($link) && $ENV{REQUEST_URI} =~ /\Q$link\E$/
+                    || length($link) && $link =~ /\&host=/ && $ENV{REQUEST_URI} =~ /\Q$link\E/
                     || $link eq "" && $ENV{REQUEST_URI} !~ /\?/ );
         $link = "$MyURL$link" if ( $link eq "" || $link =~ /^\?/ );
         print <<EOF;

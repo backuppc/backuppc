@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.1.1, released 29 Mar 2017.
+# Version 4.1.2, released 15 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -987,6 +987,7 @@ sub dirCacheNewDir
     my $all = $AttrNew->getAll($dir);
     $bpc->flushXSLibMesgs();
     foreach my $name ( keys(%$all) ) {
+        next if ( $name eq "." || $name eq ".." );
         print("dirCacheNewDir: populating dir = $dir with $name\n")
                      if ( $Conf{XferLogLevel} >= 4 );
         $DirCache{$dir}{$name} = 1;
@@ -1113,10 +1114,9 @@ sub copyInodes
 
     my $dirPath  = $AttrNew->getFullMangledPath($dirName);
 
-    print("copyInodes: dirName = $dirName, dirPath = $dirPath\n") if ( $Conf{XferLogLevel} >= 3 );
+    print("copyInodes: dirName = $dirName, dirPath = $dirPath\n") if ( $Conf{XferLogLevel} >= 4 );
 
     my $attrAll = $AttrNew->getAll($dirName);
-    print("copyInodes: finished getAll()\n");
     $bpc->flushXSLibMesgs();
 
     #
@@ -1140,6 +1140,7 @@ sub copyInodes
     }
 
     foreach my $fileUM ( keys(%$attrAll) ) {
+        next if ( $fileUM eq "." || $fileUM eq ".." );
         my $a = $attrAll->{$fileUM};
         if ( $a->{type} == BPC_FTYPE_DIR ) {
             #

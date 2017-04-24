@@ -383,7 +383,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Prospetto coda";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Prospetto coda di backup")}
-<br><br>
 \${h2("Prospetto code utenti")}
 <p>
 Sono state accodate le seguenti richieste degli utenti:
@@ -394,7 +393,6 @@ Sono state accodate le seguenti richieste degli utenti:
     <td> Utente </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Prospetto code in background")}
 <p>
@@ -406,7 +404,6 @@ Sono attualmente in coda le seguenti richieste di background:
     <td> Utente </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Prospetto coda comandi")}
 <p>
 Sono attualmente in coda le seguenti richieste di comandi:

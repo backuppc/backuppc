@@ -370,7 +370,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: キューサマリ";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("バックアップキューサマリ")}
-<br><br>
 \${h2("ユーザキューサマリ")}
 <p>
 現在キューイングされているユーザ要求は次のとおりです。
@@ -381,7 +380,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> ユーザ </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("バックグラウンドキューサマリ")}
 <p>
@@ -392,7 +390,6 @@ $Lang{Backup_Queue_Summary} = <<EOF;
     <td> ユーザ </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("コマンドキューサマリ")}
 <p>
 現在キューイングされているコマンド要求は次のとおりです。

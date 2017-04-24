@@ -373,7 +373,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: overzicht wachtrij";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Overzicht Wachtrij backup")}
-<br><br>
 \${h2("Overzicht Wachtrij: Gebruikers")}
 <p>
 Deze aanvragen van gebruikers staan momenteel in de wachtrij:
@@ -384,7 +383,6 @@ Deze aanvragen van gebruikers staan momenteel in de wachtrij:
     <td> Gebruiker </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Overzicht Wachtrij: in achtergrond")}
 <p>
@@ -396,7 +394,6 @@ Deze aanvragen voor backups in de achtergrond staan momenteel in de wachtrij:
     <td> Gebruiker </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Overzicht Wachtrij: Opdrachten")}
 <p>
 Deze aanvragen via opdracht staan momenteel in de wachtrij:

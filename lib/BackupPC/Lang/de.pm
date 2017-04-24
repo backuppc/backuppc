@@ -381,7 +381,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Warteschlange Übersicht";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Backup Warteschlangenübersicht")}
-<br><br>
 \${h2("Übersicht Benutzeraufträge in der Warteschlange")}
 <p>
 Die folgenden Benutzeraufträge sind eingereiht:
@@ -392,7 +391,6 @@ Die folgenden Benutzeraufträge sind eingereiht:
     <td> Benutzer </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Übersicht Hintergrundaufträge in der Warteschlange")}
 <p>
@@ -404,7 +402,6 @@ Die folgenden Hintergrundaufträge sind eingereiht:
     <td> Benutzer </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Übersicht Kommandoaufträge in der Warteschlange")}
 <p>
 Die folgenden Kommandoaufträge sind eingereiht:

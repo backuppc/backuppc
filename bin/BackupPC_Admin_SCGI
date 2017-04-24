@@ -48,7 +48,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.1.2, released 15 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -159,12 +159,6 @@ my $socket = IO::Socket::INET->new(Listen => 5, ReuseAddr => 1, LocalPort => $Co
 my $scgi = SCGI->new($socket, blocking => 1);
 
 #
-# IPv4 local host address, that we use to make sure we only respond to
-# connections from the localhost.
-#
-my $LocalHostAddr = pack("C*", 127, 0, 0, 1);
-
-#
 # Clean up %ENV for taint checking
 #
 delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
@@ -210,7 +204,7 @@ for ( my $i = 0 ; $i < $MaxChild ; $i++ ) {
 # lock file.  If we succeed in getting the lock, it means all the children are busy
 # servicing requests, so we need to spawn another child to service new requests.
 #
-if ( !open(my $LockFd, "+<", $LockFile) ) {
+if ( !open($LockFd, "+<", $LockFile) ) {
     print("BackupPC_Admin_SCGI: can't open $LockFile; exiting in 60 seconds\n");
     sleep(60);
     exit(1);
@@ -303,7 +297,7 @@ sub childRun
     close($fhRead);
     close($LockFd);
     print("BackupPC_Admin_SCGI: child $childNum starting (pid $$)\n") if ( $LogLevel >= 3 );
-    if ( !open(my $LockFd, "+<", $LockFile) ) {
+    if ( !open($LockFd, "+<", $LockFile) ) {
         print("BackupPC_Admin_SCGI: child $childNum can't open $LockFile; exiting\n");
         exit(1);
     }
@@ -338,6 +332,7 @@ sub childRun
         if ( BackupPC::XS::DirOps::lockRangeFd($LockFdNum, 0, 1, 1) ) {
             print("BackupPC_Admin_SCGI: child $childNum lock failed ($!)... continuing\n")
                                                    if ( $LogLevel >= 3 );
+            sleep(1);
             next;
         }
         print("BackupPC_Admin_SCGI: child $childNum got accept lock\n")
@@ -346,13 +341,16 @@ sub childRun
         BackupPC::XS::DirOps::unlockRangeFd($LockFdNum, 0, 1);
         BackupPC::XS::DirOps::unlockRangeFd($LockFdNum, 1 + $childNum, 1);
 
-        my $iaddr = $request->connection->sockaddr();
-        if ( $iaddr ne $LocalHostAddr ) {
+        my $iaddr = $request->connection->peeraddr();
+        if ( ord($iaddr) != 127 ) {
+            #
+            # peer is not a localhost address (ie: 127.0.0.1/8); ignore it
+            #
             my $addrStr = join(".", unpack("C*", $iaddr));
             printf("BackupPC_Admin_SCGI: unexpected connection from $addrStr (%s) ignored\n",
                                             gethostbyaddr($iaddr, AF_INET));
             $request = undef;
-            return;
+            next;
         }
         print("BackupPC_Admin_SCGI: child $childNum processing request\n")
                                                if ( $LogLevel >= 5 );
@@ -380,7 +378,7 @@ sub handleRequest
         open($fdDebug, ">", "$LogDir/request.txt");
         print $fdDebug "Environment: ", Dumper($request->env), "\n\n";
         print $fdDebug "Body: ", $body, "\n\n";
-        print $fdDebug "Other: ", "User = $User, MyURL = $MyURL, In = ", Dumper(\%In), "Conf = ", Dumper(\%Conf), "\n\n";
+        print $fdDebug "Other: ", "User = $User, MyURL = $MyURL, PID = $$, In = ", Dumper(\%In), "Conf = ", Dumper(\%Conf), "\n\n";
         close($fdDebug);
     }
     if ( !defined($ActionDispatch{$In{action}}) ) {
@@ -410,6 +408,7 @@ sub NewRequest
     }
     $ENV{SCRIPT_NAME} = $request->env->{SCRIPT_NAME};
     $ENV{REMOTE_USER} = $request->env->{REMOTE_USER};
+    $ENV{REQUEST_URI} = $request->env->{REQUEST_URI};
 
     if ( $bpc->ConfigMTime() != $ConfigMTime ) {
         $bpc->ConfigRead();

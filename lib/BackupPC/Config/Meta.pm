@@ -330,7 +330,12 @@ use vars qw(%ConfigMeta);
     ArchivePostUserCmd	=> {type => "string", undefIfEmpty => 1},
     UserCmdCheckStatus  => "boolean",
 
-    ClientNameAlias 	=> {type => "string", undefIfEmpty => 1},
+    ClientNameAlias 	=> {
+	    type    => "list",
+	    emptyOk => 1,
+	    undefIfEmpty => 1,
+	    child   => "string",
+    },
 
     ######################################################################
     # Email reminders, status and messages

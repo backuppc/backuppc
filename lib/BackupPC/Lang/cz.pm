@@ -370,7 +370,6 @@ $Lang{BackupPC__Queue_Summary} = "BackupPC: Pøehled front";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Pøehled fronty zálohování")}
-<br><br>
 \${h2("Pøehled fronty uživatelù")}
 <p>
 Následující uživatelé jsou momentálnì ve frontì:
@@ -381,7 +380,6 @@ Následující uživatelé jsou momentálnì ve frontì:
     <td> Uživatel </td></tr>
 \$strUser
 </table>
-<br><br>
 
 \${h2("Souhrn fronty v pozadí")}
 <p>
@@ -393,7 +391,6 @@ Následující žádosti v pozadí jsou momentálnì ve frontì:
     <td> Uživatel </td></tr>
 \$strBg
 </table>
-<br><br>
 \${h2("Souhrn fronty pøíkazù")}
 <p>
 Následující pøíkazy jsou momentálnì ve frontì:

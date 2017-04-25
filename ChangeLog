@@ -21,9 +21,13 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-Merged pull requests: #92, #93, #94
+Merged pull requests: #92, #93, #94, #014
 
 * Fixed NetBios lookup of hosts, reported by Doug Lytle.
+
+* Fixed bin/BackupPC_tarExtract and lib/BackupPC/Xfer/Ftp.pm in case where
+  a directory tree is no longer present in a new backup.  Reported by
+  Jens Potthast and Matt Bedynek.
 
 * Fixed SCGI when BackupPC is run in non-daemon mode (which is the systemd
   default starting in 4.1.1).
@@ -35,13 +39,15 @@ Merged pull requests: #92, #93, #94
 * Fixed status link in SCGI server, improved the navigation tab (now
   it doesn't scroll) and some css/html cleanup; from Nicholas Hall (#96).
 
+* Fixed logic in bin/BackupPC_dump for $Conf{FixedIPNetBiosNameCheck} to
+  prevent netbios name check; from Nicholas Hall (#102)
+
 * Increased $Conf{FullKeepCnt}[0] by 1 in expiry calculations, so the most
   recent filled backup effectively isn't counted for expiry.  This improves
   the behavior, particularly when $Conf{FullKeepCnt} = 1.
 
-* Removed extra quotes from $Conf{CgiURL} in configure.pl (#93) from
-  Alexander Moisseev (#93).  Also added $DestDir to some print messages
-  in configure.pl.
+* Removed extra quotes from $Conf{CgiURL} in configure.pl from Alexander
+  Moisseev (#93).  Also added $DestDir to some print messages in configure.pl.
 
 * BackupPC_dump and BackupPC_restore now support the -p option to turn off
   progress reports.  The old -p (inplace) option to BackupPC_tarExtract

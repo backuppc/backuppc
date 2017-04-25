@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.1, released 29 Mar 2017.
+# Version 4.1.2, released 15 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -904,6 +904,7 @@ sub handleDir
     # If we didn't see a file, move to old.
     #
     foreach my $name ( keys(%$all) ) {
+        next if ( $name eq "." || $name eq ".." );
         my $path = "$f->{name}/$name";
         $path =~ s{^/+}{};
         $t->logWrite("dirCleanup: checking $path, expected = $expectedFiles{$path}\n", 5);
@@ -1168,7 +1169,6 @@ sub copyInodes
     $t->logWrite("copyInodes: dirName = $dirName, dirPath = $dirPath\n", 4);
 
     my $attrAll = $AttrNew->getAll($dirName);
-    $t->logWrite("copyInodes: finished getAll()\n", 4);
     $bpc->flushXSLibMesgs();
 
     #
@@ -1192,6 +1192,7 @@ sub copyInodes
     }
 
     foreach my $fileUM ( keys(%$attrAll) ) {
+        next if ( $fileUM eq "." || $fileUM eq ".." );
         my $a = $attrAll->{$fileUM};
         if ( $a->{type} == BPC_FTYPE_DIR ) {
             #

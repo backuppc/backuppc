@@ -46,6 +46,9 @@ Merged pull requests: #92, #93, #94, #014
   recent filled backup effectively isn't counted for expiry.  This improves
   the behavior, particularly when $Conf{FullKeepCnt} = 1.
 
+* Rsync transfers now use --timeout=$Conf{ClientTimeout} instead of
+  using an alarm based on rsync log output.
+
 * Removed extra quotes from $Conf{CgiURL} in configure.pl from Alexander
   Moisseev (#93).  Also added $DestDir to some print messages in configure.pl.
 

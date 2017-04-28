@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.1.0, released 23 Mar 2017.
+# Version 4.1.2, released 15 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -63,6 +63,7 @@ sub start
     my(@fileList, $rsyncArgs, $logMsg, $rsyncCmd);
     my $binDir = $t->{bpc}->BinDir();
 
+    alarm(0);
     #
     # We add a slash to the share name we pass to rsync
     #
@@ -333,6 +334,9 @@ sub start
         if ( $conf->{ClientCharset} ne "" ) {
             push(@$rsyncArgs, "--iconv=utf8,$conf->{ClientCharset}");
         }
+        if ( $conf->{ClientTimeout} > 0 && $conf->{ClientTimeout} =~ /^\d+$/ ) {
+            push(@$rsyncArgs, "--timeout=$conf->{ClientTimeout}");
+        }
 
         if ( $t->{XferMethod} eq "rsync" ) {
             unshift(@$rsyncArgs, "--rsync-path=$conf->{RsyncClientPath}")
@@ -441,7 +445,6 @@ sub start
         #
         # Run the $conf->{RsyncBackupPCPath} command
         #
-	alarm(0);
         print("This is the rsync child about to exec $conf->{RsyncBackupPCPath}\n");
 	$bpc->cmdExecOrEval($rsyncCmd);
         print("cmdExecOrEval failed $?\n");
@@ -453,7 +456,6 @@ sub start
     #from_to($str, $conf->{ClientCharset}, "utf8")
     #                        if ( $conf->{ClientCharset} ne "" );
     $t->{XferLOG}->write(\"Running: $str\n");
-    alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
     return $logMsg;
 }
@@ -464,7 +466,7 @@ sub run
     my $conf = $t->{conf};
     my $bpc  = $t->{bpc};
 
-    alarm($conf->{ClientTimeout});
+    alarm(0);
     while ( 1 ) {
         my($mesg, $done);
         if ( sysread($t->{rsyncFd}, $mesg, 32768) <= 0 ) {
@@ -498,7 +500,6 @@ sub run
             #
             # refresh our inactivity alarm
             #
-            alarm($conf->{ClientTimeout}) if ( !$t->{abort} );
             if ( /^log:\s(recv|del\.|send)\s(.{11})\s.{9}\s*\d+,\s*\d+\s*(\d+)\s(.*)/ ) {
                 my $type     = $1;
                 my $changes  = $2;

@@ -87,7 +87,7 @@
 #
 #========================================================================
 #
-# Version 4.1.1, released 29 Mar 2017.
+# Version 4.1.2, released 15 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1165,6 +1165,7 @@ for my $shareName ( @$ShareNames ) {
 	$sizeNewComp   += $results[8];
         $inodeLast      = $results[9];
     }
+    alarm(0);
 
     #
     # Merge the xfer status (need to accumulate counts)

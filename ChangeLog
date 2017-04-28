@@ -49,6 +49,8 @@ Merged pull requests: #92, #93, #94, #014
 * Rsync transfers now use --timeout=$Conf{ClientTimeout} instead of
   using an alarm based on rsync log output.
 
+* added --delete-excluded and --one-file-system to $Conf{RsyncArgs}.
+
 * Removed extra quotes from $Conf{CgiURL} in configure.pl from Alexander
   Moisseev (#93).  Also added $DestDir to some print messages in configure.pl.
 

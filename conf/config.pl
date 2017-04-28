@@ -1244,6 +1244,8 @@ $Conf{RsyncArgs} = [
             '--links',
             '--hard-links',
             '--delete',
+            '--delete-excluded',
+            '--one-file-system',
             '--partial',
             '--log-format=log: %o %i %B %8U,%8G %9l %f%L',
             '--stats',

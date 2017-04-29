@@ -1663,11 +1663,11 @@ $Conf{CompressLevel} = 3;
 #
 # Note that stdout buffering combined with huge files being backed up
 # could cause longish delays in the output from smbclient that
-# BackupPC_dump sees, so in rare cases you might want to increase
+# BackupPC_dump sees, so in some cases you might want to increase
 # this value.
 #
-# Despite the name, this parameter sets the timeout for all transport
-# methods (tar, smb etc).
+# For rsync, this is passed onto rsync_bpc using the --timeout argument,
+# which is based on any I/O, so you could likely reduce this value.
 #
 $Conf{ClientTimeout} = 72000;
 

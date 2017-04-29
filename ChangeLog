@@ -21,7 +21,7 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-Merged pull requests: #92, #93, #94, #014
+Merged pull requests: #93, #94, #97, #102
 
 * Fixed NetBios lookup of hosts, reported by Doug Lytle.
 
@@ -37,7 +37,7 @@ Merged pull requests: #92, #93, #94, #014
   (#94).
 
 * Fixed status link in SCGI server, improved the navigation tab (now
-  it doesn't scroll) and some css/html cleanup; from Nicholas Hall (#96).
+  it doesn't scroll) and some css/html cleanup; from Nicholas Hall (#97).
 
 * Fixed logic in bin/BackupPC_dump for $Conf{FixedIPNetBiosNameCheck} to
   prevent netbios name check; from Nicholas Hall (#102)

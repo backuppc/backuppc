@@ -97,6 +97,7 @@ sub start
         #
         if ( $remoteDir =~ m{(.*)\Q$t->{pathHdrSrc}\E(/*)$} ) {
             $remoteDir = "$1$2";
+            $remoteDir = "/" if ( $remoteDir eq "" );
             $t->{XferLOG}->write(\"Trimming $t->{pathHdrSrc} from remoteDir -> $remoteDir\n");
         } else {
             for ( my $i = 0 ; $i < @{$t->{fileList}} ; $i++ ) {

@@ -893,7 +893,7 @@ Este quadro mostra cada versão única disponível nos diversos backups:
 <li> Clique no atalho da versão do arquivo (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) para baixar esse arquivo,
 <li> Os arquivos com conteúdos diferentes entre cópias distintas de backup tem o mesmo
-     número de verssão,
+     número de verssão (PleaseTranslateThis: except between v3 and v4 backups),
 <li> Os arquivos ou diretórios inexistentes em um determinado backup tem uma 
      caixa vazia.
 <li> Os arquivos mostrados com a mesma versão podem ter diferentes atributos.

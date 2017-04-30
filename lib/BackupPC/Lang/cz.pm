@@ -887,7 +887,7 @@ ze všech záloh:
 <li> Klikni na odkaz verze souboru (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) k jeho stažení,
 <li> Soubory se stejným obsahem v rùzných zálohách mají stejné
-     èíslo verze,
+     èíslo verze (PleaseTranslateThis: except between v3 and v4 backups),
 <li> Soubory nebo adresáøe, které nejsou ve vybrané záloze 
      nejsou oznaèeny.
 <li> Soubory zobrazené se stejným èíslem verze mohou mít rozdílné atributy.

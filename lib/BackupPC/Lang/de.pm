@@ -895,7 +895,7 @@ Diese Ansicht zeigt alle unterschiedlichen Versionen der Dateien in den Datensic
 <li> Wählen Sie hier auf einen Verzeichnis Namen: (\$Lang->{DirHistory_dirLink}) um Verzeichnisse anzuzeigen.
 <li> Klicken Sie auf eine Dateiversion (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) für einen Download der Datei.
-<li> Dateien mit dem gleichen Inhalt in verschiedenen Datensicherungen haben die gleiche Versionsnummer.
+<li> Dateien mit dem gleichen Inhalt in verschiedenen Datensicherungen haben die gleiche Versionsnummer (PleaseTranslateThis: except between v3 and v4 backups).
 <li> Dateien oder Verzeichnisse, die in einer Datensicherung nicht vorhanden sind, haben dort keinen Eintrag.
 <li> Dateien mit der gleichen Version können unterschiedliche Attribute haben. Wählen Sie die Datensicherungsnummer um die Attribute anzuzeigen.
 </ul>

@@ -888,7 +888,7 @@ Przedstawienie każdej unikalnej wersji każdego pliku we wszystkich kopiach:
 <li> Kliknij na wersje pliku (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) aby śćiagnać ten plik,
 <li> Pliki z tą samą zawartością pomiędzy różnymi kopiami mają ten sam
-     numer wersji,
+     numer wersji (PleaseTranslateThis: except between v3 and v4 backups),
 <li> Pliki lub adresy ,które nie są dostępne w określonej kopii
      nie są zaznaczone.
 <li> Pliki pokazane z tą samą wersją mogą mieć inny atrybut.

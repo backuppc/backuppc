@@ -890,7 +890,7 @@ the backups:
 <li> Click on a file version link (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) to download that file,
 <li> Files with the same contents between different backups have the same
-     version number,
+     version number (except between v3 and v4 backups),
 <li> Files or directories not present in a particular backup have an
      empty box.
 <li> Files shown with the same version might have different attributes.

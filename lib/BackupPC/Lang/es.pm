@@ -891,7 +891,7 @@ las copias de seguridad:
 <li> Haga click en un v&iacute;nculo de versi&oacute;n de archivo (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) para descargar ese archivo,
 <li> Los archivos con diferentes contenidos entre distintas copias de seguridad tienen el mismo
-     n&uacute;mero de versi&oacute;n,
+     n&uacute;mero de versi&oacute;n (PleaseTranslateThis: except between v3 and v4 backups),
 <li> Los archivos o directorios que no existen en una copia concreta tienen una
      celda vac&iacute;a.
 <li> Los archivos mostrados con la misma versi&oacute;n pueden tener diferentes atributos.

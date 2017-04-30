@@ -892,7 +892,7 @@ alle backups heen:
 <li> Klik op de versie-link van een bestand (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) om dat bestand te downloaden,
 <li> Bestanden met dezelfde inhoud maar in verschillende backups hebben
-     hetzelfde versienummer,
+     hetzelfde versienummer (PleaseTranslateThis: except between v3 and v4 backups),
 <li> Bestanden of mappen die in een bepaalde backup niet aanwezig zijn hebben
      een lege cel.
 <li> Bestanden met hetzelfde versienummer kunnen wel verschillende attributen 

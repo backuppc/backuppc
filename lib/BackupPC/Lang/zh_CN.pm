@@ -871,7 +871,7 @@ $Lang{DirHistory_for__host} = <<EOF;
 <li> 点击目录链接标记 (\$Lang->{DirHistory_dirLink}) 进入相应目录，
 <li> 点击文件版本链接标记 (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) 下载相应文件，
-<li> 如果一个文件的内容在多个备份中相同，文件在多个备份中具有相同版本号，
+<li> 如果一个文件的内容在多个备份中相同，文件在多个备份中具有相同版本号，(PleaseTranslateThis: except between v3 and v4 backups)
 <li> 如果一个文件或目录在某个备份中不存在，下表中用空白表示，
 <li> 具有相同版本号的文件可能在不同备份中有不同的文件属性。可以点击备份序列号来查看文件在相应备份中的属性。
 </ul>

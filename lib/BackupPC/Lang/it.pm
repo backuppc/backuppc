@@ -902,7 +902,7 @@ Questa videata mostra tutte le versioni uniche disponibili nei diversi backup:
 <li> Fare clic sul collegamento ad un file (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) per scaricare quel file
 <li> I file con lo stesso contenuto fra backup diversi hanno lo stesso
-     numero di versione
+     numero di versione (PleaseTranslateThis: except between v3 and v4 backups)
 <li> I file o directory non disponibili in uno specifico backup presentano
      una casella vuota
 <li> I file visualizzati con la stessa versione possono avere attributi

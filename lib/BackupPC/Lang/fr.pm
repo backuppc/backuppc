@@ -888,7 +888,7 @@ Cette page montre toutes les version disponibles des fichiers sauvegardés pour l
 <li> Cliquez sur une version d'un fichier (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) pour le télécharger.
 <li> Les fichiers avec des contenus identiques pour plusieurs sauvegardes ont 
-     le même numéro de version.
+     le même numéro de version (PleaseTranslateThis: except between v3 and v4 backups).
 <li> Les fichiers qui ne sont pas présents sur une sauvegarde en particulier 
      sont représentés par une boîte vide.
 <li> Les fichiers montrés avec la même version peuvent avoir des attributs différents. 

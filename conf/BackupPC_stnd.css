@@ -1,7 +1,7 @@
 /*
  * BackupPC modern CSS definitions
  *
- * Version 4.0.0git, released 07 mar 2017.
+ * Version 4.1.2, released 15 Apr 2017.
  *
  * See http: //backuppc.sourceforge.net.
  *
@@ -328,6 +328,10 @@ table tr td.border input[type="button"] {
     font-weight: 400;
     border-bottom: 1px dotted #E0E0D7;
     padding-top: 16px;
+}
+
+.editSubTable {
+    border: 1px solid #dfdfdf;
 }
 
 .BpcTableFormRowError {}

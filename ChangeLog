@@ -40,14 +40,20 @@ Merged pull requests: #93, #94, #97, #102
   it doesn't scroll) and some css/html cleanup; from Nicholas Hall (#97).
 
 * Fixed logic in bin/BackupPC_dump for $Conf{FixedIPNetBiosNameCheck} to
-  prevent netbios name check; from Nicholas Hall (#102)
+  prevent netbios name check; from Nicholas Hall (#102).
+
+* Fixed config editor bug in sub-entries of hash config variables, related
+  to SCGI.
+
+* Fixed rsync restore of a top-level directory when the share is "/",
+  reported by Ray Frush.
 
 * Increased $Conf{FullKeepCnt}[0] by 1 in expiry calculations, so the most
   recent filled backup effectively isn't counted for expiry.  This improves
   the behavior, particularly when $Conf{FullKeepCnt} = 1.
 
 * Rsync transfers now use --timeout=$Conf{ClientTimeout} instead of
-  using an alarm based on rsync log output.
+  using an alarm based on rsync log output, suggested by ACR.
 
 * added --delete-excluded and --one-file-system to $Conf{RsyncArgs}.
 

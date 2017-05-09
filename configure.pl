@@ -790,11 +790,20 @@ foreach my $var ( @$newConf ) {
     }
     $blockComment = $1 if ( $var->{text} =~ /^([\s\n]*#{70}.*#{70}[\s\n]+)/s );
     $var->{text} =~ s/^\s*\$Conf\{(.*?)\}(\s*=\s*['"]?)(.*?)(['"]?\s*;)/
+
+                my $a = $2;
+                my $b = $4;
+                # Get quotes from default config to avoid missing or extra quotes
+                # when replacing misused undef or empty string values
+                ($a, $b) = GetQuotes($1)
+                  if ( (!defined($OrigConf{$1}) or $OrigConf{$1} eq "" )
+                       && $Conf{$1} ne $OrigConf{$1} );
+
                 defined($Conf{$1}) && ref($Conf{$1}) eq ""
                                    && !defined($opts{"config-override"}{$1})
                                    && $Conf{$1} ne $OrigConf{$1}
-                                   ? "\$Conf{$1}$2$Conf{$1}$4"
-                                   : "\$Conf{$1}$2$3$4"/emg;
+                                   ? "\$Conf{$1}$a$Conf{$1}$b"
+                                   : "\$Conf{$1}$a$3$b"/emg;
     print OUT $var->{text};
 }
 close(OUT);
@@ -1184,6 +1193,13 @@ sub ConfigMerge
         $resVars->{$res->[$i]{var}} = $i;
     }
     return ($res, $resVars);
+}
+
+sub GetQuotes
+{
+    my $posn = $distVars->{$1};
+    $distConf->[$posn]->{text} =~ /^\s*\$Conf\{.*?\}(\s*=\s*['"]?).*?(['"]?\s*;)/mg;
+    return ( $1, $2 );
 }
 
 sub my_chown

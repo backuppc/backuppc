@@ -471,7 +471,7 @@ $Conf{CgiHeaders}
 
 <div id="navigation-container">
 	<div id="logo-container">
-		<a href="/"><img src="$Conf{CgiImageDirURL}/logo.gif"></a>
+		<a href="https://backuppc.github.io/backuppc/"><img src="$Conf{CgiImageDirURL}/logo.gif"></a>
 	</div>
 EOF
 

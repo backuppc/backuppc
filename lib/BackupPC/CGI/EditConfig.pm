@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.1.2, released 30 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -411,14 +411,14 @@ sub action
             #
             #print STDERR Dumper(\%In);
             foreach my $v ( sort(keys(%In)) ) {
-                if ( $v =~ /^v_zZ_(\Q$var\E(_zZ_.*|$))/ ) {
-                    delete($In{$v}) if ( !defined($In{"orig_zZ_$1"}) );
+                if ( $v =~ /^v_((zZ_|flds_)\Q$var\E(_zZ_.*|$))/ ) {
+                    delete($In{$v}) if ( !defined($In{"orig_$1"}) );
                 }
-                if ( $v =~ /^orig_zZ_(\Q$var\E(_zZ_.*|$))/ ) {
-                    $In{"v_zZ_$1"} = $In{$v};
+                if ( $v =~ /^orig_((zZ_|flds_)\Q$var\E(_zZ_.*|$))/ ) {
+                    $In{"v_$1"} = $In{$v};
                 }
             }
-            delete($In{"vflds.$var"});
+            #delete($In{"v_flds_$var"});
         }
 
         ($newConf, $override) = inputParse($bpc, $userHost);
@@ -614,8 +614,9 @@ EOF
 	    return false;
 	}
 	var allVars = {};
-	var varRE  = new RegExp("^v_zZ_(" + varName + ".*)");
-	var origRE = new RegExp("^orig_zZ_(" + varName + ".*)");
+	var varRE  = new RegExp("^v_((zZ_|flds_)" + varName + ".*)");
+	var origRE = new RegExp("^orig_((zZ_|flds_)" + varName + ".*)");
+	var fldsRE = new RegExp("^flds_");
         for ( var i = 0 ; i < document.editForm.elements.length ; i++ ) {
 	    var e = document.editForm.elements[i];
 	    var re;
@@ -624,7 +625,7 @@ EOF
 		    allVars[re[1]] = 0;
 		}
 		allVars[re[1]]++;
-		//debugMsg("found v_zZ_ match with " + re[1]);
+		//debugMsg("found v_ match with " + re[1]);
 		//debugMsg("allVars[" + re[1] + "] = " + allVars[re[1]]);
 	    } else if ( (re = origRE.exec(e.name)) != null ) {
 		if ( allVars[re[1]] == null ) {
@@ -639,13 +640,20 @@ EOF
 	    if ( allVars[v] != 0 ) {
 		//debugMsg("Not the same shape because of " + v);
 		sameShape = 0;
-	    } else {
+                break;
+            }
+            if ( fldsRE.exec(v) != null ) {
+                // always rebuild a compound variable
+		sameShape = 0;
+                break;
+            }
+        }
+	if ( sameShape ) {
+            for ( v in allVars ) {
                 // copy the original variable values
 		//debugMsg("setting " + v);
-		eval("document.editForm.v_zZ_" + v + ".value = document.editForm.orig_zZ_" + v + ".value");
+		eval("document.editForm.v_" + v + ".value = document.editForm.orig_" + v + ".value");
             }
-	}
-	if ( sameShape ) {
 	    return true;
 	} else {
             // need to rebuild the form since the compound variable
@@ -915,11 +923,19 @@ EOF
             # Just switching menus: copy all the orig_zZ_ input parameters
             #
             foreach my $var ( sort(keys(%In)) ) {
-                next if ( $var !~ /^orig_zZ_/ );
-                my $val = decode_utf8($In{$var});
-                $contentHidden .= <<EOF;
+                if ( $var =~ /^orig_zZ_/ ) {
+                    my $val = decode_utf8($In{$var});
+                    $contentHidden .= <<EOF;
 <input type="hidden" name="$var" value="${EscHTML($val)}">
 EOF
+                } elsif ( $var =~ /^orig_flds_/ ) {
+                    foreach my $v ( split(/\0/, $In{$var}) ) {
+                        my $val = decode_utf8($v);
+                        $contentHidden .= <<EOF;
+<input type="hidden" name="$var" value="${EscHTML($val)}">
+EOF
+                    }
+                }
             }
 	}
     } else {
@@ -991,7 +1007,7 @@ sub fieldHiddenBuild
                 # rather than hard-coded
                 #
                 $content .= <<EOF;
-<input type="hidden" name="vflds.$varName" value="${EscHTML($fld)}">
+<input type="hidden" name="${prefix}_flds_$varName" value="${EscHTML($fld)}">
 EOF
             }
             $content .= fieldHiddenBuild($childType, "${varName}_zZ_$fldNum",
@@ -1194,7 +1210,7 @@ EOF
                 # rather than hard-coded
                 #
                 $content .= <<EOF;
-<input type="hidden" name="vflds.$varName" value="${EscHTML($fld)}">
+<input type="hidden" name="v_flds_$varName" value="${EscHTML($fld)}">
 EOF
             }
             $content .= "</td>\n";
@@ -1239,7 +1255,7 @@ EOF
                 # rather than hard-coded
                 #
                 $content .= <<EOF;
-<input type="hidden" name="vflds.$varName" value="${EscHTML($fld)}">
+<input type="hidden" name="v_flds_$varName" value="${EscHTML($fld)}">
 EOF
             }
             $content .= fieldEditBuild($childType, "${varName}_zZ_$fldNum",
@@ -1346,7 +1362,7 @@ sub fieldErrorCheck
         } elsif ( defined($type->{child}) ) {
             @order = sort(keys(%{$type->{child}}));
         } else {
-            @order = split(/\0/, $In{"vflds.$varName"});
+            @order = split(/\0/, $In{"v_flds_$varName"});
         }
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {
             my $fld = $order[$fldNum];
@@ -1459,7 +1475,7 @@ sub fieldInputParse
         } elsif ( defined($type->{child}) ) {
             @order = sort(keys(%{$type->{child}}));
         } else {
-            @order = split(/\0/, $In{"vflds.$varName"});
+            @order = split(/\0/, $In{"v_flds_$varName"});
         }
 
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {

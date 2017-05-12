@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 15 Apr 2017.
+# Version 4.1.2, released 30 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -457,7 +457,7 @@ sub Header
     );
     my $host = $In{host};
 
-    binmode(STDOUT, ":utf8");
+    binmode(select, ":utf8");
     print $Cgi->header(-charset => "utf-8");
     print <<EOF;
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">

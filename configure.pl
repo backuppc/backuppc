@@ -720,6 +720,12 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
 #
 if ( $Upgrade && !defined($Conf{PoolV3Enabled}) ) {
     $Conf{PoolV3Enabled} = 1;
+    #
+    # for an upgrade, remove the new --one-file-system flag if it wasn't there before
+    #
+    if ( $oldConf->[$oldVars->{RsyncArgs}]{text} !~ /--one-file-system/ ) {
+        $distConf->[$distVars->{RsyncArgs}]{text} =~ s/\n\s*'--one-file-system',\n/\n/;
+    }
     $newConf->[$newVars->{RsyncArgs}]{text}        = $distConf->[$distVars->{RsyncArgs}]{text};
     $newConf->[$newVars->{RsyncRestoreArgs}]{text} = $distConf->[$distVars->{RsyncRestoreArgs}]{text};
     #

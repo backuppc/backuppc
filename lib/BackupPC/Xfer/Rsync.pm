@@ -576,7 +576,7 @@ sub run
                 $t->{XferLOG}->write(\"Parsing done: nFilesTotal = $t->{stats}{nFilesTotal}\n")
                                         if ( $conf->{XferLogLevel} >= 3 );
                 $t->{fileCnt} = $t->{stats}{nFilesTotal};
-                $t->{byteCnt} = $t->{stats}{nFilesTotal};
+                $t->{byteCnt} = $t->{stats}{sizeTotal};
                 next;
             }
 

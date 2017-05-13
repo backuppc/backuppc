@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.1.1, released 29 Mar 2017.
+# Version 4.1.2, released 30 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -350,19 +350,25 @@ sub copy_v3_file
 
     if ( $copyFile ) {
         my $f = BackupPC::XS::FileZIO::open($a->{fullPath}, 0, $Compress);
-        my($size, $data, $data1MB, $fileSize, $found, @s);
+        my($size, $data, $data1MB, $fileSize, $found, @s, $thisRead);
         if ( !defined($f) ) {
             print(STDERR "Unable to open file $a->{fullPath}\n");
             $FileErrorCnt++;
             return;
         }
         my $md5 = Digest::MD5->new();
-        $fileSize = $f->read(\$data1MB, 1 << 20);
-        $md5->add($data1MB);
-        while ( $f->read(\$data, 1 << 20) > 0 ) {
-            $md5->add($data);
-            $fileSize += length($data);
-        }
+        do {
+            $thisRead = $f->read(\$data, 1 << 20);
+            if ( $thisRead < 0 ) {
+                print(STDERR "error reading file $a->{fullPath} (read returns $thisRead)\n");
+                $ErrorCnt++;
+                $f->close();
+                return;
+            } elsif ( $thisRead > 0 ) {
+                $md5->add($data);
+                $fileSize += length($data);
+            }
+        } while ( $thisRead > 0 );
         my $inode = (stat($a->{fullPath}))[1];
         my $digest4 = $md5->digest();
         my $digest3 = $bpc->Buffer2MD5_v3(Digest::MD5->new(), $fileSize, \$data1MB);

@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.1.2, released 30 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -361,19 +361,25 @@ sub update_v3_dir
         # Compute the V3 and V4 digests
         #
 	my $f = BackupPC::XS::FileZIO::open($fullPath, 0, $Compress);
-	my($size, $data, $data1MB, $fileSize, $found, @s);
+	my($size, $data, $data1MB, $fileSize, $found, @s, $thisRead);
 	if ( !defined($f) ) {
 	    print("BackupPC_migrateV3toV4: unable to open file $fullPath\n");
 	    $ErrorCnt++;
             next;
 	}
 	my $md5 = Digest::MD5->new();
-	$fileSize = $f->read(\$data1MB, 1 << 20);
-	$md5->add($data1MB);
-	while ( $f->read(\$data, 1 << 20) > 0 ) {
-	    $md5->add($data);
-	    $fileSize += length($data);
-	}
+	do {
+	    $thisRead = $f->read(\$data, 1 << 20);
+	    if ( $thisRead < 0 ) {
+		print("BackupPC_migrateV3toV4: error reading file $fullPath (read returns $thisRead)\n");
+		$ErrorCnt++;
+		$f->close();
+		next;
+	    } elsif ( $thisRead > 0 ) {
+		$md5->add($data);
+		$fileSize += length($data);
+	    }
+	} while ( $thisRead > 0 );
 	my $digest4 = $md5->digest();
 	my $digest3 = $bpc->Buffer2MD5_v3(Digest::MD5->new(), $fileSize, \$data1MB);
 	my $path3 = $bpc->MD52Path_v3($digest3, $Compress);

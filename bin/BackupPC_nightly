@@ -59,7 +59,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.1.2, released 30 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -84,7 +84,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib qw( :BPC_DT_ALL );
 use BackupPC::XS;
 use BackupPC::DirOps;
@@ -179,8 +179,10 @@ if ( $opts{r} ) {
 
 ###########################################################################
 # Send email and generation of backupInfo files for each backup
+# Also clean any temp pool/cpool files
 ###########################################################################
 if ( $opts{m} ) {
+    CleanV4PoolTempFiles();
     print("log BackupPC_nightly now running BackupPC_sendEmail\n");
     print("__bpc_progress_state__ BackupPC_sendEmail\n") if ( !$opts{p} );
     system("$BinDir/BackupPC_sendEmail");
@@ -339,4 +341,24 @@ sub ScanAndCleanV3Pool()
     }
     sleep(1);
     processPendingDeletes(1);
+}
+
+#
+# Remove any orphan pool write temp files.  The file names is three numbers
+# separated by periods.  The first number is the pid, and we check if that
+# process is still alive.  If not, we delete the file.
+#
+sub CleanV4PoolTempFiles
+{
+    my $pidRunning = {};
+    foreach my $pool ( qw(pool cpool) ) {
+	foreach my $e ( @{BackupPC::DirOps::dirRead($bpc, "$TopDir/$pool")} ) {
+	    next if ( $e->{name} !~ /^(\d+)\.\d+\.\d+$/ || !-f "$TopDir/$pool/$e->{name}" );
+	    my $pid = $1;
+	    $pidRunning->{$pid} = kill(0, $pid) ? 1 : 0 if ( !defined($pidRunning->{$pid} ) );
+	    next if ( $pidRunning->{$pid} );
+	    #print("pid $pid: unlink $TopDir/$pool/$e->{name}\n");
+	    unlink("$TopDir/$pool/$e->{name}");
+	}
+    }
 }

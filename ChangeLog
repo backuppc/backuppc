@@ -21,6 +21,32 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+Merger pull requests: #109
+
+* Fixed editing of compound menu variables (eg: BackupFilesOnly).
+
+* Cleans up any orphan temporary pool writing files.
+
+* Better error checking when using $f->read() on pool files .
+
+* Fixed utf-8 output in SCGI.
+
+* Fixed a reference counting bug in BackupPC_tarExtract.
+
+* Fixed	rsync restore transfer byte total.
+
+* Replaced logo href with https://backuppc.github.io/backuppc.
+
+* On a v3->v4 upgrade, remove the new --one-file-system flag from the new
+  RsyncArgs if it wasn't there before.
+
+* Added /usr/local/bin to search path in configure.pl from Alexander
+  Moisseev (#109).
+
+#------------------------------------------------------------------------
+# Version 4.1.2, 30 Apr 2017
+#------------------------------------------------------------------------
+
 Merged pull requests: #93, #94, #97, #102
 
 * Fixed NetBios lookup of hosts, reported by Doug Lytle.

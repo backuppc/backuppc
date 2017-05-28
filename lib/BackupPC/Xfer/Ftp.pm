@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 15 Apr 2017.
+# Version 4.1.3, released 21 May 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -580,9 +580,7 @@ sub getFTPArgs
     my $conf = $t->{conf};
 
     return {
-        Host         => $conf->{ClientNameAlias}
-                     || $t->{hostIP}
-                     || $t->{host},
+        Host         => $t->{hostIP} || $t->{host},
 #        Firewall     => undef,                            # not used
 #        FirewallType => undef,                            # not used
 #        BlockSize    => $conf->{FtpBlockSize} || 10240,
@@ -1095,60 +1093,46 @@ sub moveFileToOld
         return;
     }
     $t->logWrite("moveFileToOld $a->{name}, $f->{name}, links = $a->{nlinks}, type = $a->{type}\n", 5);
-    if ( !$AttrOld || $AttrOld->get($f->{name}) ) {
-        if ( $a->{nlinks} > 0 ) {
-            $a->{nlinks}--;
-            if ( $a->{nlinks} <= 0 ) {
-                $AttrNew->deleteInode($a->{inode});
-                $DeltaNew->update($a->{compress}, $a->{digest}, -1);
-            } else {
-                $AttrNew->setInode($a->{inode}, $a);
-            }
+    if ( $a->{nlinks} > 0 ) {
+        $a->{nlinks}--;
+        if ( $a->{nlinks} <= 0 ) {
+            $AttrNew->deleteInode($a->{inode});
+            $DeltaNew->update($a->{compress}, $a->{digest}, -1);
         } else {
-            $DeltaNew->update($a->{compress}, $a->{digest}, -1)
-                                            if ( length($a->{digest}) );
+            $AttrNew->setInode($a->{inode}, $a);
         }
-        $AttrNew->delete($f->{name});
-        if ( $a->{type} == BPC_FTYPE_DIR ) {
+    } else {
+        $DeltaNew->update($a->{compress}, $a->{digest}, -1)
+                                        if ( length($a->{digest}) );
+        if ( $AttrOld && $AttrOld->get($f->{name}) && $AttrOld->set($f->{name}, $a, 1) ) {
+            $DeltaOld->update($a->{compress}, $a->{digest}, 1);
+        }
+    }
+    $AttrNew->delete($f->{name});
+    if ( $a->{type} == BPC_FTYPE_DIR ) {
+        if ( !$AttrOld || $AttrOld->get($f->{name}) ) {
             #
             # Delete the directory tree, including updating reference counts
             #
             my $pathNew = $AttrNew->getFullMangledPath($f->{name});
             BackupPC::DirOps::RmTreeQuiet($bpc, $pathNew, $a->{compress}, $DeltaNew, $AttrNew);
-        }
-        return;
-    }
-
-    if ( $a->{nlinks} > 0 ) {
-        #
-        # only write the inode if it doesn't exist in old;
-        # in that case, increase the pool reference count
-        #
-        if ( $AttrOld->set($f->{name}, $a, 1) ) {
-            $DeltaOld->update($a->{compress}, $a->{digest}, 1);
-        }
-    } else {
-        $AttrOld->set($f->{name}, $a);
-        $DeltaOld->update($a->{compress}, $a->{digest}, 1);
-    }
-    $AttrNew->delete($f->{name});
-    $DeltaNew->update($a->{compress}, $a->{digest}, -1);
-    if ( $a->{type} == BPC_FTYPE_DIR && $AttrOld ) {
-        #
-        # For a directory we need to move it to old, and copy
-        # any inodes that are referenced below this directory.
-        #
-        my $pathNew = $AttrNew->getFullMangledPath($f->{name});
-        my $pathOld = $AttrOld->getFullMangledPath($f->{name});
-        $t->logWrite("moveFileToOld(..., $f->{name}): renaming $pathNew to $pathOld\n", 5);
-        $AttrNew->flush(0, $f->{name});
-        BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress}, -1, $DeltaNew);
-        BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress},  1, $DeltaOld);
-        $t->copyInodes($f->{name});
-        $t->pathCreate($pathOld);
-        if ( !rename($pathNew, $pathOld) ) {
-            $t->logWrite("moveFileToOld(..., $f->{name}): can't rename $pathNew to $pathOld\n", 1);
-            $t->{xferErrCnt}++;
+        } else {
+            #
+            # For a directory we need to move it to old, and copy
+            # any inodes that are referenced below this directory.
+            #
+            my $pathNew = $AttrNew->getFullMangledPath($f->{name});
+            my $pathOld = $AttrOld->getFullMangledPath($f->{name});
+            $t->logWrite("moveFileToOld(..., $f->{name}): renaming $pathNew to $pathOld\n", 5);
+            $AttrNew->flush(0, $f->{name});
+            BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress}, -1, $DeltaNew);
+            BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress},  1, $DeltaOld);
+            $t->copyInodes($f->{name});
+            $t->pathCreate($pathOld);
+            if ( !rename($pathNew, $pathOld) ) {
+                $t->logWrite("moveFileToOld(..., $f->{name}): can't rename $pathNew to $pathOld\n", 1);
+                $t->{xferErrCnt}++;
+            }
         }
     }
 }

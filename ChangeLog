@@ -25,15 +25,24 @@ Merger pull requests: #109
 
 * Fixed editing of compound menu variables (eg: BackupFilesOnly).
 
-* Cleans up any orphan temporary pool writing files.
+* Made tarPipe in lib/BackupPC/Xfer/Tar.pm non-blocking to avoid a
+  reported deadlock when BackupPC's select() returns ok for reading,
+  but there are no bytes to read from the client tar's log/stdout
+  output.  Thanks to Matt Bedynek for running various tests and
+  providing debugging insights to track this down.
 
-* Better error checking when using $f->read() on pool files .
+* Better error checking when using $f->read() on pool files.
+  Thanks to Cody Jackson for tracking down this issue, related to
+  reading corrupted compressed pool files.
+
+* Cleans up any orphan temporary pool writing files.
 
 * Fixed utf-8 output in SCGI.
 
 * Fixed a reference counting bug in BackupPC_tarExtract.
 
-* Fixed	rsync restore transfer byte total.
+* Fixed	rsync restore transfer byte total, reported by Alexander
+  Moisseev
 
 * Replaced logo href with https://backuppc.github.io/backuppc.
 

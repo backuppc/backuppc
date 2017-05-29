@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.1, released 14 Mar 2017.
+# Version 4.1.2, released 30 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -39,6 +39,8 @@ package BackupPC::Xfer::Tar;
 use strict;
 use Encode qw/from_to encode/;
 use base qw(BackupPC::Xfer::Protocol);
+use Fcntl qw(F_GETFL F_SETFL O_NONBLOCK);
+use Errno qw(EWOULDBLOCK);
 
 sub useTar
 {
@@ -169,6 +171,13 @@ sub start
     $t->{XferLOG}->write(\"Running: $str\n");
     alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
+    #
+    # make pipeTar non-blocking; BackupPC_dump uses select() to see if there
+    # is something to read.
+    #
+    if ( !fcntl($t->{pipeTar}, F_SETFL, fcntl($t->{pipeTar}, F_GETFL, 0) | O_NONBLOCK) ) {
+        $t->{_errStr} = "can't set pipeTar to non-blocking";
+    }
     return $logMsg;
 }
 
@@ -179,17 +188,24 @@ sub readOutput
 
     if ( vec($rout, fileno($t->{pipeTar}), 1) ) {
         my $mesg;
+
+	$! = 0;
         if ( sysread($t->{pipeTar}, $mesg, 8192) <= 0 ) {
-            vec($$FDreadRef, fileno($t->{pipeTar}), 1) = 0;
-            if ( !close($t->{pipeTar}) && $? != 256 ) {
-                #
-                # Tar 1.16 uses exit status 1 (256) when some files
-                # changed during archive creation.  We allow this
-                # as a benign error and consider the archive ok
-                #
-		$t->{tarOut} .= "Tar exited with error $? ($!) status\n";
-		$t->{xferOK} = 0 if ( !$t->{tarBadExitOk} );
-	    }
+            if ( $! == EWOULDBLOCK ) {
+                $t->{XferLOG}->write(\"readOutput: no bytes read (EWOULDBLOCK); continuing\n");
+            } elsif ( eof($t->{pipeTar}) ) {
+                $t->{XferLOG}->write(\"readOutput: sysread returns 0 and got EOF\n");
+                vec($$FDreadRef, fileno($t->{pipeTar}), 1) = 0;
+                if ( !close($t->{pipeTar}) && $? != 256 ) {
+                    #
+                    # Tar 1.16 uses exit status 1 (256) when some files
+                    # changed during archive creation.  We allow this
+                    # as a benign error and consider the archive ok
+                    #
+                    $t->{tarOut} .= "Tar exited with error $? ($!) status\n";
+                    $t->{xferOK} = 0 if ( !$t->{tarBadExitOk} );
+                }
+            }
         } else {
             $t->{tarOut} .= $mesg;
         }

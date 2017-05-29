@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.1.2, released 30 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,14 +38,14 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::XS;
+use BackupPC::DirOps;
 use Encode;
 
 use Data::Dumper;
 use Getopt::Std;
-use DirHandle ();
 use vars qw($Lang $TopDir $BinDir $LogDir %Conf %HostConf $Hosts);
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
@@ -371,12 +371,11 @@ EOF
 # Check for bogus directories (probably PCs that are no longer
 # on the backup list)
 #
-my $d = DirHandle->new("$TopDir/pc") or die("Can't read $TopDir/pc: $!");
 my @oldDirs = ();
-my @files = $d->read;
-$d->close;
-foreach my $host ( @files ) {
-    next if ( $host =~ /^\./ || defined($Status{$host}) );
+foreach my $e ( @{BackupPC::DirOps::dirRead($bpc, "$TopDir/pc")} ) {
+    next if ( $e->{name} eq "." || $e->{name} eq ".." );
+    my $host = $e->{name};
+    next if ( defined($Status{$host}) );
     push(@oldDirs, "$TopDir/pc/$host");
 }
 if ( @oldDirs ) {

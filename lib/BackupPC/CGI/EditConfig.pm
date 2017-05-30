@@ -923,18 +923,11 @@ EOF
             # Just switching menus: copy all the orig_zZ_ input parameters
             #
             foreach my $var ( sort(keys(%In)) ) {
-                if ( $var =~ /^orig_zZ_/ ) {
+                if ( $var =~ /^orig_(zZ_|flds_)/ ) {
                     my $val = decode_utf8($In{$var});
                     $contentHidden .= <<EOF;
 <input type="hidden" name="$var" value="${EscHTML($val)}">
 EOF
-                } elsif ( $var =~ /^orig_flds_/ ) {
-                    foreach my $v ( split(/\0/, $In{$var}) ) {
-                        my $val = decode_utf8($v);
-                        $contentHidden .= <<EOF;
-<input type="hidden" name="$var" value="${EscHTML($val)}">
-EOF
-                    }
                 }
             }
 	}
@@ -1007,7 +1000,7 @@ sub fieldHiddenBuild
                 # rather than hard-coded
                 #
                 $content .= <<EOF;
-<input type="hidden" name="${prefix}_flds_$varName" value="${EscHTML($fld)}">
+<input type="hidden" name="${prefix}_flds_${varName}_zZ_$fldNum" value="${EscHTML($fld)}">
 EOF
             }
             $content .= fieldHiddenBuild($childType, "${varName}_zZ_$fldNum",
@@ -1210,7 +1203,7 @@ EOF
                 # rather than hard-coded
                 #
                 $content .= <<EOF;
-<input type="hidden" name="v_flds_$varName" value="${EscHTML($fld)}">
+<input type="hidden" name="v_flds_${varName}_zZ_$fldNum" value="${EscHTML($fld)}">
 EOF
             }
             $content .= "</td>\n";
@@ -1255,7 +1248,7 @@ EOF
                 # rather than hard-coded
                 #
                 $content .= <<EOF;
-<input type="hidden" name="v_flds_$varName" value="${EscHTML($fld)}">
+<input type="hidden" name="v_flds_${varName}_zZ_$fldNum" value="${EscHTML($fld)}">
 EOF
             }
             $content .= fieldEditBuild($childType, "${varName}_zZ_$fldNum",
@@ -1362,7 +1355,10 @@ sub fieldErrorCheck
         } elsif ( defined($type->{child}) ) {
             @order = sort(keys(%{$type->{child}}));
         } else {
-            @order = split(/\0/, $In{"v_flds_$varName"});
+            for ( my $fldNum = 0 ; ; $fldNum++ ) {
+                last if ( !defined($In{"v_flds_${varName}_zZ_$fldNum"}) );
+                push(@order, $In{"v_flds_${varName}_zZ_$fldNum"});
+            }
         }
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {
             my $fld = $order[$fldNum];
@@ -1475,7 +1471,10 @@ sub fieldInputParse
         } elsif ( defined($type->{child}) ) {
             @order = sort(keys(%{$type->{child}}));
         } else {
-            @order = split(/\0/, $In{"v_flds_$varName"});
+            for ( my $fldNum = 0 ; ; $fldNum++ ) {
+                last if ( !defined($In{"v_flds_${varName}_zZ_$fldNum"}) );
+                push(@order, $In{"v_flds_${varName}_zZ_$fldNum"});
+            }
         }
 
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {

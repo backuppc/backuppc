@@ -2403,6 +2403,9 @@ set $Conf{PoolV3Enabled} to 0.
        -p              don't print progress information
        -v              verbose
 
+The BackupPC server should not be running when you run BackupPC_migrateV3toV4.
+It will check and exit if the BackupPC server is running.
+
 If you want to test BackupPC_migrateV3toV4, a cautious approach is to make
 backup copies of the V3 backups, allowing you to restore them if there is
 any issue.  For example, if exampleHost has three 3.x backups numbered 5,

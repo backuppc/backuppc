@@ -48,7 +48,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 15 Apr 2017.
+# Version 4.1.2, released 30 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -153,7 +153,9 @@ my $ChildExited = 0;
 
 $SIG{INT}  = \&childKill;
 $SIG{CHLD} = \&childCleanup;
-my $socket = IO::Socket::INET->new(Listen => 5, ReuseAddr => 1, LocalPort => $Conf{SCGIServerPort} || 8199)
+my $socket = IO::Socket::INET->new(Listen => 5, ReuseAddr => 1,
+                                   LocalAddr => 'localhost',
+                                   LocalPort => $Conf{SCGIServerPort} || 8199)
                 or die "cannot bind to port $Conf{SCGIServerPort}: $!";
 
 my $scgi = SCGI->new($socket, blocking => 1);

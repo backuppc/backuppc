@@ -81,6 +81,11 @@ EOF
     exit(1);
 }
 
+#
+# Make sure BackupPC isn't running
+#
+CheckIfServerRunning();
+
 if ( defined($opts{h}) ) {
     if ( $opts{h} !~ /^([\w\.\s-]+)$/
             || $opts{h} =~ m{(^|/)\.\.(/|$)}
@@ -103,6 +108,11 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
         print("BackupPC_migrateV3toV4: Can't read $Host's config file: $error\n");
         exit(1);
     }
+    #
+    # Make sure BackupPC isn't running
+    #
+    CheckIfServerRunning();
+
     %Conf = $bpc->Conf();
     $Conf{XferLogLevel} = 8 if ( $opts{v} );
     BackupPC::XS::Lib::logLevelSet($Conf{XferLogLevel});
@@ -515,4 +525,14 @@ sub printProgress
     return if ( $pctText eq $FileCntPctTextLast );
     print("$Host #$BkupNum: $pctText%\n");
     $FileCntPctTextLast = $pctText;
+}
+
+sub CheckIfServerRunning
+{
+    return if ( $opts{m} );
+    my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
+    if ( $err eq "" ) {
+        print STDERR "$0: can't run since BackupPC is running\n";
+        exit(1);
+    }
 }

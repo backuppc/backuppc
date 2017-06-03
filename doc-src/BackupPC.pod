@@ -3423,7 +3423,10 @@ This file can be used to override settings just for a particular PC.
 
 The configuration file is a perl script that is executed by BackupPC, so
 you should be careful to preserve the file syntax (punctuation, quotes
-etc) when you edit it. It is recommended that you use CVS, RCS or some
+etc) when you edit it. Specifically, preserving quotes means you should never
+use undef for configuration parameters that expect string values. An empty
+string ('') should be used in this case.
+It is recommended that you use CVS, RCS or some
 other method of source control for changing config.pl.
 
 BackupPC reads or re-reads the main configuration file and

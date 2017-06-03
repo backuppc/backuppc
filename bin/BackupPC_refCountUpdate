@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.1.2, released 30 Apr 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -914,13 +914,14 @@ sub cleanPoolFiles
 
             my($digest, $cnt);
             my $idx = 0;
+            my $minMtime = time() - 7 * 24 * 3600;
             while ( 1 ) {
                 ($digest, $cnt, $idx) = $count->iterate($idx);
                 last if ( !defined($digest) );
                 next if ( $cnt > 0 );
                 my $poolFile = $bpc->MD52Path($digest, $compress);
                 my @s = stat($poolFile);
-                next if ( !@s || $s[7] == 0 );
+                next if ( !@s || $s[7] == 0 || $s[9] >= $minMtime );
                 my $mode  = $s[2];
                 my $nBlks = $s[12];
                 if ( $mode & S_IXOTH ) {

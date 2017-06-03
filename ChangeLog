@@ -52,6 +52,14 @@ Merger pull requests: #109
 * Added /usr/local/bin to search path in configure.pl from Alexander
   Moisseev (#109).
 
+* Chasing down an unsolved bug with help from Lano and Dieter Fauth
+  where newly added pool files in uncompressed backups get removed
+  by BackupPC_refCountUpdate during a long-running backup, or if
+  BackupPC_migrateV3toV4 is running.  Two workarounds added in this
+  release: BackupPC_migrateV3toV4 will now exit if BackupPC is running,
+  and BackupPC_refCountUpdate only removes pool files that are more
+  than a week old.
+
 #------------------------------------------------------------------------
 # Version 4.1.2, 30 Apr 2017
 #------------------------------------------------------------------------
@@ -62,7 +70,7 @@ Merged pull requests: #93, #94, #97, #102
 
 * Fixed bin/BackupPC_tarExtract and lib/BackupPC/Xfer/Ftp.pm in case where
   a directory tree is no longer present in a new backup.  Reported by
-  Jens Potthast and Matt Bedynek.
+  Jens Potthast and Matt Bedynek, who helped debug it.
 
 * Fixed SCGI when BackupPC is run in non-daemon mode (which is the systemd
   default starting in 4.1.1).

@@ -21,7 +21,7 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-Merger pull requests: #109
+Merger pull requests: #109, #114
 
 * Fixed editing of compound menu variables (eg: BackupFilesOnly).
 
@@ -51,6 +51,10 @@ Merger pull requests: #109
 
 * Added /usr/local/bin to search path in configure.pl from Alexander
   Moisseev (#109).
+
+* Avoid missing or extra quotes when replacing misused undef or
+  empty string values in configure.pl from Alexander Moisseev
+  (#114).
 
 * Chasing down an unsolved bug with help from Lano and Dieter Fauth
   where newly added pool files in uncompressed backups get removed

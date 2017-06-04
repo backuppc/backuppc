@@ -480,8 +480,6 @@ if ( $Conf{SCGIServerPort} < 0 ) {
             exit(1);
         }
     }
-} else {
-    $Conf{CgiDir} = "";
 }
 
 if ( $Conf{SCGIServerPort} > 0 || $Conf{CgiDir} ne "" ) {
@@ -877,14 +875,16 @@ sub DoInstall
     #
     # Create install directories
     #
-    foreach my $dir ( qw(bin share/doc/BackupPC
+    foreach my $dir ( qw(bin
+                         share share/doc share/doc/BackupPC
+                         lib lib/BackupPC
                          lib/BackupPC/CGI
                          lib/BackupPC/Config
                          lib/BackupPC/Lang
                          lib/BackupPC/Storage
                          lib/BackupPC/Xfer
                          lib/BackupPC/Zip
-                         lib/Net/FTP
+                         lib/Net lib/Net/FTP
                      ) ) {
         next if ( -d "$DestDir$Conf{InstallDir}/$dir" );
         mkpath("$DestDir$Conf{InstallDir}/$dir", 0, 0755);
@@ -995,7 +995,12 @@ sub DoInstall
     }
 
     print("Making systemd and init.d scripts\n");
-    mkpath("systemd/init.d", 0, 0755);
+    foreach my $dir ( qw(systemd systemd/init.d) ) {
+        mkpath($dir, 0, 0755);
+        if ( !-d $dir || !my_chown($Uid, $Gid, $dir) ) {
+            die("Failed to create or chown $dir\n");
+        }
+    }
     InstallFile("systemd/src/backuppc.service", "systemd/backuppc.service", 0644);
     foreach my $init ( qw(init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
                           init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc

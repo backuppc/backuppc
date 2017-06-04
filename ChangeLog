@@ -21,7 +21,7 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-Merger pull requests: #109, #114
+Merged pull requests: #109, #114
 
 * Fixed editing of compound menu variables (eg: BackupFilesOnly).
 
@@ -33,7 +33,8 @@ Merger pull requests: #109, #114
 
 * Better error checking when using $f->read() on pool files.
   Thanks to Cody Jackson for tracking down this issue, related to
-  reading corrupted compressed pool files.
+  reading corrupted compressed pool files.  There's also an
+  additional fix in backuppc-xs (version 0.54).
 
 * Cleans up any orphan temporary pool writing files.
 
@@ -56,13 +57,13 @@ Merger pull requests: #109, #114
   empty string values in configure.pl from Alexander Moisseev
   (#114).
 
-* Chasing down an unsolved bug with help from Lano and Dieter Fauth
+* Chasing down a still unsolved bug with help from Lano and Dieter Fauth
   where newly added pool files in uncompressed backups get removed
   by BackupPC_refCountUpdate during a long-running backup, or if
   BackupPC_migrateV3toV4 is running.  Two workarounds added in this
   release: BackupPC_migrateV3toV4 will now exit if BackupPC is running,
-  and BackupPC_refCountUpdate only removes pool files that are more
-  than a week old.
+  and BackupPC_refCountUpdate only removes pool files that are more than
+  a week old.
 
 #------------------------------------------------------------------------
 # Version 4.1.2, 30 Apr 2017

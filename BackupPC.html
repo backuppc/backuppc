@@ -141,14 +141,13 @@
 </ul>
 
 <hr />
-
 <h1 id="BackupPC-Introduction">BackupPC Introduction</h1>
 
-<p>This documentation describes BackupPC version 4.0.0, released on 3 Mar 2017.</p>
+<p>This documentation describes BackupPC version 4.1.3, released on 21 May 2017.</p>
 
 <h2 id="Overview">Overview</h2>
 
-<p>BackupPC is a high-performance, enterprise-grade system for backing up Unix, Linux, Windows, and macOS PCs, desktops and laptops to a server&#39;s disk. BackupPC is highly configurable and easy to install and maintain.</p>
+<p>BackupPC is a high-performance, enterprise-grade system for backing up Unix, Linux, WinXX, and MacOSX PCs, desktops and laptops to a server&#39;s disk. BackupPC is highly configurable and easy to install and maintain.</p>
 
 <p>Given the ever decreasing cost of disks and raid systems, it is now practical and cost effective to backup a large number of machines onto a server&#39;s local disk or network storage. For some sites this might be the complete backup solution. For other sites additional permanent archives could be created by periodically backing up the server to tape.</p>
 
@@ -156,7 +155,7 @@
 
 <ul>
 
-<li><p>A clever pooling scheme minimizes disk storage and disk I/O. Identical files across multiple backups of the same or different PC are stored only once (using hard links), resulting in substantial savings in disk storage and disk writes.</p>
+<li><p>A clever pooling scheme minimizes disk storage and disk I/O. Identical files across multiple backups of the same or different PC are stored only once, resulting in substantial savings in disk storage and disk writes.</p>
 
 </li>
 <li><p>Compression provides additional reductions in storage, depending on the type of data being backed up. The CPU impact of compression is low since only new files (those not already in the pool) need to be compressed.</p>
@@ -168,7 +167,7 @@
 <li><p>The http/cgi user interface has internationalization (i18n) support, currently providing English, French, German, Spanish, Italian, Dutch, Polish, Portuguese-Brazilian, Chinese, Polish, Czech, Japanese, Ukrainian, and Russian.</p>
 
 </li>
-<li><p>No client-side software is needed. On Windows the standard smb protocol is used to extract backup data. On linux, unix or macOS clients, rsync, tar (over ssh/rsh/nfs) or ftp is used to extract backup data. Alternatively, rsync can also be used on Windows (using cygwin), since rsync provides for efficient transfers and allows incremental backups to detect almost all changes.</p>
+<li><p>No client-side software is needed. On WinXX the standard smb protocol is used to extract backup data. On linux, unix or MacOSX clients, rsync, tar (over ssh/rsh/nfs) or ftp is used to extract backup data. Alternatively, rsync can also be used on WinXX (using cygwin), since rsync provides for efficient transfers and allows incremental backups to detect almost all changes.</p>
 
 </li>
 <li><p>Flexible restore options. Single files can be downloaded from any backup directly from the CGI interface. Zip or Tar archives for selected files or directories from any backup can also be downloaded from the CGI interface. Finally, direct restore to the client machine (using smb or tar) for selected files or directories is also supported from the CGI interface.</p>
@@ -183,7 +182,7 @@
 <li><p>Users are sent periodic email reminders if their PC has not recently been backed up. Email content, timing and policies are configurable.</p>
 
 </li>
-<li><p>BackupPC is Open Source software hosted by SourceForge.</p>
+<li><p>BackupPC is Open Source software hosted by GitHub.</p>
 
 </li>
 </ul>
@@ -196,7 +195,7 @@
 
 <ul>
 
-<li><p>No use of hardlinks (except temporarily to do atomic renames). Reference counting is handled at the application level in a batch manner.</p>
+<li><p>No use of hardlinks (except temporarily to do atomic renames). Reference counting is handled at the application level in a batch manner (hardlinks will still remain for any legacy V3 backups).</p>
 
 </li>
 <li><p>Backups are stored as &quot;reverse deltas&quot; - the most recent backup is always filled and older backups are reconstituted by merging all the deltas starting with the nearest future filled backup and working backwards.</p>
@@ -210,7 +209,7 @@
 <li><p>The concepts of incr/full backups and unfilled/filled storage are decoupled. The most recent backup is always filled. By default, for the remaining backups, full backups are filled and incremental backups are unfilled, but that is configurable.</p>
 
 </li>
-<li><p>Uses full-file MD5 digests, which are stored in the directory attrib files. Each backup directory only contains an empty attrib file whose name includes the MD5 digest, which is used to look up the file in the pool.</p>
+<li><p>Uses full-file MD5 digests, which are stored in the directory attrib files. Each backup directory only contains an empty attrib file whose name includes its own MD5 digest, which is used to look up the attrib file&#39;s contents in the pool. In turn, that file contains the metadata for every file in that directory, including each files&#39;s MD5 digest.</p>
 
 </li>
 <li><p>The Pool layout still supports chains to handle md5 collisions. While collisions can be constructed and are now well-known, they are highly unlikely in the wild. Pool files are never renamed or moved, unlike V3.</p>
@@ -228,7 +227,7 @@
 <li><p>The use of rsync --checksum allows BackupPC to guess a potential match anywhere in the pool, even on a first-time backup. In that case, the usual rsync block checksums are still exchanged to make sure the complete file is identical.</p>
 
 </li>
-<li><p>Uses a modified rsync called rsync_bpc (currently based on rsync-3.0.9) on the server side (in place of File::RsyncP), with C code layer to interface to the BackupPC storage. So the whole data path for rsync is now in compiled C code, which is much faster than perl.</p>
+<li><p>Uses a modified rsync called rsync_bpc (currently based on rsync-3.0.9) on the server side (in place of File::RsyncP), with a C code interface to the BackupPC storage. So the whole data path for rsync is now in compiled C code, which is much faster than perl.</p>
 
 </li>
 <li><p>Due to the use of rsync-3.X, acls and xattrs are supported, and many other useful options (but not all) are supported. Rsync protocol 30 supports the efficient incremental file list, which significantly improves memory usage and startup time. It also supports MD5 full-file checksums, which match BackupPC&#39;s new digest. That allows a full-file digest to be checked as easily as an mtime on the server side.</p>
@@ -371,7 +370,7 @@
 <li><p>When you install V4, it will notice that the V3 pool exists. Running configure.pl should set <a href="#_conf_poolv3enabled_">$Conf{PoolV3Enabled}</a> to 1 in that case, but you should be sure to check that.</p>
 
 </li>
-<li><p>When a V4 backups is first done, BackupPC_backupDuplicate is run to duplicate the most recent V3 backup to create a new V4 backup. A &quot;filled&quot; view of the most recent V3 backup is used to create a &quot;filled&quot; V4 backup tree.</p>
+<li><p>When a V4 backup is first done, BackupPC_backupDuplicate is run to duplicate the most recent V3 backup to create a new V4 backup. A &quot;filled&quot; view of the most recent V3 backup is used to create a &quot;filled&quot; V4 backup tree.</p>
 
 <p>This step could be time consuming, since every file needs to be read (as a V3 file) and written as a V4 file. However, the V4 pooling code knows about the V3 pool, so it will move the V3 pool file into the V4 pool. So this duplication process doesn&#39;t burn a lot of pool storage space, but every file still needs to be read (to compute the MD5 digest) and &quot;written&quot; (really just matching/linking).</p>
 
@@ -479,9 +478,9 @@
 
 <p>The BackupPC project page is at:</p>
 
-<pre><code>    http://backuppc.sourceforge.net</code></pre>
+<pre><code>    https://backuppc.github.io/backuppc</code></pre>
 
-<p>This page has links to the current documentation, github and general information.</p>
+<p>This page has links to the current documentation, github project source and general information.</p>
 
 </dd>
 <dt id="Github">Github</dt>
@@ -550,7 +549,7 @@
 
 <h2 id="Road-map">Road map</h2>
 
-<p>The new features planned for future releases of BackupPC are on the Wiki at <a href="http://backuppc.wiki.sourceforge.net">http://backuppc.wiki.sourceforge.net</a>.</p>
+<p>The new features planned for future releases of BackupPC are on the Wiki at <a href="https://github.com/backuppc/backuppc/wiki">https://github.com/backuppc/backuppc/wiki</a>.</p>
 
 <p>Comments and suggestions are welcome.</p>
 
@@ -591,7 +590,7 @@
 <p>For BackupPC to use Rsync you will also need to install rsync-bpc on the server.</p>
 
 </li>
-<li><p>If you are using smb to backup Windows machines you need smbclient and nmblookup from the samba package. You will also need nmblookup if you are backing up linux/unix DHCP machines. See <a href="http://www.samba.org">http://www.samba.org</a>.</p>
+<li><p>If you are using smb to backup WinXX machines you need smbclient and nmblookup from the samba package. You will also need nmblookup if you are backing up linux/unix DHCP machines. See <a href="http://www.samba.org">http://www.samba.org</a>.</p>
 
 <p>See <a href="http://www.samba.org">http://www.samba.org</a> for source and binaries. It&#39;s pretty easy to fetch and compile samba, and just grab smbclient and nmblookup, without doing the installation. Alternatively, <a href="http://www.samba.org">http://www.samba.org</a> has binary distributions for most platforms.</p>
 
@@ -647,7 +646,7 @@
 
 <pre><code>    https://github.com/backuppc/backuppc/releases</code></pre>
 
-<p>You can also download the distribution from <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>. Hit the &quot;Code&quot; button, then select the &quot;backuppc&quot; or &quot;backuppc-beta&quot; package and download the latest version.</p>
+<p>You can also download the distribution from <a href="https://sourceforge.net/projects/backuppc/files">https://sourceforge.net/projects/backuppc/files</a>.</p>
 
 <h2 id="Step-2:-Installing-the-distribution">Step 2: Installing the distribution</h2>
 
@@ -664,7 +663,7 @@
 
 <pre><code>    https://github.com/backuppc/backuppc-xs/releases</code></pre>
 
-<p>and also CPAN and <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>.</p>
+<p>and also CPAN.</p>
 
 </dd>
 <dt id="Archive::Zip">Archive::Zip</dt>
@@ -720,10 +719,10 @@
     make
     make install</code></pre>
 
-<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.0.0.tar.gz, run these commands as root:</p>
+<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.1.3.tar.gz, run these commands as root:</p>
 
-<pre><code>    tar zxf BackupPC-4.0.0.tar.gz
-    cd BackupPC-4.0.0
+<pre><code>    tar zxf BackupPC-4.1.3.tar.gz
+    cd BackupPC-4.1.3
     perl configure.pl</code></pre>
 
 <p>The configure.pl script also accepts command-line options if you wish to run it in a non-interactive manner. It has self-contained documentation for all the command-line options, which you can read with perldoc:</p>
@@ -752,6 +751,10 @@
 <pre><code>    su -s /bin/bash __BACKUPPCUSER__</code></pre>
 
 <p>Depending upon your configuration you might also need the -l option.</p>
+
+<p>If the -s option is not available on your operating system, you can specify the -m option to use your login shell as invoked shell:</p>
+
+<pre><code>    su -m __BACKUPPCUSER__</code></pre>
 
 </dd>
 <dt id="Data-Directory">Data Directory</dt>
@@ -880,26 +883,26 @@
 
 <h2 id="Step-5:-Client-Setup">Step 5: Client Setup</h2>
 
-<p>Four methods for getting backup data from a client are supported: smb, tar, rsync and ftp. Smb or rsync are the preferred methods for Windows clients and rsync or tar are the preferred methods for linux/unix/macOS clients.</p>
+<p>Four methods for getting backup data from a client are supported: smb, tar, rsync and ftp. Smb or rsync are the preferred methods for WinXX clients and rsync or tar are the preferred methods for linux/unix/MacOSX clients.</p>
 
-<p>The transfer method is set using the <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> configuration setting. If you have a mixed environment (ie: you will use smb for some clients and tar for others), you will need to pick the most common choice for <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> for the main config.pl file, and then override it in the per-PC config file for those hosts that will use the other method. (Or you could run two completely separate instances of BackupPC, with different data directories, one for Windows and the other for linux/unix, but then common files between the different machine types will duplicated.)</p>
+<p>The transfer method is set using the <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> configuration setting. If you have a mixed environment (ie: you will use smb for some clients and tar for others), you will need to pick the most common choice for <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> for the main config.pl file, and then override it in the per-PC config file for those hosts that will use the other method. (Or you could run two completely separate instances of BackupPC, with different data directories, one for WinXX and the other for linux/unix, but then common files between the different machine types will duplicated.)</p>
 
 <p>Here are some brief client setup notes:</p>
 
 <dl>
 
-<dt id="Windows">Windows</dt>
+<dt id="WinXX">WinXX</dt>
 <dd>
 
-<p>One setup for Windows clients is to set <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;smb&quot;. Actually, rsyncd is the better method for Windows if you are prepared to run rsync/cygwin on your Windows client.</p>
+<p>One setup for WinXX clients is to set <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;smb&quot;. Actually, rsyncd is the better method for WinXX if you are prepared to run rsync/cygwin on your WinXX client.</p>
 
-<p>If you want to use rsyncd for Windows clients you can find a pre-packaged zip file on <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>. The package is called cygwin-rsync. It contains rsync.exe, template setup files and the minimal set of cygwin libraries for everything to run. The README file contains instructions for running rsync as a service, so it starts automatically everytime you boot your machine. If you use rsync to backup Windows machines, be sure to set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> correctly (eg: &#39;cp1252&#39;) so that the Windows filename encoding is correctly converted to utf8.</p>
+<p>If you want to use rsyncd for WinXX clients you can find a pre-packaged zip file on <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>. The package is called cygwin-rsync. It contains rsync.exe, template setup files and the minimal set of cygwin libraries for everything to run. The README file contains instructions for running rsync as a service, so it starts automatically everytime you boot your machine. If you use rsync to backup WinXX machines, be sure to set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> correctly (eg: &#39;cp1252&#39;) so that the WinXX filename encoding is correctly converted to utf8.</p>
 
 <p>Otherwise, to use SMB, you can either create shares for the data you want to backup or your can use the existing C$ share. To create a new share, open &quot;My Computer&quot;, right click on the drive (eg: C), and select &quot;Sharing...&quot; (or select &quot;Properties&quot; and select the &quot;Sharing&quot; tab). In this dialog box you can enable sharing, select the share name and permissions.</p>
 
 <p>All Windows NT based OS (NT, 2000, XP Pro), are configured by default to share the entire C drive as C$. This is a special share used for various administration functions, one of which is to grant access to backup operators. All you need to do is create a new domain user, specifically for backup. Then add the new backup user to the built in &quot;Backup Operators&quot; group. You now have backup capability for any directory on any computer in the domain in one easy step. This avoids using administrator accounts and only grants permission to do exactly what you want for the given user, i.e.: backup. Also, for additional security, you may wish to deny the ability for this user to logon to computers in the default domain policy.</p>
 
-<p>If this machine uses DHCP you will also need to make sure the NetBios name is set. Go to Control Panel|System|Network Identification (on Windows 2000) or Control Panel|System|Computer Name (on Windows XP). Also, you should go to Control Panel|Network Connections|Local Area Connection|Properties|Internet Protocol (TCP/IP)|Properties|Advanced|WINS and verify that NetBios is not disabled.</p>
+<p>If this machine uses DHCP you will also need to make sure the NetBios name is set. Go to Control Panel|System|Network Identification (on Win2K) or Control Panel|System|Computer Name (on WinXP). Also, you should go to Control Panel|Network Connections|Local Area Connection|Properties|Internet Protocol (TCP/IP)|Properties|Advanced|WINS and verify that NetBios is not disabled.</p>
 
 <p>The relevant configuration settings are <a href="#_conf_smbsharename_">$Conf{SmbShareName}</a>, <a href="#_conf_smbshareusername_">$Conf{SmbShareUserName}</a>, <a href="#_conf_smbsharepasswd_">$Conf{SmbSharePasswd}</a>, <a href="#_conf_smbclientpath_">$Conf{SmbClientPath}</a>, <a href="#_conf_smbclientfullcmd_">$Conf{SmbClientFullCmd}</a>, <a href="#_conf_smbclientincrcmd_">$Conf{SmbClientIncrCmd}</a> and <a href="#_conf_smbclientrestorecmd_">$Conf{SmbClientRestoreCmd}</a>.</p>
 
@@ -923,7 +926,7 @@
 
 <p>Placement and protection of the smb share password is a significant security issue, so please double-check the file and directory permissions. In a future version there might be support for encryption of this password, but a private key will still have to be stored in a protected place. Suggestions are welcome.</p>
 
-<p>As an alternative to setting <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;smb&quot; (using smbclient) for Windows clients, you can use an smb network filesystem (eg: ksmbfs or similar) on your linux/unix server to mount the share, and then set <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;tar&quot; (use tar on the network mounted file system).</p>
+<p>As an alternative to setting <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;smb&quot; (using smbclient) for WinXX clients, you can use an smb network filesystem (eg: ksmbfs or similar) on your linux/unix server to mount the share, and then set <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;tar&quot; (use tar on the network mounted file system).</p>
 
 <p>Also, to make sure that filenames with special characters are correctly transferred by smbclient you should make sure that the smb.conf file has (for samba 3.x):</p>
 
@@ -997,10 +1000,10 @@
 <p>There are two common versions of ssh: v1 and v2. Here are some instructions for one way to setup ssh. (Check which version of SSH you have by typing &quot;ssh&quot; or &quot;man ssh&quot;.)</p>
 
 </dd>
-<dt id="macOS">macOS</dt>
+<dt id="MacOSX">MacOSX</dt>
 <dd>
 
-<p>In general this should be similar to Linux/Unix machines. In versions 10.4 and later, the native macOS tar works, and also supports resource forks. xtar is another option, and rsync works too (although the macOS-supplied rsync has an extension for extended attributes that is not compatible with standard rsync).</p>
+<p>In general this should be similar to Linux/Unix machines. In versions 10.4 and later, the native MacOSX tar works, and also supports resource forks. xtar is another option, and rsync works too (although the MacOSX-supplied rsync has an extension for extended attributes that is not compatible with standard rsync).</p>
 
 </dd>
 <dt id="SSH-Setup">SSH Setup</dt>
@@ -1010,7 +1013,7 @@
 
 <p>Note that if you run rsyncd (rsync daemon), ssh is not used. In this case, rsyncd provides its own authentication, but there is no encryption of network data. If you want encryption of network data you can use ssh to create a tunnel, or use a program like stunnel.</p>
 
-<p>Setup instructions for ssh can be found on the Wiki at <a href="https://github.com/backuppc/backuppc/wiki">https://github.com/backuppc/backuppc/wiki</a></p>
+<p>Setup instructions for ssh can be found on the Wiki at <a href="https://github.com/backuppc/backuppc/wiki">https://github.com/backuppc/backuppc/wiki</a>.</p>
 
 </dd>
 <dt id="Clients-that-use-DHCP">Clients that use DHCP</dt>
@@ -1018,7 +1021,7 @@
 
 <p>If a client machine uses DHCP BackupPC needs some way to find the IP address given the hostname. One alternative is to set dhcp to 1 in the hosts file, and BackupPC will search a pool of IP addresses looking for hosts. More efficiently, it is better to set dhcp = 0 and provide a mechanism for BackupPC to find the IP address given the hostname.</p>
 
-<p>For Windows machines BackupPC uses the NetBios name server to determine the IP address given the hostname. For unix machines you can run nmbd (the NetBios name server) from the Samba distribution so that the machine responds to a NetBios name request. See the manual page and Samba documentation for more information.</p>
+<p>For WinXX machines BackupPC uses the NetBios name server to determine the IP address given the hostname. For unix machines you can run nmbd (the NetBios name server) from the Samba distribution so that the machine responds to a NetBios name request. See the manual page and Samba documentation for more information.</p>
 
 <p>Alternatively, you can set <a href="#_conf_nmblookupfindhostcmd_">$Conf{NmbLookupFindHostCmd}</a> to any command that returns the IP address given the hostname.</p>
 
@@ -1056,6 +1059,10 @@
 <pre><code>    su -s /bin/bash __BACKUPPCUSER__</code></pre>
 
 <p>Depending upon your configuration you might also need the -l option.</p>
+
+<p>If the -s option is not available on your operating system, you can specify the -m option to use your login shell as invoked shell:</p>
+
+<pre><code>    su -m __BACKUPPCUSER__</code></pre>
 
 <p>You can request status information and start and stop backups using this interface. This socket interface is mainly provided for the CGI interface (and some of the BackupPC subprograms use it too). But right now we just want to make sure BackupPC is happy. Each of these commands should produce some status output:</p>
 
@@ -1185,7 +1192,7 @@
         Options +ExecCGI
         Order deny,allow
         Deny from all
-        Allow from 192.168.0
+        Allow from 192.168.0  
         AuthName &quot;Backup Admin&quot;
         AuthType Basic
         AuthUserFile /path/to/user_file
@@ -1352,7 +1359,7 @@
 
 <h2 id="Fixing-installation-problems">Fixing installation problems</h2>
 
-<p>If you find a solution to your problem that could help other users please add it to the Wiki at <a href="https://github.com/backuppc/backuppc/wiki">https://github.com/backuppc/backuppc/wiki</a></p>
+<p>If you find a solution to your problem that could help other users please add it to the Wiki at <a href="https://github.com/backuppc/backuppc/wiki">https://github.com/backuppc/backuppc/wiki</a>.</p>
 
 <hr />
 <h1 id="Restore-functions">Restore functions</h1>
@@ -1455,7 +1462,7 @@
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the tar archive is created
-
+  
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -1486,7 +1493,7 @@
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the zip archive is created
-
+  
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -1504,7 +1511,7 @@
 
 <p>In V4 that is not possible, since only a single attrib file is stored per directory in the PC backup tree, so the directory contents aren&#39;t visible without looking in the attrib file.</p>
 
-<p>A new utility BackupPC_ls (like &quot;ls&quot;) can be used to view PC backup trees. It shows file digests, which can be pasted to BackupPC_zipCreate if you want to view the file contents. The arguments are similar to BackupPC_zcat. The usage is:</p>
+<p>A new utility BackupPC_ls (like &quot;ls&quot;) can be used to view PC backup trees. It shows file digests, which can be pasted to BackupPC_zcat if you want to view the file contents. The arguments are similar to BackupPC_zcat. The usage is:</p>
 
 <pre><code>    BackupPC_ls [-iR] [-h host] [-n bkupNum] [-s shareName] dirs/files...</code></pre>
 
@@ -1544,7 +1551,7 @@
 
 <p><a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;archive&#39;;</p>
 
-<p>To further customise the archive&#39;s parameters you can adding the changed parameters in the host&#39;s config.pl file. The parameters are explained in the config.pl file. Parameters may be fixed or the user can be allowed to change them (eg: output device).</p>
+<p>To further customise the archive&#39;s parameters you can add the changed parameters in the host&#39;s config.pl file. The parameters are explained in the config.pl file. Parameters may be fixed or the user can be allowed to change them (eg: output device).</p>
 
 <p>The per-host archive command is <a href="#_conf_archiveclientcmd_">$Conf{ArchiveClientCmd}</a>. By default this invokes</p>
 
@@ -1634,6 +1641,50 @@
        -s              recompute pool stats</code></pre>
 
 </dd>
+<dt id="BackupPC_migrateV3toV4">BackupPC_migrateV3toV4</dt>
+<dd>
+
+<p>If you upgraded an existing 3.x installation, BackupPC 4.x is backward compatible with 3.x backups: it can browse, view and restore files. However, the existing 3.x backups will still use hardlinks for storage, and until those 3.x backups eventually expire, hardlinks will still be used for 3.x backups.</p>
+
+<p>BackupPC_migrateV3toV4 is an optional utility that can migrate existing 3.x backups to 4.x stoage format, eliminating hardlinks. This allows you to eliminate the old V3 pool and you can then set <a href="#_conf_poolv3enabled_">$Conf{PoolV3Enabled}</a> to 0.</p>
+
+<pre><code>    BackupPC_migrateV3toV4 -a [-m] [-p] [-v]
+    BackupPC_migrateV3toV4 -h host [-n V3backupNum] [-m] [-p] [-v]
+    Options:
+       -a              migrate all hosts and all backups
+       -h host         migrate just a specific host
+       -n V3backupNum  migrate specific host backup; does all V3 backups
+                       for that host if not specified
+       -m              don&#39;t migrate anything; just print what would be done
+       -p              don&#39;t print progress information
+       -v              verbose</code></pre>
+
+<p>If you want to test BackupPC_migrateV3toV4, a cautious approach is to make backup copies of the V3 backups, allowing you to restore them if there is any issue. For example, if exampleHost has three 3.x backups numbered 5, 6, 7, you can use cp -prl (preserving hardlinks) to make copies:</p>
+
+<pre><code>    cd /data/BackupPC/pc/exampleHost
+    mv 5 5.orig ; cp -prl 5.orig 5
+    mv 6 6.orig ; cp -prl 6.orig 6
+    mv 7 7.orig ; cp -prl 7.orig 7
+    cp backups backups.save
+
+    BackupPC_migrateV3toV4 -h exampleHost -n 5
+    BackupPC_migrateV3toV4 -h exampleHost -n 6
+    BackupPC_migrateV3toV4 -h exampleHost -n 7</code></pre>
+
+<p>If you want to put things back the way they were:</p>
+
+<pre><code>    rm -rf 5 ; mv 5.orig 5
+    rm -rf 6 ; mv 6.orig 6
+    rm -rf 7 ; mv 7.orig 7
+    # copy the [567] lines from backups.save into backups;
+    # only do &quot;cp backups.save backups&quot; if you are sure no
+    # new backups have been done</code></pre>
+
+<p>Two important things to note with BackupPC_migrateV3toV4. First, V4 storage does use more filesystem inodes than V3 (that&#39;s the small cost of getting rid of hardlinks). In particular, each directory in a backup tree uses two inodes in V4 (one for the directory, and one for the (empty) attrib file), and only one inode in V3 (one for the directory, and the attrib and all other files are hardlinked to the pool). So before you run BackupPC_migrateV3toV4, make sure you have enough inodes in __TOPDIR__; use df -i to make sure you are under 45% inode usage.</p>
+
+<p>Secondly, if you run BackupPC_migrateV3toV4 on all your backups, the old V3 pool should be empty, except for old-style attrib files, which should all have only one link since no backups should reference them any longer. Before you turn off the V3 pool by setting <a href="#_conf_poolv3enabled_">$Conf{PoolV3Enabled}</a> to 0, make sure BackupPC_nightly has run enough times (specifically, <a href="#_conf_poolsizenightlyupdateperiod_">$Conf{PoolSizeNightlyUpdatePeriod}</a> times) so that the V3 pool can be emptied. You could do this manually, but only if you are very careful to check that the remaining files only have one link.</p>
+
+</dd>
 <dt id="BackupPC_poolCntPrint">BackupPC_poolCntPrint</dt>
 <dd>
 
@@ -1665,7 +1716,7 @@
           -v     - verbose
       Notes: in case there are legacy (ie: &lt;=4.0.0alpha3) unapplied poolCntDelta
       files in TopDir/pc/HOST/refCnt then the -f flag is turned on.
-
+  
     BackupPC_refCountUpdate -m [-f] [-p] [-c] [-r N-M] [-s] [-v] [-P phase]
           -m       Updates main count db, based on each HOST
           -f     - do an fsck on all the hosts, ignoring poolCntDelta files,
@@ -2823,9 +2874,9 @@
     efficient to view or restore older backups.
 
   - more importantly, in V4+, deleting backups is done based on Fill/Unfilled,
-    not whether the original backup was full/incremental.  If there aren&#39;t
-    any filled backups (other than the most recent), then the FillKeepPeriod
-    settings won&#39;t have any effect.</code></pre>
+    not whether the original backup was full/incremental.  If there aren&#39;t any
+    filled backups (other than the most recent), then the <a href="#_conf_fullkeepcnt_">$Conf{FullKeepCnt}</a>
+    and related settings won&#39;t have any effect.</code></pre>
 
 </dd>
 <strong><dt id="_conf_fullkeepcnt_">$Conf{FullKeepCnt}</a> = 1;</dt></strong>
@@ -2833,7 +2884,9 @@
 
 <p>Number of filled backups to keep. Must be &gt;= 1.</p>
 
-<p>Note: Starting in V4+, deleting backups is done based on Fill/Unfilled, not whether the original backup was full/incremental. reasons these parameters continue to be called FullKeepCnt, rather than FilledKeepCnt. If <a href="#_conf_fillcycle_">$Conf{FillCycle}</a> is 0, then full backups continue to be filled, so the terms are interchangeable. For V3 backups, the expiry settings have their original meanings.</p>
+<p>The most recent backup (which is always filled) doesn&#39;t count when checking <a href="#_conf_fullkeepcnt_">$Conf{FullKeepCnt}</a>. So if you specify <a href="#_conf_fullkeepcnt_">$Conf{FullKeepCnt}</a> = 1 then that means keep one full backup in addition to the most recent backup (which might be a filled incr or full).</p>
+
+<p>Note: Starting in V4+, deleting backups is done based on Fill/Unfilled, not whether the original backup was full/incremental. For backward compatibility, these parameters continue to be called FullKeepCnt, rather than FilledKeepCnt. If <a href="#_conf_fillcycle_">$Conf{FillCycle}</a> is 0, then full backups continue to be filled, so the terms are interchangeable. For V3 backups, the expiry settings have their original meanings.</p>
 
 <p>In the steady state, each time a full backup completes successfully the oldest one is removed. If this number is decreased, the extra old backups will be removed.</p>
 
@@ -2893,7 +2946,7 @@
 <dd>
 
 </dd>
-<strong><dt id="_conf_fullagemax_">$Conf{FullAgeMax}</a> = 90;</dt></strong>
+<strong><dt id="_conf_fullagemax_">$Conf{FullAgeMax}</a> = 180;</dt></strong>
 <dd>
 
 <p>Very old full backups are removed after <a href="#_conf_fullagemax_">$Conf{FullAgeMax}</a> days. However, we keep at least <a href="#_conf_fullkeepcntmin_">$Conf{FullKeepCntMin}</a> full backups no matter how old they are.</p>
@@ -3077,19 +3130,19 @@
 <strong><dt id="_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;smb&#39;;</dt></strong>
 <dd>
 
-<p>What transport method to use to backup each host. If you have a mixed set of Windows and linux/unix hosts you will need to override this in the per-PC config.pl.</p>
+<p>What transport method to use to backup each host. If you have a mixed set of WinXX and linux/unix hosts you will need to override this in the per-PC config.pl.</p>
 
 <p>The valid values are:</p>
 
 <pre><code>  - &#39;smb&#39;:     backup and restore via smbclient and the SMB protocol.
-               Easiest choice for Windows.
+               Easiest choice for WinXX.
 
   - &#39;rsync&#39;:   backup and restore via rsync (via rsh or ssh).
-               Best choice for linux/unix.  Good choice also for Windows.
+               Best choice for linux/unix.  Good choice also for WinXX.
 
   - &#39;rsyncd&#39;:  backup and restore via rsync daemon on the client.
                Best choice for linux/unix if you have rsyncd running on
-               the client.  Good choice also for Windows.
+               the client.  Good choice also for WinXX.
 
   - &#39;tar&#39;:    backup and restore via tar, tar over ssh, rsh or nfs.
               Good choice for linux/unix.
@@ -3112,9 +3165,9 @@
 
 <p>If the filenames displayed in the browser (eg: accents or special characters) don&#39;t look right then it is likely you haven&#39;t set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> correctly.</p>
 
-<p>If you are using smbclient on a Windows machine, smbclient will convert to the &quot;unix charset&quot; setting in smb.conf. The default is utf8, in which case leave <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> empty since smbclient does the right conversion.</p>
+<p>If you are using smbclient on a WinXX machine, smbclient will convert to the &quot;unix charset&quot; setting in smb.conf. The default is utf8, in which case leave <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> empty since smbclient does the right conversion.</p>
 
-<p>If you are using rsync on a Windows machine then it does no conversion. A typical Windows encoding for latin1/western europe is &#39;cp1252&#39;, so in this case set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> to &#39;cp1252&#39;.</p>
+<p>If you are using rsync on a WinXX machine then it does no conversion. A typical WinXX encoding for latin1/western europe is &#39;cp1252&#39;, so in this case set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> to &#39;cp1252&#39;.</p>
 
 <p>On a linux or unix client, run &quot;locale charmap&quot; to see the client&#39;s charset. Set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> to this value. A typical value for english/US is &#39;ISO-8859-1&#39;.</p>
 
@@ -3124,7 +3177,7 @@
 <strong><dt id="_conf_clientcharsetlegacy_">$Conf{ClientCharsetLegacy}</a> = &#39;iso-8859-1&#39;;</dt></strong>
 <dd>
 
-<p>Prior to 3.x no charset conversion was done by BackupPC. Backups were stored in whatever charset the XferMethod provided - typically utf8 for smbclient and the client&#39;s locale settings for rsync and tar (eg: cp1252 for rsync on Windows and perhaps iso-8859-1 with rsync on linux). This setting tells BackupPC the charset that was used to store filenames in old backups taken with BackupPC 2.x, so that non-ascii filenames in old backups can be viewed and restored.</p>
+<p>Prior to 3.x no charset conversion was done by BackupPC. Backups were stored in whatever charset the XferMethod provided - typically utf8 for smbclient and the client&#39;s locale settings for rsync and tar (eg: cp1252 for rsync on WinXX and perhaps iso-8859-1 with rsync on linux). This setting tells BackupPC the charset that was used to store filenames in old backups taken with BackupPC 2.x, so that non-ascii filenames in old backups can be viewed and restored.</p>
 
 </dd>
 </dl>
@@ -3729,9 +3782,9 @@
 
 <p>Timeout in seconds when listening for the transport program&#39;s (smbclient, tar etc) stdout. If no output is received during this time, then it is assumed that something has wedged during a backup, and the backup is terminated.</p>
 
-<p>Note that stdout buffering combined with huge files being backed up could cause longish delays in the output from smbclient that BackupPC_dump sees, so in rare cases you might want to increase this value.</p>
+<p>Note that stdout buffering combined with huge files being backed up could cause longish delays in the output from smbclient that BackupPC_dump sees, so in some cases you might want to increase this value.</p>
 
-<p>Despite the name, this parameter sets the timeout for all transport methods (tar, smb etc).</p>
+<p>For rsync, this is passed onto rsync_bpc using the --timeout argument, which is based on any I/O, so you could likely reduce this value.</p>
 
 </dd>
 <strong><dt id="_conf_maxoldperpclogfiles_">$Conf{MaxOldPerPCLogFiles}</a> = 12;</dt></strong>
@@ -3854,12 +3907,18 @@
 <strong><dt id="_conf_clientnamealias_">$Conf{ClientNameAlias}</a> = undef;</dt></strong>
 <dd>
 
-<p>Override the client&#39;s hostname. This allows multiple clients to all refer to the same physical host. This should only be set in the per-PC config file and is only used by BackupPC at the last moment prior to generating the command used to backup that machine (ie: the value of <a href="#_conf_clientnamealias_">$Conf{ClientNameAlias}</a> is invisible everywhere else in BackupPC). The setting can be a hostname or IP address, eg:</p>
+<p>Override the client&#39;s hostname. This allows multiple clients to all refer to the same physical host. This should only be set in the per-PC config file and is only used by BackupPC at the last moment prior to checking the host is alive, and generating the command used to backup # that machine (ie: the value of <a href="#_conf_clientnamealias_">$Conf{ClientNameAlias}</a> is invisible everywhere else in BackupPC). The setting can be a hostname or IP address, eg:</p>
 
 <pre><code>        <a href="#_conf_clientnamealias_">$Conf{ClientNameAlias}</a> = &#39;realHostName&#39;;
         <a href="#_conf_clientnamealias_">$Conf{ClientNameAlias}</a> = &#39;192.1.1.15&#39;;</code></pre>
 
-<p>will cause the relevant smb/tar/rsync backup/restore commands to be directed to realHostName, not the client name.</p>
+<p>which will cause the relevant smb/tar/rsync backup/restore commands to be directed to realHostName or the IP address, not the client name.</p>
+
+<p>It can also be an array, to allow checking (in order) of several host names or IP addresses that refer to the same host. For example, if your client has a wired and wireless connection you could set:</p>
+
+<pre><code>        <a href="#_conf_clientnamealias_">$Conf{ClientNameAlias}</a> = [&#39;hostname-lan&#39;, &#39;hostname-wifi&#39;];</code></pre>
+
+<p>If hostname-lan is alive, it will be used for the backup/restore. If not, the next name (hostname-wifi) is tested.</p>
 
 <p>Note: this setting doesn&#39;t work for hosts with DHCP set to 1.</p>
 
@@ -4038,7 +4097,7 @@
 <p>Important security warning!! The SCGIServerPort must not be accessible by anyone untrusted. That means you can&#39;t allow untrusted users access to the BackupPC server, and you should block the SCGIServerPort TCP port on the BackupPC server. If you don&#39;t understand what that means, or can&#39;t confirm you have configured SCGI securely, then don&#39;t enable it!!</p>
 
 </dd>
-<strong><dt id="_conf_cgiurl_">$Conf{CgiURL}</a> = undef;</dt></strong>
+<strong><dt id="_conf_cgiurl_">$Conf{CgiURL}</a> = &#39;&#39;;</dt></strong>
 <dd>
 
 <p>Full URL of the BackupPC_Admin CGI script, or the configured path for SCGI. Used for links in email messages.</p>
@@ -4152,7 +4211,7 @@
 
 <p>CSS stylesheet &quot;skin&quot; for the CGI interface. It is stored in the <a href="#_conf_cgiimagedir_">$Conf{CgiImageDir}</a> directory and accessed via the <a href="#_conf_cgiimagedirurl_">$Conf{CgiImageDirURL}</a> URL.</p>
 
-<p>For BackupPC v3.x several color, layout and font changes were made. The previous v2.x version is available as BackupPC_stnd_orig.css, so if you prefer the old skin, change this to BackupPC_stnd_orig.css.</p>
+<p>For BackupPC v3 and v2 the prior css versions are available as BackupPC_retro_v3.css and BackupPC_retro_v2.css</p>
 
 </dd>
 <strong><dt id="_conf_cgiuserconfigeditenable_">$Conf{CgiUserConfigEditEnable}</a> = 1;</dt></strong>
@@ -4181,7 +4240,7 @@
 
 <p>Craig Barratt &lt;cbarratt@users.sourceforge.net&gt;</p>
 
-<p>See <a href="https://backuppc.github.io/backuppc/">https://backuppc.github.io/backuppc/</a>.</p>
+<p>See <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>.</p>
 
 <hr />
 <h1 id="Copyright">Copyright</h1>
@@ -4203,7 +4262,7 @@
 
 <p>Javier Gonzalez provided the Spanish translation, es.pm for v2.0.0.</p>
 
-<p>Manfred Herrmann provided the German translation, de.pm for v2.0.0. Manfred continues to support de.pm updates for each new version, together with some help from Ralph Pa&szlig;gang.</p>
+<p>Manfred Herrmann provided the German translation, de.pm for v2.0.0. Manfred continues to support de.pm updates for each new version, together with some help from Ralph Pa&Atilde;&#159;gang.</p>
 
 <p>Lorenzo Cappelletti provided the Italian translation, it.pm for v2.1.0. Giuseppe Iuculano and Vittorio Macchi updated it for 3.0.0.</p>
 

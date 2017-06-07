@@ -2099,7 +2099,7 @@ $Conf{CgiNavBarLinks} = [
     },
     {
         link  => "https://backuppc.github.io/backuppc",
-        name  => "Github",           # displays literal "Github"
+        name  => "Homepage",         # displays literal "Homepage"
     },
 ];
 

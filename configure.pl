@@ -741,7 +741,7 @@ if ( $Upgrade && !defined($Conf{PoolV3Enabled}) ) {
 #
 $newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{http://backuppc.wiki.sourceforge.net}{https://github.com/backuppc/backuppc/wiki}g;
 $newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{http://backuppc.sourceforge.net}{https://backuppc.github.io/backuppc}g;
-$newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{SourceForge}{Github}g;
+$newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{SourceForge}{Homepage}g;
 
 #
 # Apply any command-line configuration parameter settings

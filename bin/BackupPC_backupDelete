@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.1.1, released 29 Mar 2017.
+# Version 4.1.3, released 3 Jun 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -201,7 +201,7 @@ if ( $Backups[$idx]{version} < 4 ) {
                 $AttrDel->flush(1);
                 $bpc->flushXSLibMesgs();
             }
-            if ( $DeltaDel ) {
+            if ( $DeltaDel && $LogLevel >= 5 ) {
                 print("Deltas for $Backups[$idx]{num}:\n");
                 $DeltaDel->print();
                 $DeltaDel->flush();
@@ -264,16 +264,18 @@ if ( $Backups[$idx]{version} < 4 ) {
 
             $AttrDel->flush(1);
             $bpc->flushXSLibMesgs();
-            if ( $DeltaDel ) {
+            if ( $DeltaDel && $LogLevel >= 5 ) {
                 print("Deltas for $Backups[$idx]{num}:\n");
                 $DeltaDel->print();
                 $DeltaDel->flush();
             }
             $AttrMerge->flush(1);
             $bpc->flushXSLibMesgs();
-            print("Deltas for $Backups[$idxMerge]{num}:\n");
-            $DeltaMerge->print();
-            $DeltaMerge->flush();
+            if ( $LogLevel >= 5 ) {
+                print("Deltas for $Backups[$idxMerge]{num}:\n");
+                $DeltaMerge->print();
+                $DeltaMerge->flush();
+            }
         }
     }
     #

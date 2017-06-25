@@ -32,7 +32,7 @@ the command.  If that fails, it will return the error.
 
 It makes no effort to determine what sorts of errors are likely to
 succeed when they're retried.  Partly that's because it's hard to
-know; if you're retreiving a file from an FTP site with several
+know; if you're retrieving a file from an FTP site with several
 mirrors and the file is not found, for example, maybe on the next try
 you'll connect to a different server and find it.  But mostly it's
 from laziness; if you have some good ideas about how to determine when

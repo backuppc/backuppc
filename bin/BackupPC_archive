@@ -261,7 +261,7 @@ sub ArchiveCleanup
 
     if ( !$stat{xferOK} ) {
 	#
-	# Kill off the tranfer program, first nicely then forcefully.
+	# Kill off the transfer program, first nicely then forcefully.
 	# We use negative PIDs to make sure all processes in each
 	# group get the signal.
 	#

@@ -554,7 +554,7 @@ sub TarWriteFile
         }
         $f->close;
         #
-        # Check @ARGV and the list of hardlinked files we have explicity
+        # Check @ARGV and the list of hardlinked files we have explicitly
         # dumped to see if we have dumped this file or not
         #
         my $done = 0;

@@ -276,7 +276,7 @@ sub ZipWriteFile
         # Symlinks can't be Zipped. 8(
 	# We could zip the pointed-to dir/file (just like hardlink), but we
 	# have to avoid the infinite-loop case of a symlink pointed to a
-	# directory above us.  Ignore for now.  Could be a comand-line
+	# directory above us.  Ignore for now.  Could be a command-line
 	# option later.
 	#
 	$SpecialCnt++;

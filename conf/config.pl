@@ -360,7 +360,7 @@ $Conf{CgiDir}      = '';
 # are really running as user $Conf{BackupPCUser}.  If this flag is set
 # and the effective user id (euid) differs from $Conf{BackupPCUser}
 # then both scripts exit with an error.  This catches cases where
-# BackupPC might be accidently started as root or the wrong user,
+# BackupPC might be accidentally started as root or the wrong user,
 # or if the CGI script is not installed correctly.
 #
 $Conf{BackupPCUserVerify} = 1;
@@ -2104,7 +2104,7 @@ $Conf{CgiNavBarLinks} = [
 ];
 
 #
-# Hilight colors based on status that are used in the PC summary page.
+# Highlight colors based on status that are used in the PC summary page.
 #
 $Conf{CgiStatusHilightColor} = {
     Reason_backup_failed           => '#ffcccc',

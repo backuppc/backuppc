@@ -5,7 +5,7 @@
 # DESCRIPTION
 #
 #   This library defines a Factory for invoking transfer protocols in
-#   a polymorphic manner.  This libary allows for easier expansion of
+#   a polymorphic manner.  This library allows for easier expansion of
 #   supported protocols.
 #
 # AUTHOR

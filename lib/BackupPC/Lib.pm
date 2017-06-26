@@ -904,7 +904,7 @@ sub NetBiosInfoGet
     my($s, $nmbCmd);
 
     #
-    # Skip NetBios check if NmbLookupCmd is emtpy
+    # Skip NetBios check if NmbLookupCmd is empty
     #
     if ( $bpc->{Conf}{NmbLookupCmd} eq "" ) {
 	print(STDERR "NetBiosInfoGet: return $host because \$Conf{NmbLookupCmd}"
@@ -952,7 +952,7 @@ sub NetBiosHostIPFind
     my($s, $nmbCmd, $subnet, $ipAddr, $firstIpAddr);
 
     #
-    # Skip NetBios lookup if NmbLookupFindHostCmd is emtpy
+    # Skip NetBios lookup if NmbLookupFindHostCmd is empty
     #
     if ( $bpc->{Conf}{NmbLookupFindHostCmd} eq "" ) {
 	print(STDERR "NetBiosHostIPFind: return $host because"
@@ -1029,7 +1029,7 @@ sub fileNameUnmangle
 
 #
 # Escape shell meta-characters with backslashes.
-# This should be applied to each argument seperately, not an
+# This should be applied to each argument separately, not an
 # entire shell command.
 #
 sub shellEscape

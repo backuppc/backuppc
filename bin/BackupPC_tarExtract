@@ -880,7 +880,7 @@ sub exitMesg
     #
     if ( $AttrNew ) {
         #
-        # Make sure the top-level share has an attibute entry.
+        # Make sure the top-level share has an attribute entry.
         # Normally that is added when any directory appears in the archive.
         # But if the archive only has files, we'll never add entries for
         # the parent directories.

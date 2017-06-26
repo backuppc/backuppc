@@ -104,7 +104,7 @@ if ( $Conf{BackupPCUserVerify}
 # Ensure we don't have old versions of key libraries and executables
 ###########################################################################
 if ( $BackupPC::XS::VERSION < 0.53 ) {
-    print(STDERR "BackupPC: old verison $BackupPC::XS::VERSION of BackupPC::XS: need >= 0.50; exiting in 30s\n");
+    print(STDERR "BackupPC: old version $BackupPC::XS::VERSION of BackupPC::XS: need >= 0.50; exiting in 30s\n");
     sleep(30);
     exit(1);
 }
@@ -870,7 +870,7 @@ sub Main_Process_Signal
 ############################################################################
 # Main_Check_Timeout()
 #
-# Check if a timeout has occured, and if so, queue all the PCs for backups.
+# Check if a timeout has occurred, and if so, queue all the PCs for backups.
 # Also does log file aging on the first timeout after midnight.
 ############################################################################
 sub Main_Check_Timeout

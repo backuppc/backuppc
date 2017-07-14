@@ -2030,7 +2030,7 @@ $Conf{RrdToolPath} = '';
 # Language to use.  See lib/BackupPC/Lang for the list of supported
 # languages, which include English (en), French (fr), Spanish (es),
 # German (de), Italian (it), Dutch (nl), Polish (pl), Portuguese
-# Brazilian (pt_br) and Chinese (zh_CH).
+# Brazilian (pt_br) and Chinese (zh_CN).
 #
 # Currently the Language setting applies to the CGI interface and email
 # messages sent to users.  Log files and other text are still in English.

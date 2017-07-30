@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.3, released 21 May 2017.
+# Version 4.1.3, released 3 Jun 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -995,7 +995,7 @@ sub handleFile
     if ( !*FTP || $@ || $errs ) {
         $t->logFileAction( "fail", $f->{name}, $f );
         $t->{xferBadFileCnt}++;
-        $stats->{errCnt} += scalar @$errs;
+        $stats->{errCnt} += ref($errs) eq 'ARRAY' ? scalar(@$errs) : 1;
         return;
     }
 

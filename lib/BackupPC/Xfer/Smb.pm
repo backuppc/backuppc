@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.1, released 14 Mar 2017.
+# Version 4.1.3, released 3 Jun 2017.
 #
 # See http://backuppc.sourceforge.net.
 #

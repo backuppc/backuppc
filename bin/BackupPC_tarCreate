@@ -101,8 +101,8 @@ EOF
 }
 
 my $Host;
-if ( $opts{h} =~ /^([\w@.\s-]+)$/ ) {
-    $Host = $opts{h};
+if ( $opts{h} !~ m{(^|/)\.\.(/|$)} && $opts{h} =~ /^([\w@.\s-]+)$/ ) {
+    $Host = $1;
 } else {
     print(STDERR "$0: bad host name '$opts{h}'\n");
     exit(1);

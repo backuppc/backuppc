@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.1.3, released 20 May 2017.
+# Version 4.1.3, released 3 Jun 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -528,9 +528,6 @@ sub TarReadFile
         ($exist, $digest) = processClose($poolWrite, $f->{size});
         if ( $a->{digest} eq $digest ) {
             logFileAction("same", $f) if ( $Conf{XferLogLevel} >= 1 );
-            $ExistFileCnt++;
-            $ExistFileSize     += $f->{size};
-            $ExistFileCompSize += -s $a->{poolPath} if ( -f $a->{poolPath} );
             $same = 1 if ( $a->{nlinks} == 0 );
         }
         if ( !$same ) {

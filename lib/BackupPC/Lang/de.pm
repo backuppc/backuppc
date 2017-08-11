@@ -28,7 +28,7 @@ $Lang{Start_Archive} = "Archivierung starten";
 $Lang{Stop_Dequeue_Archive} = "Archivierung stoppen";
 $Lang{Start_Full_Backup} = "Starte vollständiges Backup";
 $Lang{Start_Incr_Backup} = "Starte inkrementelles Backup";
-$Lang{Stop_Dequeue_Backup} = "Backup Stoppen/Aussetzen";
+$Lang{Stop_Dequeue_Backup} = "Backup stoppen/aussetzen";
 $Lang{Restore} = "Wiederherstellen";
 
 $Lang{Type_full} = "voll";
@@ -189,7 +189,7 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
 </table>
 \${h2("Computer ohne Backups")}
 <p>
-Es gibt \$hostCntNone Computer ohne Backups !!!
+Es gibt \$hostCntNone Computer ohne Backups!
 <p>
 <table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Computer </td>
@@ -377,7 +377,7 @@ $Lang{Only_privileged_users_can_view_queues_} = "Nur berechtigte Benutzer könne
 # --------------------------------
 $Lang{Only_privileged_users_can_archive} = "Nur berechtigte Benutzer könnnen archivieren.";
 # --------------------------------
-$Lang{BackupPC__Queue_Summary} = "BackupPC: Warteschlangenübersicht";
+$Lang{BackupPC__Queue_Summary} = "BackupPC: Warteschlange Übersicht";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Backup Warteschlangenübersicht")}
@@ -446,7 +446,7 @@ EOF
 
 # -------------------------------
 $Lang{Recent_Email_Summary} = <<EOF;
-\${h1("Übersicht der letzten eMails (Sortierung nach Zeitpunkt)")}
+\${h1("Übersicht der letzten E-Mails (Sortierung nach Zeitpunkt)")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Empfänger </td>
@@ -977,7 +977,7 @@ $Lang{Archive___num_details_for__host2 } = <<EOF;
 EOF
 
 # -----------------------------------
-$Lang{Email_Summary} = "BackupPC: Emailübersicht";
+$Lang{Email_Summary} = "BackupPC: E-Mailübersicht";
 
 # -----------------------------------
 #  !! ERROR messages !!
@@ -994,7 +994,7 @@ $Lang{Invalid_number__num} = "ungültige Nummer \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "kann Datei nicht öffnen \$file: Konfigurationsproblem?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Nur berechtigte Benutzer können Log oder Config Dateien einsehen.";
 $Lang{Only_privileged_users_can_view_log_files} = "Nur berechtigte Benutzer können LOG Dateien einsehen.";
-$Lang{Only_privileged_users_can_view_email_summaries} = "Nur berechtigte Benutzer können die Email Übersicht einsehen.";
+$Lang{Only_privileged_users_can_view_email_summaries} = "Nur berechtigte Benutzer können die E-Mail Übersicht einsehen.";
 $Lang{Only_privileged_users_can_browse_backup_files} = "Nur berechtigte Benutzer können Backup Dateien durchsuchen"
                 . " für computer \${EscHTML(\$In{host})}.";
 $Lang{Empty_host_name} = "Kein Hostname.";
@@ -1056,7 +1056,7 @@ $Lang{PC_Summary} = "Computerübersicht";
 $Lang{LOG_file} = "LOG Datei";
 $Lang{LOG_files} = "LOG Dateien";
 $Lang{Old_LOGs} = "Alte LOG Dateien";
-$Lang{Email_summary} = "Emailübersicht";
+$Lang{Email_summary} = "E-Mailübersicht";
 $Lang{Config_file} = "Konfigurationsdatei";
 # $Lang{Hosts_file} = "Hosts Datei";
 $Lang{Current_queues} = "Warteschlangen";
@@ -1076,8 +1076,8 @@ $Lang{XferLOG} = "XferLOG";
 $Lang{Errors}  = "Fehler";
 
 # ------------
-$Lang{Last_email_sent_to__was_at___subject} = <<EOF;
-<li>Letzte eMail gesendet an \${UserLink(\$user)} am  \$mailTime, Titel "\$subj".
+$Lang{Last__sent_to__was_at___subject} = <<EOF;
+<li>Letzte E-Mail gesendet an \${UserLink(\$user)} am  \$mailTime, Titel "\$subj".
 EOF
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
@@ -1240,18 +1240,18 @@ $Lang{and} = "und";
 $Lang{Status_idle} = "wartet";
 $Lang{Status_backup_starting} = "Backup startet";
 $Lang{Status_backup_in_progress} = "Backup läuft";
-$Lang{Status_restore_starting} = "Restore startet";
-$Lang{Status_restore_in_progress} = "Restore läuft";
+$Lang{Status_restore_starting} = "Wiederherstellung startet";
+$Lang{Status_restore_in_progress} = "Wiederherstellung läuft";
 $Lang{Status_admin_pending} = "Link steht an";
 $Lang{Status_admin_running} = "Link läuft";
 
 $Lang{Reason_backup_done} = "Backup durchgeführt";
-$Lang{Reason_restore_done} = "Restore durchgeführt";
+$Lang{Reason_restore_done} = "Wiederherstellung durchgeführt";
 $Lang{Reason_archive_done} = "Archivierung durchgeführt";
 $Lang{Reason_nothing_to_do} = "kein Auftrag";
-$Lang{Reason_backup_failed} = "Backup Fehler";
-$Lang{Reason_restore_failed} = "Restore Fehler";
-$Lang{Reason_archive_failed} = "Archivierung Fehler";
+$Lang{Reason_backup_failed} = "Backupfehler";
+$Lang{Reason_restore_failed} = "Wiederherstellungsfehler";
+$Lang{Reason_archive_failed} = "Archivierungsfehler";
 $Lang{Reason_no_ping} = "nicht erreichbar";
 $Lang{Reason_backup_canceled_by_user} = "Abbruch durch Benutzer";
 $Lang{Reason_restore_canceled_by_user} = "Abbruch durch Benutzer";
@@ -1271,7 +1271,7 @@ Subject: $subj
 $headers
 Hallo $userName,
 
-Ihr Computer ($host) wurde durch den Backup Server noch nie erfolgreich gesichert.
+Ihr Computer ($host) wurde durch den Backupserver noch nie erfolgreich gesichert.
 
 Backups sollten automatisch erfolgen, wenn Ihr Computer am Netzwerk angeschlossen ist.
 Sie sollten Ihren Backup-Betreuer oder den IT-Dienstleister kontaktieren, wenn:
@@ -1280,13 +1280,13 @@ Sie sollten Ihren Backup-Betreuer oder den IT-Dienstleister kontaktieren, wenn:
     um ein Installations- bzw. Konfigurationsproblem, was die Durchführung von
     automatischen Backups verhindert.
 
-  - Wenn Sie kein automatisches Backup des Computers brauchen und diese e-mail nicht
+  - Wenn Sie kein automatisches Backup des Computers brauchen und diese E-Mail nicht
     mehr erhalten möchten.
 
-Andernfalls sollten Sie sicherstellen, daß Ihr Computer regelmäßig korrekt am Netzwerk
+Andernfalls sollten Sie sicherstellen, dass Ihr Computer regelmäßig korrekt am Netzwerk
 angeschlossen wird.
 
-Mit freundlichen Grüßen,
+Mit freundlichen Grüßen
 Ihr BackupPC Server
 http://backuppc.sourceforge.net
 EOF
@@ -1313,11 +1313,11 @@ Andernfalls, wenn Sie z.B. lange Zeit nicht im Büro sind, können Sie höchsten
 manuell Ihre Dateien sichern (evtl. kopieren auf eine externe Festplatte).
 
 Bitte denken Sie daran, dass alle in den letzten $days Tagen geänderten Dateien (z.B.
-auch Emails und Anhänge oder Datenbankeinträge) verloren gehen falls Ihre
+auch E-Mails und Anhänge oder Datenbankeinträge) verloren gehen falls Ihre
 Festplatte ausfällt oder Dateien durch versehentliches Löschen oder
 Virenbefall unbrauchbar werden.
 
-Mit freundlichen Grüßen,
+Mit freundlichen Grüßen
 Ihr BackupPC Server
 http://backuppc.sourceforge.net
 EOF
@@ -1332,27 +1332,27 @@ $headers
 Hallo $userName,
 
 die Outlook Dateien auf Ihrem Computer wurden $howLong Tage nicht gesichert.
-Diese Dateien enthalten Ihre Emails, Anhänge, Adressen und Kalender.
+Diese Dateien enthalten Ihre E-Mails, Anhänge, Adressen und Kalender.
 
 Ihr Computer wurde zwar $numBackups mal seit $firstTime Tagen bis vor $lastTime Tagen
 gesichert. Allerdings sperrt Outlook den Zugriff auf diese Dateien.
 
 Es wird folgendes Vorgehen empfohlen:
 
-1. Der Computer muss an das BackupServer Netzwerk angeschlossen sein.
-2. Beenden Sie das Outlook Programm.
+1. Der Computer muss an das BackupServer-Netzwerk angeschlossen sein.
+2. Beenden Sie Outlook.
 3. Starten Sie ein inkrementelles Backup mit dem Internet-Browser hier: 
 
     $CgiURL?host=$host               
 
-    Name und Passwort eingeben und dann 2 mal nacheinander
+    Name und Passwort eingeben und dann zweimal nacheinander
     auf "Starte inkrementelles Backup" klicken
     Klicken Sie auf "Gehe zurück zur ...Hauptseite" und beobachten Sie
     den Status des Backupvorgangs (Browser von Zeit zu Zeit aktualisieren).
     Das sollte je nach Dateigröße nur eine kurze Zeit dauern.
     
 
-Mit freundlichen Grüßen,
+Mit freundlichen Grüßen
 Ihr BackupPC Server
 http://backuppc.sourceforge.net
 EOF
@@ -1393,9 +1393,9 @@ $Lang{CfgEdit_Title_Other_Parameters} = "Andere Einstellungen";
 $Lang{CfgEdit_Title_Remote_Apache_Settings} = "Apache Remote Einstellungen";
 $Lang{CfgEdit_Title_Program_Paths} = "Programmpfade";
 $Lang{CfgEdit_Title_Install_Paths} = "Installationspfade";
-$Lang{CfgEdit_Title_Email} = "Email";
-$Lang{CfgEdit_Title_Email_settings} = "Email Einstellungen";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Email Benutzernachrichten";
+$Lang{CfgEdit_Title_Email} = "E-Mail";
+$Lang{CfgEdit_Title_Email_settings} = "E-Maileinstellungen";
+$Lang{CfgEdit_Title_Email_User_Messages} = "E-Mail Benutzernachrichten";
 $Lang{CfgEdit_Title_CGI} = "CGI";
 $Lang{CfgEdit_Title_Admin_Privileges} = "Admininistrationsprivilegien";
 $Lang{CfgEdit_Title_Page_Rendering} = "Seitenrendering";
@@ -1403,15 +1403,15 @@ $Lang{CfgEdit_Title_Paths} = "Pfade";
 $Lang{CfgEdit_Title_User_URLs} = "Benutzer URLs";
 $Lang{CfgEdit_Title_User_Config_Editing} = "Benutzerkonfiguration ändern";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
-$Lang{CfgEdit_Title_Xfer_Settings} = "Xfer Einstellungen";
-$Lang{CfgEdit_Title_Ftp_Settings} = "FTP Einstellungen";
-$Lang{CfgEdit_Title_Smb_Settings} = "Smb Einstellungen";
-$Lang{CfgEdit_Title_Tar_Settings} = "Tar Einstellungen";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync Einstellungen";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd Einstellungen";
-$Lang{CfgEdit_Title_Archive_Settings} = "Archive Einstellungen";
+$Lang{CfgEdit_Title_Xfer_Settings} = "Xfer-Einstellungen";
+$Lang{CfgEdit_Title_Ftp_Settings} = "FTP-Einstellungen";
+$Lang{CfgEdit_Title_Smb_Settings} = "SMB-Einstellungen";
+$Lang{CfgEdit_Title_Tar_Settings} = "Tar-Einstellungen";
+$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync-Einstellungen";
+$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd-Einstellungen";
+$Lang{CfgEdit_Title_Archive_Settings} = "Archiveinstellungen";
 $Lang{CfgEdit_Title_Include_Exclude} = "Include/Exclude";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Pfade/Kommandos";
+$Lang{CfgEdit_Title_Smb_Paths_Commands} = "SMB Pfade/Kommandos";
 $Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Pfade/Kommandos";
 $Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Pfade/Kommandos/Argumente";
 $Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Port/Argumente";
@@ -1421,23 +1421,23 @@ $Lang{CfgEdit_Title_Full_Backups} = "volle Backups";
 $Lang{CfgEdit_Title_Incremental_Backups} = "inkrementelle Backups";
 $Lang{CfgEdit_Title_Blackouts} = "Blackouts";
 $Lang{CfgEdit_Title_Other} = "Andere";
-$Lang{CfgEdit_Title_Backup_Settings} = "Backup Einstellungen";
+$Lang{CfgEdit_Title_Backup_Settings} = "Backupeinstellungen";
 $Lang{CfgEdit_Title_Client_Lookup} = "Auflösen des Klienten";
-$Lang{CfgEdit_Title_User_Commands} = "Benutzer Kommandos";
+$Lang{CfgEdit_Title_User_Commands} = "Benutzerkommandos";
 $Lang{CfgEdit_Title_Hosts} = "Hosts";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
-Um einen neuen Hosts hinzuzufügen, wähle Hinzufügen und gib 
+Um einen neuen Host hinzuzufügen, wähle Hinzufügen und gib 
 dann den Namen ein. Um mit der Konfigurationvorlage eines anderen Hosts
 zu beginnen, gib als Namen NEWHOST=COPYHOST ein. Dies wird alle
 bereits bestehenden hostspezifischen Einstellungen für NEWHOST
 mit den Werten von COPYHOST überschreiben. Du kannst dies auch für einen bereits 
-bestehenden Hosts machen. Um einen Host zu löschen, wähle den Löschen Knopf.
+bestehenden Hosts machen. Um einen Host zu löschen, wähle den Löschen-Knopf.
 Das Hinzufügen, Löschen und Kopieren von Konfigurationen pro Host
-wird erst durch wählen von Speichern aktiviert. Bereits bestehende
+wird erst durch Wählen von Speichern aktiviert. Bereits bestehende
 Backups werden beim Löschen eines Hosts nicht mitgelöscht. Nach einem
 erneuten Anlegen des selben Hosts sind alle alten Backups wieder verfügbar.
-Um Backups vollständig zu entfernen müssen die Dateien unter \$topDir/pc/HOST
+Um Backups vollständig zu entfernen, müssen die Dateien unter \$topDir/pc/HOST
 gelöscht werden.
 EOF
 
@@ -1458,27 +1458,27 @@ $Lang{CfgEdit_Button_Delete}   = "Löschen";
 $Lang{CfgEdit_Button_Add}      = "Hinzufügen";
 $Lang{CfgEdit_Button_Override} = "Überschreiben";
 $Lang{CfgEdit_Button_New_Key}  = "Neuer Schlüssel";
-$Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
+$Lang{CfgEdit_Button_New_Share} = "Neuer ShareName oder '*'";
 
 $Lang{CfgEdit_Error_No_Save}
             = "Wegen Fehlern nicht gesichert";
 $Lang{CfgEdit_Error__must_be_an_integer}
-            = "Error: \$var muss eine Zahl sein";
+            = "Fehler: \$var muss eine Zahl sein";
 $Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "Error: \$var muss eine ganze Zahl sein";
+            = "Fehler: \$var muss eine ganze Zahl sein";
 $Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Error: \$var Eintrag \$k muss eine Zahl sein";
+            = "Fehler: \$var Eintrag \$k muss eine Zahl sein";
 $Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Error: \$var Eintrag \$k muss eine ganze Zahl sein";
+            = "Fehler: \$var Eintrag \$k muss eine ganze Zahl sein";
 $Lang{CfgEdit_Error__must_be_executable_program}
-            = "Error: \$var muss ein gültiger ausführbarer Pfad sein";
+            = "Fehler: \$var muss ein gültiger ausführbarer Pfad sein";
 $Lang{CfgEdit_Error__must_be_valid_option}
-            = "Error: \$var muss eine gültige Option sein";
+            = "Fehler: \$var muss eine gültige Option sein";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "Ursprungs Host \$copyHost existiert nicht; Erstelle den vollen Hostnamen \$fullHost.  Lösche den Host wenn das nicht war, was du wolltest.";
+            = "Ursprungshost \$copyHost existiert nicht; Erstelle den vollen Hostnamen \$fullHost. Lösche den Host wenn das nicht war, was du wolltest.";
 
 $Lang{CfgEdit_Log_Copy_host_config}
-            = "\$User hat die Konfig von host \$fromHost zu \$host kopiert\n";
+            = "\$User hat die Konfiguration vom Host \$fromHost zu \$host kopiert\n";
 $Lang{CfgEdit_Log_Delete_param}
             = "\$User hat \$p von \$conf gelöscht\n";
 $Lang{CfgEdit_Log_Add_param_value}

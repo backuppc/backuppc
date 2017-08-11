@@ -33,7 +33,7 @@
 #   Based on Backup_tarCreate by Craig Barratt <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2013  Craig Barratt and Guillaume Filion
+#   Copyright (C) 2002-2017  Craig Barratt and Guillaume Filion
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.1.3, released 3 Jun 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -58,7 +58,7 @@
 
 use strict;
 no  utf8;
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use Archive::Zip qw(:ERROR_CODES);
 use File::Path;
 use Getopt::Std;
@@ -96,12 +96,13 @@ EOF
     exit(1);
 }
 
-if ( $opts{h} !~ /^([\w\.\s-]+)$/
-        || $opts{h} =~ m{(^|/)\.\.(/|$)} ) {
+my $Host;
+if ( $opts{h} !~ m{(^|/)\.\.(/|$)} && $opts{h} =~ /^([\w@.\s-]+)$/ ) {
+    $Host = $1;
+} else {
     print(STDERR "$0: bad host name '$opts{h}'\n");
     exit(1);
 }
-my $Host = $opts{h};
 
 if ( $opts{n} !~ /^(-?\d+)$/ ) {
     print(STDERR "$0: bad dump number '$opts{n}'\n");

@@ -831,7 +831,7 @@ $Conf{BackupZeroFilesIsFatal} = 1;
 $Conf{XferMethod} = 'smb';
 
 #
-# Level of verbosity in Xfer log files.  0 means be quiet, 1 will give
+# Level of verbosity in Xfer log files.  0 means be quiet, 1
 # will give one line per file, 2 will also show skipped files on
 # incrementals, higher values give more output.
 #

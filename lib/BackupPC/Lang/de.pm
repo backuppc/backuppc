@@ -22,6 +22,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+use utf8;
+
 # --------------------------------
 
 $Lang{Start_Archive} = "Archivierung starten";

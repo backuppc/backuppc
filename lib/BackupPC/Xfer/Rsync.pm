@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 15 Apr 2017.
+# Version 4.1.3, released 3 Jun 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -603,12 +603,19 @@ sub run
     #
     # Remove any rsyncTmp files in the backup directory
     #
-    my $bkupDir = "$conf->{TopDir}/pc/$t->{client}/$t->{backups}[$t->{newBkupIdx}]{num}";
-    foreach my $e ( @{BackupPC::DirOps::dirRead($bpc, $bkupDir)} ) {
-	if ( $e->{name} =~ /^rsyncTmp\.\d+\.[.\d]+$/ ) {
-            $t->{XferLOG}->write(\"Removing rsync temporary file $bkupDir/$e->{name}\n");
+    my $bkupDir = $t->{type} eq "restore" ? "$conf->{TopDir}/pc/$t->{bkupSrcHost}/$t->{bkupSrcNum}"
+					  : "$conf->{TopDir}/pc/$t->{client}/$t->{backups}[$t->{newBkupIdx}]{num}";
+    my $bkupDirEntries = BackupPC::DirOps::dirRead($bpc, $bkupDir);
+    my $pidRunning = {};
+    if ( ref($bkupDirEntries) eq 'ARRAY' ) {
+        foreach my $e ( @$bkupDirEntries ) {
+            next if ( $e->{name} !~ /^rsyncTmp\.(\d+)\.\d+\.\d+$/ );
+            my $pid = $1;
+            $pidRunning->{$pid} = kill(0, $pid) ? 1 : 0 if ( !defined($pidRunning->{$pid} ) );
+            next if ( $pidRunning->{$pid} );
+	    $t->{XferLOG}->write(\"Removing rsync temporary file $bkupDir/$e->{name}\n");
 	    unlink("$bkupDir/$e->{name}");
-	}
+        }
     }
 
     if ( $t->{type} eq "restore" ) {

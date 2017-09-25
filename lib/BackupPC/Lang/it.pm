@@ -363,8 +363,8 @@ Si sta per arrestare/disaccodare i backup per \$host;
 <input type="hidden" name="host"   value="\$host">
 <input type="hidden" name="doit"   value="1">
 <input type="hidden" name="action" value="">
-Also, please don\'t start another backup for
-<input type="text" name="backoff" size="10" value="\$backoff"> hours.
+Inoltre, non avviare ulteriori backup per
+<input type="text" name="backoff" size="10" value="\$backoff"> ora/e.
 <p>
 Arrestare veramente?
 <input type="button" value="\$buttonText"
@@ -902,7 +902,7 @@ Questa videata mostra tutte le versioni uniche disponibili nei diversi backup:
 <li> Fare clic sul collegamento ad un file (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) per scaricare quel file
 <li> I file con lo stesso contenuto fra backup diversi hanno lo stesso
-     numero di versione (PleaseTranslateThis: except between v3 and v4 backups)
+     numero di versione (ad esclusione di backup tra versione v3 e v4)
 <li> I file o directory non disponibili in uno specifico backup presentano
      una casella vuota
 <li> I file visualizzati con la stessa versione possono avere attributi
@@ -1239,9 +1239,9 @@ EOF
 #$Lang{on} = "acceso";
 $Lang{off} = "spento";
 
-$Lang{backupType_full} = "comp.";
-$Lang{backupType_incr} = "incr.";
-$Lang{backupType_active}  = "active";
+$Lang{backupType_full} = "completo";
+$Lang{backupType_incr} = "incrementale";
+$Lang{backupType_active}  = "in esecuzione";
 $Lang{backupType_partial} = "parziale";
 
 $Lang{failed} = "fallito";
@@ -1254,7 +1254,7 @@ $Lang{Status_idle} = "inattivo";
 $Lang{Status_backup_starting} = "avvio backup";
 $Lang{Status_backup_in_progress} = "backup in esecuzione";
 $Lang{Status_restore_starting} = "avvio ripristino";
-$Lang{Status_restore_in_progress} = "restore in esecuzione";
+$Lang{Status_restore_in_progress} = "ripristino in esecuzione";
 $Lang{Status_admin_pending} = "collegamenti pendenti";
 $Lang{Status_admin_running} = "collegamenti in esecuzione";
 

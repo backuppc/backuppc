@@ -297,7 +297,7 @@ EOF
 
 $Lang{BackupPC_Archive2_parity} = <<EOF;
 <tr>
-    <td>Percentuale di dati di parità (0 = disabiltata, 5 = valori tipici)</td>
+    <td>Percentuale di dati di paritï¿½ (0 = disabiltata, 5 = valori tipici)</td>
     <td><input type="numeric" value="\$ArchivePar" name="par"></td>
 </tr>
 EOF
@@ -308,7 +308,7 @@ $Lang{BackupPC_Archive2_split} = <<EOF;
     <td><input type="numeric" value="\$ArchiveSplit" name="splitsize">Megabyte </td>
 </tr>
 EOF
-  
+
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
         <li>Il pool di \${poolSize}GiB comprende \$info->{"\${name}FileCnt"}
@@ -458,7 +458,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Sfoglia backup \$num per \$host";
@@ -527,7 +527,7 @@ $Lang{Restore_Options_for__host_Option1_disabled} = <<EOF;
 Il ripristino diretto &egrave; stato disabilitato per l\'host host \${EscHTML(\$hostDest)}.
 Per favore, seleziona uno degli altri metodi di ripristino.
 EOF
-  
+
 # ------------------------------
 $Lang{Option_2__Download_Zip_archive} = <<EOF;
 <p>
@@ -657,7 +657,7 @@ $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
 La risposta del server &egrave; stata: \$reply
 EOF
 
-  
+
 # -------------------------
 $Lang{Host__host_Backup_Summary} = "BackupPC: prospetto backup host \$host";
 
@@ -689,7 +689,7 @@ Cliccare sul numero di backup per sfogliare e ripristinare i file di backup.
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
-    <td align="center"> Completo </td>
+    <td align="center"> Filled </td>
     <td align="center"> Livello </td>
     <td align="center"> Data avvio </td>
     <td align="center"> Durata (minuti) </td>
@@ -824,11 +824,11 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
-       cb.checked = !cb.checked;	
+       cb.checked = !cb.checked;
     }
 
 //-->
@@ -993,11 +993,11 @@ $Lang{Email_Summary} = "BackupPC: Prospetto email";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new fallita: controllare il file error_log di Apache\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Utente errato: il mio ID utente &egrave; \$> invece di \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Solo gli utenti privilegiati possono visualizzare i prospetti dei PC.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Solo gli utenti privilegiati possono arrestare o avviare un backup su"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Numero non valido: \${EscHTML(\$In{num})}";
@@ -1168,7 +1168,7 @@ $Lang{checkAllHosts} = <<EOF;
 <input type="submit" name="Submit" value="Archivia host selezionati">
 </td></tr>
 EOF
- 
+
 $Lang{fileHeader} = <<EOF;
     <tr class="fviewheader"><td align=center> Nome </td>
        <td align="center"> Tipo </td>
@@ -1269,8 +1269,8 @@ $Lang{Reason_no_ping}        = "no ping";
 $Lang{Reason_backup_canceled_by_user}  = "backup annullato dall\'utente";
 $Lang{Reason_restore_canceled_by_user} = "ripristino annullato dall\'utente";
 $Lang{Reason_archive_canceled_by_user} = "archivio annullato dall\'utente";
-$Lang{Disabled_OnlyManualBackups}  = "auto disabilitato";  
-$Lang{Disabled_AllBackupsDisabled} = "disabilitato";                  
+$Lang{Disabled_OnlyManualBackups}  = "auto disabilitato";
+$Lang{Disabled_AllBackupsDisabled} = "disabilitato";
 
 # ---------
 # Email messages
@@ -1354,7 +1354,7 @@ collegato alla rete. E` sufficiente uscire da Outlook e da tutte le altre
 applicazioni e, semplicemente usando il tuo programma di navigazione,
 andare alla seguente pagina:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 Seleziona "Avvia backup incrementale" due volte per avviare un nuovo
 backup incrementale. E` possibile selezionare "Ritorna alla pagina di
@@ -1437,7 +1437,7 @@ $Lang{CfgEdit_Title_User_Commands} = "Comandi Utente";
 $Lang{CfgEdit_Title_Hosts} = "Hosts";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
-Per aggiungere un nuovo host, seleziona Aggiungi e inserisci il nome. 
+Per aggiungere un nuovo host, seleziona Aggiungi e inserisci il nome.
 Per aggiungere un nuovo host partendo dalla configurazione di un altro
 host, inserisci il nome dell\'host con il formato NUOVOHOST=HOSTDACOPIARE.
 Questo sovrascriver&aacute; qualsiasi eventuale configurazione per il
@@ -1501,4 +1501,3 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User host \$host ha cambiato \$key da \$valueOld in \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User ha aggiunto l\'host \$host: \$value\n";
-

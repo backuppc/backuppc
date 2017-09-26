@@ -103,8 +103,13 @@ if ( $Conf{BackupPCUserVerify}
 ###########################################################################
 # Ensure we don't have old versions of key libraries and executables
 ###########################################################################
-if ( $BackupPC::XS::VERSION < 0.53 ) {
-    print(STDERR "BackupPC: old version $BackupPC::XS::VERSION of BackupPC::XS: need >= 0.50; exiting in 30s\n");
+my $PackageVersion = {
+    'BackupPC::XS' => '0.53',
+    rsync_bpc      => '3.0.9.6',
+};
+
+if ( $BackupPC::XS::VERSION < $PackageVersion->{'BackupPC::XS'} ) {
+    print(STDERR "BackupPC: old version $BackupPC::XS::VERSION of BackupPC::XS: need >= $PackageVersion->{'BackupPC::XS'}; exiting in 30s\n");
     sleep(30);
     exit(1);
 }
@@ -117,8 +122,8 @@ if ( $Conf{RsyncBackupPCPath} ne "" && -x $Conf{RsyncBackupPCPath} ) {
     }
     my $version = "unknown";
     $version = $1 if ( $output =~ /rsync_bpc\s+version\s+([\d.]+)\s+protocol/ );
-    if ( $version eq "unknown" || version->parse($1) < version->parse('3.0.9.6') ) {
-        print(STDERR "BackupPC: rsync_bpc at $Conf{RsyncBackupPCPath} needs to be upgraded (got version $1; need >= 3.0.9.6); exiting in 30s\n");
+    if ( $version eq "unknown" || version->parse($1) < version->parse($PackageVersion->{rsync_bpc}) ) {
+        print(STDERR "BackupPC: rsync_bpc at $Conf{RsyncBackupPCPath} needs to be upgraded (got version $1; need >= $PackageVersion->{rsync_bpc}); exiting in 30s\n");
         sleep(30);
         exit(1);
     }

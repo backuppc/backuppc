@@ -655,7 +655,7 @@ sub CheckLangTags
 	    my $v2 = shift(@$d);
 	    if ( $v1->{var} ne $v2->{var} ) {
 		print("Botch: got $lang var $v2->{var} vs en.pm $v1->{var}\n");
-		exit;
+		exit 1;
 	    }
 	    my $t1 = LangTextStrip($v1->{val});
 	    my $t2 = LangTextStrip($v2->{val});

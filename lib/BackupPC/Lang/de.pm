@@ -1078,7 +1078,7 @@ $Lang{XferLOG} = "XferLOG";
 $Lang{Errors}  = "Fehler";
 
 # ------------
-$Lang{Last__sent_to__was_at___subject} = <<EOF;
+$Lang{Last_email_sent_to__was_at___subject} = <<EOF;
 <li>Letzte E-Mail gesendet an \${UserLink(\$user)} am  \$mailTime, Titel "\$subj".
 EOF
 # ------------

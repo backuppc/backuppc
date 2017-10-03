@@ -359,7 +359,8 @@ sub Main_Initialize
     #
     # Report that we started, and update $Info.
     #
-    print(LOG $bpc->timeStamp, "BackupPC started, pid $$\n");
+    printf(LOG "%sBackupPC %s (Perl v%vd) started, pid %d\n",
+      $bpc->timeStamp, $bpc->{Version}, $^V, $$);
     $Info->{ConfigModTime} = $bpc->ConfigMTime();
     $Info->{pid} = $$;
     $Info->{startTime} = time;

@@ -110,6 +110,7 @@ my @PerlSrc = qw(
     lib/BackupPC/CGI/Archive.pm
     lib/BackupPC/CGI/ArchiveInfo.pm
     lib/BackupPC/CGI/Browse.pm
+    lib/BackupPC/CGI/DeleteBackup.pm
     lib/BackupPC/CGI/DirHistory.pm
     lib/BackupPC/CGI/EditConfig.pm
     lib/BackupPC/CGI/EmailSummary.pm

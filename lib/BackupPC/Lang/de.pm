@@ -321,6 +321,7 @@ EOF
 
 # --------------------------------
 $Lang{BackupPC__Backup_Requested_on__host} = "BackupPC: Backupauftrag für \$host";
+$Lang{BackupPC__Delete_Requested_for_a_backup_of__host} = "BackupPC: Delete Requested for a backup of \$host";
 # --------------------------------
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
@@ -656,6 +657,35 @@ $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
 Die Antwort des Server war: \$reply
 EOF
 
+
+# --------------------------------
+$Lang{BackupPC__Delete_Backup_Confirm__num_of__host} = "BackupPC: Delete Backup Confirm #\$num of \$host";
+# --------------------------------
+$Lang{A_filled} = "a filled";
+$Lang{An_unfilled} = "an unfilled";
+$Lang{Are_you_sure_delete} = <<EOF;
+\${h1("Are you sure?")}
+<p>
+You are about to delete \$filled \$type backup #\$num of \$host.
+
+<form name="Confirm" action="\$MyURL" method="get">
+
+<input type="hidden" name="host" value="\${EscHTML(\$host)}">
+<input type="hidden" name="num" value="\$num">
+
+<input type="hidden" name="doit" value="1">
+<input type="hidden" name="action" value="">
+
+Do you really want to do this?
+
+<input type="button" value="\${EscHTML(\$Lang->{CfgEdit_Button_Delete})}"
+ onClick="document.Confirm.action.value='deleteBackup';
+          document.Confirm.submit();">
+
+<input type="submit" value="No" name="ignore">
+</form>
+EOF
+
 # -------------------------
 $Lang{Host__host_Backup_Summary} = "BackupServer: Computer \$host Backupübersicht";
 
@@ -686,7 +716,8 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wiederherzustellen.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center"> Backup# </td>
+<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
+    <td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> gefüllt </td>
     <td align="center"> Level </td>
@@ -999,6 +1030,8 @@ $Lang{Only_privileged_users_can_view_log_files} = "Nur berechtigte Benutzer kön
 $Lang{Only_privileged_users_can_view_email_summaries} = "Nur berechtigte Benutzer können die E-Mail Übersicht einsehen.";
 $Lang{Only_privileged_users_can_browse_backup_files} = "Nur berechtigte Benutzer können Backup Dateien durchsuchen"
                 . " für computer \${EscHTML(\$In{host})}.";
+$Lang{Only_privileged_users_can_delete_backups} = "Only privileged users can delete backups"
+                . " of host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name} = "Kein Hostname.";
 $Lang{Directory___EscHTML} = "Verzeichnis \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
 		    . " ist leer";
@@ -1047,6 +1080,8 @@ $Lang{Backup_requested_on__host_by__User} = "Backup angefordert für \$host durc
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Backup gestoppt/gelöscht für \$host durch \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} = "Restore beauftragt nach Computer \$hostDest, von Backup #\$num,"
 	     . " durch User \$User von Client \$ENV{REMOTE_ADDR}";
+$Lang{Delete_requested_for_backup_of__host_by__User} = "Delete requested for backup #\$num of \$host"
+             . " by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivierung beauftragt durch \$User von \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------

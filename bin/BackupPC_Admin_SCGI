@@ -88,6 +88,7 @@ use BackupPC::CGI::Summary;
 use BackupPC::CGI::View;
 
 my %ActionDispatch = (
+    "deleteBackup"               => "DeleteBackup",
     "summary"                    => "Summary",
     "Start_Incr_Backup"          => "StartStopBackup",
     "Start_Full_Backup"          => "StartStopBackup",

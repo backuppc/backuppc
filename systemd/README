@@ -12,7 +12,7 @@ To install the systemd service:
    (or change the group name as necessary).
 
  - as root, run these commands:
-     cp backuppc.service /lib/systemd/system   # (or /usr/lib/systemd/system)
+     cp backuppc.service /etc/systemd/system
      systemctl daemon-reload
      systemctl enable backuppc.service         # should create a link in /etc/systemd/system/multi-user.target.wants/backuppc.service
 

@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 30 Apr 2017.
+# Version 4.1.3, released 3 Jun 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1190,7 +1190,7 @@ EOF
             if ( !$type->{noKeyEdit}
 		    && (keys(%$varValue) > 1 || $type->{emptyOk}) ) {
                 $content .= <<EOF;
-<input type="submit" name="del_${varName}_zZ_$fld" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
+<input type="button" name="del_${varName}_zZ_$fld" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
         onClick="deleteSubmit('${varName}_zZ_$fld')">
 EOF
             }

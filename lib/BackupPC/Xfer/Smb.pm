@@ -308,6 +308,7 @@ sub readOutput
                 || /^\s*Timezone is/i
                 || /^\s*tar_re_search set/i
                 || /^\s*creating lame (up|low)case table/i
+                || /^\s*rlimit_max: increasing rlimit_max/i
 	    ) {
             # ignore these messages
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
@@ -343,7 +344,7 @@ sub readOutput
 			file  => $badFile
 		    });
             }
-            $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
+            $t->{XferLOG}->write(\"XferErr $_\n") if ( $t->{logLevel} >= 1 );
         }
     }
     return 1;

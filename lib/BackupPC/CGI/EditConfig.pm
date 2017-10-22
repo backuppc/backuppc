@@ -465,8 +465,11 @@ sub action
             foreach my $paramInfo ( @{$ConfigMenu{$m}{param}} ) {
                 my $param = $paramInfo->{name};
                 if ( defined($paramInfo->{text}) ) {
-                    $text = $n;
-                    $mask[$text] = 1;
+                    $mask[$n] = 1;
+		    if ( ref($paramInfo->{visible}) ne "CODE"
+			    || &{$paramInfo->{visible}}($newConf, $bpc) ) {
+			$text = $n;
+		    }
                 } else {
                     if ( $bpc->{Conf}{CgiUserConfigEdit}{$param}
                           || (defined($bpc->{Conf}{CgiUserConfigEdit}{$param})

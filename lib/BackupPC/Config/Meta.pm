@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2013  Craig Barratt
+#   Copyright (C) 2004-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.1.3, released 3 Jun 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -438,6 +438,7 @@ use vars qw(%ConfigMeta);
                 SmbShareName              => "boolean",
                 SmbShareUserName          => "boolean",
                 SmbSharePasswd            => "boolean",
+                SmbClientPath             => "boolean",
                 SmbClientFullCmd          => "boolean",
                 SmbClientIncrCmd          => "boolean",
                 SmbClientRestoreCmd       => "boolean",
@@ -448,6 +449,7 @@ use vars qw(%ConfigMeta);
                 TarClientPath             => "boolean",
                 TarClientRestoreCmd       => "boolean",
                 RsyncShareName            => "boolean",
+                RsyncBackupPCPath         => "boolean",
                 RsyncdClientPort          => "boolean",
                 RsyncdUserName            => "boolean",
                 RsyncdPasswd              => "boolean",

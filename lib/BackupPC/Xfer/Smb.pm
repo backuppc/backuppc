@@ -201,9 +201,11 @@ sub readOutput
             if ( $! == EWOULDBLOCK ) {
                 $t->{XferLOG}->write(\"readOutput: no bytes read (EWOULDBLOCK); continuing\n");
             } elsif ( eof($t->{pipeSMB}) ) {
-                $t->{XferLOG}->write(\"readOutput: sysread returns 0 and got EOF\n");
                 vec($$FDreadRef, fileno($t->{pipeSMB}), 1) = 0;
-		close($t->{pipeSMB});
+		my $ok = close($t->{pipeSMB});
+                $t->{XferLOG}->write(\"readOutput: sysread returns 0 and got EOF (exit ok = $ok, $!)\n");
+                $t->{xferOK} = $ok ? 1 : 0;
+                $t->{smbOut} .= "Non-zero exit status from smbclient\n" if ( !$ok );
             }
         } else {
             $t->{smbOut} .= $mesg;
@@ -294,6 +296,9 @@ sub readOutput
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
         } elsif ( /^\s*directory \\/i ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 2 );
+        } elsif ( /^tar:\d+ Error opening remote file/i ) {
+            $t->{xferErrCnt}++;
+            $t->{XferLOG}->write(\"XferErr $_\n") if ( $t->{logLevel} >= 1 );
         } elsif ( /smb: \\>/
                 || /^\s*tar:\d+/ # MAKSYM 14082016: ignoring 2 more Samba-4.3 specific lines
                 || /^\s*WARNING:/i

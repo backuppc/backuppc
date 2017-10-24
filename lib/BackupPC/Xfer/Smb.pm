@@ -314,6 +314,7 @@ sub readOutput
                 || /^\s*tar_re_search set/i
                 || /^\s*creating lame (up|low)case table/i
                 || /^\s*rlimit_max: increasing rlimit_max/i
+                || /^\s*OS=\[/i
 	    ) {
             # ignore these messages
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );

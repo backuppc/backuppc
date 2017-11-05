@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2013  Craig Barratt
+#   Copyright (C) 2003-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.1.3, released 3 Jun 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -171,7 +171,7 @@ EOF
 	    @fileListTrim = (@fileListTrim[0..9], '...');
 	}
 	$bpc->ServerMesg("log User $User downloaded tar archive for $host,"
-		       . " backup $num; files were: "
+		       . " backup $num; share $share; files were: "
 		       . join(", ", @fileListTrim));
 
         my @pathOpts;
@@ -220,7 +220,7 @@ EOF
 	    @fileListTrim = (@fileListTrim[0..9], '...');
 	}
 	$bpc->ServerMesg("log User $User downloaded zip archive for $host,"
-		       . " backup $num; files were: "
+		       . " backup $num; share $share; files were: "
 		       . join(", ", @fileListTrim));
 
         my @pathOpts;

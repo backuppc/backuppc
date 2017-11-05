@@ -1,0 +1,37 @@
+﻿sudo: false
+env:
+  global:
+    - MAKEFLAGS="-j 2"
+
+language: perl
+perl:
+  - 5.24
+  - 5.22
+  - 5.20
+  - 5.18
+  - 5.16
+  - 5.14
+  - 5.12
+  - 5.10
+  - 5.8
+
+cache:
+  directories:
+  - ~/perl_modules
+
+before_install:
+  - cpanm --quiet --notest local::lib
+  - eval "$(perl -Mlocal::lib=~/perl_modules)"
+
+install:
+  - cpanm --quiet --installdeps --notest .
+
+before_script:
+  - ./makeDist --nosyntaxCheck --version HEAD
+  - cd ./dist/BackupPC-HEAD
+  - sudo useradd -s /usr/sbin/nologin -G travis backuppc
+
+script:
+  - sudo PATH="$PATH" PERL5LIB="$PERL5LIB" ./configure.pl --batch
+  - sudo PATH="$PATH" PERL5LIB="$PERL5LIB" su -m backuppc -c '/usr/local/BackupPC/bin/BackupPC -d'
+  - sudo cat /var/log/BackupPC/LOG

@@ -21,6 +21,22 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Replaced submit with button so that Enter doesn't activate the Delete
+  button.  Fixes issue #161, reported by Philippe-M.
+
+* In bin/BackupPC_dump, added "share" to __bpc_progress_state__ message
+  so it is 'backup share "$shareName"'.  Reported by guestisp with a patch.
+
+* lib/BackupPC/Xfer/Smb.pm ignores additional debug messages from
+  smbclient, and flags lines in the XferLOG it doesn't recognize.
+
+* added share name to log message in lib/BackupPC/CGI/Restore.pm for tar
+  and zip restore.
+
+#------------------------------------------------------------------------
+# Version Version 4.1.3, 3 Jun 2017
+#------------------------------------------------------------------------
+
 Merged pull requests: #109, #114
 
 * Fixed editing of compound menu variables (eg: BackupFilesOnly).

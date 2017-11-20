@@ -152,12 +152,12 @@ sub RRDGraph
                 "DEF:c3kB=$RRDFile:c3kB:LAST",
                 "DEF:p4kB=$RRDFile:p4kB:LAST",
                 "DEF:c4kB=$RRDFile:c4kB:LAST",
-                "PRINT:p3kB:LAST:%lf",
-                "PRINT:c3kB:LAST:%lf",
-                "PRINT:p4kB:LAST:%lf",
-                "PRINT:c4kB:LAST:%lf",
+                "PRINT:p3kB:MAX:%lf",
+                "PRINT:c3kB:MAX:%lf",
+                "PRINT:p4kB:MAX:%lf",
+                "PRINT:c4kB:MAX:%lf",
             ], sub {
-                if ( $_[0] =~ /^print\[([0-3])\] = "([.0-9]+)"$/ ) {
+                if ( $_[0] =~ /^print\[([0-3])\] = "([.,0-9]+)"$/ ) {
                     $poolMax[$1] = $2 unless ( $2 == 0 );
                 }
             }, 1, undef);

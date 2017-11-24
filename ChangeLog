@@ -21,7 +21,7 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-Merged pull requests #121, #125, #131, #133, #134, #137, #148, #149, #150
+Merged pull requests #99, #121, #125, #131, #133, #134, #137, #148, #149, #150
   #151, #152, #153, #155, #157, #167
 
 * lib/BackupPC/Xfer/Smb.pm: made pipeSMB non-blocking to avoid a
@@ -58,7 +58,7 @@ Merged pull requests #121, #125, #131, #133, #134, #137, #148, #149, #150
   config editor.
 
 * config/config.pl: added -mSMB3 to $Conf{SmbClientIncrCmd} and
-  $Conf{SmbClientRestoreCmd} (#XXXX)
+  $Conf{SmbClientRestoreCmd}, from @SvenBunge (#99)
 
 * lib/BackupPC/Xfer/Rsync.pm: improved cleanup of orphan rsyncTmp files
 

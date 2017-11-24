@@ -21,17 +21,73 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+Merged pull requests #121, #125, #131, #133, #134, #137, #148, #149, #150
+  #151, #152, #153, #155, #157, #167
+
+* lib/BackupPC/Xfer/Smb.pm: made pipeSMB non-blocking to avoid a
+  reported deadlock when BackupPC's select() returns ok for reading,
+  but there are no bytes to read from the client tar's log/stdout
+  output.  Parallel change to lib/BackupPC/Xfer/Tar.pm in 4.1.3.
+
+* bin/BackupPC_tarCreate and bin/BackupPC_zipCreate: untaint the host name
+  so they work with setuid under CGI; fixes empty tar or zip files
+  downloaded via CGI interface (issue #156)
+
+* bin/BackupPC: fixed BackupPC::XS min version checking and error message,
+  from @moisseev (#152)
+
+* bin/BackupPC: added more detailed startup information (perl and BackupPC
+  version) to log, from @moisseev (#157)
+
+* bin/BackupPC_rrdUpdate: fixed empty pools hiding from @moisseev (#167)
+
+* lib/BackupPC/Xfer/Smb.pm: now ignores additional debug messages from
+  smbclient, and flags lines in the XferLOG it doesn't recognize.
+
 * Replaced submit with button so that Enter doesn't activate the Delete
   button.  Fixes issue #161, reported by Philippe-M.
 
-* In bin/BackupPC_dump, added "share" to __bpc_progress_state__ message
-  so it is 'backup share "$shareName"'.  Reported by guestisp with a patch.
+* removed commented-out settings for some ftp args (eg, port#) in
+  lib/BackupPC/Xfer/Ftp.pm; reported by Adam W.
 
-* lib/BackupPC/Xfer/Smb.pm ignores additional debug messages from
-  smbclient, and flags lines in the XferLOG it doesn't recognize.
+* bin/BackupPC_backupDelete: only print delta counts if LogLevel is >= 5
+
+* bin/BackupPC_tarExtract: fix existing file size count and size
+
+* lib/BackupPC/CGI/EditConfig.pm: fixed masking of subheadings in
+  config editor.
+
+* config/config.pl: added -mSMB3 to $Conf{SmbClientIncrCmd} and
+  $Conf{SmbClientRestoreCmd} (#XXXX)
+
+* lib/BackupPC/Xfer/Rsync.pm: improved cleanup of orphan rsyncTmp files
+
+* In bin/BackupPC_dump, added "share" to __bpc_progress_state__ message so
+  it is 'backup share "$shareName"'.  Patch #150 by @guestisp (issue #143)
 
 * added share name to log message in lib/BackupPC/CGI/Restore.pm for tar
   and zip restore.
+
+* makeDist: fixed exit code from @moisseev (#153)
+
+* Added Travis CI configuration from @moisseev (#155) and enabled travis
+
+* Replaced "Homepage" with "Github" in config.pl and configure.pl from
+  @moisseev (#121)
+
+* Spelling fixes, mainly in comments from @ka7 (#125).
+
+* Fixed comment in config.pl (zh_CH -> zh_CN) from @patch (#131)
+
+* Fixed German translations from @mainboarder (#133, #134)
+
+* Fixed minor comment typo in config.pl from @pbe-axelor (#137)
+
+* Fixed comments in systemd/README from @schuetzm (#138)
+
+* Fixed Italian translations from @guestip (#148, #149; issue #142)
+
+* Fixed incorrect hash key in German translations from @moisseev (#151)
 
 #------------------------------------------------------------------------
 # Version Version 4.1.3, 3 Jun 2017

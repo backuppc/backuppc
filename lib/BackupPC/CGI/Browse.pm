@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2013  Craig Barratt
+#   Copyright (C) 2003-2017  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.1.4, released 24 Nov 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -84,7 +84,7 @@ sub action
     if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
 	$attr = $view->dirAttrib($num, "", "");
 	if ( keys(%$attr) > 0 ) {
-	    $share = (sort(keys(%$attr)))[0];
+	    $share = (sort(keys(%$attr)))[-1];
 	    $dir   = '/';
 	} else {
             ErrorExit(eval("qq{$Lang->{Directory___EscHTML}}"));

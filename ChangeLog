@@ -31,7 +31,7 @@ Merged pull requests #99, #121, #125, #131, #133, #134, #137, #148, #149, #150
 
 * bin/BackupPC_tarCreate and bin/BackupPC_zipCreate: untaint the host name
   so they work with setuid under CGI; fixes empty tar or zip files
-  downloaded via CGI interface (issue #156)
+  downloaded via CGI interface (fixes issue #156)
 
 * bin/BackupPC: fixed BackupPC::XS min version checking and error message,
   from @moisseev (#152)
@@ -43,6 +43,9 @@ Merged pull requests #99, #121, #125, #131, #133, #134, #137, #148, #149, #150
 
 * lib/BackupPC/Xfer/Smb.pm: now ignores additional debug messages from
   smbclient, and flags lines in the XferLOG it doesn't recognize.
+
+* lib/BackupPC/CGI/Browse.pm: default display now has the last, rather
+  than first, share opened.
 
 * Replaced submit with button so that Enter doesn't activate the Delete
   button.  Fixes issue #161, reported by Philippe-M.

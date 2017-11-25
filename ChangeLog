@@ -31,7 +31,7 @@ Merged pull requests #99, #121, #125, #131, #133, #134, #137, #148, #149, #150
 
 * bin/BackupPC_tarCreate and bin/BackupPC_zipCreate: untaint the host name
   so they work with setuid under CGI; fixes empty tar or zip files
-  downloaded via CGI interface (fixes issue #156)
+  downloaded via CGI interface (fixes issue 156)
 
 * bin/BackupPC: fixed BackupPC::XS min version checking and error message,
   from @moisseev (#152)
@@ -48,7 +48,7 @@ Merged pull requests #99, #121, #125, #131, #133, #134, #137, #148, #149, #150
   than first, share opened.
 
 * Replaced submit with button so that Enter doesn't activate the Delete
-  button.  Fixes issue #161, reported by Philippe-M.
+  button.  Fixes issue 161, reported by Philippe-M.
 
 * removed commented-out settings for some ftp args (eg, port#) in
   lib/BackupPC/Xfer/Ftp.pm; reported by Adam W.
@@ -66,7 +66,7 @@ Merged pull requests #99, #121, #125, #131, #133, #134, #137, #148, #149, #150
 * lib/BackupPC/Xfer/Rsync.pm: improved cleanup of orphan rsyncTmp files
 
 * In bin/BackupPC_dump, added "share" to __bpc_progress_state__ message so
-  it is 'backup share "$shareName"'.  Patch #150 by @guestisp (issue #143)
+  it is 'backup share "$shareName"'.  Patch #150 by @guestisp (issue 143)
 
 * added share name to log message in lib/BackupPC/CGI/Restore.pm for tar
   and zip restore.
@@ -88,7 +88,7 @@ Merged pull requests #99, #121, #125, #131, #133, #134, #137, #148, #149, #150
 
 * Fixed comments in systemd/README from @schuetzm (#138)
 
-* Fixed Italian translations from @guestip (#148, #149; issue #142)
+* Fixed Italian translations from @guestip (#148, #149; issue 142)
 
 * Fixed incorrect hash key in German translations from @moisseev (#151)
 

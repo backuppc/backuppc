@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.0.2, released 18 Mar 2017.
+# Version 4.1.4, released 24 Nov 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -104,7 +104,7 @@ if ( $Conf{BackupPCUserVerify}
 # Ensure we don't have old versions of key libraries and executables
 ###########################################################################
 my $PackageVersion = {
-    'BackupPC::XS' => '0.56',
+    'BackupPC::XS' => '0.57',
     rsync_bpc      => '3.0.9.8',
 };
 

@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 30 Apr 2017.
+# Version 4.1.4, released 25 Nov 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -364,9 +364,23 @@ sub processOneHostBackup
         }
         my $deltaInfo = BackupPC::XS::DeltaRefCnt::new("$pcDir/$bkupNum");
         print("__bpc_progress_state__ refCnt #$bkupNum\n") if ( !$opts{p} );
-        $ErrorCnt += BackupPC::XS::DirOps::refCountAll("$pcDir/$bkupNum", $compress, 1, $deltaInfo);
+        my($err, $inodeMax) = BackupPC::XS::DirOps::refCountAllInodeMax("$pcDir/$bkupNum", $compress, 1, $deltaInfo);
+        $ErrorCnt += $err;
         $deltaInfo->flush();
         $bpc->flushXSLibMesgs();
+        #
+        # Update inodeLast for this backup if it is larger than what's stored in backups
+        #
+        my @backups = $bpc->BackupInfoRead($host);
+        for ( my $i = 0 ; $i < @backups ; $i++ ) {
+            next if ( $backups[$i]{num} != $bkupNum || $backups[$i]{inodeLast} > $inodeMax );
+            $inodeMax += 2;
+            print("BackupPC_refCountUpdate: $host #$bkupNum inodeLast set to $inodeMax (was $backups[$i]{inodeLast})\n");
+            $backups[$i]{inodeLast} = $inodeMax;
+            BackupPC::Storage->backupInfoWrite($pcDir, $bkupNum, $backups[$i], 1);
+            $bpc->BackupInfoWrite($host, @backups);
+            last;
+        }
     }
     print("__bpc_progress_state__ cntUpdate #$bkupNum\n") if ( !$opts{p} );
     updateHostDelta2Cnt($host, $bkupRefCntDir, $fsck, 0, $bkupNum);

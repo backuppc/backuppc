@@ -87,7 +87,7 @@
 #
 #========================================================================
 #
-# Version 4.1.3, released 3 Jun 2017.
+# Version 4.1.4, released 25 Nov 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -304,6 +304,7 @@ my $lastIncrTime = 0;
 my($incrBaseTime, $incrBaseBkupNum);
 my($lastBkupIdx, $lastBkupNum, $lastBkupType, $lastBkupCompressLevel, $prevBkupIdx);
 my($newBkupNum, $newBkupIdx, $preV4, $noFillCnt);
+my $inodeLast = 1;
 
 #
 # Maintain backward compatibility with $Conf{FullPeriod} == -1 or -2
@@ -422,6 +423,7 @@ my $thisNoFillCnt;
 for ( my $i = 0 ; $i < @Backups ; $i++ ) {
     $Backups[$i]{preV4} = ($Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./) ? 1 : 0;
     $thisNoFillCnt++ if ( $Backups[$i]{noFill} );
+    $inodeLast = $Backups[$i]{inodeLast} if ( $inodeLast < $Backups[$i]{inodeLast} );
     if ( !defined($lastBkupNum) || $Backups[$i]{num} > $lastBkupNum ) {
         $lastBkupNum           = $Backups[$i]{num};
         $prevBkupIdx           = $lastBkupIdx;
@@ -817,7 +819,6 @@ if ( $newBkupIdx >= @Backups ) {
     $Backups[$newBkupIdx]{xferMethod} = $Conf{XferMethod};
     $Backups[$newBkupIdx]{charset}    = $Conf{ClientCharset};
     $Backups[$newBkupIdx]{version}    = $bpc->Version();
-    $Backups[$newBkupIdx]{inodeLast}  = $Backups[$lastBkupIdx]{inodeLast};
     $Backups[$newBkupIdx]{compress}   = $Conf{CompressLevel};
 }
 #
@@ -862,7 +863,7 @@ if ( defined($newBkupNum) && !-d "$Dir/$newBkupNum/refCnt" ) {
 #
 # Save backupInfo and backups
 #
-BackupPC::Storage->backupInfoWrite($Dir, $newBkupNum, $Backups[$newBkupIdx]);
+BackupPC::Storage->backupInfoWrite($Dir, $newBkupNum, $Backups[$newBkupIdx], 1);
 $bpc->BackupInfoWrite($client, @Backups);
 
 my $startTime     = time();
@@ -875,7 +876,6 @@ my $sizeNew       = 0;
 my $sizeNewComp   = 0;
 my $nFilesTotal   = 0;
 my $sizeTotal     = 0;
-my $inodeLast;
 my($logMsg, %stat, $xfer, $ShareNames, $noFilesErr);
 
 $ShareNames = BackupPC::Xfer::getShareNames(\%Conf);
@@ -926,6 +926,14 @@ for my $shareName ( @$ShareNames ) {
     }
 
     print("__bpc_progress_state__ backup share \"$shareName\"\n") if ( !$opts{p} );
+
+    #
+    # Update inodeLast for this backup
+    #
+    @Backups = $bpc->BackupInfoRead($client);
+    $Backups[$newBkupIdx]{inodeLast} = $inodeLast;
+    BackupPC::Storage->backupInfoWrite($Dir, $newBkupNum, $Backups[$newBkupIdx], 1);
+    $bpc->BackupInfoWrite($client, @Backups);
 
     $xfer = BackupPC::Xfer::create($Conf{XferMethod}, $bpc);
     if ( !defined($xfer) ) {

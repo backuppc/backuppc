@@ -21,6 +21,13 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+* Changed required BackupPC::XS version from 0.56 to 0.57.
+
+* bin/BackupPC_dump now updates inodeLast for share being backed up.
+
+* bin/BackupPC_refCountUpdate: inodeLast is checked and updated during fsck;
+  needs BackupPC::XS 0.57.
+
 #------------------------------------------------------------------------
 # Version 4.1.4, 25 Nov 2017
 #------------------------------------------------------------------------

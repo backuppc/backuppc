@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.1.3, released 3 Jun 2017.
+# Version 4.1.5, released 3 Dec 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -109,6 +109,7 @@ BackupPC::XS::Lib::logLevelSet($Conf{XferLogLevel});
 my @Backups = $bpc->BackupInfoRead($client);
 
 my($lastBkupIdx, $lastBkupNum, $newBkupNum, $newBkupIdx);
+my($PaxHdrGlobal);
 
 $newBkupIdx  = @Backups - 1;
 $newBkupNum  = $Backups[$newBkupIdx]{num};
@@ -233,6 +234,7 @@ sub TarReadFileInfo
     my($name, $mode, $uid, $gid, $size, $mtime, $chksum, $type,
        $linkname, $magic, $version, $uname, $gname, $devmajor,
        $devminor, $prefix);
+    my $paxHdr = {};
 
     while ( 1 ) {
         $head = TarReadHeader($fh);
@@ -298,23 +300,51 @@ sub TarReadFileInfo
            print("$name: checksum error at " . sysseek($fh, 0, 1) , "\n");
            $Errors++;
         }
+
         if ( $type eq "L" ) {
             $longName = TarRead($fh, $size) || return;
             # remove trailing NULL
-            $longName = substr($longName, 0, $size - 1);
+            $paxHdr = {};
+            $paxHdr->{path} = substr($longName, 0, $size - 1);
             TarFlush($fh, $size);
             next;
         } elsif ( $type eq "K" ) {
             $longLink = TarRead($fh, $size) || return;
             # remove trailing NULL
-            $longLink = substr($longLink, 0, $size - 1);
+            $paxHdr->{linkpath} = substr($longLink, 0, $size - 1);
             TarFlush($fh, $size);
             next;
+        } elsif ( $type eq "x" || $type eq "g" ) {
+            my $paxStr = TarRead($fh, $size) || return;
+            $paxHdr = {};
+            while ( $paxStr =~ /(\d+) (.*?)=(.*?)\n(.*)/s ) {
+                $paxHdr->{$2} = $3;
+                printf("Got pax header $2 -> $3\n");
+                $paxStr = $4;
+            }
+            TarFlush($fh, $size);
+            if ( $type eq "g" ) {
+                $PaxHdrGlobal = $paxHdr;
+                $paxHdr = {};
+            }
+            next;
         }
+
+        #
+        # merge global headers if defined, then override extracted file meta data
+        #
+        $paxHdr = { %$PaxHdrGlobal, %$paxHdr } if ( $PaxHdrGlobal );
+        $name     = $paxHdr->{path}     if ( defined($paxHdr->{path}) );
+        $linkname = $paxHdr->{linkpath} if ( defined($paxHdr->{linkpath}) );
+        $size     = $paxHdr->{size}     if ( defined($paxHdr->{size}) );
+        $mtime    = $paxHdr->{mtime}    if ( defined($paxHdr->{mtime}) );
+        $uid      = $paxHdr->{uid}      if ( defined($paxHdr->{uid}) );
+        $gid      = $paxHdr->{gid}      if ( defined($paxHdr->{gid}) );
+        $uname    = $paxHdr->{uname}    if ( defined($paxHdr->{uname}) );
+        $gname    = $paxHdr->{gname}    if ( defined($paxHdr->{gname}) );
+
         printf("Got file '%s', mode 0%o, size %g, type %d\n",
                 $name, $mode, $size, $type) if ( $Conf{XferLogLevel} >= 3 );
-        $name     = $longName if ( defined($longName) );
-        $linkname = $longLink if ( defined($longLink) );
 
         #
         # Map client charset encodings to utf8

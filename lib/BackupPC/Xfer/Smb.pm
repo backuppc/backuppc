@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.3, released 3 Jun 2017.
+# Version 4.1.4, released 24 Nov 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -315,6 +315,7 @@ sub readOutput
                 || /^\s*creating lame (up|low)case table/i
                 || /^\s*rlimit_max: increasing rlimit_max/i
                 || /^\s*OS=\[/i
+                || /^\s*$/
 	    ) {
             # ignore these messages
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );

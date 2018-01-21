@@ -1282,6 +1282,7 @@ $Conf{RsyncArgs} = [
 #                                 $Conf{ClientNameAlias} is set)
 #        $hostIP       IP address of host
 #        $confDir      configuration directory path
+#        $shareName    share name being backed up
 #
 # This allows settings of the form:
 #

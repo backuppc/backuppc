@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.1.3, released 3 Jun 2017.
+# Version 4.1.4, released 24 Nov 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -166,6 +166,7 @@ sub start
                             host      => $t->{host},
                             hostIP    => $t->{hostIP},
                             client    => $t->{client},
+			    shareName => $t->{shareName},
                             confDir   => $conf->{ConfDir},
                             sshPath   => $conf->{SshPath},
                         });
@@ -357,6 +358,7 @@ sub start
                             host      => $t->{host},
                             hostIP    => $t->{hostIP},
                             client    => $t->{client},
+			    shareName => $t->{shareName},
                             confDir   => $conf->{ConfDir},
                             sshPath   => $conf->{SshPath},
                         });

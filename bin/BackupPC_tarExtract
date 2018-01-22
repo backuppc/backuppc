@@ -319,7 +319,7 @@ sub TarReadFileInfo
             $paxHdr = {};
             while ( $paxStr =~ /(\d+) (.*?)=(.*?)\n(.*)/s ) {
                 $paxHdr->{$2} = $3;
-                printf("Got pax header $2 -> $3\n");
+                print("Got pax header $2 -> $3\n") if ( $Conf{XferLogLevel} >= 6 );
                 $paxStr = $4;
             }
             TarFlush($fh, $size);

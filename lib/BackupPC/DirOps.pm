@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.1.4, released 24 Nov 2017.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -109,7 +109,7 @@ sub dirRead
 
     from_to($path, "utf8", $need->{charsetLegacy})
                         if ( $need->{charsetLegacy} ne "" );
-    return if ( !opendir(my $fh, $path) );
+    return [] if ( !opendir(my $fh, $path) );
     if ( $IODirentLoaded && !$IODirentOk ) {
         #
         # Make sure the IO::Dirent really works - some installs

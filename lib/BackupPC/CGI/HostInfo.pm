@@ -157,7 +157,15 @@ EOF
                             if ( $Backups[$i]{fillFromNum} ne "" );
         my $ltype = $Lang->{"backupType_$Backups[$i]{type}"};
         $str .= <<EOF;
-<tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
+<tr><td align="center" class="border"><form name="DeleteForm" action="$MyURL" method="get" style="margin-bottom: 0px;">
+        <input type="hidden" name="action" value="deleteBackup">
+        <input type="hidden" name="host"   value="$host">
+        <input type="hidden" name="num"    value="$Backups[$i]{num}">
+        <input type="hidden" name="nofill" value="$Backups[$i]{noFill}">
+        <input type="hidden" name="ltype"  value="$ltype">
+        <input type="submit" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}">
+    </form></td>
+    <td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center" class="border"> $ltype </td>
     <td align="center" class="border"> $filled </td>
     <td align="center" class="border"> $level </td>

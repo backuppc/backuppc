@@ -751,6 +751,10 @@ sub Main_TryToRun_Bg_or_User_Queue
             $progName = "BackupPC_restore";
             $type     = "restore";
             push(@args, $req->{hostIP}, $req->{host}, $req->{reqFileName});
+        } elsif ( $req->{delete} ) {
+            $progName = "BackupPC_backupDelete";
+            $type     = "delete";
+            push(@args, '-h', $req->{host}, '-n', $req->{num}, $req->{opts});
 	} elsif ( $req->{archive} ) {
             $progName = "BackupPC_archive";
             $type     = "archive";
@@ -1566,6 +1570,35 @@ sub Main_Check_Client_Messages
                                . " so this request will start later";
                     } else {
                         $reply = "ok: requested restore of $host";
+                    }
+                }
+            } elsif ( $cmd =~ /^delete (\S+)\s+(\S+)\s+(\d+)\s+(.*)/ ) {
+                my $user = $1;
+                $host    = $bpc->uriUnesc($2);
+                my $num  = $3;
+                my $opts = $4;
+                if ( !defined($Hosts->{$host}) ) {
+                    print(LOG $bpc->timeStamp,
+                               "User $user requested delete from unknown host $host");
+                    $reply = "delete error: unknown host $host";
+                } else {
+                    print(LOG $bpc->timeStamp,
+                               "User $user requested delete for backup #$num from $host\n");
+                    unshift(@UserQueue, {
+                                host    => $host,
+                                num     => $num,
+                                reqTime => time,
+                                delete  => 1,
+                                opts    => $opts,
+                                userReq => 1,
+                        });
+                    $UserQueueOn{$host} = 1;
+                    if ( defined($Jobs{$host}) ) {
+                        $reply = "ok: requested delete from $host, but a"
+                               . " job is currently running,"
+                               . " so this request will start later";
+                    } else {
+                        $reply = "ok: requested delete from $host";
                     }
                 }
             } elsif ( $cmd =~ /^status\s*(.*)/ ) {

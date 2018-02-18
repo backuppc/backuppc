@@ -44,15 +44,18 @@ use Encode qw(decode_utf8);
 
 sub action {
     my ( $str, $reply );
-    my $host   = $In{host};
-    my $num    = $In{num};
-    my $filled = $In{nofill} ? $Lang->{An_unfilled} : $Lang->{A_filled};
-    my $type   = decode_utf8($In{ltype});
+    my $host = $In{host};
 
     my $Privileged = CheckPermission($host);
     if ( !$Privileged ) {
         ErrorExit( eval("qq{$Lang->{Only_privileged_users_can_delete_backups}}") );
     }
+    if ( $In{num} !~ /^\d+$/ || $In{type} !~ /^\w+$/ || $In{nofill} !~ /^\d+$/ ) {
+        ErrorExit("Backup number ${EscHTML($In{num})} for host ${EscHTML($host)} does not exist.");
+    }
+    my $num    = $In{num};
+    my $filled = $In{nofill} ? $Lang->{An_unfilled} : $Lang->{A_filled};
+    my $type   = $Lang->{$In{type}};
     ServerConnect();
     if ( $In{doit} ) {
         $str   = eval("qq{$Lang->{Delete_requested_for_backup_of__host_by__User}}");

@@ -162,7 +162,7 @@ EOF
         <input type="hidden" name="host"   value="$host">
         <input type="hidden" name="num"    value="$Backups[$i]{num}">
         <input type="hidden" name="nofill" value="$Backups[$i]{noFill}">
-        <input type="hidden" name="ltype"  value="$ltype">
+        <input type="hidden" name="type"   value="$Backups[$i]{type}">
         <input type="submit" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}">
     </form></td>
     <td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>

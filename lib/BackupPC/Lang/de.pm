@@ -177,6 +177,7 @@ Es gibt \$hostCntGood Computer die erfolgreich gesichert wurden, mit insgesamt:
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Computer </td>
     <td align="center"> Benutzer </td>
+    <td align="center"> Kommentar </td>
     <td align="center"> #Voll </td>
     <td align="center"> Alter (Tage) </td>
     <td align="center"> Größe (GiB) </td>

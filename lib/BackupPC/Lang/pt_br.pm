@@ -167,6 +167,7 @@ Existem \$hostCntGood hosts com backup, de um total de :
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Usuario </td>
+    <td align="center"> Comente </td>
     <td align="center"> #Completo </td>
     <td align="center"> Completo Antig. (Dias) </td>
     <td align="center"> Completo Tamanho (GiB) </td>

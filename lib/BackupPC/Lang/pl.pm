@@ -165,6 +165,7 @@ Jest \$hostCntGood hostów które zostaly zabezpieczone, na całkowita liczbę:
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Użytwkonik </td>
+    <td align="center"> Komentarz </td>
     <td align="center"> #Pełny </td>
     <td align="center"> Pełny Wiek (dni) </td>
     <td align="center"> Pełny Rozmiar (GiB) </td>

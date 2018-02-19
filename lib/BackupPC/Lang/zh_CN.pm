@@ -162,6 +162,7 @@ $Lang{BackupPC_Summary} = <<EOF;
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> 客户机 </td>
     <td align="center"> 用户 </td>
+    <td align="center"> 评论 </td>
     <td align="center"> 完全备份个数 </td>
     <td align="center"> 最后一次完全备份 (天前) </td>
     <td align="center"> 完全备份大小 (GiB) </td>

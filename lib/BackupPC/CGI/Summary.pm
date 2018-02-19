@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2013  Craig Barratt
+#   Copyright (C) 2003-2018  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.2.0, released 18 Feb 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -139,6 +139,7 @@ sub action
 <tr$reasonHilite><td class="border">${HostLink($host)}</td>
     <td align="center" class="border"> ${UserLink(defined($Hosts->{$host})
 				    ? $Hosts->{$host}{user} : "")} </td>
+    <td align="center" class="border">${EscHTML($Conf{ClientComment})}</td>
     <td align="center" class="border">$fullCnt</td>
     <td align="center" class="border">$fullAge</td>
     <td align="center" class="border">$fullSize</td>

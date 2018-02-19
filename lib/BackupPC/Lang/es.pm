@@ -164,6 +164,7 @@ Hay \$hostCntGood hosts que tienen copia de seguridad, de un total de :
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"> <td> Host </td>
     <td align="center"> Usuario </td>
+    <td align="center"> Comentario </td>
     <td align="center"> # Completo </td>
     <td align="center"> Completo Antiguedad (d&iacute;as) </td>
     <td align="center"> Completo Tama&ntilde;o (GB) </td>

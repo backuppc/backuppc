@@ -163,6 +163,7 @@ There are \$hostCntGood hosts that have been backed up, for a total of:
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> User </td>
+    <td align="center"> Comment </td>
     <td align="center"> #Full </td>
     <td align="center"> Full Age (days) </td>
     <td align="center"> Full Size (GiB) </td>

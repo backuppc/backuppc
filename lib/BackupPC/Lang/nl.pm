@@ -164,6 +164,7 @@ Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Machine </td>
     <td align="center"> Gebruiker </td>
+    <td align="center"> Commentaar </td>
     <td align="center"> Aantal Voll. </td>
     <td align="center"> Voll.Lftd (dagen) </td>
     <td align="center"> Voll.Grootte (GiB) </td>

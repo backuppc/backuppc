@@ -174,6 +174,7 @@ Ci sono \$hostCntGood host sottoposti a backup per un totale di:
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Utente </td>
+    <td align=";enter"> Commento </td>
     <td align="center"> Completi </td>
     <td align="center"> Et&agrave; completi (giorni) </td>
     <td align="center"> Dimensione completi (GiB) </td>

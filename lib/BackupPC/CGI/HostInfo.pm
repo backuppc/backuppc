@@ -366,6 +366,9 @@ EOF
         $statusStr .= eval("qq{$Lang->{Backups_are_deferred_for_hours_hours_change_this_number}}");
 
     }
+    if ( length($Conf{ClientComment}) ) {
+        $statusStr .= "<li>${EscHTML($Conf{ClientComment})}\n";
+    }
     if ( @Backups ) {
         # only allow incremental if there are already some backups
         $startIncrStr = <<EOF;

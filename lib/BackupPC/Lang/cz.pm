@@ -162,6 +162,7 @@ $Lang{BackupPC_Summary} = <<EOF;
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Uživatel </td>
+    <td align="center"> Poznámka </td>
     <td align="center"> #Plný </td>
     <td align="center"> Plný Èas (dní) </td>
     <td align="center"> Plný Velikost (GiB) </td>

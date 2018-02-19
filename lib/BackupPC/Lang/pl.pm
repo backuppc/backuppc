@@ -705,14 +705,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Kliknij na numer kopii aby przeglądać i przywracać wybrane pliki/katalogi.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> Backup# </td>
+<tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Wypełniony </td>
     <td align="center"> Poziom </td>
     <td align="center"> Początek </td>
     <td align="center"> Czas trwania w min. </td>
     <td align="center"> Wiek/dni </td>
+    <td align="center"> </td>
     <td align="center"> Ścieżka serwera kopii </td>
 </tr>
 \$str

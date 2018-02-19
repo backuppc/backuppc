@@ -706,14 +706,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> backup nr.</td>
+<tr class="tableheader"><td align="center"> backup nr.</td>
     <td align="center"> Type </td>
     <td align="center"> Aangevuld </td>
     <td align="center"> Niveau </td>
     <td align="center"> Startdatum </td>
     <td align="center"> Duurtijd in min. </td>
     <td align="center"> Lftd. in dagen </td>
+    <td align="center"> </td>
     <td align="center"> Plaats op de server </td>
 </tr>
 \$str

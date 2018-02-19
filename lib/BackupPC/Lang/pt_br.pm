@@ -708,14 +708,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Clique no número do Backup para revisar e restaurar arquivos.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> Cópia Nº </td>
+<tr class="tableheader"><td align="center"> Cópia Nº </td>
     <td align="center"> Tipo </td>
     <td align="center"> Completo </td>
     <td align="center"> ENG Level </td>
     <td align="center"> Data Início </td>
     <td align="center"> Duração/min </td>
     <td align="center"> Idade/dias </td>
+    <td align="center"> </td>
     <td align="center"> Rota da Cópia no Servidor </td>
 </tr>
 \$str

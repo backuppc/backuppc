@@ -716,14 +716,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Cliccare sul numero di backup per sfogliare e ripristinare i file di backup.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> Numero backup </td>
+<tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
     <td align="center"> Filled </td>
     <td align="center"> Livello </td>
     <td align="center"> Data avvio </td>
     <td align="center"> Durata (minuti) </td>
     <td align="center"> Et&agrave; (giorni) </td>
+    <td align="center"> </td>
     <td align="center"> Percorso backup server </td>
 </tr>
 \$str

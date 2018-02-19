@@ -704,14 +704,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Click on the backup number to browse and restore backup files.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> Backup# </td>
+<tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> Filled </td>
     <td align="center"> Level </td>
     <td align="center"> Start Date </td>
     <td align="center"> Duration/mins </td>
     <td align="center"> Age/days </td>
+    <td align="center"> </td>
     <td align="center"> Server Backup Path </td>
 </tr>
 \$str

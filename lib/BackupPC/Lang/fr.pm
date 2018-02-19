@@ -702,14 +702,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de sauvegarde.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> Sauvegarde n° </td>
+<tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
     <td align="center"> Fusionnée </td> 
     <td align="center"> Niveau </td>
     <td align="center"> Date de démarrage </td>
     <td align="center"> Durée (min) </td>
     <td align="center"> Âge (jours) </td>
+    <td align="center"> </td>
     <td align="center"> Chemin d\'accès de la sauvegarde sur le serveur </td>
 </tr>
 \$str

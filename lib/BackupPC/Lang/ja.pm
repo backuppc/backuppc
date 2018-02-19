@@ -696,14 +696,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 閲覧・バックアップファイルのリストアを行いたいバックアップ番号をクリックしてください。
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> バックアップ番号 </td>
+<tr class="tableheader"><td align="center"> バックアップ番号 </td>
     <td align="center"> 種別 </td>
     <td align="center"> フィルド </td>
     <td align="center"> レベル </td>
     <td align="center"> 開始日時 </td>
     <td align="center"> 間隔(分) </td>
     <td align="center"> 経過(日) </td>
+    <td align="center"> </td>
     <td align="center"> サーババックアップパス </td>
 </tr>
 \$str

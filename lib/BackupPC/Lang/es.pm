@@ -705,14 +705,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Haga click en el n&uacute;mero de copia de seguridad para revisar y restaurar archivos.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> Copia N&deg; </td>
+<tr class="tableheader"><td align="center"> Copia N&deg; </td>
     <td align="center"> Tipo </td>
     <td align="center"> Completo </td>
     <td align="center"> Nivel </td>
     <td align="center"> Fecha Inicio </td>
     <td align="center"> Duraci&oacute;n/min </td>
     <td align="center"> Antiguedad/d&iacute;as </td>
+    <td align="center"> </td>
     <td align="center"> Ruta a la Copia en Servidor </td>
 </tr>
 \$str

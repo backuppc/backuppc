@@ -690,14 +690,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 点击备份序列号浏览和恢复文件。
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> 备份序列号＃ </td>
+<tr class="tableheader"><td align="center"> 备份序列号＃ </td>
     <td align="center"> 类型 </td>
     <td align="center"> 完整 </td>
     <td align="center"> 备份级别 </td>
     <td align="center"> 开始时间 </td>
     <td align="center"> 耗时（分钟）</td>
     <td align="center"> 距离现在（天前）</td>
+    <td align="center"> </td>
     <td align="center"> 服务器上备份路径 </td>
 </tr>
 \$str

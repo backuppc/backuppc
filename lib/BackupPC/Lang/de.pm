@@ -716,14 +716,14 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wiederherzustellen.
 </p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3">
-<tr class="tableheader"><td align="center" bgcolor="#ffffff"> </td>
-    <td align="center"> Backup# </td>
+<tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> gefüllt </td>
     <td align="center"> Level </td>
     <td align="center"> Start Zeitpunkt </td>
     <td align="center"> Dauer/min </td>
     <td align="center"> Alter/Tage </td>
+    <td align="center"> </td>
     <td align="center"> Serverbackuppfad </td>
 </tr>
 \$str

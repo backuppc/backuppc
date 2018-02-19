@@ -483,6 +483,7 @@ use vars qw(%ConfigMeta);
                 MaxOldPerPCLogFiles       => "boolean",
                 CompressLevel             => "boolean",
                 ClientNameAlias           => "boolean",
+                ClientComment             => "boolean",
                 DumpPreUserCmd            => "boolean",
                 DumpPostUserCmd           => "boolean",
                 RestorePreUserCmd         => "boolean",

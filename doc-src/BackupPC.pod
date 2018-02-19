@@ -2912,7 +2912,7 @@ following files:
 
 Current log file for this PC from BackupPC_dump.
 
-=item LOG.DDMMYYYY or LOG.DDMMYYYY.z
+=item LOG.MMYYYY or LOG.MMYYYY.z
 
 Last month's log file.  Log files are aged monthly and compressed
 (if compression is enabled), and old LOG files are deleted.

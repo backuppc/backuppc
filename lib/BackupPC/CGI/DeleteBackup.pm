@@ -11,7 +11,7 @@
 #   Alexander Moisseev  <moiseev@mezonplus.ru>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2017  Craig Barratt
+#   Copyright (C) 2003-2018  Craig Barratt
 #   Copyright (C) 2017  Alexander Moisseev
 #
 #   This program is free software: you can redistribute it and/or modify
@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 4.1.3, released 3 Jun 2017.
+# Version 4.2.0, released 18 Feb 2018.
 #
 # See http://backuppc.github.io/backuppc
 #
@@ -50,7 +50,7 @@ sub action {
     if ( !$Privileged ) {
         ErrorExit( eval("qq{$Lang->{Only_privileged_users_can_delete_backups}}") );
     }
-    if ( $In{num} !~ /^\d+$/ || $In{type} !~ /^\w+$/ || $In{nofill} !~ /^\d+$/ ) {
+    if ( $In{num} !~ /^\d+$/ || $In{type} !~ /^\w*$/ || $In{nofill} !~ /^\d*$/ ) {
         ErrorExit("Backup number ${EscHTML($In{num})} for host ${EscHTML($host)} does not exist.");
     }
     my $num    = $In{num};

@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2017  Craig Barratt
+#   Copyright (C) 2001-2018  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.1, released 29 Mar 2017.
+# Version 4.2.0, released 18 Feb 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -102,29 +102,12 @@ if ( !-f "$Dir/LOCK" ) {
     open(LOCK, ">", "$Dir/LOCK") && close(LOCK);
 }
 
-my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
-my $logPath = sprintf("%s/LOG.%02d%04d", $Dir, $mon + 1, $year + 1900);
-
-if ( !-f $logPath ) {
-    #
-    # Compress and prune old log files
-    #
-    my $lastLog = $Conf{MaxOldPerPCLogFiles} - 1;
-    foreach my $file ( $bpc->sortedPCLogFiles($client) ) {
-        if ( $lastLog <= 0 ) {
-            unlink($file);
-            next;
-        }
-        $lastLog--;
-        next if ( $file =~ /\.z$/ || !$Conf{CompressLevel} );
-        BackupPC::XS::compressCopy($file,
-                                        "$file.z",
-                                        undef,
-                                        $Conf{CompressLevel}, 1);
-    }
+my($LogFd, $LogPath) = $bpc->openPCLogFile($client);
+if ( !defined($LogFd) ) {
+    print("Unable to open/create $LogPath; exiting\n");
+    exit(1);
 }
-open(LOG, ">>", $logPath);
-select(LOG); $| = 1; select(STDOUT);
+select($LogFd); $| = 1; select(STDOUT);
 
 #
 # Read the request file
@@ -185,11 +168,11 @@ foreach my $h ( @validHosts ) {
     ($host, $hostIP) = @$h;
     my $delay = $bpc->CheckHostAlive($hostIP);
     if ( $delay < 0 ) {
-	print(LOG $bpc->timeStamp, "no ping response from $hostIP ($host)\n");
+	print($LogFd $bpc->timeStamp, "no ping response from $hostIP ($host)\n");
 	$hostIP = undef;
 	next;
     } elsif ( $delay > $Conf{PingMaxMsec} ) {
-	printf(LOG "%sping too slow on $hostIP ($host) %.4gmsec\n", $bpc->timeStamp, $delay);
+	printf($LogFd "%sping too slow on $hostIP ($host) %.4gmsec\n", $bpc->timeStamp, $delay);
 	$hostIP = undef;
 	next;
     }
@@ -361,7 +344,7 @@ if ( $useTar ) {
 	open(STDOUT, ">&WH");
 	alarm(0);
 	exec("$BinDir/BackupPC_tarCreate", @tarArgs);
-	print(LOG $bpc->timeStamp, "can't exec $BinDir/BackupPC_tarCreate\n");
+	print($LogFd $bpc->timeStamp, "can't exec $BinDir/BackupPC_tarCreate\n");
 	print(STDERR "$0: can't exec $BinDir/BackupPC_tarCreate\n") if ( $opts{v} );
 	# FIX: need to cleanup xfer
 	exit(0);
@@ -374,7 +357,7 @@ if ( $useTar ) {
 
     @xferPid = $xfer->xferPid;
 
-    print(LOG $bpc->timeStamp, $logMsg, "\n");
+    print($LogFd $bpc->timeStamp, $logMsg, "\n");
     print(STDERR $logMsg, "\n") if ( $opts{v} );
     print("started_restore\n");
 
@@ -418,7 +401,7 @@ if ( $useTar ) {
 	}
 	last if ( !$xfer->readOutput(\$FDread, $rout) );
 	while ( my $str = $xfer->logMsgGet ) {
-	    print(LOG $bpc->timeStamp, "xfer: $str\n");
+	    print($LogFd $bpc->timeStamp, "xfer: $str\n");
             print(STDERR "xfer: $str\n") if ( $opts{v} );
 	}
 	if ( $xfer->getStats->{fileCnt} == 1 ) {
@@ -438,7 +421,7 @@ if ( $useTar ) {
     #
     # otherwise the xfer module does everything for us
     #
-    print(LOG $bpc->timeStamp, $logMsg . "\n");
+    print($LogFd $bpc->timeStamp, $logMsg . "\n");
     print(STDERR $logMsg, "\n") if ( $opts{v} );
     print("started_restore\n");
     ($xferCreateFileCnt, $xferCreateByteCnt,
@@ -503,7 +486,7 @@ sub HostLookupCheck
     #
     print("Name server doesn't know about $host; trying NetBios\n") if ( $opts{v} );
     if ( !defined($hostIP = $bpc->NetBiosHostIPFind($host)) ) {
-        print(LOG $bpc->timeStamp, "Can't find host $host via NS and netbios\n");
+        print($LogFd $bpc->timeStamp, "Can't find host $host via NS and netbios\n");
         print("host $host not found\n");
     }
     return $hostIP;
@@ -526,7 +509,7 @@ sub catch_signal
     #
     # Note: needs to be tested for each kind of XferMethod
     #
-    print(LOG $bpc->timeStamp, "cleaning up after signal $signame\n");
+    print($LogFd $bpc->timeStamp, "cleaning up after signal $signame\n");
     print(STDERR "$0: cleaning up after signal $signame\n") if ( $opts{v} );
     $SIG{$signame} = 'IGNORE';
     $RestoreLOG->write(\"exiting after signal $signame\n");
@@ -646,12 +629,12 @@ sub RestoreCleanup
     $bpc->RestoreInfoWrite($client, @Restores);
 
     if ( !$stat{xferOK} ) {
-	print(LOG $bpc->timeStamp, "restore failed ($stat{hostError})\n");
+	print($LogFd $bpc->timeStamp, "restore failed ($stat{hostError})\n");
 	print("restore failed: $stat{hostError}\n");
 	return 1;
     } else {
         $stat{xferErrCnt} ||= 0;
-	print(LOG $bpc->timeStamp, "restore $lastNum complete"
+	print($LogFd $bpc->timeStamp, "restore $lastNum complete"
                 . " ($xferCreateFileCnt files, $xferCreateByteCnt bytes,"
                 . " $xferCreateDirCnt dirs, $stat{xferErrCnt} xferErrs)\n");
 	print("restore complete\n");
@@ -692,7 +675,7 @@ sub UserCommandRun
         share        => $RestoreReq{shareDest},
         XferMethod   => $Conf{XferMethod},
         sshPath      => $Conf{SshPath},
-        LOG          => *LOG,
+        LOG          => $LogFd,
 	user         => $Hosts->{$client}{user},
 	moreUsers    => $Hosts->{$client}{moreUsers},
         XferLOG      => $RestoreLOG,

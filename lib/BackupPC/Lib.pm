@@ -1366,6 +1366,39 @@ sub sortedPCLogFiles
 }
 
 #
+# Opens a writeable file handle to the per-client's LOG file.
+# Also ages LOG files if the LOG file is new
+#
+sub openPCLogFile
+{
+    my($bpc, $client) = @_;
+    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    my $logPath = sprintf("%s/pc/%s/LOG.%02d%04d", $bpc->{TopDir}, $client, $mon + 1, $year + 1900);
+    my $logFd;
+
+    if ( !-f $logPath ) {
+        #
+        # Compress and prune old log files
+        #
+        my $lastLog = $bpc->{Conf}{MaxOldPerPCLogFiles} - 1;
+        foreach my $file ( $bpc->sortedPCLogFiles($client) ) {
+            if ( $lastLog <= 0 ) {
+                unlink($file);
+                next;
+            }
+            $lastLog--;
+            next if ( $file =~ /\.z$/ || !$bpc->{Conf}{CompressLevel} );
+            BackupPC::XS::compressCopy($file,
+                                        "$file.z",
+                                        undef,
+                                        $bpc->{Conf}{CompressLevel}, 1);
+        }
+    }
+    open($logFd, ">>", $logPath);
+    return ($logFd, $logPath);
+}
+
+#
 # converts a glob-style pattern into a perl regular expression.
 #
 sub glob2re

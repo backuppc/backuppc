@@ -604,26 +604,28 @@ sub mergeDir
         }
         next if ( $a->{type} != BPC_FTYPE_DIR );
         #
-        # Since it's a directory, move the whole thing over.
+        # Since it's a directory, if it exists, move the whole thing over.
         # We need to traverse the moved directory to make sure any referenced
         # inodes get moved over too and to update the reference counts added
         # to the merge backup.
         #
         my $file = $bpc->fileNameEltMangle($fileUM);
-        logMsg("renaming $delDir/$file to $mergeDir/$file\n") if ( $LogLevel >= 7 );
-        if ( !rename("$delDir/$file", "$mergeDir/$file") ) {
-            #
-            # try again if the target directory doesn't exist
-            #
-            mkpath($mergeDir, 0, 0777) if ( !-d $mergeDir );
+        if ( -d "$delDir/$file" ) {
+            logMsg("renaming $delDir/$file to $mergeDir/$file\n") if ( $LogLevel >= 7 );
             if ( !rename("$delDir/$file", "$mergeDir/$file") ) {
-                logMsg("Can't move $delDir/$file to $mergeDir/$file; removing tree\n");
                 #
-                # need to remove this tree.
+                # try again if the target directory doesn't exist
                 #
-                BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, $DeltaDel, \&progressUpdate);
-                $Errors++;
-                next;
+                mkpath($mergeDir, 0, 0777) if ( !-d $mergeDir );
+                if ( !rename("$delDir/$file", "$mergeDir/$file") ) {
+                    logMsg("Can't move $delDir/$file to $mergeDir/$file; removing tree\n");
+                    #
+                    # need to remove this tree.
+                    #
+                    BackupPC::DirOps::RmTreeQuiet($bpc, "$delDir/$file", $DelCompress, $DeltaDel, \&progressUpdate);
+                    $Errors++;
+                    next;
+                }
             }
         }
         BackupPC::DirOps::find($bpc, {wanted => \&copyInodes}, "$mergeDir/$file", 1);

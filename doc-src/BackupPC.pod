@@ -2164,7 +2164,8 @@ The usage is:
        -n dumpNum      dump number from which the tar archive is created
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
-       -s shareName    share name from which the tar archive is created
+       -s shareName    share name from which the tar archive is created;
+                       can be "*" to mean all shares.
   
     Other options:
        -t              print summary totals

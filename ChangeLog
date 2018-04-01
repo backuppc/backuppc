@@ -21,6 +21,33 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+Merged pull request #160.
+
+* Backups can now be deleted via the CGI interface, written by @moisseev
+  (#160).
+  
+* bin/BackupPC_backupDelete: added -L option that puts output into client
+  LOG file, to support CGI backup deletion.
+
+* Added support for a user-editable comment per host, via a new ClientComment
+  config parameter, requested by @andrewmaksymowsky.
+  
+* bin/BackupPC_tarExtract: Added support for pax headers, which smbclient
+  uses for long file names
+
+* bin/BackupPC_backupDelete: make sure directory exists when renaming tree
+  from deleted backup.
+
+* lib/BackupPC/Xfer/Smb.pm: ignore empty output lines from smbclient;
+  fixes issue #159.
+
+* bin/BackupPC: improved several of the exit error messages.
+
+* lib/BackupPC/Xfer/Rsync.pm: added shareName to RsyncArgs* argument
+  substitutions; suggested by Alex Kobel.
+
+* conf/BackupPC_stnd.css: removed import url('https://fonts.googleapis.com/css....'.
+
 #------------------------------------------------------------------------
 # Version 4.1.5, 3 Dec 2017
 #------------------------------------------------------------------------

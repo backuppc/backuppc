@@ -21,7 +21,7 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-Merged pull request #160.
+Merged pull requests #160, #190.
 
 * Backups can now be deleted via the CGI interface, written by @moisseev
   (#160).
@@ -46,7 +46,8 @@ Merged pull request #160.
 * lib/BackupPC/Xfer/Rsync.pm: added shareName to RsyncArgs* argument
   substitutions; suggested by Alex Kobel.
 
-* conf/BackupPC_stnd.css: removed import url('https://fonts.googleapis.com/css....'.
+* conf/BackupPC_stnd.css: removed import url('https://fonts.googleapis.com/css....'
+  suggested by @MartijnRas in issue #174.
 
 #------------------------------------------------------------------------
 # Version 4.1.5, 3 Dec 2017

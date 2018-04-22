@@ -724,7 +724,7 @@ Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wi
     <td align="center"> Start Zeitpunkt </td>
     <td align="center"> Dauer/min </td>
     <td align="center"> Alter/Tage </td>
-    <td align="center"> </td>
+    \$deleteHdrStr
     <td align="center"> Serverbackuppfad </td>
 </tr>
 \$str

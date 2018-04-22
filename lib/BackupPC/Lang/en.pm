@@ -712,7 +712,7 @@ Click on the backup number to browse and restore backup files.
     <td align="center"> Start Date </td>
     <td align="center"> Duration/mins </td>
     <td align="center"> Age/days </td>
-    <td align="center"> </td>
+    \$deleteHdrStr
     <td align="center"> Server Backup Path </td>
 </tr>
 \$str

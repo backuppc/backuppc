@@ -714,7 +714,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
     <td align="center"> Дата Начала </td>
     <td align="center"> Длительность(мин) </td>
     <td align="center"> Возраст(дни) </td>
-    <td align="center"> </td>
+    \$deleteHdrStr
     <td align="center"> Локальный Путь Копии </td>
 </tr>
 \$str

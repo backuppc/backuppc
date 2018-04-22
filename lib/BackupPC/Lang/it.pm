@@ -724,7 +724,7 @@ Cliccare sul numero di backup per sfogliare e ripristinare i file di backup.
     <td align="center"> Data avvio </td>
     <td align="center"> Durata (minuti) </td>
     <td align="center"> Et&agrave; (giorni) </td>
-    <td align="center"> </td>
+    \$deleteHdrStr
     <td align="center"> Percorso backup server </td>
 </tr>
 \$str

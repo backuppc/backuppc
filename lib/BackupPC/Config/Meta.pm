@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 18 Feb 2018.
+# Version 4.2.0, released 8 Apr 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -408,6 +408,7 @@ use vars qw(%ConfigMeta);
         },
     CgiImageDirURL 	=> "string",
     CgiCSSFile	 	=> "string",
+    CgiUserDeleteBackupEnable => "boolean",
     CgiUserConfigEditEnable => "boolean",
     CgiUserConfigEdit   => {
 	    type => "hash",

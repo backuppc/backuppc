@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 18 Feb 2018.
+# Version 4.2.0, released 8 Apr 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -168,6 +168,7 @@ our %ConfigMenu = (
 	    {name => "CgiUserUrlCreate"},
 
 	    {text => "CfgEdit_Title_User_Config_Editing"},
+	    {name => "CgiUserDeleteBackupEnable"},
 	    {name => "CgiUserConfigEditEnable"},
 	    {name => "CgiUserConfigEdit"},
         ],

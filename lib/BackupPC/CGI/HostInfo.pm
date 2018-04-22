@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 18 Feb 2018.
+# Version 4.2.0, released 8 Apr 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -75,6 +75,7 @@ sub action
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_view_information_about}}"));
     }
+    my $deleteEnabled = $PrivAdmin || ($Conf{CgiUserDeleteBackupEnable} && $Privileged);
     ReadUserEmailInfo();
 
     if ( $Conf{XferMethod} eq "archive" ) {
@@ -122,7 +123,8 @@ EOF
     # Normal, non-archive case
     #
     my @Backups = $bpc->BackupInfoRead($host);
-    my($str, $sizeStr, $compStr, $errStr, $warnStr);
+    my($str, $sizeStr, $compStr, $errStr, $warnStr, $deleteHdrStr);
+    $deleteHdrStr = '<td align="center"> </td>' if ( $deleteEnabled );
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
         my($MBExistComp, $ExistComp, $MBNewComp, $NewComp);
         my($dur, $duration, $MB, $MBperSec, $MBExist, $MBNew);
@@ -156,6 +158,19 @@ EOF
         $filled .= " ($Backups[$i]{fillFromNum}) "
                             if ( $Backups[$i]{fillFromNum} ne "" );
         my $ltype = $Lang->{"backupType_$Backups[$i]{type}"};
+        my $deleteStr;
+        if ( $deleteEnabled ) {
+            $deleteStr = <<EOF;
+    <td align="center" class="border"><form name="DeleteForm" action="$MyURL" method="get" style="margin-bottom: 0px;">
+        <input type="hidden" name="action" value="deleteBackup">
+        <input type="hidden" name="host"   value="$host">
+        <input type="hidden" name="num"    value="$Backups[$i]{num}">
+        <input type="hidden" name="nofill" value="$Backups[$i]{noFill}">
+        <input type="hidden" name="type"   value="$Backups[$i]{type}">
+        <input type="submit" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}">
+    </form></td>
+EOF
+        }
         $str .= <<EOF;
 <tr>
     <td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
@@ -165,14 +180,7 @@ EOF
     <td align="right" class="border">  $startTime </td>
     <td align="right" class="border">  $duration </td>
     <td align="right" class="border">  $age </td>
-    <td align="center" class="border"><form name="DeleteForm" action="$MyURL" method="get" style="margin-bottom: 0px;">
-        <input type="hidden" name="action" value="deleteBackup">
-        <input type="hidden" name="host"   value="$host">
-        <input type="hidden" name="num"    value="$Backups[$i]{num}">
-        <input type="hidden" name="nofill" value="$Backups[$i]{noFill}">
-        <input type="hidden" name="type"   value="$Backups[$i]{type}">
-        <input type="submit" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}">
-    </form></td>
+    $deleteStr
     <td align="left" class="border">   <tt>$TopDir/pc/$host/$Backups[$i]{num}</tt> </td></tr>
 EOF
         $sizeStr .= <<EOF;

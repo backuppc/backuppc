@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 18 Feb 2018.
+# Version 4.2.0, released 8 Apr 2018.
 #
 # See http://backuppc.github.io/backuppc
 #
@@ -46,7 +46,8 @@ sub action {
     my ( $str, $reply );
     my $host = $In{host};
 
-    my $Privileged = CheckPermission($host);
+    my $Privileged = CheckPermission($host)
+                           && ($PrivAdmin || $Conf{CgiUserDeleteBackupEnable});
     if ( !$Privileged ) {
         ErrorExit( eval("qq{$Lang->{Only_privileged_users_can_delete_backups}}") );
     }

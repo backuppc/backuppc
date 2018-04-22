@@ -48,7 +48,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 30 Apr 2017.
+# Version 4.2.0, released 8 Apr 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -70,6 +70,7 @@ use BackupPC::CGI::AdminOptions;
 use BackupPC::CGI::Archive;
 use BackupPC::CGI::ArchiveInfo;
 use BackupPC::CGI::Browse;
+use BackupPC::CGI::DeleteBackup;
 use BackupPC::CGI::DirHistory;
 use BackupPC::CGI::EditConfig;
 use BackupPC::CGI::EmailSummary;

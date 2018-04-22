@@ -127,8 +127,6 @@ EOF
     } elsif ( $Info{cpool4FileCnt} > 0 ) {
         $poolInfo = $cpoolInfo;
     }
-    my $generalInfo = eval("qq{$Lang->{BackupPC_Server_Status_General_Info}}")
-                                if ( $Privileged );
     my $generalInfo = "";
     if ( $Privileged ) {
         $generalInfo  = eval("qq{$Lang->{BackupPC_Server_Status_General_Info}}");

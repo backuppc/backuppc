@@ -21,6 +21,20 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+Merged pull requests #195.
+
+* Added new config variable $Conf{CgiUserDeleteBackupEnable} (default off) 
+  that sets whether users can delete backups via the CGI interface.
+
+* Fixed delete backup bug in bin/BackupPC_Admin_SCGI reported by 
+  Julian Zielke in issue #193.
+
+* Removed unneeded variable assignment in lib/BackupPC/CGI/GeneralInfo.pm,
+  from @moisseev (#195).
+
+* Added check to dirCacheFlush() in bin/BackupPC_tarExtract to skip files
+  that don't have attributes; reported by Tarak Patel.
+
 #------------------------------------------------------------------------
 # Version 4.2.0, 8 Apr 2018
 #------------------------------------------------------------------------

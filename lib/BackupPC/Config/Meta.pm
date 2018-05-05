@@ -408,7 +408,7 @@ use vars qw(%ConfigMeta);
         },
     CgiImageDirURL 	=> "string",
     CgiCSSFile	 	=> "string",
-    CgiUserDeleteBackupEnable => "boolean",
+    CgiUserDeleteBackupEnable => "integer",
     CgiUserConfigEditEnable => "boolean",
     CgiUserConfigEdit   => {
 	    type => "hash",

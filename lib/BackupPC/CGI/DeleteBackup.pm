@@ -47,7 +47,8 @@ sub action {
     my $host = $In{host};
 
     my $Privileged = CheckPermission($host)
-                           && ($PrivAdmin || $Conf{CgiUserDeleteBackupEnable});
+                           && ($PrivAdmin || $Conf{CgiUserDeleteBackupEnable} > 0);
+    $Privileged = 0 if ( $Conf{CgiUserDeleteBackupEnable} < 0 );
     if ( !$Privileged ) {
         ErrorExit( eval("qq{$Lang->{Only_privileged_users_can_delete_backups}}") );
     }

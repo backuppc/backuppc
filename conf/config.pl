@@ -2170,10 +2170,12 @@ $Conf{CgiImageDirURL} = '';
 $Conf{CgiCSSFile} = 'BackupPC_stnd.css';
 
 #
-# Whether the user is allowed to delete backups. If set, the user will
-# have a delete button for each backup on any host they have permission
-# to access.  If set to 0, only administrators have access to the
-# backup delete feature.
+# Whether the user is allowed to delete backups. If set to a positive
+# value, the user will have a delete button for each backup on any
+# host they have permission to access.  If set to 0, only
+# administrators have access to the backup delete feature.
+# If set to a negative value, even admins will not be able
+# to use the delete feature.
 #
 $Conf{CgiUserDeleteBackupEnable} = 0;
 

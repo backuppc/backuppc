@@ -75,7 +75,8 @@ sub action
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_view_information_about}}"));
     }
-    my $deleteEnabled = $PrivAdmin || ($Conf{CgiUserDeleteBackupEnable} && $Privileged);
+    my $deleteEnabled = $PrivAdmin || ($Conf{CgiUserDeleteBackupEnable} > 0 && $Privileged);
+    $deleteEnabled = 0 if ( $Conf{CgiUserDeleteBackupEnable} < 0 );
     ReadUserEmailInfo();
 
     if ( $Conf{XferMethod} eq "archive" ) {

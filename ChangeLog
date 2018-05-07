@@ -21,11 +21,12 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-Merged pull requests #195.
+Merged pull request #195.
 
-* Added new config variable $Conf{CgiUserDeleteBackupEnable} (default 0) 
-  that sets whether users and admins can delete backups via the CGI
-  interface.
+* Added new config variable $Conf{CgiUserDeleteBackupEnable} that
+  sets whether users and admins can delete backups via the CGI
+  interface. The default value is 0, which means it's disabled
+  for regular users but available for admins.
 
 * Fixed delete backup bug in bin/BackupPC_Admin_SCGI reported by 
   Julian Zielke in issue #193.

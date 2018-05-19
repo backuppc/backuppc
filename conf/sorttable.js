@@ -11,8 +11,7 @@ function sortables_init() {
     tbls = document.getElementsByTagName("table");
     for (ti=0;ti<tbls.length;ti++) {
         thisTbl = tbls[ti];
-        if (((' '+thisTbl.className+' ').indexOf("sortable") != -1) && (thisTbl.id)) {
-            //initTable(thisTbl.id);
+        if ((' '+thisTbl.className+' ').indexOf("sortable") != -1) {
             ts_makeSortable(thisTbl);
         }
     }

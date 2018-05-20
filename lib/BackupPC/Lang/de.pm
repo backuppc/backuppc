@@ -440,7 +440,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: LOG Datei Historie";
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("LOG Datei Historie \$hdr")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Datei </td>
     <td align="center"> Größe </td>
     <td align="center"> letzte Änderung </td></tr>

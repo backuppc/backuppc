@@ -427,7 +427,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: 日志文件历史";
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("日志文件历史 \$hdr")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 文件 </td>
     <td align="center"> 大小 </td>
     <td align="center"> 修改时间 </td></tr>

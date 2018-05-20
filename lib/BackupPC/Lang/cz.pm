@@ -427,7 +427,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Historie Log Souboru";
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("Historie Log Souboru \$hdr")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Soubor </td>
     <td align="center"> Velikost </td>
     <td align="center"> Èas modifikace </td></tr>

@@ -428,7 +428,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Log File History";
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("Log File History \$hdr")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> File </td>
     <td align="center"> Size </td>
     <td align="center"> Modification time </td></tr>

@@ -429,7 +429,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Historial de Archivos de Eventos"
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("Historial de Archivos de Eventos \$hdr")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Archivo </td>
     <td align="center"> Tama&ntilde;o </td>
     <td align="center"> Hora Modificaci&oacute;n </td></tr>

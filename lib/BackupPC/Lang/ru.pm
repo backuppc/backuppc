@@ -432,7 +432,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Log File History";
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("Архив Журналов \$hdr")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Файл </td>
     <td align="center"> Размер </td>
     <td align="center"> Время изменения </td></tr>

@@ -103,7 +103,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("Probíhající úlohy")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Host </td>
     <td> Typ </td>
     <td> Uživatel </td>
@@ -122,7 +122,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("Selhání, která vyžadují pozornost")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Host </td>
     <td align="center"> Typ </td>
     <td align="center"> Uživatel </td>

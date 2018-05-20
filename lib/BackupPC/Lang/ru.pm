@@ -108,7 +108,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("Работы, выполняемые в данный момент времени")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td>Узел</td>
     <td>Тип</td>
     <td>Пользователь</td>
@@ -127,7 +127,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("Сбои, нуждающиеся внимания")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center">Узел</td>
     <td align="center">Тип</td>
     <td align="center">Пользователь</td>

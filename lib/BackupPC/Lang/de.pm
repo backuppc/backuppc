@@ -117,7 +117,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("Zur Zeit aktive Aufträge")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Computer </td>
     <td> Typ </td>
     <td> Benutzer </td>
@@ -136,7 +136,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("Fehler, die näher analysiert werden müssen!")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Computer </td>
     <td align="center"> Typ </td>
     <td align="center"> Benutzer </td>

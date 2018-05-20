@@ -103,7 +103,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("正在运行的任务")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> 客户机 </td>
     <td> 类型 </td>
     <td> 用户 </td>
@@ -122,7 +122,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("需要关注的错误")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> 客户机 </td>
     <td align="center"> 类型 </td>
     <td align="center"> 用户 </td>

@@ -106,7 +106,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("現在実行中のジョブ")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> ホスト </td>
     <td> 種別 </td>
     <td> ユーザ </td>
@@ -125,7 +125,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("注意する必要がある失敗")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> ホスト </td>
     <td align="center"> 種別 </td>
     <td align="center"> ユーザ </td>

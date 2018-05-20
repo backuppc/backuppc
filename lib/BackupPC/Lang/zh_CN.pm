@@ -439,7 +439,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("最近电子邮件报告（最新排前）")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 收信人 </td>
     <td align="center"> 客户机 </td>
     <td align="center"> 时间 </td>

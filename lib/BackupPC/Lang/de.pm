@@ -452,7 +452,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Übersicht der letzten E-Mails (Sortierung nach Zeitpunkt)")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Empfänger </td>
     <td align="center"> Computer </td>
     <td align="center"> Zeitpunkt </td>

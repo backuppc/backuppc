@@ -443,7 +443,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Останні поштові відправлення (В зворотньому порядку)")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Отримувач </td>
     <td align="center"> Хост </td>
     <td align="center"> Час </td>

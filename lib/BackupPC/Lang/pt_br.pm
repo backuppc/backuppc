@@ -444,7 +444,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Resumo de Emails Recentes (Ordem cronológica invertida)")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Destinatário </td>
     <td align="center"> Host </td>
     <td align="center"> Hora </td>

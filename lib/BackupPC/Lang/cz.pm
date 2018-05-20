@@ -439,7 +439,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Pøehled nedávných emailù (Øazeno zpìtnì)")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Pøíjemce </td>
     <td align="center"> Odesílatel </td>
     <td align="center"> Èas </td>

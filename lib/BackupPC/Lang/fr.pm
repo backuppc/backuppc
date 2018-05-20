@@ -440,7 +440,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Résumé des courriels récents (du plus récent au plus vieux)")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Destinataire </td>
     <td align="center"> Hôte </td>
     <td align="center"> Date </td>

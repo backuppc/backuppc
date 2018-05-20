@@ -438,7 +438,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("最近のメールサマリ(日時降順)")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 受信者 </td>
     <td align="center"> ホスト </td>
     <td align="center"> 日時 </td>

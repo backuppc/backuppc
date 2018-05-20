@@ -442,7 +442,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Podsumowanie Emaili (kojeność odwrotna)")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Adresat </td>
     <td align="center"> Nadawca </td>
     <td align="center"> Czas </td>

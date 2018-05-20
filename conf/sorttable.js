@@ -11,21 +11,34 @@ function sortables_init() {
     tbls = document.getElementsByTagName("table");
     for (ti=0;ti<tbls.length;ti++) {
         thisTbl = tbls[ti];
-        if ((' '+thisTbl.className+' ').indexOf("sortable") != -1) {
+        if (ts_hasClass(thisTbl, "sortable")) {
             ts_makeSortable(thisTbl);
         }
     }
 }
 
-function ts_makeSortable(table) {
+function ts_getHeaderRowIdx(table) {
     if (table.rows && table.rows.length > 0) {
-        var firstRow = table.rows[0];
+        // Find first table row with class sortheader
+        for (var i=0;i<table.rows.length;i++) {
+          if (ts_hasClass(table.rows[i], "sortheader")) {
+            return i;
+          }
+        }
+        // No row found with class sortheader : assume first's one is the header
+        return 0;
     }
-    if (!firstRow) return;
+    return false;
+}
+
+
+function ts_makeSortable(table) {
+    var headerRowIdx = ts_getHeaderRowIdx(table);
+    if (headerRowIdx === false) return;
+    var headerRow = table.rows[headerRowIdx];
     
-    // We have a first row: assume it's the header, and make its contents clickable links
-    for (var i=0;i<firstRow.cells.length;i++) {
-        var cell = firstRow.cells[i];
+    for (var i=0;i<headerRow.cells.length;i++) {
+        var cell = headerRow.cells[i];
         var txt = ts_getInnerText(cell);
         cell.innerHTML = '<a href="#" class="sortheader" '+ 
         'onclick="ts_resortTable(this, '+i+');return false;">' + 
@@ -74,10 +87,12 @@ function ts_resortTable(lnk,clid) {
     if (itm.match(/^[£$]/)) sortfn = ts_sort_currency;
     if (itm.match(/^[\d\.]+$/)) sortfn = ts_sort_numeric;
     SORT_COLUMN_INDEX = column;
-    var firstRow = new Array();
+    var headerRowIdx = ts_getHeaderRowIdx(table);
+    console.log(headerRowIdx);
+    var headerRow = new Array();
     var newRows = new Array();
-    for (i=0;i<table.rows[0].length;i++) { firstRow[i] = table.rows[0][i]; }
-    for (j=1;j<table.rows.length;j++) { newRows[j-1] = table.rows[j]; }
+    for (i=0;i<table.rows[headerRowIdx].length;i++) { headerRow[i] = table.rows[0][i]; }
+    for (j=headerRowIdx+1;j<table.rows.length;j++) { newRows[j-headerRowIdx-1] = table.rows[j]; }
 
     newRows.sort(sortfn);
 
@@ -116,6 +131,14 @@ function getParent(el, pTagName) {
 	else
 		return getParent(el.parentNode, pTagName);
 }
+
+function ts_hasClass(el, className) {
+        if ((' '+el.className+' ').indexOf((' '+className+' ')) != -1) {
+		return true;
+	}
+	return false;
+}
+
 function ts_sort_date(a,b) {
     // y2k notes: two digit years less than 50 are treated as 20XX, greater than 50 are treated as 19XX
     aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]);

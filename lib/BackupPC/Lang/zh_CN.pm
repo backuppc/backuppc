@@ -690,7 +690,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 点击备份序列号浏览和恢复文件。
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> 备份序列号＃ </td>
     <td align="center"> 类型 </td>
     <td align="center"> 完整 </td>
@@ -708,7 +708,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 \$restoreStr
 </p>
 \${h2("传输错误报告")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 备份序列号＃ </td>
     <td align="center"> 类型 </td>
     <td align="center"> 查看 </td>
@@ -725,13 +725,13 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 "原有文件"是指原先已存在备份池中的文件；"新增文件"是指备份新写入池中的文件。
 空文件不被统计在内。
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> 合计 </td>
     <td align="center" colspan="2"> 原有文件 </td>
     <td align="center" colspan="2"> 新增文件 </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> 备份序列号＃ </td>
     <td align="center"> 类型 </td>
     <td align="center"> 文件数目 </td>
@@ -749,12 +749,12 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 备份池中原有文件和新增文件的压缩性能报告。
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> 原有文件 </td>
     <td align="center" colspan="3"> 新增文件 </td>
 </tr>
-<tr class="tableheader"><td align="center"> 备份序列号＃ </td>
+<tr class="tableheader sortheader"><td align="center"> 备份序列号＃ </td>
     <td align="center"> 类型 </td>
     <td align="center"> 压缩级别 </td>
     <td align="center"> 压缩前(MB) </td>
@@ -1189,7 +1189,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("恢复报告")}
 <p>
 点击恢复序列号获取详情。
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 恢复序列号 </td>
     <td align="center"> 结果 </td>
     <td align="right"> 开始时间 </td>

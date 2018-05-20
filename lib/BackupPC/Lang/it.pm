@@ -716,7 +716,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Cliccare sul numero di backup per sfogliare e ripristinare i file di backup.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
     <td align="center"> Filled </td>
@@ -734,7 +734,7 @@ Cliccare sul numero di backup per sfogliare e ripristinare i file di backup.
 \$restoreStr
 </p>
 \${h2("Prospetto errori trasferimento")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
     <td align="center"> Vedere </td>
@@ -753,13 +753,13 @@ quelli aggiunti al pool.
 I file vuoti e gli errori SMB non sono conteggiati nei contatori di
 riutilizzo e file nuovi.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totali </td>
     <td align="center" colspan="2"> File esistenti </td>
     <td align="center" colspan="2"> File nuovi </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
     <td align="center"> Numero file </td>
@@ -778,12 +778,12 @@ riutilizzo e file nuovi.
 Prestazione della compressione per file gi&agrave; nel pool e per quelli
 nuovi.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> File esistenti </td>
     <td align="center" colspan="3"> File nuovi </td>
 </tr>
-<tr class="tableheader"><td align="center"> Numero backup </td>
+<tr class="tableheader sortheader"><td align="center"> Numero backup </td>
     <td align="center"> Tipo </td>
     <td align="center"> Livello compressione </td>
     <td align="center"> Dimensione (MB) </td>
@@ -1231,7 +1231,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Prospetto ripristino")}
 <p>
 Fare clic sul numero del ripristino per maggiori dettagli.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Numero ripristino </td>
     <td align="center"> Risultato </td>
     <td align="right"> Data avvio</td>

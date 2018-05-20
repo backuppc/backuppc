@@ -706,7 +706,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> backup nr.</td>
     <td align="center"> Type </td>
     <td align="center"> Aangevuld </td>
@@ -724,7 +724,7 @@ Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
 \$restoreStr
 </p>
 \${h2("Overzicht van fouten tijdens overdracht")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> backup nr. </td>
     <td align="center"> Type </td>
     <td align="center"> Bekijken </td>
@@ -742,13 +742,13 @@ Bestaande bestanden zijn bestanden die reeds aanwezig waren op de backupschijf.
 Nieuwe bestanden zijn bestanden die aan de schijf zijn toegevoegd.
 Lege bestanden en SMB-fouten worden niet geteld in de aantallen \'hergebruik\' en \'nieuw\'.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totalen </td>
     <td align="center" colspan="2"> Bestaande bestanden </td>
     <td align="center" colspan="2"> Nieuwe bestanden </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> Backup nr. </td>
     <td align="center"> Type </td>
     <td align="center"> Aantal best.</td>
@@ -767,12 +767,12 @@ Lege bestanden en SMB-fouten worden niet geteld in de aantallen \'hergebruik\' e
 Compressie van bestanden die reeds op schijf stonden en van nieuw
 gecomprimeerde bestanden.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Bestaande bestanden </td>
     <td align="center" colspan="3"> Nieuwe bestanden </td>
 </tr>
-<tr class="tableheader"><td align="center"> backup nr. </td>
+<tr class="tableheader sortheader"><td align="center"> backup nr. </td>
     <td align="center"> Type </td>
     <td align="center"> Comp.niveau </td>
     <td align="center"> Grootte in MB </td>
@@ -1218,7 +1218,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Overzicht herstellingen")}
 <p>
 Klik op het nummer voor meer details.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Herstel nr.</td>
     <td align="center"> Resultaat </td>
     <td align="right"> Startdatum</td>

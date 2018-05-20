@@ -716,7 +716,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wiederherzustellen.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> gefüllt </td>
@@ -734,7 +734,7 @@ Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wi
 \$restoreStr
 </p>
 \${h2("Xfer Fehler Übersicht - bitte kontrollieren")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Anzeigen </td>
@@ -752,13 +752,13 @@ Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wi
 "Neue Dateien" bedeutet neu zum Pool hinzugefügt.
 Leere Dateien und eventuelle Dateifehler sind nicht in den Summen enthalten.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Gesamt </td>
     <td align="center" colspan="2"> bestehende Dateien </td>
     <td align="center" colspan="2"> neue Dateien </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> #Dateien </td>
@@ -776,12 +776,12 @@ Leere Dateien und eventuelle Dateifehler sind nicht in den Summen enthalten.
 <p>
 Kompressionsergebnisse für bereits im Backup-Pool vorhandene und für neu komprimierte Dateien.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> vorhandene Dateien </td>
     <td align="center" colspan="3"> neue Dateien </td>
 </tr>
-<tr class="tableheader"><td align="center"> Backup# </td>
+<tr class="tableheader sortheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Komp Level </td>
     <td align="center"> Größe/MB </td>
@@ -1221,7 +1221,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Restore Übersicht")}
 <p>
 Klicken Sie auf die Restore Nummer (Restore#) für mehr Details.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Restore# </td>
     <td align="center"> Ergebnis </td>
     <td align="right"> Start Zeitpunkt</td>

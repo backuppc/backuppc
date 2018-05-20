@@ -701,7 +701,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Kliknìte na èíslo zálohy pro prohlížení a obnovení zálohy.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Vyplnìno </td>
@@ -719,7 +719,7 @@ Kliknìte na èíslo zálohy pro prohlížení a obnovení zálohy.
 \$restoreStr
 </p>
 \${h2("Pøehled Xfer chyb")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Pohled </td>
@@ -737,13 +737,13 @@ Existující soubory jsou ty, které jsou již v úložišti; nové jsou pøidané
 do úložištì.
 Prázné soubory a SMB chyby nejsou poèítány.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Celkovì </td>
     <td align="center" colspan="2"> Existující soubory </td>
     <td align="center" colspan="2"> Nové soubory </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> Záloha # </td>
     <td align="center"> Typ </td>
     <td align="center"> #Soubory </td>
@@ -762,12 +762,12 @@ Prázné soubory a SMB chyby nejsou poèítány.
 Výkon komprese pro soubory, které jsou již v úložišti a pro novì
 zkomprimované soubory.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Existující soubory </td>
     <td align="center" colspan="3"> Nové soubory </td>
 </tr>
-<tr class="tableheader"><td align="center"> Záloha # </td>
+<tr class="tableheader sortheader"><td align="center"> Záloha # </td>
     <td align="center"> Typ </td>
     <td align="center"> Úroveò komprese </td>
     <td align="center"> Velikost/MB </td>
@@ -1213,7 +1213,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Obnovit souhrn")}
 <p>
 Klikni na obnovení pro více detailù.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Obnovení # </td>
     <td align="center"> Výsledek </td>
     <td align="right"> Datum spuštení</td>

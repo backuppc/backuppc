@@ -704,7 +704,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Click on the backup number to browse and restore backup files.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> Filled </td>
@@ -722,7 +722,7 @@ Click on the backup number to browse and restore backup files.
 \$restoreStr
 </p>
 \${h2("Xfer Error Summary")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> View </td>
@@ -740,13 +740,13 @@ Existing files are those already in the pool; new files are those added
 to the pool.
 Empty files and SMB errors aren\'t counted in the reuse and new counts.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totals </td>
     <td align="center" colspan="2"> Existing Files </td>
     <td align="center" colspan="2"> New Files </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> #Files </td>
@@ -765,12 +765,12 @@ Empty files and SMB errors aren\'t counted in the reuse and new counts.
 Compression performance for files already in the pool and newly
 compressed files.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Existing Files </td>
     <td align="center" colspan="3"> New Files </td>
 </tr>
-<tr class="tableheader"><td align="center"> Backup# </td>
+<tr class="tableheader sortheader"><td align="center"> Backup# </td>
     <td align="center"> Type </td>
     <td align="center"> Comp Level </td>
     <td align="center"> Size/MiB </td>
@@ -1216,7 +1216,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Restore Summary")}
 <p>
 Click on the restore number for more details.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Restore# </td>
     <td align="center"> Result </td>
     <td align="right"> Start Date</td>

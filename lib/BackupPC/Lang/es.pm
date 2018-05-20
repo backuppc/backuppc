@@ -705,7 +705,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Haga click en el n&uacute;mero de copia de seguridad para revisar y restaurar archivos.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Copia N&deg; </td>
     <td align="center"> Tipo </td>
     <td align="center"> Completo </td>
@@ -723,7 +723,7 @@ Haga click en el n&uacute;mero de copia de seguridad para revisar y restaurar ar
 \$restoreStr
 </p>
 \${h2("Resumen de Errores de Transferencia")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Copia N&deg; </td>
     <td align="center"> Tipo </td>
     <td align="center"> Ver </td>
@@ -742,13 +742,13 @@ aquellos que se han a&ntilde;adido al lote.
 Los archivos vac&iacute;os y los errores SMB no cuentan en las cifras de reutilizados
 ni en la de nuevos.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totales </td>
     <td align="center" colspan="2"> Archivos Existentes </td>
     <td align="center" colspan="2"> Archivos Nuevos </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> Copia N&deg; </td>
     <td align="center"> Tipo </td>
     <td align="center"> N&deg; Archivos </td>
@@ -767,12 +767,12 @@ ni en la de nuevos.
 Efectividad de compresi&oacute;n para los archivos ya existentes en el lote y los
 archivos nuevos comprimidos.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Archivos Existentes </td>
     <td align="center" colspan="3"> Archivos Nuevos </td>
 </tr>
-<tr class="tableheader"><td align="center"> Copia N&deg; </td>
+<tr class="tableheader sortheader"><td align="center"> Copia N&deg; </td>
     <td align="center"> Tipo </td>
     <td align="center"> Nivel Comp </td>
     <td align="center"> Tama&ntilde;o/MB </td>
@@ -1218,7 +1218,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Resumen de Restauraci&oacute;n")}
 <p>
 Haga click en el n&uacute;mero de restauraci&oacute;n para ver sus detalles.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Restauraci&oacute;n N&deg; </td>
     <td align="center"> Resultado </td>
     <td align="right"> Fecha Inicio</td>

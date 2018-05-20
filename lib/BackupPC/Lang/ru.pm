@@ -706,7 +706,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Щёлкните по номеру для просмотра и восстановления скопированных файлов.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> № </td>
     <td align="center"> Тип </td>
     <td align="center"> Полный </td>
@@ -724,7 +724,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 \$restoreStr
 </p>
 \${h2("Сводка Ошибок при Копировании")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> № </td>
     <td align="center"> Тип </td>
     <td align="center"> Журнал </td>
@@ -743,13 +743,13 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 Пустые файлы не учитываются.
 Empty files and SMB errors aren\'t counted in the reuse and new counts.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Всего </td>
     <td align="center" colspan="2"> Существующие Файлы </td>
     <td align="center" colspan="2"> Новые Файлы </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> № </td>
     <td align="center"> Тип </td>
     <td align="center"> Файлов </td>
@@ -767,12 +767,12 @@ Empty files and SMB errors aren\'t counted in the reuse and new counts.
 <p>
 Степень сжатия существующих и новых файлов.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Существующие Файлы </td>
     <td align="center" colspan="3"> Новые Файлы </td>
 </tr>
-<tr class="tableheader"><td align="center"> № </td>
+<tr class="tableheader sortheader"><td align="center"> № </td>
     <td align="center"> Тип </td>
     <td align="center"> Уровень Сжатия </td>
     <td align="center"> Размер(МБ) </td>
@@ -1217,7 +1217,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Сводка Восстановлений")}
 <p>
 Щёлкните по номеру для более детального просмотра.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> № </td>
     <td align="center"> Результат </td>
     <td align="right"> Дата начала </td>

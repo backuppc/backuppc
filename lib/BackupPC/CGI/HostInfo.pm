@@ -124,7 +124,7 @@ EOF
     # Normal, non-archive case
     #
     my @Backups = $bpc->BackupInfoRead($host);
-    my($str, $sizeStr, $compStr, $errStr, $warnStr, $deleteHdrStr);
+    my(@bkpRows, @sizeRows, @compRows, @errRows, @warnRows, $deleteHdrStr);
     $deleteHdrStr = '<td align="center"> </td>' if ( $deleteEnabled );
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
         my($MBExistComp, $ExistComp, $MBNewComp, $NewComp);
@@ -172,7 +172,7 @@ EOF
     </form></td>
 EOF
         }
-        $str .= <<EOF;
+        push @bkpRows, <<EOF;
 <tr>
     <td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center" class="border"> $ltype </td>
@@ -184,7 +184,7 @@ EOF
     $deleteStr
     <td align="left" class="border">   <tt>$TopDir/pc/$host/$Backups[$i]{num}</tt> </td></tr>
 EOF
-        $sizeStr .= <<EOF;
+        push @sizeRows, <<EOF;
 <tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center" class="border"> $ltype </td>
     <td align="right" class="border">  $Backups[$i]{nFiles} </td>
@@ -199,7 +199,7 @@ EOF
         my $is_compress = $Backups[$i]{compress} || $Lang->{off};
         if (! $ExistComp) { $ExistComp = "&nbsp;"; }
         if (! $MBExistComp) { $MBExistComp = "&nbsp;"; }
-        $compStr .= <<EOF;
+        push @compRows, <<EOF;
 <tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center" class="border"> $ltype </td>
     <td align="center" class="border"> $is_compress </td>
@@ -211,7 +211,7 @@ EOF
     <td align="right" class="border">  $NewComp </td>
 </tr>
 EOF
-        $errStr .= <<EOF;
+        push @errRows, <<EOF;
 <tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center" class="border"> $ltype </td>
     <td align="center" class="border"> <a href="$MyURL?action=view&type=XferLOG&num=$Backups[$i]{num}&host=${EscURI($host)}">$Lang->{XferLOG}</a>,
@@ -222,9 +222,14 @@ EOF
     <td align="right" class="border">  $Backups[$i]{tarErrs} </td></tr>
 EOF
     }
+    my $str = join("\n", reverse(@bkpRows));
+    my $sizeStr = join("\n", reverse(@sizeRows));
+    my $compStr = join("\n", reverse(@compRows));
+    my $errStr = join("\n", reverse(@errRows));
+    my $warnStr = join("\n", reverse(@warnRows));
 
     my @Restores = $bpc->RestoreInfoRead($host);
-    my $restoreStr;
+    my @restoreRows;
 
     for ( my $i = 0 ; $i < @Restores ; $i++ ) {
         my $startTime = timeStamp2($Restores[$i]{startTime});
@@ -235,7 +240,7 @@ EOF
         my $MBperSec  = sprintf("%.2f", $Restores[$i]{size} / (1024*1024*$dur));
         my $Restores_Result = $Lang->{failed};
         if ($Restores[$i]{result} ne "failed") { $Restores_Result = $Lang->{success}; }
-        $restoreStr  .= <<EOF;
+        push @restoreRows, <<EOF;
 <tr><td align="center" class="border"><a href="$MyURL?action=restoreInfo&num=$Restores[$i]{num}&host=${EscURI($host)}">$Restores[$i]{num}</a> </td>
     <td align="center" class="border"> $Restores_Result </td>
     <td align="right" class="border"> $startTime </td>
@@ -247,6 +252,7 @@ EOF
 </tr>
 EOF
     }
+    my $restoreStr = join("\n", reverse(@restoreRows));
     if ( $restoreStr ne "" ) {
         $restoreStr = eval("qq{$Lang->{Restore_Summary}}");
     }

@@ -117,7 +117,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("Zur Zeit aktive Aufträge")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Computer </td>
     <td> Typ </td>
     <td> Benutzer </td>
@@ -136,7 +136,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("Fehler, die näher analysiert werden müssen!")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Computer </td>
     <td align="center"> Typ </td>
     <td align="center"> Benutzer </td>
@@ -389,7 +389,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Die folgenden Benutzeraufträge sind eingereiht:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
     <td> Uhrzeit </td>
     <td> Benutzer </td></tr>
@@ -400,7 +400,7 @@ Die folgenden Benutzeraufträge sind eingereiht:
 <p>
 Die folgenden Hintergrundaufträge sind eingereiht:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
     <td> Uhrzeit </td>
     <td> Benutzer </td></tr>
@@ -410,7 +410,7 @@ Die folgenden Hintergrundaufträge sind eingereiht:
 <p>
 Die folgenden Kommandoaufträge sind eingereiht:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
     <td> Uhrzeit </td>
     <td> Benutzer </td>
@@ -440,7 +440,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: LOG Datei Historie";
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("LOG Datei Historie \$hdr")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Datei </td>
     <td align="center"> Größe </td>
     <td align="center"> letzte Änderung </td></tr>
@@ -452,7 +452,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Übersicht der letzten E-Mails (Sortierung nach Zeitpunkt)")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Empfänger </td>
     <td align="center"> Computer </td>
     <td align="center"> Zeitpunkt </td>
@@ -716,7 +716,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wiederherzustellen.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> gefüllt </td>
@@ -734,7 +734,7 @@ Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wi
 \$restoreStr
 </p>
 \${h2("Xfer Fehler Übersicht - bitte kontrollieren")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Anzeigen </td>
@@ -752,13 +752,13 @@ Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wi
 "Neue Dateien" bedeutet neu zum Pool hinzugefügt.
 Leere Dateien und eventuelle Dateifehler sind nicht in den Summen enthalten.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Gesamt </td>
     <td align="center" colspan="2"> bestehende Dateien </td>
     <td align="center" colspan="2"> neue Dateien </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> #Dateien </td>
@@ -776,12 +776,12 @@ Leere Dateien und eventuelle Dateifehler sind nicht in den Summen enthalten.
 <p>
 Kompressionsergebnisse für bereits im Backup-Pool vorhandene und für neu komprimierte Dateien.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> vorhandene Dateien </td>
     <td align="center" colspan="3"> neue Dateien </td>
 </tr>
-<tr class="tableheader"><td align="center"> Backup# </td>
+<tr class="tableheader sortheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Komp Level </td>
     <td align="center"> Größe/MB </td>
@@ -1221,7 +1221,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Restore Übersicht")}
 <p>
 Klicken Sie auf die Restore Nummer (Restore#) für mehr Details.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Restore# </td>
     <td align="center"> Ergebnis </td>
     <td align="right"> Start Zeitpunkt</td>

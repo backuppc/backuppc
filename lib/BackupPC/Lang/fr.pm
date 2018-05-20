@@ -104,7 +104,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("Travaux en cours d'exécution")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Hôte </td>
     <td> Type </td>
     <td> Utilisateur </td>
@@ -123,7 +123,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("Échecs qui demandent de l'attention")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Hôte </td>
     <td align="center"> Type </td>
     <td align="center"> Utilisateur </td>
@@ -377,7 +377,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Les demandes utilisateurs suivantes sont actuellement en attente :
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Hôte </td>
     <td> Temps Requis </td>
     <td> Utilisateur </td></tr>
@@ -388,7 +388,7 @@ Les demandes utilisateurs suivantes sont actuellement en attente :
 <p>
 Les demandes en arrière plan suivantes sont actuellement en attente :
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Hôte </td>
     <td> Temps requis </td>
     <td> Utilisateur </td></tr>
@@ -398,7 +398,7 @@ Les demandes en arrière plan suivantes sont actuellement en attente :
 <p>
 Les demandes de commande suivantes sont actuellement en attente :
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Hôtes </td>
     <td> Temps Requis </td>
     <td> Utilisateur </td>
@@ -428,7 +428,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Historique du fichier journal";
 $Lang{Log_File_History__hdr} = <<EOF;
 \${h1("Historique du fichier journal \$hdr")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Fichier </td>
     <td align="center"> Taille </td>
     <td align="center"> Date de modification </td></tr>
@@ -440,7 +440,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Résumé des courriels récents (du plus récent au plus vieux)")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Destinataire </td>
     <td align="center"> Hôte </td>
     <td align="center"> Date </td>
@@ -702,7 +702,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de sauvegarde.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
     <td align="center"> Fusionnée </td> 
@@ -720,7 +720,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 \$restoreStr
 </p>
 \${h2("Résumé des erreurs de transfert")}
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
     <td align="center"> Voir </td>
@@ -738,13 +738,13 @@ Les fichiers existants sont ceux qui sont déjà sur le serveur;
 Les nouveaux fichiers sont ceux qui ont été ajoutés au serveur.
 Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés dans les fichiers nouveaux ou réutilisés.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totaux </td>
     <td align="center" colspan="2"> Fichiers existants </td>
     <td align="center" colspan="2"> Nouveaux fichiers </td>
 </tr>
-<tr class="tableheader">
+<tr class="tableheader sortheader">
     <td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
     <td align="center"> Nb de Fichiers </td>
@@ -763,12 +763,12 @@ Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés dans les fich
 Performance de la compression pour les fichiers déjà sur le serveur et
 récemment compressés.
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Fichiers existants </td>
     <td align="center" colspan="3"> Nouveaux fichiers </td>
 </tr>
-<tr class="tableheader"><td align="center"> Nb de sauvegardes </td>
+<tr class="tableheader sortheader"><td align="center"> Nb de sauvegardes </td>
     <td align="center"> Type </td>
     <td align="center"> Niveau de Compression </td>
     <td align="center"> Taille (Mo) </td>
@@ -1214,7 +1214,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Résumé de la restauration")}
 <p>
 Cliquer sur le numéro de restauration pour plus de détails.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Résultat </td>
     <td align="right"> Date de départ</td>

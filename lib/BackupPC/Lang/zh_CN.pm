@@ -376,7 +376,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 下列用户请求排在队列中：
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> 客户机 </td>
     <td> 请求时间 </td>
     <td> 用户 </td></tr>
@@ -387,7 +387,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 下列后台请求排在队列中：
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> 客户机 </td>
     <td> 请求时间 </td>
     <td> 用户 </td></tr>
@@ -397,7 +397,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 下列命令请求排在队列中：
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> 客户机 </td>
     <td> 请求时间 </td>
     <td> 用户 </td>

@@ -389,7 +389,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Die folgenden Benutzeraufträge sind eingereiht:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
     <td> Uhrzeit </td>
     <td> Benutzer </td></tr>
@@ -400,7 +400,7 @@ Die folgenden Benutzeraufträge sind eingereiht:
 <p>
 Die folgenden Hintergrundaufträge sind eingereiht:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
     <td> Uhrzeit </td>
     <td> Benutzer </td></tr>
@@ -410,7 +410,7 @@ Die folgenden Hintergrundaufträge sind eingereiht:
 <p>
 Die folgenden Kommandoaufträge sind eingereiht:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
     <td> Uhrzeit </td>
     <td> Benutzer </td>

@@ -380,7 +380,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Наступні запити користувачів поставлені до черги:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Хост </td>
     <td> Час запиту </td>
     <td> Користувач </td></tr>
@@ -391,7 +391,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Наступні фонові запити були поставлені до черги:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Хост </td>
     <td> Час запиту </td>
     <td> Користувач </td></tr>
@@ -401,7 +401,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Наступні команди були поставлені до черги:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Хост </td>
     <td> Час запиту </td>
     <td> Користувач </td>

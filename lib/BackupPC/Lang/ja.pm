@@ -376,7 +376,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 現在キューイングされているユーザ要求は次のとおりです。
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> ホスト </td>
     <td> 要求時間 </td>
     <td> ユーザ </td></tr>
@@ -386,7 +386,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 \${h2("バックグラウンドキューサマリ")}
 <p>
 現在キューイングされているバックグラウンド要求は次のとおりです。</p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> ホスト </td>
     <td> 要求時間 </td>
     <td> ユーザ </td></tr>
@@ -396,7 +396,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 現在キューイングされているコマンド要求は次のとおりです。
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> ホスト </td>
     <td> 要求時間 </td>
     <td> ユーザ </td>

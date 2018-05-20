@@ -389,7 +389,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Sono state accodate le seguenti richieste degli utenti:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Data richiesta </td>
     <td> Utente </td></tr>
@@ -400,7 +400,7 @@ Sono state accodate le seguenti richieste degli utenti:
 <p>
 Sono attualmente in coda le seguenti richieste di background:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Data richiesta </td>
     <td> Utente </td></tr>
@@ -410,7 +410,7 @@ Sono attualmente in coda le seguenti richieste di background:
 <p>
 Sono attualmente in coda le seguenti richieste di comandi:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Data richiesta </td>
     <td> Utente </td>

@@ -377,7 +377,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 The following user requests are currently queued:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Req Time </td>
     <td> User </td></tr>
@@ -388,7 +388,7 @@ The following user requests are currently queued:
 <p>
 The following background requests are currently queued:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Req Time </td>
     <td> User </td></tr>
@@ -398,7 +398,7 @@ The following background requests are currently queued:
 <p>
 The following command requests are currently queued:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Req Time </td>
     <td> User </td>

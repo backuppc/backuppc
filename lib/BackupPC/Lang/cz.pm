@@ -376,7 +376,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Následující uživatelé jsou momentálnì ve frontì:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Èas do </td>
     <td> Uživatel </td></tr>
@@ -387,7 +387,7 @@ Následující uživatelé jsou momentálnì ve frontì:
 <p>
 Následující žádosti v pozadí jsou momentálnì ve frontì:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Èas do </td>
     <td> Uživatel </td></tr>
@@ -397,7 +397,7 @@ Následující žádosti v pozadí jsou momentálnì ve frontì:
 <p>
 Následující pøíkazy jsou momentálnì ve frontì:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Èas do </td>
     <td> Uživatel </td>

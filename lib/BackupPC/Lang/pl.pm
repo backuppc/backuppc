@@ -379,7 +379,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Następujący użytkonicy są w kolejce:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Czas do </td>
     <td> Użytkownik </td></tr>
@@ -390,7 +390,7 @@ Następujący użytkonicy są w kolejce:
 <p>
 Następujące kolejki będące w tle czekają na wykonanie :
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Czas do </td>
     <td> uzytkownik </td></tr>
@@ -400,7 +400,7 @@ Następujące kolejki będące w tle czekają na wykonanie :
 <p>
 Następujące kolejki poleceń czekają na wykonanie :
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Czas do </td>
     <td> Użytkownik </td>

@@ -379,7 +379,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Deze aanvragen van gebruikers staan momenteel in de wachtrij:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Machine </td>
     <td> Aanvraagtijd </td>
     <td> Gebruiker </td></tr>
@@ -390,7 +390,7 @@ Deze aanvragen van gebruikers staan momenteel in de wachtrij:
 <p>
 Deze aanvragen voor backups in de achtergrond staan momenteel in de wachtrij:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Machine </td>
     <td> Aanvraagtijd </td>
     <td> Gebruiker </td></tr>
@@ -400,7 +400,7 @@ Deze aanvragen voor backups in de achtergrond staan momenteel in de wachtrij:
 <p>
 Deze aanvragen via opdracht staan momenteel in de wachtrij:
 </p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Machine </td>
     <td> Aanvraagtijd </td>
     <td> Gebruiker </td>

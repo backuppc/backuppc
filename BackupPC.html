@@ -143,7 +143,7 @@
 <hr />
 <h1 id="BackupPC-Introduction">BackupPC Introduction</h1>
 
-<p>This documentation describes BackupPC version 4.1.3, released on 21 May 2017.</p>
+<p>This documentation describes BackupPC version 4.2.1, released on 7 May 2018.</p>
 
 <h2 id="Overview">Overview</h2>
 
@@ -719,10 +719,10 @@
     make
     make install</code></pre>
 
-<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.1.3.tar.gz, run these commands as root:</p>
+<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.2.1.tar.gz, run these commands as root:</p>
 
-<pre><code>    tar zxf BackupPC-4.1.3.tar.gz
-    cd BackupPC-4.1.3
+<pre><code>    tar zxf BackupPC-4.2.1.tar.gz
+    cd BackupPC-4.2.1
     perl configure.pl</code></pre>
 
 <p>The configure.pl script also accepts command-line options if you wish to run it in a non-interactive manner. It has self-contained documentation for all the command-line options, which you can read with perldoc:</p>
@@ -1461,7 +1461,8 @@
        -n dumpNum      dump number from which the tar archive is created
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
-       -s shareName    share name from which the tar archive is created
+       -s shareName    share name from which the tar archive is created;
+                       can be &quot;*&quot; to mean all shares.
   
     Other options:
        -t              print summary totals
@@ -1658,6 +1659,8 @@
        -m              don&#39;t migrate anything; just print what would be done
        -p              don&#39;t print progress information
        -v              verbose</code></pre>
+
+<p>The BackupPC server should not be running when you run BackupPC_migrateV3toV4. It will check and exit if the BackupPC server is running.</p>
 
 <p>If you want to test BackupPC_migrateV3toV4, a cautious approach is to make backup copies of the V3 backups, allowing you to restore them if there is any issue. For example, if exampleHost has three 3.x backups numbered 5, 6, 7, you can use cp -prl (preserving hardlinks) to make copies:</p>
 
@@ -2047,7 +2050,7 @@
 <p>Current log file for this PC from BackupPC_dump.</p>
 
 </dd>
-<dt id="LOG.DDMMYYYY-or-LOG.DDMMYYYY.z">LOG.DDMMYYYY or LOG.DDMMYYYY.z</dt>
+<dt id="LOG.MMYYYY-or-LOG.MMYYYY.z">LOG.MMYYYY or LOG.MMYYYY.z</dt>
 <dd>
 
 <p>Last month&#39;s log file. Log files are aged monthly and compressed (if compression is enabled), and old LOG files are deleted. In earlier versions of BackupPC these files used to have a suffix of 0, 1, ....</p>
@@ -2499,7 +2502,7 @@
 
 <h2 id="Modifying-the-main-configuration-file">Modifying the main configuration file</h2>
 
-<p>The configuration file is a perl script that is executed by BackupPC, so you should be careful to preserve the file syntax (punctuation, quotes etc) when you edit it. It is recommended that you use CVS, RCS or some other method of source control for changing config.pl.</p>
+<p>The configuration file is a perl script that is executed by BackupPC, so you should be careful to preserve the file syntax (punctuation, quotes etc) when you edit it. Specifically, preserving quotes means you should never use undef for configuration parameters that expect string values. An empty string (&#39;&#39;) should be used in this case. It is recommended that you use CVS, RCS or some other method of source control for changing config.pl.</p>
 
 <p>BackupPC reads or re-reads the main configuration file and the hosts file in three cases:</p>
 
@@ -2801,7 +2804,7 @@
 <strong><dt id="_conf_backuppcuserverify_">$Conf{BackupPCUserVerify}</a> = 1;</dt></strong>
 <dd>
 
-<p>Whether BackupPC and the CGI script BackupPC_Admin verify that they are really running as user <a href="#_conf_backuppcuser_">$Conf{BackupPCUser}</a>. If this flag is set and the effective user id (euid) differs from <a href="#_conf_backuppcuser_">$Conf{BackupPCUser}</a> then both scripts exit with an error. This catches cases where BackupPC might be accidently started as root or the wrong user, or if the CGI script is not installed correctly.</p>
+<p>Whether BackupPC and the CGI script BackupPC_Admin verify that they are really running as user <a href="#_conf_backuppcuser_">$Conf{BackupPCUser}</a>. If this flag is set and the effective user id (euid) differs from <a href="#_conf_backuppcuser_">$Conf{BackupPCUser}</a> then both scripts exit with an error. This catches cases where BackupPC might be accidentally started as root or the wrong user, or if the CGI script is not installed correctly.</p>
 
 </dd>
 <strong><dt id="_conf_hardlinkmax_">$Conf{HardLinkMax}</a> = 31999;</dt></strong>
@@ -3155,7 +3158,7 @@
 <strong><dt id="_conf_xferloglevel_">$Conf{XferLogLevel}</a> = 1;</dt></strong>
 <dd>
 
-<p>Level of verbosity in Xfer log files. 0 means be quiet, 1 will give will give one line per file, 2 will also show skipped files on incrementals, higher values give more output.</p>
+<p>Level of verbosity in Xfer log files. 0 means be quiet, 1 will give one line per file, 2 will also show skipped files on incrementals, higher values give more output.</p>
 
 </dd>
 <strong><dt id="_conf_clientcharset_">$Conf{ClientCharset}</a> = &#39;&#39;;</dt></strong>
@@ -3483,7 +3486,8 @@
        $host         hostname (could be different from client name if
                                 <a href="#_conf_clientnamealias_">$Conf{ClientNameAlias}</a> is set)
        $hostIP       IP address of host
-       $confDir      configuration directory path</code></pre>
+       $confDir      configuration directory path
+       $shareName    share name being backed up</code></pre>
 
 <p>This allows settings of the form:</p>
 
@@ -3923,6 +3927,12 @@
 <p>Note: this setting doesn&#39;t work for hosts with DHCP set to 1.</p>
 
 </dd>
+<strong><dt id="_conf_clientcomment_">$Conf{ClientComment}</a> = undef;</dt></strong>
+<dd>
+
+<p>A user-settable comment string that is displayed in this host&#39;s status. The value is otherwise ignored by BackupPC.</p>
+
+</dd>
 </dl>
 
 <h2 id="Email-reminders-status-and-messages">Email reminders, status and messages</h2>
@@ -4114,7 +4124,7 @@
 <strong><dt id="_conf_language_">$Conf{Language}</a> = &#39;en&#39;;</dt></strong>
 <dd>
 
-<p>Language to use. See lib/BackupPC/Lang for the list of supported languages, which include English (en), French (fr), Spanish (es), German (de), Italian (it), Dutch (nl), Polish (pl), Portuguese Brazilian (pt_br) and Chinese (zh_CH).</p>
+<p>Language to use. See lib/BackupPC/Lang for the list of supported languages, which include English (en), French (fr), Spanish (es), German (de), Italian (it), Dutch (nl), Polish (pl), Portuguese Brazilian (pt_br) and Chinese (zh_CN).</p>
 
 <p>Currently the Language setting applies to the CGI interface and email messages sent to users. Log files and other text are still in English.</p>
 
@@ -4167,7 +4177,7 @@
 <strong><dt id="_conf_cgistatushilightcolor_">$Conf{CgiStatusHilightColor}</a> = { ...</dt></strong>
 <dd>
 
-<p>Hilight colors based on status that are used in the PC summary page.</p>
+<p>Highlight colors based on status that are used in the PC summary page.</p>
 
 </dd>
 <strong><dt id="_conf_cgiheaders_">$Conf{CgiHeaders}</a> = &#39;&lt;meta http-equiv=&quot;pragma&quot; content=&quot;no-cache&quot;&gt;&#39;;</dt></strong>
@@ -4212,6 +4222,12 @@
 <p>CSS stylesheet &quot;skin&quot; for the CGI interface. It is stored in the <a href="#_conf_cgiimagedir_">$Conf{CgiImageDir}</a> directory and accessed via the <a href="#_conf_cgiimagedirurl_">$Conf{CgiImageDirURL}</a> URL.</p>
 
 <p>For BackupPC v3 and v2 the prior css versions are available as BackupPC_retro_v3.css and BackupPC_retro_v2.css</p>
+
+</dd>
+<strong><dt id="_conf_cgiuserdeletebackupenable_">$Conf{CgiUserDeleteBackupEnable}</a> = 0;</dt></strong>
+<dd>
+
+<p>Whether the user is allowed to delete backups. If set to a positive value, the user will have a delete button for each backup on any host they have permission to access. If set to 0, only administrators have access to the backup delete feature. If set to a negative value, even admins will not be able to use the delete feature.</p>
 
 </dd>
 <strong><dt id="_conf_cgiuserconfigeditenable_">$Conf{CgiUserConfigEditEnable}</a> = 1;</dt></strong>

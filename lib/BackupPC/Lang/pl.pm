@@ -381,6 +381,7 @@ Następujący użytkonicy są w kolejce:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Czas do </td>
     <td> Użytkownik </td></tr>
 \$strUser
@@ -392,6 +393,7 @@ Następujące kolejki będące w tle czekają na wykonanie :
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Czas do </td>
     <td> uzytkownik </td></tr>
 \$strBg
@@ -402,6 +404,7 @@ Następujące kolejki poleceń czekają na wykonanie :
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Czas do </td>
     <td> Użytkownik </td>
     <td> Polecenie </td></tr>

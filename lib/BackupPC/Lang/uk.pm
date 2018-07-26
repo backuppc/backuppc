@@ -382,6 +382,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Хост </td>
+    <td> Action </td>
     <td> Час запиту </td>
     <td> Користувач </td></tr>
 \$strUser
@@ -393,6 +394,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Хост </td>
+    <td> Action </td>
     <td> Час запиту </td>
     <td> Користувач </td></tr>
 \$strBg
@@ -403,6 +405,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Хост </td>
+    <td> Action </td>
     <td> Час запиту </td>
     <td> Користувач </td>
     <td> Команда </td></tr>

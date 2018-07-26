@@ -383,6 +383,7 @@ As seguintes solicitações de usuários estão atualmente em fila:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Hora Sol. </td>
     <td> Usuário </td></tr>
 \$strUser
@@ -394,6 +395,7 @@ As seguintes solicitações em segundo plano estão atualmente em fila:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Hora Sol. </td>
     <td> Usuário </td></tr>
 \$strBg
@@ -404,6 +406,7 @@ Os seguintes comandos estão atualmente em fila:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Hora Sol. </td>
     <td> Usuário </td>
     <td> Comando </td></tr>

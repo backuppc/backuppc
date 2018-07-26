@@ -378,6 +378,7 @@ Následující uživatelé jsou momentálnì ve frontì:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Èas do </td>
     <td> Uživatel </td></tr>
 \$strUser
@@ -389,6 +390,7 @@ Následující žádosti v pozadí jsou momentálnì ve frontì:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Èas do </td>
     <td> Uživatel </td></tr>
 \$strBg
@@ -399,6 +401,7 @@ Následující pøíkazy jsou momentálnì ve frontì:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Èas do </td>
     <td> Uživatel </td>
     <td> Pøíkaz </td></tr>

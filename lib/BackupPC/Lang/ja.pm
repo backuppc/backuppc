@@ -378,6 +378,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> ホスト </td>
+    <td> Action </td>
     <td> 要求時間 </td>
     <td> ユーザ </td></tr>
 \$strUser
@@ -388,6 +389,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 現在キューイングされているバックグラウンド要求は次のとおりです。</p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> ホスト </td>
+    <td> Action </td>
     <td> 要求時間 </td>
     <td> ユーザ </td></tr>
 \$strBg
@@ -398,6 +400,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> ホスト </td>
+    <td> Action </td>
     <td> 要求時間 </td>
     <td> ユーザ </td>
     <td> コマンド </td></tr>

@@ -378,6 +378,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> 客户机 </td>
+    <td> Action </td>
     <td> 请求时间 </td>
     <td> 用户 </td></tr>
 \$strUser
@@ -389,6 +390,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> 客户机 </td>
+    <td> Action </td>
     <td> 请求时间 </td>
     <td> 用户 </td></tr>
 \$strBg
@@ -399,6 +401,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> 客户机 </td>
+    <td> Action </td>
     <td> 请求时间 </td>
     <td> 用户 </td>
     <td> 命令 </td></tr>

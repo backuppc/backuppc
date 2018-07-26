@@ -391,6 +391,7 @@ Sono state accodate le seguenti richieste degli utenti:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Data richiesta </td>
     <td> Utente </td></tr>
 \$strUser
@@ -402,6 +403,7 @@ Sono attualmente in coda le seguenti richieste di background:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Data richiesta </td>
     <td> Utente </td></tr>
 \$strBg
@@ -412,6 +414,7 @@ Sono attualmente in coda le seguenti richieste di comandi:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Data richiesta </td>
     <td> Utente </td>
     <td> Comando </td></tr>

@@ -391,6 +391,7 @@ Die folgenden Benutzeraufträge sind eingereiht:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
+    <td> Action </td>
     <td> Uhrzeit </td>
     <td> Benutzer </td></tr>
 \$strUser
@@ -402,6 +403,7 @@ Die folgenden Hintergrundaufträge sind eingereiht:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
+    <td> Action </td>
     <td> Uhrzeit </td>
     <td> Benutzer </td></tr>
 \$strBg
@@ -412,6 +414,7 @@ Die folgenden Kommandoaufträge sind eingereiht:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Computer </td>
+    <td> Action </td>
     <td> Uhrzeit </td>
     <td> Benutzer </td>
     <td> Kommando </td></tr>

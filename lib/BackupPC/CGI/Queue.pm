@@ -38,6 +38,21 @@ package BackupPC::CGI::Queue;
 use strict;
 use BackupPC::CGI::Lib qw(:all);
 
+sub GetReqType
+{
+    my $req = shift(@_);
+    if ( $req->{restore} ) {
+        return "restore";
+    } elsif ( $req->{delete} ) {
+        return "delete (#$req->{num})";
+    } elsif ( $req->{archive} ) {
+        return "archive";
+    } else {
+        return "backup ($req->{backupType})" if ( $req->{backupType} );
+	return "backup";
+    }
+}
+
 sub action
 {
     my($strBg, $strUser, $strCmd);
@@ -52,17 +67,21 @@ sub action
     while ( @BgQueue ) {
         my $req = pop(@BgQueue);
         my($reqTime) = timeStamp2($req->{reqTime});
+	my $type = GetReqType($req);
         $strBg .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
+    <td align="center"> $type </td>
     <td align="center"> $reqTime </td>
     <td align="center"> $req->{user} </td></tr>
 EOF
     }
     while ( @UserQueue ) {
         my $req = pop(@UserQueue);
+	my $type = GetReqType($req);
         my $reqTime = timeStamp2($req->{reqTime});
         $strUser .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
+    <td align="center"> $type </td>
     <td align="center"> $reqTime </td>
     <td align="center"> $req->{user} </td></tr>
 EOF
@@ -70,9 +89,11 @@ EOF
     while ( @CmdQueue ) {
         my $req = pop(@CmdQueue);
         my $reqTime = timeStamp2($req->{reqTime});
+	my $type = GetReqType($req);
         (my $cmd = $bpc->execCmd2ShellCmd(@{$req->{cmd}})) =~ s/$BinDir\///;
         $strCmd .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
+    <td align="center"> $type </td>
     <td align="center"> $reqTime </td>
     <td align="center"> $req->{user} </td>
     <td> $cmd </td></tr>

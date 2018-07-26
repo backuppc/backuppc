@@ -379,6 +379,7 @@ Les demandes utilisateurs suivantes sont actuellement en attente :
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Hôte </td>
+    <td> Action </td>
     <td> Temps Requis </td>
     <td> Utilisateur </td></tr>
 \$strUser
@@ -390,6 +391,7 @@ Les demandes en arrière plan suivantes sont actuellement en attente :
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Hôte </td>
+    <td> Action </td>
     <td> Temps requis </td>
     <td> Utilisateur </td></tr>
 \$strBg
@@ -400,6 +402,7 @@ Les demandes de commande suivantes sont actuellement en attente :
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Hôtes </td>
+    <td> Action </td>
     <td> Temps Requis </td>
     <td> Utilisateur </td>
     <td> Commande </td></tr>

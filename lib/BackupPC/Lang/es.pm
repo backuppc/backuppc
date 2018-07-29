@@ -380,6 +380,7 @@ Las siguientes solicitudes de usuarios est&aacute;n actualmente en cola:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Hora Solicitud </td>
     <td> Usuario </td></tr>
 \$strUser
@@ -391,6 +392,7 @@ Las siguientes solicitudes en segundo plano est&aacute;n actualmente en cola:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Hora Solicitud </td>
     <td> Usuario </td></tr>
 \$strBg
@@ -401,6 +403,7 @@ Los siguientes comandos est&aacute;n actualmente en cola:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Hora Solicitud </td>
     <td> Usuario </td>
     <td> Comando </td></tr>

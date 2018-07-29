@@ -381,6 +381,7 @@ Deze aanvragen van gebruikers staan momenteel in de wachtrij:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Machine </td>
+    <td> Action </td>
     <td> Aanvraagtijd </td>
     <td> Gebruiker </td></tr>
 \$strUser
@@ -392,6 +393,7 @@ Deze aanvragen voor backups in de achtergrond staan momenteel in de wachtrij:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Machine </td>
+    <td> Action </td>
     <td> Aanvraagtijd </td>
     <td> Gebruiker </td></tr>
 \$strBg
@@ -402,6 +404,7 @@ Deze aanvragen via opdracht staan momenteel in de wachtrij:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Machine </td>
+    <td> Action </td>
     <td> Aanvraagtijd </td>
     <td> Gebruiker </td>
     <td> Opdracht </td></tr>

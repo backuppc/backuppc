@@ -379,6 +379,7 @@ The following user requests are currently queued:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Req Time </td>
     <td> User </td></tr>
 \$strUser
@@ -390,6 +391,7 @@ The following background requests are currently queued:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Req Time </td>
     <td> User </td></tr>
 \$strBg
@@ -400,6 +402,7 @@ The following command requests are currently queued:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
+    <td> Action </td>
     <td> Req Time </td>
     <td> User </td>
     <td> Command </td></tr>

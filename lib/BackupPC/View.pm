@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2017  Craig Barratt
+#   Copyright (C) 2002-2018  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.1, released 12 Mar 2017.
+# Version 4.2.2, released 22 May 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -259,6 +259,7 @@ sub dirCache
                             || $file eq ".."
                             || $file eq "."
                             || $file eq "backupInfo"
+                            || $file eq "refCnt"
                             || $mangle && $file =~ /^attrib/ );
 
                     if ( defined($attr) && defined(my $a = $attr->get($fileUM)) ) {
@@ -476,6 +477,7 @@ sub shareList
                    || $file eq ".."
                    || $file eq "backupInfo"
                    || $file eq "inode"
+                   || $file eq "refCnt"
                 );
             my $fileUM = $file;
             $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );

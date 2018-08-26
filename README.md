@@ -58,7 +58,7 @@ and freely available as Open Source on [GitHub](https://github.com/backuppc/back
   files across multiple backups of the same or different PCs are stored
   only once resulting in substantial savings in disk storage.
 
-- One example of disk use: 95 latops with each full backup averaging
+- One example of disk use: 95 laptops with each full backup averaging
   3.6GB each, and each incremental averaging about 0.3GB. Storing
   three weekly full backups and six incremental backups per laptop
   is around 1200GB of raw data, but because of pooling and compression

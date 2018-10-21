@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 18 Feb 2018.
+# Version 4.2.2, released 21 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1632,6 +1632,7 @@ sub Main_Check_Client_Messages
                                     BgQueueOn => $BgQueueOn{$h},
                                     UserQueueOn => $UserQueueOn{$h},
                                     CmdQueueOn => $CmdQueueOn{$h},
+                                    Job => $Jobs{$h},
                                 });
                             push(@names, qw(*StatusHost));
                         } else {

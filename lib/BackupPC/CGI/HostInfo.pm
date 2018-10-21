@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 8 Apr 2018.
+# Version 4.2.2, released 21 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -131,6 +131,12 @@ EOF
         my($dur, $duration, $MB, $MBperSec, $MBExist, $MBNew);
         my $startTime = timeStamp2($Backups[$i]{startTime});
 
+        #
+        # if a backup is active, but there is no job, then force it to be displayed
+        # as partial.  this handles case of a forced exit of BackupPC without normal
+        # cleanup
+        #
+        $Backups[$i]{type} = "partial" if ( $Backups[$i]{type} eq "active" && !defined($StatusHost{Job}) );
         if ( $Backups[$i]{type} ne "active" ) {
             $dur       = $Backups[$i]{endTime} - $Backups[$i]{startTime};
             $dur          = 1 if ( $dur <= 0 );
@@ -292,9 +298,9 @@ EOF
             $statusStr  .= eval("qq{$Lang->{Last_email_sent_to__was_at___subject}}");
         }
     }
-    if ( defined($Jobs{$host}) ) {
-        my $startTime = timeStamp2($Jobs{$host}{startTime});
-        (my $cmd = $Jobs{$host}{cmd}) =~ s/$BinDir\///g;
+    if ( defined($StatusHost{Job}) ) {
+        my $startTime = timeStamp2($StatusHost{Job}{startTime});
+        (my $cmd = $StatusHost{Job}{cmd}) =~ s/$BinDir\///g;
         $statusStr .= eval("qq{$Lang->{The_command_cmd_is_currently_running_for_started}}");
     }
     if ( $StatusHost{BgQueueOn} ) {

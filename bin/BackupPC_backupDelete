@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 18 Feb 2018.
+# Version 4.2.2, released 21 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -158,16 +158,16 @@ if ( $opts{L} ) {
 	}
 	$pids->{$$} = 1;
 	$pids->{$delPid} = 1;
-	pidHandler($pids);
+	pidHandler(keys(%$pids));
 	while ( <$delFd> ) {
 	    if ( $_ =~ /^__bpc_progress_/ ) {
 		print($_);
 	    } elsif ( $_ =~ /^__bpc_pidStart__ (\d+)/ ) {
 		$pids->{$1} = 1;
-		pidHandler($pids);
+                pidHandler(keys(%$pids));
 	    } elsif ( $_ =~ /^__bpc_pidEnd__ (\d+)/ ) {
 		delete($pids->{$1});
-		pidHandler($pids);
+                pidHandler(keys(%$pids));
 	    } else {
 		logMsg($_);
 	    }

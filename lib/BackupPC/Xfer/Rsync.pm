@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2017  Craig Barratt
+#   Copyright (C) 2002-2018  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.1.4, released 24 Nov 2017.
+# Version 4.2.2, released 21 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -127,23 +127,22 @@ sub start
                             if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' );
             push(@$rsyncArgs, @$srcList, "$t->{hostIP}:$remoteDir");
         } else {
-            my $pwFd;
-            $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
-            if ( !length($conf->{RsyncdPasswd}) ) {
-                $t->{XferLOG}->write(\"\$Conf{RsyncdPasswd} is empty; host's rsyncd auth will fail\n");
-                $t->{_errStr} = "\$Conf{RsyncdPasswd} is empty; host's rsyncd auth will fail";
-                return;
-            }
-            if ( open($pwFd, ">", $t->{pwFile}) ) {
-                chmod(0400, $t->{pwFile});
-                binmode($pwFd);
-                syswrite($pwFd, $conf->{RsyncdPasswd});
-                close($pwFd);
-                push(@$rsyncArgs, "--password-file=$t->{pwFile}");
-            } else {
-                $t->{XferLOG}->write(\"Failed to open/create rsynd pw file $t->{pwFile}\n");
-                $t->{_errStr} = "Failed to open/create rsynd pw file $t->{pwFile}";
-                return;
+            if ( length($conf->{RsyncdPasswd}) ) {
+                my($pwFd, $ok);
+                $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
+                if ( open($pwFd, ">", $t->{pwFile}) ) {
+                    $ok = 1;
+                    $ok = 0 if ( $ok && chmod(0400, $t->{pwFile}) != 1 );
+                    $ok = 0 if ( $ok && !binmode($pwFd) );
+                    $ok = 0 if ( $ok && syswrite($pwFd, $conf->{RsyncdPasswd}) != length($conf->{RsyncdPasswd}) );
+                    $ok = 0 if ( $ok && !close($pwFd) );
+                    push(@$rsyncArgs, "--password-file=$t->{pwFile}");
+                }
+                if ( !$ok ) {
+                    $t->{XferLOG}->write(\"Failed to open/create rsynd pw file $t->{pwFile} ($!)\n");
+                    $t->{_errStr} = "Failed to open/create rsynd pw file $t->{pwFile} ($!)";
+                    return;
+                }
             }
             my $shareName = $t->{shareName};
             #from_to($shareName, "utf8", $conf->{ClientCharset})

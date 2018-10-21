@@ -2265,7 +2265,6 @@ $Conf{CgiUserConfigEdit} = {
         RsyncArgsExtra            => 1,
         RsyncBackupPCPath         => 0,
         RsyncClientPath           => 0,
-        RsyncdAuthRequired        => 1,
         RsyncdClientPort          => 1,
         RsyncdPasswd              => 1,
         RsyncdUserName            => 1,

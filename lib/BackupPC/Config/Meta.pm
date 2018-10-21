@@ -455,7 +455,6 @@ use vars qw(%ConfigMeta);
                 RsyncdClientPort          => "boolean",
                 RsyncdUserName            => "boolean",
                 RsyncdPasswd              => "boolean",
-                RsyncdAuthRequired        => "boolean",
                 RsyncArgs                 => "boolean",
                 RsyncArgsExtra            => "boolean",
                 RsyncRestoreArgs          => "boolean",

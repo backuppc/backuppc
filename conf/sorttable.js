@@ -49,7 +49,11 @@ function ts_makeSortable(table) {
 function ts_getInnerText(el) {
 	if (typeof el == "string") return el;
 	if (typeof el == "undefined") { return el };
-	if (el.innerText) return el.innerText;	//Not needed but it is faster
+
+    // Not needed but it is faster.
+    // We have to trim the content as some versions of Chrome append a trailing tab.
+    if (el.innerText) return el.innerText.trim();
+
 	var str = "";
 	
 	var cs = el.childNodes;

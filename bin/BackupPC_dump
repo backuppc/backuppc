@@ -87,7 +87,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 18 Feb 2018.
+# Version 4.2.2, released 21 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -214,12 +214,6 @@ $SIG{STOP} = \&catch_signal;
 $SIG{TSTP} = \&catch_signal;
 $SIG{TTIN} = \&catch_signal;
 my $Pid = $$;
-
-#
-# Make sure we eventually timeout if there is no activity from
-# the data transport program.
-#
-alarm($Conf{ClientTimeout});
 
 mkpath($Dir, 0, 0777) if ( !-d $Dir );
 
@@ -883,6 +877,12 @@ $NeedPostCmd = 1;
 #
 my $shareDuplicate = {};
 for my $shareName ( @$ShareNames ) {
+    #
+    # Make sure we eventually timeout if there is no activity from
+    # the data transport program.
+    #
+    alarm($Conf{ClientTimeout});
+
     local(*RH, *WH);
 
     #

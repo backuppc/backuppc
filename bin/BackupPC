@@ -121,7 +121,7 @@ if ( $Conf{RsyncBackupPCPath} ne "" && -x $Conf{RsyncBackupPCPath} ) {
         exit(1);
     }
     my $version = "unknown";
-    $version = $1 if ( $output =~ /rsync_bpc\s+version\s+([\d.]+)(beta\d+)?\s+protocol/ );
+    $version = $1 if ( $output =~ /rsync_bpc\s+version\s+([\d.]+?)(\.beta\d+)?\s+protocol/ );
     if ( $version eq "unknown" || version->parse($1) < version->parse($PackageVersion->{rsync_bpc}) ) {
         print(STDERR "BackupPC: rsync_bpc at $Conf{RsyncBackupPCPath} needs to be upgraded (got version $1; need >= $PackageVersion->{rsync_bpc}); exiting in 30s\n");
         sleep(30);

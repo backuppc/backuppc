@@ -71,7 +71,7 @@ sub action
         $strBg .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
     <td align="center"> $type </td>
-    <td align="center"> $reqTime </td>
+    <td align="center" data-date_format="$Conf{CgiDateFormatMMDD}"> $reqTime </td>
     <td align="center"> $req->{user} </td></tr>
 EOF
     }
@@ -82,7 +82,7 @@ EOF
         $strUser .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
     <td align="center"> $type </td>
-    <td align="center"> $reqTime </td>
+    <td align="center" data-date_format="$Conf{CgiDateFormatMMDD}"> $reqTime </td>
     <td align="center"> $req->{user} </td></tr>
 EOF
     }
@@ -94,7 +94,7 @@ EOF
         $strCmd .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
     <td align="center"> $type </td>
-    <td align="center"> $reqTime </td>
+    <td align="center" data-date_format="$Conf{CgiDateFormatMMDD}"> $reqTime </td>
     <td align="center"> $req->{user} </td>
     <td> $cmd </td></tr>
 EOF

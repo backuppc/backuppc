@@ -93,7 +93,7 @@ sub action
             $ArchiveStr  .= <<EOF;
 <tr><td align="center"><a href="$MyURL?action=archiveInfo&num=$Archives[$i]{num}&host=${EscURI($host)}">$Archives[$i]{num}</a> </td>
     <td align="center"> $Archives_Result </td>
-    <td align="right"> $startTime </td>
+    <td align="right" data-date_format="$Conf{CgiDateFormatMMDD}"> $startTime </td>
     <td align="right"> $duration </td>
 </tr>
 EOF
@@ -184,7 +184,7 @@ EOF
     <td align="center" class="border"> $ltype </td>
     <td align="center" class="border"> $filled </td>
     <td align="center" class="border"> $level </td>
-    <td align="right" class="border">  $startTime </td>
+    <td align="right" class="border" data-date_format="$Conf{CgiDateFormatMMDD}"> $startTime </td>
     <td align="right" class="border">  $duration </td>
     <td align="right" class="border">  $age </td>
     $deleteStr
@@ -249,7 +249,7 @@ EOF
         push @restoreRows, <<EOF;
 <tr><td align="center" class="border"><a href="$MyURL?action=restoreInfo&num=$Restores[$i]{num}&host=${EscURI($host)}">$Restores[$i]{num}</a> </td>
     <td align="center" class="border"> $Restores_Result </td>
-    <td align="right" class="border"> $startTime </td>
+    <td align="right" class="border" data-date_format="$Conf{CgiDateFormatMMDD}"> $startTime </td>
     <td align="right" class="border"> $duration </td>
     <td align="right" class="border"> $Restores[$i]{nFiles} </td>
     <td align="right" class="border"> $MB </td>

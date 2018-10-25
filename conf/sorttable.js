@@ -84,12 +84,21 @@ function ts_resortTable(lnk,clid) {
     
     // Work out a type for the column
     if (table.rows.length <= 1) return;
-    var itm = ts_getInnerText(table.rows[1].cells[column]);
+    var cell = table.rows[1].cells[column];
+    var itm = ts_getInnerText(cell);
+    var date_format = cell.dataset.date_format;    // Get date format from data-* attribute
+
     sortfn = ts_sort_caseinsensitive;
-    if (itm.match(/^\d\d[\/-]\d\d[\/-]\d\d\d\d$/)) sortfn = ts_sort_date;
-    if (itm.match(/^\d\d[\/-]\d\d[\/-]\d\d$/)) sortfn = ts_sort_date;
-    if (itm.match(/^[£$]/)) sortfn = ts_sort_currency;
-    if (itm.match(/^[\d\.]+$/)) sortfn = ts_sort_numeric;
+    if (date_format === "0") {
+        sortfn = ts_sort_date_0;
+    } else if (date_format === "1") {
+        sortfn = ts_sort_date_1;
+    } else if (itm.match(/^[£$]/)) {
+        sortfn = ts_sort_currency;
+    } else if (itm.match(/^[\d\.]+$/)) {
+        sortfn = ts_sort_numeric;
+    }
+
     SORT_COLUMN_INDEX = column;
     var headerRowIdx = ts_getHeaderRowIdx(table);
     console.log(headerRowIdx);
@@ -143,27 +152,34 @@ function ts_hasClass(el, className) {
 	return false;
 }
 
-function ts_sort_date(a,b) {
-    // y2k notes: two digit years less than 50 are treated as 20XX, greater than 50 are treated as 19XX
-    aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]);
-    bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]);
-    if (aa.length == 10) {
-        dt1 = aa.substr(6,4)+aa.substr(3,2)+aa.substr(0,2);
-    } else {
-        yr = aa.substr(6,2);
-        if (parseInt(yr) < 50) { yr = '20'+yr; } else { yr = '19'+yr; }
-        dt1 = yr+aa.substr(3,2)+aa.substr(0,2);
-    }
-    if (bb.length == 10) {
-        dt2 = bb.substr(6,4)+bb.substr(3,2)+bb.substr(0,2);
-    } else {
-        yr = bb.substr(6,2);
-        if (parseInt(yr) < 50) { yr = '20'+yr; } else { yr = '19'+yr; }
-        dt2 = yr+bb.substr(3,2)+bb.substr(0,2);
-    }
-    if (dt1==dt2) return 0;
-    if (dt1<dt2) return -1;
-    return 1;
+/**
+ * Parse a date string and convert it to a JavaScript Date object.
+ * @param {string} str - Date string.
+ * @param {number} format - Date format: 0 - "MM/DD HH:MM" or "MM/DD/YY HH:MM", 1 - "DD/MM HH:MM" or "DD/MM/YY HH:MM".
+ * @returns {object} JavaScript Date object.
+ */
+function str2date(str, format) {
+    var arr = str.match(/(\d{1,2})\/(\d{1,2})(?:\/(\d{2}))? (\d{2}):(\d{2})/);
+
+    var year = arr[3] ? ara[3] : (new Date()).getFullYear();
+    var month = arr[format ? 1 : 2] - 1;
+    var day = arr[format ? 2 : 1];
+    var hour = arr[4];
+    var minute = arr[5];
+
+    return new Date(year, month, day, hour, minute);
+}
+
+function ts_sort_date_0 (a,b) {
+    var aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]);
+    var bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]);
+    return str2date(aa, 0) - str2date(bb, 0);
+}
+
+function ts_sort_date_1 (a,b) {
+    var aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]);
+    var bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]);
+    return str2date(aa, 1) - str2date(bb, 1);
 }
 
 function ts_sort_currency(a,b) { 

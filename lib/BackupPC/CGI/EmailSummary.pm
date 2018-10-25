@@ -71,7 +71,7 @@ sub action
             $EmailStr{$info->{$host}{lastTime}} .= <<EOF;
 <tr><td>${UserLink($u)} </td>
     <td>${HostLink($host)} </td>
-    <td>$emailTimeStr </td>
+    <td data-date_format="$Conf{CgiDateFormatMMDD}">$emailTimeStr </td>
     <td>$info->{$host}{lastSubj} </td></tr>
 EOF
         }

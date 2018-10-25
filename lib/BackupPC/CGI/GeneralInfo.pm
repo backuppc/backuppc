@@ -57,7 +57,7 @@ sub action
     <td align="center" class="border"> $Jobs{$host}{type} </td>
     <td align="center" class="border"> ${UserLink(defined($Hosts->{$host})
 					? $Hosts->{$host}{user} : "")} </td>
-    <td class="border"> $startTime </td>
+    <td class="border" data-date_format="$Conf{CgiDateFormatMMDD}"> $startTime </td>
     <td class="border"> $cmd </td>
     <td align="center" class="border"> $Jobs{$host}{pid} </td>
     <td align="center" class="border"> $xferPid </td>
@@ -95,9 +95,9 @@ EOF
     <td align="center" class="border"> $Status{$host}{type} </td>
     <td align="center" class="border"> ${UserLink(defined($Hosts->{$host})
 					? $Hosts->{$host}{user} : "")} </td>
-    <td align="right" class="border"> $startTime </td>
+    <td align="right" class="border" data-date_format="$Conf{CgiDateFormatMMDD}"> $startTime </td>
     <td class="border"> $XferViewStr </td>
-    <td align="right" class="border"> $errorTime </td>
+    <td align="right" class="border" data-date_format="$Conf{CgiDateFormatMMDD}"> $errorTime </td>
     <td class="border"> ${EscHTML($shortErr)} </td></tr>
 EOF
     }

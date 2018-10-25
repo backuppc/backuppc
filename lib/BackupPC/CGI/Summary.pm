@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 18 Feb 2018.
+# Version 4.2.2, released 21 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -70,7 +70,7 @@ sub action
                     $fullDur  = $Backups[$i]{endTime} - $Backups[$i]{startTime};
                 }
                 $fullSizeTot += $Backups[$i]{size} / (1024 * 1024);
-            } else {
+            } elsif ( $Backups[$i]{type} eq "incr" ) {
                 $incrCnt++;
                 if ( $incrAge < 0 || $Backups[$i]{startTime} > $incrAge ) {
                     $incrAge = $Backups[$i]{startTime};

@@ -2073,7 +2073,7 @@ $Conf{CgiUserUrlCreate}     = 'mailto:%s';
 # dates (MM/DD), a value of 2 uses full YYYY-MM-DD format, and zero
 # for international dates (DD/MM).
 #
-$Conf{CgiDateFormatMMDD} = 1;
+$Conf{CgiDateFormatMMDD} = 2;
 
 #
 # If set, the complete list of hosts appears in the left navigation

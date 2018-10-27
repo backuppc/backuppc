@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2017  Craig Barratt
+#   Copyright (C) 2003-2018  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 30 Apr 2017.
+# Version 4.2.2, released 21 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -213,7 +213,7 @@ sub HostLink
 {
     my($host) = @_;
     my($s);
-    if ( defined($Hosts->{$host}) || defined($Status{$host}) ) {
+    if ( defined($Hosts->{$host}) ) {
         $s = "<a href=\"$MyURL?host=${EscURI($host)}\">$host</a>";
     } else {
         $s = $host;

@@ -786,7 +786,7 @@ sub Main_TryToRun_Bg_or_User_Queue
         $Jobs{$host}{pid}        = $pid;
         $Jobs{$host}{fh}         = *FH;
         $Jobs{$host}{fn}         = fileno(FH);
-        $Jobs{$host}{dhcp}       = $req->{dhcp};
+        $Jobs{$host}{dhcp}       = 1 if ( $req->{backupType} eq "dhcpPoll" );
         vec($FDread, $Jobs{$host}{fn}, 1) = 1;
         $Jobs{$host}{startTime}  = time;
         $Jobs{$host}{reqTime}    = $req->{reqTime};
@@ -796,7 +796,7 @@ sub Main_TryToRun_Bg_or_User_Queue
         $Jobs{$host}{type}       = $type;
 	$Status->{$host}{userReq}  = $req->{userReq}
 					if ( defined($Hosts->{$host}) );
-        if ( !$req->{dhcp} ) {
+        if ( !$Jobs{$host}{dhcp} ) {
             $Status->{$host}{state}     = "Status_".$type."_starting";
             $Status->{$host}{activeJob} = 1;
             $Status->{$host}{startTime} = time;
@@ -1013,7 +1013,7 @@ sub Main_Check_Job_Messages
                     $Status->{$host}{activeJob}  = 1;
                     $Status->{$host}{startTime}  = $Jobs{$host}{startTime};
                     $Status->{$host}{endTime}    = "";
-                    $Jobs{$host}{dhcp}         = 0;
+                    $Jobs{$host}{dhcp}           = 0;
                 } else {
                     print(LOG $bpc->timeStamp, "dhcp $host: $mesg\n");
                 }
@@ -1313,8 +1313,9 @@ sub Main_Check_Job_Messages
             } elsif ( defined($Status->{$host}) ) {
                 $Status->{$host}{state} = "Status_idle";
             }
-            delete($Jobs{$host});
             $Status->{$host}{activeJob} = 0 if ( defined($Status->{$host}) );
+            delete($Status->{$host}) if ( $Jobs{$host}{dhcp} );
+            delete($Jobs{$host});
         }
     }
     #
@@ -1803,7 +1804,7 @@ sub QueueOnePC
             if ( defined($Status->{$host}{backoffTime})
                   && $Status->{$host}{backoffTime} < time );
     return 1 if ( $BgQueueOn{$host} || $UserQueueOn{$host} );
-    if ( $Hosts->{$host}{dhcp} ) {
+    if ( defined($Hosts->{$host}) && $Hosts->{$host}{dhcp} ) {
         $Status->{$host}{dhcpCheckCnt}++;
         if ( $RunNightlyWhenIdle ) {
             #

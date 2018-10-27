@@ -21,6 +21,43 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+Merged pull requests #200, #208, #216, #217, #229, #230, #231.
+
+* Improvements to html table sorting, and made more tables sortable,
+  submitted by @brenard and @moisseev (issue #199, PRs #200, #229, #230).
+
+* Add action type column to queue status page (#208), submitted by
+  @brenard.
+
+* Changed default $Conf{CgiDateFormatMMDD} to 2 (YYYY-MM-DD), submitted
+  by @moisseev.
+
+* bin/BackupPC_backupDuplicate: fixed directory creation for copying v3
+  backups.
+
+* bin/BackupPC: fixed handling of dhcp hosts, reported by Jean-Marc.
+
+* bin/BackupPC: improved version cbeck of rsync_bpc to allow period
+  before "beta", reported by @ktenney in issue #214.
+
+* lib/BackupPC/CGI/Summary.pm: host summary only reports age of completed
+  backups (not partial or active), suggested by Michael Selway.
+
+* lib/BackupPC/CGI/HostInfo.pm: show active backup as partial if there
+  is no job running (to handle case of abnormal exit of BackupPC),
+  reported by @8666 in issue #220.
+
+* lib/BackupPC/Xfer/Rsync.pm: empty $Conf{RsyncdPasswd} is no longer fatal;
+  removed remaining mentions of RsyncdAuthRequired from conf/config.pl
+  and lib/BackupPC/Config/Meta.pm; reported by @jooola in issue #224.
+
+* bin/BackupPC_dump: moved alarm($Conf{ClientTimeout}) to after all the
+  pre-backup code (including expiry, duplication etc of backups, which
+  could be slow) reprted by Michael Selway.
+
+* bin/BackupPC_refCntUpdate: added a couple of __bpc_progress_state__ prints
+  to improve status reporting during nightly (-m), reprted by Michael Selway.
+
 #------------------------------------------------------------------------
 # Version 4.2.1, 7 May 2018
 #------------------------------------------------------------------------

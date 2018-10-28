@@ -545,6 +545,12 @@ sub run
                 }
                 $t->{stats}{xferErrs}++;
             }
+            if ( /^rsync error: / || /^rsync warning: / ) {
+                $t->{stats}{xferErrs}++;
+            }
+            if ( /^rsync: send_files failed to open / || /^file has vanished: / ) {
+                $t->{stats}{xferErrs}++;
+            }
             if ( /^IOrename:\s(\d+)\s(.*)/ ) {
                 my $oldName = substr($2, 0, $1);
                 my $newName = substr($2, $1);

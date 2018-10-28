@@ -79,12 +79,12 @@ function ts_resortTable(lnk,clid) {
     }
     var spantext = ts_getInnerText(span);
     var td = lnk.parentNode;
-    var column = clid || td.cellIndex;
+    SORT_COLUMN_INDEX = clid || td.cellIndex;
     var table = getParent(td,'TABLE');
     
     // Work out a type for the column
     if (table.rows.length <= 1) return;
-    var cell = table.rows[1].cells[column];
+    var cell = table.rows[1].cells[SORT_COLUMN_INDEX];
     var itm = ts_getInnerText(cell);
     var date_format = cell.dataset.date_format;    // Get date format from data-* attribute
 
@@ -99,9 +99,7 @@ function ts_resortTable(lnk,clid) {
         sortfn = ts_sort_numeric;
     }
 
-    SORT_COLUMN_INDEX = column;
     var headerRowIdx = ts_getHeaderRowIdx(table);
-    console.log(headerRowIdx);
     var headerRow = new Array();
     var newRows = new Array();
     for (i=0;i<table.rows[headerRowIdx].length;i++) { headerRow[i] = table.rows[0][i]; }
@@ -152,6 +150,10 @@ function ts_hasClass(el, className) {
 	return false;
 }
 
+function getCellText(row) {
+    return ts_getInnerText(row.cells[SORT_COLUMN_INDEX]);
+}
+
 /**
  * Parse a date string and convert it to a JavaScript Date object.
  * @param {string} str - Date string.
@@ -170,48 +172,47 @@ function str2date(str, format) {
     return new Date(year, month, day, hour, minute);
 }
 
-function ts_sort_date_0 (a,b) {
-    var aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]);
-    var bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]);
+function ts_sort_date_0(a,b) {
+    var aa = getCellText(a);
+    var bb = getCellText(b);
     return str2date(aa, 0) - str2date(bb, 0);
 }
 
-function ts_sort_date_1 (a,b) {
-    var aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]);
-    var bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]);
+function ts_sort_date_1(a,b) {
+    var aa = getCellText(a);
+    var bb = getCellText(b);
     return str2date(aa, 1) - str2date(bb, 1);
 }
 
-function ts_sort_currency(a,b) { 
-    aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]).replace(/[^0-9.]/g,'');
-    bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]).replace(/[^0-9.]/g,'');
+function ts_sort_currency(a,b) {
+    var aa = getCellText(a).replace(/[^0-9.]/g,'');
+    var bb = getCellText(b).replace(/[^0-9.]/g,'');
     return parseFloat(aa) - parseFloat(bb);
 }
 
-function ts_sort_numeric(a,b) { 
-    aa = parseFloat(ts_getInnerText(a.cells[SORT_COLUMN_INDEX]));
+function ts_sort_numeric(a,b) {
+    var aa = parseFloat(getCellText(a));
     if (isNaN(aa)) aa = 0;
-    bb = parseFloat(ts_getInnerText(b.cells[SORT_COLUMN_INDEX])); 
+    var bb = parseFloat(getCellText(b));
     if (isNaN(bb)) bb = 0;
     return aa-bb;
 }
 
 function ts_sort_caseinsensitive(a,b) {
-    aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]).toLowerCase();
-    bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]).toLowerCase();
+    var aa = getCellText(a).toLowerCase();
+    var bb = getCellText(b).toLowerCase();
     if (aa==bb) return 0;
     if (aa<bb) return -1;
     return 1;
 }
 
 function ts_sort_default(a,b) {
-    aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]);
-    bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]);
+    var aa = getCellText(a);
+    var bb = getCellText(b);
     if (aa==bb) return 0;
     if (aa<bb) return -1;
     return 1;
 }
-
 
 function addEvent(elm, evType, fn, useCapture)
 // addEvent and removeEvent
@@ -227,4 +228,4 @@ function addEvent(elm, evType, fn, useCapture)
   } else {
     alert("Handler could not be removed");
   }
-} 
+}

@@ -1400,6 +1400,7 @@ Prędkość MB/sek: \$fullRate;
 Ilość Inkr: \$incrCnt;
 Inkr wiek/Dni: \$incrAge;
 Status: \$host_state;
+Wyłączone: \$host_disabled;
 Ostatnia próba: \$host_last_attempt;
 EOF
 

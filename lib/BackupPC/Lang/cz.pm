@@ -1397,6 +1397,7 @@ Rychlost MB/sec: \$fullRate;
 Poèet inkr: \$incrCnt;
 Èas inkr/Dní: \$incrAge;
 Stav: \$host_state;
+Zakázáno: \$host_disabled;
 Poslední pokus: \$host_last_attempt;
 EOF
 

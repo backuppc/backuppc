@@ -1418,6 +1418,7 @@ Snelheid MB/sec: \$fullRate;
 Aantal Incr.: \$incrCnt;
 Incr.Lftd/dagen: \$incrAge;
 Status: \$host_state;
+Invalide: \$host_disabled;
 Laatste poging: \$host_last_attempt;
 EOF
 

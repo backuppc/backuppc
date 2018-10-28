@@ -1408,6 +1408,7 @@ Velocidade MB/sec: \$fullRate;
 #Incrementais: \$incrCnt;
 Incrementais Antig/Dias: \$incrAge;
 Estado: \$host_state;
+Desativado: \$host_disabled;
 Última Tentativa: \$host_last_attempt;
 EOF
 

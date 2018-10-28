@@ -1405,6 +1405,7 @@ Vitesse (Mo/s) : \$fullRate;
 Nb incrémentielles : \$incrCnt;
 Incrémentielles Âge (jours) : \$incrAge;
 État actuel : \$host_state;
+Désactivée: \$host_disabled;
 Dernière tentative : \$host_last_attempt;
 EOF
 

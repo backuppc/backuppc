@@ -21,10 +21,11 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-Merged pull requests #200, #208, #216, #217, #229, #230, #231.
+Merged pull requests #200, #208, #216, #217, #229, #230, #231, #232.
 
 * Improvements to html table sorting, and made more tables sortable,
-  submitted by @brenard and @moisseev (issue #199, PRs #200, #229, #230).
+  submitted by @brenard and @moisseev (issue #199, PRs #200, #229, #230,
+  #232),
 
 * Add action type column to queue status page (#208), submitted by
   @brenard.
@@ -57,6 +58,12 @@ Merged pull requests #200, #208, #216, #217, #229, #230, #231.
 
 * bin/BackupPC_refCntUpdate: added a couple of __bpc_progress_state__ prints
   to improve status reporting during nightly (-m), reprted by Michael Selway.
+
+* lib/BackupPC/CGI/RSS.pm: added Disabled value to host info (copied from
+  $Conf{BackupsDisable}); suggested by @danielmotaleite (issue #222).
+
+* lib/BackupPC/Xfer/Rsync.pm: added checks for a couple of common rsync
+  file error and error exit messages that now increment the xferErrs count.
 
 #------------------------------------------------------------------------
 # Version 4.2.1, 7 May 2018

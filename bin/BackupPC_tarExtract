@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 8 Apr 2018.
+# Version 4.2.2, released 27 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -159,9 +159,10 @@ my $tar_unpack_header
     = 'Z100 A8 A8 A8 a12 A12 A8 A1 Z100 A6 A2 Z32 Z32 A8 A8 A155 x12';
 my $tar_header_length = 512;
 
-my $BufSize  = 1048576;     # 1MB or 2^20
-my $MaxFiles = 20;
-my $Errors   = 0;
+my $BufSize       = 1048576;     # 1MB or 2^20
+my $MaxFiles      = 20;
+my $Errors        = 0;
+my $FatalErrors   = 0;
 
 my $ExistFileCnt      = 0;
 my $ExistFileSize     = 0;
@@ -202,6 +203,7 @@ sub TarRead
             $Abort = 1;
             $AbortReason = "Unexpected end of tar archive";
             $Errors++;
+            $FatalErrors++;
             return;
         }
         $numBytes += $newBytes;
@@ -299,6 +301,7 @@ sub TarReadFileInfo
         if (unpack ("%16C*", $head) != $chksum) {
            print("$name: checksum error at " . sysseek($fh, 0, 1) , "\n");
            $Errors++;
+           $FatalErrors++;
         }
 
         if ( $type eq "L" ) {
@@ -452,7 +455,8 @@ sub moveFileToOld
             copyInodes($f->{name});
             pathCreate($pathOld);
             if ( !rename($pathNew, $pathOld) ) {
-                print("moveFileToOld(..., $f->{name}): can't rename $pathNew to $pathOld\n");
+                printf("moveFileToOld(..., %s: can't rename %s to %s ($!, %d, %d, %d)\n",
+			    $f->{name}, $pathNew, $pathOld, -e $pathNew, -e $pathOld, -d $pathOld);
                 $Errors++;
             }
         }
@@ -545,6 +549,7 @@ sub TarReadFile
                     print("Unexpected end of tar archive during read\n");
                     $AbortReason = "Unexpected end of tar archive";
                     $Errors++;
+                    $FatalErrors++;
                 }
                 $Abort = 1;
                 print("Removing partial file $f->{name}\n")
@@ -868,7 +873,7 @@ sub pathCreate
     unlink($fullPath) if ( -e $fullPath );
     eval { mkpath($fullPath, 0, 0777) };
     if ( $@ ) {
-        print("Can't create $fullPath\n");
+        print("Can't create $fullPath ($!)\n");
         $Errors++;
         return -1;
     }
@@ -965,7 +970,7 @@ sub exitMesg
         . " $ExistFileCnt filesExist, $ExistFileSize sizeExist, $ExistFileCompSize sizeExistComp,"
         . " $TotalFileCnt filesTotal, $TotalFileSize sizeTotal,"
         . " $NewFileCnt filesNew, $NewFileSize sizeNew, $NewFileCompSize sizeNewComp, $Inode inodeLast\n");
-    exit($Errors ? 1 : 0);
+    exit($FatalErrors ? 1 : 0);
 }
 
 #######################################################################

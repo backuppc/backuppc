@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2017  Craig Barratt
+#   Copyright (C) 2001-2018  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 30 Apr 2017.
+# Version 4.2.2, released 27 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -132,9 +132,11 @@ if ( $err ) {
     if ( $opts{c} && $Conf{EMailAdminUserName} ne "" ) {
         my $headers = $Conf{EMailHeaders};
         $headers .= "\n" if ( $headers !~ /\n$/ );
+        my $subject = $Conf{EMailAdminSubject} ne "" ? $Conf{EMailAdminSubject}
+                                                     : "BackupPC: can't connect to server";
         my $mesg = <<EOF;
 To: $Conf{EMailAdminUserName}
-Subject: BackupPC: can't connect to server
+Subject: $subject
 $headers
 Error: cannot connect to BackupPC server.
 
@@ -159,9 +161,11 @@ eval($reply);
 if ( $opts{u} ne "" ) {
     my $headers = $Conf{EMailHeaders};
     $headers .= "\n" if ( $headers !~ /\n$/ );
+    my $subject = $Conf{EMailAdminSubject} ne "" ? $Conf{EMailAdminSubject}
+                                                 : "BackupPC test email";
     my $mesg = <<EOF;
 To: $opts{u}
-Subject: BackupPC test email
+Subject: $subject
 $headers
 This is a test message from $0.
 
@@ -334,9 +338,11 @@ misconfiguration.  Please fix this host:
 EOF
             my $headers = $Conf{EMailHeaders};
             $headers .= "\n" if ( $headers !~ /\n$/ );
+            my $subject = $Conf{EMailAdminSubject} ne "" ? $Conf{EMailAdminSubject}
+                                                         : "BackupPC administrative attention needed";
             $badHostMesg = <<EOF;
 To: $AdminBadHostsEmail[$i]
-Subject: BackupPC administrative attention needed
+Subject: $subject
 $headers
 ${badHostMesg}Regards,
 PC Backup Genie
@@ -395,9 +401,11 @@ EOF
 if ( $adminMesg ne "" && $Conf{EMailAdminUserName} ne "" ) {
     my $headers = $Conf{EMailHeaders};
     $headers .= "\n" if ( $headers !~ /\n$/ );
+    my $subject = $Conf{EMailAdminSubject} ne "" ? $Conf{EMailAdminSubject}
+                                                 : "BackupPC administrative attention needed";
     $adminMesg = <<EOF;
 To: $Conf{EMailAdminUserName}
-Subject: BackupPC administrative attention needed
+Subject: $subject
 $headers
 ${adminMesg}Regards,
 PC Backup Genie

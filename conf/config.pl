@@ -1864,6 +1864,11 @@ $Conf{EMailFromUserName} = '';
 $Conf{EMailAdminUserName} = '';
 
 #
+# Subject for admin emails.  If empty, defaults to pre-4.2.2 values.
+#
+$Conf{EMailAdminSubject} = '';
+
+#
 # Destination domain name for email sent to users.  By default
 # this is empty, meaning email is sent to plain, unqualified
 # addresses.  Otherwise, set it to the destination domain, eg:
@@ -2221,7 +2226,8 @@ $Conf{CgiUserConfigEdit} = {
         DumpPostUserCmd           => 0,
         DumpPreShareCmd           => 0,
         DumpPreUserCmd            => 0,
-        EMailAdminUserName        => 1,
+        EMailAdminSubject         => 0,
+        EMailAdminUserName        => 0,
         EMailFromUserName         => 1,
         EMailHeaders              => 1,
         EMailNoBackupEverMesg     => 1,

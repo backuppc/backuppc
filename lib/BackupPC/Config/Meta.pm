@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 8 Apr 2018.
+# Version 4.2.2, released 27 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -346,6 +346,7 @@ use vars qw(%ConfigMeta);
     EMailNotifyMinDays        => "float",
     EMailFromUserName         => "string",
     EMailAdminUserName        => "string",
+    EMailAdminSubject         => "string",
     EMailUserDestDomain       => "string",
     EMailNoBackupEverSubj     => {type => "string",    undefIfEmpty => 1},
     EMailNoBackupEverMesg     => {type => "bigstring", undefIfEmpty => 1},

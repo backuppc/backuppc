@@ -496,6 +496,7 @@ use vars qw(%ConfigMeta);
                 UserCmdCheckStatus        => "boolean",
                 EMailNotifyMinDays        => "boolean",
                 EMailFromUserName         => "boolean",
+                EMailAdminSubject         => "boolean",
                 EMailAdminUserName        => "boolean",
                 EMailUserDestDomain       => "boolean",
                 EMailNoBackupEverSubj     => "boolean",

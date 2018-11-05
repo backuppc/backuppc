@@ -94,6 +94,9 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         <li>L\'espace de stockage a été récemment rempli à \$Info{DUlastValue}%
             (\$DUlastTime), le maximum aujourd\'hui a été de \$Info{DUDailyMax}% (\$DUmaxTime)
             et hier le maximum était de \$Info{DUDailyMaxPrev}%.
+        <li>Inode L\'espace de stockage a été récemment rempli à \$Info{DUInodelastValue}%
+            (\$DUlastTime), le maximum aujourd\'hui a été de \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+            et hier le maximum était de \$Info{DUInodeDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -147,6 +150,9 @@ $Lang{BackupPC_Summary}=<<EOF;
 <li>L\'espace de stockage a été récemment rempli à \$Info{DUlastValue}%
     (\$DUlastTime), le maximum aujourd\'hui a été de \$Info{DUDailyMax}% (\$DUmaxTime)
     et hier le maximum était de \$Info{DUDailyMaxPrev}%.
+<li>Inode L\'espace de stockage a été récemment rempli à \$Info{DUInodelastValue}%
+    (\$DUlastTime), le maximum aujourd\'hui a été de \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+    et hier le maximum était de \$Info{DUInodeDailyMaxPrev}%.
 </ul>
 </p>
 

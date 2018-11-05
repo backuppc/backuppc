@@ -93,6 +93,9 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         <li>备份池文件系统磁盘空间占用率是 \$Info{DUlastValue}%
             （统计于 \$DUlastTime），今天的最大占用率是 \$Info{DUDailyMax}%（统计于 \$DUmaxTime），
             昨天的最大占用率是 \$Info{DUDailyMaxPrev}%。
+        <li>Inode 备份池文件系统磁盘空间占用率是 \$Info{DUInodelastValue}%
+            （统计于 \$DUlastTime），今天的最大占用率是 \$Info{DUInodeDailyMax}%（统计于 \$DUInodemaxTime），
+            昨天的最大占用率是 \$Info{DUInodeDailyMaxPrev}%。
     </ul>
 </ul>
 EOF
@@ -146,6 +149,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <li>备份池文件系统磁盘空间占用率是 \$Info{DUlastValue}%
     （统计于 \$DUlastTime），今天的最大占用率是 \$Info{DUDailyMax}%（统计于 \$DUmaxTime），
     昨天的最大占用率是 \$Info{DUDailyMaxPrev}%。
+<li>Inode 备份池文件系统磁盘空间占用率是 \$Info{DUInodelastValue}%
+    （统计于 \$DUlastTime），今天的最大占用率是 \$Info{DUInodeDailyMax}%（统计于 \$DUInodemaxTime），
+    昨天的最大占用率是 \$Info{DUInodeDailyMaxPrev}%。
 </ul>
 </p>
 

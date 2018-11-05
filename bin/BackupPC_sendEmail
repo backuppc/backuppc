@@ -363,12 +363,16 @@ my $adminMesg = "";
 if ( $Info{DUDailySkipHostCntPrev} > 0 ) {
     my $n = $Info{DUDailySkipHostCntPrev};
     my $m = $Conf{DfMaxUsagePct};
+    my $mInode = $Conf{DfMaxInodeUsagePct};
     $adminMesg .= <<EOF;
 Yesterday $n hosts were skipped because the file system containing
 $TopDir was too full.  The threshold in the
 configuration file is $m%, while yesterday the file system was
-up to $Info{DUDailyMaxPrev}% full.  Please find more space on the file system,
-or reduce the number of full or incremental backups that we keep.
+up to $Info{DUDailyMaxPrev}% full.  The maximum inode usage yesterday
+was $Info{DUInodeDailyMaxPrev}% and the threshold is $mInode%.
+
+Please find more space on the file system, or reduce the number of full
+or incremental backups that we keep.
 
 EOF
 }

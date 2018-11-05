@@ -94,6 +94,9 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         <li>Pool file system was recently at \$Info{DUlastValue}%
             (\$DUlastTime), today\'s max is \$Info{DUDailyMax}% (\$DUmaxTime)
             and yesterday\'s max was \$Info{DUDailyMaxPrev}%.
+        <li>Pool file system inode usage was recently at \$Info{DUInodelastValue}%
+            (\$DUlastTime), today\'s max is \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+            and yesterday\'s max was \$Info{DUInodeDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -146,7 +149,10 @@ $Lang{BackupPC_Summary} = <<EOF;
 <li>This status was generated at \$now.
 <li>Pool file system was recently at \$Info{DUlastValue}%
     (\$DUlastTime), today\'s max is \$Info{DUDailyMax}% (\$DUmaxTime)
-        and yesterday\'s max was \$Info{DUDailyMaxPrev}%.
+    and yesterday\'s max was \$Info{DUDailyMaxPrev}%.
+<li>Pool file system inode usage was recently at \$Info{DUInodelastValue}%
+    (\$DUlastTime), today\'s max is \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+    and yesterday\'s max was \$Info{DUInodeDailyMaxPrev}%.
 </ul>
 </p>
 

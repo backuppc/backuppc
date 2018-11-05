@@ -272,6 +272,19 @@ $Conf{DfPath} = '';
 $Conf{DfCmd} = '$dfPath $topDir';
 
 #
+# Command to run df to get inode % usage.  The following variables are substituted
+# at run-time:
+#
+#   $dfPath      path to df ($Conf{DfPath})
+#   $topDir      top-level BackupPC data directory
+#
+# Note: all Cmds are executed directly without a shell, so the prog name
+# needs to be a full path and you can't include shell syntax like
+# redirection and pipes; put that in a script if you need it.
+#
+$Conf{DfInodeUsageCmd} = '$dfPath -i $topDir';
+
+#
 # Full path to various commands for archiving
 #
 $Conf{SplitPath} = '';
@@ -282,7 +295,7 @@ $Conf{Bzip2Path} = '';
 
 #
 # Maximum threshold for disk utilization on the __TOPDIR__ filesystem.
-# If the output from $Conf{DfPath} reports a percentage larger than
+# If the output from $Conf{DfCmd} reports a percentage larger than
 # this number then no new regularly scheduled backups will be run.
 # However, user requested backups (which are usually incremental and
 # tend to be small) are still performed, independent of disk usage.
@@ -290,6 +303,17 @@ $Conf{Bzip2Path} = '';
 # usage exceeds this number.
 #
 $Conf{DfMaxUsagePct} = 95;
+
+#
+# Maximum threshold for inode utilization on the __TOPDIR__ filesystem.
+# If the output from $Conf{DfInodeUsageCmd} reports a percentage larger
+# than this number then no new regularly scheduled backups will be run.
+# However, user requested backups (which are usually incremental and
+# tend to be small) are still performed, independent of disk usage.
+# Also, currently running backups will not be terminated when the disk
+# inode usage exceeds this number.
+#
+$Conf{DfMaxInodeUsagePct} = 95;
 
 #
 # List of DHCP address ranges we search looking for PCs to backup.

@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 21 Oct 2018.
+# Version 4.2.2, released 27 Oct 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -645,32 +645,40 @@ sub Main_TryToRun_Bg_or_User_Queue
 {
     my($req, $host);
     my(@deferUserQueue, @deferBgQueue);
-    my $du;
+    my($du, $duInode);
 
     if ( time - $Info->{DUlastValueTime} >= 600 ) {
         #
         # Update our notion of disk usage no more than
         # once every 10 minutes
         #
-        $du = $bpc->CheckFileSystemUsage($TopDir);
+        $du = $bpc->CheckFileSystemUsage(0);
         $Info->{DUlastValue}     = $du;
         $Info->{DUlastValueTime} = time;
+        $duInode = $bpc->CheckFileSystemUsage(1);
+        $Info->{DUInodelastValue} = $duInode;
     } else {
         #
         # if we recently checked it then just use the old value
         #
         $du = $Info->{DUlastValue};
+        $duInode = $Info->{DUInodelastValue};
     }
     if ( $Info->{DUDailyMaxReset} ) {
         $Info->{DUDailyMaxStartTime} = time;
         $Info->{DUDailyMaxReset}     = 0;
         $Info->{DUDailyMax}          = 0;
+        $Info->{DUInodeDailyMax}     = 0;
     }
     if ( $du > $Info->{DUDailyMax} ) {
         $Info->{DUDailyMax}     = $du;
         $Info->{DUDailyMaxTime} = time;
     }
-    if ( $du > $Conf{DfMaxUsagePct} ) {
+    if ( $duInode > $Info->{DUInodeDailyMax} ) {
+        $Info->{DUInodeDailyMax}     = $duInode;
+        $Info->{DUInodeDailyMaxTime} = time;
+    }
+    if ( $du > $Conf{DfMaxUsagePct} || $duInode > $Conf{DfMaxInodeUsagePct} ) {
         my @bgQueue = @BgQueue;
         my $nSkip = 0;
 
@@ -688,8 +696,11 @@ sub Main_TryToRun_Bg_or_User_Queue
             }
         }
         if ( $nSkip ) {
-            print(LOG $bpc->timeStamp,
-                       "Disk too full ($du%); skipped $nSkip hosts\n");
+            if ( $duInode > 0 ) {
+                print(LOG $bpc->timeStamp, "Disk too full (usage $du%; inode $duInode%); skipped $nSkip hosts\n");
+            } else {
+                print(LOG $bpc->timeStamp, "Disk too full (usage $du%); skipped $nSkip hosts\n");
+            }
             $Info->{DUDailySkipHostCnt} += $nSkip;
         }
     }
@@ -896,12 +907,14 @@ sub Main_Check_Timeout
         # and various house keeping.
         #
         $FirstWakeup = 0;
-        printf(LOG "%s24hr disk usage: %d%% max, %d%% recent,"
-                   . " %d skipped hosts\n",
-                   $bpc->timeStamp, $Info->{DUDailyMax}, $Info->{DUlastValue},
+        printf(LOG "%s24hr disk usage: %d%% max, %d%% recent; inode: %d%% max, %d%% recent; "
+                   . " %d skipped hosts\n", $bpc->timeStamp,
+                   $Info->{DUDailyMax}, $Info->{DUlastValue},
+                   $Info->{DUInodeDailyMax}, $Info->{DUInodelastValue},
                    $Info->{DUDailySkipHostCnt});
         $Info->{DUDailyMaxReset}        = 1;
         $Info->{DUDailyMaxPrev}         = $Info->{DUDailyMax};
+        $Info->{DUInodeDailyMaxPrev}    = $Info->{DUInodeDailyMax};
         $Info->{DUDailySkipHostCntPrev} = $Info->{DUDailySkipHostCnt};
         $Info->{DUDailySkipHostCnt}     = 0;
         my $lastLog = $Conf{MaxOldLogFiles} - 1;
@@ -1491,9 +1504,9 @@ sub Main_Check_Client_Messages
                                    . " Ignoring this request";
                         } elsif ( $status == 2 ) {
                             print(LOG $bpc->timeStamp,
-                                   "Disk too full ($Info->{DUlastValue}%)."
+                                   "Disk too full (usage $Info->{DUlastValue}%; inode $Info->{DUInodelastValue}%)."
                                  . " Not queueing backup of $host\n");
-                            $reply = "error: disk too full ($Info->{DUlastValue}%)";
+                            $reply = "error: disk too full (usage $Info->{DUlastValue}%; inode $Info->{DUInodelastValue}%)";
                             $Info->{DUDailySkipHostCnt}++;
                         } elsif ( $status == 3 ) {
                             # should never reach this because
@@ -1824,7 +1837,8 @@ sub QueueOnePC
         #
         # this is a fixed ip host or DHCP ip address: queue it
         #
-        if ( $Info->{DUlastValue} > $Conf{DfMaxUsagePct} ) {
+        if ( $Info->{DUlastValue} > $Conf{DfMaxUsagePct}
+                || $Info->{DUInodelastValue} > $Conf{DfMaxInodeUsagePct} ) {
             #
             # Since we are out of disk space, instead of queuing
             # a regular job, queue an expire check instead.  That
@@ -1880,7 +1894,7 @@ sub QueueAllPCs
     }
     if ( $nSkip ) {
         print(LOG $bpc->timeStamp,
-               "Disk too full ($Info->{DUlastValue}%); skipped $nSkip hosts\n");
+               "Disk too full (usage $Info->{DUlastValue}%; inode $Info->{DUInodelastValue}%); skipped $nSkip hosts\n");
         $Info->{DUDailySkipHostCnt} += $nSkip;
     }
 }

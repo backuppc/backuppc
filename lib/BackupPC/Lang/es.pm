@@ -94,6 +94,9 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         <li>El sistema de archivos estaba recientemente al \$Info{DUlastValue}%
             (\$DUlastTime), el m&aacute;ximo de hoy es \$Info{DUDailyMax}% (\$DUmaxTime)
             y el m&aacute;ximo de ayer era \$Info{DUDailyMaxPrev}%.
+        <li>Inode El sistema de archivos estaba recientemente al \$Info{DUInodelastValue}%
+            (\$DUlastTime), el m&aacute;ximo de hoy es \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+            y el m&aacute;ximo de ayer era \$Info{DUInodeDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -147,6 +150,9 @@ $Lang{BackupPC_Summary}=<<EOF;
 <li>El sistema de archivos estaba recientemente al \$Info{DUlastValue}%
     (\$DUlastTime), el m&aacute;ximo de hoy es \$Info{DUDailyMax}% (\$DUmaxTime)
     y el m&aacute;ximo de ayer era \$Info{DUDailyMaxPrev}%.
+<li>Inode El sistema de archivos estaba recientemente al \$Info{DUInodelastValue}%
+    (\$DUlastTime), el m&aacute;ximo de hoy es \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+    y el m&aacute;ximo de ayer era \$Info{DUInodeDailyMaxPrev}%.
 </ul>
 </p>
 

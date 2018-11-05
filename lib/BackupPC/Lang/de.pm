@@ -106,6 +106,9 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
             (\$DUlastTime) voll, das Maximum heute ist \$Info{DUDailyMax}% (\$DUmaxTime)
             und das Maximum gestern war \$Info{DUDailyMaxPrev}%. (Hinweis: Sollten ca. 70% überschritten werden, so
 	    ist evtl. bald eine Erweiterung des Backupspeichers erforderlich. Ist weitere Planung nötig?)
+        <li>Das Pool Filesystem Inode (Backup-Speicherplatz) ist zu \$Info{DUInodelastValue}%
+            (\$DUlastTime) voll, das Maximum heute ist \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+            und das Maximum gestern war \$Info{DUInodeDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -161,6 +164,9 @@ $Lang{BackupPC_Summary}=<<EOF;
     (\$DUlastTime) voll, das Maximum heute ist \$Info{DUDailyMax}% (\$DUmaxTime)
     und das Maximum gestern war \$Info{DUDailyMaxPrev}%. (Hinweis: Sollten ca. 70% überschritten werden, so
     ist evtl. bald eine Erweiterung des Backupspeichers erforderlich. Ist weitere Planung nötig?)
+<li>Das Pool Filesystem Inode (Backup-Speicherplatz) ist zu \$Info{DUInodelastValue}%
+    (\$DUlastTime) voll, das Maximum heute ist \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+    und das Maximum gestern war \$Info{DUInodeDailyMaxPrev}%.
 </ul>
 </p>
 

@@ -69,6 +69,8 @@ our %ConfigMenu = (
             {text => "CfgEdit_Title_Pool_Filesystem_Limits"},
 	    {name => "DfCmd"},
 	    {name => "DfMaxUsagePct"},
+	    {name => "DfInodeUsageCmd"},
+	    {name => "DfMaxInodeUsagePct"},
 	    {name => "HardLinkMax"},
 
             {text => "CfgEdit_Title_Other_Parameters"},

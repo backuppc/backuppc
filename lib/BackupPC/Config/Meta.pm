@@ -89,6 +89,7 @@ use vars qw(%ConfigMeta);
     Ping6Path	 	=> {type => "execPath", undefIfEmpty => 1},
     DfPath	 	=> {type => "execPath", undefIfEmpty => 1},
     DfCmd	 	=> "string",
+    DfInodeUsageCmd	=> "string",
     SplitPath	 	=> {type => "execPath", undefIfEmpty => 1},
     ParPath	 	=> {type => "execPath", undefIfEmpty => 1},
     CatPath	 	=> {type => "execPath", undefIfEmpty => 1},
@@ -96,6 +97,7 @@ use vars qw(%ConfigMeta);
     Bzip2Path	 	=> {type => "execPath", undefIfEmpty => 1},
     RrdToolPath	 	=> {type => "execPath", undefIfEmpty => 1},
     DfMaxUsagePct	=> "float",
+    DfMaxInodeUsagePct	=> "float",
     DHCPAddressRanges   => {
             type    => "list",
 	    emptyOk => 1,

@@ -96,6 +96,9 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         <li>プールファイルシステムは \$Info{DUlastValue}%
             (\$DUlastTime 現在)、今日の最大値は \$Info{DUDailyMax}% (\$DUmaxTime)、
             昨日の最大値は \$Info{DUDailyMaxPrev}%。
+        <li>Inode プールファイルシステムは \$Info{DUInodelastValue}%
+            (\$DUlastTime 現在)、今日の最大値は \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)、
+            昨日の最大値は \$Info{DUInodeDailyMaxPrev}%。
     </ul>
 </ul>
 EOF
@@ -149,6 +152,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <li>プールファイルシステムは \$Info{DUlastValue}%
     (\$DUlastTime 現在)、今日の最大値は \$Info{DUDailyMax}% (\$DUmaxTime)、
         昨日の最大値は \$Info{DUDailyMaxPrev}%。
+<li>Inode プールファイルシステムは \$Info{DUInodelastValue}%
+    (\$DUlastTime 現在)、今日の最大値は \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)、
+    昨日の最大値は \$Info{DUInodeDailyMaxPrev}%。
 </ul>
 </p>
 

@@ -95,6 +95,9 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         <li>Het backup filesystem werd recentelijk aangevuld voor \$Info{DUlastValue}%
             op (\$DUlastTime), het maximum van vandaag is \$Info{DUDailyMax}% (\$DUmaxTime)
             en het maximum van gisteren was \$Info{DUDailyMaxPrev}%.
+        <li>Het backup filesystem inode werd recentelijk aangevuld voor \$Info{DUInodelastValue}%
+            op (\$DUlastTime), het maximum van vandaag is \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+            en het maximum van gisteren was \$Info{DUInodeDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -148,6 +151,9 @@ $Lang{BackupPC_Summary}=<<EOF;
 <li>Het backup filesystem werd recentelijk aangevuld voor \$Info{DUlastValue}%
      op (\$DUlastTime), het maximum van vandaag is \$Info{DUDailyMax}% (\$DUmaxTime)
      en het maximum van gisteren was \$Info{DUDailyMaxPrev}%.
+<li>Het backup filesystem inode werd recentelijk aangevuld voor \$Info{DUInodelastValue}%
+    op (\$DUlastTime), het maximum van vandaag is \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+    en het maximum van gisteren was \$Info{DUInodeDailyMaxPrev}%.
 </ul>
 </p>
 

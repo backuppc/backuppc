@@ -198,7 +198,13 @@ $ConfVars->{RunDir}       = 2;
 $ConfVars->{ConfDir}      = 2;
 $ConfVars->{InstallDir}   = 2;
 $ConfVars->{CgiImageDir}  = 2;
-$ConfVars->{ClientCharsetLegacy}  = 2;      # actually used
+
+#
+# These config paramaters are used in the code
+#
+$ConfVars->{ClientCharsetLegacy} = 2;
+$ConfVars->{DfCmd}               = 2;
+$ConfVars->{DfInodeUsageCmd}     = 2;
 
 #
 # These config parameters are used in the code to be backward compatible,

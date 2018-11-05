@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2018  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.2.2, released 3 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -101,13 +101,14 @@ EOF
     <td class="border"> ${EscHTML($shortErr)} </td></tr>
 EOF
     }
-    my $now          = timeStamp2(time);
-    my $nextWakeupTime = timeStamp2($Info{nextWakeup});
-    my $DUlastTime   = timeStamp2($Info{DUlastValueTime});
-    my $DUmaxTime    = timeStamp2($Info{DUDailyMaxTime});
-    my $numBgQueue   = $QueueLen{BgQueue};
-    my $numUserQueue = $QueueLen{UserQueue};
-    my $numCmdQueue  = $QueueLen{CmdQueue};
+    my $now             = timeStamp2(time);
+    my $nextWakeupTime  = timeStamp2($Info{nextWakeup});
+    my $DUlastTime      = timeStamp2($Info{DUlastValueTime});
+    my $DUmaxTime       = timeStamp2($Info{DUDailyMaxTime});
+    my $DUInodemaxTime  = timeStamp2($Info{DUInodeDailyMaxTime});
+    my $numBgQueue      = $QueueLen{BgQueue};
+    my $numUserQueue    = $QueueLen{UserQueue};
+    my $numCmdQueue     = $QueueLen{CmdQueue};
     my $serverStartTime = timeStamp2($Info{startTime});
     my $configLoadTime  = timeStamp2($Info{ConfigLTime});
 

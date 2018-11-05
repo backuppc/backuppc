@@ -878,16 +878,17 @@ sub CheckHostAlive
 
 sub CheckFileSystemUsage
 {
-    my($bpc) = @_;
+    my($bpc, $inode) = @_;
     my($topDir) = $bpc->{TopDir};
     my($s, $dfCmd);
+    my $cmd = $inode ? "DfInodeUsageCmd" : "DfCmd";
 
-    return 0 if ( $bpc->{Conf}{DfCmd} eq "" );
+    return 0 if ( $bpc->{Conf}{$cmd} eq "" );
     my $args = {
 	dfPath   => $bpc->{Conf}{DfPath},
 	topDir   => $bpc->{TopDir},
     };
-    $dfCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{DfCmd}, $args);
+    $dfCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{$cmd}, $args);
     $s = $bpc->cmdSystemOrEval($dfCmd, undef, $args);
     return 0 if ( $? || $s !~ /(\d+)%/s );
     return $1;

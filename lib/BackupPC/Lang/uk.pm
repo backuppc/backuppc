@@ -97,6 +97,9 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         <li>Файлова система пула зайнята на \$Info{DUlastValue}%
             (\$DUlastTime), сьогодняшній максимум \$Info{DUDailyMax}% (\$DUmaxTime)
             вчорашній максимум \$Info{DUDailyMaxPrev}%.
+        <li>Inode Файлова система пула зайнята на \$Info{DUInodelastValue}%
+            (\$DUlastTime), сьогодняшній максимум \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+            вчорашній максимум \$Info{DUInodeDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -150,6 +153,9 @@ $Lang{BackupPC_Summary} = <<EOF;
 <li>Файлова система пула зайнята на \$Info{DUlastValue}%
     (\$DUlastTime), сьогодняшній максимум \$Info{DUDailyMax}% (\$DUmaxTime)
         вчорашній максимум \$Info{DUDailyMaxPrev}%.
+<li>Inode Файлова система пула зайнята на \$Info{DUInodelastValue}%
+    (\$DUlastTime), сьогодняшній максимум \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+    вчорашній максимум \$Info{DUInodeDailyMaxPrev}%.
 </ul>
 </p>
 

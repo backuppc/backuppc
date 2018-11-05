@@ -90,9 +90,12 @@ $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
         <li>\$numUserQueue nevyøízených žádostí o zálohu od uživatelù,
         <li>\$numCmdQueue pending command requests,
         \$poolInfo
-        <li>Pool file system was recently at \$Info{DUlastValue}%
-            (\$DUlastTime), today\'s max is \$Info{DUDailyMax}% (\$DUmaxTime)
-            and yesterday\'s max was \$Info{DUDailyMaxPrev}%.
+        <li>Stav úložištì je \$Info{DUlastValue}%
+            (\$DUlastTime), dnešní maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
+                a vèerejší maximum bylo \$Info{DUDailyMaxPrev}%.
+        <li>Inode stav úložištì je \$Info{DUInodelastValue}%
+            (\$DUlastTime), dnešní maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+                a vèerejší maximum bylo \$Info{DUInodeDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -145,7 +148,10 @@ $Lang{BackupPC_Summary} = <<EOF;
 <li>Tento stav byl vygenerován v \$now.
 <li>Stav úložištì je \$Info{DUlastValue}%
     (\$DUlastTime), dnešní maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
-        a vèerejší maximum bylo \$Info{DUDailyMaxPrev}%.
+    a vèerejší maximum bylo \$Info{DUDailyMaxPrev}%.
+<li>Inode stav úložištì je \$Info{DUInodelastValue}%
+    (\$DUlastTime), dnešní maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+    a vèerejší maximum bylo \$Info{DUInodeDailyMaxPrev}%.
 </ul>
 </p>
 

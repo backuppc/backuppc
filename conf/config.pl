@@ -2000,19 +2000,19 @@ EOF
 # Administrative users have full access to all hosts, plus overall
 # status and log information.
 #
-# The administrative users are the union of the unix/linux group
-# $Conf{CgiAdminUserGroup} and the manual list of users, separated
-# by spaces, in $Conf{CgiAdminUsers}. If you don't want a group or
-# manual list of users set the corresponding configuration setting
-# to undef or an empty string.
+# The administrative users are the union of the list of unix/linux groups,
+# separated by spaces, in $Conf{CgiAdminUserGroup} and the list of users,
+# separated by spaces, in $Conf{CgiAdminUsers}. If you don't want a list of
+# groups or users set the corresponding configuration setting to undef or an
+# empty string.
 #
 # If you want every user to have admin privileges (careful!), set
 # $Conf{CgiAdminUsers} = '*'.
 #
 # Examples:
-#    $Conf{CgiAdminUserGroup} = 'admin';
+#    $Conf{CgiAdminUserGroup} = 'admin wheel';
 #    $Conf{CgiAdminUsers}     = 'craig celia';
-#    --> administrative users are the union of group admin, plus
+#    --> administrative users are the union of groups admin and wheel, plus
 #      craig and celia.
 #
 #    $Conf{CgiAdminUserGroup} = '';

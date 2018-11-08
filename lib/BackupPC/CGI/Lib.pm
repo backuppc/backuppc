@@ -358,8 +358,11 @@ sub CheckPermission
     return 0 if ( $User eq "" && $Conf{CgiAdminUsers} ne "*"
 	       || $host ne "" && !defined($Hosts->{$host}) );
     if ( $Conf{CgiAdminUserGroup} ne "" ) {
-        my($n,$p,$gid,$mem) = getgrnam($Conf{CgiAdminUserGroup});
-        $Privileged ||= ($mem =~ /\b\Q$User\E\b/);
+        for ( split ' ', $Conf{CgiAdminUserGroup} ) {
+            my ( $n, $p, $gid, $mem ) = getgrnam($_);
+            $Privileged ||= ( $mem =~ /\b\Q$User\E\b/ );
+            last if $Privileged;
+        }
     }
     if ( $Conf{CgiAdminUsers} ne "" ) {
         $Privileged ||= ($Conf{CgiAdminUsers} =~ /\b\Q$User\E\b/);

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 21 Oct 2018.
+# Version 4.2.2, released 3 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -358,10 +358,10 @@ sub CheckPermission
     return 0 if ( $User eq "" && $Conf{CgiAdminUsers} ne "*"
 	       || $host ne "" && !defined($Hosts->{$host}) );
     if ( $Conf{CgiAdminUserGroup} ne "" ) {
-        for ( split ' ', $Conf{CgiAdminUserGroup} ) {
-            my ( $n, $p, $gid, $mem ) = getgrnam($_);
+        for ( split(/\s+/, $Conf{CgiAdminUserGroup}) ) {
+            my ($n, $p, $gid, $mem) = getgrnam($_);
             $Privileged ||= ( $mem =~ /\b\Q$User\E\b/ );
-            last if $Privileged;
+            last if ( $Privileged );
         }
     }
     if ( $Conf{CgiAdminUsers} ne "" ) {

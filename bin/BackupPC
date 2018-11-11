@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 27 Oct 2018.
+# Version 4.2.2, released 3 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -696,11 +696,8 @@ sub Main_TryToRun_Bg_or_User_Queue
             }
         }
         if ( $nSkip ) {
-            if ( $duInode > 0 ) {
-                print(LOG $bpc->timeStamp, "Disk too full (usage $du%; inode $duInode%); skipped $nSkip hosts\n");
-            } else {
-                print(LOG $bpc->timeStamp, "Disk too full (usage $du%); skipped $nSkip hosts\n");
-            }
+            print(LOG $bpc->timeStamp, "Disk too full (usage $du%; inode $duInode%;"
+                                     . " thres $Conf{DfMaxUsagePct}%/$Conf{DfMaxInodeUsagePct}%); skipped $nSkip hosts\n");
             $Info->{DUDailySkipHostCnt} += $nSkip;
         }
     }
@@ -1893,8 +1890,8 @@ sub QueueAllPCs
         }
     }
     if ( $nSkip ) {
-        print(LOG $bpc->timeStamp,
-               "Disk too full (usage $Info->{DUlastValue}%; inode $Info->{DUInodelastValue}%); skipped $nSkip hosts\n");
+        print(LOG $bpc->timeStamp, "Disk too full (usage $Info->{DUlastValue}%; inode $Info->{DUInodelastValue}%;"
+                                 . " thres $Conf{DfMaxUsagePct}%/$Conf{DfMaxInodeUsagePct}%);); skipped $nSkip hosts\n");
         $Info->{DUDailySkipHostCnt} += $nSkip;
     }
 }

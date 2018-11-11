@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 27 Oct 2018.
+# Version 4.2.2, released 3 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -366,10 +366,10 @@ if ( $Info{DUDailySkipHostCntPrev} > 0 ) {
     my $mInode = $Conf{DfMaxInodeUsagePct};
     $adminMesg .= <<EOF;
 Yesterday $n hosts were skipped because the file system containing
-$TopDir was too full.  The threshold in the
-configuration file is $m%, while yesterday the file system was
-up to $Info{DUDailyMaxPrev}% full.  The maximum inode usage yesterday
-was $Info{DUInodeDailyMaxPrev}% and the threshold is $mInode%.
+$TopDir was too full.  The threshold in the configuration
+file is currently $m%, while yesterday the file system was up
+to $Info{DUDailyMaxPrev}% full.  The maximum inode usage yesterday
+was $Info{DUInodeDailyMaxPrev}% and the threshold is currently $mInode%.
 
 Please find more space on the file system, or reduce the number of full
 or incremental backups that we keep.

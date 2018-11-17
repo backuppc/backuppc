@@ -46,6 +46,7 @@ use Cwd;
 use Digest::MD5;
 use Config;
 use Encode qw/from_to encode_utf8/;
+use POSIX qw/_exit/;
 
 use BackupPC::Storage;
 use BackupPC::XS;
@@ -1158,7 +1159,7 @@ sub cmdExecOrEval
 			if ( $bpc->{verbose} );
         eval($cmd);
         print(STDERR "Perl code fragment for exec shouldn't return!!\n");
-        exit(1);
+        POSIX::_exit(1);
     } else {
         $cmd = [split(/\s+/, $cmd)] if ( ref($cmd) ne "ARRAY" );
 	print(STDERR "cmdExecOrEval: about to exec ",
@@ -1171,7 +1172,7 @@ sub cmdExecOrEval
 	#
         exec { $cmd->[0] } @$cmd;
         print(STDERR "Exec failed for @$cmd\n");
-        exit(1);
+        POSIX::_exit(1);
     }
 }
 
@@ -1235,7 +1236,7 @@ sub cmdSystemOrEvalLong
 	    #
 	    exec { $cmd->[0] } @$cmd;
             print(STDERR "Exec of @$cmd failed\n");
-            exit(1);
+            POSIX::_exit(1);
 	}
 
 	#

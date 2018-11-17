@@ -21,17 +21,27 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
-Merged pull requests #200, #208, #216, #217, #229, #230, #231, #232.
+Merged pull requests #200, #208, #216, #217, #229, #230, #231, #232,
+  #233, #235.
 
 * Improvements to html table sorting, and made more tables sortable,
   submitted by @brenard and @moisseev (issue #199, PRs #200, #229, #230,
-  #232),
+  #232).
 
 * Add action type column to queue status page (#208), submitted by
   @brenard.
 
+* Added $Conf{EMailAdminSubject} to allow the admin email subject to
+  be set.
+
+* Added checking of file system inode usage, with new configuration
+  settings $Conf{DfInodeUsageCmd} and $Conf{DfMaxInodeUsagePct}.
+
 * Changed default $Conf{CgiDateFormatMMDD} to 2 (YYYY-MM-DD), submitted
-  by @moisseev.
+  by @moisseev (#231).
+
+* Allow multiple groups in $Conf{CgiAdminUserGroup}, submitted by
+  @moisseev (#235).
 
 * bin/BackupPC_backupDuplicate: fixed directory creation for copying v3
   backups.
@@ -47,6 +57,9 @@ Merged pull requests #200, #208, #216, #217, #229, #230, #231, #232.
 * lib/BackupPC/CGI/HostInfo.pm: show active backup as partial if there
   is no job running (to handle case of abnormal exit of BackupPC),
   reported by @8666 in issue #220.
+
+* systemd/src/backuppc.service: added ExecReload, submitted by
+  @opoplawski (#233).
 
 * lib/BackupPC/Xfer/Rsync.pm: empty $Conf{RsyncdPasswd} is no longer fatal;
   removed remaining mentions of RsyncdAuthRequired from conf/config.pl
@@ -64,6 +77,15 @@ Merged pull requests #200, #208, #216, #217, #229, #230, #231, #232.
 
 * lib/BackupPC/Xfer/Rsync.pm: added checks for a couple of common rsync
   file error and error exit messages that now increment the xferErrs count.
+
+* bin/BackupPC_tarExtract: errors related to a particular file are counted
+  as Xfer errors, rather than considered fatal.
+
+* bin/BackupPC_dump: added check that $LogFd is defined before using it.
+
+* lib/BackupPC/Lib.pm: replaced exit() with POSIX::_exit() so that object
+  destruction is skipped in the child process.  This fixes corruption of
+  the compressed XferLOG file if the exec of $Conf{DumpPostUserCmd} fails.
 
 #------------------------------------------------------------------------
 # Version 4.2.1, 7 May 2018

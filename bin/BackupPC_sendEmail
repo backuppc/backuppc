@@ -210,53 +210,31 @@ foreach my $host ( sort(keys(%Status)) ) {
               || $user eq ""
           );
     my @Backups = $bpc->BackupInfoRead($host);
-    my $numBackups = @Backups;
-    if ( $numBackups == 0 ) {
-        my $subj = defined($HostConf{EMailNoBackupEverSubj})
-			? $HostConf{EMailNoBackupEverSubj}
-			: $Lang->{EMailNoBackupEverSubj};
-        my $mesg = defined($HostConf{EMailNoBackupEverMesg})
-		        ? $HostConf{EMailNoBackupEverMesg}
-			: $Lang->{EMailNoBackupEverMesg};
-        sendUserEmail($user, $host, $mesg, $subj, {
-                            userName => user2name($user)
-                        }) if ( !defined($Jobs{$host}) );
-        next;
-    }
-    my $last = my $lastFull = my $lastIncr = 0;
+    my $last = 0;
     my $lastGoodOutlook = 0;
     my $lastNum = -1;
     my $numBadOutlook = 0;
+    my $numBackups = 0;
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
         my $fh;
         #
-        # ignore partials -> only fulls and incrs should be used
-        # in figuring out when the last good backup was
+        # ignore partials and active backups -> only fulls and incrs
+        # should be used in figuring out when the last good backup was
         #
-        next if ( $Backups[$i]{type} eq "partial" );
-        $lastNum = $Backups[$i]{num} if ( $lastNum < $Backups[$i]{num} );
-        if ( $Backups[$i]{type} eq "full" ) {
-            $lastFull = $Backups[$i]{startTime}
-                    if ( $lastFull < $Backups[$i]{startTime} );
-        } else {
-            $lastIncr = $Backups[$i]{startTime}
-                    if ( $lastIncr < $Backups[$i]{startTime} );
-        }
-        $last = $Backups[$i]{startTime}
-                    if ( $last < $Backups[$i]{startTime} );
+        next if ( $Backups[$i]{type} eq "partial" || $Backups[$i]{type} eq "active" );
+        $lastNum = $Backups[$i]{num}    if ( $lastNum < $Backups[$i]{num} );
+        $last = $Backups[$i]{startTime} if ( $last < $Backups[$i]{startTime} );
+        $numBackups++;
+        next if ( $Backups[$i]{xferMethod} ne "smb" );
+
         my $badOutlook = 0;
-        my $file = "$TopDir/pc/$host/SmbLOG.$Backups[$i]{num}";
         my $comp = 0;
+        my $file = "$TopDir/pc/$host/XferLOG.$Backups[$i]{num}";
         if ( !-f $file ) {
-            $file = "$TopDir/pc/$host/XferLOG.$Backups[$i]{num}";
-            if ( !-f $file ) {
-                $comp = 1;
-                $file = "$TopDir/pc/$host/SmbLOG.$Backups[$i]{num}.z";
-                $file = "$TopDir/pc/$host/XferLOG.$Backups[$i]{num}.z"
-                                                        if ( !-f $file );
-            }
+            $comp = 1;
+            $file = "$TopDir/pc/$host/XferLOG.$Backups[$i]{num}.z";
         }
-        next if ( !defined($fh = BackupPC::XS::FileZIO::open($file, 0, $comp)) );
+        next if ( !-f $file || !defined($fh = BackupPC::XS::FileZIO::open($file, 0, $comp)) );
         while ( 1 ) {
             my $s = $fh->readLine();
             last if ( $s eq "" );
@@ -272,6 +250,18 @@ foreach my $host ( sort(keys(%Status)) ) {
             $lastGoodOutlook = $Backups[$i]{startTime}
                     if ( $lastGoodOutlook < $Backups[$i]{startTime} );
         }
+    }
+    if ( $numBackups == 0 ) {
+        my $subj = defined($HostConf{EMailNoBackupEverSubj})
+			? $HostConf{EMailNoBackupEverSubj}
+			: $Lang->{EMailNoBackupEverSubj};
+        my $mesg = defined($HostConf{EMailNoBackupEverMesg})
+		        ? $HostConf{EMailNoBackupEverMesg}
+			: $Lang->{EMailNoBackupEverMesg};
+        sendUserEmail($user, $host, $mesg, $subj, {
+                            userName => user2name($user)
+                        }) if ( !defined($Jobs{$host}) );
+        next;
     }
     if ( time - $last > $HostConf{EMailNotifyOldBackupDays} * 24*3600 ) {
         my $subj = defined($HostConf{EMailNoBackupRecentSubj})

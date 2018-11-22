@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.3, released 3 Jun 2017.
+# Version 4.2.2, released 3 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1087,53 +1087,73 @@ sub moveFileToOld
         # A new file will be created, so add delete attribute to old
         #
         if ( $AttrOld ) {
-            $t->logWrite("moveFileToOld $f->{name} (add delete attribute to old)\n", 5);
             $AttrOld->set($f->{name}, { type => BPC_FTYPE_DELETED });
+            $t->logWrite("moveFileToOld: added $f->{name} as BPC_FTYPE_DELETED in old\n", 5);
         }
         return;
     }
-    $t->logWrite("moveFileToOld $a->{name}, $f->{name}, links = $a->{nlinks}, type = $a->{type}\n", 5);
-    if ( $a->{nlinks} > 0 ) {
-        $a->{nlinks}--;
-        if ( $a->{nlinks} <= 0 ) {
-            $AttrNew->deleteInode($a->{inode});
-            $DeltaNew->update($a->{compress}, $a->{digest}, -1);
+    $t->logWrite("moveFileToOld: $a->{name}, $f->{name}, links = $a->{nlinks}, type = $a->{type}\n", 5);
+    if ( $a->{type} != BPC_FTYPE_DIR ) {
+        if ( $a->{nlinks} > 0 ) {
+            if ( $AttrOld ) {
+                if ( !$AttrOld->getInode($a->{inode}) ) {
+                    #
+                    # copy inode to old if it isn't already there
+                    #
+                    $AttrOld->setInode($a->{inode}, $a);
+                    $DeltaOld->update($a->{compress}, $a->{digest}, 1);
+                }
+                #
+                # copy to old - no need for refeence count update since
+                # inode is already there
+                #
+                $AttrOld->set($f->{name}, $a, 1) if ( !$AttrOld->get($f->{name}) );
+            }
+            $a->{nlinks}--;
+            if ( $a->{nlinks} <= 0 ) {
+                $AttrNew->deleteInode($a->{inode});
+                $DeltaNew->update($a->{compress}, $a->{digest}, -1);
+            } else {
+                $AttrNew->setInode($a->{inode}, $a);
+            }
         } else {
-            $AttrNew->setInode($a->{inode}, $a);
+            $DeltaNew->update($a->{compress}, $a->{digest}, -1);
+            if ( $AttrOld && !$AttrOld->get($f->{name}) && $AttrOld->set($f->{name}, $a, 1) ) {
+                $DeltaOld->update($a->{compress}, $a->{digest}, 1);
+            }
         }
+        $AttrNew->delete($f->{name});
     } else {
-        $DeltaNew->update($a->{compress}, $a->{digest}, -1)
-                                        if ( length($a->{digest}) );
-        if ( $AttrOld && $AttrOld->get($f->{name}) && $AttrOld->set($f->{name}, $a, 1) ) {
-            $DeltaOld->update($a->{compress}, $a->{digest}, 1);
-        }
-    }
-    $AttrNew->delete($f->{name});
-    if ( $a->{type} == BPC_FTYPE_DIR ) {
         if ( !$AttrOld || $AttrOld->get($f->{name}) ) {
             #
             # Delete the directory tree, including updating reference counts
             #
             my $pathNew = $AttrNew->getFullMangledPath($f->{name});
+            $t->logWrite("moveFileToOld(..., $f->{name}): deleting $pathNew\n", 3);
             BackupPC::DirOps::RmTreeQuiet($bpc, $pathNew, $a->{compress}, $DeltaNew, $AttrNew);
         } else {
             #
             # For a directory we need to move it to old, and copy
             # any inodes that are referenced below this directory.
+	    # Also update the reference counts for the moved files.
             #
             my $pathNew = $AttrNew->getFullMangledPath($f->{name});
             my $pathOld = $AttrOld->getFullMangledPath($f->{name});
             $t->logWrite("moveFileToOld(..., $f->{name}): renaming $pathNew to $pathOld\n", 5);
-            $AttrNew->flush(0, $f->{name});
-            BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress}, -1, $DeltaNew);
-            BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress},  1, $DeltaOld);
-            $t->copyInodes($f->{name});
             $t->pathCreate($pathOld);
+            $AttrNew->flush(0, $f->{name});
             if ( !rename($pathNew, $pathOld) ) {
-                $t->logWrite("moveFileToOld(..., $f->{name}): can't rename $pathNew to $pathOld\n", 1);
+                $t->logWrite(sprintf("moveFileToOld(..., %s: can't rename %s to %s ($!, %d, %d, %d)\n",
+                                      $f->{name}, $pathNew, $pathOld, -e $pathNew, -e $pathOld, -d $pathOld));
                 $t->{xferErrCnt}++;
+            } else {
+                BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress}, -1, $DeltaNew);
+                BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress},  1, $DeltaOld);
+                $t->copyInodes($f->{name});
+                $AttrOld->set($f->{name}, $a, 1);
             }
         }
+        $AttrNew->delete($f->{name});
     }
 }
 

@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 27 Oct 2018.
+# Version 4.2.2, released 3 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -409,28 +409,46 @@ sub moveFileToOld
         #
         # A new file will be created, so add delete attribute to old
         #
-        $AttrOld->set($f->{name}, { type => BPC_FTYPE_DELETED }) if ( $AttrOld );
+        if ( $AttrOld ) {
+            $AttrOld->set($f->{name}, { type => BPC_FTYPE_DELETED });
+            print("moveFileToOld: added $f->{name} as BPC_FTYPE_DELETED in old\n")
+                                                if ( $Conf{XferLogLevel} >= 5 );
+        }
         return;
     }
     print("moveFileToOld: $a->{name}, $f->{name}, links = $a->{nlinks}, type = $a->{type}\n")
                                         if ( $Conf{XferLogLevel} >= 5 );
-    if ( $a->{nlinks} > 0 ) {
-        $a->{nlinks}--;
-        if ( $a->{nlinks} <= 0 ) {
-            $AttrNew->deleteInode($a->{inode});
-            $DeltaNew->update($a->{compress}, $a->{digest}, -1);
+    if ( $a->{type} != BPC_FTYPE_DIR ) {
+        if ( $a->{nlinks} > 0 ) {
+	    if ( $AttrOld ) {
+		if ( !$AttrOld->getInode($a->{inode}) ) {
+                    #
+                    # copy inode to old if it isn't already there
+                    #
+		    $AttrOld->setInode($a->{inode}, $a);
+		    $DeltaOld->update($a->{compress}, $a->{digest}, 1);
+		}
+                #
+                # copy to old - no need for refeence count update since
+                # inode is already there
+                #
+		$AttrOld->set($f->{name}, $a, 1) if ( !$AttrOld->get($f->{name}) );
+	    }
+            $a->{nlinks}--;
+            if ( $a->{nlinks} <= 0 ) {
+                $AttrNew->deleteInode($a->{inode});
+                $DeltaNew->update($a->{compress}, $a->{digest}, -1);
+            } else {
+                $AttrNew->setInode($a->{inode}, $a);
+            }
         } else {
-            $AttrNew->setInode($a->{inode}, $a);
+            $DeltaNew->update($a->{compress}, $a->{digest}, -1);
+            if ( $AttrOld && !$AttrOld->get($f->{name}) && $AttrOld->set($f->{name}, $a, 1) ) {
+                $DeltaOld->update($a->{compress}, $a->{digest}, 1);
+            }
         }
+        $AttrNew->delete($f->{name});
     } else {
-        $DeltaNew->update($a->{compress}, $a->{digest}, -1)
-                                        if ( length($a->{digest}) );
-        if ( $AttrOld && !$AttrOld->get($f->{name}) && $AttrOld->set($f->{name}, $a, 1) ) {
-            $DeltaOld->update($a->{compress}, $a->{digest}, 1);
-        }
-    }
-    $AttrNew->delete($f->{name});
-    if ( $a->{type} == BPC_FTYPE_DIR ) {
         if ( !$AttrOld || $AttrOld->get($f->{name}) ) {
             #
             # Delete the directory tree, including updating reference counts
@@ -449,17 +467,20 @@ sub moveFileToOld
             my $pathOld = $AttrOld->getFullMangledPath($f->{name});
             print("moveFileToOld(..., $f->{name}): renaming $pathNew to $pathOld\n")
                                      if ( $Conf{XferLogLevel} >= 3 );
-            $AttrNew->flush(0, $f->{name});
-            BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress}, -1, $DeltaNew);
-            BackupPC::XS::DirOps::refCountAll($pathNew, $a->{compress},  1, $DeltaOld);
-            copyInodes($f->{name});
             pathCreate($pathOld);
+            $AttrNew->flush(0, $f->{name});
             if ( !rename($pathNew, $pathOld) ) {
                 printf("moveFileToOld(..., %s: can't rename %s to %s ($!, %d, %d, %d)\n",
 			    $f->{name}, $pathNew, $pathOld, -e $pathNew, -e $pathOld, -d $pathOld);
                 $Errors++;
+            } else {
+                BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress}, -1, $DeltaNew);
+                BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress},  1, $DeltaOld);
+                copyInodes($f->{name});
+                $AttrOld->set($f->{name}, $a, 1);
             }
         }
+        $AttrNew->delete($f->{name});
     }
 }
 

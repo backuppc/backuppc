@@ -29,9 +29,9 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2018  Craig Barratt
 #
-#   See http://backuppc.sourceforge.net.
+#   See https://backuppc.github.io/backuppc
 #
 #========================================================================
 

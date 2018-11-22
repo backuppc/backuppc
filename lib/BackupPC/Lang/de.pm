@@ -1335,7 +1335,7 @@ angeschlossen wird.
 
 Mit freundlichen Grüßen
 Ihr BackupPC Server
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
@@ -1366,7 +1366,7 @@ Virenbefall unbrauchbar werden.
 
 Mit freundlichen Grüßen
 Ihr BackupPC Server
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
@@ -1401,7 +1401,7 @@ Es wird folgendes Vorgehen empfohlen:
 
 Mit freundlichen Grüßen
 Ihr BackupPC Server
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 $Lang{howLong_not_been_backed_up} = "Backup nicht erfolgreich";

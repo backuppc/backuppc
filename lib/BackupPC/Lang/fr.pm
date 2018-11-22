@@ -1329,7 +1329,7 @@ ordinateur est correctement connecté au réseau.
 
 Merci de votre attention,
 BackupPC Génie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
@@ -1360,7 +1360,7 @@ avec votre ordinateur.
 
 Merci de votre attention,
 BackupPC Génie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
@@ -1392,7 +1392,7 @@ sauvegarde devrait prendre quelques minutes à s'effectuer.
 
 Merci de votre attention,
 BackupPC Génie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 $Lang{howLong_not_been_backed_up} = "jamais été sauvegardés";

@@ -1347,7 +1347,7 @@ prossima volta che sei in ufficio.
 Ciao.
 
 BackupPC Genie
-http://backuppc.sourceforge.net/
+https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
@@ -1376,7 +1376,7 @@ e gli allegati) non possono essere ripristinato se il tuo PC si guasta.
 Ciao.
 
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
@@ -1410,7 +1410,7 @@ Il backup dovrebbe essere pronto entro pochi minuti.
 Ciao.
 
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 $Lang{howLong_not_been_backed_up} = "non e` riuscito";

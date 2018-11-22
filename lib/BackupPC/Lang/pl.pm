@@ -1327,7 +1327,7 @@ nastepnym razem kiedy bedziesz przy nim.
 
 Pozdrawiam ,
 Czarodziej BackupPC
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
@@ -1356,7 +1356,7 @@ i załącznikami) nie będą przywrócone jeżeli dysk ulegnie awarii.
 
 Pozdrowienia,
 Czarodziej BackupPC
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
@@ -1387,7 +1387,7 @@ complete.
 
 Regards,
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 $Lang{howLong_not_been_backed_up} = "utworzenie kopii nie zostało zakonczone pomyślnie";

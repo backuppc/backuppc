@@ -1326,7 +1326,7 @@ Ujistìte se, že je Vaše PC pøipojeno do sítì, až budete pøíštì v kanceláøi.
 
 S pozdravem,
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
@@ -1354,7 +1354,7 @@ nebudou moci býti obnoveny, pokud se disk ve Vašem poèítaèi poškodí.
 
 S pozdravem,
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
@@ -1384,7 +1384,7 @@ ke zjištìní stavu zálohování. Dokonèení mùže trvat nìkolik minut.
 
 S pozdravem,
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 $Lang{howLong_not_been_backed_up} = "nebylo zálohováno úspìšnì";

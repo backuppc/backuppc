@@ -1301,7 +1301,7 @@ $headers
 此致敬礼，
 
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
@@ -1327,7 +1327,7 @@ $headers
 此致敬礼，
 
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
@@ -1360,7 +1360,7 @@ $headers
 此致敬礼，
 
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 $Lang{howLong_not_been_backed_up} = "还从未被成功备份过";

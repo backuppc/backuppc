@@ -1332,7 +1332,7 @@ que est&eacute; en la oficina.
 
 Saludos:
 Agente BackupPC
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
@@ -1363,7 +1363,7 @@ y archivos adjuntos) no pueden ser restaurados si su disco se aver&iacute;a.
 
 Saludos:
 Agente BackupPC
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
@@ -1418,7 +1418,7 @@ para verificar el estado del proceso de copia de seguridad. Deber&iacute;a lleva
 
 Saludos:
 Agente BackupPC
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 $Lang{howLong_not_been_backed_up} = "no se le ha realizado una copia de seguridad con &eacute;xito";

@@ -1334,7 +1334,7 @@ systeembeheerder.
 
 Met vriendelijke groeten,
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
@@ -1367,7 +1367,7 @@ van uw pc zou crashen. Hierin zijn nieuwe e-mail en bijlagen inbegrepen.
 
 Met vriendelijke groeten,
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
@@ -1405,7 +1405,7 @@ vragen vooraleer de backup volledig is.
 
 Met vriendelijke groeten,
 BackupPC Genie
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 $Lang{howLong_not_been_backed_up} = "(nog) niet succesvol gebackupt";

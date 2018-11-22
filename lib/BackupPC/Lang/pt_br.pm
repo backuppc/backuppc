@@ -1332,7 +1332,7 @@ que estiver utilizando-o.
 
 Saudações:
 Agente BackupPC
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
@@ -1363,7 +1363,7 @@ ser restaurados se seu disco danificar-se.
 
 Saudações:
 Agente BackupPC
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
@@ -1395,7 +1395,7 @@ somente alguns minutos para completar.
 
 Saudações:
 Agente BackupPC
-http://backuppc.sourceforge.net
+https://backuppc.github.io/backuppc
 EOF
 
 $Lang{howLong_not_been_backed_up} = "não foi realizado nenhum backup com êxito";

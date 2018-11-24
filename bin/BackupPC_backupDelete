@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 21 Oct 2018.
+# Version 4.2.2, released 23 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -220,6 +220,15 @@ if ( $Backups[$idx]{version} < 4 ) {
         $DeltaDel = BackupPC::XS::DeltaRefCnt::new($DelTopDir);
         $AttrDel = BackupPC::XS::AttribCache::new($Host, $Backups[$idx]{num}, $ShareName, $Backups[$idx]{compress});
         $AttrDel->setDeltaInfo($DeltaDel);
+        #
+        # Create a needFsck file, so if we are killed and can't recover, we can
+        # make sure an fsck is run next time.
+        #
+        mkdir("$DelTopDir/refCnt", 0770) if ( !-d "$DelTopDir/refCnt" );
+        my $needFsckFH;
+        if ( !(open($needFsckFH, ">", "$DelTopDir/refCnt/needFsck.del") && close($needFsckFH)) ) {
+            logMsg("BackupPC_backupDelete: can't create $DelTopDir/refCnt/needFsck.del ($?)\n");
+        }
     } else {
         $AttrDel = BackupPC::XS::AttribCache::new($Host, $Backups[$idx]{num}, "", $Backups[$idx]{compress});
     }
@@ -310,8 +319,10 @@ if ( $Backups[$idx]{version} < 4 ) {
             }
 
             $AttrDel->flush(1);
+            $DeltaDel->flush() if ( $DeltaDel );
             $bpc->flushXSLibMesgs();
             $AttrMerge->flush(1);
+            $DeltaMerge->flush();
             $bpc->flushXSLibMesgs();
         }
     }
@@ -336,7 +347,8 @@ if ( !defined($ShareName) ) {
     $bpc->BackupInfoWrite($Host, @Backups);
 }
 
-unlink("$MergeDir/refCnt/needFsck.del") if ( $Errors == 0 );
+unlink("$MergeDir/refCnt/needFsck.del")  if ( $Errors == 0 && $Conf{RefCntFsck} == 0 && -f "$MergeDir/refCnt/needFsck.del" );
+unlink("$DelTopDir/refCnt/needFsck.del") if ( $Errors == 0 && $Conf{RefCntFsck} == 0 && -f "$DelTopDir/refCnt/needFsck.del" );
 
 if ( $doRefCountUpdate || $opts{r} ) {
     my $optsp = " -p" if ( $opts{p} );
@@ -376,9 +388,17 @@ sub copyInodes
         $DeltaDel->update($a->{compress}, $a->{digest}, -1) if ( $DeltaDel && length($a->{digest}) );
         next if ( $a->{nlinks} == 0 );
         #
-        # Update inode link count in del backup, and copy/update inode in merge
+        # copy/update inode in merge, and reduce link count in delete backup
         #
         my $aInode = $AttrDel->getInode($a->{inode});
+        if ( !(my $inodeMerge = $AttrMerge->getInode($a->{inode})) ) {
+            #
+            # Copy the inode if it doesn't exist in Merge.
+            #
+            $AttrMerge->setInode($a->{inode}, $aInode);
+            $DeltaMerge->update($aInode->{compress}, $aInode->{digest}, 1)
+                                                if ( length($aInode->{digest}) );
+        }
         if ( $DeltaDel && $aInode ) {
             $aInode->{nlinks}--;
             if ( $aInode->{nlinks} <= 0 ) {
@@ -387,21 +407,6 @@ sub copyInodes
             } else {
                 $AttrDel->setInode($a->{inode}, $aInode);
             }
-        }
-        if ( !(my $inodeMerge = $AttrMerge->getInode($a->{inode})) ) {
-            #
-            # Copy the inode if it doesn't exist in Merge.
-            #
-            $aInode->{nlinks} = 1;
-            $AttrMerge->setInode($a->{inode}, $aInode);
-            $DeltaMerge->update($aInode->{compress}, $aInode->{digest}, 1)
-                                                if ( length($aInode->{digest}) );
-        } else {
-            #
-            # increase link count on exiting inode
-            #
-            $inodeMerge->{nlinks}++;
-            $AttrMerge->setInode($a->{inode}, $inodeMerge);
         }
     }
     printProgress() if ( $FileCnt >= $FileCntNext );
@@ -559,6 +564,18 @@ sub mergeDir
                     my $digestStr = unpack("H*", $aInode->{digest});
                     logMsg("got del $fileUM inode $a->{inode} (type = $aInode->{type}, size = $aInode->{size}, nlinks = $aInode->{nlinks}, digest = $digestStr)\n")
                 }
+                if ( !(my $inodeMerge = $AttrMerge->getInode($a->{inode})) ) {
+                    #
+                    # Copy the inode if it doesn't exist in Merge.
+                    #
+                    $AttrMerge->setInode($a->{inode}, $aInode);
+                    $DeltaMerge->update($aInode->{compress}, $aInode->{digest}, 1)
+                                if ( length($aInode->{digest}) );
+                    if ( $LogLevel >= 7 ) {
+                        my $digestStr = unpack("H*", $aInode->{digest});
+                        logMsg("setting merge inode $a->{inode} (type = $aInode->{type}, size = $aInode->{size}, nlinks = $aInode->{nlinks}, digest = $digestStr)\n")
+                    }
+                }
                 if ( $DeltaDel && $aInode ) {
                     $aInode->{nlinks}--;
                     if ( $aInode->{nlinks} <= 0 ) {
@@ -574,29 +591,6 @@ sub mergeDir
                             my $digestStr = unpack("H*", $aInode->{digest});
                             logMsg("updated del inode $a->{inode} (type = $aInode->{type}, size = $aInode->{size}, nlinks = $aInode->{nlinks}, digest = $digestStr)\n")
                         }
-                    }
-                }
-                if ( !(my $inodeMerge = $AttrMerge->getInode($a->{inode})) ) {
-                    #
-                    # Copy the inode if it doesn't exist in Merge.
-                    #
-                    $aInode->{nlinks} = 1;
-                    $AttrMerge->setInode($a->{inode}, $aInode);
-                    $DeltaMerge->update($aInode->{compress}, $aInode->{digest}, 1)
-                                if ( length($aInode->{digest}) );
-                    if ( $LogLevel >= 7 ) {
-                        my $digestStr = unpack("H*", $aInode->{digest});
-                        logMsg("setting merge inode $a->{inode} (type = $aInode->{type}, size = $aInode->{size}, nlinks = $aInode->{nlinks}, digest = $digestStr)\n")
-                    }
-                } else {
-                    #
-                    # increase link count on exiting inode
-                    #
-                    $inodeMerge->{nlinks}++;
-                    $AttrMerge->setInode($a->{inode}, $inodeMerge);
-                    if ( $LogLevel >= 7 ) {
-                        my $digestStr = unpack("H*", $inodeMerge->{digest});
-                        logMsg("updating merge inode $a->{inode} (type = $inodeMerge->{type}, size = $inodeMerge->{size}, nlinks = $inodeMerge->{nlinks}, digest = $digestStr)\n")
                     }
                 }
             }
@@ -632,14 +626,16 @@ sub mergeDir
     }
     printProgress() if ( $FileCnt >= $FileCntNext );
 
+    $bpc->flushXSLibMesgs();
     if ( $dirty ) {
         my $oldDigest = $attr->digest();
-        logMsg("rewriting attrib file $mergeDir/$name; ") if ( $LogLevel >= 5 );
         if ( !$attr->write($mergeDir, $name, $oldDigest, $DeltaMerge) ) {
             my $digestStr = unpack("H*", $oldDigest);
             logMsg("mergeDir: attr write to $mergeDir/$name failed (digest was $digestStr)\n");
         }
-        logMsg(sprintf("digest now %s, was %s\n", unpack("H*", $attr->digest()), unpack("H*", $oldDigest))) if ( $LogLevel >= 5 );
+        logMsg(sprintf("rewriting attrib file %s; digest is %s was %s\n",
+                       "$mergeDir/$name", unpack("H*", $attr->digest()), unpack("H*", $oldDigest)))
+                                    if ( $LogLevel >= 5 );
     }
     $bpc->flushXSLibMesgs();
 }

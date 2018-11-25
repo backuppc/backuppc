@@ -24,18 +24,25 @@
 Merged pull requests #200, #208, #216, #217, #229, #230, #231, #232,
   #233, #235.
 
-* Improvements to html table sorting, and made more tables sortable,
-  submitted by @brenard and @moisseev (issue #199, PRs #200, #229, #230,
-  #232).
+* Added checking of file system inode usage, with new configuration
+  settings $Conf{DfInodeUsageCmd} and $Conf{DfMaxInodeUsagePct}.
 
-* Add action type column to queue status page (#208), submitted by
-  @brenard.
+* bin/BackupPC_tarExtract: fixes to hardlink handling on incrementals,
+  plus cleanup
+
+* bin/BackupPC_backupDuplicate: fixed directory creation for copying v3
+  backups.
+
+* bin/BackupPC_backupDelete: couple of inode-related bug fixes; also do
+  fsck if $Conf{RefCntFsck} != 0.
+
+* bin/BackupPC: fixed handling of dhcp hosts, reported by Jean-Marc.
+
+* bin/BackupPC: improved version check of rsync_bpc to allow period
+  before "beta", reported by @ktenney in issue #214.
 
 * Added $Conf{EMailAdminSubject} to allow the admin email subject to
   be set.
-
-* Added checking of file system inode usage, with new configuration
-  settings $Conf{DfInodeUsageCmd} and $Conf{DfMaxInodeUsagePct}.
 
 * Changed default $Conf{CgiDateFormatMMDD} to 2 (YYYY-MM-DD), submitted
   by @moisseev (#231).
@@ -43,13 +50,12 @@ Merged pull requests #200, #208, #216, #217, #229, #230, #231, #232,
 * Allow multiple groups in $Conf{CgiAdminUserGroup}, submitted by
   @moisseev (#235).
 
-* bin/BackupPC_backupDuplicate: fixed directory creation for copying v3
-  backups.
+* Improvements to html table sorting, and made more tables sortable,
+  submitted by @brenard and @moisseev (issue #199, PRs #200, #229, #230,
+  #232).
 
-* bin/BackupPC: fixed handling of dhcp hosts, reported by Jean-Marc.
-
-* bin/BackupPC: improved version cbeck of rsync_bpc to allow period
-  before "beta", reported by @ktenney in issue #214.
+* Add action type column to queue status page (#208), submitted by
+  @brenard.
 
 * lib/BackupPC/CGI/Summary.pm: host summary only reports age of completed
   backups (not partial or active), suggested by Michael Selway.
@@ -86,6 +92,9 @@ Merged pull requests #200, #208, #216, #217, #229, #230, #231, #232,
 * lib/BackupPC/Lib.pm: replaced exit() with POSIX::_exit() so that object
   destruction is skipped in the child process.  This fixes corruption of
   the compressed XferLOG file if the exec of $Conf{DumpPostUserCmd} fails.
+
+* conf/config.pl: updated project home page to https://backuppc.github.io/backuppc
+  in email message footers.
 
 #------------------------------------------------------------------------
 # Version 4.2.1, 7 May 2018

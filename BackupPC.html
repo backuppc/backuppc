@@ -143,7 +143,7 @@
 <hr />
 <h1 id="BackupPC-Introduction">BackupPC Introduction</h1>
 
-<p>This documentation describes BackupPC version 4.2.1, released on 7 May 2018.</p>
+<p>This documentation describes BackupPC version 4.3.0, released on 25 Nov 2018.</p>
 
 <h2 id="Overview">Overview</h2>
 
@@ -719,10 +719,10 @@
     make
     make install</code></pre>
 
-<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.2.1.tar.gz, run these commands as root:</p>
+<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.3.0.tar.gz, run these commands as root:</p>
 
-<pre><code>    tar zxf BackupPC-4.2.1.tar.gz
-    cd BackupPC-4.2.1
+<pre><code>    tar zxf BackupPC-4.3.0.tar.gz
+    cd BackupPC-4.3.0
     perl configure.pl</code></pre>
 
 <p>The configure.pl script also accepts command-line options if you wish to run it in a non-interactive manner. It has self-contained documentation for all the command-line options, which you can read with perldoc:</p>
@@ -2697,6 +2697,17 @@
 <p>Note: all Cmds are executed directly without a shell, so the prog name needs to be a full path and you can&#39;t include shell syntax like redirection and pipes; put that in a script if you need it.</p>
 
 </dd>
+<strong><dt id="_conf_dfinodeusagecmd_">$Conf{DfInodeUsageCmd}</a> = &#39;$dfPath -i $topDir&#39;;</dt></strong>
+<dd>
+
+<p>Command to run df to get inode % usage. The following variables are substituted at run-time:</p>
+
+<pre><code>  $dfPath      path to df (<a href="#_conf_dfpath_">$Conf{DfPath}</a>)
+  $topDir      top-level BackupPC data directory</code></pre>
+
+<p>Note: all Cmds are executed directly without a shell, so the prog name needs to be a full path and you can&#39;t include shell syntax like redirection and pipes; put that in a script if you need it.</p>
+
+</dd>
 <strong><dt id="_conf_splitpath_">$Conf{SplitPath}</a> = &#39;&#39;;</dt></strong>
 <dd>
 
@@ -2722,7 +2733,13 @@
 <strong><dt id="_conf_dfmaxusagepct_">$Conf{DfMaxUsagePct}</a> = 95;</dt></strong>
 <dd>
 
-<p>Maximum threshold for disk utilization on the __TOPDIR__ filesystem. If the output from <a href="#_conf_dfpath_">$Conf{DfPath}</a> reports a percentage larger than this number then no new regularly scheduled backups will be run. However, user requested backups (which are usually incremental and tend to be small) are still performed, independent of disk usage. Also, currently running backups will not be terminated when the disk usage exceeds this number.</p>
+<p>Maximum threshold for disk utilization on the __TOPDIR__ filesystem. If the output from <a href="#_conf_dfcmd_">$Conf{DfCmd}</a> reports a percentage larger than this number then no new regularly scheduled backups will be run. However, user requested backups (which are usually incremental and tend to be small) are still performed, independent of disk usage. Also, currently running backups will not be terminated when the disk usage exceeds this number.</p>
+
+</dd>
+<strong><dt id="_conf_dfmaxinodeusagepct_">$Conf{DfMaxInodeUsagePct}</a> = 95;</dt></strong>
+<dd>
+
+<p>Maximum threshold for inode utilization on the __TOPDIR__ filesystem. If the output from <a href="#_conf_dfinodeusagecmd_">$Conf{DfInodeUsageCmd}</a> reports a percentage larger than this number then no new regularly scheduled backups will be run. However, user requested backups (which are usually incremental and tend to be small) are still performed, independent of disk usage. Also, currently running backups will not be terminated when the disk inode usage exceeds this number.</p>
 
 </dd>
 <strong><dt id="_conf_dhcpaddressranges_">$Conf{DHCPAddressRanges}</a> = [];</dt></strong>
@@ -3963,6 +3980,12 @@
 <p>Destination address to an administrative user who will receive a nightly email with warnings and errors. If there are no warnings or errors then no email will be sent. Depending upon your mail handler this is either a plain name (eg: &quot;admin&quot;) or a fully-qualified name (eg: &quot;admin@mydomain.com&quot;).</p>
 
 </dd>
+<strong><dt id="_conf_emailadminsubject_">$Conf{EMailAdminSubject}</a> = &#39;&#39;;</dt></strong>
+<dd>
+
+<p>Subject for admin emails. If empty, defaults to pre-4.2.2 values.</p>
+
+</dd>
 <strong><dt id="_conf_emailuserdestdomain_">$Conf{EMailUserDestDomain}</a> = &#39;&#39;;</dt></strong>
 <dd>
 
@@ -4074,15 +4097,15 @@
 
 <p>Administrative users have full access to all hosts, plus overall status and log information.</p>
 
-<p>The administrative users are the union of the unix/linux group <a href="#_conf_cgiadminusergroup_">$Conf{CgiAdminUserGroup}</a> and the manual list of users, separated by spaces, in <a href="#_conf_cgiadminusers_">$Conf{CgiAdminUsers}</a>. If you don&#39;t want a group or manual list of users set the corresponding configuration setting to undef or an empty string.</p>
+<p>The administrative users are the union of the list of unix/linux groups, separated by spaces, in <a href="#_conf_cgiadminusergroup_">$Conf{CgiAdminUserGroup}</a> and the list of users, separated by spaces, in <a href="#_conf_cgiadminusers_">$Conf{CgiAdminUsers}</a>. If you don&#39;t want a list of groups or users set the corresponding configuration setting to undef or an empty string.</p>
 
 <p>If you want every user to have admin privileges (careful!), set <a href="#_conf_cgiadminusers_">$Conf{CgiAdminUsers}</a> = &#39;*&#39;.</p>
 
 <p>Examples:</p>
 
-<pre><code>   <a href="#_conf_cgiadminusergroup_">$Conf{CgiAdminUserGroup}</a> = &#39;admin&#39;;
+<pre><code>   <a href="#_conf_cgiadminusergroup_">$Conf{CgiAdminUserGroup}</a> = &#39;admin wheel&#39;;
    <a href="#_conf_cgiadminusers_">$Conf{CgiAdminUsers}</a>     = &#39;craig celia&#39;;
-   --&gt; administrative users are the union of group admin, plus
+   --&gt; administrative users are the union of groups admin and wheel, plus
      craig and celia.
 
    <a href="#_conf_cgiadminusergroup_">$Conf{CgiAdminUserGroup}</a> = &#39;&#39;;
@@ -4150,7 +4173,7 @@
      be rendered as a link to http://myhost/users/craig.html.</code></pre>
 
 </dd>
-<strong><dt id="_conf_cgidateformatmmdd_">$Conf{CgiDateFormatMMDD}</a> = 1;</dt></strong>
+<strong><dt id="_conf_cgidateformatmmdd_">$Conf{CgiDateFormatMMDD}</a> = 2;</dt></strong>
 <dd>
 
 <p>Date display format for CGI interface. A value of 1 uses US-style dates (MM/DD), a value of 2 uses full YYYY-MM-DD format, and zero for international dates (DD/MM).</p>

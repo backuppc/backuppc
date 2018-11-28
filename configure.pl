@@ -87,7 +87,7 @@ foreach my $pkg ( @Packages ) {
         next if ( version->parse($ver) >= version->parse($PackageVersion->{$pkg}) );
         die <<EOF;
 
-Package $pkg needs to be at least version $PackageVersion->{$pkg}.
+Perl package $pkg needs to be at least version $PackageVersion->{$pkg}.
 The currently installed $pkg is version $ver.
 
 Please upgrade package $pkg to the latest version and then re-run
@@ -111,8 +111,8 @@ EOF
     }
     die <<EOF;
 
-BackupPC needs the package $pkg.  Please install $pkg
-before installing BackupPC.
+BackupPC needs the perl package "$pkg".  Please install "$pkg"
+(eg, using cpan) before installing BackupPC.
 
 EOF
 }

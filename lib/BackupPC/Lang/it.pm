@@ -202,6 +202,7 @@ Ci sono \$hostCntNone host senza alcun backup.
 <table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Utente </td>
+    <td align=";enter"> Commento </td>
     <td align="center"> Completi </td>
     <td align="center"> Et&agrave; completi (giorni) </td>
     <td align="center"> Dimensione completi (GiB) </td>

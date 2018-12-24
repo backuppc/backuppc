@@ -193,6 +193,7 @@ $Lang{BackupPC_Summary} = <<EOF;
 <table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td>Узел</td>
     <td align="center">Поль-ль</td>
+    <td align="center">Комментарий</td>
     <td align="center">Кол-во ПОЛН. копий</td>
     <td align="center">ПОЛН. возраст (дни)</td>
     <td align="center">ПОЛН. размер (ГБ)</td>

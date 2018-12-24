@@ -189,6 +189,7 @@ There are \$hostCntNone hosts with no backups.
 <table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> User </td>
+    <td align="center"> Comment </td>
     <td align="center"> #Full </td>
     <td align="center"> Full Age (days) </td>
     <td align="center"> Full Size (GiB) </td>

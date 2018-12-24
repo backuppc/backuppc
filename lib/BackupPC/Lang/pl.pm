@@ -191,6 +191,7 @@ Jest \$hostCntNone hostów bez kopii bezpieczeństwa.
 <table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Użytkonik </td>
+    <td align="center"> Komentarz </td>
     <td align="center"> #Pełny </td>
     <td align="center"> Pełny Wiek (dni </td>
     <td align="center"> Pełny Rozmiar (GiB) </td>

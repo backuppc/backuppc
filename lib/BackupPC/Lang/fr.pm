@@ -189,6 +189,7 @@ Il y a \$hostCntNone hôtes sans sauvegardes.
 <table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Hôte </td>
     <td align="center"> Utilisateur </td>
+    <td align="center"> Commentaire </td>
     <td align="center"> Nb complètes </td>
     <td align="center"> Complètes Âge (jours) </td>
     <td align="center"> Complètes Taille (Go) </td>

@@ -203,6 +203,7 @@ Es gibt \$hostCntNone Computer ohne Backups!
 <table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Computer </td>
     <td align="center"> Benutzer </td>
+    <td align="center"> Kommentar </td>
     <td align="center"> #Voll </td>
     <td align="center"> Alter (Tage) </td>
     <td align="center"> Größe (GiB) </td>

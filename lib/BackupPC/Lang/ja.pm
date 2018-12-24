@@ -191,7 +191,8 @@ $Lang{BackupPC_Summary} = <<EOF;
 <table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> ホスト </td>
     <td align="center"> ユーザ </td>
-    <td align="center"> #フル </td>
+    <td align="center"> コメント </td>
+    <td align="center"> フル </td>
     <td align="center"> フル世代(日) </td>
     <td align="center"> フルサイズ(GiB) </td>
     <td align="center"> 速度(MB/s) </td>

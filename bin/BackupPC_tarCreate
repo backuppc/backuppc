@@ -55,7 +55,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 13 Feb 2018.
+# Version 4.3.0, released 25 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -157,6 +157,8 @@ our $view = BackupPC::View->new($bpc, $Host, \@Backups);
 #
 my $tar_pack_header
     = 'a100 a8 a8 a8 a12 a12 A8 a1 a100 a6 a2 a32 a32 a8 a8 a155 x12';
+my $tar_unpack_header
+    = 'Z100 A8 A8 A8 a12 A12 A8 A1 Z100 A6 A2 Z32 Z32 A8 A8 A155 x12';
 my $tar_header_length = 512;
 
 my $BufSize    = $opts{w} || 1048576;     # 1MB or 2^20
@@ -336,29 +338,12 @@ sub TarWriteHeader
                                              : "";
     my $devminor = defined($hdr->{devminor}) ? sprintf("%07o", $hdr->{devminor})
                                              : "";
-    my $sizeStr;
-    if ( $hdr->{size} >= 2 * 65536 * 65536 ) {
-	#
-	# GNU extension for files >= 8GB: send size in big-endian binary
-	#
-	$sizeStr = pack("c4 N N", 0x80, 0, 0, 0,
-				  $hdr->{size} / (65536 * 65536),
-				  $hdr->{size} % (65536 * 65536));
-    } elsif ( $hdr->{size} >= 1 * 65536 * 65536 ) {
-	#
-	# sprintf octal only handles up to 2^32 - 1
-	#
-	$sizeStr = sprintf("%03o", $hdr->{size} / (1 << 24))
-		 . sprintf("%08o", $hdr->{size} % (1 << 24));
-    } else {
-	$sizeStr = sprintf("%011o", $hdr->{size});
-    }
     my $data = pack($tar_pack_header,
                      substr($hdr->{name}, 0, 99),
                      sprintf("%07o", $hdr->{mode}),
                      sprintf("%07o", $hdr->{uid}),
                      sprintf("%07o", $hdr->{gid}),
-                     $sizeStr,
+		     sprintf("%011o", $hdr->{size}),
                      sprintf("%011o", $hdr->{mtime}),
                      "",        #checksum field - space padded by pack("A8")
                      $hdr->{type},
@@ -371,6 +356,73 @@ sub TarWriteHeader
                      $devminor,
                      ""         # prefix is empty
                  );
+    #
+    # now unpack it to see which fields weren't represented correctly,
+    # and if there are any we generate a pax header
+    #
+    my @paxFlds;
+    my($name,       # string
+	$mode,      # octal number
+	$uid,       # octal number
+	$gid,       # octal number
+	$size,      # octal number
+	$mtime,     # octal number
+	$chksum,    # octal number
+	$type,      # character
+	$linkname,  # string
+	$magic,     # string
+	$version,   # two bytes
+	$uname,     # string
+	$gname,     # string
+	$devmajor,  # octal number
+	$devminor,  # octal number
+	$prefix) = unpack($tar_unpack_header, $data);
+    push(@paxFlds, "path=$hdr->{name}")    if ( $name ne $hdr->{name} );
+    push(@paxFlds, "linkpath=$hdr->{linkname}") if ( $linkname ne $hdr->{linkname} );
+    push(@paxFlds, "size=$hdr->{size}")    if ( oct($size) != $hdr->{size} );
+    push(@paxFlds, "mtime=$hdr->{mtime}")  if ( oct($mtime) != $hdr->{mtime} );
+    push(@paxFlds, "uid=$hdr->{uid}")      if ( oct($uid)  != $hdr->{uid} );
+    push(@paxFlds, "gid=$hdr->{gid}")      if ( oct($uid)  != $hdr->{gid} );
+    push(@paxFlds, "uname=$hdr->{uname}")  if ( $uname ne $hdr->{uname} );
+    push(@paxFlds, "gname=$hdr->{gname}")  if ( $gname ne $hdr->{gname} );
+    if ( @paxFlds ) {
+        #
+        # Some fields don't match - we need to generate a pax header
+        #
+        my $paxData;
+        foreach my $fld ( @paxFlds ) {
+            # the length includes the string length...
+            my $len = sprintf("%d", length($fld) + 3);                  # at least 1 digit + space + \n
+            my $len2 = sprintf("%d", length($fld) + length($len) + 2);  # + space + \n
+            if ( length($len2) != length($len) ) {
+                # rollover: adding length requires one more digit in length
+                $len2 = sprintf("%d", length($fld) + length($len2) + 2);
+            }
+            $paxData .= "$len2 " . $fld . "\n";
+        }
+        my $paxHdrData = pack($tar_pack_header,
+                         substr("./PaxHeaders/$hdr->{name}", 0, 99),
+                         sprintf("%07o", $hdr->{mode}),
+                         sprintf("%07o", $hdr->{uid}),
+                         sprintf("%07o", $hdr->{gid}),
+                         sprintf("%011o", length($paxData)),
+                         sprintf("%011o", $hdr->{mtime}),
+                         "",        #checksum field - space padded by pack("A8")
+                         "x",
+                         substr($hdr->{linkname}, 0, 99),
+                         $hdr->{magic} || 'ustar ',
+                         $hdr->{version} || ' ',
+                         $hdr->{uname},
+                         $hdr->{gname},
+                         $devmajor,
+                         $devminor,
+                         ""         # prefix is empty
+                     );
+        substr($paxHdrData, 148, 7) = sprintf("%06o\0", unpack("%16C*",$paxHdrData));
+        TarWrite($fh, \$paxHdrData);
+        TarWrite($fh, \$paxData);
+        TarWritePad($fh, length($paxData));
+    }
     substr($data, 148, 7) = sprintf("%06o\0", unpack("%16C*",$data));
     TarWrite($fh, \$data);
 }
@@ -408,33 +460,6 @@ sub TarWriteFileInfo
         return;
     }
 
-    #
-    # Handle long link names (symbolic links)
-    #
-    if ( length($hdr->{linkname}) > 99 ) {
-        my %h;
-        my $data = $hdr->{linkname} . "\0";
-        $h{name} = "././\@LongLink";
-        $h{type} = "K";
-        $h{size} = length($data);
-        TarWriteHeader($fh, \%h);
-        TarWrite($fh, \$data);
-        TarWritePad($fh, length($data));
-    }
-
-    #
-    # Handle long file names
-    #
-    if ( length($hdr->{name}) > 99 ) {
-        my %h;
-        my $data = $hdr->{name} . "\0";
-        $h{name} = "././\@LongLink";
-        $h{type} = "L";
-        $h{size} = length($data);
-        TarWriteHeader($fh, \%h);
-        TarWrite($fh, \$data);
-        TarWritePad($fh, length($data));
-    }
     TarWriteHeader($fh, $hdr);
 }
 

@@ -87,7 +87,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 27 Oct 2018.
+# Version 4.3.0, released 25 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -2177,7 +2177,9 @@ sub UserCommandRun
 	    sub {
 		$XferLOG->write(\$_[0]);
                 print($LogFd $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
-	    });
+	    },
+            $vars, \%Conf
+        );
 }
 
 sub flushLibMessages()

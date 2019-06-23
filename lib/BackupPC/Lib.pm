@@ -440,7 +440,7 @@ sub ServerConnect
     my $sockFile = "$bpc->{RunDir}/BackupPC.sock";
     socket(*FH, PF_UNIX, SOCK_STREAM, 0)     || return "unix socket: $!";
     if ( !connect(*FH, sockaddr_un($sockFile)) ) {
-        my $err = "unix connect: $!";
+        my $err = "unix connect to $sockFile: $!";
         close(*FH);
         if ( $port > 0 ) {
             my $proto = getprotobyname('tcp');
@@ -448,8 +448,8 @@ sub ServerConnect
             my $paddr = sockaddr_in($port, $iaddr);
 
             socket(*FH, PF_INET, SOCK_STREAM, $proto)
-                                             || return "inet socket: $!";
-            connect(*FH, $paddr)             || return "inet connect: $!";
+                                             || return "inet socket port $port: $!";
+            connect(*FH, $paddr)             || return "inet connect port $port: $!";
         } else {
             return $err;
         }

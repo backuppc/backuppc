@@ -2041,7 +2041,6 @@ sub OrphanShareNameClean
     my $goodShares = {};
 
     foreach my $shareName ( @$shareNames ) {
-        $shareName = encode("utf8", $shareName);
         $goodShares->{$shareName} = 1;
     }
     my $attr = BackupPC::XS::Attrib::new($compress);

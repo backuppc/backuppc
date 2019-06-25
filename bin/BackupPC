@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 3 Nov 2018.
+# Version 4.3.0, released 25 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -273,7 +273,7 @@ sub Main_Initialize
     # correctly and make sure $TopDir is on a file system that supports
     # hardlinks.
     #
-    if ( $Info->{pid} ne "" && kill(0, $Info->{pid}) ) {
+    if ( $Info->{pid} ne "" && kill(0, $Info->{pid}) && !$bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
         print(STDERR $bpc->timeStamp,
                  "Another BackupPC is running (pid $Info->{pid}); quitting...\n");
         exit(1);

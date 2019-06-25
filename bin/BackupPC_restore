@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 18 Feb 2018.
+# Version 4.3.0, released 25 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -707,7 +707,11 @@ sub UserCommandRun
     #
     $bpc->cmdSystemOrEval($cmd,
 	    sub {
-		$RestoreLOG->write(\$_[0]);
+		if ( $RestoreLOG && length($_[0]) ) {
+                    $RestoreLOG->write(\$_[0]);
+                } elsif ( $LogFd && length($_[0]) ) {
+                    print($LogFd $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
+                }
 	    },
 	    $vars, \%Conf);
 }

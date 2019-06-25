@@ -2174,8 +2174,11 @@ sub UserCommandRun
     #
     $bpc->cmdSystemOrEval($cmd,
 	    sub {
-		$XferLOG->write(\$_[0]);
-                print($LogFd $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
+                if ( $XferLOG && length($_[0]) ) {
+                    $XferLOG->write(\$_[0]);
+                } elsif ( $LogFd && length($_[0]) ) {
+                    print($LogFd $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
+                }
 	    },
             $vars, \%Conf
         );

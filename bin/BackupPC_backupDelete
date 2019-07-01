@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 23 Nov 2018.
+# Version 4.3.0, released 25 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -179,7 +179,7 @@ if ( $opts{L} ) {
     print("__bpc_pidStart__ $$\n") if ( !$opts{p} );
 }
 
-my($MergeCompress, $MergeDir);
+my($MergeCompress, $MergeDir, $MergeFilled);
 my($AttrDel, $DeltaDel, $AttrMerge, $DeltaMerge);
 my $HostDir       = "$TopDir/pc/$Host";
 my $DelCompress   = $Backups[$idx]{compress};
@@ -278,6 +278,7 @@ if ( $Backups[$idx]{version} < 4 ) {
             }
             $MergeCompress = $Backups[$idxMerge]{compress};
             $MergeDir      = "$HostDir/$Backups[$idxMerge]{num}";
+            $MergeFilled   = !$Backups[$idxMerge]{noFill};
             #
             # Create a needFsck file, so if we are killed and can't recover, we can
             # make sure an fsck is run next time.
@@ -627,6 +628,20 @@ sub mergeDir
     printProgress() if ( $FileCnt >= $FileCntNext );
 
     $bpc->flushXSLibMesgs();
+    if ( $MergeFilled ) {
+        #
+        # if the merge directory is filled, actually delete any files that have
+        # BPC_FTYPE_DELETED types
+        #
+        my $attrAll = $attr->get();
+        foreach my $fileUM ( keys(%$attrAll) ) {
+            my $a = $attrAll->{$fileUM};
+            next if ( $a->{type} != BPC_FTYPE_DELETED );
+            logMsg("removing attrib for deleted file $mergeDir/$fileUM\n") if ( $LogLevel >= 7 );
+            $attr->delete($fileUM);
+            $dirty = 1;
+        }
+    }
     if ( $dirty ) {
         my $oldDigest = $attr->digest();
         if ( !$attr->write($mergeDir, $name, $oldDigest, $DeltaMerge) ) {

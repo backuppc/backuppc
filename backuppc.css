@@ -12,10 +12,12 @@ footer {
 
 h1 {
     font-size: 2em;
-    margin: .67em 0;
+    padding-top: 90px;
+    margin: -76px 0 .67em 0;
 }
 h2 {
-    margin: 50px 0 20px 0;
+    padding-top: 90px;
+    margin: -57px 0 20px 0;
     font-weight: 300;
     color: #888;
 }

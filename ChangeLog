@@ -53,6 +53,9 @@ Merged pull request #240.
 * bin/BackupPC_archive: use $bpc->openPCLogFile() instead of manual LOG
   file rotation
 
+* lib/BackupPC/CGI/Archive.pm: create client directory if it doesn't
+  exist
+
 #------------------------------------------------------------------------
 # Version 4.3.0, 25 Nov 2018
 #------------------------------------------------------------------------

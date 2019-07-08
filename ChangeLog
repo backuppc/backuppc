@@ -50,6 +50,9 @@ Merged pull request #240.
 * added Data::Dumper SortKeys(1) to lib/BackupPC/Storage/Text.pm so that
   config hash writes have repeatable order; suggested by @kr4ut (#275).
 
+* bin/BackupPC_archive: use $bpc->openPCLogFile() instead of manual LOG
+  file rotation
+
 #------------------------------------------------------------------------
 # Version 4.3.0, 25 Nov 2018
 #------------------------------------------------------------------------

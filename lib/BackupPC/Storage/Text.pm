@@ -12,7 +12,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2017  Craig Barratt
+#   Copyright (C) 2004-2018  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 4.0.1, released 12 Mar 2017.
+# Version 4.3.0, released 25 Nov 2018.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -379,6 +379,7 @@ sub ConfigFileMerge
                     my $d = Data::Dumper->new([$newConf->{$var}], [*value]);
                     $d->Indent(1);
                     $d->Terse(1);
+                    $d->Sortkeys(1);
                     my $value = $d->Dump;
                     $value =~ s/(.*)\n/$1;\n/s;
                     $contents .= "\$Conf{$var} = " . $value;
@@ -412,6 +413,7 @@ sub ConfigFileMerge
 	my $d = Data::Dumper->new([$newConf->{$var}], [*value]);
 	$d->Indent(1);
 	$d->Terse(1);
+        $d->Sortkeys(1);
 	my $value = $d->Dump;
 	$value =~ s/(.*)\n/$1;\n/s;
 	$contents .= "\$Conf{$var} = " . $value;

@@ -20,6 +20,35 @@
 #------------------------------------------------------------------------
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
+Merged pull request #240.
+
+* Fixed CGI host summary columns for new Comment value; reported by
+  @karlis-irmejs (#245).
+
+* Added support to BackupPC_tarCreate for PAX headers to allow large
+  metadata values to be correctly encoded; reported by @seblu (#254).
+
+* Fixed regexp in BackupPC so that versions like rsync-bpc 3.1.2beta0
+  are matched.  PR submitted by Adrien Ferrand (#240).
+
+* Added more details to error messages when failing to connect to
+  BackupPC server; reported by @dmak (#261).
+
+* bin/BackupPC Main_Initialize() checks if a BackupPC server is running
+  by trying to connect to it, in addition to existing check that PID
+  exists; reported by @toggoboge (#264).
+
+* Fixed utf8 encoded share names in deletion of orphan RsyncShareNames,
+  reported by @Yann79 (#266).
+
+* Fixed %Conf passing to perl code version of $bpc->cmdSystemOrEval;
+  reported by Jeff Kosowsky.
+
+* BackupPC_backupDelete removes files with BPC_FTYPE_DELETED from filled
+  merged backup; reported by Jeff Kosowsky.
+
+* added Data::Dumper SortKeys(1) to lib/BackupPC/Storage/Text.pm so that
+  config hash writes have repeatable order; suggested by @kr4ut (#275).
 
 #------------------------------------------------------------------------
 # Version 4.3.0, 25 Nov 2018

@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2013  Craig Barratt
+#   Copyright (C) 2003-2019  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.3.1, released 8 Jul 2019.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -38,6 +38,7 @@ package BackupPC::CGI::Archive;
 use strict;
 use BackupPC::CGI::Lib qw(:all);
 use Data::Dumper;
+use File::Path;
 
 sub action
 {
@@ -224,6 +225,8 @@ EOF
                             [  \%ArchiveReq],
                             [qw(*ArchiveReq)]);
             $archive->Indent(1);
+	    eval { mkpath("$TopDir/pc/$archivehost", 0, 0777) }
+					if ( !-d "$TopDir/pc/$archivehost" );
 	    my $openPath = "$TopDir/pc/$archivehost/$reqFileName";
 	    if ( open(REQ, ">", $openPath) ) {
                 binmode(REQ);

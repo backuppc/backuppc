@@ -273,7 +273,7 @@ sub Main_Initialize
     # correctly and make sure $TopDir is on a file system that supports
     # hardlinks.
     #
-    if ( $Info->{pid} ne "" && kill(0, $Info->{pid}) && !$bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
+    if ( defined $Info->{pid} && kill(0, $Info->{pid}) && !$bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
         print(STDERR $bpc->timeStamp,
                  "Another BackupPC is running (pid $Info->{pid}); quitting...\n");
         exit(1);
@@ -281,7 +281,7 @@ sub Main_Initialize
 
     foreach my $progName ( qw(SmbClientPath NmbLookupPath PingPath DfPath
                               SendmailPath SshPath RsyncBackupPCPath) ) {
-        next if ( $Conf{$progName} eq "" || -x $Conf{$progName} );
+        next if ( !defined $Conf{$progName} || $Conf{$progName} eq "" || -x $Conf{$progName} );
         print(STDERR $bpc->timeStamp,
                      "\$Conf{$progName} = '$Conf{$progName}' is not a"
                    . " valid executable program; exiting\n");
@@ -323,9 +323,12 @@ sub Main_Initialize
 
         chdir ("/") or die("Cannot chdir to /: $!\n");
         close(STDIN);
-        open(STDIN , ">/dev/null") or die("Cannot open /dev/null as stdin\n");
-        # STDOUT and STDERR are handled in LogFileOpen() right below,
-        # otherwise we would have to reopen them too.
+        {
+            no warnings;
+            open(STDIN , ">/dev/null") or die("Cannot open /dev/null as stdin\n");
+            # STDOUT and STDERR are handled in LogFileOpen() right below,
+            # otherwise we would have to reopen them too.
+        }
     }
 
     #
@@ -603,9 +606,10 @@ sub Main_TryToRun_CmdQueue
             setpgrp 0,0;
             $ENV{BPC_REQUSER} = $req->{user};
             POSIX::nice($Conf{CmdQueueNice}) if ( $Conf{CmdQueueNice} );
-            exec(@$cmd);
-            print(LOG $bpc->timeStamp, "can't exec @$cmd for $host\n");
-            exit(0);
+            unless ( exec(@$cmd) ) {
+                print( LOG $bpc->timeStamp, "can't exec @$cmd for $host\n" );
+                exit(0);
+            }
         }
         $Jobs{$host}{pid}       = $pid;
         $Jobs{$host}{fh}        = *FH;
@@ -787,9 +791,10 @@ sub Main_TryToRun_Bg_or_User_Queue
         }
         if ( !$pid ) {
             setpgrp 0,0;
-            exec("$BinDir/$progName", @args);
-            print(LOG $bpc->timeStamp, "can't exec $progName for $host\n");
-            exit(0);
+            unless ( exec( "$BinDir/$progName", @args ) ) {
+                print( LOG $bpc->timeStamp, "can't exec $progName for $host\n" );
+                exit(0);
+            }
         }
         $Jobs{$host}{pid}        = $pid;
         $Jobs{$host}{fh}         = *FH;

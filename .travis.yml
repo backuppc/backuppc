@@ -1,4 +1,5 @@
-﻿sudo: false
+﻿dist: trusty
+sudo: false
 env:
   global:
     - MAKEFLAGS="-j 2"

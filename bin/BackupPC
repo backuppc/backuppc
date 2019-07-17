@@ -176,8 +176,8 @@ my(%CmdQueueOn, %UserQueueOn, %BgQueueOn);
 # number stored in $ClientConnCnt.  Each entry is a hash that contains
 # various information about the client connection.
 #
-my %Clients    = ();
-my $ClientConnCnt;
+my %Clients       = ();
+my $ClientConnCnt = 0;
 
 #
 # Read file descriptor mask used by select().  Every file descriptor
@@ -200,8 +200,12 @@ my $SigName = "";
 #
 # Misc variables
 #
-my($RunNightlyWhenIdle, $FirstWakeup, $CmdJob, $ServerInetPort);
-my($BackupPCNightlyJobs, $BackupPCNightlyLock);
+my $CmdJob              = "";
+my $BackupPCNightlyJobs = 0;
+my $BackupPCNightlyLock = 0;
+my $FirstWakeup         = 0;
+my $RunNightlyWhenIdle  = 0;
+my $ServerInetPort      = -1;
 
 #
 # Complete the rest of the initialization

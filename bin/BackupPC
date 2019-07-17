@@ -655,7 +655,7 @@ sub Main_TryToRun_Bg_or_User_Queue
     my(@deferUserQueue, @deferBgQueue);
     my($du, $duInode);
 
-    if ( time - $Info->{DUlastValueTime} >= 600 ) {
+    if ( !defined $Info->{DUlastValueTime} || time - $Info->{DUlastValueTime} >= 600 ) {
         #
         # Update our notion of disk usage no more than
         # once every 10 minutes
@@ -678,11 +678,11 @@ sub Main_TryToRun_Bg_or_User_Queue
         $Info->{DUDailyMax}          = 0;
         $Info->{DUInodeDailyMax}     = 0;
     }
-    if ( $du > $Info->{DUDailyMax} ) {
+    if ( !defined $Info->{DUDailyMax} || $du > $Info->{DUDailyMax} ) {
         $Info->{DUDailyMax}     = $du;
         $Info->{DUDailyMaxTime} = time;
     }
-    if ( $duInode > $Info->{DUInodeDailyMax} ) {
+    if ( !defined $Info->{DUInodeDailyMax} || $duInode > $Info->{DUInodeDailyMax} ) {
         $Info->{DUInodeDailyMax}     = $duInode;
         $Info->{DUInodeDailyMaxTime} = time;
     }

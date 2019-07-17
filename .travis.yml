@@ -1,10 +1,12 @@
-﻿sudo: false
+﻿dist: trusty
+sudo: false
 env:
   global:
     - MAKEFLAGS="-j 2"
 
 language: perl
 perl:
+  - 5.30
   - 5.28
   - 5.26
   - 5.24
@@ -37,3 +39,4 @@ script:
   - sudo PATH="$PATH" PERL5LIB="$PERL5LIB" ./configure.pl --batch
   - sudo PATH="$PATH" PERL5LIB="$PERL5LIB" su -m backuppc -c '/usr/local/BackupPC/bin/BackupPC -d'
   - sudo cat /var/log/BackupPC/LOG
+  - sudo egrep -v '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} (Reading hosts file|BackupPC HEAD \(Perl v5\.[0-9]{1,2}\.[0-9]\) started, pid [0-9]+|Next wakeup is [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})$' /var/log/BackupPC/LOG; test $? -eq 1

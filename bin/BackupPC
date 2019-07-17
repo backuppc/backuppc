@@ -1051,7 +1051,7 @@ sub Main_Check_Job_Messages
                 $Status->{$host}{deadCnt}   = 0;
                 $Status->{$host}{aliveCnt}++;
                 $Status->{$host}{dhcpCheckCnt}--
-                                if ( $Status->{$host}{dhcpCheckCnt} > 0 );
+                                if ( defined $Status->{$host}{dhcpCheckCnt} && $Status->{$host}{dhcpCheckCnt} > 0 );
             } elsif ( $mesg =~ /^xferPids *(.*)/ ) {
                 $Jobs{$host}{xferPid} = $1;
             } elsif ( $mesg =~ /^__bpc_progress_state__ (.*)/ ) {
@@ -1115,7 +1115,7 @@ sub Main_Check_Job_Messages
 		    $Status->{$host}{startTime} = time;
 		}
                 $Status->{$host}{dhcpCheckCnt}--
-                                if ( $Status->{$host}{dhcpCheckCnt} > 0 );
+                                if ( defined $Status->{$host}{dhcpCheckCnt} && $Status->{$host}{dhcpCheckCnt} > 0 );
             } elsif ( $mesg =~ /^no ping response/
                             || $mesg =~ /^ping too slow/
                             || $mesg =~ /^host not found/ ) {
@@ -1346,7 +1346,7 @@ sub Main_Check_Job_Messages
     #
     return if ( @CmdQueue || @BgQueue || @UserQueue || keys(%Jobs) > 1 );
     foreach my $host ( keys(%$Status) ) {
-        next if ( $Status->{$host}{dhcpCheckCnt} <= 0 );
+        next if ( !defined $Status->{$host}{dhcpCheckCnt} || $Status->{$host}{dhcpCheckCnt} <= 0 );
         $Status->{$host}{deadCnt} += $Status->{$host}{dhcpCheckCnt};
         $Status->{$host}{dhcpCheckCnt} = 0;
         if ( $Status->{$host}{deadCnt} >= $Conf{BlackoutBadPingLimit} ) {

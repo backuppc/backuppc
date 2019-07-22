@@ -312,9 +312,9 @@ sub poolCountUpdate
             $Info->{"${p}FileCntRm"}     = 0;
             $Info->{"${p}FileCntRep"}    = 0;
             $Info->{"${p}FileRepMax"}    = 0;
-            $Info->{"${p}FileCntRename"} = 0;
             $Info->{"${p}FileLinkMax"}   = 0;
             $Info->{"${p}Time"}          = 0;
+            delete $Info->{"${p}FileCntRename"};
             for ( my $i = 0 ; $i < 16 ; $i++ ) {
                 $Info->{"${p}FileCnt"}
                        += $Info->{pool}{$p}[$i]{FileCnt};
@@ -332,8 +332,6 @@ sub poolCountUpdate
                         = $Info->{pool}{$p}[$i]{FileRepMax}
                           if ( $Info->{"${p}FileRepMax"} <
                               $Info->{pool}{$p}[$i]{FileRepMax} );
-                $Info->{"${p}FileCntRename"}
-                       += $Info->{pool}{$p}[$i]{FileCntRename};
                 $Info->{"${p}FileLinkMax"}
                         = $Info->{pool}{$p}[$i]{FileLinkMax}
                           if ( $Info->{"${p}FileLinkMax"} <

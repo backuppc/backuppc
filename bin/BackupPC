@@ -517,6 +517,7 @@ sub Main_TryToRun_nightly
                     $Info->{pool}{"${p}4"}[$i]{FileLinkMax}   = 0;
                     $Info->{pool}{"${p}4"}[$i]{FileLinkTotal} = 0;
                     $Info->{pool}{"${p}4"}[$i]{Time}          = 0;
+                    delete $Info->{pool}{"${p}4"}[$i]{FileCntRename};
                 }
             }
         }
@@ -1262,7 +1263,11 @@ sub Main_Check_Job_Messages
 			    $Info->{"${p}FileCntRm"}     = 0;
 			    $Info->{"${p}FileCntRep"}    = 0;
 			    $Info->{"${p}FileRepMax"}    = 0;
-			    $Info->{"${p}FileCntRename"} = 0;
+			    if ( $p =~ /^c?pool$/ ) {
+				$Info->{"${p}FileCntRename"} = 0
+			    } else {
+				delete $Info->{"${p}FileCntRename"};
+			    }
 			    $Info->{"${p}FileLinkMax"}   = 0;
 			    $Info->{"${p}Time"}          = 0;
 			    for ( my $i = 0 ; $i < 16 ; $i++ ) {
@@ -1283,7 +1288,8 @@ sub Main_Check_Job_Messages
 					  if ( $Info->{"${p}FileRepMax"} <
 					      $Info->{pool}{$p}[$i]{FileRepMax} );
 				$Info->{"${p}FileCntRename"}
-				       += $Info->{pool}{$p}[$i]{FileCntRename};
+					+= $Info->{pool}{$p}[$i]{FileCntRename}
+					  if ( $p =~ /^c?pool$/ );
 				$Info->{"${p}FileLinkMax"}
 					= $Info->{pool}{$p}[$i]{FileLinkMax}
 					  if ( $Info->{"${p}FileLinkMax"} <

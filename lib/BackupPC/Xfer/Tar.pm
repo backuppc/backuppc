@@ -209,7 +209,7 @@ sub readOutput
         if ( /^Total bytes (written|read): / ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
             $t->{xferOK} = 1;
-        } elsif ( /^\./ ) {
+        } elsif ( /^(a )?\./ ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= $logFileThres );
             $t->{fileCnt}++;
         } else {

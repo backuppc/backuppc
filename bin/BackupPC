@@ -176,8 +176,8 @@ my(%CmdQueueOn, %UserQueueOn, %BgQueueOn);
 # number stored in $ClientConnCnt.  Each entry is a hash that contains
 # various information about the client connection.
 #
-my %Clients    = ();
-my $ClientConnCnt;
+my %Clients       = ();
+my $ClientConnCnt = 0;
 
 #
 # Read file descriptor mask used by select().  Every file descriptor
@@ -200,8 +200,12 @@ my $SigName = "";
 #
 # Misc variables
 #
-my($RunNightlyWhenIdle, $FirstWakeup, $CmdJob, $ServerInetPort);
-my($BackupPCNightlyJobs, $BackupPCNightlyLock);
+my $CmdJob              = "";
+my $BackupPCNightlyJobs = 0;
+my $BackupPCNightlyLock = 0;
+my $FirstWakeup         = 0;
+my $RunNightlyWhenIdle  = 0;
+my $ServerInetPort      = -1;
 
 #
 # Complete the rest of the initialization
@@ -273,7 +277,7 @@ sub Main_Initialize
     # correctly and make sure $TopDir is on a file system that supports
     # hardlinks.
     #
-    if ( $Info->{pid} ne "" && kill(0, $Info->{pid}) && !$bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
+    if ( defined $Info->{pid} && kill(0, $Info->{pid}) && !$bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
         print(STDERR $bpc->timeStamp,
                  "Another BackupPC is running (pid $Info->{pid}); quitting...\n");
         exit(1);
@@ -281,7 +285,7 @@ sub Main_Initialize
 
     foreach my $progName ( qw(SmbClientPath NmbLookupPath PingPath DfPath
                               SendmailPath SshPath RsyncBackupPCPath) ) {
-        next if ( $Conf{$progName} eq "" || -x $Conf{$progName} );
+        next if ( !defined $Conf{$progName} || $Conf{$progName} eq "" || -x $Conf{$progName} );
         print(STDERR $bpc->timeStamp,
                      "\$Conf{$progName} = '$Conf{$progName}' is not a"
                    . " valid executable program; exiting\n");
@@ -323,9 +327,12 @@ sub Main_Initialize
 
         chdir ("/") or die("Cannot chdir to /: $!\n");
         close(STDIN);
-        open(STDIN , ">/dev/null") or die("Cannot open /dev/null as stdin\n");
-        # STDOUT and STDERR are handled in LogFileOpen() right below,
-        # otherwise we would have to reopen them too.
+        {
+            no warnings;
+            open(STDIN , ">/dev/null") or die("Cannot open /dev/null as stdin\n");
+            # STDOUT and STDERR are handled in LogFileOpen() right below,
+            # otherwise we would have to reopen them too.
+        }
     }
 
     #
@@ -603,9 +610,10 @@ sub Main_TryToRun_CmdQueue
             setpgrp 0,0;
             $ENV{BPC_REQUSER} = $req->{user};
             POSIX::nice($Conf{CmdQueueNice}) if ( $Conf{CmdQueueNice} );
-            exec(@$cmd);
-            print(LOG $bpc->timeStamp, "can't exec @$cmd for $host\n");
-            exit(0);
+            unless ( exec(@$cmd) ) {
+                print( LOG $bpc->timeStamp, "can't exec @$cmd for $host\n" );
+                exit(0);
+            }
         }
         $Jobs{$host}{pid}       = $pid;
         $Jobs{$host}{fh}        = *FH;
@@ -647,7 +655,7 @@ sub Main_TryToRun_Bg_or_User_Queue
     my(@deferUserQueue, @deferBgQueue);
     my($du, $duInode);
 
-    if ( time - $Info->{DUlastValueTime} >= 600 ) {
+    if ( !defined $Info->{DUlastValueTime} || time - $Info->{DUlastValueTime} >= 600 ) {
         #
         # Update our notion of disk usage no more than
         # once every 10 minutes
@@ -670,11 +678,11 @@ sub Main_TryToRun_Bg_or_User_Queue
         $Info->{DUDailyMax}          = 0;
         $Info->{DUInodeDailyMax}     = 0;
     }
-    if ( $du > $Info->{DUDailyMax} ) {
+    if ( !defined $Info->{DUDailyMax} || $du > $Info->{DUDailyMax} ) {
         $Info->{DUDailyMax}     = $du;
         $Info->{DUDailyMaxTime} = time;
     }
-    if ( $duInode > $Info->{DUInodeDailyMax} ) {
+    if ( !defined $Info->{DUInodeDailyMax} || $duInode > $Info->{DUInodeDailyMax} ) {
         $Info->{DUInodeDailyMax}     = $duInode;
         $Info->{DUInodeDailyMaxTime} = time;
     }
@@ -787,9 +795,10 @@ sub Main_TryToRun_Bg_or_User_Queue
         }
         if ( !$pid ) {
             setpgrp 0,0;
-            exec("$BinDir/$progName", @args);
-            print(LOG $bpc->timeStamp, "can't exec $progName for $host\n");
-            exit(0);
+            unless ( exec( "$BinDir/$progName", @args ) ) {
+                print( LOG $bpc->timeStamp, "can't exec $progName for $host\n" );
+                exit(0);
+            }
         }
         $Jobs{$host}{pid}        = $pid;
         $Jobs{$host}{fh}         = *FH;
@@ -1042,7 +1051,7 @@ sub Main_Check_Job_Messages
                 $Status->{$host}{deadCnt}   = 0;
                 $Status->{$host}{aliveCnt}++;
                 $Status->{$host}{dhcpCheckCnt}--
-                                if ( $Status->{$host}{dhcpCheckCnt} > 0 );
+                                if ( defined $Status->{$host}{dhcpCheckCnt} && $Status->{$host}{dhcpCheckCnt} > 0 );
             } elsif ( $mesg =~ /^xferPids *(.*)/ ) {
                 $Jobs{$host}{xferPid} = $1;
             } elsif ( $mesg =~ /^__bpc_progress_state__ (.*)/ ) {
@@ -1106,7 +1115,7 @@ sub Main_Check_Job_Messages
 		    $Status->{$host}{startTime} = time;
 		}
                 $Status->{$host}{dhcpCheckCnt}--
-                                if ( $Status->{$host}{dhcpCheckCnt} > 0 );
+                                if ( defined $Status->{$host}{dhcpCheckCnt} && $Status->{$host}{dhcpCheckCnt} > 0 );
             } elsif ( $mesg =~ /^no ping response/
                             || $mesg =~ /^ping too slow/
                             || $mesg =~ /^host not found/ ) {
@@ -1337,7 +1346,7 @@ sub Main_Check_Job_Messages
     #
     return if ( @CmdQueue || @BgQueue || @UserQueue || keys(%Jobs) > 1 );
     foreach my $host ( keys(%$Status) ) {
-        next if ( $Status->{$host}{dhcpCheckCnt} <= 0 );
+        next if ( !defined $Status->{$host}{dhcpCheckCnt} || $Status->{$host}{dhcpCheckCnt} <= 0 );
         $Status->{$host}{deadCnt} += $Status->{$host}{dhcpCheckCnt};
         $Status->{$host}{dhcpCheckCnt} = 0;
         if ( $Status->{$host}{deadCnt} >= $Conf{BlackoutBadPingLimit} ) {

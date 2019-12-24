@@ -361,7 +361,7 @@ sub poolCountUpdate
 sub CheckIfServerRunning
 {
     my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort});
-    if ( $err eq "" ) {
+    if ( !defined $err ) {
         print STDERR "$0: can't run since BackupPC is running\n";
         exit(1);
     }

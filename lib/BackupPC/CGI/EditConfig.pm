@@ -1116,7 +1116,7 @@ EOF
             for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
                 if ( @$varValue > 1 || $type->{emptyOk} ) {
                     $content .= <<EOF;
-<td class="border">
+<tr><td class="border">
 <input type="button" name="del_${varName}_zZ_$i" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
     onClick="deleteSubmit('${varName}_zZ_$i')">
 </td>

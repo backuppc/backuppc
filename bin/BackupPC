@@ -327,12 +327,9 @@ sub Main_Initialize
 
         chdir ("/") or die("Cannot chdir to /: $!\n");
         close(STDIN);
-        {
-            no warnings;
-            open(STDIN , ">/dev/null") or die("Cannot open /dev/null as stdin\n");
-            # STDOUT and STDERR are handled in LogFileOpen() right below,
-            # otherwise we would have to reopen them too.
-        }
+        open(STDIN, "<", "/dev/null") or die("Cannot open /dev/null as stdin\n");
+        # STDOUT and STDERR are handled in LogFileOpen() right below,
+        # otherwise we would have to reopen them too.
     }
 
     #

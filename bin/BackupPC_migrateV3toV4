@@ -14,7 +14,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2017  Craig Barratt
+#   Copyright (C) 2001-2019  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 30 Apr 2017.
+# Version 4.3.2, released 25 Dec 2019.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -388,6 +388,7 @@ sub update_v3_dir
 	    } elsif ( $thisRead > 0 ) {
 		$md5->add($data);
 		$fileSize += length($data);
+                $data1MB .= $data if ( length($data1MB) < (1 << 20) );
 	    }
 	} while ( $thisRead > 0 );
 	my $digest4 = $md5->digest();

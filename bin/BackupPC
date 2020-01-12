@@ -588,12 +588,8 @@ sub Main_TryToRun_CmdQueue
         $host = $req->{host};
         if ( defined($Jobs{$host}) ) {
             print(LOG $bpc->timeStamp,
-                       "Botch on admin job for $host: already in use!!\n");
-            #
-            # Just put this request back on the end of the queue.
-            #
-            unshift(@CmdQueue, $req);
-            return;
+                       "Botch on admin job for $host: already in use!! skipping cmd: $req->{cmd})\n");
+            next;
         }
         $CmdQueueOn{$host} = 0;
         my $cmd  = $req->{cmd};
@@ -957,7 +953,7 @@ sub Main_Check_Timeout
         # Remember to run the nightly script when the next CmdQueue
         # job is done.
         #
-        if ( $RunNightlyWhenIdle == 2 ) {
+        if ( $RunNightlyWhenIdle == 2 || $BackupPCNightlyJobs > 0 ) {
             print(LOG $bpc->timeStamp, "BackupPC_nightly is still running after 24 hours!!"
                                      . "  You should adjust the config settings; Skipping this run\n");
         } else {
@@ -1469,7 +1465,12 @@ sub Main_Check_Client_Messages
             } elsif ( $cmd =~ /^backup all$/ ) {
                 QueueAllPCs();
             } elsif ( $cmd =~ /^BackupPC_nightly run$/ ) {
-                $RunNightlyWhenIdle = 1;
+                if ( $BackupPCNightlyJobs > 0 ) {
+                    print(LOG $bpc->timeStamp,
+                              "Ignoring request to run BackupPC_nightly: already running\n");
+                } else {
+                    $RunNightlyWhenIdle = 1;
+                }
             } elsif ( $cmd =~ /^backup (\S+)\s+(\S+)\s+(\S+)\s+(\S+)/ ) {
                 my $hostIP     = $1;
                 $host          = $2;

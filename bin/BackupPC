@@ -327,12 +327,9 @@ sub Main_Initialize
 
         chdir ("/") or die("Cannot chdir to /: $!\n");
         close(STDIN);
-        {
-            no warnings;
-            open(STDIN , ">/dev/null") or die("Cannot open /dev/null as stdin\n");
-            # STDOUT and STDERR are handled in LogFileOpen() right below,
-            # otherwise we would have to reopen them too.
-        }
+        open(STDIN, "<", "/dev/null") or die("Cannot open /dev/null as stdin\n");
+        # STDOUT and STDERR are handled in LogFileOpen() right below,
+        # otherwise we would have to reopen them too.
     }
 
     #
@@ -1394,7 +1391,7 @@ sub Main_Check_Client_Messages
         # Process any complete lines received from this client.
         #
         while ( $Clients{$client}{mesg} =~ /(.*?)[\n\r]+(.*)/s ) {
-            my($reply);
+            my $reply;
             my $cmd = $1;
             $Clients{$client}{mesg} = $2;
             #
@@ -1694,7 +1691,7 @@ sub Main_Check_Client_Messages
             #
             # send a reply to the client, at a minimum "ok\n".
             #
-            $reply = "ok" if ( $reply eq "" );
+            $reply = "ok" if ( !defined $reply );
             $reply .= "\n";
             syswrite($Clients{$client}{fh}, $reply, length($reply));
         }

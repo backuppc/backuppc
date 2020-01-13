@@ -435,8 +435,8 @@ sub Main_TryToRun_nightly
         #
 	$Conf{MaxBackupPCNightlyJobs} = 1
 		    if ( $Conf{MaxBackupPCNightlyJobs} <= 0 );
-	$Conf{BackupPCNightlyPeriod} = 1
-		    if ( $Conf{BackupPCNightlyPeriod} <= 0 );
+        $Info->{NightlyPhase} = $Info->{NightlyPhase} % $Conf{BackupPCNightlyPeriod}
+                    if ( $Info->{NightlyPhase} < 0 || $Info->{NightlyPhase} >= $Conf{BackupPCNightlyPeriod} );
         $Info->{PoolSizeNightlyPhase} ||= 0;
 	#
 	# Decide what subset of the 16 top-level directories 0..9a..f

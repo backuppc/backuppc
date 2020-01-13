@@ -337,6 +337,25 @@ sub ConfigDataRead
         delete($conf->{BlackoutWeekDays});
     }
 
+    #
+    # Check that certain settings have valid values
+    #
+    if ( $conf->{BackupPCNightlyPeriod} != 1
+	      && $conf->{BackupPCNightlyPeriod} != 2
+	      && $conf->{BackupPCNightlyPeriod} != 4
+	      && $conf->{BackupPCNightlyPeriod} != 8
+	      && $conf->{BackupPCNightlyPeriod} != 16 ) {
+	$conf->{BackupPCNightlyPeriod} = 1;
+    }
+    if ( $conf->{PoolSizeNightlyUpdatePeriod} != 0
+	      && $conf->{PoolSizeNightlyUpdatePeriod} != 1
+	      && $conf->{PoolSizeNightlyUpdatePeriod} != 2
+	      && $conf->{PoolSizeNightlyUpdatePeriod} != 4
+	      && $conf->{PoolSizeNightlyUpdatePeriod} != 8
+	      && $conf->{PoolSizeNightlyUpdatePeriod} != 16 ) {
+	$conf->{PoolSizeNightlyUpdatePeriod} = 16;
+    }
+
     return (undef, $conf);
 }
 

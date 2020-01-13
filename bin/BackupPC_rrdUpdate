@@ -68,6 +68,17 @@ my $NowRnd0 = 86400 * int($Now / 86400);
 my $NowRnd1 = $NowRnd0 + 86400;
 my $RRDFile = "$LogDir/poolUsage.rrd";
 
+if ( -f $RRDFile ) {
+    my $lastUpdate = $bpc->cmdSystemOrEval([$Conf{RrdToolPath}, "last", $RRDFile]);
+    if ($?) {
+        print $lastUpdate;
+        exit(1);
+    } elsif ($lastUpdate == $NowRnd1) {
+        print "skipping repeated RRD update for the same day: last update time is $lastUpdate\n";
+        exit(0);
+    }
+}
+
 RRDUpdate();
 RRDGraph(4);
 RRDGraph(52);

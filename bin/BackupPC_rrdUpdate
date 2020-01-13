@@ -117,7 +117,7 @@ sub RRDUpdate
     foreach my $host ( sort( keys( %{ $bpc->HostInfoRead() } ) ) ) {
         my @Backups = $bpc->BackupInfoRead($host);
         for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-            $sizeTot += $Backups[$i]{size};
+            $sizeTot += $Backups[$i]{size} || 0;
         }
     }
     $sizeTot = $sizeTot / 1024;

@@ -68,6 +68,17 @@ my $NowRnd0 = 86400 * int($Now / 86400);
 my $NowRnd1 = $NowRnd0 + 86400;
 my $RRDFile = "$LogDir/poolUsage.rrd";
 
+if ( -f $RRDFile ) {
+    my $lastUpdate = $bpc->cmdSystemOrEval([$Conf{RrdToolPath}, "last", $RRDFile]);
+    if ($?) {
+        print $lastUpdate;
+        exit(1);
+    } elsif ($lastUpdate == $NowRnd1) {
+        print "skipping repeated RRD update for the same day: last update time is $lastUpdate\n";
+        exit(0);
+    }
+}
+
 RRDUpdate();
 RRDGraph(4);
 RRDGraph(52);
@@ -82,7 +93,7 @@ sub RRDUpdate
     # We store data in RRD with predicted time of next update.
     #
     if ( !-f $RRDFile ) {
-        print $bpc->cmdSystemOrEval(
+        if ( ($err = $bpc->cmdSystemOrEval(
             [
                 $Conf{RrdToolPath},
                 "create", $RRDFile,
@@ -94,7 +105,9 @@ sub RRDUpdate
                 "DS:p4kB:GAUGE:172800:0:U",
                 "DS:c4kB:GAUGE:172800:0:U",
                 "RRA:LAST:0:1:732"
-            ]);
+            ])) ) {
+            print "$err";
+        }
     }
 
     #
@@ -104,7 +117,7 @@ sub RRDUpdate
     foreach my $host ( sort( keys( %{ $bpc->HostInfoRead() } ) ) ) {
         my @Backups = $bpc->BackupInfoRead($host);
         for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-            $sizeTot += $Backups[$i]{size};
+            $sizeTot += $Backups[$i]{size} || 0;
         }
     }
     $sizeTot = $sizeTot / 1024;
@@ -122,10 +135,9 @@ sub RRDUpdate
             ])) ) {
          print "$err";
      } else {
-         printf("%sRRD updated:"
+         printf("RRD updated:"
               . " date %s; cpoolKb %f; total %f;"
               . " poolKb %f; pool4Kb %f; cpool4Kb %f\n",
-                    $bpc->timeStamp,
                     $NowRnd1, $Info{"cpoolKb"}, $sizeTot,
                     $Info{"poolKb"}, $Info{"pool4Kb"}, $Info{"cpool4Kb"});
     }

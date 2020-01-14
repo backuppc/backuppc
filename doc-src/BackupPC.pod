@@ -1681,6 +1681,28 @@ configuration entries will look like this:
         require valid-user
     </Location>
 
+Or a typical Nginx configuration file:
+
+    server {
+        listen 80;
+        server_name yourBackupPCServerHost;
+
+        root  /var/www/backuppc;
+
+        access_log  /var/log/nginx/backuppc.access.log;
+        error_log   /var/log/nginx/backuppc.error.log;
+
+        location /BackupPC_Admin {
+            auth_basic "BackupPC";
+            auth_basic_user_file conf.d/backuppc.users;
+
+            include   scgi_params;
+            scgi_pass 127.0.0.1:10268;
+	        scgi_param REMOTE_USER $remote_user;
+	        scgi_param SCRIPT_NAME $document_uri;
+        }
+    }
+
 This allows the SCGI interface to be accessed with a URL:
 
     http://yourBackupPCServerHost/BackupPC_Admin

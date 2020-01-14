@@ -969,6 +969,10 @@ The CGI Perl module is required for the http/cgi user interface. CGI was a core 
 but from version 5.22 Perl no longer ships with it so you'll need to install it if you
 are using a recent version of perl.
 
+=item SCGI
+
+The SCGI Perl module is required to use the S/CGI protocol for the http/cgi user interface.
+
 =item File::Listing, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect
 
 To use ftp with BackupPC you will need four libraries, but actually

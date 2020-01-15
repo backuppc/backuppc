@@ -46,7 +46,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
 <table class="tableStnd">
-  <tr><td>Ricarica la configurazione del server:<td><input type="button" value="Reload"
+  <tr><td>Ricarica la configurazione del server:<td><input type="button" value="Ricarica"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
 </table>
@@ -297,7 +297,7 @@ EOF
 
 $Lang{BackupPC_Archive2_parity} = <<EOF;
 <tr>
-    <td>Percentuale di dati di parità (0 = disabiltata, 5 = valori tipici)</td>
+    <td>Percentuale di dati di paritï¿½ (0 = disabiltata, 5 = valori tipici)</td>
     <td><input type="numeric" value="\$ArchivePar" name="par"></td>
 </tr>
 EOF

@@ -46,7 +46,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
 <table class="tableStnd">
-  <tr><td>Ricarica la configurazione del server:<td><input type="button" value="Reload"
+  <tr><td>Ricarica la configurazione del server:<td><input type="button" value="Ricarica"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
 </table>
@@ -568,7 +568,7 @@ l\'archivio relativamente a \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 <br>
 <table class="tableStnd" border="0">
 <tr>
-    <td>Compressione (0=off, 1=fast,...,9=best)</td>
+    <td>Compressione (0=spenta, 1=veloce,...,9=migliore)</td>
     <td><input type="text" size="6" value="5" name="compressLevel"></td>
 </tr><tr>
     <td>Code page (e.g. cp866)</td>

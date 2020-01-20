@@ -27,7 +27,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2018  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.3.0, released 25 Nov 2018.
+# Version 4.3.2, released 18 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -168,6 +168,15 @@ my @BgQueue    = ();
 # a hash of flags for each queue type.
 #
 my(%CmdQueueOn, %UserQueueOn, %BgQueueOn);
+
+#
+# BackupPC_tarCreate and BackupPC_zipCreate shouldn't run when a backup
+# is active.  We maintain a per-host mutex.  A -1 value means a
+# backup or delete job is running (ie: a writer).  A positive value
+# is the number of readers, ie: restore, archive, BackupPC_tarCreate,
+# BackupPC_zipCreate processes running.  Zero means that host is idle.
+#
+my(%HostMutex, %HostMutexCurrJob);
 
 #
 # One or more clients can connect to the server to get status information
@@ -713,7 +722,7 @@ sub Main_TryToRun_Bg_or_User_Queue
     #
     while ( 1 ) {
         local(*FH);
-        my(@args, $progName, $type);
+        my(@args, $progName, $type, $mutexDelta);
         my $nJobs = keys(%Jobs);
         #
         # CmdJob doesn't count towards MaxBackups / MaxUserBackups
@@ -730,6 +739,17 @@ sub Main_TryToRun_Bg_or_User_Queue
                         && @UserQueue > 0 ) {
             $req = pop(@UserQueue);
             if ( defined($Jobs{$req->{host}}) ) {
+                #
+                # Job is currently running for this host; save it for later
+                #
+                push(@deferUserQueue, $req);
+                next;
+            }
+            if ( $HostMutex{$req->{host}} > 0 && !$req->{restore} && !$req->{archive} ) {
+                #
+                # Currently there are readers (eg, BackupPC_tarCreate) running, so we
+                # can't run a backup or delete
+                #
                 push(@deferUserQueue, $req);
                 next;
             }
@@ -746,6 +766,14 @@ sub Main_TryToRun_Bg_or_User_Queue
                 unshift(@deferBgQueue, $req);
                 next;
             }
+            if ( $HostMutex{$req->{host}} > 0 && !$req->{restore} && !$req->{archive} ) {
+                #
+                # Currently there are readers (eg, BackupPC_tarCreate) running, so we
+                # can't run a backup or delete
+                #
+                unshift(@deferBgQueue, $req);
+                next;
+            }
             $BgQueueOn{$req->{host}} = 0;
         } else {
             #
@@ -758,26 +786,31 @@ sub Main_TryToRun_Bg_or_User_Queue
         $host = $req->{host};
         my $user = $req->{user};
         if ( $req->{restore} ) {
-            $progName = "BackupPC_restore";
-            $type     = "restore";
-            push(@args, $req->{hostIP}, $req->{host}, $req->{reqFileName});
+            $progName   = "BackupPC_restore";
+            $type       = "restore";
+            $mutexDelta = 1;
+            push(@args, "-m", $req->{hostIP}, $req->{host}, $req->{reqFileName});
         } elsif ( $req->{delete} ) {
-            $progName = "BackupPC_backupDelete";
-            $type     = "delete";
-            push(@args, '-L', '-h', $req->{host}, '-n', $req->{num}, $req->{opts});
+            $progName   = "BackupPC_backupDelete";
+            $type       = "delete";
+            $mutexDelta = -1;
+            push(@args, "-L", "-h", "-m", $req->{host}, '-n', $req->{num}, $req->{opts});
 	} elsif ( $req->{archive} ) {
-            $progName = "BackupPC_archive";
-            $type     = "archive";
-            push(@args, $req->{user}, $req->{host}, $req->{reqFileName});
+            $progName   = "BackupPC_archive";
+            $type       = "archive";
+            $mutexDelta = 1;
+            push(@args, "-m", $req->{user}, $req->{host}, $req->{reqFileName});
         } else {
-            $progName = "BackupPC_dump";
-            $type     = "backup";
+            $progName   = "BackupPC_dump";
+            $type       = "backup";
+            $mutexDelta = -1;
             push(@args, "-I") if ( $req->{backupType} eq "autoIncr" );
             push(@args, "-F") if ( $req->{backupType} eq "autoFull" );
             push(@args, "-i") if ( $req->{backupType} eq "doIncr" );
             push(@args, "-f") if ( $req->{backupType} eq "doFull" );
             push(@args, "-d") if ( $req->{backupType} eq "dhcpPoll" );
             push(@args, "-e") if ( $req->{dumpExpire} );
+            push(@args, "-m");
             push(@args, $host);
         }
         my $pid = open(FH, "-|");
@@ -805,6 +838,9 @@ sub Main_TryToRun_Bg_or_User_Queue
         $Jobs{$host}{cmd}        = $bpc->execCmd2ShellCmd($progName, @args);
         $Jobs{$host}{user}       = $user;
         $Jobs{$host}{type}       = $type;
+        $Jobs{$host}{mutexDelta} = $mutexDelta;
+        $HostMutex{$host}       += $mutexDelta;
+        $HostMutexCurrJob{$host} = $progName;
 	$Status->{$host}{userReq}  = $req->{userReq}
 					if ( defined($Hosts->{$host}) );
         if ( !$Jobs{$host}{dhcp} ) {
@@ -1332,6 +1368,7 @@ sub Main_Check_Job_Messages
                 $Status->{$host}{state} = "Status_idle";
             }
             $Status->{$host}{activeJob} = 0 if ( defined($Status->{$host}) );
+            $HostMutex{$host} -= $Jobs{$host}{mutexDelta};
             delete($Status->{$host}) if ( $Jobs{$host}{dhcp} );
             delete($Jobs{$host});
         }
@@ -1685,6 +1722,19 @@ sub Main_Check_Client_Messages
             } elsif ( $cmd =~ /^quit/ || $cmd =~ /^exit/ ) {
                 $nbytes = 0;
                 last;
+            } elsif ( $cmd =~ /^hostMutex\s+(\w+)\s+(-?\d+)\s+(.*)/ ) {
+                $host          = $1;
+                my $mutexDelta = $2;
+                my $progName   = $3;
+                if ( $HostMutex{$host} == 0 || ($HostMutex{$host} > 0 && $mutexDelta > 0) ) {
+                    push(@{$Clients{$client}{hostMutexList}}, {host => $host, mutexDelta => $mutexDelta});
+                    $HostMutex{$host}       += $mutexDelta;
+                    $HostMutexCurrJob{$host} = $progName;
+                    $reply = "ok";
+                } else {
+                    print(LOG $bpc->timeStamp, "Can't run $progName while $HostMutexCurrJob{$host} is running on host $host\n");
+                    $reply = "fail: can't run $progName while $HostMutexCurrJob{$host} is running on host $host";
+                }
             } else {
                 print(LOG $bpc->timeStamp, "Unknown command $cmd\n");
                 $reply = "error: bad command $cmd";
@@ -1713,6 +1763,11 @@ sub Main_Check_Client_Messages
         if ( $nbytes <= 0 ) {
             close($Clients{$client}{fh});
             vec($FDread, $Clients{$client}{fn}, 1) = 0;
+            if ( defined($Clients{$client}{hostMutexList}) ) {
+                foreach my $d ( @{$Clients{$client}{hostMutexList}} ) {
+                    $HostMutex{$d->{host}} -= $d->{mutexDelta};
+                }
+            }
             delete($Clients{$client});
         }
     }

@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2018  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.3.0, released 25 Nov 2018.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -62,8 +62,8 @@ my($hostIP, $host, $client, $reqFileName, %stat);
 $bpc->ChildInit();
 
 my %opts;
-if ( !getopts("pv", \%opts) || @ARGV != 3 ) {
-    print("usage: $0 [-p] [-v] <hostIP> <client> <reqFileName>\n");
+if ( !getopts("pvm", \%opts) || @ARGV != 3 ) {
+    print("usage: $0 [-p] [-v] [-m] <hostIP> <client> <reqFileName>\n");
     exit(1);
 }
 
@@ -74,6 +74,11 @@ if ( $ARGV[2] !~ /^([\w.]+)$/ ) {
     exit(1);
 }
 $reqFileName = $1;
+if ( !$opts{m} && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
+              && (my $status = $bpc->ServerMesg("hostMutex $client 1 BackupPC_restore")) =~ /fail/ ) {
+    print(STDERR "$0: $status (use -m option to force running)\n");
+    exit(1);
+}
 
 $bpc->verbose(1) if ( $opts{v} );
 

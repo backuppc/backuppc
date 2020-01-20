@@ -8,13 +8,13 @@
 #   BackupPC_backupDuplicate: make a copy of the last V4 backup
 #
 #   Usage:
-#       BackupPC_backupDuplicate -h host
+#       BackupPC_backupDuplicate [-m] [-p] -h host
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2019  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 25 Dec 2019.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -64,11 +64,13 @@ my $Hosts  = $bpc->HostInfoRead();
 
 my %opts;
 
-if ( !getopts("ph:", \%opts) || @ARGV >= 1 || !defined($opts{h}) ) {
+if ( !getopts("mph:", \%opts) || @ARGV >= 1 || !defined($opts{h}) ) {
     print STDERR <<EOF;
-usage: BackupPC_backupDuplicate -h host [-p]
+usage: BackupPC_backupDuplicate [-m] [-p] -h host
   Options:
      -h host         host name
+     -m              force running even if a backup on this host is running
+                     (specifically, don't take the server host mutex)
      -p              don't print progress information
 EOF
     exit(1);
@@ -86,6 +88,13 @@ if ( defined(my $error = $bpc->ConfigRead($Host)) ) {
     exit(1);
 }
 %Conf = $bpc->Conf();
+
+if ( !$opts{m} && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
+              && (my $status = $bpc->ServerMesg("hostMutex $Host -1 BackupPC_backupDuplicate")) =~ /fail/ ) {
+    print(STDERR "$0: $status (use -m option to force running)\n");
+    exit(1);
+}
+
 BackupPC::XS::Lib::logLevelSet($Conf{XferLogLevel});
 my $LogLevel = $Conf{XferLogLevel};
 $bpc->ChildInit();

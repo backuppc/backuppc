@@ -35,6 +35,9 @@
 #
 #     -v   verbose.  for manual usage: prints failure reasons in more detail.
 #
+#     -m   run even if a backup on this host is running
+#          (specifically, don't take the server host mutex)
+#
 #   BackupPC_dump is run periodically by BackupPC to backup $client.
 #   The file $TopDir/pc/$client/backups is read to decide whether a
 #   full or incremental backup needs to be run.  If no backup is
@@ -70,7 +73,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2018  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -87,7 +90,7 @@
 #
 #========================================================================
 #
-# Version 4.3.0, released 25 Nov 2018.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -126,8 +129,31 @@ my $LockFd;
 $bpc->ChildInit();
 
 my %opts;
-if ( !getopts("defivpFI", \%opts) || @ARGV != 1 ) {
-    print("usage: $0 [-d] [-e] [-f] [-i] [-F] [-I] [-p] [-v] <client>\n");
+if ( !getopts("defimvpFI", \%opts) || @ARGV != 1 ) {
+    print STDERR <<EOF;
+usage: $0 [options] <client>
+  Options:
+     -i   Do an incremental dump, overriding any scheduling (but a full
+          dump will be done if no dumps have yet succeeded)
+     -f   Do a full dump, overriding any scheduling.
+     -I   Do an increment dump if the regular schedule requires a
+          full or incremental, otherwise do nothing (a full is done
+          if no dumps have yet succeeded)
+     -F   Do a full dump if the regular schedule requires a
+          full or incremental, otherwise do nothing
+     -d   Host is a DHCP pool address, and the client argument
+          just an IP address.  We lookup the NetBios name from
+          the IP address.
+     -e   Just do an dump expiry check for the client.  Don't do anything
+          else.  This is used periodically by BackupPC to make sure that
+          dhcp hosts have correctly expired old backups.  Without this,
+          dhcp hosts that are no longer on the network will not expire
+          old backups.
+     -p   don't show progress
+     -v   verbose.  for manual usage: prints failure reasons in more detail.
+     -m   run even if a backup on this host is running
+          (specifically, don't take the server host mutex)
+EOF
     exit(1);
 }
 if ( $ARGV[0] !~ /^([\w\.\s-]+)$/ ) {
@@ -260,7 +286,10 @@ my $reply = $bpc->ServerMesg("status host($clientURI)");
 $reply = $1 if ( $reply =~ /(.*)/s );
 my(%StatusHost);
 eval($reply);
-$bpc->ServerDisconnect();
+if ( !$opts{m} && (my $status = $bpc->ServerMesg("hostMutex $client -1 BackupPC_dump")) =~ /fail/ ) {
+    print(STDERR "$0: $status (use -m option to force running)\n");
+    exit(1);
+}
 
 #
 # For DHCP tell BackupPC which host this is
@@ -761,7 +790,7 @@ if ( $doDuplicate ) {
     #
     # Run BackupPC_backupDuplicate, then re-read the backups file.
     #
-    my $cmd = ["$BinDir/BackupPC_backupDuplicate", "-h", $client];
+    my $cmd = ["$BinDir/BackupPC_backupDuplicate", "-m", "-h", $client];
     push(@$cmd, "-p") if ( $opts{p} );
     $XferLOG->write(\"Executing @$cmd\n");
     $bpc->cmdSystemOrEval($cmd,
@@ -1952,7 +1981,7 @@ sub BackupRemove
 
     my $fileExt = $Backups[$idx]{compress} > 0 ? ".z" : "";
     my $bkupNum = $Backups[$idx]{num};
-    my @args    = ("-h", $client, "-n", $Backups[$idx]{num}, "-l");
+    my @args    = ("-h", $client, "-n", $Backups[$idx]{num}, "-l", "-m");
 
     if ( defined($shareName) ) {
         push(@args, "-s", $shareName, "/");

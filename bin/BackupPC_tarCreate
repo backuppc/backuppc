@@ -28,6 +28,8 @@
 #                       $Conf{ClientCharset} when backup was done)
 #       -l              just print a file listing; don't generate an archive
 #       -L              just print a detailed file listing; don't generate an archive
+#       -m              run even if a backup on this host is running
+#                       (specifically, don't take the server host mutex)
 #
 #     The -h, -n and -s options specify which dump is used to generate
 #     the tar archive.  The -r and -p options can be used to relocate
@@ -38,7 +40,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2018  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -55,7 +57,7 @@
 #
 #========================================================================
 #
-# Version 4.3.0, released 25 Nov 2018.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -74,10 +76,11 @@ use BackupPC::XS qw( :all );
 use BackupPC::View;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+my %Conf   = $bpc->Conf();
 
 my %opts;
 
-if ( !getopts("Llte:h:n:p:r:s:b:w:", \%opts) || @ARGV < 1 ) {
+if ( !getopts("Lltme:h:n:p:r:s:b:w:", \%opts) || @ARGV < 1 ) {
     print STDERR <<EOF;
 usage: $0 [options] files/directories...
   Required options:
@@ -98,6 +101,8 @@ usage: $0 [options] files/directories...
                      \$Conf{ClientCharset} when backup was done)
      -l              just print a file listing; don't generate an archive
      -L              just print a detailed file listing; don't generate an archive
+     -m              force running even if a backup on this host is running
+                     (specifically, don't take the server host mutex)
 EOF
     exit(1);
 }
@@ -112,6 +117,11 @@ if ( $opts{h} !~ m{(^|/)\.\.(/|$)} && $opts{h} =~ /^([\w@.\s-]+)$/ ) {
 
 if ( $opts{n} !~ /^(-?\d+)$/ ) {
     print(STDERR "$0: bad dump number '$opts{n}'\n");
+    exit(1);
+}
+if ( !$opts{m} && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
+              && (my $status = $bpc->ServerMesg("hostMutex $Host 1 BackupPC_tarCreate")) =~ /fail/ ) {
+    print(STDERR "$0: $status (use -m option to force running)\n");
     exit(1);
 }
 my $Num = $opts{n};

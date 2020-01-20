@@ -14,7 +14,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2018  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.3.0, released 25 Nov 2018.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -64,10 +64,9 @@ my $DirCntNext     = 20;
 my $doRefCountUpdate;
 
 my %opts;
-
-if ( !getopts("lLprh:n:s:", \%opts) || !defined($opts{h}) || !defined($opts{n}) || (!defined($opts{s}) && @ARGV >= 1) ) {
+if ( !getopts("lLpmrh:n:s:", \%opts) || !defined($opts{h}) || !defined($opts{n}) || (!defined($opts{s}) && @ARGV >= 1) ) {
     print STDERR <<EOF;
-usage: BackupPC_backupDelete -h host -n num [-p] [-l] [-L] [-r] [-s shareName [dirs...]]
+usage: BackupPC_backupDelete -h host -n num [-p] [-l] [-L] [-r] [-m] [-s shareName [dirs...]]
   Options:
      -h host         host name
      -n num          backup number to delete
@@ -77,6 +76,8 @@ usage: BackupPC_backupDelete -h host -n num [-p] [-l] [-L] [-r] [-s shareName [d
      -L              log output to host's LOG file (instead of stdout)
      -l              don't remove XferLOG files
      -r              do a ref count update (default: none)
+     -m              run even if a backup on this host is running
+                     (specifically, don't take the server host mutex)
   If a shareName is specified, just that share (or share/dirs) are deleted.
   The backup itself is not deleted, nor is the log file removed.
 EOF
@@ -95,6 +96,12 @@ if ( defined(my $error = $bpc->ConfigRead($Host)) ) {
     exit(1);
 }
 %Conf = $bpc->Conf();
+
+if ( !$opts{m} && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
+              && (my $status = $bpc->ServerMesg("hostMutex $Host -1 BackupPC_backupDelete")) =~ /fail/ ) {
+    print(STDERR "$0: $status (use -m option to force running)\n");
+    exit(1);
+}
 
 BackupPC::XS::Lib::logLevelSet($Conf{XferLogLevel});
 my $LogLevel = $Conf{XferLogLevel};

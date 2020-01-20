@@ -742,7 +742,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 \$errStr
 </table>
 
-\${h2("Récapitulatif de la taille des fichier et du nombre de réutilisations")}
+\${h2("Récapitulatif de la taille des fichiers et du nombre de réutilisations")}
 <p>
 Les fichiers existants sont ceux qui sont déjà sur le serveur; 
 Les nouveaux fichiers sont ceux qui ont été ajoutés au serveur.

@@ -1189,6 +1189,9 @@ $Conf{RsyncBackupPCPath} = "";
 # to just allow ssh via a low-privileged user, and use sudo
 # in $Conf{RsyncClientPath}.
 #
+# The setting should only have two entries: "-e" and
+# everything else; don't add additoinal array elements.
+#
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
 $Conf{RsyncSshArgs} = [

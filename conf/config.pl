@@ -91,8 +91,8 @@ $Conf{UmaskMode} = 027;
 
 #
 # Times at which we wake up, check all the PCs, and schedule necessary
-# backups.  Times are measured in hours since midnight.  Can be
-# fractional if necessary (eg: 4.25 means 4:15am).
+# backups.  Times are measured in hours since midnight local time.
+# Can be fractional if necessary (eg: 4.25 means 4:15am).
 #
 # If the hosts you are backing up are always connected to the network
 # you might have only one or two wakeups each night.  This will keep

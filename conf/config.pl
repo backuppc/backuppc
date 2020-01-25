@@ -1237,24 +1237,6 @@ $Conf{RsyncdUserName} = '';
 $Conf{RsyncdPasswd} = '';
 
 #
-# Additional arguments for a full rsync or rsyncd backup.
-#
-# The --checksum argument causes the client to send full-file checksum
-# for every file (meaning the client reads every file and computes the
-# checksum, which is sent with the file list).  On the server, rsync_bpc
-# will skip any files that have a matching full-file checksum, and size,
-# mtime and number of hardlinks.  Any file that has different attributes
-# will be updating using the block rsync algorithm.
-#
-# In V3, full backups applied the block rsync algorithm to every file,
-# which is a lot slower but a bit more conservative.  To get that
-# behavior, replace --checksum with --ignore-times.
-#
-$Conf{RsyncFullArgsExtra} = [
-            '--checksum',
-];
-
-#
 # Arguments to rsync for backup.  Do not edit the first set unless you
 # have a good understanding of rsync options.
 #
@@ -1318,6 +1300,30 @@ $Conf{RsyncArgs} = [
 #     ];
 #
 $Conf{RsyncArgsExtra} = [];
+
+#
+# Additional arguments for a full rsync or rsyncd backup.
+#
+# The --checksum argument causes the client to send full-file checksum
+# for every file (meaning the client reads every file and computes the
+# checksum, which is sent with the file list).  On the server, rsync_bpc
+# will skip any files that have a matching full-file checksum, and size,
+# mtime and number of hardlinks.  Any file that has different attributes
+# will be updating using the block rsync algorithm.
+#
+# In V3, full backups applied the block rsync algorithm to every file,
+# which is a lot slower but a bit more conservative.  To get that
+# behavior, replace --checksum with --ignore-times.
+#
+$Conf{RsyncFullArgsExtra} = [
+            '--checksum',
+];
+
+#
+# Additional arguments for an incremental rsync or rsyncd backup.
+#
+$Conf{RsyncIncrArgsExtra} = [
+];
 
 #
 # Arguments to rsync for restore.  Do not edit the first set unless you
@@ -2302,6 +2308,7 @@ $Conf{CgiUserConfigEdit} = {
         RsyncdPasswd              => 1,
         RsyncdUserName            => 1,
         RsyncFullArgsExtra        => 1,
+        RsyncIncrArgsExtra        => 1,
         RsyncRestoreArgs          => 1,
         RsyncShareName            => 1,
         RsyncSshArgs              => 1,

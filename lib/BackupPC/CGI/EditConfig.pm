@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2005-2018  Craig Barratt
+#   Copyright (C) 2005-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 27 Oct 2018.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -299,6 +299,8 @@ our %ConfigMenu = (
             {name => "RsyncArgsExtra",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
             {name => "RsyncFullArgsExtra",
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
+            {name => "RsyncIncrArgsExtra",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
             {name => "RsyncRestoreArgs",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },

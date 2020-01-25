@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2018  Craig Barratt
+#   Copyright (C) 2004-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 27 Oct 2018.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -278,6 +278,11 @@ use vars qw(%ConfigMeta);
 	    emptyOk      => 1,
 	    child        => "string",
     },
+    RsyncIncrArgsExtra	 => {
+	    type         => "list",
+	    emptyOk      => 1,
+	    child        => "string",
+    },
 
     ######################################################################
     # FTP Configuration
@@ -462,6 +467,7 @@ use vars qw(%ConfigMeta);
                 RsyncArgsExtra            => "boolean",
                 RsyncRestoreArgs          => "boolean",
                 RsyncFullArgsExtra        => "boolean",
+                RsyncIncrArgsExtra        => "boolean",
                 RsyncSshArgs              => "boolean",
                 RsyncClientPath           => "boolean",
                 FtpShareName              => "boolean",

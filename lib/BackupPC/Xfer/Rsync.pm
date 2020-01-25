@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2018  Craig Barratt
+#   Copyright (C) 2002-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 21 Oct 2018.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -320,11 +320,16 @@ sub start
             $logMsg = "full backup started for directory $t->{shareName}";
             if ( ref($conf->{RsyncFullArgsExtra}) eq 'ARRAY' ) {
                 push(@$rsyncArgs, @{$conf->{RsyncFullArgsExtra}});
-            } else {
+            } elsif ( ref($conf->{RsyncFullArgsExtra}) eq '' && $conf->{RsyncFullArgsExtra} ne "" ) {
                 push(@$rsyncArgs, $conf->{RsyncFullArgsExtra});
             }
         } else {
             $logMsg = "incr backup started for directory $t->{shareName}";
+            if ( ref($conf->{RsyncIncrArgsExtra}) eq 'ARRAY' ) {
+                push(@$rsyncArgs, @{$conf->{RsyncIncrArgsExtra}});
+            } elsif ( ref($conf->{RsyncIncrArgsExtra}) eq '' && $conf->{RsyncIncrArgsExtra} ne "" ) {
+                push(@$rsyncArgs, $conf->{RsyncIncrArgsExtra});
+            }
         }
         
         #

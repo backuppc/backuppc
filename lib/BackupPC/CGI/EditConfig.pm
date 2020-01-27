@@ -184,6 +184,7 @@ our %ConfigMenu = (
             {name => "XferLogLevel"},
             {name => "ClientCharset"},
             {name => "ClientCharsetLegacy"},
+            {name => "ClientShareName2Path"},
             {name => "RefCntFsck"},
 
             ### Smb Settings

@@ -203,6 +203,13 @@ use vars qw(%ConfigMeta);
 
     ClientCharset       => "string",
     ClientCharsetLegacy => "string",
+    ClientShareName2Path => {
+            type      => "hash",
+	    keyText   => "CfgEdit_Button_New_Share",
+            emptyOk   => 1,
+            childType => "string",
+    },
+
     RefCntFsck          => "integer",
 
     ######################################################################

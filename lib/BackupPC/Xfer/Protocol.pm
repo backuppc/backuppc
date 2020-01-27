@@ -11,7 +11,7 @@
 #   Paul Mantz    <pcmantz@zmanda.com>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.3.2, released 26 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -266,6 +266,24 @@ sub logWrite
     $level = 3 if ( !defined($level) );
     
     return ( $XferLOG->write(\$msg) ) if ( $level <= $t->{logLevel} );
+}
+
+##############################################################################
+# Share name mapping
+##############################################################################
+#
+# shareName2Path() maps the share name to the actual client path using
+# the optional $Conf{ClientShareName2Path} setting.
+#
+sub shareName2Path
+{
+    my($t, $shareName) = @_;
+
+    return $shareName if ( ref($t->{conf}{ClientShareName2Path}) ne "HASH"
+                         || ($t->{conf}{ClientShareName2Path}{$shareName} eq "" && $t->{conf}{ClientShareName2Path}{"*"} eq "") );
+    return $t->{conf}{ClientShareName2Path}{$shareName} if ( $t->{conf}{ClientShareName2Path}{$shareName} ne "" );
+    return $t->{conf}{ClientShareName2Path}{"*"}        if ( $t->{conf}{ClientShareName2Path}{"*"} ne "" );
+    return $shareName;
 }
 
 ##############################################################################

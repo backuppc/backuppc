@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2017  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.2, released 30 Apr 2017.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -54,10 +54,11 @@ sub start
     my $conf = $t->{conf};
     my(@fileList, $tarClientCmd, $logMsg, $incrDate);
     local(*TAR);
+    my $shareNamePath = $t->shareName2Path($t->{shareName});
 
     if ( $t->{type} eq "restore" ) {
 	$tarClientCmd = $conf->{TarClientRestoreCmd};
-        $logMsg = "restore started below directory $t->{shareName}";
+        $logMsg  = "restore started below directory $t->{shareName}";
 	#
 	# restores are considered to work unless we see they fail
 	# (opposite to backups...)
@@ -110,18 +111,20 @@ sub start
         }
 	push(@$tarClientCmd, split(/ +/, $args));
     }
+    $logMsg .= " (client path $shareNamePath)" if ( $t->{shareName} ne $shareNamePath );
     #
     # Merge variables into @tarClientCmd
     #
     my $args = {
-        host      => $t->{host},
-        hostIP    => $t->{hostIP},
-        client    => $t->{client},
-        incrDate  => $incrDate,
-        shareName => $t->{shareName},
-	fileList  => \@fileList,
-        tarPath   => $conf->{TarClientPath},
-        sshPath   => $conf->{SshPath},
+        host          => $t->{host},
+        hostIP        => $t->{hostIP},
+        client        => $t->{client},
+        incrDate      => $incrDate,
+        shareNameOrig => $t->{shareName},
+        shareName     => $shareNamePath,
+	fileList      => \@fileList,
+        tarPath       => $conf->{TarClientPath},
+        sshPath       => $conf->{SshPath},
     };
     from_to($args->{shareName}, "utf8", $conf->{ClientCharset})
                             if ( $conf->{ClientCharset} ne "" );

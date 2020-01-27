@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2017  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.4, released 24 Nov 2017.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -54,6 +54,7 @@ sub start
     my $conf = $t->{conf};
     my $I_option = $t->{hostIP} eq $t->{host} ? [] : ['-I', $t->{hostIP}];
     my(@fileList, $X_option, $smbClientCmd, $logMsg);
+    my $shareNamePath = $t->shareName2Path($t->{shareName});
     my($timeStampFile);
     local(*SMB);
 
@@ -117,12 +118,14 @@ sub start
                     . " $t->{shareName}";
         }
     }
+    $logMsg .= " (client path $shareNamePath)" if ( $t->{shareName} ne $shareNamePath );
     my $args = {
 	smbClientPath => $conf->{SmbClientPath},
 	host          => $t->{host},
 	hostIP	      => $t->{hostIP},
 	client	      => $t->{client},
-	shareName     => $t->{shareName},
+        shareNameOrig => $t->{shareName},
+        shareName     => $shareNamePath,
 	userName      => $conf->{SmbShareUserName},
 	fileList      => \@fileList,
 	I_option      => $I_option,

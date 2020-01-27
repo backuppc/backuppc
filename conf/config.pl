@@ -903,6 +903,26 @@ $Conf{ClientCharset} = '';
 #
 $Conf{ClientCharsetLegacy} = 'iso-8859-1';
 
+#
+# Optionally map the share name to a different path on the client when the
+# xfer program is run. This can be used if you create a snapshot on the client,
+# which has a different path to the real share name.  Or you could use simpler
+# names for the share instead of a path (eg: root, home, usr) and map them to
+# the real paths here.
+#
+# This should be a hash whose key is the share name used in $Conf{SmbShareName},
+# $Conf{TarShareName}, $Conf{RsyncShareName}, $Conf{FtpShareName}, and the
+# value is the string path name on the client.  When a backup or restore is
+# done, if there is no matching entry in $Conf{ClientShareName2Path}, or the
+# entry is empty, then the share name is not modified (so the default behavior
+# is unchanged).
+#
+# If you are using the rsyncd xfer method, then there is no need to use this
+# configuration setting (since rsyncd already supports mapping of share names
+# to paths in the client's rsyncd.conf).
+#
+$Conf{ClientShareName2Path} = { };
+
 ###########################################################################
 # Samba Configuration
 # (can be overwritten in the per-PC log file)
@@ -2253,6 +2273,7 @@ $Conf{CgiUserConfigEdit} = {
         ClientCharsetLegacy       => 1,
         ClientComment             => 1,
         ClientNameAlias           => 1,
+        ClientShareName2Path      => 1,
         ClientTimeout             => 1,
         CompressLevel             => 1,
         DumpPostShareCmd          => 0,

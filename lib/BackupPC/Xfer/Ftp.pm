@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 3 Nov 2018.
+# Version 4.3.2, released 19 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -167,7 +167,8 @@ sub start
     #
     # Convert the encoding type of the names if at all possible
     #
-    from_to( $args->{shareName}, "utf8", $conf->{ClientCharset} )
+    $t->{shareNamePath} = $t->shareName2Path($t->{shareName});
+    from_to( $args->{shareNamePath}, "utf8", $conf->{ClientCharset} )
                                 if ( $conf->{ClientCharset} ne "" );
 
     #
@@ -215,40 +216,32 @@ sub start
     }
     $t->logWrite("Binary command successful\n", 2);
 
-    eval { $ret = $t->{ftp}->cwd( $t->{shareName} ); };
+    eval { $ret = $t->{ftp}->cwd( $t->{shareNamePath} ); };
     if ( !$ret ) {
         $t->{_errStr} =
-            "Can't change working directory to $t->{shareName}: " . $t->{ftp}->message();
+            "Can't change working directory to $t->{shareNamePath}: " . $t->{ftp}->message();
         $t->{xferErrCnt}++;
         return;
     }
-    $t->logWrite("Set cwd to $t->{shareName}\n", 2);
-
-    eval { $t->{sharePath} = $t->{ftp}->pwd(); };
-    if ( $t->{sharePath} eq "" ) {
-        $t->{_errStr} =
-            "Can't retrieve full working directory of $t->{shareName}: $!";
-        $t->{xferErrCnt}++;
-        return;
-    }
-    $t->logWrite("Pwd returned as $t->{sharePath}\n", 2);
+    $t->logWrite("Set cwd to $t->{shareNamePath}\n", 2);
 
     #
     # log the beginning of action based on type
     #
     if ( $t->{type} eq 'restore' ) {
         $logMsg = "ftp restore for host $t->{host} started on directory "
-          . "$t->{shareName}\n";
+          . "$t->{shareName}";
 
     } elsif ( $t->{type} eq 'full' ) {
         $logMsg = "ftp full backup for host $t->{host} started on directory "
-          . "$t->{shareName}\n";
+          . "$t->{shareName}";
 
     } elsif ( $t->{type} eq 'incr' ) {
         $logMsg = "ftp incremental backup for $t->{host} started for directory "
-                . "$t->{shareName}\n";
+                . "$t->{shareName}";
     }
-    $t->logWrite($logMsg, 1);
+    $logMsg .= " (client path $t->{shareNamePath})" if ( $t->{shareName} ne $t->{shareNamePath} );
+    $t->logWrite($logMsg . "\n", 1);
 
     #
     # call the recursive function based on the type of action
@@ -399,7 +392,7 @@ sub restoreDir
 
     my $dirList = $view->dirAttrib($t->{bkupSrcNum}, $t->{bkupSrcShare}, $dirName);
 
-    (my $targetPath = "$t->{shareName}/$dirName") =~ s{//+}{/}g;
+    (my $targetPath = "$t->{shareNamePath}/$dirName") =~ s{//+}{/}g;
 
     my ( $fileName, $fileAttr, $fileType );
 
@@ -453,9 +446,9 @@ sub restoreFile
     my $fout;
 
     my $fileDest = ( $conf->{ClientCharset} ne "" )
-                 ? from_to( "$t->{shareName}//$fileName",
+                 ? from_to( "$t->{shareNamePath}//$fileName",
                             "utf8", $conf->{ClientCharset} )
-                 : "$t->{shareName}/$fileName";
+                 : "$t->{shareNamePath}/$fileName";
 
     $t->logWrite("restoreFile($fileName) -> $fileDest\n", 4);
 
@@ -681,9 +674,6 @@ sub remotels
             compress => $t->{compress},
         };
         $f->{linkname} = $linkname if ( defined($linkname) );
-
-	$f->{fullName} = "$t->{sharePath}/$f->{name}";
-	$f->{fullName} =~ s/\/+/\//g;
 
         $t->logWrite("remotels: adding name $f->{name}, type $f->{type} ($info->[1]), size $f->{size}, mode $f->{mode}, $uid/$gid\n", 4);
 

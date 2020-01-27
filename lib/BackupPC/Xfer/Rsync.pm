@@ -62,15 +62,16 @@ sub start
     my $conf = $t->{conf};
     my(@fileList, $rsyncArgs, $logMsg, $rsyncCmd);
     my $binDir = $t->{bpc}->BinDir();
+    my $shareNamePath = $t->shareName2Path($t->{shareName});
 
     alarm(0);
     #
     # We add a slash to the share name we pass to rsync
     #
-    ($t->{shareNameSlash} = "$t->{shareName}/") =~ s{//+$}{/};
+    ($t->{shareNameSlash} = "$shareNamePath/") =~ s{//+$}{/};
 
     if ( $t->{type} eq "restore" ) {
-	my $remoteDir = "$t->{shareName}/$t->{pathHdrDest}";
+	my $remoteDir = "$shareNamePath/$t->{pathHdrDest}";
 	$remoteDir    =~ s{//+}{/}g;
         my $filesFd;
         my $srcList;
@@ -144,7 +145,7 @@ sub start
                     return;
                 }
             }
-            my $shareName = $t->{shareName};
+            #my $shareName = $t->{shareName};
             #from_to($shareName, "utf8", $conf->{ClientCharset})
             #                    if ( $conf->{ClientCharset} ne "" );
             if ( $conf->{RsyncdClientPort} != 873 ) {
@@ -162,12 +163,13 @@ sub start
         # Merge variables into $rsyncArgs
         #
         $rsyncArgs = $bpc->cmdVarSubstitute($rsyncArgs, {
-                            host      => $t->{host},
-                            hostIP    => $t->{hostIP},
-                            client    => $t->{client},
-			    shareName => $t->{shareName},
-                            confDir   => $conf->{ConfDir},
-                            sshPath   => $conf->{SshPath},
+                            host          => $t->{host},
+                            hostIP        => $t->{hostIP},
+                            client        => $t->{client},
+                            shareNameOrig => $t->{shareName},
+                            shareName     => $shareNamePath,
+                            confDir       => $conf->{ConfDir},
+                            sshPath       => $conf->{SshPath},
                         });
         #
         # create --bpc-bkup-merge list.  This is the list of backups that have to
@@ -359,12 +361,13 @@ sub start
         # Merge variables into $rsyncArgs
         #
         $rsyncArgs = $bpc->cmdVarSubstitute($rsyncArgs, {
-                            host      => $t->{host},
-                            hostIP    => $t->{hostIP},
-                            client    => $t->{client},
-			    shareName => $t->{shareName},
-                            confDir   => $conf->{ConfDir},
-                            sshPath   => $conf->{SshPath},
+                            host          => $t->{host},
+                            hostIP        => $t->{hostIP},
+                            client        => $t->{client},
+                            shareNameOrig => $t->{shareName},
+                            shareName     => $shareNamePath,
+                            confDir       => $conf->{ConfDir},
+                            sshPath       => $conf->{SshPath},
                         });
 
         if ( $t->{XferMethod} eq "rsync" ) {
@@ -393,7 +396,7 @@ sub start
                 $t->{_errStr} = "Failed to open/create rsynd pw file $t->{pwFile}";
                 return;
             }
-            my $shareName = $t->{shareName};
+            my $shareName = $shareNamePath;
             #from_to($shareName, "utf8", $conf->{ClientCharset})
             #                    if ( $conf->{ClientCharset} ne "" );
             push(@$rsyncArgs, @fileList) if ( @fileList );
@@ -426,6 +429,7 @@ sub start
             '--bpc-log-level',      $conf->{XferLogLevel},
         );
     }
+    $logMsg .= " (client path $shareNamePath)" if ( $t->{shareName} ne $shareNamePath );
 
     #from_to($args->{shareName}, "utf8", $conf->{ClientCharset})
     #                        if ( $conf->{ClientCharset} ne "" );

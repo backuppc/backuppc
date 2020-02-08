@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.2, released 26 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -451,6 +451,7 @@ use vars qw(%ConfigMeta);
                 XferLogLevel              => "boolean",
                 ClientCharset             => "boolean",
                 ClientCharsetLegacy       => "boolean",
+                ClientShareName2Path      => "boolean",
                 RefCntFsck                => "boolean",
                 SmbShareName              => "boolean",
                 SmbShareUserName          => "boolean",

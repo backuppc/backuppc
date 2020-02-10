@@ -794,7 +794,7 @@ sub Main_TryToRun_Bg_or_User_Queue
             $progName   = "BackupPC_backupDelete";
             $type       = "delete";
             $mutexDelta = -1;
-            push(@args, "-L", "-h", "-m", $req->{host}, '-n', $req->{num}, $req->{opts});
+            push(@args, "-L", "-m", "-h", $req->{host}, '-n', $req->{num}, $req->{opts});
 	} elsif ( $req->{archive} ) {
             $progName   = "BackupPC_archive";
             $type       = "archive";

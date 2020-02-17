@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.2, released 26 Jan 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -227,7 +227,7 @@ sub readOutput
         if ( /^Total bytes (written|read): / ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
             $t->{xferOK} = 1;
-        } elsif ( /^\./ ) {
+        } elsif ( /^(a )?\./ ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= $logFileThres );
             $t->{fileCnt}++;
         } else {

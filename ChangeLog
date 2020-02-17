@@ -21,6 +21,56 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+Merged pull requests #278, #281, #289, #295, #297, #307, #308, #311,
+  #312, #313, #314.
+
+* Added per-host read/write exclusivity to worker programs, so
+  command-line programs don't collide with backups or other
+  operations; reportde by @hamster65 (issue #299)
+
+* Added $Conf{RsyncIncrArgsExtra} (issue #284)
+
+* Added $Conf{ClientShareName2Path}, which allows mapping of share
+  names/path to real paths on the client (eg, to backup a snapshot
+  that's in a different directory to the share name path)
+
+* Fixed v3 digest calculation in bin/BackupPC_backupDuplicate and
+  bin/BackupPC_migrateV3toV4; reported by @palmtop (issue #291)
+  
+* Improved handling of BackupPC_nightly running for more than 24 hours:
+  drop next queued run, and provide better log messages; reported
+  by @guestisp (issue #303)
+
+* Improved error checking on $Conf{BackupPCNightlyPeriod}, and update
+  $Info->{NightlyPhase} if it's larger than $Conf{BackupPCNightlyPeriod};
+  reported by @guestisp (issue #304)
+
+* Fixed warnings in bin/BackupPC, submitted by @moisseev (#278)
+
+* Avoid rrd updates using the same time stamp, submitted by @moisseev
+  (#311, issue #305)
+
+* Removed unused counting of renamed files, submitted by @moisseev (#281)
+
+* Make tar xfer output parsing compatible with FreeBSD tar, submitted
+  by @haarp (#289)
+
+* Fix daemon stdin open to read mode, submitted by @moisseev (#308)
+
+* Hosts config editor table layout CGI fix, submitted by @steven-de-wit
+  (#297)
+
+* Fixes to French translation, submitted by @pjoubert- (#295)
+
+* Fixes to Italian translation, submitted by @guestisp (#314)
+
+* Updated comments for Apache 2.4 config in httpd/src/BackupPC.conf,
+  submitted by @NotAProfessionalDeveloper (#307)
+
+* Documentation update for SCGI prerequisite, submitted by @guestisp (#312)
+
+* Documentation update for nginx config, submitted by @guestisp (#313)
+
 #------------------------------------------------------------------------
 # Version 4.3.1, 14 Jul 2019
 #------------------------------------------------------------------------

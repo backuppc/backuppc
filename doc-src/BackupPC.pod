@@ -666,10 +666,6 @@ available at:
     https://github.com/backuppc/backuppc-xs/releases
     https://github.com/backuppc/rsync-bpc/releases
 
-or on SourceForge:
-
-    https://sourceforge.net/projects/backuppc/files
-
 =item BackupPC Wiki
 
 BackupPC has a Wiki at L<https://github.com/backuppc/backuppc/wiki>.
@@ -921,8 +917,6 @@ Alternatively, manually fetching and installing BackupPC is easy.
 Start by downloading the latest version from
 
     https://github.com/backuppc/backuppc/releases
-
-You can also download the distribution from L<https://sourceforge.net/projects/backuppc/files>.
 
 =head2 Step 2: Installing the distribution
 
@@ -1259,9 +1253,9 @@ Actually, rsyncd is the better method for WinXX if you are prepared to
 run rsync/cygwin on your WinXX client.
 
 If you want to use rsyncd for WinXX clients you can find a pre-packaged
-zip file on L<http://backuppc.sourceforge.net>. The package is called
-cygwin-rsync. It contains rsync.exe, template setup files and the
-minimal set of cygwin libraries for everything to run.  The README file
+exe installer on L<https://github.com/backuppc/cygwin-rsyncd/releases>.
+The package is called cygwin-rsync. It contains rsync.exe, template setup files
+and the minimal set of cygwin libraries for everything to run.  The README file
 contains instructions for running rsync as a service, so it starts
 automatically everytime you boot your machine.  If you use rsync
 to backup WinXX machines, be sure to set $Conf{ClientCharset}
@@ -3431,13 +3425,13 @@ BackupPC's data directory with the noatime (or, with Linux kernels
 BackupPC isn't perfect (but it is getting better). Please see
 L<http://backuppc.sourceforge.net/faq/limitations.html> for a
 discussion of some of BackupPC's limitations.
-(Note, we should move this to the Github Wiki.)
+(Note, this is old and we should move this to the Github Wiki.)
 
 =head2 Security issues
 
 Please see L<http://backuppc.sourceforge.net/faq/security.html> for a
 discussion of some of various security issues.
-(Note, we should move this to the Github Wiki.)
+(Note, this is old and we should move this to the Github Wiki.)
 
 =head1 Configuration File
 
@@ -3514,11 +3508,11 @@ and improvements (most of the releases have been in this category).
 
 Craig Barratt  <cbarratt@users.sourceforge.net>
 
-See L<http://backuppc.sourceforge.net>.
+See L<https://backuppc.github.io/backuppc/BackupPC.html>.
 
 =head1 Copyright
 
-Copyright (C) 2001-2017 Craig Barratt
+Copyright (C) 2001-2020 Craig Barratt
 
 =head1 Credits
 

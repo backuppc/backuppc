@@ -143,7 +143,7 @@
 <hr />
 <h1 id="BackupPC-Introduction">BackupPC Introduction</h1>
 
-<p>This documentation describes BackupPC version 4.3.1, released on 14 Jul 2019.</p>
+<p>This documentation describes BackupPC version 4.3.2, released on 17 Feb 2020.</p>
 
 <h2 id="Overview">Overview</h2>
 
@@ -684,6 +684,12 @@
 <p>The CGI Perl module is required for the http/cgi user interface. CGI was a core module, but from version 5.22 Perl no longer ships with it so you&#39;ll need to install it if you are using a recent version of perl.</p>
 
 </dd>
+<dt id="SCGI">SCGI</dt>
+<dd>
+
+<p>The SCGI Perl module is required to use the S/CGI protocol for the http/cgi user interface.</p>
+
+</dd>
 <dt id="File::Listing-Net::FTP-Net::FTP::RetrHandle-Net::FTP::AutoReconnect">File::Listing, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect</dt>
 <dd>
 
@@ -719,10 +725,10 @@
     make
     make install</code></pre>
 
-<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.3.1.tar.gz, run these commands as root:</p>
+<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.3.2.tar.gz, run these commands as root:</p>
 
-<pre><code>    tar zxf BackupPC-4.3.1.tar.gz
-    cd BackupPC-4.3.1
+<pre><code>    tar zxf BackupPC-4.3.2.tar.gz
+    cd BackupPC-4.3.2
     perl configure.pl</code></pre>
 
 <p>The configure.pl script also accepts command-line options if you wish to run it in a non-interactive manner. It has self-contained documentation for all the command-line options, which you can read with perldoc:</p>
@@ -1105,7 +1111,7 @@
 
 <dl>
 
-<dt id="SCGI">SCGI</dt>
+<dt id="SCGI1">SCGI</dt>
 <dd>
 
 <p>New to 4.x, SCGI uses the SCGI interface to Apache, which requires the mod_scgi.so module to be installed and loaded by Apache. This allows Apache to run as any unprivileged user. The actual SCGI server runs as the as the BackupPC user (__BACKUPPCUSER__), and handles the requests from Apache via a TCP socket.</p>
@@ -1144,6 +1150,28 @@
         AuthName &quot;access&quot;
         require valid-user
     &lt;/Location&gt;</code></pre>
+
+<p>Or a typical Nginx configuration file:</p>
+
+<pre><code>    server {
+        listen 80;
+        server_name yourBackupPCServerHost;
+
+        root  /var/www/backuppc;
+
+        access_log  /var/log/nginx/backuppc.access.log;
+        error_log   /var/log/nginx/backuppc.error.log;
+
+        location /BackupPC_Admin {
+            auth_basic &quot;BackupPC&quot;;
+            auth_basic_user_file conf.d/backuppc.users;
+
+            include   scgi_params;
+            scgi_pass 127.0.0.1:10268;
+                scgi_param REMOTE_USER $remote_user;
+                scgi_param SCRIPT_NAME $document_uri;
+        }
+    }</code></pre>
 
 <p>This allows the SCGI interface to be accessed with a URL:</p>
 
@@ -2573,7 +2601,7 @@
 <strong><dt id="_conf_wakeupschedule_">$Conf{WakeupSchedule}</a> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];</dt></strong>
 <dd>
 
-<p>Times at which we wake up, check all the PCs, and schedule necessary backups. Times are measured in hours since midnight. Can be fractional if necessary (eg: 4.25 means 4:15am).</p>
+<p>Times at which we wake up, check all the PCs, and schedule necessary backups. Times are measured in hours since midnight local time. Can be fractional if necessary (eg: 4.25 means 4:15am).</p>
 
 <p>If the hosts you are backing up are always connected to the network you might have only one or two wakeups each night. This will keep the backup activity after hours. On the other hand, if you are backing up laptops that are only intermittently connected to the network you will want to have frequent wakeups (eg: hourly) to maximize the chance that each laptop is backed up.</p>
 
@@ -3200,6 +3228,16 @@
 <p>Prior to 3.x no charset conversion was done by BackupPC. Backups were stored in whatever charset the XferMethod provided - typically utf8 for smbclient and the client&#39;s locale settings for rsync and tar (eg: cp1252 for rsync on WinXX and perhaps iso-8859-1 with rsync on linux). This setting tells BackupPC the charset that was used to store filenames in old backups taken with BackupPC 2.x, so that non-ascii filenames in old backups can be viewed and restored.</p>
 
 </dd>
+<strong><dt id="_conf_clientsharename2path_">$Conf{ClientShareName2Path}</a> = { };</dt></strong>
+<dd>
+
+<p>Optionally map the share name to a different path on the client when the xfer program is run. This can be used if you create a snapshot on the client, which has a different path to the real share name. Or you could use simpler names for the share instead of a path (eg: root, home, usr) and map them to the real paths here.</p>
+
+<p>This should be a hash whose key is the share name used in <a href="#_conf_smbsharename_">$Conf{SmbShareName}</a>, <a href="#_conf_tarsharename_">$Conf{TarShareName}</a>, <a href="#_conf_rsyncsharename_">$Conf{RsyncShareName}</a>, <a href="#_conf_ftpsharename_">$Conf{FtpShareName}</a>, and the value is the string path name on the client. When a backup or restore is done, if there is no matching entry in <a href="#_conf_clientsharename2path_">$Conf{ClientShareName2Path}</a>, or the entry is empty, then the share name is not modified (so the default behavior is unchanged).</p>
+
+<p>If you are using the rsyncd xfer method, then there is no need to use this configuration setting (since rsyncd already supports mapping of share names to paths in the client&#39;s rsyncd.conf).</p>
+
+</dd>
 </dl>
 
 <h2 id="Samba-Configuration">Samba Configuration</h2>
@@ -3434,6 +3472,8 @@
 
 <p>Ssh arguments for rsync to run ssh to connect to the client. Rather than permit root ssh on the client, it is more secure to just allow ssh via a low-privileged user, and use sudo in <a href="#_conf_rsyncclientpath_">$Conf{RsyncClientPath}</a>.</p>
 
+<p>The setting should only have two entries: &quot;-e&quot; and everything else; don&#39;t add additoinal array elements.</p>
+
 <p>This setting only matters if <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;rsync&#39;.</p>
 
 </dd>
@@ -3465,16 +3505,6 @@
 <dd>
 
 <p>Rsync daemon username on client, for <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &quot;rsyncd&quot;. The username and password are stored on the client in whatever file the &quot;secrets file&quot; parameter in rsyncd.conf points to (eg: /etc/rsyncd.secrets).</p>
-
-</dd>
-<strong><dt id="_conf_rsyncfullargsextra_">$Conf{RsyncFullArgsExtra}</a> = [ ... ];</dt></strong>
-<dd>
-
-<p>Additional arguments for a full rsync or rsyncd backup.</p>
-
-<p>The --checksum argument causes the client to send full-file checksum for every file (meaning the client reads every file and computes the checksum, which is sent with the file list). On the server, rsync_bpc will skip any files that have a matching full-file checksum, and size, mtime and number of hardlinks. Any file that has different attributes will be updating using the block rsync algorithm.</p>
-
-<p>In V3, full backups applied the block rsync algorithm to every file, which is a lot slower but a bit more conservative. To get that behavior, replace --checksum with --ignore-times.</p>
 
 </dd>
 <strong><dt id="_conf_rsyncargs_">$Conf{RsyncArgs}</a> = [ ... ];</dt></strong>
@@ -3511,6 +3541,22 @@
 <pre><code>    <a href="#_conf_rsyncargsextra_">$Conf{RsyncArgsExtra}</a> = [
             &#39;--exclude-from=$confDir/pc/$host.exclude&#39;,
     ];</code></pre>
+
+</dd>
+<strong><dt id="_conf_rsyncfullargsextra_">$Conf{RsyncFullArgsExtra}</a> = [ ... ];</dt></strong>
+<dd>
+
+<p>Additional arguments for a full rsync or rsyncd backup.</p>
+
+<p>The --checksum argument causes the client to send full-file checksum for every file (meaning the client reads every file and computes the checksum, which is sent with the file list). On the server, rsync_bpc will skip any files that have a matching full-file checksum, and size, mtime and number of hardlinks. Any file that has different attributes will be updating using the block rsync algorithm.</p>
+
+<p>In V3, full backups applied the block rsync algorithm to every file, which is a lot slower but a bit more conservative. To get that behavior, replace --checksum with --ignore-times.</p>
+
+</dd>
+<strong><dt id="_conf_rsyncincrargsextra_">$Conf{RsyncIncrArgsExtra}</a> = [ ... ];</dt></strong>
+<dd>
+
+<p>Additional arguments for an incremental rsync or rsyncd backup.</p>
 
 </dd>
 <strong><dt id="_conf_rsyncrestoreargs_">$Conf{RsyncRestoreArgs}</a> = [ ... ];</dt></strong>

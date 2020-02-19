@@ -26,7 +26,7 @@ Merged pull requests #278, #281, #289, #295, #297, #307, #308, #311,
 
 * Added per-host read/write exclusivity to worker programs, so
   command-line programs don't collide with backups or other
-  operations; reportde by @hamster65 (issue #299)
+  operations; reported by @hamster65 (issue #299)
 
 * Added $Conf{RsyncIncrArgsExtra} (issue #284)
 

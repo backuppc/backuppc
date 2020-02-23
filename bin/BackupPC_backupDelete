@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.2, released 17 Feb 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -242,7 +242,8 @@ if ( $Backups[$idx]{version} < 4 ) {
     foreach my $delPath ( @$DelPaths ) {
         my($delPathM, $fullDelPath);
         if ( defined($delPath) ) {
-            $fullDelPath = "/$delPath" if ( $delPath !~ m{^/} );
+            $fullDelPath = $delPath;
+            $fullDelPath = "/$fullDelPath" if ( $fullDelPath !~ m{^/} );
             $delPathM    = $bpc->fileNameMangle($delPath);
             $fullDelPath = "/$ShareName$fullDelPath";
             $delPathM    = "/$ShareNameM$delPathM";

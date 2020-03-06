@@ -20,6 +20,11 @@ body {
     height:100%
 }
 
+#logo-container a img {
+    max-width: 151px;
+    max-height: 47px;
+}
+
 h1 {
     font-family:arial,sans-serif;
     font-size:16pt;

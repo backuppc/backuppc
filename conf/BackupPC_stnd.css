@@ -24,6 +24,10 @@ body {
     cursor: default;
 }
 
+#logo-container a img {
+    max-width: 90%;
+}
+
 button, input[type="button"], input[type="submit"] {
     font-family: 'Open Sans',Trebuchet MS,Trebuchet,arial,sans-serif,helvetica;
     border: 1px solid #dfdfdf;

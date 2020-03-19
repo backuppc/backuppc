@@ -90,7 +90,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.2, released 17 Feb 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -286,22 +286,24 @@ my $reply = $bpc->ServerMesg("status host($clientURI)");
 $reply = $1 if ( $reply =~ /(.*)/s );
 my(%StatusHost);
 eval($reply);
-if ( !$opts{m} && (my $status = $bpc->ServerMesg("hostMutex $client -1 BackupPC_dump")) =~ /fail/ ) {
-    print(STDERR "$0: $status (use -m option to force running)\n");
-    exit(1);
-}
 
 #
 # For DHCP tell BackupPC which host this is
 #
 if ( $opts{d} ) {
     if ( $StatusHost{activeJob} ) {
-        # oops, something is already running for this host
-	print("Exiting because backup is already running for $client\n")
-			if ( $opts{v} );
-        exit(0);
+	print(STDERR "$0: exiting because backup is already running for $client\n");
+        exit(1);
     }
-    print("DHCP $hostIP $clientURI\n");
+    if ( (my $status = $bpc->ServerMesg("DHCP $hostIP $clientURI")) =~ /fail/ ) {
+        print(STDERR "$0: $status; exiting\n");
+        exit(1);
+    }
+}
+
+if ( !$opts{m} && (my $status = $bpc->ServerMesg("hostMutex $client -1 BackupPC_dump")) =~ /fail/ ) {
+    print(STDERR "$0: $status (use -m option to force running)\n");
+    exit(1);
 }
 
 my(@Backups, $type);

@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 18 Jan 2020.
+# Version 4.3.2, released 17 Feb 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -722,7 +722,7 @@ sub Main_TryToRun_Bg_or_User_Queue
     #
     while ( 1 ) {
         local(*FH);
-        my(@args, $progName, $type, $mutexDelta);
+        my(@args, $progName, $type);
         my $nJobs = keys(%Jobs);
         #
         # CmdJob doesn't count towards MaxBackups / MaxUserBackups
@@ -788,29 +788,24 @@ sub Main_TryToRun_Bg_or_User_Queue
         if ( $req->{restore} ) {
             $progName   = "BackupPC_restore";
             $type       = "restore";
-            $mutexDelta = 1;
-            push(@args, "-m", $req->{hostIP}, $req->{host}, $req->{reqFileName});
+            push(@args, $req->{hostIP}, $req->{host}, $req->{reqFileName});
         } elsif ( $req->{delete} ) {
             $progName   = "BackupPC_backupDelete";
             $type       = "delete";
-            $mutexDelta = -1;
-            push(@args, "-L", "-m", "-h", $req->{host}, '-n', $req->{num}, $req->{opts});
+            push(@args, "-L", "-h", $req->{host}, '-n', $req->{num}, $req->{opts});
 	} elsif ( $req->{archive} ) {
             $progName   = "BackupPC_archive";
             $type       = "archive";
-            $mutexDelta = 1;
-            push(@args, "-m", $req->{user}, $req->{host}, $req->{reqFileName});
+            push(@args, $req->{user}, $req->{host}, $req->{reqFileName});
         } else {
             $progName   = "BackupPC_dump";
             $type       = "backup";
-            $mutexDelta = -1;
             push(@args, "-I") if ( $req->{backupType} eq "autoIncr" );
             push(@args, "-F") if ( $req->{backupType} eq "autoFull" );
             push(@args, "-i") if ( $req->{backupType} eq "doIncr" );
             push(@args, "-f") if ( $req->{backupType} eq "doFull" );
             push(@args, "-d") if ( $req->{backupType} eq "dhcpPoll" );
             push(@args, "-e") if ( $req->{dumpExpire} );
-            push(@args, "-m");
             push(@args, $host);
         }
         my $pid = open(FH, "-|");
@@ -838,9 +833,6 @@ sub Main_TryToRun_Bg_or_User_Queue
         $Jobs{$host}{cmd}        = $bpc->execCmd2ShellCmd($progName, @args);
         $Jobs{$host}{user}       = $user;
         $Jobs{$host}{type}       = $type;
-        $Jobs{$host}{mutexDelta} = $mutexDelta;
-        $HostMutex{$host}       += $mutexDelta;
-        $HostMutexCurrJob{$host} = $progName;
 	$Status->{$host}{userReq}  = $req->{userReq}
 					if ( defined($Hosts->{$host}) );
         if ( !$Jobs{$host}{dhcp} ) {
@@ -1043,30 +1035,7 @@ sub Main_Check_Job_Messages
         while ( $Jobs{$host}{mesg} =~ /(.*?)[\n\r]+(.*)/s ) {
             $mesg = $1;
             $Jobs{$host}{mesg} = $2;
-            if ( $Jobs{$host}{dhcp} ) {
-                if ( $mesg =~ /^DHCP (\S+) (\S+)/ ) {
-                    my $newHost = $bpc->uriUnesc($2);
-                    if ( defined($Jobs{$newHost}) ) {
-                        print(LOG $bpc->timeStamp,
-                                "Backup on $newHost is already running\n");
-                        kill($bpc->sigName2num("INT"), $Jobs{$host}{pid});
-                        $nbytes = 0;
-                        last;
-                    }
-                    $Jobs{$host}{dhcpHostIP} = $host;
-                    $Status->{$newHost}{dhcpHostIP} = $host;
-                    $Jobs{$newHost} = $Jobs{$host};
-                    delete($Jobs{$host});
-                    $host = $newHost;
-                    $Status->{$host}{state}      = "Status_backup_starting";
-                    $Status->{$host}{activeJob}  = 1;
-                    $Status->{$host}{startTime}  = $Jobs{$host}{startTime};
-                    $Status->{$host}{endTime}    = "";
-                    $Jobs{$host}{dhcp}           = 0;
-                } else {
-                    print(LOG $bpc->timeStamp, "dhcp $host: $mesg\n");
-                }
-            } elsif ( $mesg =~ /^started (.*) dump, share=(.*)/ ) {
+            if ( $mesg =~ /^started (.*) dump, share=(.*)/ ) {
                 $Jobs{$host}{type}      = $1;
                 $Jobs{$host}{shareName} = $2;
                 print(LOG $bpc->timeStamp,
@@ -1368,7 +1337,6 @@ sub Main_Check_Job_Messages
                 $Status->{$host}{state} = "Status_idle";
             }
             $Status->{$host}{activeJob} = 0 if ( defined($Status->{$host}) );
-            $HostMutex{$host} -= $Jobs{$host}{mutexDelta};
             delete($Status->{$host}) if ( $Jobs{$host}{dhcp} );
             delete($Jobs{$host});
         }
@@ -1517,8 +1485,7 @@ sub Main_Check_Client_Messages
 		$hostIP        = $bpc->uriUnesc($hostIP);
                 if ( !defined($Hosts->{$host}) ) {
                     print(LOG $bpc->timeStamp,
-                               "User $user requested backup of unknown host"
-                             . " $host\n");
+                               "User $user requested backup of unknown host $host\n");
                     $reply = "error: unknown host $host";
                 } else {
                     #
@@ -1608,8 +1575,7 @@ sub Main_Check_Client_Messages
 		$hostIP    = $bpc->uriUnesc($hostIP);
                 if ( !defined($Hosts->{$host}) ) {
                     print(LOG $bpc->timeStamp,
-                               "User $user requested restore to unknown host"
-                             . " $host");
+                               "User $user requested restore to unknown host $host\n");
                     $reply = "restore error: unknown host $host";
                 } else {
                     print(LOG $bpc->timeStamp,
@@ -1640,7 +1606,7 @@ sub Main_Check_Client_Messages
                 my $opts = $4;
                 if ( !defined($Hosts->{$host}) ) {
                     print(LOG $bpc->timeStamp,
-                               "User $user requested delete from unknown host $host");
+                               "User $user requested delete from unknown host $host\n");
                     $reply = "delete error: unknown host $host";
                 } else {
                     print(LOG $bpc->timeStamp,
@@ -1722,11 +1688,14 @@ sub Main_Check_Client_Messages
             } elsif ( $cmd =~ /^quit/ || $cmd =~ /^exit/ ) {
                 $nbytes = 0;
                 last;
-            } elsif ( $cmd =~ /^hostMutex\s+(\w+)\s+(-?\d+)\s+(.*)/ ) {
+            } elsif ( $cmd =~ /^hostMutex\s+(\S+)\s+(-?\d+)\s+(.*)/ ) {
                 $host          = $1;
                 my $mutexDelta = $2;
                 my $progName   = $3;
-                if ( $HostMutex{$host} == 0 || ($HostMutex{$host} > 0 && $mutexDelta > 0) ) {
+                if ( !defined($Hosts->{$host}) ) {
+                    print(LOG $bpc->timeStamp, "hostMutex for unknown host $host ignored: $cmd\n");
+                    $reply = "fail: hostMutex: unknown host $host";
+                } elsif ( $HostMutex{$host} == 0 || ($HostMutex{$host} > 0 && $mutexDelta > 0) ) {
                     push(@{$Clients{$client}{hostMutexList}}, {host => $host, mutexDelta => $mutexDelta});
                     $HostMutex{$host}       += $mutexDelta;
                     $HostMutexCurrJob{$host} = $progName;
@@ -1734,6 +1703,39 @@ sub Main_Check_Client_Messages
                 } else {
                     print(LOG $bpc->timeStamp, "Can't run $progName while $HostMutexCurrJob{$host} is running on host $host\n");
                     $reply = "fail: can't run $progName while $HostMutexCurrJob{$host} is running on host $host";
+                }
+            } elsif ( $cmd =~ /^hostMutexGet\s+(\S+)$/ ) {
+                $host = $1;
+                if ( !defined($Hosts->{$host}) ) {
+                    print(LOG $bpc->timeStamp, "hostMutexGet for unknown host $host ignored: $cmd\n");
+                    $reply = "fail: hostMutexGet: unknown host $host";
+                } else {
+                    $reply = "hostMutexGet: $host == $HostMutex{$host}";
+                }
+            } elsif ( $cmd =~ /^DHCP (\S+) (\S+)/ ) {
+                my $host    = $1;
+                my $newHost = $bpc->uriUnesc($2);
+                if ( !defined($Jobs{$host}) ) {
+                    print(LOG $bpc->timeStamp, "DHCP command for invalid job ignored (cmd = $cmd)\n");
+                    $reply = "fail: unknown host/job $host";
+                } elsif ( defined($Jobs{$newHost}) ) {
+                    print(LOG $bpc->timeStamp, "Backup on $newHost is already running (DHCP command = $cmd)\n");
+                    $reply = "fail: newhost $newHost already has a job running (cmd = $cmd)";
+                } else {
+                    $Jobs{$host}{dhcpHostIP} = $host;
+                    $Status->{$newHost}{dhcpHostIP} = $host;
+                    $Jobs{$newHost} = $Jobs{$host};
+                    $HostMutex{$newHost} = $HostMutex{$host};
+                    $HostMutexCurrJob{$newHost} = $HostMutexCurrJob{$host};
+                    delete($Jobs{$host});
+                    delete($HostMutex{$host});
+                    delete($HostMutexCurrJob{$host});
+                    $host = $newHost;
+                    $Status->{$host}{state}      = "Status_backup_starting";
+                    $Status->{$host}{activeJob}  = 1;
+                    $Status->{$host}{startTime}  = $Jobs{$host}{startTime};
+                    $Status->{$host}{endTime}    = "";
+                    $Jobs{$host}{dhcp}           = 0;
                 }
             } else {
                 print(LOG $bpc->timeStamp, "Unknown command $cmd\n");

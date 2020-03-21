@@ -284,6 +284,7 @@ pod2html("doc/BackupPC.pod",
 
 foreach my $file ( (@PerlSrc,
 	    <images/*.gif>,
+	    <images/*.svg>,
 	    <images/*.png>,
 	    <images/*.ico>,
 	    qw(
@@ -332,7 +333,7 @@ sub InstallFile
     my($file, $dest) = @_;
 
     unlink($dest) if ( -d $dest );
-    if ( $file =~ /\.gif/ || $file =~ /\.png/ || $file =~ /\.ico/ ) {
+    if ( $file =~ /\.(?:ico|gif|svg|png)$/ ) {
         die("can't copy($file, $dest)\n") unless copy($file, $dest);
     } else {
         my $lineCnt = 0;

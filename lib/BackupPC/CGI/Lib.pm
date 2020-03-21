@@ -467,7 +467,13 @@ sub Header
 <html><head>
 <title>$title</title>
 <link rel=stylesheet type="text/css" href="$Conf{CgiImageDirURL}/$Conf{CgiCSSFile}" title="CSSFile">
-<link rel=icon href="$Conf{CgiImageDirURL}/favicon.ico" type="image/x-icon">
+
+<link rel="apple-touch-icon" sizes="180x180" href="$Conf{CgiImageDirURL}/apple-touch-icon.png?v=2">
+<link rel="icon" type="image/png" sizes="32x32" href="$Conf{CgiImageDirURL}/favicon-32x32.png?v=2">
+<link rel="icon" type="image/png" sizes="16x16" href="$Conf{CgiImageDirURL}/favicon-16x16.png?v=2">
+<link rel="mask-icon" href="$Conf{CgiImageDirURL}/safari-pinned-tab.svg?v=2" color="#5bbad5">
+<link rel="shortcut icon" href="$Conf{CgiImageDirURL}/favicon.ico?v=2">
+
 $Conf{CgiHeaders}
 <script src="$Conf{CgiImageDirURL}/sorttable.js"></script>
 </head><body onLoad="document.getElementById('NavMenu').style.height=document.body.scrollHeight">

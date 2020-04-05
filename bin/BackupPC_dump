@@ -549,7 +549,7 @@ foreach my $h ( @validHosts ) {
 
 if ( !defined($hostIP) ) {
     print($LogFd $bpc->timeStamp, "can't ping $host (client = $client); exiting\n");
-    print("can't ping $host (client = $client); exiting\n");
+    print("can't ping $host (client = $client); exiting\n") if ( $opts{v} );
     exit(1);
 }
 

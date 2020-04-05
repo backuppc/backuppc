@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.2, released 17 Feb 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -277,6 +277,7 @@ sub readOutput
                     || /^\s*Call timed out: server did not respond/i
 		    || /^\s*tree connect failed: ERRDOS - ERRnoaccess \(Access denied\.\)/
 		    || /^\s*tree connect failed: NT_STATUS_BAD_NETWORK_NAME/
+		    || /^\s*session setup failed: NT_STATUS_LOGON_FAILURE/
 		    || /^\s*NT_STATUS_INSUFF_SERVER_RESOURCES listing /
                  ) {
 	    if ( $t->{hostError} eq "" ) {

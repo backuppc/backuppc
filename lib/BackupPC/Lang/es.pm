@@ -991,7 +991,7 @@ EOF
 # ------------------------------
 $Lang{Archive___num_details_for__host} = "BackupPC: Copia de seguridad #\$num .Detalles de \$host";
 
-$Lang{Archive___num_details_for__host2 } = <<EOF;
+$Lang{Archive___num_details_for__host2} = <<EOF;
 \${h1("Copia de seguridad #\$num Detalles de \$host")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">

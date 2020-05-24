@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2013  Craig Barratt
+#   Copyright (C) 2003-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -78,7 +78,7 @@ EOF
         $counter++;
     }
 
-    my $content = eval("qq{$Lang->{Archive___num_details_for__host2 }}");
+    my $content = eval("qq{$Lang->{Archive___num_details_for__host2}}");
     Header(eval("qq{$Lang->{Archive___num_details_for__host}}"), $content, 1);
     Trailer();
 }

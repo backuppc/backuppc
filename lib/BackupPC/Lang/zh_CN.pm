@@ -968,7 +968,7 @@ EOF
 # ------------------------------
 $Lang{Archive___num_details_for__host} = "BackupPC: 客户机 \$host 备档 #\$num 详情";
 
-$Lang{Archive___num_details_for__host2 } = <<EOF;
+$Lang{Archive___num_details_for__host2} = <<EOF;
 \${h1("客户机 \$host 备档 #\$num 详情")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">

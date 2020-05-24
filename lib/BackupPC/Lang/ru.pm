@@ -991,7 +991,7 @@ EOF
 # ------------------------------
 $Lang{Archive___num_details_for__host} = "BackupPC: Archive #\$num details for \$host";
 
-$Lang{Archive___num_details_for__host2 } = <<EOF;
+$Lang{Archive___num_details_for__host2} = <<EOF;
 \${h1("Детали по Архиву № \$num узла \$host")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">

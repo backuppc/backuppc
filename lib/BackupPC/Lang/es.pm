@@ -45,7 +45,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 </form>
 <!--
 \${h2("Server Configuration")}
-<ul> 
+<ul>
   <li><i>Espacio para otras opciones... e.j.,</i>
   <li>Editar configuraci&oacute;n del servidor
 </ul>
@@ -459,7 +459,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Explorar Copia de Seguridad \$num de \$host";
@@ -854,7 +854,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -1023,11 +1023,11 @@ $Lang{Email_Summary} = "BackupPC: Resumen de Correos";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->nuevo ha fallado: revise el error_log de apache\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Usuario err&oacute;neo: mi userid es \$>, en lugar de \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "S&oacute;lo los usuarios autorizados pueden ver los res&uacute;menes de PC's.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "S&oacute;lo los usuarios autorizados pueden iniciar o detener las copias de seguridad en"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "N&uacute;mero no v&aacute;lido \${EscHTML(\$In{num})}";
@@ -1301,8 +1301,8 @@ $Lang{Reason_no_ping} = "no hay ping";
 $Lang{Reason_backup_canceled_by_user} = "copia cancelada por el usuario";
 $Lang{Reason_restore_canceled_by_user} = "restauraci&oacute;n cancelada por el usuario";
 $Lang{Reason_archive_canceled_by_user} = "archivado cancelado por el usuario";
-$Lang{Disabled_OnlyManualBackups}  = "auto deshabilitado";  
-$Lang{Disabled_AllBackupsDisabled} = "deshabilitado";                  
+$Lang{Disabled_OnlyManualBackups}  = "auto deshabilitado";
+$Lang{Disabled_AllBackupsDisabled} = "deshabilitado";
 
 # ---------
 # Email messages
@@ -1381,7 +1381,7 @@ Estimado $userName,
 
 
 The Outlook files on your PC have $howLong.
-These files contain all your email, attachments, contact and calendar           
+These files contain all your email, attachments, contact and calendar
 information.  Your PC has been correctly backed up $numBackups times from
 $firstTime to $lastTime days ago.  However, Outlook locks all its files when
 it is running, preventing these files from being backed up.
@@ -1390,7 +1390,7 @@ It is recommended you backup the Outlook files when you are connected
 to the network by exiting Outlook and all other applications, and,
 using just your browser, go to this link:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 Select "Start Incr Backup" twice to start a new incremental backup.
 You can select "Return to $host page" and then hit "reload" to check
@@ -1401,8 +1401,8 @@ Regards,
 ----------------------------------------------------------------
 Los archivos de Outlook de su PC tienen $howLong.
 Estos archivos contienen todo su correo, adjuntos, contactos e informaci&oacute;n de
-su agenda. Los archivos de su PC han sido correctamente salvaguardados $numBackups veces 
-desde $firstTime hasta hace $lastTime d&iacute;as. Sin embargo, Outlook bloquea todos 
+su agenda. Los archivos de su PC han sido correctamente salvaguardados $numBackups veces
+desde $firstTime hasta hace $lastTime d&iacute;as. Sin embargo, Outlook bloquea todos
 sus archivos mientras funciona, impidiendo que pueda hacerse una copia de seguridad de
 los mismos.
 
@@ -1410,7 +1410,7 @@ Se le recomienda hacer copia de seguridad de los archivos de Outlook cuando est&
 conectado a la red cerrando Outlook y el resto de aplicaciones y utilizando su
 navegador de internet haga click en este v&iacute;nculo:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 Seleccione "Iniciar copia de seguridad incremental" dos veces para iniciar
 una neva copia de seguridad incremental.
@@ -1495,13 +1495,13 @@ $Lang{CfgEdit_Title_Hosts} = "Hosts";
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 Para agregar un nuevo host, seleccione Agregar y luego escriba el nombre. Para empezar
 la configuraci&oacute;n de cada host desde otro host, escriba el nombre de host
-como NEWHOST=COPYHOST. Esto sobrescribir&aacute; cualquier configuraci&oacute;n por host 
-existente para NEWHOST. TambiŽn puede hacer esto para un host ya existente. Para eliminar 
-un host, pulse el bot&oacute;n Eliminar. Al agregar, eliminar y copiar la 
-configuraci&oacute;n, los cambios no entrar&aacute;n en vigor hasta que se pulse el 
-bot&oacute;n Guardar. Ninguna de las copias de seguridad de host eliminados ser&aacute;n 
-removidos, por lo que si accidentalmente borra un host, simplemente vuelva a agregarlo. 
-Para remover completamente las copias de seguridad de un host, es necesario eliminar 
+como NEWHOST=COPYHOST. Esto sobrescribir&aacute; cualquier configuraci&oacute;n por host
+existente para NEWHOST. TambiŽn puede hacer esto para un host ya existente. Para eliminar
+un host, pulse el bot&oacute;n Eliminar. Al agregar, eliminar y copiar la
+configuraci&oacute;n, los cambios no entrar&aacute;n en vigor hasta que se pulse el
+bot&oacute;n Guardar. Ninguna de las copias de seguridad de host eliminados ser&aacute;n
+removidos, por lo que si accidentalmente borra un host, simplemente vuelva a agregarlo.
+Para remover completamente las copias de seguridad de un host, es necesario eliminar
 manualmente los archivos debajo de \$topDir/pc/HOST
 EOF
 
@@ -1555,5 +1555,5 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User host \$host cambi&oacute; \$key de \$valueOld a \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User aument&oacute; host \$host: \$value\n";
-  
-#end of es.pm backuppc ver 3.3.0 - luis bustamante olivera - luisbustamante@yahoo.com 
+
+#end of es.pm backuppc ver 3.3.0 - luis bustamante olivera - luisbustamante@yahoo.com

@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2018  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 21 Oct 2018.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -55,7 +55,7 @@ my %opts;
 if ( !getopts("cFfnmpsvh:r:P:o:", \%opts) || @ARGV != 0 || !(defined($opts{h}) || $opts{m}) ) {
     print <<EOF;
 Usage:
-  BackupPC_refCountUpdate -h HOST [-c] [-f] [-F] [-o N] [-p] [-v] 
+  BackupPC_refCountUpdate -h HOST [-c] [-f] [-F] [-o N] [-p] [-v]
       With no other args, updates count db on backups with poolCntDelta files
       and computers the host's total reference counts.  Also builds refCnt for
       any >=4.0 backups without refCnts.
@@ -415,7 +415,7 @@ sub updateHostRefCounts
     my @Backups = $bpc->BackupInfoRead($host);
     my $refCntDestDir = "$TopDir/pc/$host/refCnt";
     my $needFsck = {};
-    
+
     print("__bpc_progress_state__ sumUpdate\n") if ( !$opts{p} );
     for ( my $refCntFile = 0 ; $refCntFile < 128 ; $refCntFile++ ) {
         print("__bpc_progress_fileCnt__ $refCntFile/128\n") if ( !$opts{p} && ($refCntFile & 0x7) == 0 );
@@ -980,7 +980,7 @@ sub cleanPoolFiles
                     $dirty = 1;
                     #
                     # update stats
-                    # 
+                    #
                     $PoolStats->{$poolName}[$refCntFile]{fileCnt}--;
                     $PoolStats->{$poolName}[$refCntFile]{blkCnt}   -= $nBlks;
                     $PoolStats->{$poolName}[$refCntFile]{fileCntRm}++;

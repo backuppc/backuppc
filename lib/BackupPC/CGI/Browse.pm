@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2017  Craig Barratt
+#   Copyright (C) 2003-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.1.4, released 24 Nov 2017.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -247,7 +247,7 @@ EOF
         }
 	@DirStrPrev = @DirStr;
         last if ( $relDir eq "" && $share eq "" );
-        # 
+        #
         # Prune the last directory off $relDir, or at the very end
 	# do the top-level directory.
         #

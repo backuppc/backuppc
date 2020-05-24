@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -49,7 +49,7 @@ sub run
     my($t) = @_;
     my $bpc = $t->{bpc};
     my $conf = $t->{conf};
-    
+
     my(@HostList, @BackupList, $archiveClientCmd, $archiveClientCmd2, $logMsg);
 
     $archiveClientCmd = $conf->{ArchiveClientCmd};

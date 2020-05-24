@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 26 Jan 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -410,8 +410,8 @@ use vars qw(%ConfigMeta);
 		Reason_no_ping                 => "string",
 		Reason_backup_canceled_by_user => "string",
 		Status_backup_in_progress      => "string",
-                Disabled_OnlyManualBackups     => "string", 
-                Disabled_AllBackupsDisabled    => "string",  
+                Disabled_OnlyManualBackups     => "string",
+                Disabled_AllBackupsDisabled    => "string",
 	    },
     },
     CgiHeaders	 	=> "bigstring",

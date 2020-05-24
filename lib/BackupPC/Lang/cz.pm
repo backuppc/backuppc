@@ -457,7 +457,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Prohlížet zálohu \$num pro \$host";
@@ -849,7 +849,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -929,7 +929,7 @@ ze všech záloh:
      \$Lang->{DirHistory_fileLink}1, ...) k jeho stažení,
 <li> Soubory se stejným obsahem v rùzných zálohách mají stejné
      èíslo verze (PleaseTranslateThis: except between v3 and v4 backups),
-<li> Soubory nebo adresáøe, které nejsou ve vybrané záloze 
+<li> Soubory nebo adresáøe, které nejsou ve vybrané záloze
      nejsou oznaèeny.
 <li> Soubory zobrazené se stejným èíslem verze mohou mít rozdílné atributy.
      Vyber èíslo zálohy k zobrazení atributù souboru.
@@ -1018,11 +1018,11 @@ $Lang{Email_Summary} = "BackupPC: Souhrn emailù";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: zkontroluj apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Špatný uživatel: moje userid je \$>, místo \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Pouze oprávnìní uživatelé jsou oprávnìni prohlížet souhrny PC.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Pouze oprávnìní uživatelé mohou ukonèit nebo spustit zálohování na"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Špatné èíslo \${EscHTML(\$In{num})}";
@@ -1067,7 +1067,7 @@ $Lang{Archive_number__num_for_host__does_not_exist} = "Èíslo archivu \$num pro h
 $Lang{Can_t_find_IP_address_for} = "Nelze nalézt IP adresu pro \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host} = <<EOF;
 \$host je DHCP host, and není známa jeho IP adresa.  Zkontrolováno
-netbios jméno \$ENV{REMOTE_ADDR}\$tryIP, a zjištìno, že zaøízení 
+netbios jméno \$ENV{REMOTE_ADDR}\$tryIP, a zjištìno, že zaøízení
 není \$host.
 <p>
 Dokud nebude vidìt \$host na vybrané DHCP adrese, mùžete pouze
@@ -1296,8 +1296,8 @@ $Lang{Reason_no_ping}        = "žádný ping";
 $Lang{Reason_backup_canceled_by_user}  = "zálohování zrušeno uživatelem";
 $Lang{Reason_restore_canceled_by_user} = "obnovení zrušeno uživatelem";
 $Lang{Reason_archive_canceled_by_user} = "archivace zrušena uživatelem";
-$Lang{Disabled_OnlyManualBackups}  = "automatické zálohování zakázáno";  
-$Lang{Disabled_AllBackupsDisabled} = "zakázáno";                  
+$Lang{Disabled_OnlyManualBackups}  = "automatické zálohování zakázáno";
+$Lang{Disabled_AllBackupsDisabled} = "zakázáno";
 
 
 # ---------
@@ -1313,7 +1313,7 @@ $headers
 Dear $userName,
 
 Vaše PC ($host) nebylo nikdy úspìšnì zálohováno naším
-zálohovacím softwarem.  Zálohování PC by mìlo být spuštìno 
+zálohovacím softwarem.  Zálohování PC by mìlo být spuštìno
 automaticky, když je Vaše PC pøipojeno do sítì. Mel by jste
 kontaktovat Vaši podporu pokud:
 
@@ -1340,7 +1340,7 @@ $headers
 Drahý $userName,
 
 Vaše PC ($host) nebylo úspìšnì zálohovýno již $days dní.
-Vaše PC bylo korektnì zálohováno $numBackups krát od $firstTime 
+Vaše PC bylo korektnì zálohováno $numBackups krát od $firstTime
 do dne pøed $days dny.  Zálohování PC by se mìlo spustit automaticky,
 když je Vaše PC pøipojeno do sítì.
 
@@ -1350,7 +1350,7 @@ proè zálohování nefunguje.
 
 Pokud jste mimo kanceláø, nemùžete udìlat nic jiného než zkopírovat kritické
 soubory na jiná media. Mìl by jste mít na pamìti, že všechny soubory vytvoøené
-nebo zmìnìné v posledních $days dnech (i s všemi novými emaily a pøílohami) 
+nebo zmìnìné v posledních $days dnech (i s všemi novými emaily a pøílohami)
 nebudou moci býti obnoveny, pokud se disk ve Vašem poèítaèi poškodí.
 
 S pozdravem,
@@ -1368,7 +1368,7 @@ $headers
 Drahý $userName,
 
 Soubory programu Outlook na Vašem PC mají $howLong.
-Tyto soubory obsahují všechny Vaše emaily, pøílohy, kontakty a informace v           
+Tyto soubory obsahují všechny Vaše emaily, pøílohy, kontakty a informace v
 kalendáøi.  Vaše PC bylo naposled korektnì zálohováno $numBackups krát od
 $firstTime do $lastTime. Nicménì Outlook zamkne všechny svoje soubory když
 je spuštìn a znemožòuje jejich zálohování.
@@ -1377,9 +1377,9 @@ Doporuèujeme Vám zálohovat soubory Outlooku, když jste pøipojen do sítì tak,
 že ukonèíte program Outlook a všechny ostatní aplikace a ve vašem prohlížeèi
 otevøete tuto adresu:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
-Vyberte "Spustit inkrementaèní zálohování" dvakrát ke spuštení nového 
+Vyberte "Spustit inkrementaèní zálohování" dvakrát ke spuštení nového
 zálohování. Mùžete vybrat "Návrat na $host page" a poté stiknout "obnovit"
 ke zjištìní stavu zálohování. Dokonèení mùže trvat nìkolik minut.
 
@@ -1461,10 +1461,10 @@ $Lang{CfgEdit_Title_Hosts} = "Hosti";
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 K pøidání nového hosta, vyberte Pøidat a zadejte jméno. Pro
 konfiguraci hosta z jiného hosta, zadejte jméno hosta jako
-NEWHOST=COPYHOST. To pøepíše existující konfiguraci pro NEWHOST.  
+NEWHOST=COPYHOST. To pøepíše existující konfiguraci pro NEWHOST.
 Tento postup mùžete použít i pto existujícího hosta.
 Hosta smažete stisknutím tlaèítka delete. Pøidání, smazání a kopírování
-konfigurace nanabude platnosti dokud nedojde k stisknutí tlaèítka Uložit 
+konfigurace nanabude platnosti dokud nedojde k stisknutí tlaèítka Uložit
 Žádná ze záloh smazaných hostù nebude odstranìna, tedy pokud omylem
 so if you accidently delete a host, simply re-add it.  To completely
 smažete hostovy zálohy, musíte ruènì smazat soubory v \$topDir/pc/HOST
@@ -1521,5 +1521,5 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User host \$host zmìnil \$key z \$valueOld na \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User pøidal host \$host: \$value\n";
-  
+
 #end of lang_cz.pm

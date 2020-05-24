@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -352,7 +352,7 @@ our %ConfigMenu = (
 	    {name => "FixedIPNetBiosNameCheck"},
 	    {name => "PingCmd"},
 	    {name => "PingMaxMsec"},
-	    
+
 	    {text => "CfgEdit_Title_Other"},
 	    {name => "ClientComment"},
 	    {name => "ClientTimeout"},
@@ -530,7 +530,7 @@ EOF
 
     my $saveStyle = "";
     my $saveColor = "#ff0000";
-    
+
     if ( $In{modified} && $In{saveAction} ne "Save" && !%$errors ) {
         $saveStyle = "style=\"color:$saveColor\"";
     } else {

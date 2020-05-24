@@ -456,7 +456,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: \$host \$num バックアップの閲覧";
@@ -842,7 +842,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -1007,11 +1007,11 @@ $Lang{Email_Summary} = "BackupPC: メールサマリ";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: check apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Wrong user: my userid is \$>, instead of \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Only privileged users can stop or start backups on"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "番号 \${EscHTML(\$In{num})} が不正です。";
@@ -1284,8 +1284,8 @@ $Lang{Reason_no_ping}        = "無応答";
 $Lang{Reason_backup_canceled_by_user}  = "ユーザによるバックアップ取消";
 $Lang{Reason_restore_canceled_by_user} = "ユーザによるリストア取消";
 $Lang{Reason_archive_canceled_by_user} = "ユーザによるアーカイブ取消";
-$Lang{Disabled_OnlyManualBackups}  = "自動無効化";  
-$Lang{Disabled_AllBackupsDisabled} = "無効化";                  
+$Lang{Disabled_OnlyManualBackups}  = "自動無効化";
+$Lang{Disabled_AllBackupsDisabled} = "無効化";
 
 
 # ---------
@@ -1359,7 +1359,7 @@ $headers
 Dear $userName,
 
 The Outlook files on your PC have $howLong.
-These files contain all your email, attachments, contact and calendar           
+These files contain all your email, attachments, contact and calendar
 information.  Your PC has been correctly backed up $numBackups times from
 $firstTime to $lastTime days ago.  However, Outlook locks all its files when
 it is running, preventing these files from being backed up.
@@ -1368,7 +1368,7 @@ It is recommended you backup the Outlook files when you are connected
 to the network by exiting Outlook and all other applications, and,
 using just your browser, go to this link:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 Select "Start Incr Backup" twice to start a new incremental backup.
 You can select "Return to $host page" and then hit "reload" to check
@@ -1511,5 +1511,5 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User added host \$host: \$value\n";
-  
+
 #end of lang_ja.pm

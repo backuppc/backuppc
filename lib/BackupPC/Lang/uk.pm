@@ -312,9 +312,9 @@ EOF
 $Lang{Pool_Stat} = <<EOF;
         <li>Пул займає \${poolSize}GiB в тому числі \$info->{"\${name}FileCnt"} файлів
             та \$info->{"\${name}DirCnt"} тек (на \$poolTime),
-        <li>Під час хешування пулу виявлено \$info->{"\${name}FileCntRep"} файлів що 
+        <li>Під час хешування пулу виявлено \$info->{"\${name}FileCntRep"} файлів що
             повторюються з найбільшою кількістю повторень \$info->{"\${name}FileRepMax"},
-        <li>Під час нічного очищення видалено \$info->{"\${name}FileCntRm"} файлів 
+        <li>Під час нічного очищення видалено \$info->{"\${name}FileCntRm"} файлів
             загальним розміром \${poolRmSize}GiB (близько \$poolTime),
 EOF
 
@@ -461,7 +461,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Продивитися резервну копію \$num для \$host";
@@ -472,7 +472,7 @@ $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("Restore Options for \$host")}
 <p>
 You have selected the following files/directories from
-Ви позначили ластупні файли/теки з 
+Ви позначили ластупні файли/теки з
 ресурсу \$share, номер резервної копіїr #\$num:
 <ul>
 \$fileListStr
@@ -486,7 +486,7 @@ You have selected the following files/directories from
 EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
-Ви можете запустити відновлення файла прямо на 
+Ви можете запустити відновлення файла прямо на
 <b>\$directHost</b>.
 </p><p>
 <b>Увага!:</b> Всі існуючі файли будуть перезаписані!
@@ -540,7 +540,7 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
 щоб продивитися або відновити будь-які файли.
 </p><p>
 <b>Увага:</b> в залежності від того, які файли/теки Ви позначили залежить розмір архіву.
-Процес його створення та звантаження може зайняти деякий час. Ви маєте бути впевнені, 
+Процес його створення та звантаження може зайняти деякий час. Ви маєте бути впевнені,
 що Вам вистачить місця на локальному диску для його збереження.
 </p>
 <form action="\$MyURL" method="post">
@@ -575,7 +575,7 @@ $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 <p>
 Archive::Zip не встановлено тому Ви не можете звантажити
 zip-архів.
-Попросіть системного адміністратора встановити Archive::Zip з 
+Попросіть системного адміністратора встановити Archive::Zip з
 <a href="http://www.cpan.org">www.cpan.org</a>.
 </p>
 EOF
@@ -590,7 +590,7 @@ $Lang{Option_3__Download_Zip_archive} = <<EOF;
 щоб продивитися або відновити будь-які файли.
 </p><p>
 <b>Увага:</b> в залежності від того, які файли/теки Ви позначили залежить розмір архіву.
-Процес його створення та звантаження може зайняти деякий час. Ви маєте бути впевнені, 
+Процес його створення та звантаження може зайняти деякий час. Ви маєте бути впевнені,
 що Вам вистачить місця на локальному диску для його збереження.
 </p>
 <form action="\$MyURL" method="post">
@@ -852,7 +852,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -926,13 +926,13 @@ $Lang{DirHistory_for__host} = <<EOF;
 Резервних копіях:
 <ul>
 <li> Натисніть на номер резервної копії для повернення до перегляду рез. копій,
-<li> Натисніть на посилання на теку (\$Lang->{DirHistory_dirLink}) для переходу 
+<li> Натисніть на посилання на теку (\$Lang->{DirHistory_dirLink}) для переходу
      в цю теку,
 <li> Натисніть на посилання на версію файла (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) для його звантаженняe,
 <li> Фали з однаковим вмістом мають однакову версію в усіх
       резервних копіях (PleaseTranslateThis: except between v3 and v4 backups),
-<li> Файли та теки, що відсутні в поточній резервній копії позначені 
+<li> Файли та теки, що відсутні в поточній резервній копії позначені
      порожнім прямокутником.
 <li> Файли однієї версії можуть відрізнятися атрибутами файлової системи.
      Виберіть номмер резервної копії для перегляду атрибутів.
@@ -1021,11 +1021,11 @@ $Lang{Email_Summary} = "BackupPC: Зведена інформація по Email
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: check apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Неправильний користувач: мій userid  \$>, а не \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Тільки привілейований користувач може запустити резевне копіювання на"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Неправильнмй номер \${EscHTML(\$In{num})}";
@@ -1299,8 +1299,8 @@ $Lang{Reason_no_ping}        = "no ping";
 $Lang{Reason_backup_canceled_by_user}  = "резерв. копіювання перерване користувачем";
 $Lang{Reason_restore_canceled_by_user} = "відновлення перерване користувачем";
 $Lang{Reason_archive_canceled_by_user} = "архівування перерване користувачем";
-$Lang{Disabled_OnlyManualBackups}  = "auto відключене";  
-$Lang{Disabled_AllBackupsDisabled} = "відключене";                  
+$Lang{Disabled_OnlyManualBackups}  = "auto відключене";
+$Lang{Disabled_AllBackupsDisabled} = "відключене";
 
 
 # ---------
@@ -1374,7 +1374,7 @@ $headers
 Dear $userName,
 
 The Outlook files on your PC have $howLong.
-These files contain all your email, attachments, contact and calendar           
+These files contain all your email, attachments, contact and calendar
 information.  Your PC has been correctly backed up $numBackups times from
 $firstTime to $lastTime days ago.  However, Outlook locks all its files when
 it is running, preventing these files from being backed up.
@@ -1383,7 +1383,7 @@ It is recommended you backup the Outlook files when you are connected
 to the network by exiting Outlook and all other applications, and,
 using just your browser, go to this link:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 Select "Start Incr Backup" twice to start a new incremental backup.
 You can select "Return to $host page" and then hit "reload" to check
@@ -1528,5 +1528,5 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User added host \$host: \$value\n";
-  
+
 #end of lang_en.pm

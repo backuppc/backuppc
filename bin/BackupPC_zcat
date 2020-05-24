@@ -18,7 +18,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2013  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -44,7 +44,7 @@
 use strict;
 no  utf8;
 
-use lib "__INSTALLDIR__/lib";
+use lib "/usr/local/BackupPC/lib";
 use Compress::Zlib;
 use BackupPC::XS qw( :all );
 use BackupPC::Lib;
@@ -58,7 +58,7 @@ my %Conf   = $bpc->Conf();
 my %opts;
 if ( !getopts("h:n:s:", \%opts) ) {
     print STDERR <<EOF;
-usage: 
+usage:
     BackupPC_zcat file...
     BackupPC_zcat MD5_digest...
     BackupPC_zcat $TopDir/pc/host/num/share/mangledPath...
@@ -151,7 +151,7 @@ sub zcat
     my($fh, $fileName) = @_;
     my($data, $r, $ret);
 
-    while ( ($r = $fh->read(\$data, 4 * 65536)) > 0 ) { 
+    while ( ($r = $fh->read(\$data, 4 * 65536)) > 0 ) {
         print($data);
     }
     if ( $r < 0 ) {

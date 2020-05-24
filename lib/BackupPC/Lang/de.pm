@@ -372,7 +372,7 @@ Sie werden Backups abbrechen bzw. Aufträge löschen für Computer \$host;
 <input type="hidden" name="host"   value="\$host">
 <input type="hidden" name="doit"   value="1">
 <input type="hidden" name="action" value="">
-Zusätzlich bitte keine Backups starten für die Dauer von 
+Zusätzlich bitte keine Backups starten für die Dauer von
 <input type="text" name="backoff" size="10" value="\$backoff"> Stunden.
 <p>
 Möchten Sie das wirklich tun?
@@ -470,7 +470,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Durchsuchen des Backups \$num für Computer \$host";
@@ -493,13 +493,13 @@ Bitte wählen Sie eine der folgenden Möglichkeiten:.
 EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
-Sie können diese Wiederherstellung starten um die Dateien/Verzeichnisse direkt auf den Computer <b>\$directHost</b> wiederherzustellen. 
+Sie können diese Wiederherstellung starten um die Dateien/Verzeichnisse direkt auf den Computer <b>\$directHost</b> wiederherzustellen.
 Alternativ können Sie einen anderen Computer und/oder Freigabe als Ziel angeben.
 </p><p>
 <b>Warnung:</b> alle aktuell existierenden Dateien/Verzeichnisse, die bereits vorhanden sind,
 werden überschrieben! (Tip: Alternativ eine spezielle Freigabe erstellen mit Schreibrecht für den
 Backup-Benutzer und die wiederhergestellten Dateien/Verzeichnisse durch Stichproben prüfen, ob die beabsichtigte
-Wiederherstellung korrekt ist.) 
+Wiederherstellung korrekt ist.)
 </p>
 <form action="\$MyURL" method="post" name="direct">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
@@ -547,7 +547,7 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
 <p>
 Sie können eine ZIP Archivdatei downloaden, die alle selektierten Dateien/Verzeichnisse
 enthält. Mit einer lokalen Anwendung (z.B. WinZIP, WinXP-ZIP-Ordner...) können Sie dann
-beliebige Dateien entpacken. 
+beliebige Dateien entpacken.
 </p><p>
 <b>Warnung:</b> Abhängig von der Anzahl und Größe der selektierten
 Dateien/Verzeichnisse kann die ZIP Archiv Datei extrem groß bzw. zu groß werden. Der Download kann
@@ -585,7 +585,7 @@ $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 \${h2("Möglichkeit 2: Download als Zip Archiv")}
 <p>
 Archive::Zip ist nicht installiert. Der Download als Zip Archiv Datei ist daher nicht möglich.
-Bitte lassen Sie bei Bedarf von Ihrem Administrator die Perl-Erweiterung Archive::Zip von 
+Bitte lassen Sie bei Bedarf von Ihrem Administrator die Perl-Erweiterung Archive::Zip von
 <a href="http://www.cpan.org">www.cpan.org</a> installieren. Vielen Dank!
 </p>
 EOF
@@ -863,7 +863,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -1027,11 +1027,11 @@ $Lang{Email_Summary} = "BackupPC: E-Mailübersicht";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: Überprüfen Sie das Apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Falscher Benutzer: Meine userid ist \$>, anstelle \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Nur berechtigte Benutzer können die Computer Übersicht einsehen.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Nur berechtigte Benutzer können Backups starten und stoppen für"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "ungültige Nummer \${EscHTML(\$In{num})}";
@@ -1389,16 +1389,16 @@ Es wird folgendes Vorgehen empfohlen:
 
 1. Der Computer muss an das BackupServer-Netzwerk angeschlossen sein.
 2. Beenden Sie Outlook.
-3. Starten Sie ein inkrementelles Backup mit dem Internet-Browser hier: 
+3. Starten Sie ein inkrementelles Backup mit dem Internet-Browser hier:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
     Name und Passwort eingeben und dann zweimal nacheinander
     auf "Starte inkrementelles Backup" klicken
     Klicken Sie auf "Gehe zurück zur ...Hauptseite" und beobachten Sie
     den Status des Backupvorgangs (Browser von Zeit zu Zeit aktualisieren).
     Das sollte je nach Dateigröße nur eine kurze Zeit dauern.
-    
+
 
 Mit freundlichen Grüßen
 Ihr BackupPC Server
@@ -1476,11 +1476,11 @@ $Lang{CfgEdit_Title_User_Commands} = "Benutzerkommandos";
 $Lang{CfgEdit_Title_Hosts} = "Hosts";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
-Um einen neuen Host hinzuzufügen, wähle Hinzufügen und gib 
+Um einen neuen Host hinzuzufügen, wähle Hinzufügen und gib
 dann den Namen ein. Um mit der Konfigurationvorlage eines anderen Hosts
 zu beginnen, gib als Namen NEWHOST=COPYHOST ein. Dies wird alle
 bereits bestehenden hostspezifischen Einstellungen für NEWHOST
-mit den Werten von COPYHOST überschreiben. Du kannst dies auch für einen bereits 
+mit den Werten von COPYHOST überschreiben. Du kannst dies auch für einen bereits
 bestehenden Hosts machen. Um einen Host zu löschen, wähle den Löschen-Knopf.
 Das Hinzufügen, Löschen und Kopieren von Konfigurationen pro Host
 wird erst durch Wählen von Speichern aktiviert. Bereits bestehende
@@ -1497,7 +1497,7 @@ EOF
 $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Host \$host Konfigurationseditor")}
 <p>
-Beachte: Wähle Überschreiben, wenn du einen computerspezifischen Wert verändern willst 
+Beachte: Wähle Überschreiben, wenn du einen computerspezifischen Wert verändern willst
 <p>
 EOF
 
@@ -1540,6 +1540,6 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User Host \$host hat den Schlüssel \$key von \$valueOld zu \$valueNew geändert\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User hat den Host \$host: \$value hinzugefügt\n";
-  
+
 #end of lang_de.pm
 

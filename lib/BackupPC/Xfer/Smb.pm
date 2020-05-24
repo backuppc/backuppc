@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 17 Feb 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,7 +59,7 @@ sub start
     local(*SMB);
 
     #
-    # First propagate the PASSWD setting 
+    # First propagate the PASSWD setting
     #
     $ENV{PASSWD} = $ENV{BPC_SMB_PASSWD} if ( defined($ENV{BPC_SMB_PASSWD}) );
     $ENV{PASSWD} = $conf->{SmbSharePasswd}

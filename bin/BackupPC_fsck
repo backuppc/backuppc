@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2017  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Feb 2017.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -193,7 +193,7 @@ sub poolCountUpdate
             for ( my $subDir = 0 ; $subDir < 128 ; $subDir++ ) {
                 my $subPoolDir = sprintf("%s/%02x", $poolDir, $subDir * 2);
                 next if ( !-d $subPoolDir );
-                
+
                 my $entries = BackupPC::DirOps::dirRead($bpc, $subPoolDir);
                 next if ( !defined($entries) );
 

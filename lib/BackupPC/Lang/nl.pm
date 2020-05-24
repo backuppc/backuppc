@@ -460,7 +460,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Overzicht backup nummer \$num van pc \$host";
@@ -487,7 +487,7 @@ $Lang{Restore_Options_for__host_Option1} = <<EOF;
 U kan deze bestanden rechtstreeks herstellen naar pc
 <b>\$directHost</b>.
 </p><p>
-<b>Waarschuwing:</b> bestaande bestanden met dezelfde naam zullen 
+<b>Waarschuwing:</b> bestaande bestanden met dezelfde naam zullen
 overschreven worden!
 </p>
 <form action="\$MyURL" method="post" name="direct">
@@ -586,7 +586,7 @@ $Lang{Option_3__Download_Zip_archive} = <<EOF;
 \${h2("Optie 3: Download Tar-bestand")}
 <p>
 U kan een tar-bestand downloaden dat alle bestanden/mappen bevat die u
-geselecteerd hebt. U kan dan een applicatie op uw pc, zoals tar of WinZip, 
+geselecteerd hebt. U kan dan een applicatie op uw pc, zoals tar of WinZip,
 gebruiken om de bestanden te bekijken of uit te pakken.
 </p><p>
 <b>Waarschuwing:</b> Afhankelijk van welke bestanden/mappen u geselecteerd hebt
@@ -616,7 +616,7 @@ $Lang{Are_you_sure} = <<EOF;
 \${h1("Weet u het zeker?")}
 <p>
 U hebt gevraagd om bestanden rechtstreeks terug te zetten op de machine \$In{hostDest}.
-De volgende bestanden zullen hersteld worden in share \$In{shareDest}, 
+De volgende bestanden zullen hersteld worden in share \$In{shareDest},
 uit backup nummer \$num:
 <p>
 <table class="tableStnd" border>
@@ -854,7 +854,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -936,7 +936,7 @@ alle backups heen:
      hetzelfde versienummer (PleaseTranslateThis: except between v3 and v4 backups),
 <li> Bestanden of mappen die in een bepaalde backup niet aanwezig zijn hebben
      een lege cel.
-<li> Bestanden met hetzelfde versienummer kunnen wel verschillende attributen 
+<li> Bestanden met hetzelfde versienummer kunnen wel verschillende attributen
      (eigenaar,lees- of schrijfrechten) hebben.Selecteer het backupnummer om
      de attributen van het bestand te bekijken.
 </ul>
@@ -1023,11 +1023,11 @@ $Lang{Email_Summary} = "BackupPC: Overzicht E-mail";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new mislukt: controleer de apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Foutieve gebruiker: mijn userid is \$>, in plaats van \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Enkel gebruikers met bijzondere rechten kunnen PC-overzichten bekijken.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
 		  "Enkel gebruikers met bijzondere rechten kunnen backups stoppen of starten van machine"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Ongeldig of onjuist nummer \${EscHTML(\$In{num})}";
@@ -1301,8 +1301,8 @@ $Lang{Reason_no_ping} = "geen ping";
 $Lang{Reason_backup_canceled_by_user} = "backup geannuleerd door gebruiker";
 $Lang{Reason_restore_canceled_by_user} = "herstellen geannuleerd door gebruiker";
 $Lang{Reason_archive_canceled_by_user} = "archivering geannuleerd door gebruiker";
-$Lang{Disabled_OnlyManualBackups}  = "auto uitgeschakeld";  
-$Lang{Disabled_AllBackupsDisabled} = "uitgeschakeld";                  
+$Lang{Disabled_OnlyManualBackups}  = "auto uitgeschakeld";
+$Lang{Disabled_AllBackupsDisabled} = "uitgeschakeld";
 
 # ---------
 # Email messages
@@ -1318,17 +1318,17 @@ Beste $userName,
 
 Uw pc ($host) is tot op heden nog nooit succesvol gebackupt door
 onze PC backup software. PC backups zouden automatisch moeten gebeuren
-als uw pc verbonden is met het netwerk. 
+als uw pc verbonden is met het netwerk.
 U kan best contact opnemen met de systeembeheerder als:
 
   - Uw pc regelmatig en normaal verbonden was met het netwerk.
     Mogelijk is er immers een configuratie of setupfout waardoor
     backups niet mogelijk waren/zijn.
-  
+
   - U helemaal geen backup wenst van deze pc en u wil dat er
     hierover geen e-mail meer gezonden worden
 
-In andere gevallen dient u er voor te zorgen dat uw pc zo spoedig 
+In andere gevallen dient u er voor te zorgen dat uw pc zo spoedig
 mogelijk verbonden wordt met het netwerk.
 In geval van twijfel of voor hulp kan u contact opnemen met de
 systeembeheerder.
@@ -1351,7 +1351,7 @@ Er is reeds gedurende $days dagen geen backup meer gemaakt van uw pc ($host).
 Er zijn ondertussen van uw pc $numBackups backups gemaakt sinds $firstTime dagen geleden.
 De laatste backup dateert van $days dagen geleden.
 PC backups zouden automatisch moeten gebeuren als uw pc verbonden
-is met het netwerk. 
+is met het netwerk.
 
 Als uw pc gedurende geruime tijd (meer dan een paar uur) verbonden
 was met het netwerk gedurende de laatste $days dagen, kan u het beste
@@ -1390,13 +1390,13 @@ Helaas, wanneer Outlook geopend is, worden al de bijhorende bestanden
 ontoegankelijk gemaakt voor andere programma's, inclusief het programma backupPC.
 Hierdoor kon van deze bestanden geen backup gemaakt worden.
 
-Als u nu verbonden bent met het netwerk, wordt U aangeraden om een 
+Als u nu verbonden bent met het netwerk, wordt U aangeraden om een
 backup te maken van de Outlookbestanden. Dat kan op volgende manier:
-- Sluit Outlook 
+- Sluit Outlook
 - Sluit bij voorkeur ook alle andere toepassingen
 - open uw browser en ga naar deze link:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 - Kies dan voor "Start incrementele backup" tweemaal om zo een incrementele backup te starten.
 
@@ -1430,7 +1430,7 @@ Laatste poging: \$host_last_attempt;
 EOF
 
 #######################################################################
-# Configuration editor strings 
+# Configuration editor strings
 #######################################################################
 
 $Lang{Only_privileged_users_can_edit_config_files} = "Enkel gebruikers met bijzondere rechten kunnen de configuratie wijzigen.";
@@ -1481,15 +1481,15 @@ $Lang{CfgEdit_Title_Hosts} = "Machines";
 
 $Lang{CfgEdit_Hosts_Comment} = <<eof;
 Om een nieuwe machine toe te voegen: selecteer 'Toevoegen' en geef de naam op.
-Om met de machine-specifieke configuratie van een andere machine als basis te gebruiken: 
+Om met de machine-specifieke configuratie van een andere machine als basis te gebruiken:
 Geef de naam van de machine als NIEUWE_MACHINE=TE_KOPIEREN_MACHINE.
-Dit zal de een reeds bestaande machine-specifieke configuratie voor 
+Dit zal de een reeds bestaande machine-specifieke configuratie voor
 NIEUWE_MACHINE overschrijven. Je kan dit ook doen voor een reeds bestaande machine.
 Om een machine te verwijderen: klik op de de Verwijderen-knop.
-Bij 'Toevoegen', 'Verwijderen' en 'Kopi&euml;ren' van instellingen, worden de 
+Bij 'Toevoegen', 'Verwijderen' en 'Kopi&euml;ren' van instellingen, worden de
 wijzigingen pas effectief nadat je op 'Bewaren' hebt geklikt.
 Backups van gewiste machines worden niet verwijderd.
-Als je dus per vergissing een machine hebt verwijderd, kan je deze 
+Als je dus per vergissing een machine hebt verwijderd, kan je deze
 eenvoudig opnieuw toevoegen. Om de backups van een machine volledig
 te verwijderen, moet je de bestanden verwijderen in de map
 \$topdir/pc/MACHINE
@@ -1530,7 +1530,7 @@ $Lang{CfgEdit_Error__must_be_valid_option}
             = "Fout: \$var is geen geldige optie";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
 	    = "Te kopi&euml;ren machine \$copyHost bestaat niet; Machine \$fullHost wordt aangemaakt. Verwijder deze machine indien dit niet is wat je wil.";
-            
+
 $Lang{CfgEdit_Log_Copy_host_config}
 	    = "\$User kopieerde de instellingen van machine \$fromHost naar \$host\n";
 $Lang{CfgEdit_Log_Delete_param}
@@ -1545,6 +1545,6 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User machine \$host wijzigde \$key van \$valueOld naar \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User voegde machine \$host toe: \$value\n";
-  
+
 #end of lang_nl.pm
 

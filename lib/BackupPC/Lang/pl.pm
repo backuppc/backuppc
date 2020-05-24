@@ -256,7 +256,7 @@ EOF
 
 $Lang{BackupPC_Archive2} = <<EOF;
 \${h1(qq{$Lang{BackupPC__Archive}})}
-Przystępuje do archiwizacji następujących hostów 
+Przystępuje do archiwizacji następujących hostów
 <ul>
 \$HostListStr
 </ul>
@@ -460,7 +460,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Przeglądaj \$num dla \$host";
@@ -484,7 +484,7 @@ Proszę wybrać jedna z nich.
 EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
-Możesz zacząć przywracanie bezpośrednio na 
+Możesz zacząć przywracanie bezpośrednio na
 <b>\$directHost</b>.
 </p><p>
 <b>Uwaga:</b> jakikolwiek plik pasujący do tych ktore masz
@@ -852,7 +852,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -1019,11 +1019,11 @@ $Lang{Email_Summary} = "BackupPC: Podsumowanie emailów";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: sprawdź apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Zly użytkownik: mój userid to \$>, a nie \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Tylko uprzywilejowani użytkownicy mogą przegladać podsumowania.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Tylko uprzywilejowani użytkownicy mogą dokonywać kopii na"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Zły numer \${EscHTML(\$In{num})}";
@@ -1068,10 +1068,10 @@ $Lang{Archive_number__num_for_host__does_not_exist} = "Archiwum numer \$num dla 
 $Lang{Can_t_find_IP_address_for} = "Nie moge znaleść adresu IP dla \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host} = <<EOF;
 \$host jest hostem DHCP, i dlatego nie znam jego IP.  Sprawdziłem
-nazwe netbios \$ENV{REMOTE_ADDR}\$tryIP, i znalazlem ze ta maszyna 
+nazwe netbios \$ENV{REMOTE_ADDR}\$tryIP, i znalazlem ze ta maszyna
 to nie \$host.
 <p>
-Dopuki  \$host jest adresem DHCP, możesz 
+Dopuki  \$host jest adresem DHCP, możesz
 rozpocząć to źądanie bezpośrednio z tejże maszyny.
 EOF
 
@@ -1297,8 +1297,8 @@ $Lang{Reason_no_ping}        = "nie ma pingu";
 $Lang{Reason_backup_canceled_by_user}  = "kopia przerwana przez użytwkonika";
 $Lang{Reason_restore_canceled_by_user} = "przywracanie przerwane przez użytkownika";
 $Lang{Reason_archive_canceled_by_user} = "archiwum przerwane przez użytwkonika";
-$Lang{Disabled_OnlyManualBackups}  = "automat wyłączony";  
-$Lang{Disabled_AllBackupsDisabled} = "wyłączony";                  
+$Lang{Disabled_OnlyManualBackups}  = "automat wyłączony";
+$Lang{Disabled_AllBackupsDisabled} = "wyłączony";
 
 
 # ---------
@@ -1313,12 +1313,12 @@ Temat: $subj
 $headers
 Drogi $userName,
 
-Twoj PC ($host) nigdy nie został zabespieczony przez nasz program 
-tworzenia kopii bezpieczeństwa.  Backup powinien nastąpic automatycznie 
+Twoj PC ($host) nigdy nie został zabespieczony przez nasz program
+tworzenia kopii bezpieczeństwa.  Backup powinien nastąpic automatycznie
 kiedy twoj PC zostanie podłączony do sieci.  Powinieneś skontaktować się
 z pomocą techniczną jeżeli:
 
-  - Twój PC jest cały czas podłączony , co oznacza ze wysteuje problem z konfiguracją 
+  - Twój PC jest cały czas podłączony , co oznacza ze wysteuje problem z konfiguracją
     uniemożliwiający tworzenie kopii.
 
   - Nie chcesz aby kopie były wykonywane i nie chcesz tych wiadomośći.
@@ -1342,7 +1342,7 @@ Drogi $userName,
 
 Twój PC ($host) nie był pomyślnie zarchiwizowany przez $days dni.
 Twój PC był poprawnie zarchiwizowany $numBackups razy, od $firstTime do $days
-temu.  Wykonywanie kopii bezpieczeństwa powinno nastąpić automatycznie po 
+temu.  Wykonywanie kopii bezpieczeństwa powinno nastąpić automatycznie po
 podłączeniu do śieci.
 
 Jeżeli twoj PC był podłączony więcej niż kilka godzin do
@@ -1370,7 +1370,7 @@ $headers
 Dear $userName,
 
 The Outlook files on your PC have $howLong.
-These files contain all your email, attachments, contact and calendar           
+These files contain all your email, attachments, contact and calendar
 information.  Your PC has been correctly backed up $numBackups times from
 $firstTime to $lastTime days ago.  However, Outlook locks all its files when
 it is running, preventing these files from being backed up.
@@ -1379,7 +1379,7 @@ It is recommended you backup the Outlook files when you are connected
 to the network by exiting Outlook and all other applications, and,
 using just your browser, go to this link:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 Select "Start Incr Backup" twice to start a new incremental backup.
 You can select "Return to $host page" and then hit "reload" to check
@@ -1464,11 +1464,11 @@ $Lang{CfgEdit_Title_Hosts} = "Hosty";
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 Aby dodać nowego hosta, zaznacz "Dodaj" i podaj jego nazwę.  Aby
 skopiowac ustawienia z innego hosta, wpisz nazwę hosta jako
-NOWYHOST=KOPIOWANYHOST.  Takie ustawienie spowoduje nadpisanie 
+NOWYHOST=KOPIOWANYHOST.  Takie ustawienie spowoduje nadpisanie
 konfiguracji dla NOWYHOST .  Możesz zrobic to także dla istniejacych
 już hostów.  Aby skasować hosta, po prostu naciśnij "Kasuj".  "Dodaj", "Skasuj",
 oraz kopia konfiguracji, nie zadziała puki nie naciśniesz "Zapisz".
-Także zadna z usuniętych kopii hostów,więc jeżeli przypadkowo skasujesz coś, 
+Także zadna z usuniętych kopii hostów,więc jeżeli przypadkowo skasujesz coś,
 po prostu znowu ją dodaj.  Aby całkowicie usunąć kopie bezpieczeństwa
 danego hosta, musisz manualnie usunąć pliki z katalogu \$topDir/pc/HOST
 EOF
@@ -1523,5 +1523,5 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User z hosta \$host zmienił \$key z \$valueOld na \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User dodał host \$host: \$value\n";
-  
+
 #end of lang_en.pm

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -51,7 +51,7 @@ use Data::Dumper;
 use base qw(BackupPC::Xfer::Protocol);
 
 use vars qw( $FTPLibOK $FTPLibErr $ARCLibOK );
- 
+
 BEGIN {
 
     $FTPLibOK = 1;
@@ -857,7 +857,7 @@ sub handleDir
         my $fullName = "$t->{shareName}/$f->{name}";
         $fullName =~ s{/+}{/}g;
         next if ( !$t->checkIncludeExclude($fullName) );
-        
+
         #
         # handle based on filetype
         #
@@ -977,11 +977,11 @@ sub handleFile
     if ( $a && $a->{digest} eq $digest ) {
         $same = 1 if ( $a->{nlinks} == 0 );
     }
-    
+
     if ( !$same ) {
         $t->moveFileToOld($a, $f);
     }
-  
+
     if ( !*FTP || $@ || $errs ) {
         $t->logFileAction( "fail", $f->{name}, $f );
         $t->{xferBadFileCnt}++;

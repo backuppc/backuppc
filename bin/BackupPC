@@ -44,7 +44,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 17 Feb 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -104,7 +104,7 @@ if ( $Conf{BackupPCUserVerify}
 # Ensure we don't have old versions of key libraries and executables
 ###########################################################################
 my $PackageVersion = {
-    'BackupPC::XS' => '0.57',
+    'BackupPC::XS' => '0.60',
     rsync_bpc      => '3.0.9.8',
 };
 
@@ -300,7 +300,7 @@ sub Main_Initialize
                    . " valid executable program; exiting\n");
         exit(1);
     }
- 
+
     #
     # Create $RunDir if it doesn't exist
     #
@@ -316,7 +316,7 @@ sub Main_Initialize
                    . " file systems, or this file system doesn't support hardlinks,"
                    . " or these directories don't exist, or there is a permissions"
                    . " problem, or the file system is out of inodes or full.  Use"
-                   . " df, df -i, and ls -ld to check each of these possibilities."  
+                   . " df, df -i, and ls -ld to check each of these possibilities."
                    . " Exiting...\n");
         exit(1);
     }
@@ -464,7 +464,7 @@ sub Main_TryToRun_nightly
 	$end = $start + 1 if ( $end <= $start );
 	$Info->{NightlyPhase}++;
 	$Info->{NightlyPhase} = 0 if ( $end >= 16 );
-        
+
         #
         # Check if there is a job that is still running since the last
         # time BackupPC_nightly finished.  If so, add the -r option to
@@ -1797,7 +1797,7 @@ sub Main_Check_Client_Messages
     if ( $ServerInetPort > 0 && vec($fdRead, fileno(SERVER_INET), 1) ) {
         local(*CLIENT);
         my $paddr = accept(CLIENT, SERVER_INET);
-        my($port,$iaddr) = sockaddr_in($paddr); 
+        my($port,$iaddr) = sockaddr_in($paddr);
         my $name = gethostbyaddr($iaddr, AF_INET);
         $ClientConnCnt++;
         $Clients{$ClientConnCnt}{mesg} = "";

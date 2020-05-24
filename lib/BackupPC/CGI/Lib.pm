@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2018  Craig Barratt
+#   Copyright (C) 2003-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 3 Nov 2018.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -302,7 +302,7 @@ sub ServerConnect
     return if ( $bpc->ServerOK() );
     $bpc->ServerDisconnect();
     if ( my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
-        if ( CheckPermission() 
+        if ( CheckPermission()
           && -f $Conf{ServerInitdPath}
           && $Conf{ServerInitdStartCmd} ne "" ) {
             my $content = eval("qq{$Lang->{Admin_Start_Server}}");

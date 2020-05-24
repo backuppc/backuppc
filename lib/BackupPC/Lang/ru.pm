@@ -462,7 +462,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Browse backup \$num for \$host";
@@ -854,7 +854,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -928,7 +928,7 @@ $Lang{DirHistory_for__host} = <<EOF;
 резервных копиях:
 <ul>
 <li> Щёлкните по номеру копии для возврата к просмотру копии;
-<li> Щёлкните по ссылке на каталог (\$Lang->{DirHistory_dirLink}) для захода 
+<li> Щёлкните по ссылке на каталог (\$Lang->{DirHistory_dirLink}) для захода
      в этот каталог;
 <li> Щёлкните по версии файла (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) для загрузки этого файла;
@@ -1023,11 +1023,11 @@ $Lang{Email_Summary} = "BackupPC: Email Summary";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: check apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Wrong user: my userid is \$>, instead of \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Only privileged users can stop or start backups on"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Invalid number \${EscHTML(\$In{num})}";
@@ -1300,8 +1300,8 @@ $Lang{Reason_no_ping}        = "не \'пингуется\'";
 $Lang{Reason_backup_canceled_by_user}  = "копирование прервано пользователем";
 $Lang{Reason_restore_canceled_by_user} = "восстановление прервано пользователем";
 $Lang{Reason_archive_canceled_by_user} = "восстановление прервано пользователем";
-$Lang{Disabled_OnlyManualBackups}  = "автозапрет";  
-$Lang{Disabled_AllBackupsDisabled} = "запрещено";                  
+$Lang{Disabled_OnlyManualBackups}  = "автозапрет";
+$Lang{Disabled_AllBackupsDisabled} = "запрещено";
 
 
 # ---------
@@ -1375,7 +1375,7 @@ $headers
 Dear $userName,
 
 The Outlook files on your PC have $howLong.
-These files contain all your email, attachments, contact and calendar           
+These files contain all your email, attachments, contact and calendar
 information.  Your PC has been correctly backed up $numBackups times from
 $firstTime to $lastTime days ago.  However, Outlook locks all its files when
 it is running, preventing these files from being backed up.
@@ -1384,7 +1384,7 @@ It is recommended you backup the Outlook files when you are connected
 to the network by exiting Outlook and all other applications, and,
 using just your browser, go to this link:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 Select "Start Incr Backup" twice to start a new incremental backup.
 You can select "Return to $host page" and then hit "reload" to check
@@ -1529,5 +1529,5 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User added host \$host: \$value\n";
-  
+
 #end of ru.pm

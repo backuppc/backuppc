@@ -90,7 +90,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 17 Feb 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -347,7 +347,7 @@ if ( !$opts{i} && !$opts{f} && $Conf{BlackoutGoodCnt} >= 0
         # Allow blackout to span midnight (specified by hourBegin
         # being greater than hourEnd)
         #
-        next if ( ref($p->{weekDays}) ne "ARRAY" 
+        next if ( ref($p->{weekDays}) ne "ARRAY"
                     || !defined($p->{hourBegin})
                     || !defined($p->{hourEnd})
                 );
@@ -694,7 +694,7 @@ if ( !defined($lastBkupNum) ) {
         $doDuplicate = 0;
         $newBkupNum  = $lastBkupNum;
         $newBkupIdx  = @Backups;
-        do { 
+        do {
             $newBkupNum++;
         } while ( -d "$Dir/$newBkupNum" );
         if ( !rename("$Dir/$lastBkupNum", "$Dir/$newBkupNum") ) {
@@ -1745,7 +1745,7 @@ sub BackupExpire
             # Only delete an incr backup if the Conf settings are satisfied
             # for all $cntIncrDel incrementals.  Since BackupRemove() updates
             # the @Backups array we need to do the deletes in the reverse order.
-            # 
+            #
             for ( my $i = $firstIncr + $cntIncrDel - 1 ;
                     $i >= $firstIncr ; $i-- ) {
                 print($LogFd $bpc->timeStamp, "Removing unfilled backup $Backups[$i]{num}\n");
@@ -1796,7 +1796,7 @@ sub BackupExpire
             # most recent one, or the next backup is filled.
             # (In pre-V4 we can't deleted a full backup if the next backup is not
             # filled.)
-            # 
+            #
             if ( !$Backups[$firstFull]{preV4} || (@Backups <= $firstFull + 1
                         || !$Backups[$firstFull + 1]{noFill}) ) {
                 print($LogFd $bpc->timeStamp, "Removing filled backup $Backups[$firstFull]{num}\n");
@@ -1873,7 +1873,7 @@ sub BackupFullExpire
         my $noDelete = $i + 1 < @$Backups ? $Backups->[$i+1]{noFill} : 0;
         $noDelete = 0 if ( !$Backups[$i]{preV4} );
 
-        if ( !$noDelete && 
+        if ( !$noDelete &&
               ($fullKeepIdx >= @$fullKeepCnt
               || $k > 0
                  && $fullKeepIdx > 0

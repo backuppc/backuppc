@@ -308,7 +308,7 @@ EOF
 $Lang{Pool_Stat} = <<EOF;
         <li>备份服务器文件池大小是 \${poolSize}GiB 包含 \$info->{"\${name}FileCnt"} 个文件
             和 \$info->{"\${name}DirCnt"} 个文件夹／目录（截至 \$poolTime）。文件池大小基本就是所有备份数据占用的实际磁盘空间。
-        <li>服务器文件池散列操作(Hashing)发现 \$info->{"\${name}FileCntRep"} 
+        <li>服务器文件池散列操作(Hashing)发现 \$info->{"\${name}FileCntRep"}
             个文件具有重复散列值，其中 \$info->{"\${name}FileRepMax"} 个文件具有相同散列值。相同散列值并不意味着相同文件。散列操作被用来节省相同文件所占用的磁盘空间。
         <li>每日例行清理过期数据操作删除了 \$info->{"\${name}FileCntRm"} 个文件共
              \${poolRmSize}GiB （操作于 \$poolTime ）。
@@ -457,7 +457,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: 浏览客户机 \$host 备份序列号 \$num";
@@ -529,7 +529,7 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
 \${h2("方法 2：下载 Zip 备档")}
 <p>
 你可以将所有你选择的文件和目录下载进一个 Zip 备档。然后再用一个本地应用，
-例如 WinZip，来浏览或提取其中的任何文件。 
+例如 WinZip，来浏览或提取其中的任何文件。
 </p><p>
 <b>警告：</b> 取决于你选择的文件／目录，此备档可能会占用很大存储空间。
 可能需要若干分钟或更长时间来生成和传输此备档，并且还需要足够大的本地磁盘空间。
@@ -575,7 +575,7 @@ $Lang{Option_3__Download_Zip_archive} = <<EOF;
 \${h2("方法 3：下载 Tar 备档")}
 <p>
 你可以将所有你选择的文件和目录下载进一个 Tar 备档。然后再用一个本地应用，
-例如 tar 或 WinZip，来浏览或提取其中的任何文件。 
+例如 tar 或 WinZip，来浏览或提取其中的任何文件。
 </p><p>
 <b>警告：</b> 取决于你选择的文件／目录，此备档可能会占用很大存储空间。
 可能需要若干分钟或更长时间来生成和传输此备档，并且还需要足够大的本地磁盘空间。
@@ -836,7 +836,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -852,7 +852,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="share" value="\${EscHTML(\$share)}">
 <input type="hidden" name="action" value="browse">
 <ul>
-<li> 你正在浏览备份 #\$num，该备份开始于 \$backupTime 
+<li> 你正在浏览备份 #\$num，该备份开始于 \$backupTime
        （\$backupAge 天前）。
 \$filledBackup
 <li> 进入目录：<input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
@@ -1000,11 +1000,11 @@ $Lang{Email_Summary} = "BackupPC: 电子邮件报告";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new 步骤失败：请检查 Apache 服务器日志\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "错误用户：我的用户 ID 是 \$>, 不是 \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "只有特权用户可以执行备份的开始或停止操作于客户机"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "无效数字 \${EscHTML(\$In{num})}";
@@ -1129,7 +1129,7 @@ EOF
 
 # ------
 $Lang{Pings_to_host_have_failed_StatusHost_deadCnt__consecutive_times} = <<EOF;
-<li>试图与客户机 \$host 联系（Ping 操作）已连续失败 \$StatusHost{deadCnt} 次。 
+<li>试图与客户机 \$host 联系（Ping 操作）已连续失败 \$StatusHost{deadCnt} 次。
 EOF
 
 # -----
@@ -1272,8 +1272,8 @@ $Lang{Reason_no_ping}        = "网络连接中断(no ping)";
 $Lang{Reason_backup_canceled_by_user}  = "备份被用户取消";
 $Lang{Reason_restore_canceled_by_user} = "恢复被用户取消";
 $Lang{Reason_archive_canceled_by_user} = "备档被用户取消";
-$Lang{Disabled_OnlyManualBackups}  = "自动备份被关闭";  
-$Lang{Disabled_AllBackupsDisabled} = "关闭";                  
+$Lang{Disabled_OnlyManualBackups}  = "自动备份被关闭";
+$Lang{Disabled_AllBackupsDisabled} = "关闭";
 
 
 # ---------
@@ -1353,7 +1353,7 @@ $headers
 2。退出 Outlook 及所有其它应用；
 3。使用网页浏览器访问此链接：
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 选择 “开始增量备份”，启动增量备份操作；然后选择 “返回 $host 主页”
 并用浏览器的 “刷新” 功能来检查该备份操作的状态。
@@ -1442,7 +1442,7 @@ $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 所以此用户名必须是一个合法电子邮件用户名。"moreUsers" 列中可填入该客户机的
 其他使用者的用户名，他们也拥有开始／中止／浏览／恢复该客户机备份的权限，
 多个用户名间用逗号分隔且不能含空格。与 "user" 列不同的是，"moreUsers" 列
-中用户不被传送电子邮件，所以他们不必是合法电子邮件用户名，只要能被 
+中用户不被传送电子邮件，所以他们不必是合法电子邮件用户名，只要能被
 Apache Web 服务器认证登录即可。 如果想在一台现有客户机的管理配置的基础上
 配置一台新机，该新机主机名可在 "host" 列以这种方式输入 "NEWHOST=COPYHOST" ，
 这里 NEWHOST 是新机主机名，COPYHOST 是现有客户机主机名。也可以以这种方式
@@ -1503,5 +1503,5 @@ $Lang{CfgEdit_Log_Host_Change}
             = "用户 \$User 将客户机 \$host 上的 \$key 从 \$valueOld 更改为 \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "用户 \$User 添加了客户机 \$host: \$value\n";
-  
+
 #end of lang_zh_CN.pm

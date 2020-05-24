@@ -482,7 +482,7 @@ Veuillez sélectionner une des options suivantes.
 EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
-Vous pouvez démarrer une restauration de ces fichiers 
+Vous pouvez démarrer une restauration de ces fichiers
 directement sur <b>\$directHost</b>.
 </p><p>
 <b>Attention:</b>
@@ -532,7 +532,7 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
 <p>
 \${h2("Option 2: Télécharger une archive Zip")}
 <p>
-Vous pouvez télécharger une archive compressée (.zip) contenant tous les fichiers/répertoires que vous 
+Vous pouvez télécharger une archive compressée (.zip) contenant tous les fichiers/répertoires que vous
 avez sélectionnés. Vous pouvez utiliser une application locale, comme Winzip, pour voir ou extraire n\'importe quel fichier.
 </p><p>
 <b>Attention:</b> en fonction des fichiers/répertoires que vous avez sélectionnés,
@@ -571,8 +571,8 @@ $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 \${h2("Option 2: Télécharger une archive Zip")}
 <p>
 Vous ne pouvez pas télécharger d'archive zip, car Archive::Zip n\'est pas
-installé. 
-Veuillez demander à votre administrateur système d\'installer 
+installé.
+Veuillez demander à votre administrateur système d\'installer
 Archive::Zip depuis <a href="http://www.cpan.org">www.cpan.org</a>.
 </p>
 EOF
@@ -582,8 +582,8 @@ EOF
 $Lang{Option_3__Download_Zip_archive} = <<EOF;
 \${h2("Option 3: Télécharger une archive tar")}
 <p>
-Vous pouvez télécharger une archive Tar contenant tous les fichiers/répertoires 
-que vous avez sélectionnés. Vous pourrez alors utiliser une application locale, 
+Vous pouvez télécharger une archive Tar contenant tous les fichiers/répertoires
+que vous avez sélectionnés. Vous pourrez alors utiliser une application locale,
 comme tar ou winzip pour voir ou extraire n\'importe quel fichier.
 </p><p>
 <b>Attention:</b> en fonction des fichiers/répertoires que vous avez sélectionnés,
@@ -612,8 +612,8 @@ $Lang{Restore_Confirm_on__host} = "BackupPC: Confirmation de restauration sur \$
 $Lang{Are_you_sure} = <<EOF;
 \${h1("Êtes-vous sûr ?")}
 <p>
-Vous êtes sur le point de démarrer une restauration directement sur 
-la machine \$In{hostDest}. Les fichiers suivants vont être restaurés 
+Vous êtes sur le point de démarrer une restauration directement sur
+la machine \$In{hostDest}. Les fichiers suivants vont être restaurés
 dans le partage \$In{shareDest}, depuis la sauvegarde numéro \$num:
 <p>
 <table class="tableStnd" border>
@@ -715,7 +715,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Sauvegarde n° </td>
     <td align="center"> Type </td>
-    <td align="center"> Fusionnée </td> 
+    <td align="center"> Fusionnée </td>
     <td align="center"> Niveau </td>
     <td align="center"> Date de démarrage </td>
     <td align="center"> Durée (min) </td>
@@ -744,7 +744,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
 
 \${h2("Récapitulatif de la taille des fichiers et du nombre de réutilisations")}
 <p>
-Les fichiers existants sont ceux qui sont déjà sur le serveur; 
+Les fichiers existants sont ceux qui sont déjà sur le serveur;
 Les nouveaux fichiers sont ceux qui ont été ajoutés au serveur.
 Les fichiers vides et les erreurs de SMB ne sont pas comptabilisés dans les fichiers nouveaux ou réutilisés.
 </p>
@@ -851,7 +851,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -928,11 +928,11 @@ Cette page montre toutes les version disponibles des fichiers sauvegardés pour l
      dans celui-ci.
 <li> Cliquez sur une version d'un fichier (\$Lang->{DirHistory_fileLink}0,
      \$Lang->{DirHistory_fileLink}1, ...) pour le télécharger.
-<li> Les fichiers avec des contenus identiques pour plusieurs sauvegardes ont 
+<li> Les fichiers avec des contenus identiques pour plusieurs sauvegardes ont
      le même numéro de version, sauf entre des sauvegardes en v3 et v4.
-<li> Les fichiers qui ne sont pas présents sur une sauvegarde en particulier 
+<li> Les fichiers qui ne sont pas présents sur une sauvegarde en particulier
      sont représentés par une boîte vide.
-<li> Les fichiers montrés avec la même version peuvent avoir des attributs différents. 
+<li> Les fichiers montrés avec la même version peuvent avoir des attributs différents.
      Choisissez le numéro de sauvegarde pour voir les attributs de fichiers.
 </ul>
 
@@ -947,10 +947,10 @@ Cette page montre toutes les version disponibles des fichiers sauvegardés pour l
 EOF
 
 # ------------------------------
-$Lang{Restore___num_details_for__host} = "BackupPC: Détails de la restauration n°\$num pour \$host"; 
+$Lang{Restore___num_details_for__host} = "BackupPC: Détails de la restauration n°\$num pour \$host";
 
 $Lang{Restore___num_details_for__host2} = <<EOF;
-\${h1("Détails de la restauration n°\$num pour \$host")} 
+\${h1("Détails de la restauration n°\$num pour \$host")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> Numéro </td><td class="border"> \$Restores[\$i]{num} </td></tr>
@@ -1019,11 +1019,11 @@ $Lang{Email_Summary} = "BackupPC: Résumé du courriel";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new a échoué: regardez le fichier error_log d\'apache\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Mauvais utilisateur: mon userid est \$>, à la place de \$uid "
               . "(\$Conf{BackupPCUser})\n";
 #$Lang{Only_privileged_users_can_view_PC_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les résumés des machines.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Seuls les utilisateurs privilégiés peuvent arrêter ou démarrer des sauvegardes sur "
                   . " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Numéro invalide \${EscHTML(\$In{num})}";
@@ -1067,11 +1067,11 @@ $Lang{Archive_number__num_for_host__does_not_exist} = "L\'archive n°\$num pour l
 
 $Lang{Can_t_find_IP_address_for} = "Ne peut pas trouver d\'adresse IP pour \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host} = <<EOF;
-L\'hôte est un serveur DHCP, et je ne connais pas son adresse IP. J\'ai 
-vérifié le nom netbios de \$ENV{REMOTE_ADDR}\$tryIP, et j\'ai trouvé que 
+L\'hôte est un serveur DHCP, et je ne connais pas son adresse IP. J\'ai
+vérifié le nom netbios de \$ENV{REMOTE_ADDR}\$tryIP, et j\'ai trouvé que
 cette machine n\'est pas \$host.
 <p>
-Tant que je ne verrai pas \$host à une adresse DHCP particulière, vous 
+Tant que je ne verrai pas \$host à une adresse DHCP particulière, vous
 ne pourrez démarrer cette requête que depuis la machine elle même.
 EOF
 
@@ -1161,7 +1161,7 @@ $Lang{Prior_to_that__pings} = "Avant cela, les pings";
 
 # -----
 $Lang{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times} = <<EOF;
-<li>Les \$priorStr vers \$host ont réussi \$StatusHost{aliveCnt} 
+<li>Les \$priorStr vers \$host ont réussi \$StatusHost{aliveCnt}
             fois consécutives.
 EOF
 
@@ -1297,8 +1297,8 @@ $Lang{Reason_no_ping}        = "pas de ping";
 $Lang{Reason_backup_canceled_by_user}  = "sauvegarde annulée par l'utilisateur";
 $Lang{Reason_restore_canceled_by_user} = "restauration annulée par l'utilisateur";
 $Lang{Reason_archive_canceled_by_user} = "archivage annulé par l'utilisateur";
-$Lang{Disabled_OnlyManualBackups}  = "auto désactivé";  
-$Lang{Disabled_AllBackupsDisabled} = "désactivé";                  
+$Lang{Disabled_OnlyManualBackups}  = "auto désactivé";
+$Lang{Disabled_AllBackupsDisabled} = "désactivé";
 
 # ---------
 # Email messages
@@ -1325,7 +1325,7 @@ au réseau. Vous devriez contacter le responsable informatique si :
     votre ordinateur ni ne voulez recevoir d'autres messages
     comme celui-ci.
 
-Dans le cas contraire, veuillez vous assurer dès que possible que votre 
+Dans le cas contraire, veuillez vous assurer dès que possible que votre
 ordinateur est correctement connecté au réseau.
 
 Merci de votre attention,
@@ -1347,9 +1347,9 @@ jours. $numBackups sauvegardes ont étés effectuées du $firstTime
 jusqu'à il y a $days jours. Les sauvegardes devraient normalement
 survenir lorsque votre ordinateur est connecté au réseau.
 
-Si votre ordinateur a effectivement été connecté au réseau plus de 
-quelques heures durant les derniers $days jours, vous devriez 
-contacter votre responsable informatique pour savoir pourquoi les 
+Si votre ordinateur a effectivement été connecté au réseau plus de
+quelques heures durant les derniers $days jours, vous devriez
+contacter votre responsable informatique pour savoir pourquoi les
 sauvegardes ne s'effectuent pas correctement.
 
 Autrement, si vous êtes en dehors du bureau, il n'y a pas d'autre
@@ -1383,7 +1383,7 @@ Il est recommandé d'effectuer une sauvegarde de vos fichiers Outlook
 quand vous serez connecté au réseau en quittant Outlook et toute autre
 application, et en visitant ce lien avec votre navigateur web:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 Choisissez "Démarrer la sauvegarde incrémentielle" deux fois afin
 d'effectuer une nouvelle sauvegarde. Vous pouvez ensuite choisir
@@ -1471,11 +1471,11 @@ Pour ajouter une machine, choisissez Ajouter et entrez ensuite le nom. Pour fair
 une copie de la configuration d'une autre machine, entrer le nom de la machine
 comme NOUVEAU=ACOPIER. Cela va écraser toute configuration par défaut pour
 cette machine. Vous pouvez aussi faire cela pour une machine existante.
-Pour détruire une machine, cliquer sur le bouton Détruire. Les ajouts, 
-destructions et modifications ne prennent effet que lorsque que vous cliquez 
+Pour détruire une machine, cliquer sur le bouton Détruire. Les ajouts,
+destructions et modifications ne prennent effet que lorsque que vous cliquez
 sur le bouton Sauvegarder. Aucune des sauvegardes des machines ne sera
 détruite, donc si vous effacez une machine par erreur, créez-la à nouveau. Pour
-détruire les sauvegardes d'une machine, vous devez effacer les fichiers 
+détruire les sauvegardes d'une machine, vous devez effacer les fichiers
 manuellement dans \$topDir/pc/HOST
 EOF
 
@@ -1529,5 +1529,5 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User a changé \$key de \$valueOld à \$valueNew sur \$host\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User a jouté la machine \$host: \$value\n";
-  
+
 #end of lang_fr.pm

@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2017  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0, released 3 Mar 2017.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -98,7 +98,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '4.0.0',
+        Version => '4.3.3',
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -1152,7 +1152,7 @@ sub cmdVarSubstitute
 sub cmdExecOrEval
 {
     my($bpc, $cmd, @args) = @_;
-    
+
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", @$cmd) if ( ref($cmd) eq "ARRAY" );
 	print(STDERR "cmdExecOrEval: about to eval perl code $cmd\n")
@@ -1193,7 +1193,7 @@ sub cmdSystemOrEvalLong
     my($bpc, $cmd, $stdoutCB, $ignoreStderr, $pidHandlerCB, @args) = @_;
     my($pid, $out, $allOut);
     local(*CHILD);
-    
+
     $? = 0;
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", @$cmd) if ( ref($cmd) eq "ARRAY" );

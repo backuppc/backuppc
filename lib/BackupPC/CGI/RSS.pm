@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 21 Oct 2018.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -125,8 +125,8 @@ sub action
 
         $str = eval("qq{$Lang->{RSS_Host_Summary}}");
 
-        $rss->add_item(title => $host . ', ' . 
-                                $host_state . ', ' . 
+        $rss->add_item(title => $host . ', ' .
+                                $host_state . ', ' .
                                 $host_last_attempt,
                        link => $base_url . '?host=' . $host,
                        description => $str);

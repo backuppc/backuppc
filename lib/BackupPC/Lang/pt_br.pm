@@ -49,7 +49,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 </form>
 <!--
 \${h2("Configuração do Servidor")}
-<ul> 
+<ul>
   <li><i>Espaço para outras opções... e.j.,</i>
   <li>Editar configurações do servidor
 </ul>
@@ -462,7 +462,7 @@ $Lang{Recent_Email_Summary} = <<EOF;
 \$str
 </table>
 EOF
- 
+
 
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Explorar Backup \$num de \$host";
@@ -857,7 +857,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
         }
       }
     }
-    
+
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
@@ -936,7 +936,7 @@ Este quadro mostra cada versão única disponível nos diversos backups:
      \$Lang->{DirHistory_fileLink}1, ...) para baixar esse arquivo,
 <li> Os arquivos com conteúdos diferentes entre cópias distintas de backup tem o mesmo
      número de verssão (PleaseTranslateThis: except between v3 and v4 backups),
-<li> Os arquivos ou diretórios inexistentes em um determinado backup tem uma 
+<li> Os arquivos ou diretórios inexistentes em um determinado backup tem uma
      caixa vazia.
 <li> Os arquivos mostrados com a mesma versão podem ter diferentes atributos.
      Selecione o número do backup para ver os atributos do arquivo.
@@ -1025,11 +1025,11 @@ $Lang{Email_Summary} = "BackupPC: Resumo de Emails";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->nova falha: revise o error_log do apache\n";
-$Lang{Wrong_user__my_userid_is___} =  
+$Lang{Wrong_user__my_userid_is___} =
               "Usuário inválido: meu userid é \$>, no lugar de \$uid"
             . "(\$Conf{BackupPCUser})\n";
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Somente os usuários autorizados podem ver os resumos de PCs.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} = 
+$Lang{Only_privileged_users_can_stop_or_start_backups} =
                   "Somente os usuários autorizados podem iniciar ou parar as cópias"
 		. " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Número inválido \${EscHTML(\$In{num})}";
@@ -1302,8 +1302,8 @@ $Lang{Reason_no_ping} = "sem ping";
 $Lang{Reason_backup_canceled_by_user} = "backup cancelado pelo usuário";
 $Lang{Reason_restore_canceled_by_user} = "restauração cancelada pelo usuário";
 $Lang{Reason_archive_canceled_by_user} = "arquivamento cancelado pelo usuário";
-$Lang{Disabled_OnlyManualBackups}  = "ENG auto disabled";  
-$Lang{Disabled_AllBackupsDisabled} = "ENG disabled";                  
+$Lang{Disabled_OnlyManualBackups}  = "ENG auto disabled";
+$Lang{Disabled_AllBackupsDisabled} = "ENG disabled";
 
 # ---------
 # Email messages
@@ -1357,7 +1357,7 @@ $days dias deveria contactar com seu suporte técnico para ver porque os backups
 não funcionam adequadamente.
 
 Por outro lado, se você não o está utilizando, não há muito o que fazer a não
-ser copiar manualmente os arquivos mais críticos para outro suporte físico. 
+ser copiar manualmente os arquivos mais críticos para outro suporte físico.
 Deve-se estar ciente de que qualquer arquivo que tenha sido criado ou modificado
 nos últimos $days dias (incluindo todos os emails novos e arquivos anexos) não podem
 ser restaurados se seu disco danificar-se.
@@ -1386,12 +1386,12 @@ Recomendamos fazer cópia de segurança dos arquivos do Outlook quando estiver
 conectado a rede fechando o Outlook e o resto das aplicações e utilizando seu
 navegador de internet. Clique neste link:
 
-    $CgiURL?host=$host               
+    $CgiURL?host=$host
 
 Selecione "Começar backup incremental" duas vezes para começar
 um novo backup incremental.
 Pode-se selecionar "Voltar a página de $host " e clicar em "refazer"
-para ver o estado do processo de backup. Este processo deve durar 
+para ver o estado do processo de backup. Este processo deve durar
 somente alguns minutos para completar.
 
 Saudações:
@@ -1535,6 +1535,6 @@ $Lang{CfgEdit_Log_Host_Change}
             = "\$User host \$host alterado \$key de \$valueOld para \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
             = "\$User adicionado host \$host: \$value\n";
-  
+
 #end of lang_pt_BR.pm
 

@@ -48,7 +48,7 @@
 #
 #========================================================================
 #
-# Version 4.2.0, released 8 Apr 2018.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -184,7 +184,7 @@ $ENV{PATH} = $Conf{MyPath};
 #
 #  - the parent blocks trying to lock bytes 1..$MaxChild.  If it succeeds, it means
 #    all the children are busy, so it forks a new child.
-# 
+#
 my $LockFd;
 if ( !open($LockFd, ">", $LockFile) ) {
     print("BackupPC_Admin_SCGI: can't open/create $LockFile; exiting in 60 seconds\n");

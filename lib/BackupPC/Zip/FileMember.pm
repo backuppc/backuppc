@@ -15,7 +15,7 @@
 #   Based on Archive::Zip::FileMember, Copyright (c) 2000 Ned Konz.
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2013  Craig Barratt
+#   Copyright (C) 2002-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -59,7 +59,7 @@ sub newFromFileNamed    # BackupPC::Zip::FileMember
     $self->{'compressionMethod'} = COMPRESSION_STORED;
     $self->{'compressedSize'} = $self->{'uncompressedSize'} = $size;
     $self->{'fileCompressLevel'} = $compress;
-    $self->desiredCompressionMethod( ( $self->compressedSize() > 0 ) 
+    $self->desiredCompressionMethod( ( $self->compressedSize() > 0 )
 	    ? COMPRESSION_DEFLATED
 	    : COMPRESSION_STORED );
     $self->isTextFile( -T _ );

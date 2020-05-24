@@ -5,7 +5,7 @@
 # for restore on a client.
 #
 # DESCRIPTION
-#  
+#
 #   Usage: BackupPC_tarCreate [options] files/directories...
 #
 #   Flags:
@@ -57,7 +57,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -206,7 +206,7 @@ if ( !$opts{l} && !$opts{L} ) {
     #
     # Finish with two null 512 byte headers, and then round out a full
     # block.
-    # 
+    #
     my $data = "\0" x ($tar_header_length * 2);
     TarWrite($fh, \$data);
     TarWrite($fh, undef);

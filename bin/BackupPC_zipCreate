@@ -5,7 +5,7 @@
 # for restore on a client.
 #
 # DESCRIPTION
-#  
+#
 #   Usage: BackupPC_zipCreate [options] files/directories...
 #
 #   Flags:
@@ -52,7 +52,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -157,7 +157,7 @@ my $ShareName = $opts{s};
 my $BufSize    = 1048576;     # 1MB or 2^20
 my(%UidCache, %GidCache);
 #my $fh = *STDOUT;
-my $fh = new IO::Handle;      
+my $fh = new IO::Handle;
 $fh->fdopen(fileno(STDOUT),"w");
 my $zipfh = Archive::Zip->new();
 
@@ -302,7 +302,7 @@ sub ZipWriteFile
 	$ErrorCnt++;
     }
     return if ( !$zipmember );
-    
+
     #
     # Set the attributes and permissions.  The standard zip file
     # header cannot handle dates prior to 1/1/1980, or 315561600
@@ -315,7 +315,7 @@ sub ZipWriteFile
     # Zip files don't accept uid and gid, so we put them in the comment field.
     $zipmember->fileComment("uid=".$hdr->{uid}." gid=".$hdr->{gid})
 	    if ( $hdr->{uid} || $hdr->{gid} );
-    
+
     # Specify the compression level for this member
     $zipmember->desiredCompressionLevel($compLevel) if ($compLevel =~ /[0-9]/);
 
@@ -326,7 +326,7 @@ sub ZipWriteFile
         # Set "version made by" field to 0 (MS-DOS) for OEM code pages
         $zipmember->fileAttributeFormat('FA_MSDOS');
     }
-    
+
     # Finally Zip the member
     $zipfh->addMember($zipmember);
 }

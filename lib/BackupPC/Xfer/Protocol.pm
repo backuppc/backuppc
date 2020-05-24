@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 26 Jan 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -40,12 +40,12 @@ use strict;
 use Data::Dumper;
 use Encode qw/from_to encode/;
 
-#    
-#  usage: 
+#
+#  usage:
 #    $t = BackupPC::Xfer::Protocol->new($args);
 #
 # new() is the constructor.  There's nothing special going on here.
-#    
+#
 sub new
 {
     my($class, $bpc, $args) = @_;
@@ -81,13 +81,13 @@ sub new
     return $t;
 }
 
-#    
+#
 #  usage:
 #    $t->args($args);
 #
 # args() can be used to send additional argument to the Xfer object
 # via a hash reference.
-#    
+#
 sub args
 {
     my($t, $args) = @_;
@@ -264,7 +264,7 @@ sub logWrite
 
     my $XferLOG = $t->{XferLOG};
     $level = 3 if ( !defined($level) );
-    
+
     return ( $XferLOG->write(\$msg) ) if ( $level <= $t->{logLevel} );
 }
 
@@ -291,18 +291,18 @@ sub shareName2Path
 ##############################################################################
 
 #
-# loadInclExclRegexps() places the appropriate file include/exclude regexps 
+# loadInclExclRegexps() places the appropriate file include/exclude regexps
 #
 sub loadInclExclRegexps
 {
     my ( $t, $shareType ) = @_;
     my $bpc  = $t->{bpc};
     my $conf = $t->{conf};
-    
+
     my @BackupFilesOnly    = ();
     my @BackupFilesExclude = ();
     my ($shareName, $shareNameRE);
-    
+
     $shareName = $t->{shareName};
     $shareName =~ s/\/*$//;    # remove trailing slashes
     $shareName = "/" if ( $shareName eq "" );
@@ -316,7 +316,7 @@ sub loadInclExclRegexps
     if ( ref( $conf->{BackupFilesOnly} ) eq "HASH" ) {
 
         foreach my $share ( ( '*', $shareName ) ) {
-   	    push @BackupFilesOnly, @{ $conf->{BackupFilesOnly}{$share} } 
+   	    push @BackupFilesOnly, @{ $conf->{BackupFilesOnly}{$share} }
 	        if ( defined( $conf->{BackupFilesOnly}{$share} ) );
         }
 	
@@ -327,7 +327,7 @@ sub loadInclExclRegexps
     } elsif ( !defined( $conf->{BackupFilesOnly} ) ) {
 
         #
-        # do nothing 
+        # do nothing
         #
 	
     } else {
@@ -336,10 +336,10 @@ sub loadInclExclRegexps
         # not a legitimate entry for $conf->{BackupFilesOnly}
         #
         $t->{_errStr} = "Incorrect syntax in BackupFilesOnly for host $t->{Host}";
-          
+
         return;
     }
-    
+
     #
     # load all relevant values into @BackupFilesExclude
     #
@@ -396,7 +396,7 @@ sub checkIncludeExclude
 
     return ( $t->checkIncludeMatch($file) && !$t->checkExcludeMatch($file) );
 }
-    
+
 sub checkIncludeMatch
 {
     my ($t, $file) = @_;
@@ -404,9 +404,9 @@ sub checkIncludeMatch
     my $shareName = $t->{shareName};
     my $includes  = $t->{BackupFilesOnly} || return 1;
     my $match = "";
-    
+
     foreach my $include ( @{$includes} ) {
-      
+
         #
         # construct regexp elsewhere to avoid syntactical evil
         #
@@ -451,7 +451,7 @@ sub checkExcludeMatch
         return 1 if ( $file =~ /$match/ );
 
         $match = '^' . quotemeta($file) . '(?=\/.*)?';
-                
+
 	#
         # return true if the file is a parent of the exclude folder,
         # or the folder itself.

@@ -4,14 +4,14 @@
 # BackupPC_attribPrint: print the contents of attrib files.
 #
 # DESCRIPTION
-#  
+#
 #   Usage: BackupPC_attribPrint attribPath
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2005-2013  Craig Barratt
+#   Copyright (C) 2005-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 30 Nov 2013.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -90,21 +90,24 @@ if ( !$attrib->read($dir, $file) ) {
         exit(1);
     }
 }
-my $info = $attrib->get();
-#
-# convert digest to a hex string
-#
-foreach my $file ( keys(%$info) ) {
-    next if ( !defined($info->{$file}{digest}) );
-    $info->{$file}{digest} = unpack("H*", $info->{$file}{digest});
-}
 if ( length($attrib->digest()) ) {
     printf("Attrib digest is %s\n", unpack("H*", $attrib->digest()));
 }
 $Data::Dumper::Indent   = 1;
 $Data::Dumper::Sortkeys = 1;
-if ( defined($specificInode) ) {
-    print Dumper($info->{$specificInodeHexStr});
-} else {
-    print Dumper($info);
+$Data::Dumper::Pad      = "  ";
+$Data::Dumper::Terse    = 1;
+my $idx = 0;
+my $info;
+print("\$attrib = {\n");
+while ( 1 ) {
+    ($info, $idx) = $attrib->iterate($idx);
+    last if ( !defined($info) );
+    next if ( defined($specificInode) && $info->{name} ne $specificInodeHexStr );
+    $info->{digest} = unpack("H*", $info->{digest}) if ( defined($info->{digest}) );
+    my $str = Data::Dumper->Dump([$info]);
+    $str =~ s/\n$//;
+    $str =~ s/^ *//;
+    print "  '$info->{name}' => ", $str, ",\n";
 }
+print("};\n")

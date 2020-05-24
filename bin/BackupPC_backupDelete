@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 17 Feb 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -389,9 +389,12 @@ sub copyInodes
         $DeltaMerge->update($MergeCompress, $digest, 1);
         $DeltaDel->update($DelCompress, $digest, -1) if ( $DeltaDel );
     }
-    my $attrAll = $attr->get();
-    foreach my $fileUM ( keys(%$attrAll) ) {
-        my $a = $attrAll->{$fileUM};
+    my $idx = 0;
+    my $a;
+    while ( 1 ) {
+        ($a, $idx) = $attr->iterate($idx);
+        last if ( !defined($a) );
+        my $fileUM = $a->{name};
         $FileCnt++;
         $DeltaMerge->update($a->{compress}, $a->{digest}, 1) if ( length($a->{digest}) );
         $DeltaDel->update($a->{compress}, $a->{digest}, -1) if ( $DeltaDel && length($a->{digest}) );
@@ -641,9 +644,12 @@ sub mergeDir
         # if the merge directory is filled, actually delete any files that have
         # BPC_FTYPE_DELETED types
         #
-        my $attrAll = $attr->get();
-        foreach my $fileUM ( keys(%$attrAll) ) {
-            my $a = $attrAll->{$fileUM};
+        my $idx = 0;
+        my $a;
+        while ( 1 ) {
+            ($a, $idx) = $attr->iterate($idx);
+            last if ( !defined($a) );
+            my $fileUM = $a->{name};
             next if ( $a->{type} != BPC_FTYPE_DELETED );
             logMsg("removing attrib for deleted file $mergeDir/$fileUM\n") if ( $LogLevel >= 7 );
             $attr->delete($fileUM);

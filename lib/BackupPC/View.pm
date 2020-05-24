@@ -13,7 +13,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2002-2018  Craig Barratt
+#   Copyright (C) 2002-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 22 May 2018.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -213,13 +213,16 @@ sub dirCache
                 #
                 # new style V4 attributes - everything is in the attrib file
                 #
-                my $attrAll = $attr->get();
-                foreach my $fileUM ( keys(%$attrAll) ) {
+                my $idx = 0;
+                my $a;
+                while ( 1 ) {
+                    ($a, $idx) = $attr->iterate($idx);
+                    last if ( !defined($a) );
+                    my $fileUM = $a->{name};
                     #
                     # skip directories in earlier backups (in V3 each backup
                     # always has the complete directory tree).
                     #
-                    my $a = $attrAll->{$fileUM};
                     next if ( $i < $m->{idx} && $a->{type} == BPC_FTYPE_DIR );
                     #print(STDERR "Adding $fileUM with type $a->{type}\n");
                     if ( !$m->{files}{$fileUM} ) {
@@ -405,9 +408,12 @@ sub dirCache
                 }
             } else {
                 #print(STDERR "Got attr\n");
-                $attrAll = $attr->get();
-                foreach my $fileUM ( keys(%$attrAll) ) {
-                    my $a = $attrAll->{$fileUM};
+                my $idx = 0;
+                my $a;
+                while ( 1 ) {
+                    ($a, $idx) = $attr->iterate($idx);
+                    last if ( !defined($a) );
+                    my $fileUM = $a->{name};
                     if ( $a->{type} == BPC_FTYPE_DELETED ) {
                         #print(STDERR "deleting $fileUM\n");
                         delete($m->{files}{$fileUM});
@@ -677,9 +683,12 @@ sub dirHistory
             #
             # new style V4 attributes - everything is in the attrib file
             #
-            my $attrAll = $attr->get();
-            foreach my $fileUM ( keys(%$attrAll) ) {
-                my $a = $attrAll->{$fileUM};
+            my $idx = 0;
+            my $a;
+            while ( 1 ) {
+                ($a, $idx) = $attr->iterate($idx);
+                last if ( !defined($a) );
+                my $fileUM = $a->{name};
                 $files->{$fileUM}[$i]               = $a;
                 $attr->delete($fileUM);
                 ($files->{$fileUM}[$i]{relPath}     = "$dir/$fileUM") =~ s{//+}{/}g;
@@ -852,9 +861,12 @@ sub dirHistory
             if ( !$attr->read($path) ) {
                 push(@{$m->{error}}, "Can't read attribute file in $path\n");
             } else {
-                my $attrAll = $attr->get();
-                foreach my $fileUM ( keys(%$attrAll) ) {
-                    my $a = $attrAll->{$fileUM};
+                my $idx = 0;
+                my $a;
+                while ( 1 ) {
+                    ($a, $idx) = $attr->iterate($idx);
+                    last if ( !defined($a) );
+                    my $fileUM = $a->{name};
                     if ( $a->{type} == BPC_FTYPE_DELETED ) {
                         delete($files->{$fileUM}[$i]);
                         delete($hardlinks->{$fileUM});

@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2017  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.4, released 24 Nov 2017.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -310,13 +310,17 @@ sub RmTreeQuietInner
                 if ( !$attr->read(".", $name) ) {
                     print(STDERR "Can't read attribute file in $cwd/$path/$name\n");
                 }
-                my $attrAll = $attr->get();
+                my $fileCnt = 0;
                 my $d = $attr->digest();
 
                 $deltaInfo->update($compress, $d, -1) if ( $deltaInfo && length($d) );
                 if ( $compress >= 0 ) {
-                    foreach my $fileUM ( keys(%$attrAll) ) {
-                        my $a = $attrAll->{$fileUM};
+                    my $idx = 0;
+                    my $a;
+                    while ( 1 ) {
+                        ($a, $idx) = $attr->iterate($idx);
+                        last if ( !defined($a) );
+                        $fileCnt++;
                         $deltaInfo->update($compress, $a->{digest}, -1)
                                                         if ( $deltaInfo && length($a->{digest}) );
 			next if ( $a->{nlinks} == 0 || !$deltaInfo || !$attrCache );
@@ -333,7 +337,7 @@ sub RmTreeQuietInner
 			}
                     }
                 }
-                &$progressCB(scalar(keys(%$attrAll))) if ( ref($progressCB) eq 'CODE' );
+                &$progressCB($fileCnt) if ( ref($progressCB) eq 'CODE' );
             } else {
                 #
                 # the callback should know it's directories, not files in the non-ref

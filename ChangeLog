@@ -40,7 +40,7 @@ Merged pull requests #278, #281, #289, #295, #297, #307, #308, #311,
 
 * Fixed v3 digest calculation in bin/BackupPC_backupDuplicate and
   bin/BackupPC_migrateV3toV4; reported by @palmtop (issue #291)
-  
+
 * Improved handling of BackupPC_nightly running for more than 24 hours:
   drop next queued run, and provide better log messages; reported
   by @guestisp (issue #303)
@@ -205,7 +205,7 @@ Merged pull request #195.
   interface. The default value is 0, which means it's disabled
   for regular users but available for admins.
 
-* Fixed delete backup bug in bin/BackupPC_Admin_SCGI reported by 
+* Fixed delete backup bug in bin/BackupPC_Admin_SCGI reported by
   Julian Zielke in issue #193.
 
 * Added check to dirCacheFlush() in bin/BackupPC_tarExtract to skip files
@@ -222,13 +222,13 @@ Merged pull requests #160, #190.
 
 * Backups can now be deleted via the CGI interface, written by @moisseev
   (#160).
-  
+
 * bin/BackupPC_backupDelete: added -L option that puts output into client
   LOG file, to support CGI backup deletion.
 
 * Added support for a user-editable comment per host, via a new ClientComment
   config parameter, requested by @andrewmaksymowsky.
-  
+
 * bin/BackupPC_tarExtract: Added support for pax headers, which smbclient
   uses for long file names
 
@@ -512,7 +512,7 @@ Merged pull requests: #93, #94, #97, #102
 
 * Remove orphan share names if they are removed from the host's
   configuration.
- 
+
 * Improvements to various utilities.
 
 * Reference counting is now per-backup.
@@ -1309,7 +1309,7 @@ Merged pull requests: #93, #94, #97, #102
   it is generating warnings about old/unused files/directories.
 
 * Applied patch from Marc Prewitt to fix host queue order.
- 
+
 * Applied Lorenzo Cappelletti's it.pm patch.
 
 * Applied Wander Winkelhorst's nl.pm patch.
@@ -1671,7 +1671,7 @@ Merged pull requests: #93, #94, #97, #102
 
 * Added exponential expiry option for full dumps.  This allows you
   to specify
-  
+
    - how many fulls to keep at intervals of $Conf{FullPeriod}, followed by
    - how many fulls to keep at intervals of 2 * $Conf{FullPeriod},
    - how many fulls to keep at intervals of 4 * $Conf{FullPeriod},
@@ -2149,7 +2149,7 @@ Merged pull requests: #93, #94, #97, #102
 
 * All unix file attributes are now saved (and pooled when possible).
   This includes user and group ownership, permissions, and modification
-  time.  Smbclient also does a reasonable job of emulating unix 
+  time.  Smbclient also does a reasonable job of emulating unix
   permissions (such as mtime), and these attributes get saved too.
 
 * The new default is to not fill incremental dumps.  configure.pl

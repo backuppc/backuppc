@@ -16,16 +16,16 @@
 #   makeDist merges the version number, release date and turns all the
 #   library paths etc back into the symbolic form (eg: __INSTALLDIR__)
 #   so that configure.pl will do the right thing.
-# 
+#
 #   Sometime the language files are not up to date, and makeDist exits
 #   after complaining about the lang files being inconsistent.  Use
 #   the --nolangCheck option to turn off that checking.
-# 
+#
 #   By default makeDist does a syntax check on all the source files.
 #   If you want to skip that you can use the --nosyntaxCheck option, eg:
-# 
+#
 #       makeDist --nolangCheck --nosyntaxCheck --releasedate '1 Dec 2013' --version 4.0.0alpha3
-# 
+#
 #   The distribution is in the file name: dist/BackupPC-$Version.tar.gz.
 #
 # AUTHOR

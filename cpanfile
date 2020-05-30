@@ -1,3 +1,3 @@
-requires 'BackupPC::XS', '0.57';
+requires 'BackupPC::XS', '0.60';
 requires 'CGI';
 requires 'File::Listing';

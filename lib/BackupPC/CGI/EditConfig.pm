@@ -1307,7 +1307,7 @@ EOF
 	    }
             my $textType = ($varName =~ /Passwd/) ? "password" : "text";
             $content .= <<EOF;
-<input type="$textType" class="editTextInput" name="v_zZ_$varName" size="$size" maxlength="256" value="${EscHTML($varValue)}"$onChange>
+<input type="$textType" class="editTextInput" name="v_zZ_$varName" size="$size" maxlength="4096" value="${EscHTML($varValue)}"$onChange>
 EOF
         } elsif ( $type->{type} eq "boolean" ) {
             # checkbox

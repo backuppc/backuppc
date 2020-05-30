@@ -103,6 +103,12 @@ and freely available as Open Source on [GitHub](https://github.com/backuppc/back
 - Open Source hosted by GitHub and freely available under GPL.
 
 
+## Packaging Help Needed
+
+BackupPC 4.x doesn't have packages available for all the main linux distros.
+If you are willing to create and support packaging BackupPC 4.x for your
+favorite linux distro, please step up and help!  Feel free to create a git
+issue indicating your interest.
 
 ## Resources
 
@@ -153,7 +159,7 @@ Do not send subscription requests to this address!
 
 ## Copyright
 
-Copyright (C) 2001-2018 Craig Barratt. All rights reserved.
+Copyright (C) 2001-2020 Craig Barratt. All rights reserved.
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU General Public License.
 

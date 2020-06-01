@@ -1210,7 +1210,7 @@ $Conf{RsyncBackupPCPath} = "";
 # in $Conf{RsyncClientPath}.
 #
 # The setting should only have two entries: "-e" and
-# everything else; don't add additoinal array elements.
+# everything else; don't add additional array elements.
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #

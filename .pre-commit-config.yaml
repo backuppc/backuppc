@@ -15,3 +15,8 @@ repos:
       - id: mixed-line-ending
       - id: pretty-format-json
       - id: trailing-whitespace
+
+  - repo: "https://github.com/perltidy/perltidy"
+    rev: master
+    hooks:
+      - id: perltidy

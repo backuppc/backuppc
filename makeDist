@@ -390,8 +390,8 @@ sub InstallFile
 		print OUT "$1'__CONFDIR__'$2\n";
             } elsif ( $file =~ /Lib.pm/ && /^(\s*my \$useFHS\s*=\s*)\d;/ ) {
                 print OUT "${1}0;\n";
-            } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'[\w\d\.]+',/ ) {
-                print OUT "$1'$Version',\n";
+            } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> *)'[\w\d\.]+',?(.*)/ ) {
+                print OUT "$1'$Version'$2\n";
 	    } elsif ( $file =~ /configure.pl/ && /__CONFIGURE_BIN_LIST__/ ) {
 		print OUT "        ", join("\n        ", grep(/^bin\//, @PerlSrc)), "\n";
 	    } elsif ( $file =~ /configure.pl/ && /__CONFIGURE_LIB_LIST__/ ) {

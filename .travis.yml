@@ -1,10 +1,8 @@
-﻿dist: trusty
-sudo: false
-env:
-  global:
-    - MAKEFLAGS="-j 2"
+﻿os: linux
+dist: bionic
 
 language: perl
+# See https://www.cpan.org/src/
 perl:
   - 5.30
   - 5.28
@@ -12,31 +10,30 @@ perl:
   - 5.24
   - 5.22
   - 5.20
-  - 5.18
-  - 5.16
-  - 5.14
-  - 5.12
-  - 5.10
-  - 5.8
 
 cache:
   directories:
-  - ~/perl_modules
-
+    - ~/perl_modules
 before_install:
+  - export MAKEFLAGS="-j $(nproc)"
   - cpanm --quiet --notest local::lib
   - eval "$(perl -Mlocal::lib=~/perl_modules)"
-
 install:
   - cpanm --quiet --installdeps --notest .
-
 before_script:
   - ./makeDist --nosyntaxCheck --version HEAD
   - cd ./dist/BackupPC-HEAD
   - sudo useradd -s /usr/sbin/nologin -G travis backuppc
-
 script:
-  - sudo PATH="$PATH" PERL5LIB="$PERL5LIB" ./configure.pl --batch
-  - sudo PATH="$PATH" PERL5LIB="$PERL5LIB" su -m backuppc -c '/usr/local/BackupPC/bin/BackupPC -d'
+  - sudo --preserve-env=PATH,PERL5LIB ./configure.pl --batch
+  - sudo --preserve-env=PATH,PERL5LIB su -m backuppc -c '/usr/local/BackupPC/bin/BackupPC -d'
   - sudo cat /var/log/BackupPC/LOG
   - sudo egrep -v '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2} (Reading hosts file|BackupPC HEAD \(Perl v5\.[0-9]{1,2}\.[0-9]\) started, pid [0-9]+|Next wakeup is [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})$' /var/log/BackupPC/LOG; test $? -eq 1
+
+jobs:
+  - stage: lint
+    language: python
+    python: 3.8
+    script:
+      - pip3 install pre-commit
+      - pre-commit run --all --color always

@@ -1,4 +1,5 @@
 ﻿---
+# Remove dist flag once travis uses bonic as default
 dist: bionic
 
 language: perl

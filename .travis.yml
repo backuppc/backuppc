@@ -46,6 +46,9 @@ jobs:
   - stage: lint
     language: python
     python: 3.8
+    before_install: skip
+    install: skip
+    before_script: skip
     script:
       - pip3 install pre-commit
       - pre-commit run --all --color always

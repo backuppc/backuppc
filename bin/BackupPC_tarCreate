@@ -395,6 +395,21 @@ sub TarWriteHeader
     push(@paxFlds, "gid=$hdr->{gid}")      if ( oct($uid)  != $hdr->{gid} );
     push(@paxFlds, "uname=$hdr->{uname}")  if ( $uname ne $hdr->{uname} );
     push(@paxFlds, "gname=$hdr->{gname}")  if ( $gname ne $hdr->{gname} );
+    if ( ref($hdr->{xattr}) eq 'HASH' ) {
+        # include xattr and acl using gnu tar naming convention
+        foreach my $name ( keys(%{$hdr->{xattr}}) ) {
+            # Skip rsync acls; should try to figure out binary rsync acls, and map
+            # then to ascii version used by tar...
+            next if ( $name eq "user.rsync.%aacl" || $name eq "user.rsync.%dacl" );
+            if ( $name eq "user.gtar.%aacl" ) {
+                push(@paxFlds, "SCHILY.acl.access=" . $hdr->{xattr}{$name});
+            } elsif ( $name eq "user.gtar.%dacl" ) {
+                push(@paxFlds, "SCHILY.acl.default=" . $hdr->{xattr}{$name});
+            } else {
+                push(@paxFlds, "SCHILY.xattr.$name=" . $hdr->{xattr}{$name});
+            }
+        }
+    }
     if ( @paxFlds ) {
         #
         # Some fields don't match - we need to generate a pax header

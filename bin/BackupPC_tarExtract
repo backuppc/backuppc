@@ -9,7 +9,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2018  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 3 Nov 2018.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -320,10 +320,14 @@ sub TarReadFileInfo
         } elsif ( $type eq "x" || $type eq "g" ) {
             my $paxStr = TarRead($fh, $size) || return;
             $paxHdr = {};
-            while ( $paxStr =~ /(\d+) (.*?)=(.*?)\n(.*)/s ) {
-                $paxHdr->{$2} = $3;
-                print("Got pax header $2 -> $3\n") if ( $Conf{XferLogLevel} >= 6 );
-                $paxStr = $4;
+            while ( $paxStr =~ /(\d+) / ) {
+                my $setting = substr($paxStr, 0, $1);
+                $paxStr  = substr($paxStr, $1);
+                $setting =~ s/\n$//;
+                if ( $setting =~ /\d+ (.*?)=(.*)/s ) {
+                    $paxHdr->{$1} = $2;
+                    print("Got pax header $1 -> $2\n") if ( $Conf{XferLogLevel} >= 6 );
+                }
             }
             TarFlush($fh, $size);
             if ( $type eq "g" ) {
@@ -358,6 +362,18 @@ sub TarReadFileInfo
             from_to($linkname, $Conf{ClientCharset}, "utf8");
         }
         # printf("File now %s (hex: %s)\n", $name, unpack("H*", $name));
+        my $xattr = {};
+        foreach my $name ( keys(%$paxHdr) ) {
+            if ( $name =~ /^SCHILY\.xattr\.(.*)/s ) {
+                $xattr->{$1} = $paxHdr->{$name};
+            } elsif ( $name = "SCHILY.acl.access" ) {
+                $xattr->{"user.gtar.%aacl"} = $paxHdr->{$name} if ( length($paxHdr->{$name}) );
+                delete($paxHdr->{$name});
+            } elsif ( $name = "SCHILY.acl.default" ) {
+                $xattr->{"user.gtar.%dacl"} = $paxHdr->{$name} if ( length($paxHdr->{$name}) );
+                delete($paxHdr->{$name});
+            }
+        }
 
         $name     =~ s{^\./+}{};
         $name     =~ s{/+\.?$}{};
@@ -374,6 +390,7 @@ sub TarReadFileInfo
             linkname   => $linkname,
             devmajor   => $devmajor,
             devminor   => $devminor,
+            xattr      => $xattr,
         };
     }
 }
@@ -484,6 +501,18 @@ sub moveFileToOld
     }
 }
 
+sub xattrEqual
+{
+    my($x1, $x2) = @_;
+
+    return 1 if ( !defined($x1) && !defined($x2) );
+    return 0 if ( !defined($x1) || !defined($x2) || scalar(keys(%$x1)) != scalar(keys(%$x2)) );
+    foreach my $n ( keys(%$x1) ) {
+        return 0 if ( !defined($x2->{$n}) || $x1->{$n} ne $x2->{$n} );
+    }
+    return 1;
+}
+
 sub TarReadFile
 {
     my($fh) = @_;
@@ -541,6 +570,7 @@ sub TarReadFile
                                 mode     => $f->{mode},
                                 uid      => $f->{uid},
                                 gid      => $f->{gid},
+                                xattr    => $f->{xattr},
                                 size     => 0,
                                 mtime    => $f->{mtime},
                                 inode    => $Inode++,
@@ -644,6 +674,7 @@ sub TarReadFile
                 $f->{inode}  = $aTarget->{inode};
                 $f->{nlinks} = $aTarget->{nlinks};
                 $f->{digest} = $aTarget->{digest};
+                $f->{xattr}  = $aTarget->{xattr};
                 if ( defined($a)
                   && $a->{type}   == $f->{type}
                   && $a->{mode}   == $f->{mode}
@@ -780,7 +811,8 @@ sub TarReadFile
           && $a->{gid}    == $f->{gid}
           && $a->{size}   == $f->{size}
           && $a->{mtime}  == $f->{mtime}
-          && $a->{digest} eq $digest ) {
+          && $a->{digest} eq $digest
+          && xattrEqual($a->{xattr}, $f->{xattr}) ) {
             #
             # same contents, same attributes, so no need to rewrite
             #
@@ -822,6 +854,7 @@ sub TarReadFile
                         nlinks   => $nlinks,
                         compress => $newCompress,
                         digest   => $digest,
+                        xattr    => $f->{xattr},
                    });
     }
     $bpc->flushXSLibMesgs();

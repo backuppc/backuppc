@@ -80,6 +80,9 @@ sub start
         #from_to($remoteDir, "utf8", $conf->{ClientCharset})
         #                            if ( $conf->{ClientCharset} ne "" );
         $rsyncArgs = [@{$conf->{RsyncRestoreArgs}}];
+        if ( ref($conf->{RsyncRestoreArgsExtra}) eq 'ARRAY' ) {
+            push(@$rsyncArgs, @{$conf->{RsyncRestoreArgsExtra}});
+        }
 
         #
         # Each name in the fileList starts with $t->{pathHdrSrc}.  The

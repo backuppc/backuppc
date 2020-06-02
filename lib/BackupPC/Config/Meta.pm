@@ -280,6 +280,12 @@ use vars qw(%ConfigMeta);
             undefIfEmpty => 1,
 	    child        => "string",
     },
+    RsyncRestoreArgsExtra => {
+	    type         => "list",
+	    emptyOk      => 1,
+            undefIfEmpty => 1,
+	    child        => "string",
+    },
     RsyncFullArgsExtra	 => {
 	    type         => "list",
 	    emptyOk      => 1,
@@ -474,6 +480,7 @@ use vars qw(%ConfigMeta);
                 RsyncArgs                 => "boolean",
                 RsyncArgsExtra            => "boolean",
                 RsyncRestoreArgs          => "boolean",
+                RsyncRestoreArgsExtra     => "boolean",
                 RsyncFullArgsExtra        => "boolean",
                 RsyncIncrArgsExtra        => "boolean",
                 RsyncSshArgs              => "boolean",

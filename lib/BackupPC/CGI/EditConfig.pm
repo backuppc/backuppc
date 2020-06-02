@@ -305,6 +305,8 @@ our %ConfigMenu = (
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
             {name => "RsyncRestoreArgs",
                 visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
+            {name => "RsyncRestoreArgsExtra",
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
 
             ### Archive paths and commands
             {text => "CfgEdit_Title_Archive_Paths_Commands",

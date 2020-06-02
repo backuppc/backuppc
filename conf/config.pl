@@ -1387,6 +1387,14 @@ $Conf{RsyncRestoreArgs} = [
             #'--xattrs',
 ];
 
+#
+# Additional arguments for an rsync or rsyncd restore.
+#
+# This makes it easy to have per-client arguments.
+#
+$Conf{RsyncRestoreArgsExtra} = [
+];
+
 ###########################################################################
 # FTP Configuration
 # (can be overwritten in the per-PC log file)
@@ -2331,6 +2339,7 @@ $Conf{CgiUserConfigEdit} = {
         RsyncFullArgsExtra        => 1,
         RsyncIncrArgsExtra        => 1,
         RsyncRestoreArgs          => 1,
+        RsyncRestoreArgsExtra     => 1,
         RsyncShareName            => 1,
         RsyncSshArgs              => 1,
         SmbClientFullCmd          => 0,

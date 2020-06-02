@@ -1,5 +1,4 @@
-﻿os: linux
-dist: bionic
+---
 
 language: perl
 # Perl version matrix follows versions still in use by popular

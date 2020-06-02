@@ -90,6 +90,9 @@ if ( !$attrib->read($dir, $file) ) {
         exit(1);
     }
 }
+if ( my $msg = BackupPC::XS::Lib::logMsgGet() ) {
+    print join("", @$msg);
+}
 if ( length($attrib->digest()) ) {
     printf("Attrib digest is %s\n", unpack("H*", $attrib->digest()));
 }

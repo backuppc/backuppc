@@ -2,7 +2,11 @@
 dist: bionic
 
 language: perl
-# See https://www.cpan.org/src/
+# Perl version matrix follows versions still in use by popular
+# distributions such as Debian or Ubuntu, see:
+# - https://www.cpan.org/src/
+# - https://packages.debian.org/search?keywords=perl
+# - https://packages.ubuntu.com/search?keywords=perl
 perl:
   - 5.30
   - 5.28

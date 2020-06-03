@@ -1499,7 +1499,7 @@ $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 Para agregar un nuevo host, seleccione Agregar y luego escriba el nombre. Para empezar
 la configuraci&oacute;n de cada host desde otro host, escriba el nombre de host
 como NEWHOST=COPYHOST. Esto sobrescribir&aacute; cualquier configuraci&oacute;n por host
-existente para NEWHOST. También puede hacer esto para un host ya existente. Para eliminar
+existente para NEWHOST. Tambi√©n puede hacer esto para un host ya existente. Para eliminar
 un host, pulse el bot&oacute;n Eliminar. Al agregar, eliminar y copiar la
 configuraci&oacute;n, los cambios no entrar&aacute;n en vigor hasta que se pulse el
 bot&oacute;n Guardar. Ninguna de las copias de seguridad de host eliminados ser&aacute;n
@@ -1515,7 +1515,7 @@ EOF
 $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Host \$host Editor de Configuraci&oacute;n")}
 <p>
-Nota: Marque 'Reemplazar' si desea modificar un valor específico a este host.
+Nota: Marque 'Reemplazar' si desea modificar un valor espec√≠fico a este host.
 <p>
 EOF
 

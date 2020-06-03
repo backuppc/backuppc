@@ -14,7 +14,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2019  Craig Barratt
+#   Copyright (C) 2001-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 25 Dec 2019.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -143,6 +143,11 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
         print("BackupPC_migrateV3toV4: backup $opts{n} for host $Host doesn't exist\n");
         next;
     }
+    if ( -d "$TopDir/pc/$Host/new" ) {
+        print("BackupPC_migrateV3toV4: removing partial backup in $TopDir/pc/$Host/new\n");
+        BackupPC::DirOps::RmTreeQuiet($bpc, "$TopDir/pc/$Host/new", -2);
+    }
+    unlink("$TopDir/pc/$Host/NewFileList") if ( -e "$TopDir/pc/$Host/NewFileList" );
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
         next if ( (defined($opts{n}) && $opts{n} != $Backups[$i]{num}) );
         if ( $Backups[$i]{version} >= 4 ) {

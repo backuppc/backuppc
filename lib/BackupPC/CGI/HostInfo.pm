@@ -10,7 +10,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2018  Craig Barratt
+#   Copyright (C) 2003-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.2.2, released 21 Oct 2018.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -74,6 +74,26 @@ sub action
     my $Privileged = CheckPermission($host);
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_view_information_about}}"));
+    }
+    if ( $In{action} eq "keepBackup" ) {
+	my $num   = $In{num};
+	my $keep  = $In{keep};
+        my $i;
+	if ( $num !~ /^\d+$/ ) {
+	    ErrorExit("Backup number ${EscHTML($In{num})} for host ${EscHTML($host)} does not exist.");
+	}
+	my @Backups = $bpc->BackupInfoRead($host);
+	for ( $i = 0 ; $i < @Backups ; $i++ ) {
+	    if ( $Backups[$i]{num} == $num ) {
+		$Backups[$i]{keep} = $keep ? 1 : 0;
+		$bpc->BackupInfoWrite($host, @Backups);
+		BackupPC::Storage->backupInfoWrite($bpc->TopDir() . "/pc/$host", $Backups[$i]{num}, $Backups[$i], 1);
+		last;
+	    }
+	}
+        if ( $i >= @Backups ) {
+            ErrorExit("Backup number ${EscHTML($In{num})} for host ${EscHTML($host)} does not exist.");
+        }
     }
     my $deleteEnabled = $PrivAdmin || ($Conf{CgiUserDeleteBackupEnable} > 0 && $Privileged);
     $deleteEnabled = 0 if ( $Conf{CgiUserDeleteBackupEnable} < 0 );
@@ -165,19 +185,32 @@ EOF
         $filled .= " ($Backups[$i]{fillFromNum}) "
                             if ( $Backups[$i]{fillFromNum} ne "" );
         my $ltype = $Lang->{"backupType_$Backups[$i]{type}"};
-        my $deleteStr;
-        if ( $deleteEnabled ) {
-            $deleteStr = <<EOF;
-    <td align="center" class="border"><form name="DeleteForm" action="$MyURL" method="get" style="margin-bottom: 0px;">
+        my $keepOrDeleteStr = "    <td class=\"border\">\n";
+        if ( !$Backups[$i]{noFill} && $i < @Backups - 1 ) {
+            my $keepChecked = $Backups[$i]{keep} ? " checked" : "";
+            $keepOrDeleteStr .= <<EOF;
+      <form name="KeepForm" action="$MyURL" method="get" style="margin: 0px;">
+        <input type="checkbox" name="keep"   $keepChecked value="1" onchange="this.form.submit()">
+        <input type="hidden"   name="num"    value="$Backups[$i]{num}">
+        <input type="hidden"   name="action" value="keepBackup">
+        <input type="hidden"   name="host"   value="$host">
+      </form><span style="display:none">$Backups[$i]{keep}<!- for sorting -></span></td>
+EOF
+        }
+        $keepOrDeleteStr .= "    </td>\n    <td class=\"border\">\n";
+        if ( (!$Backups[$i]{keep} || $Backups[$i]{noFill}) && $deleteEnabled ) {
+            $keepOrDeleteStr .= <<EOF;
+      <form name="DeleteForm" action="$MyURL" method="get" style="margin: 0px;">
         <input type="hidden" name="action" value="deleteBackup">
         <input type="hidden" name="host"   value="$host">
         <input type="hidden" name="num"    value="$Backups[$i]{num}">
         <input type="hidden" name="nofill" value="$Backups[$i]{noFill}">
         <input type="hidden" name="type"   value="$Backups[$i]{type}">
         <input type="submit" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}">
-    </form></td>
+      </form>
 EOF
         }
+        $keepOrDeleteStr .= "    </td>\n";
         push @bkpRows, <<EOF;
 <tr>
     <td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
@@ -187,7 +220,7 @@ EOF
     <td align="right" class="border" data-date_format="$Conf{CgiDateFormatMMDD}"> $startTime </td>
     <td align="right" class="border">  $duration </td>
     <td align="right" class="border">  $age </td>
-    $deleteStr
+    $keepOrDeleteStr
     <td align="left" class="border">   <tt>$TopDir/pc/$host/$Backups[$i]{num}</tt> </td></tr>
 EOF
         push @sizeRows, <<EOF;

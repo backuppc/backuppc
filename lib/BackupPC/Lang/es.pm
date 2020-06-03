@@ -723,6 +723,7 @@ Haga click en el n&uacute;mero de copia de seguridad para revisar y restaurar ar
     <td align="center"> Fecha Inicio </td>
     <td align="center"> Duraci&oacute;n/min </td>
     <td align="center"> Antiguedad/d&iacute;as </td>
+    <td align="center"> Mantener </td>
     \$deleteHdrStr
     <td align="center"> Ruta a la Copia en Servidor </td>
 </tr>

@@ -719,6 +719,7 @@ Kliknìte na èíslo zálohy pro prohlížení a obnovení zálohy.
     <td align="center"> Datum spuštìní </td>
     <td align="center"> Doba trvání/minuty </td>
     <td align="center"> Doba/dny </td>
+    <td align="center"> Drzet </td>
     \$deleteHdrStr
     <td align="center"> Cesta serveru zálohy </td>
 </tr>

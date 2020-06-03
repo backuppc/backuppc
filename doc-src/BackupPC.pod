@@ -3105,6 +3105,22 @@ The level of this dump.  A full dump is level 0.  Currently incrementals
 are 1.  In V4+ multi-level incrementals are no longer supported, so this
 is just a 0 or 1.
 
+=item charset
+
+The client charset when this backup was made.
+
+=item version
+
+The BackupPC version when this backup was made.
+
+=item inodeLast
+
+The last inode number used in this backup.
+
+=item keep
+
+If set this backup won't be deleted.
+
 =back
 
 =item restores

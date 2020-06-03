@@ -724,6 +724,7 @@ Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
     <td align="center"> Startdatum </td>
     <td align="center"> Duurtijd in min. </td>
     <td align="center"> Lftd. in dagen </td>
+    <td align="center"> Houden </td>
     \$deleteHdrStr
     <td align="center"> Plaats op de server </td>
 </tr>

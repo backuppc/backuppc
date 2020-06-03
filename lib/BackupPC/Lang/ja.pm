@@ -714,6 +714,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
     <td align="center"> 開始日時 </td>
     <td align="center"> 間隔(分) </td>
     <td align="center"> 経過(日) </td>
+    <td align="center"> 保つ </td>
     \$deleteHdrStr
     <td align="center"> サーババックアップパス </td>
 </tr>

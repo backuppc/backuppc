@@ -723,6 +723,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
     <td align="center"> Дата початку </td>
     <td align="center"> Тривалість/хв </td>
     <td align="center"> Вік/днів </td>
+    <td align="center"> Тримайте </td>
     \$deleteHdrStr
     <td align="center"> Серверний шлях копії </td>
 </tr>

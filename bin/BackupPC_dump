@@ -831,6 +831,7 @@ if ( $newBkupIdx >= @Backups ) {
     $Backups[$newBkupIdx]{charset}    = $Conf{ClientCharset};
     $Backups[$newBkupIdx]{version}    = $bpc->Version();
     $Backups[$newBkupIdx]{compress}   = $Conf{CompressLevel};
+    $Backups[$newBkupIdx]{keep}       = 0;
 }
 #
 # New backup shows as "active" while running
@@ -1687,6 +1688,10 @@ sub BackupExpire
 	$cntFull = $cntIncr = 0;
 	$oldestIncr = $oldestFull = 0;
 	for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+            #
+            # don't consider any backups marked keep
+            #
+            next if ( $Backups[$i]{keep} );
             $Backups[$i]{preV4} = ($Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./) ? 1 : 0;
             if ( $Backups[$i]{preV4} ) {
                 if ( $Backups[$i]{type} eq "full" ) {
@@ -1856,6 +1861,10 @@ sub BackupFullExpire
     my $keepPeriod = ($fullPeriod * ($fullKeepCnt->[0] - 1) - $startTimeDeviation) * 24 * 3600;
 
     for ( my $i = 0 ; $i < @$Backups ; $i++ ) {
+        #
+        # don't consider any backups marked keep
+        #
+        next if ( $Backups[$i]{keep} );
         if ( $Backups[$i]{preV4} ) {
             next if ( $Backups->[$i]{type} ne "full" );
         } else {
@@ -1984,6 +1993,15 @@ sub BackupRemove
     my $fileExt = $Backups[$idx]{compress} > 0 ? ".z" : "";
     my $bkupNum = $Backups[$idx]{num};
     my @args    = ("-h", $client, "-n", $Backups[$idx]{num}, "-l", "-m");
+
+    if ( $Backups[$idx]{keep} ) {
+        #
+        # this shouldn't happen, but report an error if it does
+        #
+        $XferLOG->write(\"BackupRemove(num = $bkupNum) -> skipping because keep is set\n")
+                            if ( defined($XferLOG) );
+        return 1;
+    }
 
     if ( defined($shareName) ) {
         push(@args, "-s", $shareName, "/");

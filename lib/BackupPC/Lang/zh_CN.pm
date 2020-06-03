@@ -708,6 +708,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
     <td align="center"> 开始时间 </td>
     <td align="center"> 耗时（分钟）</td>
     <td align="center"> 距离现在（天前）</td>
+    <td align="center"> 保持 </td>
     \$deleteHdrStr
     <td align="center"> 服务器上备份路径 </td>
 </tr>

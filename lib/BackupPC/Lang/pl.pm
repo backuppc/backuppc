@@ -723,6 +723,7 @@ Kliknij na numer kopii aby przeglądać i przywracać wybrane pliki/katalogi.
     <td align="center"> Początek </td>
     <td align="center"> Czas trwania w min. </td>
     <td align="center"> Wiek/dni </td>
+    <td align="center"> Trzymać </td>
     \$deleteHdrStr
     <td align="center"> Ścieżka serwera kopii </td>
 </tr>

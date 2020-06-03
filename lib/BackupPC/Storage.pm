@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2017  Craig Barratt
+#   Copyright (C) 2004-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.1.1, released 29 Mar 2017.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -51,7 +51,7 @@ sub new
                     xferErrs xferBadFile xferBadShare tarErrs
                     compress sizeExistComp sizeNewComp
                     noFill fillFromNum mangle xferMethod level
-                    charset version inodeLast
+                    charset version inodeLast keep
                 )],
         RestoreFields => [qw(
                     num startTime endTime result errorMsg nFiles size

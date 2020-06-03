@@ -720,6 +720,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de s
     <td align="center"> Date de démarrage </td>
     <td align="center"> Durée (min) </td>
     <td align="center"> Âge (jours) </td>
+    <td align="center"> Garder </td>
     \$deleteHdrStr
     <td align="center"> Chemin d\'accès de la sauvegarde sur le serveur </td>
 </tr>

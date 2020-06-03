@@ -726,6 +726,7 @@ Clique no número do Backup para revisar e restaurar arquivos.
     <td align="center"> Data Início </td>
     <td align="center"> Duração/min </td>
     <td align="center"> Idade/dias </td>
+    <td align="center"> Guarda </td>
     \$deleteHdrStr
     <td align="center"> Rota da Cópia no Servidor </td>
 </tr>

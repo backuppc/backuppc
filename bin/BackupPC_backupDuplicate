@@ -31,7 +31,7 @@
 #
 #========================================================================
 #
-# Version 4.3.2, released 19 Jan 2020.
+# Version 4.3.3, released 5 Apr 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -140,6 +140,7 @@ $Backups[$newIdx]{num}      = $newNum;
 $Backups[$newIdx]{noFill}   = 0;
 $Backups[$newIdx]{compress} = $Compress;
 $Backups[$newIdx]{version}  = $bpc->Version();
+$Backups[$newIdx]{keep}     = 0;
 
 print("__bpc_pidStart__ $$\n") if ( !$opts{p} );
 

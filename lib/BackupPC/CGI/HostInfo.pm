@@ -186,7 +186,7 @@ EOF
                             if ( $Backups[$i]{fillFromNum} ne "" );
         my $ltype = $Lang->{"backupType_$Backups[$i]{type}"};
         my $keepOrDeleteStr = "    <td class=\"border\">\n";
-        if ( !$Backups[$i]{noFill} && $i < @Backups - 1 ) {
+        if ( !$Backups[$i]{noFill} && ($i < @Backups - 1 || $Backups[$i]{type} eq "full") ) {
             my $keepChecked = $Backups[$i]{keep} ? " checked" : "";
             $keepOrDeleteStr .= <<EOF;
       <form name="KeepForm" action="$MyURL" method="get" style="margin: 0px;">

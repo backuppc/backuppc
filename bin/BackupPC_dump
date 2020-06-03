@@ -1596,6 +1596,7 @@ sub BackupFailCleanup
             $Backups[$newBkupIdx]         = {%{$Backups[$lastBkupIdx]}};
             $Backups[$newBkupIdx]{num}    = $newBkupNum;
             $Backups[$newBkupIdx]{noFill} = 0;
+            $Backups[$newBkupIdx]{keep}   = 0;
             print($LogFd $bpc->timeStamp, "Removing empty backup #$removeNum\n");
             $XferLOG->write(\"Removing empty backup #$removeNum\n");
             BackupRemove($client, $removeIdx, 0);
@@ -1958,6 +1959,7 @@ sub BackupSave
     $Backups[$i]{charset}       = $Conf{ClientCharset};
     $Backups[$i]{version}       = $bpc->Version();
     $Backups[$i]{inodeLast}     = $inodeLast;
+    $Backups[$i]{keep}          = 0;
 
     return if ( $noWrite );
     #

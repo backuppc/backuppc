@@ -22,6 +22,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+use utf8;
+
 # --------------------------------
 
 $Lang{Start_Archive} = "Avvia archivio";
@@ -307,7 +309,7 @@ EOF
 
 $Lang{BackupPC_Archive2_parity} = <<EOF;
 <tr>
-    <td>Percentuale di dati di parit� (0 = disabiltata, 5 = valori tipici)</td>
+    <td>Percentuale di dati di paritï¿½ (0 = disabiltata, 5 = valori tipici)</td>
     <td><input type="numeric" value="\$ArchivePar" name="par"></td>
 </tr>
 EOF

@@ -14,22 +14,24 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+use utf8;
+
 # --------------------------------
 
 $Lang{Start_Archive} = "Spustit Archivaci";
-$Lang{Stop_Dequeue_Archive} = "Ukonèit/Odstranit z Fronty Archivaci";
-$Lang{Start_Full_Backup} = "Spustit Úplné Zálohování";
-$Lang{Start_Incr_Backup} = "Spustit Inkremetaèní Zálohování";
-$Lang{Stop_Dequeue_Backup} = "Ukonèit/Odstranit z Fronty Zálohování";
+$Lang{Stop_Dequeue_Archive} = "UkonÄit/Odstranit z Fronty Archivaci";
+$Lang{Start_Full_Backup} = "Spustit ÃšplnÃ© ZÃ¡lohovÃ¡nÃ­";
+$Lang{Start_Incr_Backup} = "Spustit InkremetaÄnÃ­ ZÃ¡lohovÃ¡nÃ­";
+$Lang{Stop_Dequeue_Backup} = "UkonÄit/Odstranit z Fronty ZÃ¡lohovÃ¡nÃ­";
 $Lang{Restore} = "Obnovit";
-$Lang{Type_full} = "úplnı";
-$Lang{Type_incr} = "inkrementaèní";
+$Lang{Type_full} = "ÃºplnÃ½";
+$Lang{Type_incr} = "inkrementaÄnÃ­";
 
 # -----
 
-$Lang{Only_privileged_users_can_view_admin_options} = "Pouze oprávnìní uivatelé mají pøístup k administraènímu nastavení.";
-$Lang{H_Admin_Options} = "BackupPC Server: Administraèní nastavení";
-$Lang{Admin_Options} = "Administraèní nastavení";
+$Lang{Only_privileged_users_can_view_admin_options} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© majÃ­ pÅ™Ã­stup k administraÄnÃ­mu nastavenÃ­.";
+$Lang{H_Admin_Options} = "BackupPC Server: AdministraÄnÃ­ nastavenÃ­";
+$Lang{Admin_Options} = "AdministraÄnÃ­ nastavenÃ­";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
@@ -37,7 +39,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
 <table class="tableStnd">
-  <tr><td>Znovu nahrát konfiguraci serveru:<td><input type="button" value="Reload"
+  <tr><td>Znovu nahrÃ¡t konfiguraci serveru:<td><input type="button" value="Reload"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
 </table>
@@ -45,26 +47,26 @@ $Lang{Admin_Options_Page} = <<EOF;
 <!--
 \${h2("Konfigurace serveru")}
 <ul>
-  <li><i>Jiná nastavení mohou bıt zde ... napø,</i>
+  <li><i>JinÃ¡ nastavenÃ­ mohou bÃ½t zde ... napÅ™,</i>
   <li>Editace konfigurace serveru
 </ul>
 -->
 EOF
 
-$Lang{Unable_to_connect_to_BackupPC_server} = "Není moné se pøipojit k BackupPC serveru";
+$Lang{Unable_to_connect_to_BackupPC_server} = "NenÃ­ moÅ¾nÃ© se pÅ™ipojit k BackupPC serveru";
 $Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
-Tento CGI skript (\$MyURL) se není schopnı pøipojit k BackupPC
+Tento CGI skript (\$MyURL) se nenÃ­ schopnÃ½ pÅ™ipojit k BackupPC
 server na \$Conf{ServerHost} port \$Conf{ServerPort}.<br>
 Chyba: \$err.<br>
-Je moné, e BackupPC server není spuštìn nebo je chyba v konfiguraci.
-Prosím oznamte to systémovému administrátorovi.
+Je moÅ¾nÃ©, Å¾e BackupPC server nenÃ­ spuÅŸtÄ›n nebo je chyba v konfiguraci.
+ProsÃ­m oznamte to systÃ©movÃ©mu administrÃ¡torovi.
 EOF
 
 $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">
 BackupPC server na <tt>\$Conf{ServerHost}</tt> port <tt>\$Conf{ServerPort}</tt>
-není momentálnì spuštìn (moná jste ho ukonèil nebo ještì nespustil).<br>
+nenÃ­ momentÃ¡lnÄ› spuÅŸtÄ›n (moÅ¾nÃ¡ jste ho ukonÄil nebo jeÅŸtÄ› nespustil).<br>
 Chceste ho spustit?
 <input type="hidden" name="action" value="startServer">
 <input type="submit" value="Spustit Server" name="ignore">
@@ -76,26 +78,26 @@ EOF
 $Lang{H_BackupPC_Server_Status} = "Status Serveru BackupPC";
 
 $Lang{BackupPC_Server_Status_General_Info}= <<EOF;
-\${h2(\"Obecné Informace o Serveru\")}
+\${h2(\"ObecnÃ© Informace o Serveru\")}
 
 <ul>
 <li> PID serveru je \$Info{pid},  na hostu \$Conf{ServerHost},
-     verze \$Info{Version}, spuštìnı \$serverStartTime.
-<li> Vygenerování stavu : \$now.
-<li> Nahrání konfigurace : \$configLoadTime.
-<li> PC bude pøíštì ve frontì : \$nextWakeupTime.
-<li> Další informace:
+     verze \$Info{Version}, spuÅŸtÄ›nÃ½ \$serverStartTime.
+<li> VygenerovÃ¡nÃ­ stavu : \$now.
+<li> NahrÃ¡nÃ­ konfigurace : \$configLoadTime.
+<li> PC bude pÅ™Ã­ÅŸtÄ› ve frontÄ› : \$nextWakeupTime.
+<li> DalÅŸÃ­ informace:
     <ul>
-        <li>\$numBgQueue nevyøízenıch ádostí o zálohu z posledního naplánované probuzení,
-        <li>\$numUserQueue nevyøízenıch ádostí o zálohu od uivatelù,
+        <li>\$numBgQueue nevyÅ™Ã­zenÃ½ch Å¾Ã¡dostÃ­ o zÃ¡lohu z poslednÃ­ho naplÃ¡novanÃ© probuzenÃ­,
+        <li>\$numUserQueue nevyÅ™Ã­zenÃ½ch Å¾Ã¡dostÃ­ o zÃ¡lohu od uÅ¾ivatelÅ¯,
         <li>\$numCmdQueue pending command requests,
         \$poolInfo
-        <li>Stav úloištì je \$Info{DUlastValue}%
-            (\$DUlastTime), dnešní maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
-                a vèerejší maximum bylo \$Info{DUDailyMaxPrev}%.
-        <li>Inode stav úloištì je \$Info{DUInodelastValue}%
-            (\$DUlastTime), dnešní maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
-                a vèerejší maximum bylo \$Info{DUInodeDailyMaxPrev}%.
+        <li>Stav ÃºloÅ¾iÅŸtÄ› je \$Info{DUlastValue}%
+            (\$DUlastTime), dneÅŸnÃ­ maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
+                a vÄerejÅŸÃ­ maximum bylo \$Info{DUDailyMaxPrev}%.
+        <li>Inode stav ÃºloÅ¾iÅŸtÄ› je \$Info{DUInodelastValue}%
+            (\$DUlastTime), dneÅŸnÃ­ maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+                a vÄerejÅŸÃ­ maximum bylo \$Info{DUInodeDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -104,14 +106,14 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 \${h1(qq{$Lang{H_BackupPC_Server_Status}})}
 
 <p>
-\${h2("Probíhající úlohy")}
+\${h2("ProbÃ­hajÃ­cÃ­ Ãºlohy")}
 <p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Host </td>
     <td> Typ </td>
-    <td> Uivatel </td>
-    <td> Spuštìno </td>
-    <td> Pøíkaz </td>
+    <td> UÅ¾ivatel </td>
+    <td> SpuÅŸtÄ›no </td>
+    <td> PÅ™Ã­kaz </td>
     <td align="center"> PID </td>
     <td align="center"> Xfer PID </td>
     <td align="center"> Status </td>
@@ -123,82 +125,82 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \$generalInfo
 
-\${h2("Selhání, která vyadují pozornost")}
+\${h2("SelhÃ¡nÃ­, kterÃ¡ vyÅ¾adujÃ­ pozornost")}
 <p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Host </td>
     <td align="center"> Typ </td>
-    <td align="center"> Uivatel </td>
-    <td align="center"> Poslední pokus </td>
+    <td align="center"> UÅ¾ivatel </td>
+    <td align="center"> PoslednÃ­ pokus </td>
     <td align="center"> Detaily </td>
-    <td align="center"> Èas chyby </td>
-    <td> Poslední chyba (jiná ne ádnı ping) </td></tr>
+    <td align="center"> ÄŒas chyby </td>
+    <td> PoslednÃ­ chyba (jinÃ¡ neÅ¾ Å¾Ã¡dnÃ½ ping) </td></tr>
 \$statusStr
 </table>
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Server_Summary} = "BackupPC: Vıpis Hostù";
+$Lang{BackupPC__Server_Summary} = "BackupPC: VÃ½pis HostÅ¯";
 $Lang{BackupPC__Archive} = "BackupPC: Archiv";
 $Lang{BackupPC_Summary} = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
 <ul>
-<li>Tento stav byl vygenerován v \$now.
-<li>Stav úloištì je \$Info{DUlastValue}%
-    (\$DUlastTime), dnešní maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
-    a vèerejší maximum bylo \$Info{DUDailyMaxPrev}%.
-<li>Inode stav úloištì je \$Info{DUInodelastValue}%
-    (\$DUlastTime), dnešní maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
-    a vèerejší maximum bylo \$Info{DUInodeDailyMaxPrev}%.
+<li>Tento stav byl vygenerovÃ¡n v \$now.
+<li>Stav ÃºloÅ¾iÅŸtÄ› je \$Info{DUlastValue}%
+    (\$DUlastTime), dneÅŸnÃ­ maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
+    a vÄerejÅŸÃ­ maximum bylo \$Info{DUDailyMaxPrev}%.
+<li>Inode stav ÃºloÅ¾iÅŸtÄ› je \$Info{DUInodelastValue}%
+    (\$DUlastTime), dneÅŸnÃ­ maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+    a vÄerejÅŸÃ­ maximum bylo \$Info{DUInodeDailyMaxPrev}%.
 </ul>
 </p>
 
-\${h2("Hosté s úspìšnì provedenımi zálohami")}
+\${h2("HostÃ© s ÃºspÄ›ÅŸnÄ› provedenÃ½mi zÃ¡lohami")}
 <p>
-\$hostCntGood hostù bylo úspìšnì zálohováno, v celkové velikost:
+\$hostCntGood hostÅ¯ bylo ÃºspÄ›ÅŸnÄ› zÃ¡lohovÃ¡no, v celkovÃ© velikost:
 <ul>
-<li> \$fullTot úplnıch záloh v celkové velitosti \${fullSizeTot}GiB
-     (pøed kompresí),
-<li> \$incrTot inkementaèních záloh v celkové velikosti \${incrSizeTot}GiB
-     (pøed kompresí).
+<li> \$fullTot ÃºplnÃ½ch zÃ¡loh v celkovÃ© velitosti \${fullSizeTot}GiB
+     (pÅ™ed kompresÃ­),
+<li> \$incrTot inkementaÄnÃ­ch zÃ¡loh v celkovÃ© velikosti \${incrSizeTot}GiB
+     (pÅ™ed kompresÃ­).
 </ul>
 </p>
 <table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
-    <td align="center"> Uivatel </td>
-    <td align="center"> Poznámka </td>
-    <td align="center"> #Plnı </td>
-    <td align="center"> Plnı Èas (dní) </td>
-    <td align="center"> Plnı Velikost (GiB) </td>
+    <td align="center"> UÅ¾ivatel </td>
+    <td align="center"> PoznÃ¡mka </td>
+    <td align="center"> #PlnÃ½ </td>
+    <td align="center"> PlnÃ½ ÄŒas (dnÃ­) </td>
+    <td align="center"> PlnÃ½ Velikost (GiB) </td>
     <td align="center"> Rychlost (MB/s) </td>
     <td align="center"> #Inkr </td>
-    <td align="center"> Inkr èas (dní) </td>
-    <td align="center"> Poslední Záloha (dní) </td>
+    <td align="center"> Inkr Äas (dnÃ­) </td>
+    <td align="center"> PoslednÃ­ ZÃ¡loha (dnÃ­) </td>
     <td align="center"> Stav </td>
     <td align="center"> #Xfer chyb </td>
-    <td align="center"> Poslední pokus </td></tr>
+    <td align="center"> PoslednÃ­ pokus </td></tr>
 \$strGood
 </table>
-\${h2("Hosté s ádnımi provedenımi zálohami")}
+\${h2("HostÃ© s Å¾Ã¡dnÃ½mi provedenÃ½mi zÃ¡lohami")}
 <p>
-\$hostCntNone hostù s ádnımi zálohani.
+\$hostCntNone hostÅ¯ s Å¾Ã¡dnÃ½mi zÃ¡lohani.
 <p>
 <table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
-    <td align="center"> Uivatel </td>
-    <td align="center"> Poznámka </td>
-    <td align="center"> #Plnı </td>
-    <td align="center"> Plnı Èas (dní) </td>
-    <td align="center"> Plnı Velikost (GiB) </td>
+    <td align="center"> UÅ¾ivatel </td>
+    <td align="center"> PoznÃ¡mka </td>
+    <td align="center"> #PlnÃ½ </td>
+    <td align="center"> PlnÃ½ ÄŒas (dnÃ­) </td>
+    <td align="center"> PlnÃ½ Velikost (GiB) </td>
     <td align="center"> Rychlost (MB/s) </td>
     <td align="center"> #Inkr </td>
-    <td align="center"> Inkr èas (dní) </td>
-    <td align="center"> Poslední Záloha (dní) </td>
+    <td align="center"> Inkr Äas (dnÃ­) </td>
+    <td align="center"> PoslednÃ­ ZÃ¡loha (dnÃ­) </td>
     <td align="center"> Stav </td>
     <td align="center"> #Xfer chyb </td>
-    <td align="center"> Poslední pokus </td></tr>
+    <td align="center"> PoslednÃ­ pokus </td></tr>
 \$strNone
 </table>
 EOF
@@ -232,7 +234,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 //-->
 </script>
 
-\$hostCntGood hostù, kteøí byli zálohováni v celkové velikosti \${fullSizeTot}GiB
+\$hostCntGood hostÅ¯, kteÅ™Ã­ byli zÃ¡lohovÃ¡ni v celkovÃ© velikosti \${fullSizeTot}GiB
 <p>
 <form name="form1" method="post" action="\$MyURL">
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
@@ -241,8 +243,8 @@ $Lang{BackupPC_Archive} = <<EOF;
 <input type="hidden" name="action" value="Archive">
 <table class="tableStnd" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> Host</td>
-    <td align="center"> Uivatel </td>
-    <td align="center"> Velikost zálohy </td>
+    <td align="center"> UÅ¾ivatel </td>
+    <td align="center"> Velikost zÃ¡lohy </td>
 \$strGood
 \$checkAllHosts
 </table>
@@ -253,7 +255,7 @@ EOF
 
 $Lang{BackupPC_Archive2} = <<EOF;
 \${h1(qq{$Lang{BackupPC__Archive}})}
-Nasledující hosté se chystají k archivaci
+NasledujÃ­cÃ­ hostÃ© se chystajÃ­ k archivaci
 <ul>
 \$HostListStr
 </ul>
@@ -274,7 +276,7 @@ EOF
 
 $Lang{BackupPC_Archive2_location} = <<EOF;
 <tr>
-    <td>Umístìní Archivu</td>
+    <td>UmÃ­stÄ›nÃ­ Archivu</td>
     <td><input type="text" value="\$ArchiveDest" name="archive_device"></td>
 </tr>
 EOF
@@ -292,53 +294,53 @@ EOF
 
 $Lang{BackupPC_Archive2_parity} = <<EOF;
 <tr>
-    <td>Procent paritních dat (0 = vypnuté, 5 = typické)</td>
+    <td>Procent paritnÃ­ch dat (0 = vypnutÃ©, 5 = typickÃ©)</td>
     <td><input type="numeric" value="\$ArchivePar" name="par"></td>
 </tr>
 EOF
 
 $Lang{BackupPC_Archive2_split} = <<EOF;
 <tr>
-    <td>Rozdìlit vıstup na</td>
+    <td>RozdÄ›lit vÃ½stup na</td>
     <td><input type="numeric" value="\$ArchiveSplit" name="splitsize">Megabytes</td>
 </tr>
 EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>V úloišti je \${poolSize}GiB zahrnujíc \$info->{"\${name}FileCnt"} souborù
-            a \$info->{"\${name}DirCnt"} adresáøù (od \$poolTime),
-        <li>Hashování úloištì dává \$info->{"\${name}FileCntRep"} opakujících se
-        souborù s nejdelším øetìzem \$info->{"\${name}FileRepMax"},
-        <li>Noèní úklid úloištì odstranil \$info->{"\${name}FileCntRm"} souborù
+        <li>V ÃºloÅ¾iÅŸti je \${poolSize}GiB zahrnujÃ­c \$info->{"\${name}FileCnt"} souborÅ¯
+            a \$info->{"\${name}DirCnt"} adresÃ¡Å™Å¯ (od \$poolTime),
+        <li>HashovÃ¡nÃ­ ÃºloÅ¾iÅŸtÄ› dÃ¡vÃ¡ \$info->{"\${name}FileCntRep"} opakujÃ­cÃ­ch se
+        souborÅ¯ s nejdelÅŸÃ­m Å™etÄ›zem \$info->{"\${name}FileRepMax"},
+        <li>NoÄnÃ­ Ãºklid ÃºloÅ¾iÅŸtÄ› odstranil \$info->{"\${name}FileCntRm"} souborÅ¯
             velikosti \${poolRmSize}GiB (kolem \$poolTime),
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Backup_Requested_on__host} = "BackupPC:  Záloha vyádána na \$host";
+$Lang{BackupPC__Backup_Requested_on__host} = "BackupPC:  ZÃ¡loha vyÅ¾Ã¡dÃ¡na na \$host";
 $Lang{BackupPC__Delete_Requested_for_a_backup_of__host} = "BackupPC: Delete Requested for a backup of \$host";
 # --------------------------------
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
 <p>
-Odpovìï serveru na: \$reply
+OdpovÄ›Ä serveru na: \$reply
 <p>
-Vra se na <a href="\$MyURL?host=\$host">domovskou stránku \$host</a>.
+VraÂ se na <a href="\$MyURL?host=\$host">domovskou strÃ¡nku \$host</a>.
 EOF
 # --------------------------------
-$Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: Zaèátek zálohy potvrzen na \$host";
+$Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: ZaÄÃ¡tek zÃ¡lohy potvrzen na \$host";
 # --------------------------------
 $Lang{Are_you_sure_start} = <<EOF;
 \${h1("Are you sure?")}
 <p>
-Chystáte se spustit \$type zálohu na \$host.
+ChystÃ¡te se spustit \$type zÃ¡lohu na \$host.
 
 <form name="Confirm" action="\$MyURL" method="get">
 <input type="hidden" name="host" value="\$host">
 <input type="hidden" name="hostIP" value="\$ipAddr">
 <input type="hidden" name="doit" value="1">
 <input type="hidden" name="action" value="">
-Opravdu to chcete provést?
+Opravdu to chcete provÃ©st?
 <input type="button" value="\$buttonText"
   onClick="document.Confirm.action.value='\$In{action}';
            document.Confirm.submit();">
@@ -346,23 +348,23 @@ Opravdu to chcete provést?
 </form>
 EOF
 # --------------------------------
-$Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: Ukonèit potvrzení kopie na \$host";
+$Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: UkonÄit potvrzenÃ­ kopie na \$host";
 # --------------------------------
 $Lang{Are_you_sure_stop} = <<EOF;
 
-\${h1("Jste si jistı?")}
+\${h1("Jste si jistÃ½?")}
 
 <p>
-Chystáte se ukonèit/vyøadit z fronty zálohování na \$host;
+ChystÃ¡te se ukonÄit/vyÅ™adit z fronty zÃ¡lohovÃ¡nÃ­ na \$host;
 
 <form name="Confirm" action="\$MyURL" method="get">
 <input type="hidden" name="host"   value="\$host">
 <input type="hidden" name="doit"   value="1">
 <input type="hidden" name="action" value="">
-Prosím, nezaèínejte jiné zálohování
+ProsÃ­m, nezaÄÃ­nejte jinÃ© zÃ¡lohovÃ¡nÃ­
 <input type="text" name="backoff" size="10" value="\$backoff"> hodin.
 <p>
-Opravdu to chcete provést?
+Opravdu to chcete provÃ©st?
 <input type="button" value="\$buttonText"
   onClick="document.Confirm.action.value='\$In{action}';
            document.Confirm.submit();">
@@ -371,47 +373,47 @@ Opravdu to chcete provést?
 
 EOF
 # --------------------------------
-$Lang{Only_privileged_users_can_view_queues_} = "Pouze oprávnìní uivatelé mají pøistup k frontám.";
+$Lang{Only_privileged_users_can_view_queues_} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© majÃ­ pÅ™istup k frontÃ¡m.";
 # --------------------------------
-$Lang{Only_privileged_users_can_archive} = "Pouze oprávnìní uivatelé mohou archivovat.";
+$Lang{Only_privileged_users_can_archive} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© mohou archivovat.";
 # --------------------------------
-$Lang{BackupPC__Queue_Summary} = "BackupPC: Pøehled front";
+$Lang{BackupPC__Queue_Summary} = "BackupPC: PÅ™ehled front";
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
-\${h1("Pøehled fronty zálohování")}
-\${h2("Pøehled fronty uivatelù")}
+\${h1("PÅ™ehled fronty zÃ¡lohovÃ¡nÃ­")}
+\${h2("PÅ™ehled fronty uÅ¾ivatelÅ¯")}
 <p>
-Následující uivatelé jsou momentálnì ve frontì:
+NÃ¡sledujÃ­cÃ­ uÅ¾ivatelÃ© jsou momentÃ¡lnÄ› ve frontÄ›:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Action </td>
-    <td> Èas do </td>
-    <td> Uivatel </td></tr>
+    <td> ÄŒas do </td>
+    <td> UÅ¾ivatel </td></tr>
 \$strUser
 </table>
 
-\${h2("Souhrn fronty v pozadí")}
+\${h2("Souhrn fronty v pozadÃ­")}
 <p>
-Následující ádosti v pozadí jsou momentálnì ve frontì:
+NÃ¡sledujÃ­cÃ­ Å¾Ã¡dosti v pozadÃ­ jsou momentÃ¡lnÄ› ve frontÄ›:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Action </td>
-    <td> Èas do </td>
-    <td> Uivatel </td></tr>
+    <td> ÄŒas do </td>
+    <td> UÅ¾ivatel </td></tr>
 \$strBg
 </table>
-\${h2("Souhrn fronty pøíkazù")}
+\${h2("Souhrn fronty pÅ™Ã­kazÅ¯")}
 <p>
-Následující pøíkazy jsou momentálnì ve frontì:
+NÃ¡sledujÃ­cÃ­ pÅ™Ã­kazy jsou momentÃ¡lnÄ› ve frontÄ›:
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Action </td>
-    <td> Èas do </td>
-    <td> Uivatel </td>
-    <td> Pøíkaz </td></tr>
+    <td> ÄŒas do </td>
+    <td> UÅ¾ivatel </td>
+    <td> PÅ™Ã­kaz </td></tr>
 \$strCmd
 </table>
 EOF
@@ -424,13 +426,13 @@ $Lang{Log_File__file__comment} = <<EOF;
 EOF
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
-Obsah souboru <tt>\$file</tt>, modifikován \$mtimeStr \$comment
+Obsah souboru <tt>\$file</tt>, modifikovÃ¡n \$mtimeStr \$comment
 EOF
 
 # --------------------------------
-$Lang{skipped__skipped_lines} = "[ pøeskoèeno \$skipped øádkù ]\n";
+$Lang{skipped__skipped_lines} = "[ pÅ™eskoÄeno \$skipped Å™Ã¡dkÅ¯ ]\n";
 # --------------------------------
-$Lang{_pre___Can_t_open_log_file__file} = "<pre>\nNení moné otevøít log soubor \$file\n";
+$Lang{_pre___Can_t_open_log_file__file} = "<pre>\nNenÃ­ moÅ¾nÃ© otevÅ™Ã­t log soubor \$file\n";
 
 # --------------------------------
 $Lang{BackupPC__Log_File_History} = "BackupPC: Historie Log Souboru";
@@ -440,52 +442,52 @@ $Lang{Log_File_History__hdr} = <<EOF;
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Soubor </td>
     <td align="center"> Velikost </td>
-    <td align="center"> Èas modifikace </td></tr>
+    <td align="center"> ÄŒas modifikace </td></tr>
 \$str
 </table>
 EOF
 
 # -------------------------------
 $Lang{Recent_Email_Summary} = <<EOF;
-\${h1("Pøehled nedávnıch emailù (Øazeno zpìtnì)")}
+\${h1("PÅ™ehled nedÃ¡vnÃ½ch emailÅ¯ (Å˜azeno zpÄ›tnÄ›)")}
 <p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td align="center"> Pøíjemce </td>
-    <td align="center"> Odesílatel </td>
-    <td align="center"> Èas </td>
-    <td align="center"> Pøedmìt </td></tr>
+<tr class="tableheader"><td align="center"> PÅ™Ã­jemce </td>
+    <td align="center"> OdesÃ­latel </td>
+    <td align="center"> ÄŒas </td>
+    <td align="center"> PÅ™edmÄ›t </td></tr>
 \$str
 </table>
 EOF
 
 
 # ------------------------------
-$Lang{Browse_backup__num_for__host} = "BackupPC: Prohlíet zálohu \$num pro \$host";
+$Lang{Browse_backup__num_for__host} = "BackupPC: ProhlÃ­Å¾et zÃ¡lohu \$num pro \$host";
 
 # ------------------------------
-$Lang{Restore_Options_for__host} = "BackupPC: Obnovit nastavení pro \$host";
+$Lang{Restore_Options_for__host} = "BackupPC: Obnovit nastavenÃ­ pro \$host";
 $Lang{Restore_Options_for__host2} = <<EOF;
-\${h1("Obnovit nastavení pro \$host")}
+\${h1("Obnovit nastavenÃ­ pro \$host")}
 <p>
-Vybral jste následující soubory/adresáøe z
-èásti \$share, záloha èíslo #\$num:
+Vybral jste nÃ¡sledujÃ­cÃ­ soubory/adresÃ¡Å™e z
+ÄÃ¡sti \$share, zÃ¡loha ÄÃ­slo #\$num:
 <ul>
 \$fileListStr
 </ul>
 </p><p>
-Pro obnovení tìchto souborù/adresáøù máte tøi monosti.
-Vyberte si, prosím, jednu z následujících moností.
+Pro obnovenÃ­ tÄ›chto souborÅ¯/adresÃ¡Å™Å¯ mÃ¡te tÅ™i moÅ¾nosti.
+Vyberte si, prosÃ­m, jednu z nÃ¡sledujÃ­cÃ­ch moÅ¾nostÃ­.
 </p>
-\${h2("Monost 1: Pøímá obnova")}
+\${h2("MoÅ¾nost 1: PÅ™Ã­mÃ¡ obnova")}
 <p>
 EOF
 
 $Lang{Restore_Options_for__host_Option1} = <<EOF;
-Mùete spustit obnovení tìchto souborù do
+MÅ¯Å¾ete spustit obnovenÃ­ tÄ›chto souborÅ¯ do
 <b>\$directHost</b>.
 </p><p>
-<b>Varování:</b> jakıkoliv existující soubor, kterı odpovída tìm,
-které máte vybrány bude smazán!
+<b>VarovÃ¡nÃ­:</b> jakÃ½koliv existujÃ­cÃ­ soubor, kterÃ½ odpovÃ­da tÄ›m,
+kterÃ© mÃ¡te vybrÃ¡ny bude smazÃ¡n!
 </p>
 <form action="\$MyURL" method="post" name="direct">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
@@ -506,13 +508,13 @@ které máte vybrány bude smazán!
 		window.open(URL,'','width=500,height=400');
 	 }
 	 </script>
-	 <!--<a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Hledej dostupné èásti (NENÍ IMPLEMENTOVÁNO)</a>--></td>
+	 <!--<a href="javascript:myOpen('\$MyURL?action=findShares&host='+document.direct.hostDest.options.value)">Hledej dostupnÃ© ÄÃ¡sti (NENÃ IMPLEMENTOVÃNO)</a>--></td>
 </tr><tr>
-    <td>Obnovení souborù do èásti</td>
+    <td>ObnovenÃ­ souborÅ¯ do ÄÃ¡sti</td>
     <td><input type="text" size="40" value="\${EscHTML(\$share)}"
 	 name="shareDest"></td>
 </tr><tr>
-    <td>Obnovit soubory v adresáøi<br>(vztahující se k èásti)</td>
+    <td>Obnovit soubory v adresÃ¡Å™i<br>(vztahujÃ­cÃ­ se k ÄÃ¡sti)</td>
     <td valign="top"><input type="text" size="40" maxlength="256"
 	value="\${EscHTML(\$pathHdr)}" name="pathHdr"></td>
 </tr><tr>
@@ -522,22 +524,22 @@ které máte vybrány bude smazán!
 EOF
 
 $Lang{Restore_Options_for__host_Option1_disabled} = <<EOF;
-Pøímé obnovení bylo zakázáno pro hosta \${EscHTML(\$hostDest)}.
-Vyberte si, prosím, jednu z moností obnovy.
+PÅ™Ã­mÃ© obnovenÃ­ bylo zakÃ¡zÃ¡no pro hosta \${EscHTML(\$hostDest)}.
+Vyberte si, prosÃ­m, jednu z moÅ¾nostÃ­ obnovy.
 EOF
 
 # ------------------------------
 $Lang{Option_2__Download_Zip_archive} = <<EOF;
 <p>
-\${h2("Monost 2: Stáhnout Zip archiv")}
+\${h2("MoÅ¾nost 2: StÃ¡hnout Zip archiv")}
 <p>
-Mùete stáhnout Zip archiv obsahující všechny soubory/adresáøe, které
-jste vybral.  Poté mùete pouít aplikaci, napø. WinZip, k zobrazení
-nebp rozbalení nìkterého z tìchto souborù.
+MÅ¯Å¾ete stÃ¡hnout Zip archiv obsahujÃ­cÃ­ vÅŸechny soubory/adresÃ¡Å™e, kterÃ©
+jste vybral.  PotÃ© mÅ¯Å¾ete pouÅ¾Ã­t aplikaci, napÅ™. WinZip, k zobrazenÃ­
+nebp rozbalenÃ­ nÄ›kterÃ©ho z tÄ›chto souborÅ¯.
 </p><p>
-<b>Varování:</b> v závislosti na tom, které soubory/adresáøe jste vybral,
-tento archiv mùe bıt velmi velkı.  Vytvoøení a pøenos archivu mùe trvat
-minuty, a budete potøebovat dostatek místa na lokálním disku.
+<b>VarovÃ¡nÃ­:</b> v zÃ¡vislosti na tom, kterÃ© soubory/adresÃ¡Å™e jste vybral,
+tento archiv mÅ¯Å¾e bÃ½t velmi velkÃ½.  VytvoÅ™enÃ­ a pÅ™enos archivu mÅ¯Å¾e trvat
+minuty, a budete potÅ™ebovat dostatek mÃ­sta na lokÃ¡lnÃ­m disku.
 </p>
 <form action="\$MyURL" method="post">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
@@ -545,13 +547,13 @@ minuty, a budete potøebovat dostatek místa na lokálním disku.
 <input type="hidden" name="type" value="2">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<input type="checkbox" value="1" name="relative" checked> Vytvoøit archiv relativní
+<input type="checkbox" value="1" name="relative" checked> VytvoÅ™it archiv relativnÃ­
 k \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (jinak bude archiv obsahovat plnou cestu).
 <br>
 <table class="tableStnd" border="0">
 <tr>
-    <td>Komprese (0=off, 1=rychlá,...,9=nejlepší)</td>
+    <td>Komprese (0=off, 1=rychlÃ¡,...,9=nejlepÅŸÃ­)</td>
     <td><input type="text" size="6" value="5" name="compressLevel"></td>
 </tr><tr>
     <td>Code page (e.g. cp866)</td>
@@ -559,7 +561,7 @@ k \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 </tr>
 </table>
 <br>
-<input type="submit" value="Stáhnout Zip soubor" name="ignore">
+<input type="submit" value="StÃ¡hnout Zip soubor" name="ignore">
 </form>
 EOF
 
@@ -567,11 +569,11 @@ EOF
 
 $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 <p>
-\${h2("Monost 2: Stánout Zip archiv")}
+\${h2("MoÅ¾nost 2: StÃ¡nout Zip archiv")}
 <p>
-Archive::Zip není nainstalován, èili nebude moné stáhnout
+Archive::Zip nenÃ­ nainstalovÃ¡n, Äili nebude moÅ¾nÃ© stÃ¡hnout
 zip archiv.
-Poádejte systémového administrátora o instalaci Archive::Zip z
+PoÅ¾Ã¡dejte systÃ©movÃ©ho administrÃ¡tora o instalaci Archive::Zip z
 <a href="http://www.cpan.org">www.cpan.org</a>.
 </p>
 EOF
@@ -579,15 +581,15 @@ EOF
 
 # ------------------------------
 $Lang{Option_3__Download_Zip_archive} = <<EOF;
-\${h2("Monost 3: Stáhnout Tar archiv")}
+\${h2("MoÅ¾nost 3: StÃ¡hnout Tar archiv")}
 <p>
-Mùete stáhnout Tar archiv obsahující všechny soubory/adresáøe, které
-jste vybral.  Poté mùete pouít aplikaci, napø. tar nebo WinZip, k zobrazení
-nebp rozbalení nìkterého z tìchto souborù.
+MÅ¯Å¾ete stÃ¡hnout Tar archiv obsahujÃ­cÃ­ vÅŸechny soubory/adresÃ¡Å™e, kterÃ©
+jste vybral.  PotÃ© mÅ¯Å¾ete pouÅ¾Ã­t aplikaci, napÅ™. tar nebo WinZip, k zobrazenÃ­
+nebp rozbalenÃ­ nÄ›kterÃ©ho z tÄ›chto souborÅ¯.
 </p><p>
-<b>Varování:</b> v závislosti na tom, které soubory/adresáøe jste vybral,
-tento archiv mùe bıt velmi velkı.  Vytvoøení a pøenos archivu mùe trvat
-minuty, a budete potøebovat dostatek místa na lokálním disku.
+<b>VarovÃ¡nÃ­:</b> v zÃ¡vislosti na tom, kterÃ© soubory/adresÃ¡Å™e jste vybral,
+tento archiv mÅ¯Å¾e bÃ½t velmi velkÃ½.  VytvoÅ™enÃ­ a pÅ™enos archivu mÅ¯Å¾e trvat
+minuty, a budete potÅ™ebovat dostatek mÃ­sta na lokÃ¡lnÃ­m disku.
 </p>
 <form action="\$MyURL" method="post">
 <input type="hidden" name="host" value="\${EscHTML(\$host)}">
@@ -595,27 +597,27 @@ minuty, a budete potøebovat dostatek místa na lokálním disku.
 <input type="hidden" name="type" value="1">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<input type="checkbox" value="1" name="relative" checked> Vytvoø archiv relativní
+<input type="checkbox" value="1" name="relative" checked> VytvoÅ™ archiv relativnÃ­
 k \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (jinak bude archiv obsahovat plnou cestu).
 <br>
-<input type="submit" value="Stánout Tar soubor" name="ignore">
+<input type="submit" value="StÃ¡nout Tar soubor" name="ignore">
 </form>
 EOF
 
 
 # ------------------------------
-$Lang{Restore_Confirm_on__host} = "BackupPC: Potvrzení obnovení na \$host";
+$Lang{Restore_Confirm_on__host} = "BackupPC: PotvrzenÃ­ obnovenÃ­ na \$host";
 
 $Lang{Are_you_sure} = <<EOF;
-\${h1("Jsi si jistı?")}
+\${h1("Jsi si jistÃ½?")}
 <p>
-Chystáte se zahájit obnovu pøímo do poèítaèe \$In{hostDest}.
-Následující soubory budou obnoveny do èásti \$In{shareDest}, ze
-zálohy èíslo \$num:
+ChystÃ¡te se zahÃ¡jit obnovu pÅ™Ã­mo do poÄÃ­taÄe \$In{hostDest}.
+NÃ¡sledujÃ­cÃ­ soubory budou obnoveny do ÄÃ¡sti \$In{shareDest}, ze
+zÃ¡lohy ÄÃ­slo \$num:
 <p>
 <table class="tableStnd" border>
-<tr class="tableheader"><td>Originální soubor/adresáø</td><td>Bude obnoven do</td></tr>
+<tr class="tableheader"><td>OriginÃ¡lnÃ­ soubor/adresÃ¡Å™</td><td>Bude obnoven do</td></tr>
 \$fileListStr
 </table>
 
@@ -628,7 +630,7 @@ zálohy èíslo \$num:
 <input type="hidden" name="type" value="4">
 <input type="hidden" name="action" value="">
 \$hiddenStr
-Obravdu to chceš provést?
+Obravdu to chceÅŸ provÃ©st?
 <input type="button" value="\$Lang->{Restore}"
  onClick="document.RestoreForm.action.value='Restore';
           document.RestoreForm.submit();">
@@ -638,19 +640,19 @@ EOF
 
 
 # --------------------------
-$Lang{Restore_Requested_on__hostDest} = "BackupPC: Obnovit vyádané na \$hostDest";
+$Lang{Restore_Requested_on__hostDest} = "BackupPC: Obnovit vyÅ¾Ã¡danÃ© na \$hostDest";
 $Lang{Reply_from_server_was___reply} = <<EOF;
 \${h1(\$str)}
 <p>
-Odpovìï od serveru: \$reply
+OdpovÄ›Ä od serveru: \$reply
 <p>
-Jít zpìt na <a href="\$MyURL?host=\$hostDest">domovská stránka \$hostDest</a>.
+JÃ­t zpÄ›t na <a href="\$MyURL?host=\$hostDest">domovskÃ¡ strÃ¡nka \$hostDest</a>.
 EOF
 
 $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
 \${h1(\$str)}
 <p>
-Odpovìï od serveru: \$reply
+OdpovÄ›Ä od serveru: \$reply
 EOF
 
 
@@ -683,10 +685,10 @@ Do you really want to do this?
 EOF
 
 # -------------------------
-$Lang{Host__host_Backup_Summary} = "BackupPC: Pøehled záloh hosta \$host";
+$Lang{Host__host_Backup_Summary} = "BackupPC: PÅ™ehled zÃ¡loh hosta \$host";
 
 $Lang{Host__host_Backup_Summary2} = <<EOF;
-\${h1("Pøehled záloh hosta \$host")}
+\${h1("PÅ™ehled zÃ¡loh hosta \$host")}
 <p>
 \$warnStr
 <ul>
@@ -707,21 +709,21 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
           document.StartStopForm.submit();">
 </form>
 </p>
-\${h2("Pøehled záloh")}
+\${h2("PÅ™ehled zÃ¡loh")}
 <p>
-Kliknìte na èíslo zálohy pro prohlíení a obnovení zálohy.
+KliknÄ›te na ÄÃ­slo zÃ¡lohy pro prohlÃ­Å¾enÃ­ a obnovenÃ­ zÃ¡lohy.
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
-    <td align="center"> Vyplnìno </td>
-    <td align="center"> Úroveò </td>
-    <td align="center"> Datum spuštìní </td>
-    <td align="center"> Doba trvání/minuty </td>
+    <td align="center"> VyplnÄ›no </td>
+    <td align="center"> ÃšroveÅˆ </td>
+    <td align="center"> Datum spuÅŸtÄ›nÃ­ </td>
+    <td align="center"> Doba trvÃ¡nÃ­/minuty </td>
     <td align="center"> Doba/dny </td>
-    <td align="center"> Drzet </td>
+    <td align="center"> DrÅ¾et </td>
     \$deleteHdrStr
-    <td align="center"> Cesta serveru zálohy </td>
+    <td align="center"> Cesta serveru zÃ¡lohy </td>
 </tr>
 \$str
 </table>
@@ -729,14 +731,14 @@ Kliknìte na èíslo zálohy pro prohlíení a obnovení zálohy.
 
 \$restoreStr
 </p>
-\${h2("Pøehled Xfer chyb")}
+\${h2("PÅ™ehled Xfer chyb")}
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Pohled </td>
     <td align="center"> #Xfer chyby </td>
-    <td align="center"> #špatné soubory </td>
-    <td align="center"> #špatné èásti </td>
+    <td align="center"> #ÅŸpatnÃ© soubory </td>
+    <td align="center"> #ÅŸpatnÃ© ÄÃ¡sti </td>
     <td align="center"> #tar chyby </td>
 </tr>
 \$errStr
@@ -744,18 +746,18 @@ Kliknìte na èíslo zálohy pro prohlíení a obnovení zálohy.
 
 \${h2("File Size/Count Reuse Summary")}
 <p>
-Existující soubory jsou ty, které jsou ji v úloišti; nové jsou pøidané
-do úloištì.
-Prázné soubory a SMB chyby nejsou poèítány.
+ExistujÃ­cÃ­ soubory jsou ty, kterÃ© jsou jiÅ¾ v ÃºloÅ¾iÅŸti; novÃ© jsou pÅ™idanÃ©
+do ÃºloÅ¾iÅŸtÄ›.
+PrÃ¡znÃ© soubory a SMB chyby nejsou poÄÃ­tÃ¡ny.
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
-    <td align="center" colspan="3"> Celkovì </td>
-    <td align="center" colspan="2"> Existující soubory </td>
-    <td align="center" colspan="2"> Nové soubory </td>
+    <td align="center" colspan="3"> CelkovÄ› </td>
+    <td align="center" colspan="2"> ExistujÃ­cÃ­ soubory </td>
+    <td align="center" colspan="2"> NovÃ© soubory </td>
 </tr>
 <tr class="tableheader sortheader">
-    <td align="center"> Záloha # </td>
+    <td align="center"> ZÃ¡loha # </td>
     <td align="center"> Typ </td>
     <td align="center"> #Soubory </td>
     <td align="center"> Velikost/MB </td>
@@ -768,19 +770,19 @@ Prázné soubory a SMB chyby nejsou poèítány.
 \$sizeStr
 </table>
 
-\${h2("Pøehled kompresí")}
+\${h2("PÅ™ehled kompresÃ­")}
 <p>
-Vıkon komprese pro soubory, které jsou ji v úloišti a pro novì
-zkomprimované soubory.
+VÃ½kon komprese pro soubory, kterÃ© jsou jiÅ¾ v ÃºloÅ¾iÅŸti a pro novÄ›
+zkomprimovanÃ© soubory.
 </p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
-    <td align="center" colspan="3"> Existující soubory </td>
-    <td align="center" colspan="3"> Nové soubory </td>
+    <td align="center" colspan="3"> ExistujÃ­cÃ­ soubory </td>
+    <td align="center" colspan="3"> NovÃ© soubory </td>
 </tr>
-<tr class="tableheader sortheader"><td align="center"> Záloha # </td>
+<tr class="tableheader sortheader"><td align="center"> ZÃ¡loha # </td>
     <td align="center"> Typ </td>
-    <td align="center"> Úroveò komprese </td>
+    <td align="center"> ÃšroveÅˆ komprese </td>
     <td align="center"> Velikost/MB </td>
     <td align="center"> Komprese/MB </td>
     <td align="center"> Komprese </td>
@@ -792,16 +794,16 @@ zkomprimované soubory.
 </table>
 EOF
 
-$Lang{Host__host_Archive_Summary} = "BackupPC: Pøehled archivù hosta \$host ";
+$Lang{Host__host_Archive_Summary} = "BackupPC: PÅ™ehled archivÅ¯ hosta \$host ";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
-\${h1("Pøehled archivù hosta \$host")}
+\${h1("PÅ™ehled archivÅ¯ hosta \$host")}
 <p>
 \$warnStr
 <ul>
 \$statusStr
 </ul>
 
-\${h2("Uivatelské akce")}
+\${h2("UÅ¾ivatelskÃ© akce")}
 <p>
 <form name="StartStopForm" action="\$MyURL" method="get">
 <input type="hidden" name="archivehost" value="\$host">
@@ -831,7 +833,7 @@ $Lang{NavSectionTitle_} = "Server";
 
 # -------------------------
 $Lang{Backup_browse_for__host} = <<EOF;
-\${h1("Prohlíení záloh pro \$host")}
+\${h1("ProhlÃ­Å¾enÃ­ zÃ¡loh pro \$host")}
 
 <script language="javascript" type="text/javascript">
 <!--
@@ -866,13 +868,13 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="share" value="\${EscHTML(\$share)}">
 <input type="hidden" name="action" value="browse">
 <ul>
-<li> Prohlííte zálohu #\$num, která byla spuštìna kolem \$backupTime
-        (\$backupAge dní zpìt),
+<li> ProhlÃ­Å¾Ã­te zÃ¡lohu #\$num, kterÃ¡ byla spuÅŸtÄ›na kolem \$backupTime
+        (\$backupAge dnÃ­ zpÄ›t),
 \$filledBackup
-<li> Zadej adresáø: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
-<li> Klikni na adresáø níe a pokraèuj do nìj,
-<li> Klikni na soubor níe a obnov ho,
-<li> Mùeš vidìt zálohu <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> aktuálního adresáøe.
+<li> Zadej adresÃ¡Å™: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
+<li> Klikni na adresÃ¡Å™ nÃ­Å¾e a pokraÄuj do nÄ›j,
+<li> Klikni na soubor nÃ­Å¾e a obnov ho,
+<li> MÅ¯Å¾eÅŸ vidÄ›t zÃ¡lohu <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> aktuÃ¡lnÃ­ho adresÃ¡Å™e.
 </ul>
 </form>
 
@@ -908,7 +910,7 @@ This is now in the checkAll row
 EOF
 
 # ------------------------------
-$Lang{DirHistory_backup_for__host} = "BackupPC: Historie záloh adresáøù pro \$host";
+$Lang{DirHistory_backup_for__host} = "BackupPC: Historie zÃ¡loh adresÃ¡Å™Å¯ pro \$host";
 
 #
 # These two strings are used to build the links for directories and
@@ -918,56 +920,56 @@ $Lang{DirHistory_dirLink}  = "adres";
 $Lang{DirHistory_fileLink} = "v";
 
 $Lang{DirHistory_for__host} = <<EOF;
-\${h1("Historie záloh adresáøù pro \$host")}
+\${h1("Historie zÃ¡loh adresÃ¡Å™Å¯ pro \$host")}
 <p>
-Tato obrazovka zobrazuje kadou unikátní verzi souboru
-ze všech záloh:
+Tato obrazovka zobrazuje kaÅ¾dou unikÃ¡tnÃ­ verzi souboru
+ze vÅŸech zÃ¡loh:
 <ul>
-<li> Klikni na èíslo zálohy k návratu do prohlíeèe záloh,
-<li> Klikni na odkaz adresáøe (\$Lang->{DirHistory_dirLink}) k pøechodu do
-     nìj,
+<li> Klikni na ÄÃ­slo zÃ¡lohy k nÃ¡vratu do prohlÃ­Å¾eÄe zÃ¡loh,
+<li> Klikni na odkaz adresÃ¡Å™e (\$Lang->{DirHistory_dirLink}) k pÅ™echodu do
+     nÄ›j,
 <li> Klikni na odkaz verze souboru (\$Lang->{DirHistory_fileLink}0,
-     \$Lang->{DirHistory_fileLink}1, ...) k jeho staení,
-<li> Soubory se stejnım obsahem v rùznıch zálohách mají stejné
-     èíslo verze (PleaseTranslateThis: except between v3 and v4 backups),
-<li> Soubory nebo adresáøe, které nejsou ve vybrané záloze
-     nejsou oznaèeny.
-<li> Soubory zobrazené se stejnım èíslem verze mohou mít rozdílné atributy.
-     Vyber èíslo zálohy k zobrazení atributù souboru.
+     \$Lang->{DirHistory_fileLink}1, ...) k jeho staÅ¾enÃ­,
+<li> Soubory se stejnÃ½m obsahem v rÅ¯znÃ½ch zÃ¡lohÃ¡ch majÃ­ stejnÃ©
+     ÄÃ­slo verze (PleaseTranslateThis: except between v3 and v4 backups),
+<li> Soubory nebo adresÃ¡Å™e, kterÃ© nejsou ve vybranÃ© zÃ¡loze
+     nejsou oznaÄeny.
+<li> Soubory zobrazenÃ© se stejnÃ½m ÄÃ­slem verze mohou mÃ­t rozdÃ­lnÃ© atributy.
+     Vyber ÄÃ­slo zÃ¡lohy k zobrazenÃ­ atributÅ¯ souboru.
 </ul>
 
 \${h2("Historie \$dirDisplay")}
 
 <br>
 <table border cellspacing="2" cellpadding="3">
-<tr class="fviewheader"><td>Èíslo zálohy</td>\$backupNumStr</tr>
-<tr class="fviewheader"><td>Èas zálohy</td>\$backupTimeStr</tr>
+<tr class="fviewheader"><td>ÄŒÃ­slo zÃ¡lohy</td>\$backupNumStr</tr>
+<tr class="fviewheader"><td>ÄŒas zÃ¡lohy</td>\$backupTimeStr</tr>
 \$fileStr
 </table>
 EOF
 
 # ------------------------------
-$Lang{Restore___num_details_for__host} = "BackupPC: Obnovit #\$num detailù pro \$host";
+$Lang{Restore___num_details_for__host} = "BackupPC: Obnovit #\$num detailÅ¯ pro \$host";
 
 $Lang{Restore___num_details_for__host2} = <<EOF;
-\${h1("Obnovit #\$num Detailù pro \$host")}
+\${h1("Obnovit #\$num DetailÅ¯ pro \$host")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
-<tr><td class="tableheader"> Èíslo </td><td class="border"> \$Restores[\$i]{num} </td></tr>
-<tr><td class="tableheader"> Vyádal </td><td class="border"> \$RestoreReq{user} </td></tr>
-<tr><td class="tableheader"> Èas vyádání </td><td class="border"> \$reqTime </td></tr>
-<tr><td class="tableheader"> Vısledek </td><td class="border"> \$Restores[\$i]{result} </td></tr>
-<tr><td class="tableheader"> Chybová zpráva </td><td class="border"> \$Restores[\$i]{errorMsg} </td></tr>
-<tr><td class="tableheader"> Zdrojovı host </td><td class="border"> \$RestoreReq{hostSrc} </td></tr>
-<tr><td class="tableheader"> Èíslo zdrojové zálohy </td><td class="border"> \$RestoreReq{num} </td></tr>
-<tr><td class="tableheader"> Zdrojová èást </td><td class="border"> \$RestoreReq{shareSrc} </td></tr>
-<tr><td class="tableheader"> Cílovı host </td><td class="border"> \$RestoreReq{hostDest} </td></tr>
-<tr><td class="tableheader"> Cílová èást </td><td class="border"> \$RestoreReq{shareDest} </td></tr>
-<tr><td class="tableheader"> Èas spuštìní </td><td class="border"> \$startTime </td></tr>
-<tr><td class="tableheader"> Doba trvání </td><td class="border"> \$duration min </td></tr>
-<tr><td class="tableheader"> Poèet souborù </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
-<tr><td class="tableheader"> Celková velikost </td><td class="border"> \${MB} MB </td></tr>
-<tr><td class="tableheader"> Pøenosová rychlost </td><td class="border"> \$MBperSec MB/sec </td></tr>
+<tr><td class="tableheader"> ÄŒÃ­slo </td><td class="border"> \$Restores[\$i]{num} </td></tr>
+<tr><td class="tableheader"> VyÅ¾Ã¡dal </td><td class="border"> \$RestoreReq{user} </td></tr>
+<tr><td class="tableheader"> ÄŒas vyÅ¾Ã¡dÃ¡nÃ­ </td><td class="border"> \$reqTime </td></tr>
+<tr><td class="tableheader"> VÃ½sledek </td><td class="border"> \$Restores[\$i]{result} </td></tr>
+<tr><td class="tableheader"> ChybovÃ¡ zprÃ¡va </td><td class="border"> \$Restores[\$i]{errorMsg} </td></tr>
+<tr><td class="tableheader"> ZdrojovÃ½ host </td><td class="border"> \$RestoreReq{hostSrc} </td></tr>
+<tr><td class="tableheader"> ÄŒÃ­slo zdrojovÃ© zÃ¡lohy </td><td class="border"> \$RestoreReq{num} </td></tr>
+<tr><td class="tableheader"> ZdrojovÃ¡ ÄÃ¡st </td><td class="border"> \$RestoreReq{shareSrc} </td></tr>
+<tr><td class="tableheader"> CÃ­lovÃ½ host </td><td class="border"> \$RestoreReq{hostDest} </td></tr>
+<tr><td class="tableheader"> CÃ­lovÃ¡ ÄÃ¡st </td><td class="border"> \$RestoreReq{shareDest} </td></tr>
+<tr><td class="tableheader"> ÄŒas spuÅŸtÄ›nÃ­ </td><td class="border"> \$startTime </td></tr>
+<tr><td class="tableheader"> Doba trvÃ¡nÃ­ </td><td class="border"> \$duration min </td></tr>
+<tr><td class="tableheader"> PoÄet souborÅ¯ </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
+<tr><td class="tableheader"> CelkovÃ¡ velikost </td><td class="border"> \${MB} MB </td></tr>
+<tr><td class="tableheader"> PÅ™enosovÃ¡ rychlost </td><td class="border"> \$MBperSec MB/sec </td></tr>
 <tr><td class="tableheader"> TarCreate chyb </td><td class="border"> \$Restores[\$i]{tarCreateErrs} </td></tr>
 <tr><td class="tableheader"> Xfer chyb </td><td class="border"> \$Restores[\$i]{xferErrs} </td></tr>
 <tr><td class="tableheader"> Xfer log soubor </td><td class="border">
@@ -976,179 +978,179 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 </tr></tr>
 </table>
 </p>
-\${h1("Seznam souborù/adresáøù")}
+\${h1("Seznam souborÅ¯/adresÃ¡Å™Å¯")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="100%">
-<tr class="tableheader"><td>Originální soubor/adresáø</td><td>Obnoven do</td></tr>
+<tr class="tableheader"><td>OriginÃ¡lnÃ­ soubor/adresÃ¡Å™</td><td>Obnoven do</td></tr>
 \$fileListStr
 </table>
 EOF
 
 # ------------------------------
-$Lang{Archive___num_details_for__host} = "BackupPC: Archivovat #\$num detailù pro \$host";
+$Lang{Archive___num_details_for__host} = "BackupPC: Archivovat #\$num detailÅ¯ pro \$host";
 
 $Lang{Archive___num_details_for__host2} = <<EOF;
-\${h1("Archivovat #\$num Detailù pro \$host")}
+\${h1("Archivovat #\$num DetailÅ¯ pro \$host")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr><td class="tableheader"> Èíslo </td><td class="border"> \$Archives[\$i]{num} </td></tr>
-<tr><td class="tableheader"> Vyádal </td><td class="border"> \$ArchiveReq{user} </td></tr>
-<tr><td class="tableheader"> Èas vyádání </td><td class="border"> \$reqTime </td></tr>
-<tr><td class="tableheader"> Odpovìd </td><td class="border"> \$Archives[\$i]{result} </td></tr>
-<tr><td class="tableheader"> Chybová zpráva </td><td class="border"> \$Archives[\$i]{errorMsg} </td></tr>
-<tr><td class="tableheader"> Èas spustìní </td><td class="border"> \$startTime </td></tr>
-<tr><td class="tableheader"> Dpba trvání </td><td class="border"> \$duration min </td></tr>
+<tr><td class="tableheader"> ÄŒÃ­slo </td><td class="border"> \$Archives[\$i]{num} </td></tr>
+<tr><td class="tableheader"> VyÅ¾Ã¡dal </td><td class="border"> \$ArchiveReq{user} </td></tr>
+<tr><td class="tableheader"> ÄŒas vyÅ¾Ã¡dÃ¡nÃ­ </td><td class="border"> \$reqTime </td></tr>
+<tr><td class="tableheader"> OdpovÄ›d </td><td class="border"> \$Archives[\$i]{result} </td></tr>
+<tr><td class="tableheader"> ChybovÃ¡ zprÃ¡va </td><td class="border"> \$Archives[\$i]{errorMsg} </td></tr>
+<tr><td class="tableheader"> ÄŒas spustÄ›nÃ­ </td><td class="border"> \$startTime </td></tr>
+<tr><td class="tableheader"> Dpba trvÃ¡nÃ­ </td><td class="border"> \$duration min </td></tr>
 <tr><td class="tableheader"> Xfer log soubor </td><td class="border">
 <a href="\$MyURL?action=view&type=ArchiveLOG&num=\$Archives[\$i]{num}&host=\$host">View</a>,
 <a href="\$MyURL?action=view&type=ArchiveErr&num=\$Archives[\$i]{num}&host=\$host">Errors</a>
 </tr></tr>
 </table>
 <p>
-\${h1("Seznam hostù")}
+\${h1("Seznam hostÅ¯")}
 <p>
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td>Host</td><td>Èíslo kopie</td></tr>
+<tr class="tableheader"><td>Host</td><td>ÄŒÃ­slo kopie</td></tr>
 \$HostListStr
 </table>
 EOF
 
 # -----------------------------------
-$Lang{Email_Summary} = "BackupPC: Souhrn emailù";
+$Lang{Email_Summary} = "BackupPC: Souhrn emailÅ¯";
 
 # -----------------------------------
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: zkontroluj apache error_log\n";
 $Lang{Wrong_user__my_userid_is___} =
-              "Špatnı uivatel: moje userid je \$>, místo \$uid"
+              "ÅpatnÃ½ uÅ¾ivatel: moje userid je \$>, mÃ­sto \$uid"
             . "(\$Conf{BackupPCUser})\n";
-# $Lang{Only_privileged_users_can_view_PC_summaries} = "Pouze oprávnìní uivatelé jsou oprávnìni prohlíet souhrny PC.";
+# $Lang{Only_privileged_users_can_view_PC_summaries} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© jsou oprÃ¡vnÄ›ni prohlÃ­Å¾et souhrny PC.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-                  "Pouze oprávnìní uivatelé mohou ukonèit nebo spustit zálohování na"
+                  "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© mohou ukonÄit nebo spustit zÃ¡lohovÃ¡nÃ­ na"
 		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Špatné èíslo \${EscHTML(\$In{num})}";
-$Lang{Unable_to_open__file__configuration_problem} = "Nepodaøilo se otevøít \$file: problém konfigurace?";
-$Lang{Only_privileged_users_can_view_log_or_config_files} = "Pouze oprávnìní uivatelé mají pøístup k log a konfiguraèním souborùm.";
-$Lang{Only_privileged_users_can_view_log_files} = "Pouze oprávnìní uivatelé mají pøístup k log souborùm.";
-$Lang{Only_privileged_users_can_view_email_summaries} = "Pouze oprávnìní uivatelé mají pøístup k souhrnu emailù.";
-$Lang{Only_privileged_users_can_browse_backup_files} = "Pouze oprávnìní uivatelé mohou prohlíet soubory záloh"
+$Lang{Invalid_number__num} = "ÅpatnÃ© ÄÃ­slo \${EscHTML(\$In{num})}";
+$Lang{Unable_to_open__file__configuration_problem} = "NepodaÅ™ilo se otevÅ™Ã­t \$file: problÃ©m konfigurace?";
+$Lang{Only_privileged_users_can_view_log_or_config_files} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© majÃ­ pÅ™Ã­stup k log a konfiguraÄnÃ­m souborÅ¯m.";
+$Lang{Only_privileged_users_can_view_log_files} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© majÃ­ pÅ™Ã­stup k log souborÅ¯m.";
+$Lang{Only_privileged_users_can_view_email_summaries} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© majÃ­ pÅ™Ã­stup k souhrnu emailÅ¯.";
+$Lang{Only_privileged_users_can_browse_backup_files} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© mohou prohlÃ­Å¾et soubory zÃ¡loh"
                 . " pro host \${EscHTML(\$In{host})}.";
 $Lang{Only_privileged_users_can_delete_backups} = "Only privileged users can delete backups"
                 . " of host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "Prázdné jméno hosta.";
-$Lang{Directory___EscHTML} = "Adresáø \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
-		    . " je prázdnı";
-$Lang{Can_t_browse_bad_directory_name2} = "Není moné prohlíet - špatnı název adresáøe"
+$Lang{Empty_host_name} = "PrÃ¡zdnÃ© jmÃ©no hosta.";
+$Lang{Directory___EscHTML} = "AdresÃ¡Å™ \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
+		    . " je prÃ¡zdnÃ½";
+$Lang{Can_t_browse_bad_directory_name2} = "NenÃ­ moÅ¾nÃ© prohlÃ­Å¾et - ÅŸpatnÃ½ nÃ¡zev adresÃ¡Å™e"
 	            . " \${EscHTML(\$relDir)}";
-$Lang{Only_privileged_users_can_restore_backup_files} = "Pouze oprávnìní uivatelé mohou obnovovat soubory zálohy"
+$Lang{Only_privileged_users_can_restore_backup_files} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© mohou obnovovat soubory zÃ¡lohy"
                 . " pro hosta \${EscHTML(\$In{host})}.";
-$Lang{Bad_host_name} = "Špatné jméno hosta \${EscHTML(\$host)}";
-$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Nevybral jste ádnı soubor; prosím jdìte Zpìt k"
-                . " vıbìru souborù.";
-$Lang{You_haven_t_selected_any_hosts} = "Nevybral jste ádného hosta; prosím jdìte Zpìt k"
-                . " vıbìru hostù.";
-$Lang{Nice_try__but_you_can_t_put} = "Nelze umístit \'..\' do názvu souboru";
+$Lang{Bad_host_name} = "ÅpatnÃ© jmÃ©no hosta \${EscHTML(\$host)}";
+$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Nevybral jste Å¾Ã¡dnÃ½ soubor; prosÃ­m jdÄ›te ZpÄ›t k"
+                . " vÃ½bÄ›ru souborÅ¯.";
+$Lang{You_haven_t_selected_any_hosts} = "Nevybral jste Å¾Ã¡dnÃ©ho hosta; prosÃ­m jdÄ›te ZpÄ›t k"
+                . " vÃ½bÄ›ru hostÅ¯.";
+$Lang{Nice_try__but_you_can_t_put} = "Nelze umÃ­stit \'..\' do nÃ¡zvu souboru";
 $Lang{Host__doesn_t_exist} = "Host \${EscHTML(\$In{hostDest})} neexistuje";
-$Lang{You_don_t_have_permission_to_restore_onto_host} = "Nemáte oprávnìní k obnovì na"
+$Lang{You_don_t_have_permission_to_restore_onto_host} = "NemÃ¡te oprÃ¡vnÄ›nÃ­ k obnovÄ› na"
 		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "Nelze otevøít nebo vytvoøit "
+$Lang{Can_t_open_create__openPath} = "Nelze otevÅ™Ã­t nebo vytvoÅ™it "
 		. "\${EscHTML(\"\$openPath\")}";
-$Lang{Only_privileged_users_can_restore_backup_files2} = "Pouze oprávnìní uivatelé mohou obnovovat soubory zálohy"
+$Lang{Only_privileged_users_can_restore_backup_files2} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© mohou obnovovat soubory zÃ¡lohy"
                 . " pro hosta \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "Prázdné jméno hosta";
-$Lang{Unknown_host_or_user} = "Neznámı host nebo uivatel \${EscHTML(\$host)}";
-$Lang{Only_privileged_users_can_view_information_about} = "Pouze oprávnìní uivatelé mají pøístup k informacím o"
+$Lang{Empty_host_name} = "PrÃ¡zdnÃ© jmÃ©no hosta";
+$Lang{Unknown_host_or_user} = "NeznÃ¡mÃ½ host nebo uÅ¾ivatel \${EscHTML(\$host)}";
+$Lang{Only_privileged_users_can_view_information_about} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© majÃ­ pÅ™Ã­stup k informacÃ­m o"
                 . " hostu \${EscHTML(\$host)}." ;
-$Lang{Only_privileged_users_can_view_archive_information} = "Pouze oprávnìní uivatelé mají pøístup k informacím o archivaci.";
-$Lang{Only_privileged_users_can_view_restore_information} = "Pouze oprávnìní uivatelé mají pøístup k informacím o obnovì.";
-$Lang{Restore_number__num_for_host__does_not_exist} = "Èíslo obnovení \$num pro hosta \${EscHTML(\$host)}"
+$Lang{Only_privileged_users_can_view_archive_information} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© majÃ­ pÅ™Ã­stup k informacÃ­m o archivaci.";
+$Lang{Only_privileged_users_can_view_restore_information} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© majÃ­ pÅ™Ã­stup k informacÃ­m o obnovÄ›.";
+$Lang{Restore_number__num_for_host__does_not_exist} = "ÄŒÃ­slo obnovenÃ­ \$num pro hosta \${EscHTML(\$host)}"
 	        . " neexsituje.";
-$Lang{Archive_number__num_for_host__does_not_exist} = "Èíslo archivu \$num pro hosta \${EscHTML(\$host)}"
+$Lang{Archive_number__num_for_host__does_not_exist} = "ÄŒÃ­slo archivu \$num pro hosta \${EscHTML(\$host)}"
                 . " neexsituje.";
-$Lang{Can_t_find_IP_address_for} = "Nelze nalézt IP adresu pro \${EscHTML(\$host)}";
+$Lang{Can_t_find_IP_address_for} = "Nelze nalÃ©zt IP adresu pro \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host} = <<EOF;
-\$host je DHCP host, and není známa jeho IP adresa.  Zkontrolováno
-netbios jméno \$ENV{REMOTE_ADDR}\$tryIP, a zjištìno, e zaøízení
-není \$host.
+\$host je DHCP host, and nenÃ­ znÃ¡ma jeho IP adresa.  ZkontrolovÃ¡no
+netbios jmÃ©no \$ENV{REMOTE_ADDR}\$tryIP, a zjiÅŸtÄ›no, Å¾e zaÅ™Ã­zenÃ­
+nenÃ­ \$host.
 <p>
-Dokud nebude vidìt \$host na vybrané DHCP adrese, mùete pouze
-spustit ádost z pøímo klientského zaøízení.
+Dokud nebude vidÄ›t \$host na vybranÃ© DHCP adrese, mÅ¯Å¾ete pouze
+spustit Å¾Ã¡dost z pÅ™Ã­mo klientskÃ©ho zaÅ™Ã­zenÃ­.
 EOF
 
 # ------------------------------------
 # !! Server Mesg !!
 # ------------------------------------
 
-$Lang{Backup_requested_on_DHCP__host} = "Záloha vyádána z DHCP \$host (\$In{hostIP}) uivatelem"
+$Lang{Backup_requested_on_DHCP__host} = "ZÃ¡loha vyÅ¾Ã¡dÃ¡na z DHCP \$host (\$In{hostIP}) uÅ¾ivatelem"
 		                      . " \$User z \$ENV{REMOTE_ADDR}";
-$Lang{Backup_requested_on__host_by__User} = "Záloha vyádána z \$host uivatelem \$User";
-$Lang{Backup_stopped_dequeued_on__host_by__User} = "Záloha ukonèena/vyøazena z fronty z \$host uivatelem \$User";
-$Lang{Restore_requested_to_host__hostDest__backup___num} = "Obnova vyádána na hosta \$hostDest, obnova #\$num,"
-	     . " uivatelem \$User z \$ENV{REMOTE_ADDR}";
+$Lang{Backup_requested_on__host_by__User} = "ZÃ¡loha vyÅ¾Ã¡dÃ¡na z \$host uÅ¾ivatelem \$User";
+$Lang{Backup_stopped_dequeued_on__host_by__User} = "ZÃ¡loha ukonÄena/vyÅ™azena z fronty z \$host uÅ¾ivatelem \$User";
+$Lang{Restore_requested_to_host__hostDest__backup___num} = "Obnova vyÅ¾Ã¡dÃ¡na na hosta \$hostDest, obnova #\$num,"
+	     . " uÅ¾ivatelem \$User z \$ENV{REMOTE_ADDR}";
 $Lang{Delete_requested_for_backup_of__host_by__User} = "Delete requested for backup #\$num of \$host"
              . " by \$User from \$ENV{REMOTE_ADDR}";
-$Lang{Archive_requested} = "Archivace vyádána uivatelem \$User z \$ENV{REMOTE_ADDR}";
+$Lang{Archive_requested} = "Archivace vyÅ¾Ã¡dÃ¡na uÅ¾ivatelem \$User z \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------
 # ------- Stuff that was forgotten ----------------
 # -------------------------------------------------
 
 $Lang{Status} = "Stav";
-$Lang{PC_Summary} = "Souhrn hostù";
+$Lang{PC_Summary} = "Souhrn hostÅ¯";
 $Lang{LOG_file} = "LOG soubor";
 $Lang{LOG_files} = "LOG soubory";
-$Lang{Old_LOGs} = "Staré LOGy";
-$Lang{Email_summary} = "Souhrn emailù";
-$Lang{Config_file} = "Konfiguraèní soubor";
+$Lang{Old_LOGs} = "StarÃ© LOGy";
+$Lang{Email_summary} = "Souhrn emailÅ¯";
+$Lang{Config_file} = "KonfiguraÄnÃ­ soubor";
 # $Lang{Hosts_file} = "Hosts soubor";
-$Lang{Current_queues} = "Aktuální fronty";
+$Lang{Current_queues} = "AktuÃ¡lnÃ­ fronty";
 $Lang{Documentation} = "Dokumentace";
 
-#$Lang{Host_or_User_name} = "<small>Jméno uivatele nebo hosta:</small>";
+#$Lang{Host_or_User_name} = "<small>JmÃ©no uÅ¾ivatele nebo hosta:</small>";
 $Lang{Go} = "Jdi";
 $Lang{Hosts} = "Hosts";
 $Lang{Select_a_host} = "Vyber hosta...";
 
-$Lang{There_have_been_no_archives} = "<h2> Nebyli ádné archivy </h2>\n";
-$Lang{This_PC_has_never_been_backed_up} = "<h2> Toto PC nebylo nikdy zálohováno!! </h2>\n";
-$Lang{This_PC_is_used_by} = "<li>Toto PC je pouíváno uivatelem \${UserLink(\$user)}";
+$Lang{There_have_been_no_archives} = "<h2> Nebyli Å¾Ã¡dnÃ© archivy </h2>\n";
+$Lang{This_PC_has_never_been_backed_up} = "<h2> Toto PC nebylo nikdy zÃ¡lohovÃ¡no!! </h2>\n";
+$Lang{This_PC_is_used_by} = "<li>Toto PC je pouÅ¾Ã­vÃ¡no uÅ¾ivatelem \${UserLink(\$user)}";
 
-$Lang{Extracting_only_Errors} = "(Rozbalování chyb)";
+$Lang{Extracting_only_Errors} = "(RozbalovÃ¡nÃ­ chyb)";
 $Lang{XferLOG} = "XferLOG";
 $Lang{Errors}  = "Chyby";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
-<li>Poslední email odeslán uivately \${UserLink(\$user)} byl v \$mailTime, pøedmìt "\$subj".
+<li>PoslednÃ­ email odeslÃ¡n uÅ¾ivately \${UserLink(\$user)} byl v \$mailTime, pÅ™edmÄ›t "\$subj".
 EOF
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
-<li>Pøíkaz \$cmd je aktuálnì vykonáván pro \$host, spuštìn v \$startTime.
+<li>PÅ™Ã­kaz \$cmd je aktuÃ¡lnÄ› vykonÃ¡vÃ¡n pro \$host, spuÅŸtÄ›n v \$startTime.
 EOF
 
 # -----------
 $Lang{Host_host_is_queued_on_the_background_queue_will_be_backed_up_soon} = <<EOF;
-<li>Host \$host èeká ve frontì na pozadí (bude brzy zálohován).
+<li>Host \$host ÄekÃ¡ ve frontÄ› na pozadÃ­ (bude brzy zÃ¡lohovÃ¡n).
 EOF
 
 # ----------
 $Lang{Host_host_is_queued_on_the_user_queue__will_be_backed_up_soon} = <<EOF;
-<li>Host \$host èeká ve frontì uivatelù (bude brzy zálohován).
+<li>Host \$host ÄekÃ¡ ve frontÄ› uÅ¾ivatelÅ¯ (bude brzy zÃ¡lohovÃ¡n).
 EOF
 
 # ---------
 $Lang{A_command_for_host_is_on_the_command_queue_will_run_soon} = <<EOF;
-<li>Pøíkaz pro \$host èeká ve frontì pøíkazù (bude brzy spuštìn).
+<li>PÅ™Ã­kaz pro \$host ÄekÃ¡ ve frontÄ› pÅ™Ã­kazÅ¯ (bude brzy spuÅŸtÄ›n).
 EOF
 
 # --------
 $Lang{Last_status_is_state_StatusHost_state_reason_as_of_startTime} = <<EOF;
-<li>Poslední stav \"\$Lang->{\$StatusHost{state}}\"\$reason v èase \$startTime.
+<li>PoslednÃ­ stav \"\$Lang->{\$StatusHost{state}}\"\$reason v Äase \$startTime.
 EOF
 
 # --------
 $Lang{Last_error_is____EscHTML_StatusHost_error} = <<EOF;
-<li>Poslední chyba je \"\${EscHTML(\$StatusHost{error})}\".
+<li>PoslednÃ­ chyba je \"\${EscHTML(\$StatusHost{error})}\".
 EOF
 
 # ------
@@ -1157,24 +1159,24 @@ $Lang{Pings_to_host_have_failed_StatusHost_deadCnt__consecutive_times} = <<EOF;
 EOF
 
 # -----
-$Lang{Prior_to_that__pings} = "Pøedchozí pingy";
+$Lang{Prior_to_that__pings} = "PÅ™edchozÃ­ pingy";
 
 # -----
 $Lang{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times} = <<EOF;
-<li>\$priorStr na \$host byli úspìšné \$StatusHost{aliveCnt}
+<li>\$priorStr na \$host byli ÃºspÄ›ÅŸnÃ© \$StatusHost{aliveCnt}
          za sebou.
 EOF
 
 $Lang{Because__host_has_been_on_the_network_at_least__Conf_BlackoutGoodCnt_consecutive_times___} = <<EOF;
-<li>Protoe \$host byl na síti alespoò \$Conf{BlackoutGoodCnt}
-za sebou, nebude zálohován z \$blackoutStr.
+<li>ProtoÅ¾e \$host byl na sÃ­ti alespoÅˆ \$Conf{BlackoutGoodCnt}
+za sebou, nebude zÃ¡lohovÃ¡n z \$blackoutStr.
 EOF
 
 $Lang{__time0_to__time1_on__days} = "\$t0 to \$t1 on \$days";
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
-<li>Zálohy byli odloeny na \$hours hodin
-(<a href=\"\$MyURL?action=Stop_Dequeue_Backup&host=\$host\">zmìn toto èíslo</a>).
+<li>ZÃ¡lohy byli odloÅ¾eny na \$hours hodin
+(<a href=\"\$MyURL?action=Stop_Dequeue_Backup&host=\$host\">zmÄ›n toto ÄÃ­slo</a>).
 EOF
 
 $Lang{tryIP} = " a \$StatusHost{dhcpHostIP}";
@@ -1198,38 +1200,38 @@ $Lang{checkAllHosts} = <<EOF;
 EOF
 
 $Lang{fileHeader} = <<EOF;
-    <tr class="fviewheader"><td align=center> Jméno</td>
+    <tr class="fviewheader"><td align=center> JmÃ©no</td>
        <td align="center"> Typ</td>
-       <td align="center"> Mód</td>
+       <td align="center"> MÃ³d</td>
        <td align="center"> #</td>
        <td align="center"> Velikost</td>
-       <td align="center"> Datum zmìny</td>
+       <td align="center"> Datum zmÄ›ny</td>
     </tr>
 EOF
 
 $Lang{Home} = "Doma";
-$Lang{Browse} = "Prohlíení záloh";
-$Lang{Last_bad_XferLOG} = "Poslední špatnı XferLOG";
-$Lang{Last_bad_XferLOG_errors_only} = "Poslední špatnı XferLOG (chyb&nbsp;pouze)";
+$Lang{Browse} = "ProhlÃ­Å¾enÃ­ zÃ¡loh";
+$Lang{Last_bad_XferLOG} = "PoslednÃ­ ÅŸpatnÃ½ XferLOG";
+$Lang{Last_bad_XferLOG_errors_only} = "PoslednÃ­ ÅŸpatnÃ½ XferLOG (chyb&nbsp;pouze)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
-<li> Toto zobrazení je slouèeno se zálohou #\$numF.
+<li> Toto zobrazenÃ­ je slouÄeno se zÃ¡lohou #\$numF.
 EOF
 
 $Lang{Visit_this_directory_in_backup} = <<EOF;
-<li> Vyberte zálohu, kterou si pøejete zobrazit: <select onChange="window.location=this.value">\$otherDirs </select>
+<li> Vyberte zÃ¡lohu, kterou si pÅ™ejete zobrazit: <select onChange="window.location=this.value">\$otherDirs </select>
 EOF
 
 $Lang{Restore_Summary} = <<EOF;
 \${h2("Obnovit souhrn")}
 <p>
-Klikni na obnovení pro více detailù.
+Klikni na obnovenÃ­ pro vÃ­ce detailÅ¯.
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
-<tr class="tableheader"><td align="center"> Obnovení # </td>
-    <td align="center"> Vısledek </td>
-    <td align="right"> Datum spuštení</td>
-    <td align="right"> Doba trvání/minuty</td>
-    <td align="right"> #souborù </td>
+<tr class="tableheader"><td align="center"> ObnovenÃ­ # </td>
+    <td align="center"> VÃ½sledek </td>
+    <td align="right"> Datum spuÅŸtenÃ­</td>
+    <td align="right"> Doba trvÃ¡nÃ­/minuty</td>
+    <td align="right"> #souborÅ¯ </td>
     <td align="right"> MB </td>
     <td align="right"> #tar chyb </td>
     <td align="right"> #xferErrs </td>
@@ -1240,14 +1242,14 @@ Klikni na obnovení pro více detailù.
 EOF
 
 $Lang{Archive_Summary} = <<EOF;
-\${h2("Souhrn archivù")}
+\${h2("Souhrn archivÅ¯")}
 <p>
-Klikni na èíslo archivu pro více detailù.
+Klikni na ÄÃ­slo archivu pro vÃ­ce detailÅ¯.
 <table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Archiv# </td>
-    <td align="center"> Vısledek </td>
-    <td align="right"> Datum spuštení</td>
-    <td align="right"> Doba trvání/minuty</td>
+    <td align="center"> VÃ½sledek </td>
+    <td align="right"> Datum spuÅŸtenÃ­</td>
+    <td align="right"> Doba trvÃ¡nÃ­/minuty</td>
 </tr>
 \$ArchiveStr
 </table>
@@ -1260,71 +1262,71 @@ $Lang{No} = "ne";
 $Lang{Yes} = "ano";
 
 $Lang{The_directory_is_empty} = <<EOF;
-<tr><td bgcolor="#ffffff">Adresáø \$dirDisplay je prázdnı
+<tr><td bgcolor="#ffffff">AdresÃ¡Å™ \$dirDisplay je prÃ¡zdnÃ½
 </td></tr>
 EOF
 
 #$Lang{on} = "zapnout";
 $Lang{off} = "vypnout";
 
-$Lang{backupType_full}    = "plnı";
+$Lang{backupType_full}    = "plnÃ½";
 $Lang{backupType_incr}    = "inkr";
 $Lang{backupType_active}  = "active";
-$Lang{backupType_partial} = "èásteènı";
+$Lang{backupType_partial} = "ÄÃ¡steÄnÃ½";
 
-$Lang{failed} = "neúspìšnı";
-$Lang{success} = "úspìšnı";
+$Lang{failed} = "neÃºspÄ›ÅŸnÃ½";
+$Lang{success} = "ÃºspÄ›ÅŸnÃ½";
 $Lang{and} = "a";
 
 # ------
 # Hosts states and reasons
-$Lang{Status_idle} = "neèinnı";
-$Lang{Status_backup_starting} = "záloha se spouští";
-$Lang{Status_backup_in_progress} = "záloha probíhá";
-$Lang{Status_restore_starting} = "obnovení se spouští";
-$Lang{Status_restore_in_progress} = "obnovení probíhá";
-$Lang{Status_admin_pending} = "link èeká";
-$Lang{Status_admin_running} = "link bìí";
+$Lang{Status_idle} = "neÄinnÃ½";
+$Lang{Status_backup_starting} = "zÃ¡loha se spouÅŸtÃ­";
+$Lang{Status_backup_in_progress} = "zÃ¡loha probÃ­hÃ¡";
+$Lang{Status_restore_starting} = "obnovenÃ­ se spouÅŸtÃ­";
+$Lang{Status_restore_in_progress} = "obnovenÃ­ probÃ­hÃ¡";
+$Lang{Status_admin_pending} = "link ÄekÃ¡";
+$Lang{Status_admin_running} = "link bÄ›Å¾Ã­";
 
 $Lang{Reason_backup_done}    = "hotovo";
-$Lang{Reason_restore_done}   = "obnovení dokonèeno";
-$Lang{Reason_archive_done}   = "archivace dokonèena";
-$Lang{Reason_nothing_to_do}  = "neèinnı";
-$Lang{Reason_backup_failed}  = "zálohování selhalo";
-$Lang{Reason_restore_failed} = "obnovení selhalo";
+$Lang{Reason_restore_done}   = "obnovenÃ­ dokonÄeno";
+$Lang{Reason_archive_done}   = "archivace dokonÄena";
+$Lang{Reason_nothing_to_do}  = "neÄinnÃ½";
+$Lang{Reason_backup_failed}  = "zÃ¡lohovÃ¡nÃ­ selhalo";
+$Lang{Reason_restore_failed} = "obnovenÃ­ selhalo";
 $Lang{Reason_archive_failed} = "archivace selhala";
-$Lang{Reason_no_ping}        = "ádnı ping";
-$Lang{Reason_backup_canceled_by_user}  = "zálohování zrušeno uivatelem";
-$Lang{Reason_restore_canceled_by_user} = "obnovení zrušeno uivatelem";
-$Lang{Reason_archive_canceled_by_user} = "archivace zrušena uivatelem";
-$Lang{Disabled_OnlyManualBackups}  = "automatické zálohování zakázáno";
-$Lang{Disabled_AllBackupsDisabled} = "zakázáno";
+$Lang{Reason_no_ping}        = "Å¾Ã¡dnÃ½ ping";
+$Lang{Reason_backup_canceled_by_user}  = "zÃ¡lohovÃ¡nÃ­ zruÅŸeno uÅ¾ivatelem";
+$Lang{Reason_restore_canceled_by_user} = "obnovenÃ­ zruÅŸeno uÅ¾ivatelem";
+$Lang{Reason_archive_canceled_by_user} = "archivace zruÅŸena uÅ¾ivatelem";
+$Lang{Disabled_OnlyManualBackups}  = "automatickÃ© zÃ¡lohovÃ¡nÃ­ zakÃ¡zÃ¡no";
+$Lang{Disabled_AllBackupsDisabled} = "zakÃ¡zÃ¡no";
 
 
 # ---------
 # Email messages
 
 # No backup ever
-$Lang{EMailNoBackupEverSubj} = "BackupPC: adné zálohy hosta \$host se nezdaøili";
+$Lang{EMailNoBackupEverSubj} = "BackupPC: Å¾adnÃ© zÃ¡lohy hosta \$host se nezdaÅ™ili";
 $Lang{EMailNoBackupEverMesg} = <<'EOF';
 To: $user$domain
 cc:
-Pøedmìt: $subj
+PÅ™edmÄ›t: $subj
 $headers
 Dear $userName,
 
-Vaše PC ($host) nebylo nikdy úspìšnì zálohováno naším
-zálohovacím softwarem.  Zálohování PC by mìlo bıt spuštìno
-automaticky, kdy je Vaše PC pøipojeno do sítì. Mel by jste
-kontaktovat Vaši podporu pokud:
+VaÅŸe PC ($host) nebylo nikdy ÃºspÄ›ÅŸnÄ› zÃ¡lohovÃ¡no naÅŸÃ­m
+zÃ¡lohovacÃ­m softwarem.  ZÃ¡lohovÃ¡nÃ­ PC by mÄ›lo bÃ½t spuÅŸtÄ›no
+automaticky, kdyÅ¾ je VaÅŸe PC pÅ™ipojeno do sÃ­tÄ›. Mel by jste
+kontaktovat VaÅŸi podporu pokud:
 
-  - Vaše PC bylo pravidelnì pøipojováno do sítì, zøejmì
-    je nìjakı probém v nastavení nebo konfiguraci, kterı zabraòuje
-    zálohování.
+  - VaÅŸe PC bylo pravidelnÄ› pÅ™ipojovÃ¡no do sÃ­tÄ›, zÅ™ejmÄ›
+    je nÄ›jakÃ½ probÃ©m v nastavenÃ­ nebo konfiguraci, kterÃ½ zabraÅˆuje
+    zÃ¡lohovÃ¡nÃ­.
 
-  - Nechcete Vaše PC zálohovat a chcete pøestat dostávat tyto zprávy.
+  - Nechcete VaÅŸe PC zÃ¡lohovat a chcete pÅ™estat dostÃ¡vat tyto zprÃ¡vy.
 
-Ujistìte se, e je Vaše PC pøipojeno do sítì, a budete pøíštì v kanceláøi.
+UjistÄ›te se, Å¾e je VaÅŸe PC pÅ™ipojeno do sÃ­tÄ›, aÅ¾ budete pÅ™Ã­ÅŸtÄ› v kancelÃ¡Å™i.
 
 S pozdravem,
 BackupPC Genie
@@ -1332,27 +1334,27 @@ https://backuppc.github.io/backuppc
 EOF
 
 # No recent backup
-$Lang{EMailNoBackupRecentSubj} = "BackupPC: ádné nové zálohy pro \$host";
+$Lang{EMailNoBackupRecentSubj} = "BackupPC: Å¾Ã¡dnÃ© novÃ© zÃ¡lohy pro \$host";
 $Lang{EMailNoBackupRecentMesg} = <<'EOF';
 To: $user$domain
 cc:
-Pøedmìt: $subj
+PÅ™edmÄ›t: $subj
 $headers
-Drahı $userName,
+DrahÃ½ $userName,
 
-Vaše PC ($host) nebylo úspìšnì zálohovıno ji $days dní.
-Vaše PC bylo korektnì zálohováno $numBackups krát od $firstTime
-do dne pøed $days dny.  Zálohování PC by se mìlo spustit automaticky,
-kdy je Vaše PC pøipojeno do sítì.
+VaÅŸe PC ($host) nebylo ÃºspÄ›ÅŸnÄ› zÃ¡lohovÃ½no jiÅ¾ $days dnÃ­.
+VaÅŸe PC bylo korektnÄ› zÃ¡lohovÃ¡no $numBackups krÃ¡t od $firstTime
+do dne pÅ™ed $days dny.  ZÃ¡lohovÃ¡nÃ­ PC by se mÄ›lo spustit automaticky,
+kdyÅ¾ je VaÅŸe PC pÅ™ipojeno do sÃ­tÄ›.
 
-Pokud bylo Vaše PC pøipojeno do sítì více ne nìkolik hodin v prùbìhu
-posledních $days dní, mìl by jste kontaktovat Vaši podporu k zjištìní,
-proè zálohování nefunguje.
+Pokud bylo VaÅŸe PC pÅ™ipojeno do sÃ­tÄ› vÃ­ce neÅ¾ nÄ›kolik hodin v prÅ¯bÄ›hu
+poslednÃ­ch $days dnÃ­, mÄ›l by jste kontaktovat VaÅŸi podporu k zjiÅŸtÄ›nÃ­,
+proÄ zÃ¡lohovÃ¡nÃ­ nefunguje.
 
-Pokud jste mimo kanceláø, nemùete udìlat nic jiného ne zkopírovat kritické
-soubory na jiná media. Mìl by jste mít na pamìti, e všechny soubory vytvoøené
-nebo zmìnìné v posledních $days dnech (i s všemi novımi emaily a pøílohami)
-nebudou moci bıti obnoveny, pokud se disk ve Vašem poèítaèi poškodí.
+Pokud jste mimo kancelÃ¡Å™, nemÅ¯Å¾ete udÄ›lat nic jinÃ©ho neÅ¾ zkopÃ­rovat kritickÃ©
+soubory na jinÃ¡ media. MÄ›l by jste mÃ­t na pamÄ›ti, Å¾e vÅŸechny soubory vytvoÅ™enÃ©
+nebo zmÄ›nÄ›nÃ© v poslednÃ­ch $days dnech (i s vÅŸemi novÃ½mi emaily a pÅ™Ã­lohami)
+nebudou moci bÃ½ti obnoveny, pokud se disk ve VaÅŸem poÄÃ­taÄi poÅŸkodÃ­.
 
 S pozdravem,
 BackupPC Genie
@@ -1360,167 +1362,167 @@ https://backuppc.github.io/backuppc
 EOF
 
 # Old Outlook files
-$Lang{EMailOutlookBackupSubj} = "BackupPC: Soubory programu Outlook na \$host je nutné zálohovat";
+$Lang{EMailOutlookBackupSubj} = "BackupPC: Soubory programu Outlook na \$host je nutnÃ© zÃ¡lohovat";
 $Lang{EMailOutlookBackupMesg} = <<'EOF';
 To: $user$domain
 cc:
-Pøedmìt: $subj
+PÅ™edmÄ›t: $subj
 $headers
-Drahı $userName,
+DrahÃ½ $userName,
 
-Soubory programu Outlook na Vašem PC mají $howLong.
-Tyto soubory obsahují všechny Vaše emaily, pøílohy, kontakty a informace v
-kalendáøi.  Vaše PC bylo naposled korektnì zálohováno $numBackups krát od
-$firstTime do $lastTime. Nicménì Outlook zamkne všechny svoje soubory kdy
-je spuštìn a znemoòuje jejich zálohování.
+Soubory programu Outlook na VaÅŸem PC majÃ­ $howLong.
+Tyto soubory obsahujÃ­ vÅŸechny VaÅŸe emaily, pÅ™Ã­lohy, kontakty a informace v
+kalendÃ¡Å™i.  VaÅŸe PC bylo naposled korektnÄ› zÃ¡lohovÃ¡no $numBackups krÃ¡t od
+$firstTime do $lastTime. NicmÃ©nÄ› Outlook zamkne vÅŸechny svoje soubory kdyÅ¾
+je spuÅŸtÄ›n a znemoÅ¾Åˆuje jejich zÃ¡lohovÃ¡nÃ­.
 
-Doporuèujeme Vám zálohovat soubory Outlooku, kdy jste pøipojen do sítì tak,
-e ukonèíte program Outlook a všechny ostatní aplikace a ve vašem prohlíeèi
-otevøete tuto adresu:
+DoporuÄujeme VÃ¡m zÃ¡lohovat soubory Outlooku, kdyÅ¾ jste pÅ™ipojen do sÃ­tÄ› tak,
+Å¾e ukonÄÃ­te program Outlook a vÅŸechny ostatnÃ­ aplikace a ve vaÅŸem prohlÃ­Å¾eÄi
+otevÅ™ete tuto adresu:
 
     $CgiURL?host=$host
 
-Vyberte "Spustit inkrementaèní zálohování" dvakrát ke spuštení nového
-zálohování. Mùete vybrat "Návrat na $host page" a poté stiknout "obnovit"
-ke zjištìní stavu zálohování. Dokonèení mùe trvat nìkolik minut.
+Vyberte "Spustit inkrementaÄnÃ­ zÃ¡lohovÃ¡nÃ­" dvakrÃ¡t ke spuÅŸtenÃ­ novÃ©ho
+zÃ¡lohovÃ¡nÃ­. MÅ¯Å¾ete vybrat "NÃ¡vrat na $host page" a potÃ© stiknout "obnovit"
+ke zjiÅŸtÄ›nÃ­ stavu zÃ¡lohovÃ¡nÃ­. DokonÄenÃ­ mÅ¯Å¾e trvat nÄ›kolik minut.
 
 S pozdravem,
 BackupPC Genie
 https://backuppc.github.io/backuppc
 EOF
 
-$Lang{howLong_not_been_backed_up} = "nebylo zálohováno úspìšnì";
-$Lang{howLong_not_been_backed_up_for_days_days} = "nebylo zálohováno \$days dní";
+$Lang{howLong_not_been_backed_up} = "nebylo zÃ¡lohovÃ¡no ÃºspÄ›ÅŸnÄ›";
+$Lang{howLong_not_been_backed_up_for_days_days} = "nebylo zÃ¡lohovÃ¡no \$days dnÃ­";
 
 #######################################################################
 # RSS strings
 #######################################################################
 $Lang{RSS_Doc_Title}       = "BackupPC Server";
-$Lang{RSS_Doc_Description} = "RSS kanál BackupPC";
+$Lang{RSS_Doc_Description} = "RSS kanÃ¡l BackupPC";
 $Lang{RSS_Host_Summary}    = <<EOF;
-Poèet plnıch: \$fullCnt;
-Èas plnıch/dní: \$fullAge;
-Celková velikost/GiB: \$fullSize;
+PoÄet plnÃ½ch: \$fullCnt;
+ÄŒas plnÃ½ch/dnÃ­: \$fullAge;
+CelkovÃ¡ velikost/GiB: \$fullSize;
 Rychlost MB/sec: \$fullRate;
-Poèet inkr: \$incrCnt;
-Èas inkr/Dní: \$incrAge;
+PoÄet inkr: \$incrCnt;
+ÄŒas inkr/DnÃ­: \$incrAge;
 Stav: \$host_state;
-Zakázáno: \$host_disabled;
-Poslední pokus: \$host_last_attempt;
+ZakÃ¡zÃ¡no: \$host_disabled;
+PoslednÃ­ pokus: \$host_last_attempt;
 EOF
 
 #######################################################################
 # Configuration editor strings
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Pouze oprávnìní uivatelé mohou editovat konfikuraci.";
+$Lang{Only_privileged_users_can_edit_config_files} = "Pouze oprÃ¡vnÄ›nÃ­ uÅ¾ivatelÃ© mohou editovat konfikuraci.";
 $Lang{CfgEdit_Edit_Config} = "Editovat konfiguraci";
 $Lang{CfgEdit_Edit_Hosts}  = "Editovat Hosty";
 
 $Lang{CfgEdit_Title_Server} = "Server";
-$Lang{CfgEdit_Title_General_Parameters} = "Hlavní parametry";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "Plán probuzení";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "Rovnocenné úlohy";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Limity úloištì";
-$Lang{CfgEdit_Title_Other_Parameters} = "Ostatní paramtery";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Vzdálené nastavení Apache";
+$Lang{CfgEdit_Title_General_Parameters} = "HlavnÃ­ parametry";
+$Lang{CfgEdit_Title_Wakeup_Schedule} = "PlÃ¡n probuzenÃ­";
+$Lang{CfgEdit_Title_Concurrent_Jobs} = "RovnocennÃ© Ãºlohy";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Limity ÃºloÅ¾iÅŸtÄ›";
+$Lang{CfgEdit_Title_Other_Parameters} = "OstatnÃ­ paramtery";
+$Lang{CfgEdit_Title_Remote_Apache_Settings} = "VzdÃ¡lenÃ© nastavenÃ­ Apache";
 $Lang{CfgEdit_Title_Program_Paths} = "Cesty programu";
-$Lang{CfgEdit_Title_Install_Paths} = "Instalaèní cesty";
+$Lang{CfgEdit_Title_Install_Paths} = "InstalaÄnÃ­ cesty";
 $Lang{CfgEdit_Title_Email} = "Email";
-$Lang{CfgEdit_Title_Email_settings} = "Nastavení emailu";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Nastavení emailu uivatelùm";
+$Lang{CfgEdit_Title_Email_settings} = "NastavenÃ­ emailu";
+$Lang{CfgEdit_Title_Email_User_Messages} = "NastavenÃ­ emailu uÅ¾ivatelÅ¯m";
 $Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "Administraèní práva";
-$Lang{CfgEdit_Title_Page_Rendering} = "Renderování stránky";
+$Lang{CfgEdit_Title_Admin_Privileges} = "AdministraÄnÃ­ prÃ¡va";
+$Lang{CfgEdit_Title_Page_Rendering} = "RenderovÃ¡nÃ­ strÃ¡nky";
 $Lang{CfgEdit_Title_Paths} = "Cesty";
-$Lang{CfgEdit_Title_User_URLs} = "Uivatelské URL";
-$Lang{CfgEdit_Title_User_Config_Editing} = "Editace konfigurace uivatelù";
+$Lang{CfgEdit_Title_User_URLs} = "UÅ¾ivatelskÃ© URL";
+$Lang{CfgEdit_Title_User_Config_Editing} = "Editace konfigurace uÅ¾ivatelÅ¯";
 $Lang{CfgEdit_Title_Xfer} = "Xfer";
-$Lang{CfgEdit_Title_Xfer_Settings} = "Nastavení Xfer";
-$Lang{CfgEdit_Title_Ftp_Settings} = "Nastavení FTP";
-$Lang{CfgEdit_Title_Smb_Settings} = "Nastavení Smb";
-$Lang{CfgEdit_Title_Tar_Settings} = "Nastavení Tar";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Nastavení Rsync";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Nastavení Rsyncd";
-$Lang{CfgEdit_Title_Archive_Settings} = "Nastavení Archivace";
-$Lang{CfgEdit_Title_Include_Exclude} = "Zahrnout/Vylouèit";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Cesty/Pøíkazy";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Cesty/Pøíkazy";
-$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync  Cesty/Pøíkazy/Argumenty";
+$Lang{CfgEdit_Title_Xfer_Settings} = "NastavenÃ­ Xfer";
+$Lang{CfgEdit_Title_Ftp_Settings} = "NastavenÃ­ FTP";
+$Lang{CfgEdit_Title_Smb_Settings} = "NastavenÃ­ Smb";
+$Lang{CfgEdit_Title_Tar_Settings} = "NastavenÃ­ Tar";
+$Lang{CfgEdit_Title_Rsync_Settings} = "NastavenÃ­ Rsync";
+$Lang{CfgEdit_Title_Rsyncd_Settings} = "NastavenÃ­ Rsyncd";
+$Lang{CfgEdit_Title_Archive_Settings} = "NastavenÃ­ Archivace";
+$Lang{CfgEdit_Title_Include_Exclude} = "Zahrnout/VylouÄit";
+$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Cesty/PÅ™Ã­kazy";
+$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Cesty/PÅ™Ã­kazy";
+$Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync  Cesty/PÅ™Ã­kazy/Argumenty";
 $Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Port/Argumenty";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archivace Cesty/Pøíkazy";
-$Lang{CfgEdit_Title_Schedule} = "Plán";
-$Lang{CfgEdit_Title_Full_Backups} = "Plné zálohy";
-$Lang{CfgEdit_Title_Incremental_Backups} = "Inkrementaèní zálohy";
-$Lang{CfgEdit_Title_Blackouts} = "Pøetíení";
-$Lang{CfgEdit_Title_Other} = "Ostatní";
-$Lang{CfgEdit_Title_Backup_Settings} = "Nastavení zálohování";
-$Lang{CfgEdit_Title_Client_Lookup} = "Vyhledávání klientùp";
-$Lang{CfgEdit_Title_User_Commands} = "Uivatelské pøíkazy";
+$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archivace Cesty/PÅ™Ã­kazy";
+$Lang{CfgEdit_Title_Schedule} = "PlÃ¡n";
+$Lang{CfgEdit_Title_Full_Backups} = "PlnÃ© zÃ¡lohy";
+$Lang{CfgEdit_Title_Incremental_Backups} = "InkrementaÄnÃ­ zÃ¡lohy";
+$Lang{CfgEdit_Title_Blackouts} = "PÅ™etÃ­Å¾enÃ­";
+$Lang{CfgEdit_Title_Other} = "OstatnÃ­";
+$Lang{CfgEdit_Title_Backup_Settings} = "NastavenÃ­ zÃ¡lohovÃ¡nÃ­";
+$Lang{CfgEdit_Title_Client_Lookup} = "VyhledÃ¡vÃ¡nÃ­ klientÅ¯p";
+$Lang{CfgEdit_Title_User_Commands} = "UÅ¾ivatelskÃ© pÅ™Ã­kazy";
 $Lang{CfgEdit_Title_Hosts} = "Hosti";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
-K pøidání nového hosta, vyberte Pøidat a zadejte jméno. Pro
-konfiguraci hosta z jiného hosta, zadejte jméno hosta jako
-NEWHOST=COPYHOST. To pøepíše existující konfiguraci pro NEWHOST.
-Tento postup mùete pouít i pto existujícího hosta.
-Hosta smaete stisknutím tlaèítka delete. Pøidání, smazání a kopírování
-konfigurace nanabude platnosti dokud nedojde k stisknutí tlaèítka Uloit
-ádná ze záloh smazanıch hostù nebude odstranìna, tedy pokud omylem
+K pÅ™idÃ¡nÃ­ novÃ©ho hosta, vyberte PÅ™idat a zadejte jmÃ©no. Pro
+konfiguraci hosta z jinÃ©ho hosta, zadejte jmÃ©no hosta jako
+NEWHOST=COPYHOST. To pÅ™epÃ­ÅŸe existujÃ­cÃ­ konfiguraci pro NEWHOST.
+Tento postup mÅ¯Å¾ete pouÅ¾Ã­t i pto existujÃ­cÃ­ho hosta.
+Hosta smaÅ¾ete stisknutÃ­m tlaÄÃ­tka delete. PÅ™idÃ¡nÃ­, smazÃ¡nÃ­ a kopÃ­rovÃ¡nÃ­
+konfigurace nanabude platnosti dokud nedojde k stisknutÃ­ tlaÄÃ­tka UloÅ¾it
+Å½Ã¡dnÃ¡ ze zÃ¡loh smazanÃ½ch hostÅ¯ nebude odstranÄ›na, tedy pokud omylem
 so if you accidently delete a host, simply re-add it.  To completely
-smaete hostovy zálohy, musíte ruènì smazat soubory v \$topDir/pc/HOST
+smaÅ¾ete hostovy zÃ¡lohy, musÃ­te ruÄnÄ› smazat soubory v \$topDir/pc/HOST
 EOF
 
 $Lang{CfgEdit_Header_Main} = <<EOF;
-\${h1("Hlavní editor konfigurace")}
+\${h1("HlavnÃ­ editor konfigurace")}
 EOF
 
 $Lang{CfgEdit_Header_Host} = <<EOF;
 \${h1("Editor konfigurace hosta \$host")}
 <p>
-Poznámka: oznaète Pøepsat, pokud chcete modifikovat hodnotu
+PoznÃ¡mka: oznaÄte PÅ™epsat, pokud chcete modifikovat hodnotu
 specifickou pro tohoto hosta.
 <p>
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "Uloit";
-$Lang{CfgEdit_Button_Insert}   = "Vloit";
+$Lang{CfgEdit_Button_Save}     = "UloÅ¾it";
+$Lang{CfgEdit_Button_Insert}   = "VloÅ¾it";
 $Lang{CfgEdit_Button_Delete}   = "Smazat";
-$Lang{CfgEdit_Button_Add}      = "Pøidat";
-$Lang{CfgEdit_Button_Override} = "Pøepsat";
-$Lang{CfgEdit_Button_New_Key}  = "Novı klíè";
+$Lang{CfgEdit_Button_Add}      = "PÅ™idat";
+$Lang{CfgEdit_Button_Override} = "PÅ™epsat";
+$Lang{CfgEdit_Button_New_Key}  = "NovÃ½ klÃ­Ä";
 $Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
 $Lang{CfgEdit_Error_No_Save}
-            = "Chyba: Neuloeno z dùvody chyb";
+            = "Chyba: NeuloÅ¾eno z dÅ¯vody chyb";
 $Lang{CfgEdit_Error__must_be_an_integer}
-            = "Chyba: \$var musí bıt celé èíslo";
+            = "Chyba: \$var musÃ­ bÃ½t celÃ© ÄÃ­slo";
 $Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "Chyba: \$var musí bıt reálné èíslo";
+            = "Chyba: \$var musÃ­ bÃ½t reÃ¡lnÃ© ÄÃ­slo";
 $Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Chyba: vstup \$var \$k musí bıt celé èíslo";
+            = "Chyba: vstup \$var \$k musÃ­ bÃ½t celÃ© ÄÃ­slo";
 $Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Chyba: vstup \$var \$k musí bıt reálné èíslo";
+            = "Chyba: vstup \$var \$k musÃ­ bÃ½t reÃ¡lnÃ© ÄÃ­slo";
 $Lang{CfgEdit_Error__must_be_executable_program}
-            = "Chyba: \$var musí bıt správná cesta";
+            = "Chyba: \$var musÃ­ bÃ½t sprÃ¡vnÃ¡ cesta";
 $Lang{CfgEdit_Error__must_be_valid_option}
-            = "Chyba: \$var musí bıt správná monost";
+            = "Chyba: \$var musÃ­ bÃ½t sprÃ¡vnÃ¡ moÅ¾nost";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "Kopie hosta \$copyHost neexistuje; vytváøím novı název hosta \$fullHost. Smate tohota hosta, pokud to není to, co jste chtìl.";
+            = "Kopie hosta \$copyHost neexistuje; vytvÃ¡Å™Ã­m novÃ½ nÃ¡zev hosta \$fullHost. SmaÅ¾te tohota hosta, pokud to nenÃ­ to, co jste chtÄ›l.";
 
 $Lang{CfgEdit_Log_Copy_host_config}
-            = "\$User zkopíroval konfiguraci z hosta \$fromHost do \$host\n";
+            = "\$User zkopÃ­roval konfiguraci z hosta \$fromHost do \$host\n";
 $Lang{CfgEdit_Log_Delete_param}
             = "\$User smazal \$p z \$conf\n";
 $Lang{CfgEdit_Log_Add_param_value}
-            = "\$User pøidal \$p do \$conf, nastavil na \$value\n";
+            = "\$User pÅ™idal \$p do \$conf, nastavil na \$value\n";
 $Lang{CfgEdit_Log_Change_param_value}
-            = "\$User zmìnil \$p v \$conf do \$valueNew z \$valueOld\n";
+            = "\$User zmÄ›nil \$p v \$conf do \$valueNew z \$valueOld\n";
 $Lang{CfgEdit_Log_Host_Delete}
             = "\$User smazal hosta \$host\n";
 $Lang{CfgEdit_Log_Host_Change}
-            = "\$User host \$host zmìnil \$key z \$valueOld na \$valueNew\n";
+            = "\$User host \$host zmÄ›nil \$key z \$valueOld na \$valueNew\n";
 $Lang{CfgEdit_Log_Host_Add}
-            = "\$User pøidal host \$host: \$value\n";
+            = "\$User pÅ™idal host \$host: \$value\n";
 
 #end of lang_cz.pm

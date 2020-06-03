@@ -14,6 +14,8 @@
 #   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+use utf8;
+
 #File:  nl.pm       version 1.5
 # --------------------------------
 

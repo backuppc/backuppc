@@ -83,6 +83,7 @@ sub backupInfoWrite
              [   $bkupInfo],
              [qw(*backupInfo)]);
     $dump->Indent(1);
+    $dump->Sortkeys(1);
     if ( open($bkupFd, ">", "$pcDir/$bkupNum/backupInfo") ) {
         print($bkupFd $dump->Dump);
         close($bkupFd);

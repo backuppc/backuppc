@@ -401,12 +401,12 @@ if ( @Backups
     if ( $Backups[-1]{noFill} ) {
         printf($LogFd "%sSerious error: last backup %d is not filled!  Need to remove back to last filled backup\n",
                     $bpc->timeStamp, $Backups[-1]{num});
-        printf(STDERR "Serious error: last backup %d is not filled!  Need to remove back to last filled backup\n",
+        printf("Serious error: last backup %d is not filled!  Need to remove back to last filled backup\n",
                     $Backups[-1]{num}) if ( $opts{v} );
     } else {
         printf($LogFd "%sSerious error: last backup %s directory doesn't exist!!!  Need to remove back to last filled backup\n",
                     $bpc->timeStamp, "$Dir/$Backups[-1]{num}");
-        printf(STDERR "%sSerious error: last backup %s directory doesn't exist!!!  Need to remove back to last filled backup\n",
+        printf("%sSerious error: last backup %s directory doesn't exist!!!  Need to remove back to last filled backup\n",
                     $bpc->timeStamp, "$Dir/$Backups[-1]{num}") if ( $opts{v} );
     }
     for ( $i = @Backups - 1 ; $i >= 0 ; $i-- ) {
@@ -416,7 +416,7 @@ if ( @Backups
     $i++;
     while ( $i < @Backups ) {
         printf($LogFd "%sDeleting backup %d\n", $bpc->timeStamp, $Backups[$i]{num});
-        printf(STDERR "%sDeleting backup %d\n", $bpc->timeStamp, $Backups[$i]{num}) if ( $opts{v} );
+        printf("%sDeleting backup %d\n", $bpc->timeStamp, $Backups[$i]{num}) if ( $opts{v} );
         BackupRemove($client, $i, 1);
         $bpc->BackupInfoWrite($client, @Backups);
     }
@@ -1323,7 +1323,11 @@ if ( !$stat{xferOK} ) {
 	print($LogFd $bpc->timeStamp, "Backup aborted ($stat{hostError})\n");
 	$XferLOG->write(\"Backup aborted ($stat{hostError})\n");
     } else {
-	$XferLOG->write(\"Backup aborted by user signal\n");
+        if ( $XferLOG ) {
+            $XferLOG->write(\"Backup aborted by user signal\n")
+        } elsif ( $opts{v} ) {
+            print("Backup aborted by user signal\n");
+        }
     }
 
     #
@@ -1349,16 +1353,11 @@ $stat{byteCnt}         ||= 0;
 $stat{xferErrCnt}      ||= 0;
 $stat{xferBadFileCnt}  ||= 0;
 $stat{xferBadShareCnt} ||= 0;
-print($LogFd $bpc->timeStamp,
-          "$type backup $newNum complete, $stat{fileCnt} files,"
-        . " $stat{byteCnt} bytes,"
-        . " $stat{xferErrCnt} xferErrs ($stat{xferBadFileCnt} bad files,"
-        . " $stat{xferBadShareCnt} bad shares, $otherCount other)\n");
-$XferLOG->write(\"$type backup $newNum complete, $stat{fileCnt} files,"
-        . " $stat{byteCnt} bytes,"
-        . " $stat{xferErrCnt} xferErrs ($stat{xferBadFileCnt} bad files,"
-        . " $stat{xferBadShareCnt} bad shares, $otherCount other)\n")
-                    if ( $XferLOG && $Conf{XferLogLevel} >= 1 );
+my $logStr =  "$type backup $newNum complete, $stat{fileCnt} files, $stat{byteCnt} bytes,"
+           . " $stat{xferErrCnt} xferErrs ($stat{xferBadFileCnt} bad files,"
+           . " $stat{xferBadShareCnt} bad shares, $otherCount other)\n";
+print($LogFd $bpc->timeStamp, $logStr);
+$XferLOG->write(\$logStr) if ( $XferLOG && $Conf{XferLogLevel} >= 1 );
 
 if ( $stat{xferOK} && $BackupCase == 4 && -f "$Dir/$lastBkupNum/refCnt/needFsck.newDir" ) {
     #
@@ -1418,12 +1417,14 @@ sub catch_signal
 	    $reason = "aborted by signal=$sigName";
 	}
         $stat{hostError} = $reason;
+        print("Received signal: $reason\n") if ( $opts{v} );
 	if ( $Pid == $$ ) {
 	    #
 	    # Parent logs a message
 	    #
 	    print($LogFd $bpc->timeStamp,
 		    "Aborting backup up after signal $sigName\n");
+            print("Aborting backup up after signal $sigName\n") if ( $opts{v} );
 
 	    #
 	    # Tell xfer to abort, but only if we actually started one
@@ -1473,13 +1474,19 @@ sub catch_signal
 
     $SIG{$sigName} = 'IGNORE';
     UserCommandRun("DumpPostUserCmd") if ( $NeedPostCmd );
-    $XferLOG->write(\"exiting after signal $sigName\n");
+    if ( $XferLOG ) {
+        $XferLOG->write(\"exiting after signal $sigName\n");
+    } elsif ( $opts{v} ) {
+        print("exiting after signal $sigName\n");
+    }
     if ( @xferPid ) {
+        printf("killing xfer pids %s\n", join(",", @xferPid)) if ( $opts{v} );
         kill($bpc->sigName2num("INT"), @xferPid);
 	sleep(1);
 	kill($bpc->sigName2num("KILL"), @xferPid);
     }
     if ( $tarPid > 0 ) {
+        printf("killing tar pid $tarPid\n") if ( $opts{v} );
 	sleep(1);
         kill($bpc->sigName2num("INT"), $tarPid);
 	sleep(1);
@@ -1717,9 +1724,12 @@ sub BackupExpire
 	$oldestFull = (time - $Backups[$firstFull]{startTime}) / (24 * 3600)
                         if ( $cntFull > 0 );
 
-        $XferLOG->write(\"BackupExpire: cntFull = $cntFull, cntIncr = $cntIncr, firstFull = $firstFull,"
-                   . " firstIncr = $firstIncr, oldestIncr = $oldestIncr, oldestFull = $oldestFull\n")
-                                        if ( $XferLOG );
+        
+        if ( $XferLOG ) {
+            my $logStr = "BackupExpire: cntFull = $cntFull, cntIncr = $cntIncr, firstFull = $firstFull,"
+                       . " firstIncr = $firstIncr, oldestIncr = $oldestIncr, oldestFull = $oldestFull\n";
+            $XferLOG->write(\$logStr);
+        }
 
         #
         # In <= 3.x, with multi-level incrementals, several of the
@@ -2216,7 +2226,11 @@ sub UserCommandRun
     }
 
     my $cmd = $bpc->cmdVarSubstitute($Conf{$cmdType}, $vars);
-    $XferLOG->write(\"Executing $cmdType: @$cmd\n");
+    if ( $XferLOG ) {
+        $XferLOG->write(\"Executing $cmdType: @$cmd\n");
+    } elsif ( $opts{v} ) {
+        print("Executing $cmdType: @$cmd\n");
+    }
     #
     # Run the user's command, dumping the stdout/stderr into the
     # Xfer log file.  Also supply the optional $vars and %Conf in

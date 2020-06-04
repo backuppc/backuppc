@@ -1194,6 +1194,7 @@ sub cmdSystemOrEvalLong
     my($pid, $out, $allOut);
     local(*CHILD);
 
+    $? = 0;
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", @$cmd) if ( ref($cmd) eq "ARRAY" );
 	print("cmdSystemOrEval: about to eval perl code $cmd\n")

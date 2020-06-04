@@ -1194,17 +1194,26 @@ sub cmdSystemOrEvalLong
     my($pid, $out, $allOut);
     local(*CHILD);
 
-    $? = 0;
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", @$cmd) if ( ref($cmd) eq "ARRAY" );
-	print(STDERR "cmdSystemOrEval: about to eval perl code $cmd\n")
+	print("cmdSystemOrEval: about to eval perl code $cmd\n")
 			if ( $bpc->{verbose} );
         $out = eval($cmd);
 	$$stdoutCB .= $out if ( ref($stdoutCB) eq 'SCALAR' );
-	&$stdoutCB($out)   if ( ref($stdoutCB) eq 'CODE' );
+        if ( ref($stdoutCB) eq 'CODE' ) {
+            if ( $out !~ /\n$/ ) {
+                if ( $@ ) {
+                    &$stdoutCB("Eval return value: $out; perl error $@\n");
+                } else {
+                    &$stdoutCB("Eval return value: $out\n");
+                }
+            } else {
+                &$stdoutCB($out);
+            }
+        }
 	#print(STDERR "cmdSystemOrEval: finished: got output $out\n")
 	#		if ( $bpc->{verbose} );
-	return $out        if ( !defined($stdoutCB) );
+	return $out    if ( !defined($stdoutCB) );
 	return;
     } else {
         $cmd = [split(/\s+/, $cmd)] if ( ref($cmd) ne "ARRAY" );

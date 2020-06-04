@@ -154,7 +154,7 @@ sub start
             if ( $conf->{RsyncdClientPort} != 873 ) {
                 push(@$rsyncArgs, "--port=$conf->{RsyncdClientPort}");
             }
-            if ( $conf->{ClientCharset} ne "" ) {
+            if ( $conf->{ClientCharset} ne "" && $conf->{ClientCharset} ne "utf8" ) {
                 push(@$rsyncArgs, "--iconv=utf8,$conf->{ClientCharset}");
             }
             push(@$rsyncArgs,
@@ -342,7 +342,7 @@ sub start
         #
         push(@$rsyncArgs, @{$conf->{RsyncArgsExtra}})
                     if ( ref($conf->{RsyncArgsExtra}) eq 'ARRAY' );
-        if ( $conf->{ClientCharset} ne "" ) {
+        if ( $conf->{ClientCharset} ne "" && $conf->{ClientCharset} ne "utf8" ) {
             push(@$rsyncArgs, "--iconv=utf8,$conf->{ClientCharset}");
         }
         if ( $conf->{ClientTimeout} > 0 && $conf->{ClientTimeout} =~ /^\d+$/ ) {

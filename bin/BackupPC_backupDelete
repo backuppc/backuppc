@@ -64,20 +64,21 @@ my $DirCntNext     = 20;
 my $doRefCountUpdate;
 
 my %opts;
-if ( !getopts("lLpmrh:n:s:", \%opts) || !defined($opts{h}) || !defined($opts{n}) || (!defined($opts{s}) && @ARGV >= 1) ) {
+if ( !getopts("flLpmrh:n:s:", \%opts) || !defined($opts{h}) || !defined($opts{n}) || (!defined($opts{s}) && @ARGV >= 1) ) {
     print STDERR <<EOF;
-usage: BackupPC_backupDelete -h host -n num [-p] [-l] [-L] [-r] [-m] [-s shareName [dirs...]]
+usage: BackupPC_backupDelete -h host -n num [-f] [-l] [-L] [-m] [-p] [-r] [-s shareName [dirs...]]
   Options:
      -h host         host name
      -n num          backup number to delete
      -s shareName    don't delete the backup; delete just this share
                      (or only dirs below this share if specified)
-     -p              don't print progress information
+     -f              force delete even if keep is set for this backup
      -L              log output to host's LOG file (instead of stdout)
      -l              don't remove XferLOG files
-     -r              do a ref count update (default: none)
      -m              run even if a backup on this host is running
                      (specifically, don't take the server host mutex)
+     -p              don't print progress information
+     -r              do a ref count update (default: none)
   If a shareName is specified, just that share (or share/dirs) are deleted.
   The backup itself is not deleted, nor is the log file removed.
 EOF
@@ -130,6 +131,10 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
 }
 if ( !defined($idx) ) {
     print(STDERR "BackupPC_backupDelete: can't find backup number $opts{n} on host $Host\n");
+    exit(1);
+}
+if ( $Backups[$idx]{keep} && !$opts{f} ) {
+    print(STDERR "BackupPC_backupDelete: host $Host backup #$Backups[$idx]{num} has keep set; not deleting (use -f to override)\n");
     exit(1);
 }
 

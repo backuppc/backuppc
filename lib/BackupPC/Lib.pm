@@ -68,8 +68,8 @@ sub new
     #
     # Set defaults for $topDir and $installDir.
     #
-    $topDir     = '__TOPDIR__' if ( $topDir eq "" );
-    $installDir = '__INSTALLDIR__'    if ( $installDir eq "" );
+    $topDir     = '__TOPDIR__' if ( $topDir eq "" );            # updated by makeDist
+    $installDir = '__INSTALLDIR__'    if ( $installDir eq "" ); # updated by makeDist
 
     #
     # Pick some initial defaults.  For FHS the only critical
@@ -81,7 +81,7 @@ sub new
             useFHS     => $useFHS,
             TopDir     => $topDir,
             InstallDir => $installDir,
-            ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir,
+            ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir, # updated by makeDist
             LogDir     => '/var/log/BackupPC',
             RunDir     => '/var/run/BackupPC',
         };
@@ -98,7 +98,7 @@ sub new
 
     my $bpc = bless {
 	%$paths,
-        Version => '4.3.3',
+        Version => '4.3.3',     # updated by makeDist
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);

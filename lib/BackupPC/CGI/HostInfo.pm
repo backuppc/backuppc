@@ -85,10 +85,12 @@ sub action
 	my @Backups = $bpc->BackupInfoRead($host);
 	for ( $i = 0 ; $i < @Backups ; $i++ ) {
 	    if ( $Backups[$i]{num} == $num ) {
-		$Backups[$i]{keep} = $keep ? 1 : 0;
-		$bpc->BackupInfoWrite($host, @Backups);
-		BackupPC::Storage->backupInfoWrite($bpc->TopDir() . "/pc/$host", $Backups[$i]{num}, $Backups[$i], 1);
-		last;
+                if ( !$Backups[$i]{noFill} && $Backups[$i]{keep} != ($keep ? 1 : 0) ) {
+                    $Backups[$i]{keep} = $keep ? 1 : 0;
+                    $bpc->BackupInfoWrite($host, @Backups);
+                    BackupPC::Storage->backupInfoWrite($bpc->TopDir() . "/pc/$host", $Backups[$i]{num}, $Backups[$i], 1);
+                }
+                last;
 	    }
 	}
         if ( $i >= @Backups ) {

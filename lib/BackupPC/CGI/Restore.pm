@@ -355,6 +355,7 @@ EOF
                          [  \%restoreReq],
                          [qw(*RestoreReq)]);
         $dump->Indent(1);
+        $dump->Sortkeys(1);
         eval { mkpath("$TopDir/pc/$hostDest", 0, 0777) }
                                     if ( !-d "$TopDir/pc/$hostDest" );
 	my $openPath = "$TopDir/pc/$hostDest/$reqFileName";

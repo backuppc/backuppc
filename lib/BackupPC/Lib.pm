@@ -68,20 +68,20 @@ sub new
     #
     # Set defaults for $topDir and $installDir.
     #
-    $topDir     = '__TOPDIR__'     if ( $topDir eq "" );        # updated by makeDist
-    $installDir = '__INSTALLDIR__' if ( $installDir eq "" );    # updated by makeDist
+    $topDir     = '__TOPDIR__'     if ( $topDir eq "" );       # updated by configure.pl
+    $installDir = '__INSTALLDIR__' if ( $installDir eq "" );    # updated by configure.pl
 
     #
     # Pick some initial defaults.  For FHS the only critical
     # path is the ConfDir, since we get everything else out
-    # of the main config file.
+    # of the main config file.   
     #
     if ( $useFHS ) {
         $paths = {
             useFHS     => $useFHS,
             TopDir     => $topDir,
             InstallDir => $installDir,
-            ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir,    # updated by makeDist
+            ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir,    # updated by configure.pl
             LogDir     => '/var/log/BackupPC',
             RunDir     => '/var/run/BackupPC',
         };

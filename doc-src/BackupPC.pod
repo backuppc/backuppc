@@ -3121,6 +3121,12 @@ The last inode number used in this backup.
 
 If set this backup won't be deleted.
 
+=item share2path
+
+Saves the value of $Conf{ClientShareName2Path} via Data::Dumper (with some tabs,
+newlines and % characters replaced with %xx) so that the actual client path
+for each share can be displayed when browsing.
+
 =back
 
 =item restores

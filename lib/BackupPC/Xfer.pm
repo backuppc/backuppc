@@ -35,7 +35,6 @@
 #
 #========================================================================
 
-
 package BackupPC::Xfer;
 
 use strict;
@@ -59,45 +58,45 @@ sub create
 
     if ( $protocol eq 'archive' ) {
 
-        $xfer = BackupPC::Xfer::Archive->new( $bpc, $args );
+        $xfer   = BackupPC::Xfer::Archive->new($bpc, $args);
         $errStr = BackupPC::Xfer::Archive::errStr() if ( !defined($xfer) );
         return $xfer;
 
     } elsif ( $protocol eq 'ftp' ) {
 
-        $xfer = BackupPC::Xfer::Ftp->new( $bpc, $args );
+        $xfer   = BackupPC::Xfer::Ftp->new($bpc, $args);
         $errStr = BackupPC::Xfer::Ftp::errStr() if ( !defined($xfer) );
         return $xfer;
 
     } elsif ( $protocol eq 'rsync' || $protocol eq 'rsyncd' ) {
 
-        $xfer = BackupPC::Xfer::Rsync->new( $bpc, $args );
+        $xfer   = BackupPC::Xfer::Rsync->new($bpc, $args);
         $errStr = BackupPC::Xfer::Rsync::errStr() if ( !defined($xfer) );
         return $xfer;
 
     } elsif ( $protocol eq 'smb' ) {
 
-        $xfer = BackupPC::Xfer::Smb->new( $bpc, $args );
+        $xfer   = BackupPC::Xfer::Smb->new($bpc, $args);
         $errStr = BackupPC::Xfer::Smb::errStr() if ( !defined($xfer) );
         return $xfer;
 
     } elsif ( $protocol eq 'tar' ) {
 
-        $xfer = BackupPC::Xfer::Tar->new( $bpc, $args );
+        $xfer   = BackupPC::Xfer::Tar->new($bpc, $args);
         $errStr = BackupPC::Xfer::Tar::errStr() if ( !defined($xfer) );
         return $xfer;
 
-    } elsif ( $protocol eq 'protocol') {
+    } elsif ( $protocol eq 'protocol' ) {
 
-        $xfer = BackupPC::Xfer::Protocol->new( $bpc, $args );
+        $xfer   = BackupPC::Xfer::Protocol->new($bpc, $args);
         $errStr = BackupPC::Xfer::Protocol::errStr() if ( !defined($xfer) );
         return $xfer;
 
     } else {
 
-	$xfer = undef;
+        $xfer   = undef;
         $errStr = "$protocol is not a supported protocol.";
-	return $xfer;
+        return $xfer;
     }
 }
 
@@ -133,7 +132,6 @@ sub getShareNames
     return $ShareNames;
 }
 
-
 sub getRestoreCmd
 {
     my($conf) = @_;
@@ -146,7 +144,7 @@ sub getRestoreCmd
         $restoreCmd = undef;
 
     } elsif ( $conf->{XferMethod} eq "rsync"
-           || $conf->{XferMethod} eq "rsyncd" ) {
+        || $conf->{XferMethod} eq "rsyncd" ) {
         $restoreCmd = $conf->{RsyncRestoreArgs};
 
     } elsif ( $conf->{XferMethod} eq "tar" ) {
@@ -165,7 +163,6 @@ sub getRestoreCmd
     return $restoreCmd;
 }
 
-
 sub restoreEnabled
 {
     my($conf) = @_;
@@ -178,10 +175,10 @@ sub restoreEnabled
         return;
 
     } elsif ( $conf->{XferMethod} eq "rsync"
-           || $conf->{XferMethod} eq "rsyncd"
-           || $conf->{XferMethod} eq "tar"
-           || $conf->{XferMethod} eq "smb" ) {
-        $restoreCmd = getRestoreCmd( $conf );
+        || $conf->{XferMethod} eq "rsyncd"
+        || $conf->{XferMethod} eq "tar"
+        || $conf->{XferMethod} eq "smb" ) {
+        $restoreCmd = getRestoreCmd($conf);
         return !!(
             ref $restoreCmd eq "ARRAY"
             ? @$restoreCmd
@@ -192,7 +189,6 @@ sub restoreEnabled
         return;
     }
 }
-
 
 sub errStr
 {

@@ -49,19 +49,19 @@ sub action
     my($url0, $hdr, @files, $str);
     if ( $host ne "" ) {
         $url0 = "&host=${EscURI($host)}";
-        $hdr = "for host $host";
+        $hdr  = "for host $host";
     } else {
         $url0 = "";
-        $hdr = "";
+        $hdr  = "";
     }
 
     foreach my $file ( $bpc->sortedPCLogFiles($host) ) {
         my $url1 = "&num=$1" if ( $file =~ /LOG\.(\d+)(\.z)?$/ );
-        $url1    = "&num="   if ( $file =~ /LOG(\.z)?$/ );
+        $url1 = "&num=" if ( $file =~ /LOG(\.z)?$/ );
         next if ( !-f $file );
         my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
         my $size     = (stat($file))[7];
-        (my $fStr    = $file) =~ s{.*/}{};
+        (my $fStr = $file) =~ s{.*/}{};
         $str .= <<EOF;
 <tr><td> <a href="$MyURL?action=view&type=LOG$url0$url1"><tt>$fStr</tt></a></td>
     <td align="right"> $size </td>
@@ -69,8 +69,7 @@ sub action
 EOF
     }
     my $content = eval("qq{$Lang->{Log_File_History__hdr}}");
-    Header($Lang->{BackupPC__Log_File_History},
-                $content, !-f "$TopDir/pc/$host/backups");
+    Header($Lang->{BackupPC__Log_File_History}, $content, !-f "$TopDir/pc/$host/backups");
     Trailer();
 }
 
@@ -97,6 +96,5 @@ sub compareLOGName
         return $na - $nb;
     }
 }
-
 
 1;

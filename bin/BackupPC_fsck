@@ -37,7 +37,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::XS;
@@ -55,6 +56,7 @@ my %opts;
 my $EmptyMD5 = pack("H*", "d41d8cd98f00b204e9800998ecf8427e");
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
@@ -90,15 +92,15 @@ if ( $opts{s} ) {
     #
     for my $p ( qw(pool4 cpool4) ) {
         for ( my $i = 0 ; $i < 16 ; $i++ ) {
-            $Info->{pool}{$p}[$i]{FileCnt}       = 0;
-            $Info->{pool}{$p}[$i]{DirCnt}        = 0;
-            $Info->{pool}{$p}[$i]{KbRm}          = 0;
-            $Info->{pool}{$p}[$i]{Kb}            = 0;
-            $Info->{pool}{$p}[$i]{FileCntRm}     = 0;
-            $Info->{pool}{$p}[$i]{FileCntRep}    = 0;
-            $Info->{pool}{$p}[$i]{FileRepMax}    = 0;
-            $Info->{pool}{$p}[$i]{FileLinkMax}   = 0;
-            $Info->{pool}{$p}[$i]{Time}          = 0;
+            $Info->{pool}{$p}[$i]{FileCnt}     = 0;
+            $Info->{pool}{$p}[$i]{DirCnt}      = 0;
+            $Info->{pool}{$p}[$i]{KbRm}        = 0;
+            $Info->{pool}{$p}[$i]{Kb}          = 0;
+            $Info->{pool}{$p}[$i]{FileCntRm}   = 0;
+            $Info->{pool}{$p}[$i]{FileCntRep}  = 0;
+            $Info->{pool}{$p}[$i]{FileRepMax}  = 0;
+            $Info->{pool}{$p}[$i]{FileLinkMax} = 0;
+            $Info->{pool}{$p}[$i]{Time}        = 0;
         }
     }
 }
@@ -144,21 +146,21 @@ sub poolCountUpdate
     for ( my $compress = 0 ; $compress < 2 ; $compress++ ) {
         my $poolName = $compress ? "cpool4" : "pool4";
         for ( my $refCntFile = 0 ; $refCntFile < 128 ; $refCntFile++ ) {
-            my $fileCnt = 0;       # total number of pool files
-            my $dirCnt = 0;        # total number of pool directories
-            my $blkCnt = 0;        # total block size of pool files
-            my $fileCntRm = 0;     # total number of removed files
-            my $blkCntRm = 0;      # total block size of removed pool files
-            my $fileCntRep = 0;    # total number of pool files with repeated md5 checksums
-                                   # (ie: digest > 16 bytes; first instance isn't counted)
-            my $fileRepMax = 0;    # worse case chain length of pool files that have repeated
-                                   # checksums (ie: max(NNN) for all digests xxxxxxxxxxxxxxxxNNN)
-            my $fileLinkMax = 0;   # maximum number of links on a pool file
-            my $fileLinkTotal = 0; # total number of links on entire pool
 
-            my $poolDir = sprintf("%s/%02x",
-                                  $compress ? $bpc->{CPoolDir} : $bpc->{PoolDir},
-                                  $refCntFile * 2);
+            my $fileCnt       = 0;    # total number of pool files
+            my $dirCnt        = 0;    # total number of pool directories
+            my $blkCnt        = 0;    # total block size of pool files
+            my $fileCntRm     = 0;    # total number of removed files
+            my $blkCntRm      = 0;    # total block size of removed pool files
+            my $fileCntRep    = 0;    # total number of pool files with repeated md5 checksums
+                                      # (ie: digest > 16 bytes; first instance isn't counted)
+            my $fileRepMax    = 0;    # worse case chain length of pool files that have repeated
+                                      # checksums (ie: max(NNN) for all digests xxxxxxxxxxxxxxxxNNN)
+            my $fileLinkMax   = 0;    # maximum number of links on a pool file
+            my $fileLinkTotal = 0;    # total number of links on entire pool
+
+            my $poolDir = sprintf("%s/%02x", $compress ? $bpc->{CPoolDir} : $bpc->{PoolDir}, $refCntFile * 2);
+
             next if ( !-d $poolDir );
             $dirCnt++;
 
@@ -203,16 +205,17 @@ sub poolCountUpdate
                 #
                 foreach my $e ( sort {$b cmp $a} @$entries ) {
                     next if ( $e->{name} eq "."
-                            || $e->{name} eq ".."
-                            || $e->{name} eq "LOCK" );
-                    my $digest = pack("H*", $e->{name});
+                        || $e->{name} eq ".."
+                        || $e->{name} eq "LOCK" );
+                    my $digest   = pack("H*", $e->{name});
                     my $poolFile = "$subPoolDir/$e->{name}";
+
                     #printf("Got %s, digest = %s\n", $e->{name}, unpack("H*", $digest));
                     my($nBlks, @s);
                     if ( $opts{s} ) {
-                        @s = stat($poolFile);
-                        $nBlks    = $s[12];
-                        $blkCnt  += $nBlks;
+                        @s     = stat($poolFile);
+                        $nBlks = $s[12];
+                        $blkCnt += $nBlks;
                     }
                     next if ( $count->get($digest) != 0 );
 
@@ -222,8 +225,7 @@ sub poolCountUpdate
                     #
                     @s = stat($poolFile) if ( !$opts{s} );
                     my $ext = $bpc->digestExtGet($digest);
-                    my($nextDigest, $nextPoolFile) = $bpc->digestConcat($digest,
-                                                                        $ext + 1, $compress);
+                    my($nextDigest, $nextPoolFile) = $bpc->digestConcat($digest, $ext + 1, $compress);
                     if ( !-f $nextPoolFile ) {
                         #
                         # last in the chain (or no chain) - just delete it
@@ -244,7 +246,8 @@ sub poolCountUpdate
                         # in the middle of a chain of pool files, so
                         # we replace the file with an empty file.
                         #
-                        print("Zeroing pool file $poolFile (next $nextPoolFile exists)\n") if ( $Conf{XferLogLevel} >= 2 );
+                        print("Zeroing pool file $poolFile (next $nextPoolFile exists)\n")
+                          if ( $Conf{XferLogLevel} >= 2 );
                         if ( !$opts{n} ) {
                             if ( chmod(0644, $poolFile) != 1 ) {
                                 print("Can't chmod 0644 $poolFile\n");
@@ -274,29 +277,30 @@ sub poolCountUpdate
 
                     $fileCnt++;
                     $fileLinkTotal += $cnt;
-                    $fileLinkMax    = $cnt if ( $cnt > $fileLinkMax && $digest ne $EmptyMD5 );
+                    $fileLinkMax = $cnt if ( $cnt > $fileLinkMax && $digest ne $EmptyMD5 );
                     next if ( length($digest) <= 16 );
                     my $ext = $bpc->digestExtGet($digest);
                     $fileCntRep += $ext;
-                    $fileRepMax  = $ext if ( $ext > $fileRepMax );
+                    $fileRepMax = $ext if ( $ext > $fileRepMax );
                 }
                 my $kb   = int($blkCnt / 2 + 0.5);
                 my $kbRm = int($blkCntRm / 2 + 0.5);
+
                 #print("BackupPC_stats4 $refCntFile = $poolName,$fileCnt,$dirCnt,$kb,$kbRm,"
                 #      . "$fileCntRm,$fileCntRep,$fileRepMax,$fileLinkMax,$fileLinkTotal\n");
                 my $chunk = int($refCntFile / 8);
-                $Info->{pool}{$poolName}[$chunk]{FileCnt}       += $fileCnt;
-                $Info->{pool}{$poolName}[$chunk]{DirCnt}        += $dirCnt;
-                $Info->{pool}{$poolName}[$chunk]{Kb}            += $kb;
-                $Info->{pool}{$poolName}[$chunk]{KbRm}          += $kbRm;
-                $Info->{pool}{$poolName}[$chunk]{FileCntRm}     += $fileCntRm;
-                $Info->{pool}{$poolName}[$chunk]{FileCntRep}    += $fileCntRep;
-                $Info->{pool}{$poolName}[$chunk]{FileRepMax}     = $fileRepMax
-                        if ( $Info->{pool}{$poolName}[$chunk]{FileRepMax} < $fileRepMax );
-                $Info->{pool}{$poolName}[$chunk]{FileLinkMax}    = $fileLinkMax
-                        if ( $Info->{pool}{$poolName}[$chunk]{FileLinkMax} < $fileLinkMax );
+                $Info->{pool}{$poolName}[$chunk]{FileCnt}    += $fileCnt;
+                $Info->{pool}{$poolName}[$chunk]{DirCnt}     += $dirCnt;
+                $Info->{pool}{$poolName}[$chunk]{Kb}         += $kb;
+                $Info->{pool}{$poolName}[$chunk]{KbRm}       += $kbRm;
+                $Info->{pool}{$poolName}[$chunk]{FileCntRm}  += $fileCntRm;
+                $Info->{pool}{$poolName}[$chunk]{FileCntRep} += $fileCntRep;
+                $Info->{pool}{$poolName}[$chunk]{FileRepMax} = $fileRepMax
+                  if ( $Info->{pool}{$poolName}[$chunk]{FileRepMax} < $fileRepMax );
+                $Info->{pool}{$poolName}[$chunk]{FileLinkMax} = $fileLinkMax
+                  if ( $Info->{pool}{$poolName}[$chunk]{FileLinkMax} < $fileLinkMax );
                 $Info->{pool}{$poolName}[$chunk]{FileLinkTotal} += $fileLinkTotal;
-                $Info->{pool}{$poolName}[$chunk]{Time}           = time;
+                $Info->{pool}{$poolName}[$chunk]{Time} = time;
             }
         }
     }
@@ -305,53 +309,47 @@ sub poolCountUpdate
         # Update the cumulative statistics for pool4 and cpool4
         #
         for my $p ( qw(pool4 cpool4) ) {
-            $Info->{"${p}FileCnt"}       = 0;
-            $Info->{"${p}DirCnt"}        = 0;
-            $Info->{"${p}Kb"}            = 0;
-            $Info->{"${p}KbRm"}          = 0;
-            $Info->{"${p}FileCntRm"}     = 0;
-            $Info->{"${p}FileCntRep"}    = 0;
-            $Info->{"${p}FileRepMax"}    = 0;
-            $Info->{"${p}FileLinkMax"}   = 0;
-            $Info->{"${p}Time"}          = 0;
+            $Info->{"${p}FileCnt"}     = 0;
+            $Info->{"${p}DirCnt"}      = 0;
+            $Info->{"${p}Kb"}          = 0;
+            $Info->{"${p}KbRm"}        = 0;
+            $Info->{"${p}FileCntRm"}   = 0;
+            $Info->{"${p}FileCntRep"}  = 0;
+            $Info->{"${p}FileRepMax"}  = 0;
+            $Info->{"${p}FileLinkMax"} = 0;
+            $Info->{"${p}Time"}        = 0;
             delete $Info->{"${p}FileCntRename"};
+
             for ( my $i = 0 ; $i < 16 ; $i++ ) {
-                $Info->{"${p}FileCnt"}
-                       += $Info->{pool}{$p}[$i]{FileCnt};
-                $Info->{"${p}DirCnt"}
-                       += $Info->{pool}{$p}[$i]{DirCnt};
-                $Info->{"${p}Kb"}
-                       += $Info->{pool}{$p}[$i]{Kb};
-                $Info->{"${p}KbRm"}
-                       += $Info->{pool}{$p}[$i]{KbRm};
-                $Info->{"${p}FileCntRm"}
-                       += $Info->{pool}{$p}[$i]{FileCntRm};
-                $Info->{"${p}FileCntRep"}
-                       += $Info->{pool}{$p}[$i]{FileCntRep};
-                $Info->{"${p}FileRepMax"}
-                        = $Info->{pool}{$p}[$i]{FileRepMax}
-                          if ( $Info->{"${p}FileRepMax"} <
-                              $Info->{pool}{$p}[$i]{FileRepMax} );
-                $Info->{"${p}FileLinkMax"}
-                        = $Info->{pool}{$p}[$i]{FileLinkMax}
-                          if ( $Info->{"${p}FileLinkMax"} <
-                             $Info->{pool}{$p}[$i]{FileLinkMax} );
+                $Info->{"${p}FileCnt"}    += $Info->{pool}{$p}[$i]{FileCnt};
+                $Info->{"${p}DirCnt"}     += $Info->{pool}{$p}[$i]{DirCnt};
+                $Info->{"${p}Kb"}         += $Info->{pool}{$p}[$i]{Kb};
+                $Info->{"${p}KbRm"}       += $Info->{pool}{$p}[$i]{KbRm};
+                $Info->{"${p}FileCntRm"}  += $Info->{pool}{$p}[$i]{FileCntRm};
+                $Info->{"${p}FileCntRep"} += $Info->{pool}{$p}[$i]{FileCntRep};
+                $Info->{"${p}FileRepMax"} = $Info->{pool}{$p}[$i]{FileRepMax}
+                  if ( $Info->{"${p}FileRepMax"} < $Info->{pool}{$p}[$i]{FileRepMax} );
+                $Info->{"${p}FileLinkMax"} = $Info->{pool}{$p}[$i]{FileLinkMax}
+                  if ( $Info->{"${p}FileLinkMax"} < $Info->{pool}{$p}[$i]{FileLinkMax} );
                 $Info->{"${p}Time"} = $Info->{pool}{$p}[$i]{Time}
-                          if ( $Info->{"${p}Time"} <
-                                 $Info->{pool}{$p}[$i]{Time} );
+                  if ( $Info->{"${p}Time"} < $Info->{pool}{$p}[$i]{Time} );
             }
-            printf("%s%s BackupPC_fsck removed %d files of"
-                   . " size %.2fGB\n",
-                     $bpc->timeStamp, ucfirst($p),
-                     $Info->{"${p}FileCntRm"},
-                     $Info->{"${p}KbRm"} / (1000 * 1024));
-            printf("%s%s is %.2fGB, %d files (%d repeated, "
-                   . "%d max chain, %d max links), %d directories\n",
-                     $bpc->timeStamp, ucfirst($p),
-                     $Info->{"${p}Kb"} / (1000 * 1024),
-                     $Info->{"${p}FileCnt"}, $Info->{"${p}FileCntRep"},
-                     $Info->{"${p}FileRepMax"},
-                     $Info->{"${p}FileLinkMax"}, $Info->{"${p}DirCnt"});
+            printf(
+                "%s%s BackupPC_fsck removed %d files of" . " size %.2fGB\n",
+                $bpc->timeStamp, ucfirst($p),
+                $Info->{"${p}FileCntRm"},
+                $Info->{"${p}KbRm"} / (1000 * 1024)
+            );
+            printf(
+                "%s%s is %.2fGB, %d files (%d repeated, " . "%d max chain, %d max links), %d directories\n",
+                $bpc->timeStamp, ucfirst($p),
+                $Info->{"${p}Kb"} / (1000 * 1024),
+                $Info->{"${p}FileCnt"},
+                $Info->{"${p}FileCntRep"},
+                $Info->{"${p}FileRepMax"},
+                $Info->{"${p}FileLinkMax"},
+                $Info->{"${p}DirCnt"}
+            );
         }
     }
 }

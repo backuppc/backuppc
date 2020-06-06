@@ -45,7 +45,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use CGI;
 use CGI::Carp qw(fatalsToBrowser);
 use lib "__INSTALLDIR__/lib";
@@ -56,33 +57,33 @@ use BackupPC::CGI::Lib qw(:all);
 BackupPC::CGI::Lib::NewRequest;
 
 my %ActionDispatch = (
-    "summary"             	 => "Summary",
-    "Start_Incr_Backup"          => "StartStopBackup",
-    "Start_Full_Backup"          => "StartStopBackup",
-    "Stop_Dequeue_Backup"        => "StartStopBackup",
-    "Stop_Dequeue_Archive"       => "StartStopBackup",
-    "queue"               	 => "Queue",
-    "view"                	 => "View",
-    "LOGlist"             	 => "LOGlist",
-    "emailSummary"        	 => "EmailSummary",
-    "browse"              	 => "Browse",
-    "dirHistory"              	 => "DirHistory",
-    "Restore"           	 => "Restore",
-    "RestoreFile"         	 => "RestoreFile",
-    "hostInfo"		       	 => "HostInfo",
-    "generalInfo"         	 => "GeneralInfo",
-    "restoreInfo"         	 => "RestoreInfo",
-    "archiveInfo"         	 => "ArchiveInfo",
-    "Start_Archive"              => "Archive",
-    "Archive"                    => "Archive",
-    "Reload"                     => "ReloadServer",
-    "startServer"                => "StartServer",
-    "Stop"                       => "StopServer",
-    "adminOpts"                  => "AdminOptions",
-    "editConfig"                 => "EditConfig",
-    "deleteBackup"               => "DeleteBackup",
-    "keepBackup"                 => "HostInfo",
-    "rss"                        => "RSS",
+    "summary"              => "Summary",
+    "Start_Incr_Backup"    => "StartStopBackup",
+    "Start_Full_Backup"    => "StartStopBackup",
+    "Stop_Dequeue_Backup"  => "StartStopBackup",
+    "Stop_Dequeue_Archive" => "StartStopBackup",
+    "queue"                => "Queue",
+    "view"                 => "View",
+    "LOGlist"              => "LOGlist",
+    "emailSummary"         => "EmailSummary",
+    "browse"               => "Browse",
+    "dirHistory"           => "DirHistory",
+    "Restore"              => "Restore",
+    "RestoreFile"          => "RestoreFile",
+    "hostInfo"             => "HostInfo",
+    "generalInfo"          => "GeneralInfo",
+    "restoreInfo"          => "RestoreInfo",
+    "archiveInfo"          => "ArchiveInfo",
+    "Start_Archive"        => "Archive",
+    "Archive"              => "Archive",
+    "Reload"               => "ReloadServer",
+    "startServer"          => "StartServer",
+    "Stop"                 => "StopServer",
+    "adminOpts"            => "AdminOptions",
+    "editConfig"           => "EditConfig",
+    "deleteBackup"         => "DeleteBackup",
+    "keepBackup"           => "HostInfo",
+    "rss"                  => "RSS",
 );
 
 #
@@ -106,5 +107,5 @@ push(@INC, $installDir) if ( !grep($_ eq $installDir, @INC) );
 # Load the relevant action script and run it
 #
 require "BackupPC/CGI/$action.pm"
-	    if ( !defined($BackupPC::CGI::{"${action}::"}) );
+  if ( !defined($BackupPC::CGI::{"${action}::"}) );
 $BackupPC::CGI::{"${action}::"}{action}();

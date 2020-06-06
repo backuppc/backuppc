@@ -38,7 +38,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use Getopt::Std;
 use File::Copy;
@@ -51,12 +52,13 @@ use BackupPC::XS qw( :all );
 use BackupPC::DirOps;
 use BackupPC::View;
 
-my $ErrorCnt       = 0;
-my $FileErrorCnt   = 0;
-my $FileCnt        = 0;
-my $FileCntNext    = 100;
+my $ErrorCnt     = 0;
+my $FileErrorCnt = 0;
+my $FileCnt      = 0;
+my $FileCntNext  = 100;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
@@ -76,9 +78,9 @@ EOF
     exit(1);
 }
 
-if ( $opts{h} !~ /^([\w\.\s-]+)$/
-        || $opts{h} =~ m{(^|/)\.\.(/|$)}
-        || !defined($Hosts->{$opts{h}}) ) {
+if (   $opts{h} !~ /^([\w\.\s-]+)$/
+    || $opts{h} =~ m{(^|/)\.\.(/|$)}
+    || !defined($Hosts->{$opts{h}}) ) {
     print(STDERR "BackupPC_backupDuplicate: bad host name '$opts{h}'\n");
     exit(1);
 }
@@ -89,8 +91,9 @@ if ( defined(my $error = $bpc->ConfigRead($Host)) ) {
 }
 %Conf = $bpc->Conf();
 
-if ( !$opts{m} && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
-              && (my $status = $bpc->ServerMesg("hostMutex $Host -1 BackupPC_backupDuplicate")) =~ /fail/ ) {
+if (   !$opts{m}
+    && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
+    && (my $status = $bpc->ServerMesg("hostMutex $Host -1 BackupPC_backupDuplicate")) =~ /fail/ ) {
     print(STDERR "$0: $status (use -m option to force running)\n");
     exit(1);
 }
@@ -135,7 +138,7 @@ for ( my $i = 0 ; $i < @Backups ; $i++ ) {
     $Inode = $Backups[$i]{inodeLast} + 1 if ( $Inode <= $Backups[$i]{inodeLast} );
 }
 
-%{$Backups[$newIdx]}        = %{$Backups[$lastIdx]};
+%{$Backups[$newIdx]} = %{$Backups[$lastIdx]};
 $Backups[$newIdx]{num}      = $newNum;
 $Backups[$newIdx]{noFill}   = 0;
 $Backups[$newIdx]{compress} = $Compress;
@@ -214,8 +217,7 @@ my @newBackups = $bpc->BackupInfoRead($Host);
 %{$newBackups[scalar(@newBackups)]} = %{$Backups[$newIdx]};
 @Backups = @newBackups;
 $bpc->BackupInfoWrite($Host, @Backups);
-BackupPC::Storage->backupInfoWrite("$TopDir/pc/$Host",
-                                    $Backups[$newIdx]{num}, $Backups[$newIdx], 1);
+BackupPC::Storage->backupInfoWrite("$TopDir/pc/$Host", $Backups[$newIdx]{num}, $Backups[$newIdx], 1);
 $ErrorCnt += BackupPC::XS::Lib::logErrorCntGet();
 $bpc->flushXSLibMesgs();
 unlink("$DestDir/refCnt/needFsck.dup") if ( $ErrorCnt == 0 );
@@ -230,10 +232,10 @@ sub copy_v4_file
     my($name, $path) = @_;
 
     printf("Got path = %s, name = %s, e,d,f = %d,%d,%d\n", $path, $name, -e $path, -d $path, -f $path)
-                                        if ( $LogLevel >= 5 );
+      if ( $LogLevel >= 5 );
     if ( -d $path ) {
         print("Creating directory $DestDir/$path\n") if ( $LogLevel >= 4 );
-        eval { mkpath("$DestDir/$path", 0, 0777) };
+        eval {mkpath("$DestDir/$path", 0, 0777)};
         if ( $@ ) {
             print(STDERR "Can't mkpath $DestDir/$path ($@)\n");
             $ErrorCnt++;
@@ -281,7 +283,7 @@ sub copy_v3_file
     if ( $a->{type} == BPC_FTYPE_DIR ) {
         my $path = $ac->getFullMangledPath($a->{relPath});
         if ( !-d $path ) {
-            eval { mkpath($path, 0, 0777) };
+            eval {mkpath($path, 0, 0777)};
             if ( $@ ) {
                 print("Can't mkpath $path ($@)\n");
                 $ErrorCnt++;
@@ -292,10 +294,11 @@ sub copy_v3_file
     } else {
         printProgress() if ( ++$FileCnt >= $FileCntNext );
     }
-    $copyFile = 1 if ( $a->{type} == BPC_FTYPE_FILE
-                    || $a->{type} == BPC_FTYPE_SYMLINK
-                    || $a->{type} == BPC_FTYPE_CHARDEV
-                    || $a->{type} == BPC_FTYPE_BLOCKDEV );
+    $copyFile = 1
+      if ( $a->{type} == BPC_FTYPE_FILE
+        || $a->{type} == BPC_FTYPE_SYMLINK
+        || $a->{type} == BPC_FTYPE_CHARDEV
+        || $a->{type} == BPC_FTYPE_BLOCKDEV );
     #
     # TODO: confirm charset for v3 symlink contents: do we need to convert to utf8?
     #
@@ -326,22 +329,22 @@ sub copy_v3_file
                 $a->{nlinks}++;
             }
             $ac->set($origRelPath, $a);
-            $ac->set($target, $a);
+            $ac->set($target,      $a);
             print("target $target exists, set both inode = $a->{inode}, nlinks = $a->{nlinks}\n")
-                                         if ( $LogLevel >= 5 );
+              if ( $LogLevel >= 5 );
             return;
         } else {
             #
             # Target file not processed.  Just set attributes with one link,
             # so that an inode is created for us and target.
             #
-            $a->{type} = BPC_FTYPE_FILE;
+            $a->{type}   = BPC_FTYPE_FILE;
             $a->{nlinks} = 1;
-            $a->{inode} = $Inode++;
+            $a->{inode}  = $Inode++;
             $ac->set($a->{relPath}, $a);
-            $ac->set($target, $a);
+            $ac->set($target,       $a);
             print("target $target doesn't exist, set both inode = $a->{inode}, nlinks = $a->{nlinks}\n")
-                                         if ( $LogLevel >= 5 );
+              if ( $LogLevel >= 5 );
             return;
         }
     } else {
@@ -357,7 +360,7 @@ sub copy_v3_file
             #
             # new non-hardlink has a new inode, and no links
             #
-            $a->{inode} = $Inode++;
+            $a->{inode}  = $Inode++;
             $a->{nlinks} = 0;
         }
     }
@@ -384,12 +387,13 @@ sub copy_v3_file
                 $data1MB .= $data if ( length($data1MB) < (1 << 20) );
             }
         } while ( $thisRead > 0 );
-        my $inode = (stat($a->{fullPath}))[1];
+
+        my $inode   = (stat($a->{fullPath}))[1];
         my $digest4 = $md5->digest();
         my $digest3 = $bpc->Buffer2MD5_v3(Digest::MD5->new(), $fileSize, \$data1MB);
-        my $path3 = $bpc->MD52Path_v3($digest3, $Compress);
-        my $path4 = $bpc->MD52Path($digest4, $Compress);
-        my $i = -1;
+        my $path3   = $bpc->MD52Path_v3($digest3, $Compress);
+        my $path4   = $bpc->MD52Path($digest4, $Compress);
+        my $i       = -1;
 
         print("$a->{relPath}: path3 = $path3, path4 = $path4\n") if ( $LogLevel >= 5 );
 
@@ -424,7 +428,7 @@ sub copy_v3_file
                 $dir4 =~ s{(.*)/.*}{$1};
                 if ( !-d $dir4 ) {
                     print("Creating directory $dir4\n") if ( $LogLevel >= 5 );
-                    eval { mkpath($dir4, 0, 0777) };
+                    eval {mkpath($dir4, 0, 0777)};
                     if ( $@ ) {
                         print(STDERR "Can't mkpath $dir4 ($@)\n");
                         $ErrorCnt++;
@@ -450,7 +454,7 @@ sub copy_v3_file
         if ( !$found && (@s = stat($path4)) && $s[1] == $inode ) {
             $found = 1;
             print("$a->{relPath}: rediscovered in pool4 $path4; prior link error is benign\n");
-            $ErrorCnt-- if ( $ErrorCnt > 0 );        # reverse increment above
+            $ErrorCnt-- if ( $ErrorCnt > 0 );    # reverse increment above
         }
 
         if ( $found ) {
@@ -478,7 +482,9 @@ sub copy_v3_file
             my($match, $digest, $poolSize, $errorCnt) = $pw->close();
             if ( $LogLevel >= 5 ) {
                 my $digestStr = unpack("H*", $digest);
-                print("poolWrite->close $fileName: returned match $match, digest $digestStr, poolSize $poolSize, errCnt $errorCnt\n");
+                print(
+                    "poolWrite->close $fileName: returned match $match, digest $digestStr, poolSize $poolSize, errCnt $errorCnt\n"
+                );
             }
             $ErrorCnt += $errorCnt;
             $a->{digest} = $digest;
@@ -496,8 +502,8 @@ sub copy_v3_file
                     $Backups[$newIdx]{sizeExist}     += $size;
                     $Backups[$newIdx]{sizeExistComp} += $poolSize;
                 } else {
-                    $Backups[$newIdx]{sizeNew}       += $size;
-                    $Backups[$newIdx]{sizeNewComp}   += $poolSize;
+                    $Backups[$newIdx]{sizeNew}     += $size;
+                    $Backups[$newIdx]{sizeNewComp} += $poolSize;
                 }
             }
         }
@@ -505,7 +511,8 @@ sub copy_v3_file
         $Backups[$newIdx]{nFiles}++;
         $Backups[$newIdx]{nFilesExist}++;
     }
-    print("setting $a->{relPath} attrib (type $a->{type}, inode $a->{inode}, nlinks $a->{nlinks})\n") if ( $LogLevel >= 5 );
+    print("setting $a->{relPath} attrib (type $a->{type}, inode $a->{inode}, nlinks $a->{nlinks})\n")
+      if ( $LogLevel >= 5 );
     $ac->set($a->{relPath}, $a);
     $bpc->flushXSLibMesgs();
 }

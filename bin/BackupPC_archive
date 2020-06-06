@@ -35,7 +35,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::XS;
@@ -49,6 +50,7 @@ use vars qw( %ArchiveReq );
 ###########################################################################
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
@@ -63,15 +65,16 @@ if ( !getopts("m", \%opts) || @ARGV != 3 ) {
     print("usage: $0 [-m] <user> <archiveclient> <reqFileName>\n");
     exit(1);
 }
-$user = $1 if ( $ARGV[0] =~ /(.+)/ );
+$user   = $1 if ( $ARGV[0] =~ /(.+)/ );
 $client = $1 if ( $ARGV[1] =~ /(.+)/ );
 if ( $ARGV[2] !~ /^([\w\.\s-]+)$/ ) {
     print("$0: bad reqFileName (arg #3): $ARGV[2]\n");
     exit(1);
 }
 $reqFileName = $1;
-if ( !$opts{m} && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
-              && (my $status = $bpc->ServerMesg("hostMutex $client 1 BackupPC_archive")) =~ /fail/ ) {
+if (   !$opts{m}
+    && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
+    && (my $status = $bpc->ServerMesg("hostMutex $client 1 BackupPC_archive")) =~ /fail/ ) {
     print(STDERR "$0: $status (use -m option to force running)\n");
     exit(1);
 }
@@ -111,9 +114,9 @@ if ( !(my $ret = do "$Dir/$reqFileName") ) {
     if ( $@ ) {
         $err = "couldn't parse $Dir/$reqFileName: $@";
     } elsif ( !defined($ret) ) {
-	$err = "couldn't do $Dir/$reqFileName: $!";
+        $err = "couldn't do $Dir/$reqFileName: $!";
     } else {
-	$err = "couldn't run $Dir/$reqFileName";
+        $err = "couldn't run $Dir/$reqFileName";
     }
     $stat{hostError} = $err;
     exit(ArchiveCleanup($client));
@@ -143,12 +146,11 @@ if ( $Conf{ClientNameAlias} ne "" ) {
     $host = $client;
 }
 
-my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
-my $ArchiveLOG = BackupPC::XS::FileZIO::open("$Dir/ArchiveLOG$fileExt", 1,
-                                     $Conf{CompressLevel});
+my $fileExt    = $Conf{CompressLevel} > 0 ? ".z" : "";
+my $ArchiveLOG = BackupPC::XS::FileZIO::open("$Dir/ArchiveLOG$fileExt", 1, $Conf{CompressLevel});
 my($logMsg, $xfer);
 
-$stat{xferOK} = 1;
+$stat{xferOK}    = 1;
 $stat{hostAbort} = undef;
 $stat{hostError} = $stat{lastOutputLine} = undef;
 local(*RH, *WH);
@@ -170,22 +172,22 @@ $xfer = BackupPC::Xfer::Archive->new($bpc);
 #
 
 my $xferArgs = {
-    client       => $client,
-    host         => $host,
-    user         => $ArchiveReq{user},
-    type         => "archive",
-    XferLOG      => $ArchiveLOG,
-    XferMethod   => $Conf{XferMethod},
-    pathHdrSrc   => $ArchiveReq{pathHdrSrc},
-    pathHdrDest  => $ArchiveReq{pathHdrDest},
-    HostList     => \@{$ArchiveReq{HostList}},
-    BackupList   => \@{$ArchiveReq{BackupList}},
-    archiveloc   => $ArchiveReq{archiveloc},
-    parfile      => $ArchiveReq{parfile},
-    compression  => $ArchiveReq{compression},
-    compext      => $ArchiveReq{compext},
-    splitsize    => $ArchiveReq{splitsize},
-    pidHandler   => \&pidHandler,
+    client      => $client,
+    host        => $host,
+    user        => $ArchiveReq{user},
+    type        => "archive",
+    XferLOG     => $ArchiveLOG,
+    XferMethod  => $Conf{XferMethod},
+    pathHdrSrc  => $ArchiveReq{pathHdrSrc},
+    pathHdrDest => $ArchiveReq{pathHdrDest},
+    HostList    => \@{$ArchiveReq{HostList}},
+    BackupList  => \@{$ArchiveReq{BackupList}},
+    archiveloc  => $ArchiveReq{archiveloc},
+    parfile     => $ArchiveReq{parfile},
+    compression => $ArchiveReq{compression},
+    compext     => $ArchiveReq{compext},
+    splitsize   => $ArchiveReq{splitsize},
+    pidHandler  => \&pidHandler,
 };
 
 $xfer->args($xferArgs);
@@ -230,9 +232,9 @@ sub catch_signal
     $ArchiveLOG->write(\"exiting after signal $signame\n");
     $stat{xferOK} = 0;
     if ( $signame eq "INT" ) {
-	$stat{hostError} = "aborted by user (signal=$signame)";
+        $stat{hostError} = "aborted by user (signal=$signame)";
     } else {
-	$stat{hostError} = "aborted by signal=$signame";
+        $stat{hostError} = "aborted by signal=$signame";
     }
     exit(ArchiveCleanup($client));
 }
@@ -247,28 +249,28 @@ sub ArchiveCleanup
     $stat{xferOK} = 0 if ( $stat{hostError} || $stat{hostAbort} );
 
     if ( !$stat{xferOK} ) {
-	#
-	# Kill off the transfer program, first nicely then forcefully.
-	# We use negative PIDs to make sure all processes in each
-	# group get the signal.
-	#
-	if ( @xferPid ) {
-	    foreach my $pid ( @xferPid ) {
-		kill($bpc->sigName2num("INT"), -$pid);
-	    }
-	    sleep(1);
-	    foreach my $pid ( @xferPid ) {
-		kill($bpc->sigName2num("KILL"), -$pid);
-	    }
-	}
+        #
+        # Kill off the transfer program, first nicely then forcefully.
+        # We use negative PIDs to make sure all processes in each
+        # group get the signal.
+        #
+        if ( @xferPid ) {
+            foreach my $pid ( @xferPid ) {
+                kill($bpc->sigName2num("INT"), -$pid);
+            }
+            sleep(1);
+            foreach my $pid ( @xferPid ) {
+                kill($bpc->sigName2num("KILL"), -$pid);
+            }
+        }
     }
 
-    my $lastNum  = -1;
+    my $lastNum = -1;
     my @Archives;
 
     @Archives = $bpc->ArchiveInfoRead($client);
     for ( my $i = 0 ; $i < @Archives ; $i++ ) {
-	$lastNum = $Archives[$i]{num} if ( $lastNum < $Archives[$i]{num} );
+        $lastNum = $Archives[$i]{num} if ( $lastNum < $Archives[$i]{num} );
     }
     $lastNum++;
 
@@ -279,22 +281,22 @@ sub ArchiveCleanup
         UserCommandRun("ArchivePostUserCmd");
         if ( $? && $Conf{UserCmdCheckStatus} ) {
             $stat{hostError} = "RestorePreUserCmd returned error status $?";
-            $stat{xferOK} = 0;
+            $stat{xferOK}    = 0;
         }
     }
 
     rename("$Dir/ArchiveLOG$fileExt", "$Dir/ArchiveLOG.$lastNum$fileExt");
-    rename("$Dir/$reqFileName", "$Dir/ArchiveInfo.$lastNum");
+    rename("$Dir/$reqFileName",       "$Dir/ArchiveInfo.$lastNum");
     my $endTime = time();
 
     #
     # If the archive failed, clean up
     #
     if ( !$stat{xferOK} ) {
-	$stat{hostError} = $stat{lastOutputLine} if ( $stat{hostError} eq "" );
-	$stat{hostAbort} = 1;
-	$ArchiveLOG->write(\"Archive failed: $stat{hostError}")
-					    if ( defined($ArchiveLOG) );
+        $stat{hostError} = $stat{lastOutputLine} if ( $stat{hostError} eq "" );
+        $stat{hostAbort} = 1;
+        $ArchiveLOG->write(\"Archive failed: $stat{hostError}")
+          if ( defined($ArchiveLOG) );
     }
 
     $ArchiveLOG->close() if ( defined($ArchiveLOG) );
@@ -304,29 +306,29 @@ sub ArchiveCleanup
     #
     @Archives = $bpc->ArchiveInfoRead($client);
     my $i = @Archives;
-    $Archives[$i]{num}           = $lastNum;
-    $Archives[$i]{startTime}     = $startTime;
-    $Archives[$i]{endTime}       = $endTime;
-    $Archives[$i]{result}        = $stat{xferOK} ? "ok" : "failed";
-    $Archives[$i]{errorMsg}      = $stat{hostError};
+    $Archives[$i]{num}       = $lastNum;
+    $Archives[$i]{startTime} = $startTime;
+    $Archives[$i]{endTime}   = $endTime;
+    $Archives[$i]{result}    = $stat{xferOK} ? "ok" : "failed";
+    $Archives[$i]{errorMsg}  = $stat{hostError};
 
     while ( @Archives > $Conf{ArchiveInfoKeepCnt} ) {
-	my $num = $Archives[0]{num};
-	unlink("$Dir/ArchiveLOG.$num.z");
-	unlink("$Dir/ArchiveLOG.$num");
-	unlink("$Dir/ArchiveInfo.$num");
-	shift(@Archives);
+        my $num = $Archives[0]{num};
+        unlink("$Dir/ArchiveLOG.$num.z");
+        unlink("$Dir/ArchiveLOG.$num");
+        unlink("$Dir/ArchiveInfo.$num");
+        shift(@Archives);
     }
     $bpc->ArchiveInfoWrite($client, @Archives);
 
     if ( !$stat{xferOK} ) {
-	print($LogFd $bpc->timeStamp, "Archive failed ($stat{hostError})\n");
-	print("archive failed: $stat{hostError}\n");
-	return 1;
+        print($LogFd $bpc->timeStamp, "Archive failed ($stat{hostError})\n");
+        print("archive failed: $stat{hostError}\n");
+        return 1;
     } else {
         print($LogFd $bpc->timeStamp, "Archive Complete\n");
-	print("archive complete\n");
-	return;
+        print("archive complete\n");
+        return;
     }
 }
 
@@ -341,7 +343,7 @@ sub pidHandler
     @xferPid = grep(/./, @xferPid);
     return if ( !@xferPid );
     my @pids = @xferPid;
-    my $str = join(",", @pids);
+    my $str  = join(",", @pids);
     $ArchiveLOG->write(\"Xfer PIDs are now $str\n") if ( defined($ArchiveLOG) );
     print("xferPids $str\n");
 }
@@ -355,26 +357,26 @@ sub UserCommandRun
 
     return if ( !defined($Conf{$cmdType}) );
     my $vars = {
-        xfer         => $xfer,
-        client       => $client,
-        host         => $host,
-        user         => $user,
-        share        => $ArchiveReq{shareDest},
-        XferMethod   => $Conf{XferMethod},
-        HostList     => \@{$ArchiveReq{HostList}},
-        BackupList   => \@{$ArchiveReq{BackupList}},
-        archiveloc   => $ArchiveReq{archiveloc},
-        parfile      => $ArchiveReq{parfile},
-        compression  => $ArchiveReq{compression},
-        compext      => $ArchiveReq{compext},
-        splitsize    => $ArchiveReq{splitsize},
-        sshPath      => $Conf{SshPath},
-        LOG          => $LogFd,
-        XferLOG      => $ArchiveLOG,
-        stat         => \%stat,
-        xferOK       => $stat{xferOK} || 0,
-	type	     => "archive",
-	cmdType	     => $cmdType,
+        xfer        => $xfer,
+        client      => $client,
+        host        => $host,
+        user        => $user,
+        share       => $ArchiveReq{shareDest},
+        XferMethod  => $Conf{XferMethod},
+        HostList    => \@{$ArchiveReq{HostList}},
+        BackupList  => \@{$ArchiveReq{BackupList}},
+        archiveloc  => $ArchiveReq{archiveloc},
+        parfile     => $ArchiveReq{parfile},
+        compression => $ArchiveReq{compression},
+        compext     => $ArchiveReq{compext},
+        splitsize   => $ArchiveReq{splitsize},
+        sshPath     => $Conf{SshPath},
+        LOG         => $LogFd,
+        XferLOG     => $ArchiveLOG,
+        stat        => \%stat,
+        xferOK      => $stat{xferOK} || 0,
+        type        => "archive",
+        cmdType     => $cmdType,
     };
     my $cmd = $bpc->cmdVarSubstitute($Conf{$cmdType}, $vars);
     $ArchiveLOG->write(\"Executing $cmdType: @$cmd\n");
@@ -384,15 +386,18 @@ sub UserCommandRun
     # case the command is really perl code instead of a shell
     # command.
     #
-    $bpc->cmdSystemOrEval($cmd,
-	    sub {
-		$ArchiveLOG->write(\$_[0]);
-                if ( $ArchiveLOG && length($_[0]) ) {
-                    $ArchiveLOG->write(\$_[0]);
-                } elsif ( $LogFd && length($_[0]) ) {
-                    print($LogFd $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
-                }
+    $bpc->cmdSystemOrEval(
+        $cmd,
+        sub {
+            $ArchiveLOG->write(\$_[0]);
+            if ( $ArchiveLOG && length($_[0]) ) {
+                $ArchiveLOG->write(\$_[0]);
+            } elsif ( $LogFd && length($_[0]) ) {
+                print($LogFd $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
+            }
 
-	    },
-	    $vars, \%Conf);
+        },
+        $vars,
+        \%Conf
+    );
 }

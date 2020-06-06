@@ -49,7 +49,7 @@ sub GetReqType
         return "archive";
     } else {
         return "backup ($req->{backupType})" if ( $req->{backupType} );
-	return "backup";
+        return "backup";
     }
 }
 
@@ -61,13 +61,13 @@ sub action
     my $Privileged = CheckPermission();
 
     if ( !$Privileged ) {
-	ErrorExit($Lang->{Only_privileged_users_can_view_queues_});
+        ErrorExit($Lang->{Only_privileged_users_can_view_queues_});
     }
 
     while ( @BgQueue ) {
-        my $req = pop(@BgQueue);
+        my $req      = pop(@BgQueue);
         my($reqTime) = timeStamp2($req->{reqTime});
-	my $type = GetReqType($req);
+        my $type     = GetReqType($req);
         $strBg .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
     <td align="center"> $type </td>
@@ -76,8 +76,8 @@ sub action
 EOF
     }
     while ( @UserQueue ) {
-        my $req = pop(@UserQueue);
-	my $type = GetReqType($req);
+        my $req     = pop(@UserQueue);
+        my $type    = GetReqType($req);
         my $reqTime = timeStamp2($req->{reqTime});
         $strUser .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
@@ -87,9 +87,9 @@ EOF
 EOF
     }
     while ( @CmdQueue ) {
-        my $req = pop(@CmdQueue);
+        my $req     = pop(@CmdQueue);
         my $reqTime = timeStamp2($req->{reqTime});
-	my $type = GetReqType($req);
+        my $type    = GetReqType($req);
         (my $cmd = $bpc->execCmd2ShellCmd(@{$req->{cmd}})) =~ s/$BinDir\///;
         $strCmd .= <<EOF;
 <tr><td> ${HostLink($req->{host})} </td>
@@ -99,7 +99,7 @@ EOF
     <td> $cmd </td></tr>
 EOF
     }
-    my $content = eval ( "qq{$Lang->{Backup_Queue_Summary}}");
+    my $content = eval("qq{$Lang->{Backup_Queue_Summary}}");
     Header($Lang->{BackupPC__Queue_Summary}, $content);
     Trailer();
 }

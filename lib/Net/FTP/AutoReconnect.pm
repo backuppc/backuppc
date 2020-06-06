@@ -70,17 +70,17 @@ All parameters are passed along verbatim to C<Net::FTP>, as well as
 stored in case we have to reconnect.
 
 =cut
-  ;
 
-sub new {
-  my $self = {};
-  my $class = shift;
-  bless $self,$class;
+sub new
+{
+    my $self  = {};
+    my $class = shift;
+    bless $self, $class;
 
-  $self->{newargs} = \@_;
-  $self->reconnect();
+    $self->{newargs} = \@_;
+    $self->reconnect();
 
-  $self;
+    $self;
 }
 
 =head2 METHODS
@@ -94,387 +94,370 @@ Abandon the current FTP connection and create a new one, restoring all
 the state we can.
 
 =cut
-  ;
 
 sub reconnect
 {
-  my $self = shift;
+    my $self = shift;
 
-  warn "Reconnecting!\n"
-    if ($ENV{DEBUG});
+    warn "Reconnecting!\n"
+      if ( $ENV{DEBUG} );
 
-  $self->{ftp} = Net::FTP->new(@{$self->{newargs}})
-    or die "Couldn't create new FTP object\n";
+    $self->{ftp} = Net::FTP->new(@{$self->{newargs}})
+      or die "Couldn't create new FTP object\n";
 
-  if ($self->{login})
-  {
-    $self->{ftp}->login(@{$self->{login}});
-  }
-  if ($self->{authorize})
-  {
-    $self->{ftp}->authorize(@{$self->{authorize}});
-  }
-  if ($self->{mode})
-  {
-    if ($self->{mode} eq 'ascii')
-    {
-      $self->{ftp}->ascii();
+    if ( $self->{login} ) {
+        $self->{ftp}->login(@{$self->{login}});
     }
-    else
-    {
-      $self->{ftp}->binary();
+    if ( $self->{authorize} ) {
+        $self->{ftp}->authorize(@{$self->{authorize}});
     }
-  }
-  if ($self->{cwd})
-  {
-    $self->{ftp}->cwd($self->{cwd});
-  }
-  if ($self->{hash})
-  {
-    $self->{ftp}->hash(@{$self->{hash}});
-  }
-  if ($self->{restart})
-  {
-    $self->{ftp}->restart(@{$self->{restart}});
-  }
-  if ($self->{alloc})
-  {
-    $self->{ftp}->restart(@{$self->{alloc}});
-  }
-  if ($self->{pasv})
-  {
-    $self->{ftp}->pasv(@{$self->{pasv}});
-  }
-  if ($self->{port})
-  {
-    $self->{ftp}->port(@{$self->{port}});
-  }
+    if ( $self->{mode} ) {
+        if ( $self->{mode} eq 'ascii' ) {
+            $self->{ftp}->ascii();
+        } else {
+            $self->{ftp}->binary();
+        }
+    }
+    if ( $self->{cwd} ) {
+        $self->{ftp}->cwd($self->{cwd});
+    }
+    if ( $self->{hash} ) {
+        $self->{ftp}->hash(@{$self->{hash}});
+    }
+    if ( $self->{restart} ) {
+        $self->{ftp}->restart(@{$self->{restart}});
+    }
+    if ( $self->{alloc} ) {
+        $self->{ftp}->restart(@{$self->{alloc}});
+    }
+    if ( $self->{pasv} ) {
+        $self->{ftp}->pasv(@{$self->{pasv}});
+    }
+    if ( $self->{port} ) {
+        $self->{ftp}->port(@{$self->{port}});
+    }
 }
 
 sub _auto_reconnect
 {
-  my $self = shift;
-  my($code)=@_;
+    my $self = shift;
+    my($code) = @_;
 
-  my $ret = $code->();
-  if (!defined($ret))
-  {
-    $self->reconnect();
-    $ret = $code->();
-  }
-  $ret;
+    my $ret = $code->();
+    if ( !defined($ret) ) {
+        $self->reconnect();
+        $ret = $code->();
+    }
+    $ret;
 }
 
 sub _after_pcmd
 {
-  my $self = shift;
-  my($r) = @_;
-  if ($r)
-  {
-    # succeeded
-    delete $self->{port};
-    delete $self->{pasv};
-    delete $self->{restart};
-    delete $self->{alloc};
-  }
-  $r;
-}
+    my $self = shift;
+    my($r) = @_;
+    if ( $r ) {
 
+        # succeeded
+        delete $self->{port};
+        delete $self->{pasv};
+        delete $self->{restart};
+        delete $self->{alloc};
+    }
+    $r;
+}
 
 sub login
 {
-  my $self = shift;
+    my $self = shift;
 
-  $self->{login} = \@_;
-  $self->{ftp}->login(@_);
+    $self->{login} = \@_;
+    $self->{ftp}->login(@_);
 }
 
 sub authorize
 {
-  my $self = shift;
-  $self->{authorize} = \@_;
-  $self->{ftp}->authorize(@_);
+    my $self = shift;
+    $self->{authorize} = \@_;
+    $self->{ftp}->authorize(@_);
 }
 
 sub site
 {
-  my $self = shift;
-  $self->{ftp}->site(@_);
+    my $self = shift;
+    $self->{ftp}->site(@_);
 }
 
 sub ascii
 {
-  my $self = shift;
-  $self->{mode} = 'ascii';
-  $self->_auto_reconnect(sub { $self->{ftp}->ascii() });
+    my $self = shift;
+    $self->{mode} = 'ascii';
+    $self->_auto_reconnect(sub {$self->{ftp}->ascii()});
 }
 
 sub binary
 {
-  my $self = shift;
-  $self->{mode} = 'binary';
-  $self->_auto_reconnect(sub { $self->{ftp}->binary() });
+    my $self = shift;
+    $self->{mode} = 'binary';
+    $self->_auto_reconnect(sub {$self->{ftp}->binary()});
 }
 
 sub rename
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->rename(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->rename(@a)});
 }
 
 sub delete
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->delete(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->delete(@a)});
 }
 
 sub cwd
 {
-  my $self = shift;
-  my @a = @_;
-  my $ret = $self->_auto_reconnect(sub { $self->{ftp}->cwd(@a) });
-  if (defined($ret))
-  {
-    $self->{cwd} = $self->{ftp}->pwd()
-      or die "Couldn't get directory after cwd\n";
-  }
-  $ret;
+    my $self = shift;
+    my @a    = @_;
+    my $ret  = $self->_auto_reconnect(sub {$self->{ftp}->cwd(@a)});
+    if ( defined($ret) ) {
+        $self->{cwd} = $self->{ftp}->pwd()
+          or die "Couldn't get directory after cwd\n";
+    }
+    $ret;
 }
 
 sub cdup
 {
-  my $self = shift;
-  my @a = @_;
-  my $ret = $self->_auto_reconnect(sub { $self->{ftp}->cdup(@a) });
-  if (defined($ret))
-  {
-    $self->{cwd} = $self->{ftp}->pwd()
-      or die "Couldn't get directory after cdup\n";
-  }
-  $ret;
+    my $self = shift;
+    my @a    = @_;
+    my $ret  = $self->_auto_reconnect(sub {$self->{ftp}->cdup(@a)});
+    if ( defined($ret) ) {
+        $self->{cwd} = $self->{ftp}->pwd()
+          or die "Couldn't get directory after cdup\n";
+    }
+    $ret;
 }
 
 sub pwd
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->pwd(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->pwd(@a)});
 }
 
 sub rmdir
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->rmdir(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->rmdir(@a)});
 }
 
 sub mkdir
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->mkdir(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->mkdir(@a)});
 }
 
 sub ls
 {
-  my $self = shift;
-  my @a = @_;
-  my $ret = $self->_auto_reconnect(sub { $self->{ftp}->ls(@a) });
-  return $ret ? (wantarray ? @$ret : $ret) : undef;
+    my $self = shift;
+    my @a    = @_;
+    my $ret  = $self->_auto_reconnect(sub {$self->{ftp}->ls(@a)});
+    return $ret ? (wantarray ? @$ret : $ret) : undef;
 }
 
 sub dir
 {
-  my $self = shift;
-  my @a = @_;
-  my $ret = $self->_auto_reconnect(sub { $self->{ftp}->dir(@a) });
-  return $ret ? (wantarray ? @$ret : $ret) : undef;
+    my $self = shift;
+    my @a    = @_;
+    my $ret  = $self->_auto_reconnect(sub {$self->{ftp}->dir(@a)});
+    return $ret ? (wantarray ? @$ret : $ret) : undef;
 }
 
 sub restart
 {
-  my $self = shift;
-  my @a = @_;
-  $self->{restart} = \@a;
-  $self->{ftp}->restart(@_);
+    my $self = shift;
+    my @a    = @_;
+    $self->{restart} = \@a;
+    $self->{ftp}->restart(@_);
 }
 
 sub retr
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->retr(@a) }));
+    my $self = shift;
+    my @a    = @_;
+    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->retr(@a)}));
 }
 
 sub get
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->get(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->get(@a)});
 }
 
 sub mdtm
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->mdtm(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->mdtm(@a)});
 }
 
 sub size
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->size(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->size(@a)});
 }
 
 sub abort
 {
-  my $self = shift;
-  $self->{ftp}->abort();
+    my $self = shift;
+    $self->{ftp}->abort();
 }
 
 sub quit
 {
-  my $self = shift;
-  $self->{ftp}->quit();
+    my $self = shift;
+    $self->{ftp}->quit();
 }
 
 sub hash
 {
-  my $self = shift;
-  my @a = @_;
-  $self->{hash} = \@a;
-  $self->{ftp}->hash(@_);
+    my $self = shift;
+    my @a    = @_;
+    $self->{hash} = \@a;
+    $self->{ftp}->hash(@_);
 }
 
 sub alloc
 {
-  my $self = shift;
-  my @a = @_;
-  $self->{alloc} = \@a;
-  $self->_auto_reconnect(sub { $self->{ftp}->alloc(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->{alloc} = \@a;
+    $self->_auto_reconnect(sub {$self->{ftp}->alloc(@a)});
 }
 
 sub put
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->put(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->put(@a)});
 }
 
 sub put_unique
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->put_unique(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->put_unique(@a)});
 }
 
 sub append
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->append(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->append(@a)});
 }
 
 sub unique_name
 {
-  my $self = shift;
-  $self->{ftp}->unique_name(@_);
+    my $self = shift;
+    $self->{ftp}->unique_name(@_);
 }
 
 sub supported
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_auto_reconnect(sub { $self->{ftp}->supported(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->_auto_reconnect(sub {$self->{ftp}->supported(@a)});
 }
 
 sub port
 {
-  my $self = shift;
-  my @a = @_;
-  $self->{port} = \@a;
-  $self->_auto_reconnect(sub { $self->{ftp}->port(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->{port} = \@a;
+    $self->_auto_reconnect(sub {$self->{ftp}->port(@a)});
 }
 
 sub pasv
 {
-  my $self = shift;
-  my @a = @_;
-  $self->{pasv} = \@a;
-  $self->_auto_reconnect(sub { $self->{ftp}->pasv(@a) });
+    my $self = shift;
+    my @a    = @_;
+    $self->{pasv} = \@a;
+    $self->_auto_reconnect(sub {$self->{ftp}->pasv(@a)});
 }
 
 sub nlst
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->nlst(@a) }));
+    my $self = shift;
+    my @a    = @_;
+    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->nlst(@a)}));
 }
 
 sub stou
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->stou(@a) }));
+    my $self = shift;
+    my @a    = @_;
+    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->stou(@a)}));
 }
 
 sub appe
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->appe(@a) }));
+    my $self = shift;
+    my @a    = @_;
+    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->appe(@a)}));
 }
 
 sub list
 {
-  my $self = shift;
-  my @a = @_;
-  $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->list(@a) }));
+    my $self = shift;
+    my @a    = @_;
+    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->list(@a)}));
 }
 
 sub pasv_xfer
 {
-  my $self = shift;
-  $self->{ftp}->pasv_xfer(@_);
+    my $self = shift;
+    $self->{ftp}->pasv_xfer(@_);
 }
 
 sub pasv_xfer_unique
 {
-  my $self = shift;
-  $self->{ftp}->pasv_xfer_unique(@_);
+    my $self = shift;
+    $self->{ftp}->pasv_xfer_unique(@_);
 }
 
 sub pasv_wait
 {
-  my $self = shift;
-  $self->{ftp}->pasv_wait(@_);
+    my $self = shift;
+    $self->{ftp}->pasv_wait(@_);
 }
 
 sub message
 {
-  my $self = shift;
-  $self->{ftp}->message(@_);
+    my $self = shift;
+    $self->{ftp}->message(@_);
 }
 
 sub code
 {
-  my $self = shift;
-  $self->{ftp}->code(@_);
+    my $self = shift;
+    $self->{ftp}->code(@_);
 }
 
 sub ok
 {
-  my $self = shift;
-  $self->{ftp}->ok(@_);
+    my $self = shift;
+    $self->{ftp}->ok(@_);
 }
 
 sub status
 {
-  my $self = shift;
-  $self->{ftp}->status(@_);
+    my $self = shift;
+    $self->{ftp}->status(@_);
 }
 
 =head1 AUTHOR

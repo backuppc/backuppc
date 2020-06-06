@@ -12,9 +12,9 @@ my $BaseVersion  = "4.0.0alpha3";
 my $PatchLevel   = "pl0";
 my $PatchVersion = "$BaseVersion$PatchLevel";
 
-my $Base         = "/usr/local/BackupPC/dist/BackupPC-$BaseVersion";
-my $TmpDir       = "patch.tmp";
-my $OutFile      = "BackupPC-$PatchVersion.diff";
+my $Base    = "/usr/local/BackupPC/dist/BackupPC-$BaseVersion";
+my $TmpDir  = "patch.tmp";
+my $OutFile = "BackupPC-$PatchVersion.diff";
 
 find({wanted => \&CopyFile, no_chdir => 1}, $Base);
 
@@ -51,12 +51,12 @@ EOF
 mkdir($TmpDir) if ( !-d $TmpDir );
 foreach my $dir ( qw(bin lib cgi-bin) ) {
     open(DIFF, "diff -ur -I '^# Version .*, released ' -I '#.*/bin/perl' $Base/$dir $TmpDir/$dir|")
-	    || die("can't run diff\n");
+      || die("can't run diff\n");
     while ( <DIFF> ) {
-	next if ( /^Only/ || /^diff / );
-	s/^--- \Q$Base\//--- /;
-	s/^\+\+\+ \Q$TmpDir\//+++ /;
-	print OUT;
+        next if ( /^Only/ || /^diff / );
+        s/^--- \Q$Base\//--- /;
+        s/^\+\+\+ \Q$TmpDir\//+++ /;
+        print OUT;
     }
 }
 rmtree($TmpDir, 0);
@@ -64,19 +64,19 @@ rmtree($TmpDir, 0);
 sub CopyFile
 {
     (my $file = $File::Find::name) =~ s{\Q$Base}{};
-    (my $dir = $file) =~ s{(.*)/.*}{$1};
+    (my $dir  = $file)             =~ s{(.*)/.*}{$1};
     $file =~ s{^/}{};
 
     #print("Got dir = $TmpDir/$dir, file = $file\n");
-    return if ( !-f $file );
+    return                          if ( !-f $file );
     mkpath("$TmpDir/$dir", 0, 0755) if ( !-d "$TmpDir/$dir" );
     open(IN, "<", $file)
-                    || die("Can't open $file for input\n");
+      || die("Can't open $file for input\n");
     open(OUT, ">", "$TmpDir/$file")
-                    || die("Can't open $TmpDir/$file for output\n");
+      || die("Can't open $TmpDir/$file for output\n");
     while ( <IN> ) {
-        if ( /^use lib ".*BackupPC[\d.]*\/lib";/
-                || /^use lib "\/home\/pcbackup\/install\/lib";/ ) {
+        if (   /^use lib ".*BackupPC[\d.]*\/lib";/
+            || /^use lib "\/home\/pcbackup\/install\/lib";/ ) {
             print OUT "use lib \"__INSTALLDIR__/lib\";\n";
         } elsif ( $file =~ /Lib.pm/ && /(.*TopDir *=> .*)'.*',/ ) {
             print OUT "$1'__TOPDIR__',\n";
@@ -86,8 +86,7 @@ sub CopyFile
             print OUT "$1'__INSTALLDIR__',\n";
         } elsif ( $file =~ /Lib.pm/ && /(.*Version *=> .*)'.*',/ ) {
             print OUT "$1'$PatchVersion',\n";
-        } elsif ( $file =~ /BackupPC_Admin/ && /(my *\$installDir *= *)'.*'/
-) {
+        } elsif ( $file =~ /BackupPC_Admin/ && /(my *\$installDir *= *)'.*'/ ) {
             print OUT "$1'__INSTALLDIR__/lib';\n";
         } else {
             print(OUT);

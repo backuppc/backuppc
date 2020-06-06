@@ -36,7 +36,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use Getopt::Std;
 use Data::Dumper;
@@ -46,6 +47,7 @@ use BackupPC::Lib;
 use BackupPC::XS;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
@@ -123,7 +125,7 @@ foreach my $host ( @hostList ) {
             if ( !(my $ret = do "$dir/$bkupNum/backupInfo") ) {
                 print("    couldn't parse $dir/$bkupNum/backupInfo: $@\n") if $@;
                 print("    couldn't do $dir/$bkupNum/backupInfo: $!\n")
-                                                        unless defined $ret;
+                  unless defined $ret;
                 print("    couldn't run $dir/$bkupNum/backupInfo\n");
                 next;
             }
@@ -154,7 +156,10 @@ foreach my $host ( @hostList ) {
                 $startTime = parsedate($1);
                 next;
             }
-            next if ( $str !~ /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (full|incr|partial) backup (\d+) complete, (\d+) files, (\d+) bytes, (\d+) xferErrs \((\d+) bad files, (\d+) bad shares, (\d+) other\)/ );
+            next
+              if ( $str !~
+                /^(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}) (full|incr|partial) backup (\d+) complete, (\d+) files, (\d+) bytes, (\d+) xferErrs \((\d+) bad files, (\d+) bad shares, (\d+) other\)/
+              );
 
             my $type        = $2;
             my $bkupNum     = $3;
@@ -164,27 +169,28 @@ foreach my $host ( @hostList ) {
             my $badFiles    = $7;
             my $badShare    = $8;
             my $endTime     = parsedate($1);
+
             print("    Got $type backup $bkupNum at $endTime\n");
             next if ( !-d "$dir/$bkupNum" );
             $BkupFromLOG->{$bkupNum} = {
-                num            => $bkupNum,
-                type           => $type,
-                startTime      => $startTime,
-                endTime        => $endTime,
-                size           => $sizeTotal,
-                nFiles         => $nFilesTotal,
-                xferErrs       => $xferErrs,
-                xferBadFile    => $badFiles,
-                xferBadShare   => $badShare,
-                nFilesExist    => 0,
-                sizeExist      => 0,
-                sizeExistComp  => 0,
-                tarErrs        => 0,
-                compress       => $Conf{CompressLevel},
-                noFill         => $type eq "incr" ? 1 : 0,
-                level          => $type eq "incr" ? 1 : 0,
-                mangle         => 1,
-                fillFromNum    => $fillFromNum,
+                num           => $bkupNum,
+                type          => $type,
+                startTime     => $startTime,
+                endTime       => $endTime,
+                size          => $sizeTotal,
+                nFiles        => $nFilesTotal,
+                xferErrs      => $xferErrs,
+                xferBadFile   => $badFiles,
+                xferBadShare  => $badShare,
+                nFilesExist   => 0,
+                sizeExist     => 0,
+                sizeExistComp => 0,
+                tarErrs       => 0,
+                compress      => $Conf{CompressLevel},
+                noFill        => $type eq "incr" ? 1 : 0,
+                level         => $type eq "incr" ? 1 : 0,
+                mangle        => 1,
+                fillFromNum   => $fillFromNum,
             };
             $fillFromNum = $bkupNum if ( $type eq "full" );
         }
@@ -229,6 +235,7 @@ foreach my $host ( @hostList ) {
 
     if ( $changes ) {
         @Backups = sort({$a->{num} <=> $b->{num}} @Backups);
+
         # print Dumper \@Backups;
         $bpc->BackupInfoWrite($host, @Backups);
     } else {

@@ -49,8 +49,8 @@ sub action
         next if ( $host eq $bpc->scgiJob );
         next if ( !$Privileged && !CheckPermission($host) );
         $Jobs{$host}{type} = $Status{$host}{type}
-                    if ( $Jobs{$host}{type} eq "" && defined($Status{$host}));
-        (my $cmd = $Jobs{$host}{cmd}) =~ s/$BinDir\///g;
+          if ( $Jobs{$host}{type} eq "" && defined($Status{$host}) );
+        (my $cmd     = $Jobs{$host}{cmd})     =~ s/$BinDir\///g;
         (my $xferPid = $Jobs{$host}{xferPid}) =~ s/,/, /g;
         $jobStr .= <<EOF;
 <tr><td class="border"> ${HostLink($host)} </td>
@@ -67,21 +67,23 @@ EOF
         $jobStr .= "</tr>\n";
     }
     foreach my $host ( sort(keys(%Status)) ) {
-        next if ( $Status{$host}{reason} ne "Reason_backup_failed"
-		    && $Status{$host}{reason} ne "Reason_restore_failed"
-		    && (!$Status{$host}{userReq}
-			|| $Status{$host}{reason} ne "Reason_no_ping") );
+        next
+          if (
+               $Status{$host}{reason} ne "Reason_backup_failed"
+            && $Status{$host}{reason} ne "Reason_restore_failed"
+            && (  !$Status{$host}{userReq}
+                || $Status{$host}{reason} ne "Reason_no_ping")
+          );
         next if ( !$Privileged && !CheckPermission($host) );
         my $startTime = timeStamp2($Status{$host}{startTime});
         my($errorTime, $XferViewStr);
         if ( $Status{$host}{errorTime} > 0 ) {
             $errorTime = timeStamp2($Status{$host}{errorTime});
         }
-        if ( -f "$TopDir/pc/$host/SmbLOG.bad"
-                || -f "$TopDir/pc/$host/SmbLOG.bad.z"
-                || -f "$TopDir/pc/$host/XferLOG.bad"
-                || -f "$TopDir/pc/$host/XferLOG.bad.z"
-                ) {
+        if (   -f "$TopDir/pc/$host/SmbLOG.bad"
+            || -f "$TopDir/pc/$host/SmbLOG.bad.z"
+            || -f "$TopDir/pc/$host/XferLOG.bad"
+            || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
             $XferViewStr = <<EOF;
 <a href="$MyURL?action=view&type=XferLOGbad&host=${EscURI($host)}">$Lang->{XferLOG}</a>,
 <a href="$MyURL?action=view&type=XferErrbad&host=${EscURI($host)}">$Lang->{Errors}</a>
@@ -101,6 +103,7 @@ EOF
     <td class="border"> ${EscHTML($shortErr)} </td></tr>
 EOF
     }
+
     my $now             = timeStamp2(time);
     my $nextWakeupTime  = timeStamp2($Info{nextWakeup});
     my $DUlastTime      = timeStamp2($Info{DUlastValueTime});
@@ -112,8 +115,9 @@ EOF
     my $serverStartTime = timeStamp2($Info{startTime});
     my $configLoadTime  = timeStamp2($Info{ConfigLTime});
 
-    my $poolInfo     = genPoolInfo("pool4",  "pool",  \%Info);
-    my $cpoolInfo    = genPoolInfo("cpool4", "cpool", \%Info);
+    my $poolInfo  = genPoolInfo("pool4",  "pool",  \%Info);
+    my $cpoolInfo = genPoolInfo("cpool4", "cpool", \%Info);
+
     if ( $Info{pool4FileCnt} > 0 && $Info{cpool4FileCnt} > 0 ) {
         $poolInfo = <<EOF;
 <li>Uncompressed pool:
@@ -130,7 +134,7 @@ EOF
     }
     my $generalInfo = "";
     if ( $Privileged ) {
-        $generalInfo  = eval("qq{$Lang->{BackupPC_Server_Status_General_Info}}");
+        $generalInfo = eval("qq{$Lang->{BackupPC_Server_Status_General_Info}}");
         if ( -r "$LogDir/poolUsage4.png" && -r "$LogDir/poolUsage52.png" ) {
             $generalInfo .= <<EOF;
 <ul>

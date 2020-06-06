@@ -35,7 +35,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::XS;
@@ -52,6 +53,7 @@ use vars qw( %RestoreReq );
 ###########################################################################
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
@@ -74,8 +76,9 @@ if ( $ARGV[2] !~ /^([\w.]+)$/ ) {
     exit(1);
 }
 $reqFileName = $1;
-if ( !$opts{m} && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
-              && (my $status = $bpc->ServerMesg("hostMutex $client 1 BackupPC_restore")) =~ /fail/ ) {
+if (   !$opts{m}
+    && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
+    && (my $status = $bpc->ServerMesg("hostMutex $client 1 BackupPC_restore")) =~ /fail/ ) {
     print(STDERR "$0: $status (use -m option to force running)\n");
     exit(1);
 }
@@ -122,9 +125,9 @@ if ( !(my $ret = do "$Dir/$reqFileName") ) {
     if ( $@ ) {
         $err = "couldn't parse $Dir/$reqFileName: $@";
     } elsif ( !defined($ret) ) {
-	$err = "couldn't do $Dir/$reqFileName: $!";
+        $err = "couldn't do $Dir/$reqFileName: $!";
     } else {
-	$err = "couldn't run $Dir/$reqFileName";
+        $err = "couldn't run $Dir/$reqFileName";
     }
     $stat{hostError} = $err;
     exit(RestoreCleanup($client));
@@ -151,7 +154,7 @@ alarm($Conf{ClientTimeout});
 my @hostsToCheck = ();
 my @validHosts   = ();
 if ( ref($Conf{ClientNameAlias}) eq 'ARRAY' ) {
-    push(@hostsToCheck, @{ $Conf{ClientNameAlias} });
+    push(@hostsToCheck, @{$Conf{ClientNameAlias}});
 } elsif ( $Conf{ClientNameAlias} ne "" ) {
     push(@hostsToCheck, $Conf{ClientNameAlias});
 } else {
@@ -159,8 +162,8 @@ if ( ref($Conf{ClientNameAlias}) eq 'ARRAY' ) {
 }
 if ( $hostIP !~ /^\d+\.\d+\.\d+\.\d+$/ ) {
     foreach my $hostToCheck ( @hostsToCheck ) {
-	$hostIP = HostLookupCheck($hostToCheck);
-	push(@validHosts, [$hostToCheck, $hostIP]) if ( defined($hostIP) );
+        $hostIP = HostLookupCheck($hostToCheck);
+        push(@validHosts, [$hostToCheck, $hostIP]) if ( defined($hostIP) );
     }
 } else {
     push(@validHosts, [$client, $hostIP]);
@@ -173,13 +176,13 @@ foreach my $h ( @validHosts ) {
     ($host, $hostIP) = @$h;
     my $delay = $bpc->CheckHostAlive($hostIP);
     if ( $delay < 0 ) {
-	print($LogFd $bpc->timeStamp, "no ping response from $hostIP ($host)\n");
-	$hostIP = undef;
-	next;
+        print($LogFd $bpc->timeStamp, "no ping response from $hostIP ($host)\n");
+        $hostIP = undef;
+        next;
     } elsif ( $delay > $Conf{PingMaxMsec} ) {
-	printf($LogFd "%sping too slow on $hostIP ($host) %.4gmsec\n", $bpc->timeStamp, $delay);
-	$hostIP = undef;
-	next;
+        printf($LogFd "%sping too slow on $hostIP ($host) %.4gmsec\n", $bpc->timeStamp, $delay);
+        $hostIP = undef;
+        next;
     }
     last;
 }
@@ -199,9 +202,8 @@ if ( (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
     exit(RestoreCleanup($client));
 }
 
-my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
-my $RestoreLOG = BackupPC::XS::FileZIO::open("$Dir/RestoreLOG$fileExt", 1,
-                                     $Conf{CompressLevel});
+my $fileExt    = $Conf{CompressLevel} > 0 ? ".z" : "";
+my $RestoreLOG = BackupPC::XS::FileZIO::open("$Dir/RestoreLOG$fileExt", 1, $Conf{CompressLevel});
 if ( !defined($RestoreLOG) ) {
     $stat{hostError} = "unable to open/create $Dir/RestoreLOG.$fileExt";
     exit(RestoreCleanup($client));
@@ -210,13 +212,13 @@ if ( !defined($RestoreLOG) ) {
 my $xferCreateFileCnt = 0;
 my $xferCreateByteCnt = 0;
 my $xferCreateDirCnt  = 0;
-my $xferCreateErrCnt  = 1;	# assume not ok until we learn otherwise
+my $xferCreateErrCnt  = 1;    # assume not ok until we learn otherwise
 my $xferCreateErr;
 my($logMsg, $xfer);
 
 $RestoreLOG->writeTeeStderr(1) if ( $opts{v} );
 
-$stat{xferOK} = $stat{hostAbort} = undef;
+$stat{xferOK}    = $stat{hostAbort}      = undef;
 $stat{hostError} = $stat{lastOutputLine} = undef;
 local(*RH, *WH);
 
@@ -251,41 +253,41 @@ if ( $useTar ) {
     # transport program.
     #
     if ( socketpair(RH, WH, AF_UNIX, SOCK_STREAM, PF_UNSPEC) ) {
-	shutdown(RH, 1);    # no writing to this socket
-	shutdown(WH, 0);    # no reading from this socket
-	setsockopt(RH, SOL_SOCKET, SO_RCVBUF, 8 * 65536);
-	setsockopt(WH, SOL_SOCKET, SO_SNDBUF, 8 * 65536);
+        shutdown(RH, 1);    # no writing to this socket
+        shutdown(WH, 0);    # no reading from this socket
+        setsockopt(RH, SOL_SOCKET, SO_RCVBUF, 8 * 65536);
+        setsockopt(WH, SOL_SOCKET, SO_SNDBUF, 8 * 65536);
     } else {
-	#
-	# Default to pipe() if socketpair() doesn't work.
-	#
-	pipe(RH, WH);
+        #
+        # Default to pipe() if socketpair() doesn't work.
+        #
+        pipe(RH, WH);
     }
 }
 
 #
 # Run the transport program, which reads from RH and extracts the data.
 #
-my @Backups = $bpc->BackupInfoRead($RestoreReq{hostSrc});
+my @Backups  = $bpc->BackupInfoRead($RestoreReq{hostSrc});
 my $xferArgs = {
-    client       => $client,
-    host         => $host,
-    hostIP       => $hostIP,
-    type         => "restore",
-    shareName    => $RestoreReq{shareDest},
-    pipeRH       => *RH,
-    pipeWH       => *WH,
-    XferLOG      => $RestoreLOG,
-    XferMethod   => $Conf{XferMethod},
-    logLevel     => $Conf{XferLogLevel},
-    bkupSrcHost  => $RestoreReq{hostSrc},
-    bkupSrcShare => $RestoreReq{shareSrc},
-    bkupSrcNum   => $RestoreReq{num},
-    backups      => \@Backups,
-    pathHdrSrc   => $RestoreReq{pathHdrSrc},
-    pathHdrDest  => $RestoreReq{pathHdrDest},
-    fileList     => $RestoreReq{fileList},
-    pidHandler   => \&pidHandler,
+    client          => $client,
+    host            => $host,
+    hostIP          => $hostIP,
+    type            => "restore",
+    shareName       => $RestoreReq{shareDest},
+    pipeRH          => *RH,
+    pipeWH          => *WH,
+    XferLOG         => $RestoreLOG,
+    XferMethod      => $Conf{XferMethod},
+    logLevel        => $Conf{XferLogLevel},
+    bkupSrcHost     => $RestoreReq{hostSrc},
+    bkupSrcShare    => $RestoreReq{shareSrc},
+    bkupSrcNum      => $RestoreReq{num},
+    backups         => \@Backups,
+    pathHdrSrc      => $RestoreReq{pathHdrSrc},
+    pathHdrDest     => $RestoreReq{pathHdrDest},
+    fileList        => $RestoreReq{fileList},
+    pidHandler      => \&pidHandler,
     noProgressPrint => $opts{p},
 };
 
@@ -312,47 +314,41 @@ if ( $useTar ) {
     #
     my @tarPathOpts;
     if ( defined($RestoreReq{pathHdrDest})
-		&& $RestoreReq{pathHdrDest} ne $RestoreReq{pathHdrSrc} ) {
-	@tarPathOpts = ("-r", $RestoreReq{pathHdrSrc},
-			"-p", $RestoreReq{pathHdrDest}
-		);
+        && $RestoreReq{pathHdrDest} ne $RestoreReq{pathHdrSrc} ) {
+        @tarPathOpts = ("-r", $RestoreReq{pathHdrSrc}, "-p", $RestoreReq{pathHdrDest});
     }
     my @tarArgs = (
-	     "-h", $RestoreReq{hostSrc},
-	     "-n", $RestoreReq{num},
-	     "-s", $RestoreReq{shareSrc},
-	     "-t",
-	     @tarPathOpts,
-	     @{$RestoreReq{fileList}},
+        "-h", $RestoreReq{hostSrc}, "-n", $RestoreReq{num}, "-s", $RestoreReq{shareSrc}, "-t",
+        @tarPathOpts, @{$RestoreReq{fileList}},
     );
-    my $runMsg = "Running: "
-	       . $bpc->execCmd2ShellCmd("$BinDir/BackupPC_tarCreate", @tarArgs)
-	       . "\n";
+    my $runMsg = "Running: " . $bpc->execCmd2ShellCmd("$BinDir/BackupPC_tarCreate", @tarArgs) . "\n";
     $RestoreLOG->write(\$runMsg);
     if ( !defined($tarPid = open(TAR, "-|")) ) {
-	close(WH);
-	# FIX: need to cleanup xfer
-	UserCommandRun("RestorePostUserCmd") if ( $NeedPostCmd );
-	$stat{hostError} = "Can't fork to run tar";
-	exit(RestoreCleanup($client));
+        close(WH);
+
+        # FIX: need to cleanup xfer
+        UserCommandRun("RestorePostUserCmd") if ( $NeedPostCmd );
+        $stat{hostError} = "Can't fork to run tar";
+        exit(RestoreCleanup($client));
     }
     binmode(TAR);
     if ( !$tarPid ) {
-	#
-	# This is the tarCreate child.  Clone STDERR to STDOUT,
-	# STDOUT to WH, and then exec BackupPC_tarCreate.
-	#
-	setpgrp 0,0;
-	close(STDERR);
-	open(STDERR, ">&STDOUT");
-	close(STDOUT);
-	open(STDOUT, ">&WH");
-	alarm(0);
-	exec("$BinDir/BackupPC_tarCreate", @tarArgs);
-	print($LogFd $bpc->timeStamp, "can't exec $BinDir/BackupPC_tarCreate\n");
-	print(STDERR "$0: can't exec $BinDir/BackupPC_tarCreate\n") if ( $opts{v} );
-	# FIX: need to cleanup xfer
-	exit(0);
+        #
+        # This is the tarCreate child.  Clone STDERR to STDOUT,
+        # STDOUT to WH, and then exec BackupPC_tarCreate.
+        #
+        setpgrp 0, 0;
+        close(STDERR);
+        open(STDERR, ">&STDOUT");
+        close(STDOUT);
+        open(STDOUT, ">&WH");
+        alarm(0);
+        exec("$BinDir/BackupPC_tarCreate", @tarArgs);
+        print($LogFd $bpc->timeStamp, "can't exec $BinDir/BackupPC_tarCreate\n");
+        print(STDERR "$0: can't exec $BinDir/BackupPC_tarCreate\n") if ( $opts{v} );
+
+        # FIX: need to cleanup xfer
+        exit(0);
     }
     #
     # The parent must close the write handle since BackupPC_tarCreate
@@ -377,60 +373,59 @@ if ( $useTar ) {
     vec($FDread, fileno(TAR), 1) = 1;
     $xfer->setSelectMask(\$FDread);
 
-    SCAN: while ( 1 ) {
-	my $ein = $FDread;
-	last if ( $FDread =~ /^\0*$/ );
-	alarm($Conf{ClientTimeout});
-	select(my $rout = $FDread, undef, $ein, undef);
-	if ( vec($rout, fileno(TAR), 1) ) {
-	    if ( sysread(TAR, $mesg, 8192) <= 0 ) {
-		vec($FDread, fileno(TAR), 1) = 0;
-		if ( !close(TAR) ) {
-		    $xferCreateErrCnt  = 1;
-		    $xferCreateErr = "BackupPC_tarCreate failed";
-		}
-	    } else {
-		$tarOut .= $mesg;
-	    }
-	}
-	while ( $tarOut =~ /(.*?)[\n\r]+(.*)/s ) {
-	    $_ = $1;
-	    $tarOut = $2;
-	    $RestoreLOG->write(\"tarCreate: $_\n");
-	    if ( /^Done: (\d+) files, (\d+) bytes, (\d+) dirs, (\d+) specials, (\d+) errors/ ) {
-		$xferCreateFileCnt = $1;
-		$xferCreateByteCnt = $2;
-		$xferCreateDirCnt  = $3;
-		$xferCreateErrCnt  = $5;
-	    }
-	}
-	last if ( !$xfer->readOutput(\$FDread, $rout) );
-	while ( my $str = $xfer->logMsgGet ) {
-	    print($LogFd $bpc->timeStamp, "xfer: $str\n");
+  SCAN: while ( 1 ) {
+        my $ein = $FDread;
+        last if ( $FDread =~ /^\0*$/ );
+        alarm($Conf{ClientTimeout});
+        select(my $rout = $FDread, undef, $ein, undef);
+        if ( vec($rout, fileno(TAR), 1) ) {
+            if ( sysread(TAR, $mesg, 8192) <= 0 ) {
+                vec($FDread, fileno(TAR), 1) = 0;
+                if ( !close(TAR) ) {
+                    $xferCreateErrCnt = 1;
+                    $xferCreateErr    = "BackupPC_tarCreate failed";
+                }
+            } else {
+                $tarOut .= $mesg;
+            }
+        }
+        while ( $tarOut =~ /(.*?)[\n\r]+(.*)/s ) {
+            $_      = $1;
+            $tarOut = $2;
+            $RestoreLOG->write(\"tarCreate: $_\n");
+            if ( /^Done: (\d+) files, (\d+) bytes, (\d+) dirs, (\d+) specials, (\d+) errors/ ) {
+                $xferCreateFileCnt = $1;
+                $xferCreateByteCnt = $2;
+                $xferCreateDirCnt  = $3;
+                $xferCreateErrCnt  = $5;
+            }
+        }
+        last if ( !$xfer->readOutput(\$FDread, $rout) );
+        while ( my $str = $xfer->logMsgGet ) {
+            print($LogFd $bpc->timeStamp, "xfer: $str\n");
             print(STDERR "xfer: $str\n") if ( $opts{v} );
-	}
-	if ( $xfer->getStats->{fileCnt} == 1 ) {
-	    #
-	    # Make sure it is still the machine we expect.  We do this while
-	    # the transfer is running to avoid a potential race condition if
-	    # the ip address was reassigned by dhcp just before we started
-	    # the transfer.
-	    #
-	    if ( my $errMsg = CorrectHostCheck($hostIP, $host) ) {
-		$stat{hostError} = $errMsg;
-		last SCAN;
-	    }
-	}
+        }
+        if ( $xfer->getStats->{fileCnt} == 1 ) {
+            #
+            # Make sure it is still the machine we expect.  We do this while
+            # the transfer is running to avoid a potential race condition if
+            # the ip address was reassigned by dhcp just before we started
+            # the transfer.
+            #
+            if ( my $errMsg = CorrectHostCheck($hostIP, $host) ) {
+                $stat{hostError} = $errMsg;
+                last SCAN;
+            }
+        }
     }
 } else {
     #
     # otherwise the xfer module does everything for us
     #
     print($LogFd $bpc->timeStamp, $logMsg . "\n");
-    print(STDERR $logMsg, "\n") if ( $opts{v} );
+    print(STDERR $logMsg,         "\n") if ( $opts{v} );
     print("started_restore\n");
-    ($xferCreateFileCnt, $xferCreateByteCnt,
-	$xferCreateErrCnt, $xferCreateErr) = $xfer->run();
+    ($xferCreateFileCnt, $xferCreateByteCnt, $xferCreateErrCnt, $xferCreateErr) = $xfer->run();
 }
 alarm(0);
 
@@ -462,13 +457,13 @@ sub CorrectHostCheck
 {
     my($hostIP, $host) = @_;
     return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck}
-		|| $Conf{NmbLookupCmd} eq "" );
-    if (ref($Conf{ClientNameAlias}) eq 'ARRAY') {
-        return if ( grep /^$hostIP$/, @{ $Conf{ClientNameAlias} } );
+        || $Conf{NmbLookupCmd} eq "" );
+    if ( ref($Conf{ClientNameAlias}) eq 'ARRAY' ) {
+        return if ( grep /^$hostIP$/, @{$Conf{ClientNameAlias}} );
     }
     my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($hostIP);
     return "host $host has mismatching netbios name $netBiosHost"
-            if ( lc($netBiosHost) ne lc(substr($host, 0, 15)) );
+      if ( lc($netBiosHost) ne lc(substr($host, 0, 15)) );
     return;
 }
 
@@ -520,9 +515,9 @@ sub catch_signal
     $RestoreLOG->write(\"exiting after signal $signame\n");
     $stat{xferOK} = 0;
     if ( $signame eq "INT" ) {
-	$stat{hostError} = "aborted by user (signal=$signame)";
+        $stat{hostError} = "aborted by user (signal=$signame)";
     } else {
-	$stat{hostError} = "aborted by signal=$signame";
+        $stat{hostError} = "aborted by signal=$signame";
     }
     exit(RestoreCleanup($client));
 }
@@ -534,41 +529,42 @@ sub RestoreCleanup
 {
     my($client) = @_;
 
-    $stat{xferOK} = 0 if ( $stat{hostError} || $stat{hostAbort}
-			|| $xferCreateErr );
+    $stat{xferOK} = 0 if ( $stat{hostError}
+        || $stat{hostAbort}
+        || $xferCreateErr );
 
     if ( !$stat{xferOK} ) {
-	#
-	# kill off the transfer program, first nicely then forcefully
-	#
-	if ( @xferPid ) {
-	    kill($bpc->sigName2num("INT"), @xferPid);
-	    sleep(1);
-	    kill($bpc->sigName2num("KILL"), @xferPid);
-	}
-	#
-	# kill off the tar process, first nicely then forcefully
-	#
-	if ( $tarPid > 0 ) {
-	    kill($bpc->sigName2num("INT"), $tarPid);
-	    sleep(1);
-	    kill($bpc->sigName2num("KILL"), $tarPid);
-	}
+        #
+        # kill off the transfer program, first nicely then forcefully
+        #
+        if ( @xferPid ) {
+            kill($bpc->sigName2num("INT"), @xferPid);
+            sleep(1);
+            kill($bpc->sigName2num("KILL"), @xferPid);
+        }
+        #
+        # kill off the tar process, first nicely then forcefully
+        #
+        if ( $tarPid > 0 ) {
+            kill($bpc->sigName2num("INT"), $tarPid);
+            sleep(1);
+            kill($bpc->sigName2num("KILL"), $tarPid);
+        }
     }
 
-    my $lastNum  = -1;
+    my $lastNum = -1;
     my @Restores;
 
     #
     # Do one last check to make sure it is still the machine we expect.
     #
     if ( $stat{xferOK} && (my $errMsg = CorrectHostCheck($hostIP, $host)) ) {
-	$stat{hostError} = $errMsg;
-	$stat{xferOK} = 0;
+        $stat{hostError} = $errMsg;
+        $stat{xferOK}    = 0;
     }
     @Restores = $bpc->RestoreInfoRead($client);
     for ( my $i = 0 ; $i < @Restores ; $i++ ) {
-	$lastNum = $Restores[$i]{num} if ( $lastNum < $Restores[$i]{num} );
+        $lastNum = $Restores[$i]{num} if ( $lastNum < $Restores[$i]{num} );
     }
     $lastNum++;
 
@@ -579,32 +575,32 @@ sub RestoreCleanup
         UserCommandRun("RestorePostUserCmd");
         if ( $? && $Conf{UserCmdCheckStatus} ) {
             $stat{hostError} = "RestorePostUserCmd returned error status $?";
-            $stat{xferOK} = 0;
+            $stat{xferOK}    = 0;
         }
     }
 
     rename("$Dir/RestoreLOG$fileExt", "$Dir/RestoreLOG.$lastNum$fileExt");
-    rename("$Dir/$reqFileName", "$Dir/RestoreInfo.$lastNum");
+    rename("$Dir/$reqFileName",       "$Dir/RestoreInfo.$lastNum");
     my $endTime = time();
 
     #
     # If the restore failed, clean up
     #
     if ( !$stat{xferOK} ) {
-	#
-	# wait a short while and see if the system is still alive
-	#
-	$stat{hostError} ||= $xferCreateErr if ( $xferCreateErr ne "" );
-	$stat{hostError} = $stat{lastOutputLine} if ( $stat{hostError} eq "" );
-	sleep(2);
-	if ( $bpc->CheckHostAlive($hostIP) < 0 ) {
-	    $stat{hostAbort} = 1;
-	}
-	if ( $stat{hostAbort} && $stat{hostError} eq "" ) {
-	    $stat{hostError} = "lost network connection during restore";
-	}
-	$RestoreLOG->write(\"restore failed: $stat{hostError}\n")
-					    if ( defined($RestoreLOG) );
+        #
+        # wait a short while and see if the system is still alive
+        #
+        $stat{hostError} ||= $xferCreateErr if ( $xferCreateErr ne "" );
+        $stat{hostError} = $stat{lastOutputLine} if ( $stat{hostError} eq "" );
+        sleep(2);
+        if ( $bpc->CheckHostAlive($hostIP) < 0 ) {
+            $stat{hostAbort} = 1;
+        }
+        if ( $stat{hostAbort} && $stat{hostError} eq "" ) {
+            $stat{hostError} = "lost network connection during restore";
+        }
+        $RestoreLOG->write(\"restore failed: $stat{hostError}\n")
+          if ( defined($RestoreLOG) );
     }
 
     $RestoreLOG->close() if ( defined($RestoreLOG) );
@@ -625,25 +621,27 @@ sub RestoreCleanup
     $Restores[$i]{xferErrs}      = $stat{xferErrCnt} || 0;
 
     while ( @Restores > $Conf{RestoreInfoKeepCnt} ) {
-	my $num = $Restores[0]{num};
-	unlink("$Dir/RestoreLOG.$num.z");
-	unlink("$Dir/RestoreLOG.$num");
-	unlink("$Dir/RestoreInfo.$num");
-	shift(@Restores);
+        my $num = $Restores[0]{num};
+        unlink("$Dir/RestoreLOG.$num.z");
+        unlink("$Dir/RestoreLOG.$num");
+        unlink("$Dir/RestoreInfo.$num");
+        shift(@Restores);
     }
     $bpc->RestoreInfoWrite($client, @Restores);
 
     if ( !$stat{xferOK} ) {
-	print($LogFd $bpc->timeStamp, "restore failed ($stat{hostError})\n");
-	print("restore failed: $stat{hostError}\n");
-	return 1;
+        print($LogFd $bpc->timeStamp, "restore failed ($stat{hostError})\n");
+        print("restore failed: $stat{hostError}\n");
+        return 1;
     } else {
         $stat{xferErrCnt} ||= 0;
-	print($LogFd $bpc->timeStamp, "restore $lastNum complete"
-                . " ($xferCreateFileCnt files, $xferCreateByteCnt bytes,"
-                . " $xferCreateDirCnt dirs, $stat{xferErrCnt} xferErrs)\n");
-	print("restore complete\n");
-	return;
+        print($LogFd $bpc->timeStamp,
+                "restore $lastNum complete"
+              . " ($xferCreateFileCnt files, $xferCreateByteCnt bytes,"
+              . " $xferCreateDirCnt dirs, $stat{xferErrCnt} xferErrs)\n"
+        );
+        print("restore complete\n");
+        return;
     }
 }
 
@@ -681,21 +679,21 @@ sub UserCommandRun
         XferMethod   => $Conf{XferMethod},
         sshPath      => $Conf{SshPath},
         LOG          => $LogFd,
-	user         => $Hosts->{$client}{user},
-	moreUsers    => $Hosts->{$client}{moreUsers},
+        user         => $Hosts->{$client}{user},
+        moreUsers    => $Hosts->{$client}{moreUsers},
         XferLOG      => $RestoreLOG,
         stat         => \%stat,
         xferOK       => $stat{xferOK} || 0,
-	hostError    => $stat{hostError},
-	type	     => "restore",
-	bkupSrcHost  => $RestoreReq{hostSrc},
-	bkupSrcShare => $RestoreReq{shareSrc},
-	bkupSrcNum   => $RestoreReq{num},
-	backups      => \@Backups,
-	pathHdrSrc   => $RestoreReq{pathHdrSrc},
-	pathHdrDest  => $RestoreReq{pathHdrDest},
-	fileList     => $RestoreReq{fileList},
-	cmdType	     => $cmdType,
+        hostError    => $stat{hostError},
+        type         => "restore",
+        bkupSrcHost  => $RestoreReq{hostSrc},
+        bkupSrcShare => $RestoreReq{shareSrc},
+        bkupSrcNum   => $RestoreReq{num},
+        backups      => \@Backups,
+        pathHdrSrc   => $RestoreReq{pathHdrSrc},
+        pathHdrDest  => $RestoreReq{pathHdrDest},
+        fileList     => $RestoreReq{fileList},
+        cmdType      => $cmdType,
     };
     if ( $cmdType eq "RestorePostUserCmd" ) {
         print("__bpc_progress_state__ post-cmd\n") if ( !$opts{p} );
@@ -710,13 +708,16 @@ sub UserCommandRun
     # case the command is really perl code instead of a shell
     # command.
     #
-    $bpc->cmdSystemOrEval($cmd,
-	    sub {
-		if ( $RestoreLOG && length($_[0]) ) {
-                    $RestoreLOG->write(\$_[0]);
-                } elsif ( $LogFd && length($_[0]) ) {
-                    print($LogFd $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
-                }
-	    },
-	    $vars, \%Conf);
+    $bpc->cmdSystemOrEval(
+        $cmd,
+        sub {
+            if ( $RestoreLOG && length($_[0]) ) {
+                $RestoreLOG->write(\$_[0]);
+            } elsif ( $LogFd && length($_[0]) ) {
+                print($LogFd $bpc->timeStamp, "Output from $cmdType: ", $_[0]);
+            }
+        },
+        $vars,
+        \%Conf
+    );
 }

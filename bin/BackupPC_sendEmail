@@ -37,7 +37,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib;
 use BackupPC::XS;
@@ -95,7 +96,7 @@ EOF
 my $oldFormat = 0;
 foreach my $user ( keys(%UserEmailInfo) ) {
     if ( defined($UserEmailInfo{$user}{lastTime})
-            && ref($UserEmailInfo{$user}{lastTime}) ne 'HASH' ) {
+        && ref($UserEmailInfo{$user}{lastTime}) ne 'HASH' ) {
         $oldFormat = 1;
         last;
     }
@@ -132,8 +133,10 @@ if ( $err ) {
     if ( $opts{c} && $Conf{EMailAdminUserName} ne "" ) {
         my $headers = $Conf{EMailHeaders};
         $headers .= "\n" if ( $headers !~ /\n$/ );
-        my $subject = $Conf{EMailAdminSubject} ne "" ? $Conf{EMailAdminSubject}
-                                                     : "BackupPC: can't connect to server";
+        my $subject =
+            $Conf{EMailAdminSubject} ne ""
+          ? $Conf{EMailAdminSubject}
+          : "BackupPC: can't connect to server";
         my $mesg = <<EOF;
 To: $Conf{EMailAdminUserName}
 Subject: $subject
@@ -161,8 +164,10 @@ eval($reply);
 if ( $opts{u} ne "" ) {
     my $headers = $Conf{EMailHeaders};
     $headers .= "\n" if ( $headers !~ /\n$/ );
-    my $subject = $Conf{EMailAdminSubject} ne "" ? $Conf{EMailAdminSubject}
-                                                 : "BackupPC test email";
+    my $subject =
+        $Conf{EMailAdminSubject} ne ""
+      ? $Conf{EMailAdminSubject}
+      : "BackupPC test email";
     my $mesg = <<EOF;
 To: $opts{u}
 Subject: $subject
@@ -180,7 +185,7 @@ EOF
 # Generate per-host warning messages sent to each user
 ###########################################################################
 my @AdminBadHostsEmail = ();
-my @AdminBadHosts = ();
+my @AdminBadHosts      = ();
 
 foreach my $host ( sort(keys(%Status)) ) {
     #
@@ -193,28 +198,27 @@ foreach my $host ( sort(keys(%Status)) ) {
     #
     # Accumulate host errors for the admin email below
     #
-    if ( ($Status{$host}{reason} eq "Reason_backup_failed"
-               || $Status{$host}{reason} eq "Reason_restore_failed")
-           && $Status{$host}{error} !~ /^lost network connection to host/
-           && !$HostConf{BackupsDisable}
-       ) {
+    if (   ($Status{$host}{reason} eq "Reason_backup_failed" || $Status{$host}{reason} eq "Reason_restore_failed")
+        && $Status{$host}{error} !~ /^lost network connection to host/
+        && !$HostConf{BackupsDisable} ) {
         push(@AdminBadHostsEmail, $HostConf{EMailAdminUserName});
-        push(@AdminBadHosts, "$host ($Status{$host}{error})");
+        push(@AdminBadHosts,      "$host ($Status{$host}{error})");
     }
 
-    next if ( time - $UserEmailInfo{$user}{$host}{lastTime}
-                        < $HostConf{EMailNotifyMinDays} * 24*3600
-              || $HostConf{XferMethod} eq "archive"
-              || $HostConf{BackupsDisable}
-              || $Hosts->{$host}{user} eq ""
-              || $user eq ""
-          );
-    my @Backups = $bpc->BackupInfoRead($host);
-    my $last = 0;
+    next
+      if ( time - $UserEmailInfo{$user}{$host}{lastTime} < $HostConf{EMailNotifyMinDays} * 24 * 3600
+        || $HostConf{XferMethod} eq "archive"
+        || $HostConf{BackupsDisable}
+        || $Hosts->{$host}{user} eq ""
+        || $user eq "" );
+
+    my @Backups         = $bpc->BackupInfoRead($host);
+    my $last            = 0;
     my $lastGoodOutlook = 0;
-    my $lastNum = -1;
-    my $numBadOutlook = 0;
-    my $numBackups = 0;
+    my $lastNum         = -1;
+    my $numBadOutlook   = 0;
+    my $numBackups      = 0;
+
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
         my $fh;
         #
@@ -222,14 +226,14 @@ foreach my $host ( sort(keys(%Status)) ) {
         # should be used in figuring out when the last good backup was
         #
         next if ( $Backups[$i]{type} eq "partial" || $Backups[$i]{type} eq "active" );
-        $lastNum = $Backups[$i]{num}    if ( $lastNum < $Backups[$i]{num} );
-        $last = $Backups[$i]{startTime} if ( $last < $Backups[$i]{startTime} );
+        $lastNum = $Backups[$i]{num}       if ( $lastNum < $Backups[$i]{num} );
+        $last    = $Backups[$i]{startTime} if ( $last < $Backups[$i]{startTime} );
         $numBackups++;
         next if ( $Backups[$i]{xferMethod} ne "smb" );
 
         my $badOutlook = 0;
-        my $comp = 0;
-        my $file = "$TopDir/pc/$host/XferLOG.$Backups[$i]{num}";
+        my $comp       = 0;
+        my $file       = "$TopDir/pc/$host/XferLOG.$Backups[$i]{num}";
         if ( !-f $file ) {
             $comp = 1;
             $file = "$TopDir/pc/$host/XferLOG.$Backups[$i]{num}.z";
@@ -238,8 +242,8 @@ foreach my $host ( sort(keys(%Status)) ) {
         while ( 1 ) {
             my $s = $fh->readLine();
             last if ( $s eq "" );
-            if ( $s =~ /^\s*Error reading file.*\.pst : (ERRDOS - ERRlock|NT_STATUS_FILE_LOCK_CONFLICT)/
-                  || $s =~ /^\s*Error reading file.*\.pst\. Got 0 bytes/ ) {
+            if (   $s =~ /^\s*Error reading file.*\.pst : (ERRDOS - ERRlock|NT_STATUS_FILE_LOCK_CONFLICT)/
+                || $s =~ /^\s*Error reading file.*\.pst\. Got 0 bytes/ ) {
                 $badOutlook = 1;
                 last;
             }
@@ -248,68 +252,79 @@ foreach my $host ( sort(keys(%Status)) ) {
         $numBadOutlook += $badOutlook;
         if ( !$badOutlook ) {
             $lastGoodOutlook = $Backups[$i]{startTime}
-                    if ( $lastGoodOutlook < $Backups[$i]{startTime} );
+              if ( $lastGoodOutlook < $Backups[$i]{startTime} );
         }
     }
     if ( $numBackups == 0 ) {
-        my $subj = defined($HostConf{EMailNoBackupEverSubj})
-			? $HostConf{EMailNoBackupEverSubj}
-			: $Lang->{EMailNoBackupEverSubj};
-        my $mesg = defined($HostConf{EMailNoBackupEverMesg})
-		        ? $HostConf{EMailNoBackupEverMesg}
-			: $Lang->{EMailNoBackupEverMesg};
-        sendUserEmail($user, $host, $mesg, $subj, {
-                            userName => user2name($user)
-                        }) if ( !defined($Jobs{$host}) );
+        my $subj =
+          defined($HostConf{EMailNoBackupEverSubj})
+          ? $HostConf{EMailNoBackupEverSubj}
+          : $Lang->{EMailNoBackupEverSubj};
+        my $mesg =
+          defined($HostConf{EMailNoBackupEverMesg})
+          ? $HostConf{EMailNoBackupEverMesg}
+          : $Lang->{EMailNoBackupEverMesg};
+        sendUserEmail(
+            $user, $host, $mesg, $subj,
+            {
+                userName => user2name($user)
+            }
+        ) if ( !defined($Jobs{$host}) );
         next;
     }
-    if ( time - $last > $HostConf{EMailNotifyOldBackupDays} * 24*3600 ) {
-        my $subj = defined($HostConf{EMailNoBackupRecentSubj})
-			? $HostConf{EMailNoBackupRecentSubj}
-			: $Lang->{EMailNoBackupRecentSubj};
-        my $mesg = defined($HostConf{EMailNoBackupRecentMesg})
-			? $HostConf{EMailNoBackupRecentMesg}
-			: $Lang->{EMailNoBackupRecentMesg};
-        my $firstTime = sprintf("%.1f",
-                        (time - $Backups[0]{startTime}) / (24*3600));
-        my $days = sprintf("%.1f", (time - $last) / (24 * 3600));
-        sendUserEmail($user, $host, $mesg, $subj, {
-                            firstTime  => $firstTime,
-                            days       => $days,
-                            userName   => user2name($user),
-                            numBackups => $numBackups,
-                        }) if ( !defined($Jobs{$host}) );
+    if ( time - $last > $HostConf{EMailNotifyOldBackupDays} * 24 * 3600 ) {
+        my $subj =
+          defined($HostConf{EMailNoBackupRecentSubj})
+          ? $HostConf{EMailNoBackupRecentSubj}
+          : $Lang->{EMailNoBackupRecentSubj};
+        my $mesg =
+          defined($HostConf{EMailNoBackupRecentMesg})
+          ? $HostConf{EMailNoBackupRecentMesg}
+          : $Lang->{EMailNoBackupRecentMesg};
+        my $firstTime = sprintf("%.1f", (time - $Backups[0]{startTime}) / (24 * 3600));
+        my $days      = sprintf("%.1f", (time - $last) / (24 * 3600));
+        sendUserEmail(
+            $user, $host, $mesg, $subj,
+            {
+                firstTime  => $firstTime,
+                days       => $days,
+                userName   => user2name($user),
+                numBackups => $numBackups,
+            }
+        ) if ( !defined($Jobs{$host}) );
         next;
     }
     if ( $numBadOutlook > 0
-          && time - $lastGoodOutlook > $HostConf{EMailNotifyOldOutlookDays}
-                                             * 24 * 3600 ) {
+        && time - $lastGoodOutlook > $HostConf{EMailNotifyOldOutlookDays} * 24 * 3600 ) {
         my($days, $howLong);
         if ( $lastGoodOutlook == 0 ) {
             $howLong = eval("qq{$Lang->{howLong_not_been_backed_up}}");
         } else {
-            $days = sprintf("%.1f", (time - $lastGoodOutlook) / (24*3600));
+            $days    = sprintf("%.1f", (time - $lastGoodOutlook) / (24 * 3600));
             $howLong = eval("qq{$Lang->{howLong_not_been_backed_up_for_days_days}}");
         }
-        my $subj = defined($HostConf{EMailOutlookBackupSubj})
-			? $HostConf{EMailOutlookBackupSubj}
-			: $Lang->{EMailOutlookBackupSubj};
-        my $mesg = defined($HostConf{EMailOutlookBackupMesg})
-			? $HostConf{EMailOutlookBackupMesg}
-			: $Lang->{EMailOutlookBackupMesg};
-        my $firstTime = sprintf("%.1f",
-                        (time - $Backups[0]{startTime}) / (24*3600));
-        my $lastTime = sprintf("%.1f",
-                        (time - $Backups[$#Backups]{startTime}) / (24*3600));
-        sendUserEmail($user, $host, $mesg, $subj, {
-                            days       => $days,
-                            firstTime  => $firstTime,
-                            lastTime   => $lastTime,
-                            numBackups => $numBackups,
-                            userName   => user2name($user),
-                            howLong    => $howLong,
-                            serverHost => $HostConf{ServerHost},
-                        }) if ( !defined($Jobs{$host}) );
+        my $subj =
+          defined($HostConf{EMailOutlookBackupSubj})
+          ? $HostConf{EMailOutlookBackupSubj}
+          : $Lang->{EMailOutlookBackupSubj};
+        my $mesg =
+          defined($HostConf{EMailOutlookBackupMesg})
+          ? $HostConf{EMailOutlookBackupMesg}
+          : $Lang->{EMailOutlookBackupMesg};
+        my $firstTime = sprintf("%.1f", (time - $Backups[0]{startTime}) / (24 * 3600));
+        my $lastTime  = sprintf("%.1f", (time - $Backups[$#Backups]{startTime}) / (24 * 3600));
+        sendUserEmail(
+            $user, $host, $mesg, $subj,
+            {
+                days       => $days,
+                firstTime  => $firstTime,
+                lastTime   => $lastTime,
+                numBackups => $numBackups,
+                userName   => user2name($user),
+                howLong    => $howLong,
+                serverHost => $HostConf{ServerHost},
+            }
+        ) if ( !defined($Jobs{$host}) );
     }
 }
 
@@ -317,7 +332,7 @@ foreach my $host ( sort(keys(%Status)) ) {
 # Send per-host errors to per-host admin email
 #
 if ( @AdminBadHosts ) {
-    for my $i (0 .. $#AdminBadHosts) {
+    for my $i ( 0 .. $#AdminBadHosts ) {
         my $badHost = $AdminBadHosts[$i];
         if ( $AdminBadHostsEmail[$i] ne "" ) {
             my $badHostMesg .= <<EOF;
@@ -328,8 +343,10 @@ misconfiguration.  Please fix this host:
 EOF
             my $headers = $Conf{EMailHeaders};
             $headers .= "\n" if ( $headers !~ /\n$/ );
-            my $subject = $Conf{EMailAdminSubject} ne "" ? $Conf{EMailAdminSubject}
-                                                         : "BackupPC administrative attention needed";
+            my $subject =
+                $Conf{EMailAdminSubject} ne ""
+              ? $Conf{EMailAdminSubject}
+              : "BackupPC administrative attention needed";
             $badHostMesg = <<EOF;
 To: $AdminBadHostsEmail[$i]
 Subject: $subject
@@ -351,8 +368,8 @@ my $adminMesg = "";
 # Report if we skipped backups because the disk was too full
 #
 if ( $Info{DUDailySkipHostCntPrev} > 0 ) {
-    my $n = $Info{DUDailySkipHostCntPrev};
-    my $m = $Conf{DfMaxUsagePct};
+    my $n      = $Info{DUDailySkipHostCntPrev};
+    my $m      = $Conf{DfMaxUsagePct};
     my $mInode = $Conf{DfMaxInodeUsagePct};
     $adminMesg .= <<EOF;
 Yesterday $n hosts were skipped because the file system containing
@@ -395,8 +412,10 @@ EOF
 if ( $adminMesg ne "" && $Conf{EMailAdminUserName} ne "" ) {
     my $headers = $Conf{EMailHeaders};
     $headers .= "\n" if ( $headers !~ /\n$/ );
-    my $subject = $Conf{EMailAdminSubject} ne "" ? $Conf{EMailAdminSubject}
-                                                 : "BackupPC administrative attention needed";
+    my $subject =
+        $Conf{EMailAdminSubject} ne ""
+      ? $Conf{EMailAdminSubject}
+      : "BackupPC administrative attention needed";
     $adminMesg = <<EOF;
 To: $Conf{EMailAdminUserName}
 Subject: $subject
@@ -412,11 +431,9 @@ EOF
 ###########################################################################
 if ( !$opts{t} ) {
     $Data::Dumper::Indent = 1;
-    my $dumpStr = Data::Dumper->Dump(
-             [\%UserEmailInfo],
-             [qw(*UserEmailInfo)]);
+    my $dumpStr = Data::Dumper->Dump([\%UserEmailInfo], [qw(*UserEmailInfo)]);
     if ( open(HOST, ">", "$LogDir/UserEmailInfo.pl") ) {
-	binmode(HOST);
+        binmode(HOST);
         print(HOST $dumpStr);
         close(HOST);
     }
@@ -437,14 +454,14 @@ sub sendUserEmail
     my($user, $host, $mesg, $subj, $vars) = @_;
     return if ( $Conf{BackupsDisable} );
 
-    $vars->{user}     = $user;
-    $vars->{host}     = $host;
-    $vars->{headers}  = $Conf{EMailHeaders};
+    $vars->{user}    = $user;
+    $vars->{host}    = $host;
+    $vars->{headers} = $Conf{EMailHeaders};
     $vars->{headers} .= "\n" if ( $vars->{headers} !~ /\n$/ );
-    $vars->{domain}   = $Conf{EMailUserDestDomain};
-    $vars->{CgiURL}   = $Conf{CgiURL};
+    $vars->{domain} = $Conf{EMailUserDestDomain};
+    $vars->{CgiURL} = $Conf{CgiURL};
     $subj =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
-    $vars->{subj}     = encode('MIME-Header', $subj);
+    $vars->{subj} = encode('MIME-Header', $subj);
     $mesg =~ s/\$(\w+)/defined($vars->{$1}) ? $vars->{$1} : "\$$1"/eg;
     SendMail($mesg);
     $UserEmailInfo{$user}{$host}{lastTime} = time;
@@ -454,9 +471,9 @@ sub sendUserEmail
 sub SendMail
 {
     my($mesg) = @_;
-    my $from = $Conf{EMailFromUserName};
-    my $utf8 = 1
-        if ( $Conf{EMailHeaders} =~ /Content-Type:.*charset="utf-?8"/i );
+    my $from  = $Conf{EMailFromUserName};
+    my $utf8  = 1
+      if ( $Conf{EMailHeaders} =~ /Content-Type:.*charset="utf-?8"/i );
     local(*MAIL);
 
     if ( $opts{t} ) {
@@ -468,10 +485,10 @@ sub SendMail
     }
     $from = "-f $from" if ( $from ne "" );
     print("Sending test email using $Conf{SendmailPath} -t $from\n")
-                if ( $opts{u} ne "" );
+      if ( $opts{u} ne "" );
     if ( !open(MAIL, "|$Conf{SendmailPath} -t $from") ) {
-    	print("Can't run sendmail ($Conf{SendmailPath}): $!\n");
-	return;
+        print("Can't run sendmail ($Conf{SendmailPath}): $!\n");
+        return;
     }
     binmode(MAIL, ":utf8") if ( $utf8 );
     print MAIL $mesg;

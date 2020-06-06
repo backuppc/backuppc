@@ -40,17 +40,19 @@ use BackupPC::CGI::Lib qw(:all);
 
 sub action
 {
-    my($fullTot, $fullSizeTot, $incrTot, $incrSizeTot, $str,
-       $strNone, $strGood, $hostCntGood, $hostCntNone);
+    my($fullTot, $fullSizeTot, $incrTot, $incrSizeTot, $str, $strNone, $strGood, $hostCntGood, $hostCntNone);
 
     $hostCntGood = $hostCntNone = 0;
     GetStatusInfo("hosts info");
     my $Privileged = CheckPermission();
 
     foreach my $host ( GetUserHosts(1) ) {
-        my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite,
-           $lastAge, $tempState, $tempReason, $lastXferErrors);
-	my($shortErr);
+
+        my(
+            $fullDur,      $incrCnt, $incrAge,   $fullSize,   $fullRate,
+            $reasonHilite, $lastAge, $tempState, $tempReason, $lastXferErrors
+        );
+        my($shortErr);
         my @Backups = $bpc->BackupInfoRead($host);
         my $fullCnt = $incrCnt = 0;
         my $fullAge = $incrAge = $lastAge = -1;
@@ -78,7 +80,7 @@ sub action
                 $incrSizeTot += $Backups[$i]{size} / (1024 * 1024);
             }
         }
-        if ( $fullAge > $incrAge && $fullAge >= 0 )  {
+        if ( $fullAge > $incrAge && $fullAge >= 0 ) {
             $lastAge = $fullAge;
         } else {
             $lastAge = $incrAge;
@@ -89,12 +91,11 @@ sub action
             $lastAge = sprintf("%.1f", (time - $lastAge) / (24 * 3600));
         }
         if ( $fullAge < 0 ) {
-            $fullAge = "";
+            $fullAge  = "";
             $fullRate = "";
         } else {
-            $fullAge = sprintf("%.1f", (time - $fullAge) / (24 * 3600));
-            $fullRate = sprintf("%.2f",
-                                $fullSize / ($fullDur <= 0 ? 1 : $fullDur));
+            $fullAge  = sprintf("%.1f", (time - $fullAge) / (24 * 3600));
+            $fullRate = sprintf("%.2f", $fullSize / ($fullDur <= 0 ? 1 : $fullDur));
         }
         if ( $incrAge < 0 ) {
             $incrAge = "";
@@ -103,37 +104,37 @@ sub action
         }
         $fullTot += $fullCnt;
         $incrTot += $incrCnt;
-        $fullSize = sprintf("%.2f", $fullSize / 1024);
-	$incrAge = "&nbsp;" if ( $incrAge eq "" );
-        $lastXferErrors = $Backups[@Backups-1]{xferErrs} if ( @Backups );
-	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
-		      || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
-	if ( $Conf{BackupsDisable} == 1 ) {
-            if ( $Status{$host}{state} ne "Status_backup_in_progress"
-                    && $Status{$host}{state} ne "Status_restore_in_progress" ) {
+        $fullSize       = sprintf("%.2f", $fullSize / 1024);
+        $incrAge        = "&nbsp;" if ( $incrAge eq "" );
+        $lastXferErrors = $Backups[@Backups - 1]{xferErrs} if ( @Backups );
+        $reasonHilite   = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
+          || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
+        if ( $Conf{BackupsDisable} == 1 ) {
+            if (   $Status{$host}{state} ne "Status_backup_in_progress"
+                && $Status{$host}{state} ne "Status_restore_in_progress" ) {
                 $reasonHilite = $Conf{CgiStatusHilightColor}{Disabled_OnlyManualBackups};
-                $tempState = "Disabled_OnlyManualBackups";
-                $tempReason = "";
+                $tempState    = "Disabled_OnlyManualBackups";
+                $tempReason   = "";
             } else {
-                $tempState = $Status{$host}{state};
+                $tempState  = $Status{$host}{state};
                 $tempReason = $Status{$host}{reason};
             }
-	} elsif ($Conf{BackupsDisable} == 2 ) {
-	    $reasonHilite = $Conf{CgiStatusHilightColor}{Disabled_AllBackupsDisabled};
-	    $tempState = "Disabled_AllBackupsDisabled";
-	    $tempReason = "";
-	} else {
-	    $tempState = $Status{$host}{state};
-	    $tempReason = $Status{$host}{reason};
-	}
-	$reasonHilite = " bgcolor=\"$reasonHilite\"" if ( $reasonHilite ne "" );
-        if ( $tempState ne "Status_backup_in_progress"
-		&& $tempState ne "Status_restore_in_progress"
-		&& $Conf{BackupsDisable} == 0
-		&& $Status{$host}{error} ne "" ) {
-	    ($shortErr = $Status{$host}{error}) =~ s/(.{48}).*/$1.../;
-	    $shortErr = " ($shortErr)";
-	}
+        } elsif ( $Conf{BackupsDisable} == 2 ) {
+            $reasonHilite = $Conf{CgiStatusHilightColor}{Disabled_AllBackupsDisabled};
+            $tempState    = "Disabled_AllBackupsDisabled";
+            $tempReason   = "";
+        } else {
+            $tempState  = $Status{$host}{state};
+            $tempReason = $Status{$host}{reason};
+        }
+        $reasonHilite = " bgcolor=\"$reasonHilite\"" if ( $reasonHilite ne "" );
+        if (   $tempState ne "Status_backup_in_progress"
+            && $tempState ne "Status_restore_in_progress"
+            && $Conf{BackupsDisable} == 0
+            && $Status{$host}{error} ne "" ) {
+            ($shortErr = $Status{$host}{error}) =~ s/(.{48}).*/$1.../;
+            $shortErr = " ($shortErr)";
+        }
 
         $str = <<EOF;
 <tr$reasonHilite><td class="border">${HostLink($host)}</td>
@@ -161,12 +162,14 @@ EOF
     }
     $fullSizeTot = sprintf("%.2f", $fullSizeTot / 1024);
     $incrSizeTot = sprintf("%.2f", $incrSizeTot / 1024);
-    my $now      = timeStamp2(time);
+
+    my $now            = timeStamp2(time);
     my $DUlastTime     = timeStamp2($Info{DUlastValueTime});
     my $DUmaxTime      = timeStamp2($Info{DUDailyMaxTime});
     my $DUInodemaxTime = timeStamp2($Info{DUInodeDailyMaxTime});
 
-    my $content = eval ("qq{$Lang->{BackupPC_Summary}}");
+    my $content = eval("qq{$Lang->{BackupPC_Summary}}");
+
     Header($Lang->{BackupPC__Server_Summary}, $content);
     Trailer();
 }

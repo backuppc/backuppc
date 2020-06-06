@@ -68,7 +68,7 @@ BEGIN {
         eval "use $module;";
 
         if ( $@ ) {
-            $FTPLibOK = 0;
+            $FTPLibOK  = 0;
             $FTPLibErr = "module $module doesn't exist: $@";
             last;
         }
@@ -80,7 +80,7 @@ BEGIN {
     # TODO
     #
     $ARCLibOK = 0;
-};
+}
 
 ##############################################################################
 # Constructor
@@ -95,24 +95,25 @@ BEGIN {
 #
 sub new
 {
-    my ( $class, $bpc, $args ) = @_;
+    my($class, $bpc, $args) = @_;
     $args ||= {};
 
     my $t = BackupPC::Xfer::Protocol->new(
         $bpc,
         {
-           ftp   => undef,
-           stats => {
-               errorCnt          => 0,
-               TotalFileCnt      => 0,
-               TotalFileSize     => 0,
-               ExistFileCnt      => 0,
-               ExistFileSize     => 0,
-               ExistFileCompSize => 0,
-           },
-           %$args,
-        } );
-    return bless( $t, $class );
+            ftp   => undef,
+            stats => {
+                errorCnt          => 0,
+                TotalFileCnt      => 0,
+                TotalFileSize     => 0,
+                ExistFileCnt      => 0,
+                ExistFileSize     => 0,
+                ExistFileCompSize => 0,
+            },
+            %$args,
+        }
+    );
+    return bless($t, $class);
 }
 
 ##############################################################################
@@ -128,21 +129,23 @@ sub new
 #
 sub start
 {
+
     my($t) = @_;
 
-    my $bpc  = $t->{bpc};
-    my $conf = $t->{conf};
+    my $bpc    = $t->{bpc};
+    my $conf   = $t->{conf};
     my $TopDir = $bpc->TopDir();
 
-    my ( @fileList, $logMsg, $args, $dumpText );
+    my(@fileList, $logMsg, $args, $dumpText);
 
     #
     # initialize the statistics returned by getStats()
     #
-    foreach ( qw/byteCnt fileCnt xferErrCnt xferBadShareCnt
-                 xferBadFileCnt xferOK hostAbort hostError
-                 lastOutputLine/ )
-    {
+    foreach (
+        qw/byteCnt fileCnt xferErrCnt xferBadShareCnt
+        xferBadFileCnt xferOK hostAbort hostError
+        lastOutputLine/
+    ) {
         $t->{$_} = 0;
     }
 
@@ -150,8 +153,7 @@ sub start
     # Net::FTP::RetrHandle is necessary.
     #
     if ( !$FTPLibOK ) {
-        $t->{_errStr} = "Error: FTP transfer selected but module"
-          . " Net::FTP::RetrHandle is not installed.";
+        $t->{_errStr} = "Error: FTP transfer selected but module" . " Net::FTP::RetrHandle is not installed.";
         $t->{xferErrCnt}++;
         return;
     }
@@ -160,16 +162,16 @@ sub start
     # standardize the file include/exclude settings if necessary
     #
     unless ( $t->{type} eq 'restore' ) {
-        $bpc->backupFileConfFix( $conf, "FtpShareName" );
-	$t->loadInclExclRegexps("FtpShareName");
+        $bpc->backupFileConfFix($conf, "FtpShareName");
+        $t->loadInclExclRegexps("FtpShareName");
     }
 
     #
     # Convert the encoding type of the names if at all possible
     #
     $t->{shareNamePath} = $t->shareName2Path($t->{shareName});
-    from_to( $args->{shareNamePath}, "utf8", $conf->{ClientCharset} )
-                                if ( $conf->{ClientCharset} ne "" );
+    from_to($args->{shareNamePath}, "utf8", $conf->{ClientCharset})
+      if ( $conf->{ClientCharset} ne "" );
 
     #
     # Collect FTP configuration arguments and translate them for
@@ -183,10 +185,7 @@ sub start
     # Create the Net::FTP::AutoReconnect or Net::FTP object.
     #
     undef $@;
-    eval {
-        $t->{ftp} = ($ARCLibOK) ? Net::FTP::AutoReconnect->new(%$args)
-                                : Net::FTP->new(%$args);
-    };
+    eval {$t->{ftp} = ($ARCLibOK) ? Net::FTP::AutoReconnect->new(%$args) : Net::FTP->new(%$args);};
     if ( $@ || !defined($t->{ftp}) ) {
         $t->{_errStr} = "Can't open ftp connection to $args->{Host}: $!";
         $t->{xferErrCnt}++;
@@ -199,7 +198,7 @@ sub start
     #
     undef $@;
     my $ret;
-    eval { $ret = $t->{ftp}->login( $conf->{FtpUserName}, $conf->{FtpPasswd} ); };
+    eval {$ret = $t->{ftp}->login($conf->{FtpUserName}, $conf->{FtpPasswd});};
     if ( !$ret ) {
         $t->{_errStr} = "Can't ftp login to $args->{Host} (user = $conf->{FtpUserName}), $@";
         $t->{xferErrCnt}++;
@@ -207,7 +206,7 @@ sub start
     }
     $t->logWrite("Login successful to $conf->{FtpUserName}\@$args->{Host}\n", 2);
 
-    eval { $ret = $t->{ftp}->binary(); };
+    eval {$ret = $t->{ftp}->binary();};
     if ( !$ret ) {
         $t->{_errStr} =
           "Can't enable ftp binary transfer mode to $args->{Host}: " . $t->{ftp}->message();
@@ -216,10 +215,10 @@ sub start
     }
     $t->logWrite("Binary command successful\n", 2);
 
-    eval { $ret = $t->{ftp}->cwd( $t->{shareNamePath} ); };
+    eval {$ret = $t->{ftp}->cwd($t->{shareNamePath});};
     if ( !$ret ) {
         $t->{_errStr} =
-            "Can't change working directory to $t->{shareNamePath}: " . $t->{ftp}->message();
+          "Can't change working directory to $t->{shareNamePath}: " . $t->{ftp}->message();
         $t->{xferErrCnt}++;
         return;
     }
@@ -229,16 +228,13 @@ sub start
     # log the beginning of action based on type
     #
     if ( $t->{type} eq 'restore' ) {
-        $logMsg = "ftp restore for host $t->{host} started on directory "
-          . "$t->{shareName}";
+        $logMsg = "ftp restore for host $t->{host} started on directory " . "$t->{shareName}";
 
     } elsif ( $t->{type} eq 'full' ) {
-        $logMsg = "ftp full backup for host $t->{host} started on directory "
-          . "$t->{shareName}";
+        $logMsg = "ftp full backup for host $t->{host} started on directory " . "$t->{shareName}";
 
     } elsif ( $t->{type} eq 'incr' ) {
-        $logMsg = "ftp incremental backup for $t->{host} started for directory "
-                . "$t->{shareName}";
+        $logMsg = "ftp incremental backup for $t->{host} started for directory " . "$t->{shareName}";
     }
     $logMsg .= " (client path $t->{shareNamePath})" if ( $t->{shareName} ne $t->{shareNamePath} );
     $t->logWrite($logMsg . "\n", 1);
@@ -249,31 +245,30 @@ sub start
     if ( $t->{type} eq 'restore' ) {
 
         $t->restore();
-        $logMsg = "Restore of $t->{host} "
-                . ($t->{xferOK} ? "complete" : "failed");
+        $logMsg = "Restore of $t->{host} " . ($t->{xferOK} ? "complete" : "failed");
 
     } else {
         $t->{compress}    = $t->{backups}[$t->{newBkupIdx}]{compress};
         $t->{newBkupNum}  = $t->{backups}[$t->{newBkupIdx}]{num};
         $t->{lastBkupNum} = $t->{backups}[$t->{lastBkupIdx}]{num};
-        $t->{AttrNew}     = BackupPC::XS::AttribCache::new($t->{client}, $t->{newBkupNum}, $t->{shareName},
-                                                           $t->{compress});
-        $t->{DeltaNew}    = BackupPC::XS::DeltaRefCnt::new("$TopDir/pc/$t->{client}/$t->{newBkupNum}");
+        $t->{AttrNew} = BackupPC::XS::AttribCache::new($t->{client}, $t->{newBkupNum}, $t->{shareName}, $t->{compress});
+        $t->{DeltaNew} = BackupPC::XS::DeltaRefCnt::new("$TopDir/pc/$t->{client}/$t->{newBkupNum}");
         $t->{AttrNew}->setDeltaInfo($t->{DeltaNew});
 
         $t->{Inode} = 1;
-	for ( my $i = 0 ; $i < @{$t->{backups}} ; $i++ ) {
-	    $t->{Inode} = $t->{backups}[$i]{inodeLast} + 1 if ( $t->{Inode} <= $t->{backups}[$i]{inodeLast} );
-	}
+        for ( my $i = 0 ; $i < @{$t->{backups}} ; $i++ ) {
+            $t->{Inode} = $t->{backups}[$i]{inodeLast} + 1 if ( $t->{Inode} <= $t->{backups}[$i]{inodeLast} );
+        }
         $t->{Inode0} = $t->{Inode};
 
         if ( !$t->{inPlace} ) {
-            $t->{AttrOld}  = BackupPC::XS::AttribCache::new($t->{client}, $t->{lastBkupNum}, $t->{shareName},
-                                                           $t->{compress});
+            $t->{AttrOld} =
+              BackupPC::XS::AttribCache::new($t->{client}, $t->{lastBkupNum}, $t->{shareName}, $t->{compress});
             $t->{DeltaOld} = BackupPC::XS::DeltaRefCnt::new("$TopDir/pc/$t->{client}/$t->{lastBkupNum}");
             $t->{AttrOld}->setDeltaInfo($t->{DeltaOld});
         }
-        $t->logWrite("ftp inPlace = $t->{inPlace}, newBkupNum = $t->{newBkupNum}, lastBkupNum = $t->{lastBkupNum}\n", 4);
+        $t->logWrite("ftp inPlace = $t->{inPlace}, newBkupNum = $t->{newBkupNum}, lastBkupNum = $t->{lastBkupNum}\n",
+            4);
         $bpc->flushXSLibMesgs();
 
         $t->backup();
@@ -298,11 +293,9 @@ sub start
         $t->{DeltaOld}->flush() if ( $t->{DeltaOld} );
 
         if ( $t->{type} eq 'incr' ) {
-            $logMsg = "Incremental backup of $t->{host} "
-                    . ($t->{xferOK} ? "complete" : "failed");
+            $logMsg = "Incremental backup of $t->{host} " . ($t->{xferOK} ? "complete" : "failed");
         } else {
-            $logMsg = "Full backup of $t->{host} "
-                    . ($t->{xferOK} ? "complete" : "failed");
+            $logMsg = "Full backup of $t->{host} " . ($t->{xferOK} ? "complete" : "failed");
         }
         return if ( !$t->{xferOK} && defined($t->{_errStr}) );
     }
@@ -311,17 +304,15 @@ sub start
     return $logMsg;
 }
 
-
 #
 #
 #
 sub run
 {
-    my ($t) = @_;
+    my($t) = @_;
     my $stats = $t->{stats};
 
-    my ( $tarErrs,      $nFilesExist, $sizeExist,
-         $sizeExistCom, $nFilesTotal, $sizeTotal );
+    my($tarErrs, $nFilesExist, $sizeExist, $sizeExistCom, $nFilesTotal, $sizeTotal);
 
     #
     # TODO: replace the $stats array with variables at the top level,
@@ -335,24 +326,22 @@ sub run
     $sizeTotal    = $stats->{TotalFileSize};
 
     if ( $t->{type} eq "restore" ) {
-        return ( $t->{fileCnt}, $t->{byteCnt}, 0, 0 );
+        return ($t->{fileCnt}, $t->{byteCnt}, 0, 0);
 
     } else {
-        return ( $tarErrs,      $nFilesExist, $sizeExist,
-                 $sizeExistCom, $nFilesTotal, $sizeTotal );
+        return ($tarErrs, $nFilesExist, $sizeExist, $sizeExistCom, $nFilesTotal, $sizeTotal);
     }
 }
-
 
 sub restore
 {
     my($t) = @_;
 
-    my $bpc = $t->{bpc};
+    my $bpc      = $t->{bpc};
     my $fileList = $t->{fileList};
 
     $t->{view} = BackupPC::View->new($bpc, $t->{bkupSrcHost}, $t->{backups});
-    my $view   = $t->{view};
+    my $view = $t->{view};
 
     foreach my $file ( @$fileList ) {
 
@@ -380,21 +369,21 @@ sub restore
     return 1;
 }
 
-
 sub restoreDir
 {
-    my ($t, $dirName, $dirAttr) = @_;
 
-    my $ftp    = $t->{ftp};
-    my $bpc    = $t->{bpc};
-    my $conf   = $t->{conf};
-    my $view   = $t->{view};
+    my($t, $dirName, $dirAttr) = @_;
+
+    my $ftp  = $t->{ftp};
+    my $bpc  = $t->{bpc};
+    my $conf = $t->{conf};
+    my $view = $t->{view};
 
     my $dirList = $view->dirAttrib($t->{bkupSrcNum}, $t->{bkupSrcShare}, $dirName);
 
     (my $targetPath = "$t->{shareNamePath}/$dirName") =~ s{//+}{/}g;
 
-    my ( $fileName, $fileAttr, $fileType );
+    my($fileName, $fileAttr, $fileType);
 
     $t->logWrite("restoreDir($dirName) -> $targetPath\n", 4);
 
@@ -402,7 +391,7 @@ sub restoreDir
     # Create the remote directory
     #
     undef $@;
-    eval { $ftp->mkdir( $targetPath, 1 ); };
+    eval {$ftp->mkdir($targetPath, 1);};
     if ( $@ ) {
         $t->logFileAction("fail", $dirName, $dirAttr);
         return;
@@ -410,7 +399,7 @@ sub restoreDir
         $t->logFileAction("restore", $dirName, $dirAttr);
     }
 
-    while ( ($fileName, $fileAttr ) = each %$dirList ) {
+    while ( ($fileName, $fileAttr) = each %$dirList ) {
 
         $t->logWrite("restoreDir: entry = $dirName/$fileName\n", 4);
 
@@ -431,10 +420,10 @@ sub restoreDir
     }
 }
 
-
 sub restoreFile
 {
-    my ($t, $fileName, $fileAttr ) = @_;
+
+    my($t, $fileName, $fileAttr) = @_;
 
     my $conf   = $t->{conf};
     my $ftp    = $t->{ftp};
@@ -445,10 +434,10 @@ sub restoreFile
     my $tempFile = "$TopDir/pc/$t->{client}/FtpRestoreTmp$$";
     my $fout;
 
-    my $fileDest = ( $conf->{ClientCharset} ne "" )
-                 ? from_to( "$t->{shareNamePath}//$fileName",
-                            "utf8", $conf->{ClientCharset} )
-                 : "$t->{shareNamePath}/$fileName";
+    my $fileDest =
+      ($conf->{ClientCharset} ne "")
+      ? from_to("$t->{shareNamePath}//$fileName", "utf8", $conf->{ClientCharset})
+      : "$t->{shareNamePath}/$fileName";
 
     $t->logWrite("restoreFile($fileName) -> $fileDest\n", 4);
 
@@ -486,19 +475,18 @@ sub restoreFile
 
     undef $@;
     eval {
-        if ( $ftp->put( $tempFile, $fileDest ) ) {
+        if ( $ftp->put($tempFile, $fileDest) ) {
             $t->logFileAction("restore", $fileName, $fileAttr);
         } else {
-            $@ = 1 if ( !$@ );          # force the fail message below
+            $@ = 1 if ( !$@ );    # force the fail message below
         }
     };
     unlink($tempFile);
-    if ($@) {
+    if ( $@ ) {
         $t->logWrite("restoreFile($fileName) failed ($@)\n", 4);
         $t->logFileAction("fail", $fileName, $fileAttr);
     }
 }
-
 
 #
 #  usage:
@@ -511,11 +499,11 @@ sub restoreFile
 #
 sub backup
 {
-    my ($t) =  @_;
+    my($t) = @_;
 
-    my $ftp    = $t->{ftp};
-    my $bpc    = $t->{bpc};
-    my $conf   = $t->{conf};
+    my $ftp  = $t->{ftp};
+    my $bpc  = $t->{bpc};
+    my $conf = $t->{conf};
 
     #
     # determine the filetype of the shareName and back it up
@@ -523,27 +511,27 @@ sub backup
     # directory.
     #
     my $f = {
-              name     => "/",
-              type     => BPC_FTYPE_DIR,
-              mode     => 0775,
-              mtime    => time,
-              compress => $t->{compress},
-            };
+        name     => "/",
+        type     => BPC_FTYPE_DIR,
+        mode     => 0775,
+        mtime    => time,
+        compress => $t->{compress},
+    };
     if ( $t->handleDir($f) ) {
 
         $t->logWrite("adding top-level attrib for share $t->{shareName}\n", 4);
         my $fNew = {
-                    name     => $t->{shareName},
-                    type     => BPC_FTYPE_DIR,
-                    mode     => 0775,
-                    uid      => 0,
-                    gid      => 0,
-                    size     => 0,
-                    mtime    => time(),
-                    inode    => $t->{Inode}++,
-                    nlinks   => 0,
-                    compress => $t->{compress},
-               };
+            name     => $t->{shareName},
+            type     => BPC_FTYPE_DIR,
+            mode     => 0775,
+            uid      => 0,
+            gid      => 0,
+            size     => 0,
+            mtime    => time(),
+            inode    => $t->{Inode}++,
+            nlinks   => 0,
+            compress => $t->{compress},
+        };
 
         $t->{AttrNew}->set("/", $fNew);
 
@@ -557,7 +545,6 @@ sub backup
     }
 }
 
-
 ####################################################################################
 # FTP-specific functions
 ####################################################################################
@@ -569,19 +556,19 @@ sub backup
 #
 sub getFTPArgs
 {
-    my ($t)  = @_;
+    my($t) = @_;
     my $conf = $t->{conf};
 
     return {
         Host         => $t->{hostIP} || $t->{host},
-        Firewall     => undef,                            # not used
-        FirewallType => undef,                            # not used
+        Firewall     => undef,                                                      # not used
+        FirewallType => undef,                                                      # not used
         BlockSize    => $conf->{FtpBlockSize} || 10240,
-        Port         => $conf->{FtpPort}      || 21,
+        Port         => $conf->{FtpPort} || 21,
         Timeout      => defined($conf->{FtpTimeout}) ? $conf->{FtpTimeout} : 120,
         Debug        => $t->{logLevel} >= 5 ? 1 : 0,
         Passive      => (defined($conf->{FtpPassive}) ? $conf->{FtpPassive} : 1),
-        Hash         => undef,                            # do not touch
+        Hash         => undef,                                                      # do not touch
     };
 }
 
@@ -595,28 +582,26 @@ sub getFTPArgs
 #
 sub remotels
 {
-    my ( $t, $name ) = @_;
 
-    my $ftp  = $t->{ftp};
-    my $bpc  = $t->{bpc};
-    my $conf = $t->{conf};
+    my($t, $name) = @_;
+
+    my $ftp        = $t->{ftp};
+    my $bpc        = $t->{bpc};
+    my $conf       = $t->{conf};
     my $nameClient = $name;
-    my $char2type = {
+    my $char2type  = {
         'f' => BPC_FTYPE_FILE,
         'd' => BPC_FTYPE_DIR,
         'l' => BPC_FTYPE_SYMLINK,
     };
-    my ($dirContents, $remoteDir, $f, $linkname);
+    my($dirContents, $remoteDir, $f, $linkname);
 
-    from_to( $nameClient, "utf8", $conf->{ClientCharset} )
-                            if ( $conf->{ClientCharset} ne "" );
+    from_to($nameClient, "utf8", $conf->{ClientCharset})
+      if ( $conf->{ClientCharset} ne "" );
     $remoteDir = [];
     undef $@;
     $t->logWrite("remotels: about to list $name\n", 4);
-    eval {
-        $dirContents = ($nameClient =~ /^\.?$/ || $nameClient =~ /^\/*$/)
-                                ? $ftp->dir() : $ftp->dir("$nameClient/");
-    };
+    eval {$dirContents = ($nameClient =~ /^\.?$/ || $nameClient =~ /^\/*$/) ? $ftp->dir() : $ftp->dir("$nameClient/");};
     if ( !defined($dirContents) ) {
         $t->{xferErrCnt}++;
         $t->logWrite("remotels: can't retrieve remote directory contents of $name: $!\n", 1);
@@ -643,21 +628,23 @@ sub remotels
         # for $info.  So we peel off more elements if they don't appear to match.  This is very fragile.
         # Better solution would be to update $ftp->dir() to extract uid/gid if present.
         #
-        while ( @$dirContents && $dirStr !~ m{\s+\Q$info->[0]\E$}
-                              && $dirStr !~ m{^l.*\s+\Q$info->[0] -> $linkname\E$} ) {
+        while ( @$dirContents
+            && $dirStr !~ m{\s+\Q$info->[0]\E$}
+            && $dirStr !~ m{^l.*\s+\Q$info->[0] -> $linkname\E$} ) {
             $t->logWrite("no match between $dirStr and $info->[0]\n", 4);
             $dirStr = shift(@$dirContents);
         }
         my $fTypeChar = substr($info->[1], 0, 1);
-        if ( $dirStr =~ m{^.{10}\s+\d+\s+(\d+)\s+(\d+)\s+(\d+).*\Q$info->[0]\E} && ($fTypeChar ne "f" || $info->[2] == $3) ) {
+        if ( $dirStr =~ m{^.{10}\s+\d+\s+(\d+)\s+(\d+)\s+(\d+).*\Q$info->[0]\E}
+            && ($fTypeChar ne "f" || $info->[2] == $3) ) {
             $uid = $1;
             $gid = $2;
         }
 
         from_to($info->[0], $conf->{ClientCharset}, "utf8")
-                                if ( $conf->{ClientCharset} ne "" );
+          if ( $conf->{ClientCharset} ne "" );
         from_to($linkname, $conf->{ClientCharset}, "utf8")
-                                if ( $linkname ne "" && $conf->{ClientCharset} ne "" );
+          if ( $linkname ne "" && $conf->{ClientCharset} ne "" );
 
         my $dir = "$name/";
         $dir = "" if ( $name eq "" );
@@ -675,9 +662,12 @@ sub remotels
         };
         $f->{linkname} = $linkname if ( defined($linkname) );
 
-        $t->logWrite("remotels: adding name $f->{name}, type $f->{type} ($info->[1]), size $f->{size}, mode $f->{mode}, $uid/$gid\n", 4);
+        $t->logWrite(
+            "remotels: adding name $f->{name}, type $f->{type} ($info->[1]), size $f->{size}, mode $f->{mode}, $uid/$gid\n",
+            4
+        );
 
-        push( @$remoteDir, $f );
+        push(@$remoteDir, $f);
     }
     return $remoteDir;
 }
@@ -687,8 +677,8 @@ sub remotels
 #
 sub handleSymlink
 {
-    my ( $t, $f ) = @_;
-    my $a = $t->{AttrNew}->get($f->{name});
+    my($t, $f) = @_;
+    my $a     = $t->{AttrNew}->get($f->{name});
     my $stats = $t->{stats};
     my($same, $exists, $digest, $outSize, $errs);
 
@@ -710,7 +700,7 @@ sub handleSymlink
             $stats->{ExistFileCnt}++;
             $stats->{ExistFileSize}     += $f->{size};
             $stats->{ExistFileCompSize} += -s $a->{poolPath}
-                                      if ( -f $a->{poolPath} );
+              if ( -f $a->{poolPath} );
             $same = 1;
         }
     }
@@ -722,7 +712,7 @@ sub handleSymlink
         ($exists, $digest, $outSize, $errs) = $poolWrite->close();
         $f->{digest} = $digest;
         if ( $errs ) {
-            $t->logFileAction( "fail", $f->{name}, $f );
+            $t->logFileAction("fail", $f->{name}, $f);
             $t->{xferBadFileCnt}++;
             $stats->{errCnt} += scalar @$errs;
             return;
@@ -737,7 +727,7 @@ sub handleSymlink
     #
     # Perform logging
     #
-    $t->logFileAction( $same ? "same" : $exists ? "pool" : "new", $f->{name}, $f );
+    $t->logFileAction($same ? "same" : $exists ? "pool" : "new", $f->{name}, $f);
 
     #
     # Cumulate the stats
@@ -747,13 +737,13 @@ sub handleSymlink
     if ( $exists ) {
         $stats->{ExistFileCnt}++;
         $stats->{ExistFileCompSize} += -s $a->{poolPath}
-                                  if ( -f $a->{poolPath} );
-        $stats->{ExistFileSize}     += $f->{size};
+          if ( -f $a->{poolPath} );
+        $stats->{ExistFileSize} += $f->{size};
     } else {
         $stats->{NewFileCnt}++;
         $stats->{NewFileCompSize} += -s $a->{poolPath}
-                                  if ( -f $a->{poolPath} );
-        $stats->{NewFileSize}     += $f->{size};
+          if ( -f $a->{poolPath} );
+        $stats->{NewFileSize} += $f->{size};
     }
     $t->{byteCnt} += $f->{size};
     $t->{fileCnt}++;
@@ -767,7 +757,8 @@ sub handleSymlink
 #
 sub handleDir
 {
-    my ( $t, $f ) = @_;
+
+    my($t, $f) = @_;
 
     my $ftp     = $t->{ftp};
     my $bpc     = $t->{bpc};
@@ -777,24 +768,24 @@ sub handleDir
     my $same    = 0;
     my $a       = $AttrNew->get($f->{name});
 
-    my ( $exists, $digest, $outSize, $errs );
-    my ( $poolWrite, $poolFile );
-    my ( $localDir, $remoteDir, %expectedFiles );
+    my($exists, $digest, $outSize, $errs);
+    my($poolWrite, $poolFile);
+    my($localDir, $remoteDir, %expectedFiles);
 
     $a->{poolPath} = $bpc->MD52Path($a->{digest}, $a->{compress}) if ( length($a->{digest}) );
 
     my $pathNew = $AttrNew->getFullMangledPath($f->{name});
 
     if ( -d $pathNew ) {
-        $t->logFileAction( "same", $f->{name}, $f );
+        $t->logFileAction("same", $f->{name}, $f);
         $same = 1;
     } else {
         if ( -e $pathNew ) {
             $t->logWrite("handleDir: $pathNew ($f->{name}) isn't a directory... renaming and recreating\n", 3)
-                                         if ( defined($a) );
+              if ( defined($a) );
         } else {
             $t->logWrite("handleDir: creating directory $pathNew ($f->{name})\n", 3)
-                                         if ( defined($a) );
+              if ( defined($a) );
         }
         $t->moveFileToOld($a, $f);
         $t->logFileAction("new", $f->{name}, $f) if ( $t->{logLevel} >= 1 );
@@ -805,26 +796,26 @@ sub handleDir
         my $name = $f->{name};
         $name = "/$name" if ( $name !~ m{^/} );
         while ( length($name) > 1 ) {
-	    if ( $name =~ m{/} ) {
-		$name =~ s{(.*)/.*}{$1};
-	    } else {
-		$name = "/";
-	    }
+            if ( $name =~ m{/} ) {
+                $name =~ s{(.*)/.*}{$1};
+            } else {
+                $name = "/";
+            }
             my $a = $AttrNew->get($name);
             last if ( defined($a) && $a->{type} == BPC_FTYPE_DIR );
             $t->logWrite("handleDir: adding BPC_FTYPE_DIR attrib entry for $name\n", 3);
             my $fNew = {
-                            name     => $name,
-                            type     => BPC_FTYPE_DIR,
-                            mode     => $f->{mode},
-                            uid      => $f->{uid},
-                            gid      => $f->{gid},
-                            size     => 0,
-                            mtime    => $f->{mtime},
-                            inode    => $t->{Inode}++,
-                            nlinks   => 0,
-                            compress => $t->{compress},
-                       };
+                name     => $name,
+                type     => BPC_FTYPE_DIR,
+                mode     => $f->{mode},
+                uid      => $f->{uid},
+                gid      => $f->{gid},
+                size     => 0,
+                mtime    => $f->{mtime},
+                inode    => $t->{Inode}++,
+                nlinks   => 0,
+                compress => $t->{compress},
+            };
             $AttrNew->set($name, $fNew);
             $t->moveFileToOld($a, $fNew);
         }
@@ -837,11 +828,11 @@ sub handleDir
 
     $t->logWrite("handleDir: name = $f->{name}, pathNew = $pathNew\n", 4);
 
-    $remoteDir = $t->remotels( $f->{name} );
+    $remoteDir = $t->remotels($f->{name});
 
     if ( ref($remoteDir) ne 'ARRAY' ) {
         $t->logWrite("handleDir failed: $remoteDir\n", 1);
-        $t->logFileAction( "fail", $f->{name}, $f );
+        $t->logFileAction("fail", $f->{name}, $f);
         $t->{xferErrCnt}++;
         return;
     }
@@ -886,7 +877,7 @@ sub handleDir
         $t->logWrite("dirLoop: handled $f->{name}\n", 5);
         $expectedFiles{$f->{name}}++;
 
-    } # end foreach (@{$remoteDir})
+    }    # end foreach (@{$remoteDir})
 
     #
     # If we didn't see a file, move to old.
@@ -906,22 +897,22 @@ sub handleDir
     return 1;
 }
 
-
 #
 # handleFile() backs up a file.
 #
 sub handleFile
 {
-    my ( $t, $f ) = @_;
 
-    my $bpc        = $t->{bpc};
-    my $ftp        = $t->{ftp};
-    my $view       = $t->{view};
-    my $stats      = $t->{stats};
+    my($t, $f) = @_;
 
-    my ( $poolFile, $poolWrite, $data, $localSize );
-    my ( $exists, $digest, $outSize, $errs );
-    my ( $oldAttrib );
+    my $bpc   = $t->{bpc};
+    my $ftp   = $t->{ftp};
+    my $view  = $t->{view};
+    my $stats = $t->{stats};
+
+    my($poolFile, $poolWrite, $data,    $localSize);
+    my($exists,   $digest,    $outSize, $errs);
+    my($oldAttrib);
     local *FTP;
 
     my $a    = $t->{AttrNew}->get($f->{name});
@@ -934,12 +925,12 @@ sub handleFile
     # accordingly.
     #
     if ( $t->{type} eq "incr" ) {
-        if ( $a
-                && $f->{type}  == $a->{type}
-                && $f->{mtime} == $a->{mtime}
-                && $f->{size}  == $a->{size}
-                && $f->{uid}   == $a->{uid}
-                && $f->{gid}   == $a->{gid} ) {
+        if (   $a
+            && $f->{type} == $a->{type}
+            && $f->{mtime} == $a->{mtime}
+            && $f->{size} == $a->{size}
+            && $f->{uid} == $a->{uid}
+            && $f->{gid} == $a->{gid} ) {
             $t->logWrite("handleFile: $f->{name} has same attribs\n", 5);
             return 1;
         }
@@ -952,9 +943,9 @@ sub handleFile
     # TODO: convert back to local charset?
     #
     undef $@;
-    eval { tie ( *FTP, 'Net::FTP::RetrHandle', $ftp, "$f->{name}" ); };
+    eval {tie(*FTP, 'Net::FTP::RetrHandle', $ftp, "$f->{name}");};
     if ( !*FTP || $@ ) {
-        $t->logFileAction( "fail", $f->{name}, $f );
+        $t->logFileAction("fail", $f->{name}, $f);
         $t->{xferBadFileCnt}++;
         $stats->{errCnt}++;
         return;
@@ -966,12 +957,12 @@ sub handleFile
 
     undef $@;
     eval {
-        while (<FTP>) {
+        while ( <FTP> ) {
             $localSize += length($_);
-            $poolWrite->write( \$_ );
+            $poolWrite->write(\$_);
         }
     };
-    ( $exists, $digest, $outSize, $errs ) = $poolWrite->close();
+    ($exists, $digest, $outSize, $errs) = $poolWrite->close();
     $f->{digest} = $digest;
 
     if ( $a && $a->{digest} eq $digest ) {
@@ -983,7 +974,7 @@ sub handleFile
     }
 
     if ( !*FTP || $@ || $errs ) {
-        $t->logFileAction( "fail", $f->{name}, $f );
+        $t->logFileAction("fail", $f->{name}, $f);
         $t->{xferBadFileCnt}++;
         $stats->{errCnt} += ref($errs) eq 'ARRAY' ? scalar(@$errs) : 1;
         return;
@@ -993,7 +984,7 @@ sub handleFile
     # this should never happen
     #
     if ( $localSize != $f->{size} ) {
-        $t->logFileAction( "fail", $f->{name}, $f );
+        $t->logFileAction("fail", $f->{name}, $f);
         $t->logWrite("Size mismatch on $f->{name} ($localSize vs $f->{size})\n", 3);
         $stats->{xferBadFileCnt}++;
         $stats->{errCnt}++;
@@ -1008,7 +999,7 @@ sub handleFile
     #
     # Perform logging
     #
-    $t->logFileAction( $same ? "same" : $exists ? "pool" : "new", $f->{name}, $f );
+    $t->logFileAction($same ? "same" : $exists ? "pool" : "new", $f->{name}, $f);
 
     #
     # Cumulate the stats
@@ -1034,30 +1025,30 @@ sub handleFile
 #
 sub logFileAction
 {
-    my ( $t, $action, $name, $attrib ) = @_;
+    my($t, $action, $name, $attrib) = @_;
 
     my $owner = "$attrib->{uid}/$attrib->{gid}";
-    my $type = BackupPC::XS::Attrib::fileType2Text($attrib->{type});
+    my $type  = BackupPC::XS::Attrib::fileType2Text($attrib->{type});
 
     $type = $1 if ( $type =~ /(.)/ );
     $type = "" if ( $type eq "f" );
 
-    $name  = "."   if ( $name  eq "" );
+    $name  = "."   if ( $name eq "" );
     $owner = "-/-" if ( $owner eq "/" );
 
     $t->{bpc}->flushXSLibMesgs();
 
     my $fileAction = sprintf(
         "  %-6s %1s%4o %9s %11.0f %s\n",
-        $action, $type, $attrib->{mode} & 07777,
-        $owner, $attrib->{size}, $attrib->{name}
+        $action, $type,           $attrib->{mode} & 07777,
+        $owner,  $attrib->{size}, $attrib->{name}
     );
 
     if ( ($t->{stats}{TotalFileCnt} % 20) == 0 && !$t->{noProgressPrint} ) {
         printf("__bpc_progress_fileCnt__ %d\n", $t->{stats}{TotalFileCnt});
     }
 
-    return $t->logWrite( $fileAction, 1 );
+    return $t->logWrite($fileAction, 1);
 }
 
 #
@@ -1065,19 +1056,20 @@ sub logFileAction
 #
 sub moveFileToOld
 {
+
     my($t, $a, $f) = @_;
-    my $AttrNew = $t->{AttrNew};
-    my $AttrOld = $t->{AttrOld};
+    my $AttrNew  = $t->{AttrNew};
+    my $AttrOld  = $t->{AttrOld};
     my $DeltaNew = $t->{DeltaNew};
     my $DeltaOld = $t->{DeltaOld};
-    my $bpc = $t->{bpc};
+    my $bpc      = $t->{bpc};
 
     if ( !$a || keys(%$a) == 0 ) {
         #
         # A new file will be created, so add delete attribute to old
         #
         if ( $AttrOld ) {
-            $AttrOld->set($f->{name}, { type => BPC_FTYPE_DELETED });
+            $AttrOld->set($f->{name}, {type => BPC_FTYPE_DELETED});
             $t->logWrite("moveFileToOld: added $f->{name} as BPC_FTYPE_DELETED in old\n", 5);
         }
         return;
@@ -1125,7 +1117,7 @@ sub moveFileToOld
             #
             # For a directory we need to move it to old, and copy
             # any inodes that are referenced below this directory.
-	    # Also update the reference counts for the moved files.
+            # Also update the reference counts for the moved files.
             #
             my $pathNew = $AttrNew->getFullMangledPath($f->{name});
             my $pathOld = $AttrOld->getFullMangledPath($f->{name});
@@ -1133,12 +1125,14 @@ sub moveFileToOld
             $t->pathCreate($pathOld);
             $AttrNew->flush(0, $f->{name});
             if ( !rename($pathNew, $pathOld) ) {
-                $t->logWrite(sprintf("moveFileToOld(..., %s: can't rename %s to %s ($!, %d, %d, %d)\n",
-                                      $f->{name}, $pathNew, $pathOld, -e $pathNew, -e $pathOld, -d $pathOld));
+                $t->logWrite(sprintf(
+                    "moveFileToOld(..., %s: can't rename %s to %s ($!, %d, %d, %d)\n",
+                    $f->{name}, $pathNew, $pathOld, -e $pathNew, -e $pathOld, -d $pathOld
+                ));
                 $t->{xferErrCnt}++;
             } else {
                 BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress}, -1, $DeltaNew);
-                BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress},  1, $DeltaOld);
+                BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress}, 1,  $DeltaOld);
                 $t->copyInodes($f->{name});
                 $AttrOld->set($f->{name}, $a, 1);
             }
@@ -1149,16 +1143,17 @@ sub moveFileToOld
 
 sub copyInodes
 {
+
     my($t, $dirName) = @_;
-    my $AttrNew = $t->{AttrNew};
-    my $AttrOld = $t->{AttrOld};
+    my $AttrNew  = $t->{AttrNew};
+    my $AttrOld  = $t->{AttrOld};
     my $DeltaNew = $t->{DeltaNew};
     my $DeltaOld = $t->{DeltaOld};
-    my $bpc = $t->{bpc};
+    my $bpc      = $t->{bpc};
 
     return if ( !defined($AttrOld) );
 
-    my $dirPath  = $AttrNew->getFullMangledPath($dirName);
+    my $dirPath = $AttrNew->getFullMangledPath($dirName);
 
     $t->logWrite("copyInodes: dirName = $dirName, dirPath = $dirPath\n", 4);
 
@@ -1173,9 +1168,9 @@ sub copyInodes
     if ( defined(my $entries = BackupPC::DirOps::dirRead($bpc, $dirPath)) ) {
         foreach my $e ( @$entries ) {
             next if ( $e->{name} eq "."
-                   || $e->{name} eq ".."
-                   || $e->{name} eq "inode"
-                   || !-d "$dirPath/$e->{name}" );
+                || $e->{name} eq ".."
+                || $e->{name} eq "inode"
+                || !-d "$dirPath/$e->{name}" );
             my $fileUM = $bpc->fileNameUnmangle($e->{name});
             next if ( $attrAll && defined($attrAll->{$fileUM}) );
             $attrAll->{$fileUM} = {
@@ -1241,16 +1236,24 @@ sub attribUpdate
 
     $newCompress = $a->{compress} if ( $a && defined($a->{compress}) );
 
-    $t->logWrite(sprintf("File %s: old digest %s, new digest %s\n", $f->{name}, unpack("H*", $a->{digest}), unpack("H*", $f->{digest})), 5) if ( $a );
+    $t->logWrite(
+        sprintf(
+            "File %s: old digest %s, new digest %s\n",
+            $f->{name},
+            unpack("H*", $a->{digest}),
+            unpack("H*", $f->{digest})
+        ),
+        5
+    ) if ( $a );
 
     if ( $same && $a ) {
-        if ( $a->{type}   == $f->{type}
-          && $a->{mode}   == S_IMODE($f->{mode})
-          && $a->{uid}    == $f->{uid}
-          && $a->{gid}    == $f->{gid}
-          && $a->{size}   == $f->{size}
-          && $a->{mtime}  == $f->{mtime}
-          && $a->{digest} eq $f->{digest} ) {
+        if (   $a->{type} == $f->{type}
+            && $a->{mode} == S_IMODE($f->{mode})
+            && $a->{uid} == $f->{uid}
+            && $a->{gid} == $f->{gid}
+            && $a->{size} == $f->{size}
+            && $a->{mtime} == $f->{mtime}
+            && $a->{digest} eq $f->{digest} ) {
             #
             # same contents, same attributes, so no need to rewrite
             #
@@ -1273,7 +1276,7 @@ sub attribUpdate
         # file is new or changed; update ref counts
         #
         $DeltaNew->update($newCompress, $f->{digest}, 1)
-                                                if ( $f->{digest} ne "" );
+          if ( $f->{digest} ne "" );
     }
 
     if ( $attribSet ) {
@@ -1281,18 +1284,21 @@ sub attribUpdate
         $newInode = $t->{Inode}++ if ( !defined($newInode) );
         my $nlinks = 0;
         $nlinks = $f->{nlinks} if ( defined($f->{nlinks}) );
-        $AttrNew->set($f->{name}, {
-                        type     => $f->{type},
-                        mode     => S_IMODE($f->{mode}),
-                        uid      => $f->{uid},
-                        gid      => $f->{gid},
-                        size     => $f->{size},
-                        mtime    => $f->{mtime},
-                        inode    => $newInode,
-                        nlinks   => $nlinks,
-                        compress => $newCompress,
-                        digest   => $f->{digest},
-                   });
+        $AttrNew->set(
+            $f->{name},
+            {
+                type     => $f->{type},
+                mode     => S_IMODE($f->{mode}),
+                uid      => $f->{uid},
+                gid      => $f->{gid},
+                size     => $f->{size},
+                mtime    => $f->{mtime},
+                inode    => $newInode,
+                nlinks   => $nlinks,
+                compress => $newCompress,
+                digest   => $f->{digest},
+            }
+        );
     }
     $bpc->flushXSLibMesgs();
 }
@@ -1311,9 +1317,9 @@ sub pathCreate
     #
     $t->logWrite("pathCreate: fullPath = $fullPath\n", 6);
     $fullPath =~ s{/[^/]*$}{} if ( !$noStrip );
-    return 0 if ( -d $fullPath );
-    unlink($fullPath) if ( -e $fullPath );
-    eval { mkpath($fullPath, 0, 0777) };
+    return 0                  if ( -d $fullPath );
+    unlink($fullPath)         if ( -e $fullPath );
+    eval {mkpath($fullPath, 0, 0777)};
     if ( $@ ) {
         $t->logWrite("Can't create $fullPath\n", 1);
         $t->{xferErrCnt}++;

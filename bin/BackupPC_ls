@@ -36,7 +36,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 
 use BackupPC::Lib;
@@ -46,6 +47,7 @@ use Data::Dumper;
 use Getopt::Std;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
@@ -53,6 +55,7 @@ my %Conf   = $bpc->Conf();
 my($Host, $Num, $Share, $View, @Backups);
 
 my %opts;
+
 if ( !getopts("Rih:n:s:", \%opts) || @ARGV < 1 ) {
     usageAndExit();
 }
@@ -60,9 +63,9 @@ if ( !getopts("Rih:n:s:", \%opts) || @ARGV < 1 ) {
 while ( my $dir = shift(@ARGV) ) {
     my $i;
     if ( $dir =~ m{^\Q$TopDir\E/pc/([^/]*)/(\d+)/(.*)} ) {
-        $Host   = $1;
-        $Num    = $2;
-        $dir    = $3;
+        $Host = $1;
+        $Num  = $2;
+        $dir  = $3;
         if ( $dir =~ m{(.*?)(/.*)} ) {
             $Share = $1;
             $dir   = $2;
@@ -70,19 +73,19 @@ while ( my $dir = shift(@ARGV) ) {
             $Share = $dir;
             $dir   = "/";
         }
-        $dir   = $bpc->fileNameUnmangle($dir)   if ( $dir !~ m{/[^f]} && -d "$TopDir/pc/$Host/$Num/$Share/$dir" );
-        $Share = $bpc->fileNameUnmangle($Share) if ( $Share =~ /^f/ && -d "$TopDir/pc/$Host/$Num/$Share" );
+        $dir   = $bpc->fileNameUnmangle($dir)   if ( $dir   !~ m{/[^f]} && -d "$TopDir/pc/$Host/$Num/$Share/$dir" );
+        $Share = $bpc->fileNameUnmangle($Share) if ( $Share =~ /^f/     && -d "$TopDir/pc/$Host/$Num/$Share" );
     } else {
         if ( !defined($opts{h}) || !defined($opts{n}) || !defined($opts{s}) ) {
             print(STDERR "Can't determine host or backup number from path - need to specific -h, -n and -s\n");
             usageAndExit();
         }
-        $Host   = $opts{h};
-        $Num    = $opts{n};
-        $Share  = $opts{s};
+        $Host  = $opts{h};
+        $Num   = $opts{n};
+        $Share = $opts{s};
     }
     @Backups = $bpc->BackupInfoRead($Host);
-    $Num = $Backups[@Backups + $Num]{num} if ( -@Backups <= $Num && $Num < 0 );
+    $Num     = $Backups[@Backups + $Num]{num} if ( -@Backups <= $Num && $Num < 0 );
     for ( $i = 0 ; $i < @Backups ; $i++ ) {
         last if ( $Backups[$i]{num} == $Num );
     }
@@ -119,11 +122,17 @@ sub printDir
         my($str, $s, $fileData);
         my @type2modeChar   = ("-", "-", "l", "c", "b", "d", "p", "s", "?", "x");
         my @type2suffixChar = ("",  "",  "@", "%", "%", "/", "|", "=", "",  "");
-        my $attr = $info->{$file};
+        my $attr            = $info->{$file};
 
-        if ( ($attr->{type} == BPC_FTYPE_SYMLINK || $attr->{type} == BPC_FTYPE_CHARDEV
-           || $attr->{type} == BPC_FTYPE_BLOCKDEV || $attr->{type} == BPC_FTYPE_HARDLINK)
-                    && $attr->{digest} ne "" ) {
+        if (
+            (
+                   $attr->{type} == BPC_FTYPE_SYMLINK
+                || $attr->{type} == BPC_FTYPE_CHARDEV
+                || $attr->{type} == BPC_FTYPE_BLOCKDEV
+                || $attr->{type} == BPC_FTYPE_HARDLINK
+            )
+            && $attr->{digest} ne ""
+        ) {
             #
             # read the file
             # TODO - handle v3 backups
@@ -157,7 +166,7 @@ sub printDir
         $s = sprintf("%d/%d", $attr->{uid}, $attr->{gid});
         $str .= sprintf(" %8s", $s);
         if ( ($attr->{type} == BPC_FTYPE_CHARDEV || $attr->{type} == BPC_FTYPE_BLOCKDEV)
-                    && $fileData ne "" ) {
+            && $fileData ne "" ) {
             $str .= sprintf(" %10s", $fileData);
         } else {
             $str .= sprintf(" %10llu", $attr->{size});

@@ -65,7 +65,7 @@ sub action
     # default to the newest backup
     #
     if ( !defined($In{num}) && @Backups > 0 ) {
-        $i = @Backups - 1;
+        $i   = @Backups - 1;
         $num = $Backups[$i]{num};
     }
 
@@ -73,22 +73,20 @@ sub action
         last if ( $Backups[$i]{num} == $num );
     }
     if ( $i >= @Backups || $num !~ /^\d+$/ ) {
-        ErrorExit("Backup number ${EscHTML($num)} for host ${EscHTML($host)} does"
-	        . " not exist.");
+        ErrorExit("Backup number ${EscHTML($num)} for host ${EscHTML($host)} does" . " not exist.");
     }
     my $backupTime = timeStamp2($Backups[$i]{startTime});
-    my $backupAge = sprintf("%.1f", (time - $Backups[$i]{startTime})
-                                    / (24 * 3600));
-    my $view = BackupPC::View->new($bpc, $host, \@Backups, {nlink => 1});
+    my $backupAge  = sprintf("%.1f", (time - $Backups[$i]{startTime}) / (24 * 3600));
+    my $view       = BackupPC::View->new($bpc, $host, \@Backups, {nlink => 1});
 
     if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
-	$attr = $view->dirAttrib($num, "", "");
-	if ( keys(%$attr) > 0 ) {
-	    $share = (sort(keys(%$attr)))[-1];
-	    $dir   = '/';
-	} else {
+        $attr = $view->dirAttrib($num, "", "");
+        if ( keys(%$attr) > 0 ) {
+            $share = (sort(keys(%$attr)))[-1];
+            $dir   = '/';
+        } else {
             ErrorExit(eval("qq{$Lang->{Directory___EscHTML}}"));
-	}
+        }
     }
     $dir = "/$dir" if ( $dir !~ /^\// );
     my $relDir  = $dir;
@@ -104,43 +102,45 @@ sub action
     while ( 1 ) {
         my($fLast, $fLastum, @DirStr);
 
-	$attr = $view->dirAttrib($num, $share, $relDir);
+        $attr = $view->dirAttrib($num, $share, $relDir);
         if ( !defined($attr) ) {
             $relDir = decode_utf8($relDir);
             ErrorExit(eval("qq{$Lang->{Can_t_browse_bad_directory_name2}}"));
         }
 
-        my $fileCnt = 0;          # file counter
+        my $fileCnt = 0;    # file counter
         $fLast = $dirStr = "";
 
         #
         # Loop over each of the files in this directory
         #
-	foreach my $f ( sort {uc($a) cmp uc($b)} keys(%$attr) ) {
+        foreach my $f ( sort {uc($a) cmp uc($b)} keys(%$attr) ) {
             my($dirOpen, $gotDir, $imgStr, $img, $path);
-            my $fURI = $f;                             # URI escaped $f
-            my $shareURI = $share;                     # URI escaped $share
-	    if ( $relDir eq "" ) {
-		$path = "/$f";
-	    } else {
-		($path = "$relDir/$f") =~ s{//+}{/}g;
-	    }
-	    if ( $shareURI eq "" ) {
-		$shareURI = $f;
-		$path  = "/";
-	    }
-            $path =~ s{^/+}{/};
+            my $fURI     = $f;        # URI escaped $f
+            my $shareURI = $share;    # URI escaped $share
+            if ( $relDir eq "" ) {
+                $path = "/$f";
+            } else {
+                ($path = "$relDir/$f") =~ s{//+}{/}g;
+            }
+            if ( $shareURI eq "" ) {
+                $shareURI = $f;
+                $path     = "/";
+            }
+            $path     =~ s{^/+}{/};
             $path     =~ s/([^\w.\/-])/uc sprintf("%%%02X", ord($1))/eg;
             $fURI     =~ s/([^\w.\/-])/uc sprintf("%%%02X", ord($1))/eg;
             $shareURI =~ s/([^\w.\/-])/uc sprintf("%%%02X", ord($1))/eg;
-            $dirOpen  = 1 if ( defined($currDir) && $f eq $currDir );
+            $dirOpen = 1 if ( defined($currDir) && $f eq $currDir );
             if ( $attr->{$f}{type} == BPC_FTYPE_DIR ) {
                 #
                 # Display directory if it exists in current backup.
                 # First find out if there are subdirs
                 #
-                my $subDirAttr = $share eq "" ? $view->dirAttrib($num, $f, "/")
-                                              : $view->dirAttrib($num, $share, "$relDir/$f");
+                my $subDirAttr =
+                    $share eq ""
+                  ? $view->dirAttrib($num, $f,     "/")
+                  : $view->dirAttrib($num, $share, "$relDir/$f");
                 my $subDirCnt = 0;
                 my $tdStyle;
                 my $linkStyle = "fview";
@@ -149,66 +149,76 @@ sub action
                     next if ( $subDirAttr->{$sub}{type} != BPC_FTYPE_DIR );
                     $subDirCnt++;
                 }
-		$img |= 1 << 6;
-		$img |= 1 << 5 if ( $subDirCnt );
-		if ( $dirOpen ) {
+                $img |= 1 << 6;
+                $img |= 1 << 5 if ( $subDirCnt );
+                if ( $dirOpen ) {
                     $linkStyle = "fviewbold";
-		    $img |= 1 << 2;
-		    $img |= 1 << 3 if ( $subDirCnt );
-		}
-		my $imgFileName = sprintf("%07b.gif", $img);
-		$imgStr = "<img src=\"$Conf{CgiImageDirURL}/$imgFileName\" align=\"absmiddle\" width=\"9\" height=\"19\" border=\"0\">";
-		if ( "$relDir/$f" eq $dir ) {
+                    $img |= 1 << 2;
+                    $img |= 1 << 3 if ( $subDirCnt );
+                }
+                my $imgFileName = sprintf("%07b.gif", $img);
+                $imgStr =
+                  "<img src=\"$Conf{CgiImageDirURL}/$imgFileName\" align=\"absmiddle\" width=\"9\" height=\"19\" border=\"0\">";
+                if ( "$relDir/$f" eq $dir ) {
                     $tdStyle = "fviewon";
-		} else {
+                } else {
                     $tdStyle = "fviewoff";
-		}
-		my $dirName = $f;
-		$dirName =~ s/ /&nbsp;/g;
+                }
+                my $dirName = $f;
+                $dirName =~ s/ /&nbsp;/g;
                 $dirName = decode_utf8($dirName);
-		push(@DirStr, {needTick => 1,
-                               tdArgs   => " class=\"$tdStyle\"",
-			       link     => <<EOF});
+                push(
+                    @DirStr,
+                    {
+                        needTick => 1,
+                        tdArgs   => " class=\"$tdStyle\"",
+                        link     => <<EOF});
 <a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path">$imgStr</a><a href="$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$path" class="$linkStyle">&nbsp;$dirName</a></td></tr>
 EOF
                 $fileCnt++;
                 $gotDir = 1;
-		if ( $dirOpen ) {
-		    my($lastTick, $doneLastTick);
-		    foreach my $d ( @DirStrPrev ) {
-			$lastTick = $d if ( $d->{needTick} );
-		    }
-		    $doneLastTick = 1 if ( !defined($lastTick) );
-		    foreach my $d ( @DirStrPrev ) {
-			$img = 0;
-			if  ( $d->{needTick} ) {
-			    $img |= 1 << 0;
-			}
-			if ( $d == $lastTick ) {
-			    $img |= 1 << 4;
-			    $doneLastTick = 1;
-			} elsif ( !$doneLastTick ) {
-			    $img |= 1 << 3 | 1 << 4;
-			}
-			my $imgFileName = sprintf("%07b.gif", $img);
-			$imgStr = "<img src=\"$Conf{CgiImageDirURL}/$imgFileName\" align=\"absmiddle\" width=\"9\" height=\"19\" border=\"0\">";
-			push(@DirStr, {needTick => 0,
-				       tdArgs   => $d->{tdArgs},
-				       link     => $imgStr . $d->{link}
-			});
-		    }
-		}
+                if ( $dirOpen ) {
+                    my($lastTick, $doneLastTick);
+                    foreach my $d ( @DirStrPrev ) {
+                        $lastTick = $d if ( $d->{needTick} );
+                    }
+                    $doneLastTick = 1 if ( !defined($lastTick) );
+                    foreach my $d ( @DirStrPrev ) {
+                        $img = 0;
+                        if ( $d->{needTick} ) {
+                            $img |= 1 << 0;
+                        }
+                        if ( $d == $lastTick ) {
+                            $img |= 1 << 4;
+                            $doneLastTick = 1;
+                        } elsif ( !$doneLastTick ) {
+                            $img |= 1 << 3 | 1 << 4;
+                        }
+                        my $imgFileName = sprintf("%07b.gif", $img);
+                        $imgStr =
+                          "<img src=\"$Conf{CgiImageDirURL}/$imgFileName\" align=\"absmiddle\" width=\"9\" height=\"19\" border=\"0\">";
+                        push(
+                            @DirStr,
+                            {
+                                needTick => 0,
+                                tdArgs   => $d->{tdArgs},
+                                link     => $imgStr . $d->{link}
+                            }
+                        );
+                    }
+                }
             }
             if ( $relDir eq $dir ) {
                 #
                 # This is the selected directory, so display all the files
                 #
-                my ($attrStr, $iconStr);
+                my($attrStr, $iconStr);
                 if ( defined($a = $attr->{$f}) ) {
                     my $mtimeStr = $bpc->timeStamp($a->{mtime});
-		    # UGH -> fix this
-                    my $typeStr  = BackupPC::XS::Attrib::fileType2Text($a->{type});
-                    my $modeStr  = sprintf("0%o", $a->{mode} & 07777);
+
+                    # UGH -> fix this
+                    my $typeStr = BackupPC::XS::Attrib::fileType2Text($a->{type});
+                    my $modeStr = sprintf("0%o", $a->{mode} & 07777);
                     $iconStr = <<EOF;
 <img src="$Conf{CgiImageDirURL}/icon-$typeStr.png" valign="top">
 EOF
@@ -223,7 +233,7 @@ EOF
                 } else {
                     $attrStr .= "<td colspan=\"5\" align=\"center\" class=\"fviewborder\"> </td>\n";
                 }
-		(my $fDisp = "${EscHTML($f)}") =~ s/ /&nbsp;/g;
+                (my $fDisp = "${EscHTML($f)}") =~ s/ /&nbsp;/g;
                 $fDisp = decode_utf8($fDisp);
                 if ( $gotDir ) {
                     $fileStr .= <<EOF;
@@ -245,20 +255,20 @@ EOF
                 $checkBoxCnt++;
             }
         }
-	@DirStrPrev = @DirStr;
+        @DirStrPrev = @DirStr;
         last if ( $relDir eq "" && $share eq "" );
         #
         # Prune the last directory off $relDir, or at the very end
-	# do the top-level directory.
+        # do the top-level directory.
         #
-	if ( $relDir eq "" || $relDir eq "/" || $relDir !~ /(.*)\/(.*)/ ) {
-	    $currDir = $share;
-	    $share = "";
-	    $relDir = "";
-	} else {
-	    $relDir  = $1;
-	    $currDir = $2;
-	}
+        if ( $relDir eq "" || $relDir eq "/" || $relDir !~ /(.*)\/(.*)/ ) {
+            $currDir = $share;
+            $share   = "";
+            $relDir  = "";
+        } else {
+            $relDir  = $1;
+            $currDir = $2;
+        }
     }
     $share = $currDir;
     my $shareURI = $share;
@@ -287,46 +297,48 @@ EOF
         my $thisPathURI = $thisPath;
         $thisPathURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
         $dirDisplay .= "/" if ( $dirDisplay ne "" );
-        $dirDisplay .= "<a href=\"$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$thisPathURI\">${EscHTML($thisDir)}</a>";
+        $dirDisplay .=
+          "<a href=\"$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$thisPathURI\">${EscHTML($thisDir)}</a>";
     }
 
     my $filledBackup;
 
     if ( (my @mergeNums = @{$view->mergeNums}) > 1 ) {
-	shift(@mergeNums);
-	my $numF = join(", #", @mergeNums);
+        shift(@mergeNums);
+        my $numF = join(", #", @mergeNums);
         $filledBackup = eval("qq{$Lang->{This_display_is_merged_with_backup}}");
     }
 
     foreach my $d ( @DirStrPrev ) {
-	$dirStr .= "<tr><td$d->{tdArgs}>$d->{link}\n";
+        $dirStr .= "<tr><td$d->{tdArgs}>$d->{link}\n";
     }
 
     ### hide checkall button if there are no files
-    my ($topCheckAll, $checkAll, $fileHeader);
+    my($topCheckAll, $checkAll, $fileHeader);
     if ( $fileStr ) {
-    	$fileHeader = eval("qq{$Lang->{fileHeader}}");
+        $fileHeader = eval("qq{$Lang->{fileHeader}}");
 
-	$checkAll = $Lang->{checkAll};
+        $checkAll = $Lang->{checkAll};
 
-    	# and put a checkall box on top if there are at least 20 files
-	if ( $checkBoxCnt >= 20 ) {
-	    $topCheckAll = $checkAll;
-	    $topCheckAll =~ s{allFiles}{allFilestop}g;
-	}
+        # and put a checkall box on top if there are at least 20 files
+        if ( $checkBoxCnt >= 20 ) {
+            $topCheckAll = $checkAll;
+            $topCheckAll =~ s{allFiles}{allFilestop}g;
+        }
     } else {
-	$fileStr = eval("qq{$Lang->{The_directory_is_empty}}");
+        $fileStr = eval("qq{$Lang->{The_directory_is_empty}}");
     }
-    my $pathURI  = $dir;
-    $pathURI  =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
+    my $pathURI = $dir;
+    $pathURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
     if ( my @otherDirs = $view->backupList($share, $dir) ) {
         my $otherDirs;
         foreach my $i ( @otherDirs ) {
             my $selected;
             my $showDate  = timeStamp2($Backups[$i]{startTime});
-	    my $backupNum = $Backups[$i]{num};
-            $selected   = " selected" if ( $backupNum == $num );
-            $otherDirs .= "<option value=\"$MyURL?action=browse&host=${EscURI($host)}&num=$backupNum&share=$shareURI&dir=$pathURI\"$selected>#$backupNum - ($showDate)</option>\n";
+            my $backupNum = $Backups[$i]{num};
+            $selected = " selected" if ( $backupNum == $num );
+            $otherDirs .=
+              "<option value=\"$MyURL?action=browse&host=${EscURI($host)}&num=$backupNum&share=$shareURI&dir=$pathURI\"$selected>#$backupNum - ($showDate)</option>\n";
         }
         $filledBackup .= eval("qq{$Lang->{Visit_this_directory_in_backup}}");
     }

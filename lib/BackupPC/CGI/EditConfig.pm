@@ -67,15 +67,15 @@ our %ConfigMenu = (
             {name => "PoolSizeNightlyUpdatePeriod"},
 
             {text => "CfgEdit_Title_Pool_Filesystem_Limits"},
-	    {name => "DfCmd"},
-	    {name => "DfMaxUsagePct"},
-	    {name => "DfInodeUsageCmd"},
-	    {name => "DfMaxInodeUsagePct"},
-	    {name => "HardLinkMax"},
+            {name => "DfCmd"},
+            {name => "DfMaxUsagePct"},
+            {name => "DfInodeUsageCmd"},
+            {name => "DfMaxInodeUsagePct"},
+            {name => "HardLinkMax"},
 
             {text => "CfgEdit_Title_Other_Parameters"},
-	    {name => "UmaskMode"},
-	    {name => "MyPath"},
+            {name => "UmaskMode"},
+            {name => "MyPath"},
             {name => "DHCPAddressRanges"},
             {name => "CmdQueueNice"},
             {name => "PerlModuleLoad"},
@@ -87,35 +87,41 @@ our %ConfigMenu = (
             {name => "ServerMesgSecret"},
 
             {text => "CfgEdit_Title_Program_Paths"},
-	    {name => "SshPath"},
-	    {name => "NmbLookupPath"},
-	    {name => "PingPath"},
-	    {name => "Ping6Path"},
-	    {name => "DfPath"},
-	    {name => "SplitPath"},
-	    {name => "ParPath"},
-	    {name => "CatPath"},
-	    {name => "GzipPath"},
-	    {name => "Bzip2Path"},
-	    {name => "RrdToolPath"},
+            {name => "SshPath"},
+            {name => "NmbLookupPath"},
+            {name => "PingPath"},
+            {name => "Ping6Path"},
+            {name => "DfPath"},
+            {name => "SplitPath"},
+            {name => "ParPath"},
+            {name => "CatPath"},
+            {name => "GzipPath"},
+            {name => "Bzip2Path"},
+            {name => "RrdToolPath"},
 
             {text => "CfgEdit_Title_Install_Paths"},
             #
             # Can only edit TopDir and LogDir if we are in FHS mode.
             # Otherwise they are hardcoded in lib/BackupPC/Lib.pm.
             #
-            {name => "TopDir",
-                    visible => sub { return $_[1]->useFHS(); } },
-            {name => "LogDir",
-                    visible => sub { return $_[1]->useFHS(); } },
-            {name => "RunDir",
-                    visible => sub { return $_[1]->useFHS(); } },
-	    {name => "CgiDir"},
+            {
+                name    => "TopDir",
+                visible => sub {return $_[1]->useFHS();}
+            },
+            {
+                name    => "LogDir",
+                visible => sub {return $_[1]->useFHS();}
+            },
+            {
+                name    => "RunDir",
+                visible => sub {return $_[1]->useFHS();}
+            },
+            {name => "CgiDir"},
             #
             # Cannot edit ConfDir or InstallDir, since the real value is hardcoded in
             # lib/BackupPC/Lib.pm.
             # {name => "ConfDir"},
-	    # {name => "InstallDir"},
+            # {name => "InstallDir"},
             #
         ],
     },
@@ -131,53 +137,53 @@ our %ConfigMenu = (
             {name => "EMailUserDestDomain"},
 
             {text => "CfgEdit_Title_Email_User_Messages"},
-	    {name => "EMailNoBackupEverSubj"},
-	    {name => "EMailNoBackupEverMesg"},
-	    {name => "EMailNotifyOldBackupDays"},
-	    {name => "EMailNoBackupRecentSubj"},
-	    {name => "EMailNoBackupRecentMesg"},
-	    {name => "EMailNotifyOldOutlookDays"},
-	    {name => "EMailOutlookBackupSubj"},
-	    {name => "EMailOutlookBackupMesg"},
-	    {name => "EMailHeaders"},
+            {name => "EMailNoBackupEverSubj"},
+            {name => "EMailNoBackupEverMesg"},
+            {name => "EMailNotifyOldBackupDays"},
+            {name => "EMailNoBackupRecentSubj"},
+            {name => "EMailNoBackupRecentMesg"},
+            {name => "EMailNotifyOldOutlookDays"},
+            {name => "EMailOutlookBackupSubj"},
+            {name => "EMailOutlookBackupMesg"},
+            {name => "EMailHeaders"},
         ],
     },
     cgi => {
-        text => "CfgEdit_Title_CGI",
+        text  => "CfgEdit_Title_CGI",
         param => [
-	    {text => "CfgEdit_Title_Admin_Privileges"},
-	    {name => "CgiAdminUserGroup"},
-	    {name => "CgiAdminUsers"},
+            {text => "CfgEdit_Title_Admin_Privileges"},
+            {name => "CgiAdminUserGroup"},
+            {name => "CgiAdminUsers"},
 
-	    {text => "CfgEdit_Title_Page_Rendering"},
-	    {name => "Language"},
-	    {name => "CgiNavBarAdminAllHosts"},
-	    {name => "CgiSearchBoxEnable"},
-	    {name => "CgiNavBarLinks"},
-	    {name => "CgiStatusHilightColor"},
-	    {name => "CgiDateFormatMMDD"},
-	    {name => "CgiHeaders"},
-	    {name => "CgiExt2ContentType"},
-	    {name => "CgiCSSFile"},
+            {text => "CfgEdit_Title_Page_Rendering"},
+            {name => "Language"},
+            {name => "CgiNavBarAdminAllHosts"},
+            {name => "CgiSearchBoxEnable"},
+            {name => "CgiNavBarLinks"},
+            {name => "CgiStatusHilightColor"},
+            {name => "CgiDateFormatMMDD"},
+            {name => "CgiHeaders"},
+            {name => "CgiExt2ContentType"},
+            {name => "CgiCSSFile"},
 
-	    {text => "CfgEdit_Title_Paths"},
-	    {name => "SCGIServerPort"},
-	    {name => "CgiURL"},
-	    {name => "CgiImageDir"},
-	    {name => "CgiImageDirURL"},
+            {text => "CfgEdit_Title_Paths"},
+            {name => "SCGIServerPort"},
+            {name => "CgiURL"},
+            {name => "CgiImageDir"},
+            {name => "CgiImageDirURL"},
 
-	    {text => "CfgEdit_Title_User_URLs"},
-	    {name => "CgiUserHomePageCheck"},
-	    {name => "CgiUserUrlCreate"},
+            {text => "CfgEdit_Title_User_URLs"},
+            {name => "CgiUserHomePageCheck"},
+            {name => "CgiUserUrlCreate"},
 
-	    {text => "CfgEdit_Title_User_Config_Editing"},
-	    {name => "CgiUserDeleteBackupEnable"},
-	    {name => "CgiUserConfigEditEnable"},
-	    {name => "CgiUserConfigEdit"},
+            {text => "CfgEdit_Title_User_Config_Editing"},
+            {name => "CgiUserDeleteBackupEnable"},
+            {name => "CgiUserConfigEditEnable"},
+            {name => "CgiUserConfigEdit"},
         ],
     },
     xfer => {
-        text => "CfgEdit_Title_Xfer",
+        text  => "CfgEdit_Title_Xfer",
         param => [
             {text => "CfgEdit_Title_Xfer_Settings"},
             {name => "XferMethod", onchangeSubmit => 1},
@@ -188,215 +194,325 @@ our %ConfigMenu = (
             {name => "RefCntFsck"},
 
             ### Smb Settings
-            {text => "CfgEdit_Title_Smb_Settings",
-                visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
-            {name => "SmbShareName",
-                visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
-            {name => "SmbShareUserName",
-                visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
-            {name => "SmbSharePasswd",
-                visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
+            {
+                text    => "CfgEdit_Title_Smb_Settings",
+                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+            },
+            {
+                name    => "SmbShareName",
+                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+            },
+            {
+                name    => "SmbShareUserName",
+                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+            },
+            {
+                name    => "SmbSharePasswd",
+                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+            },
 
             ### Tar Settings
-            {text => "CfgEdit_Title_Tar_Settings",
-                visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
-            {name => "TarShareName",
-                visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
+            {
+                text    => "CfgEdit_Title_Tar_Settings",
+                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+            },
+            {
+                name    => "TarShareName",
+                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+            },
 
             ### Rsync Settings
-            {text => "CfgEdit_Title_Rsync_Settings",
-                visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
-            {text => "CfgEdit_Title_Rsyncd_Settings",
-                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
-            {name => "RsyncShareName",
-                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
-            {name => "RsyncdUserName",
-                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
-            {name => "RsyncdPasswd",
-                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
+            {
+                text    => "CfgEdit_Title_Rsync_Settings",
+                visible => sub {return $_[0]->{XferMethod} eq "rsync";}
+            },
+            {
+                text    => "CfgEdit_Title_Rsyncd_Settings",
+                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+            },
+            {
+                name    => "RsyncShareName",
+                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+            },
+            {
+                name    => "RsyncdUserName",
+                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+            },
+            {
+                name    => "RsyncdPasswd",
+                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+            },
 
             ### Ftp Settings
-            {text    => "CfgEdit_Title_Ftp_Settings",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            {name    => "FtpShareName",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            {name    => "FtpUserName",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            {name    => "FtpPasswd",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            {name    => "FtpPassive",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            {name    => "FtpBlockSize",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            {name    => "FtpPort",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            {name    => "FtpTimeout",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-            {name    => "FtpFollowSymlinks",
-             visible => sub { return $_[0]->{XferMethod} eq "ftp"; } },
-
+            {
+                text    => "CfgEdit_Title_Ftp_Settings",
+                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+            },
+            {
+                name    => "FtpShareName",
+                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+            },
+            {
+                name    => "FtpUserName",
+                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+            },
+            {
+                name    => "FtpPasswd",
+                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+            },
+            {
+                name    => "FtpPassive",
+                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+            },
+            {
+                name    => "FtpBlockSize",
+                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+            },
+            {
+                name    => "FtpPort",
+                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+            },
+            {
+                name    => "FtpTimeout",
+                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+            },
+            {
+                name    => "FtpFollowSymlinks",
+                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+            },
 
             ### Archive Settings
-            {text => "CfgEdit_Title_Archive_Settings",
-                visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
-            {name => "ArchiveDest",
-                visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
-            {name => "ArchiveComp",
-                visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
-            {name => "ArchivePar",
-                visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
-            {name => "ArchiveSplit",
-                visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
+            {
+                text    => "CfgEdit_Title_Archive_Settings",
+                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+            },
+            {
+                name    => "ArchiveDest",
+                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+            },
+            {
+                name    => "ArchiveComp",
+                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+            },
+            {
+                name    => "ArchivePar",
+                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+            },
+            {
+                name    => "ArchiveSplit",
+                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+            },
 
             ### Include/Exclude Settings
-            {text => "CfgEdit_Title_Include_Exclude",
-                visible => sub { return $_[0]->{XferMethod} ne "archive"; } },
-            {name => "BackupFilesOnly",
-                visible => sub { return $_[0]->{XferMethod} ne "archive"; } },
-            {name => "BackupFilesExclude",
-                visible => sub { return $_[0]->{XferMethod} ne "archive"; } },
+            {
+                text    => "CfgEdit_Title_Include_Exclude",
+                visible => sub {return $_[0]->{XferMethod} ne "archive";}
+            },
+            {
+                name    => "BackupFilesOnly",
+                visible => sub {return $_[0]->{XferMethod} ne "archive";}
+            },
+            {
+                name    => "BackupFilesExclude",
+                visible => sub {return $_[0]->{XferMethod} ne "archive";}
+            },
 
             ### Samba paths and commands
-            {text => "CfgEdit_Title_Smb_Paths_Commands",
-                visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
-            {name => "SmbClientPath",
-                visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
-            {name => "SmbClientFullCmd",
-                visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
-            {name => "SmbClientIncrCmd",
-                visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
-            {name => "SmbClientRestoreCmd",
-                visible => sub { return $_[0]->{XferMethod} eq "smb"; } },
+            {
+                text    => "CfgEdit_Title_Smb_Paths_Commands",
+                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+            },
+            {
+                name    => "SmbClientPath",
+                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+            },
+            {
+                name    => "SmbClientFullCmd",
+                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+            },
+            {
+                name    => "SmbClientIncrCmd",
+                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+            },
+            {
+                name    => "SmbClientRestoreCmd",
+                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+            },
 
             ### Tar paths and commands
-            {text => "CfgEdit_Title_Tar_Paths_Commands",
-                visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
-            {name => "TarClientPath",
-                visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
-            {name => "TarClientCmd",
-                visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
-            {name => "TarFullArgs",
-                visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
-            {name => "TarIncrArgs",
-                visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
-            {name => "TarClientRestoreCmd",
-                visible => sub { return $_[0]->{XferMethod} eq "tar"; } },
+            {
+                text    => "CfgEdit_Title_Tar_Paths_Commands",
+                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+            },
+            {
+                name    => "TarClientPath",
+                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+            },
+            {
+                name    => "TarClientCmd",
+                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+            },
+            {
+                name    => "TarFullArgs",
+                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+            },
+            {
+                name    => "TarIncrArgs",
+                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+            },
+            {
+                name    => "TarClientRestoreCmd",
+                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+            },
 
             ### Rsync paths and commands
-            {text => "CfgEdit_Title_Rsync_Paths_Commands_Args",
-                visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
-            {text => "CfgEdit_Title_Rsyncd_Port_Args",
-                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
-            {name => "RsyncBackupPCPath",
-                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
-            {name => "RsyncClientPath",
-                visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
-            {name => "RsyncSshArgs",
-                visible => sub { return $_[0]->{XferMethod} eq "rsync"; } },
-            {name => "RsyncdClientPort",
-                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; } },
-            {name => "RsyncArgs",
-                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
-            {name => "RsyncArgsExtra",
-                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
-            {name => "RsyncFullArgsExtra",
-                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
-            {name => "RsyncIncrArgsExtra",
-                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
-            {name => "RsyncRestoreArgs",
-                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
-            {name => "RsyncRestoreArgsExtra",
-                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; } },
+            {
+                text    => "CfgEdit_Title_Rsync_Paths_Commands_Args",
+                visible => sub {return $_[0]->{XferMethod} eq "rsync";}
+            },
+            {
+                text    => "CfgEdit_Title_Rsyncd_Port_Args",
+                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+            },
+            {
+                name    => "RsyncBackupPCPath",
+                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+            },
+            {
+                name    => "RsyncClientPath",
+                visible => sub {return $_[0]->{XferMethod} eq "rsync";}
+            },
+            {
+                name    => "RsyncSshArgs",
+                visible => sub {return $_[0]->{XferMethod} eq "rsync";}
+            },
+            {
+                name    => "RsyncdClientPort",
+                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+            },
+            {
+                name    => "RsyncArgs",
+                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+            },
+            {
+                name    => "RsyncArgsExtra",
+                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+            },
+            {
+                name    => "RsyncFullArgsExtra",
+                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+            },
+            {
+                name    => "RsyncIncrArgsExtra",
+                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+            },
+            {
+                name    => "RsyncRestoreArgs",
+                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+            },
+            {
+                name    => "RsyncRestoreArgsExtra",
+                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+            },
 
             ### Archive paths and commands
-            {text => "CfgEdit_Title_Archive_Paths_Commands",
-                visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
-            {name => "ArchiveClientCmd",
-                visible => sub { return $_[0]->{XferMethod} eq "archive"; } },
+            {
+                text    => "CfgEdit_Title_Archive_Paths_Commands",
+                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+            },
+            {
+                name    => "ArchiveClientCmd",
+                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+            },
 
         ],
     },
     schedule => {
-        text => "CfgEdit_Title_Schedule",
+        text  => "CfgEdit_Title_Schedule",
         param => [
-	    {text => "CfgEdit_Title_Full_Backups"},
-	    {name => "FullPeriod"},
-	    {name => "FillCycle"},
-	    {name => "FullKeepCnt"},
-	    {name => "FullKeepCntMin"},
-	    {name => "FullAgeMax"},
+            {text => "CfgEdit_Title_Full_Backups"},
+            {name => "FullPeriod"},
+            {name => "FillCycle"},
+            {name => "FullKeepCnt"},
+            {name => "FullKeepCntMin"},
+            {name => "FullAgeMax"},
 
-	    {text => "CfgEdit_Title_Incremental_Backups"},
-	    {name => "IncrPeriod"},
-	    {name => "IncrKeepCnt"},
-	    {name => "IncrKeepCntMin"},
-	    {name => "IncrAgeMax"},
+            {text => "CfgEdit_Title_Incremental_Backups"},
+            {name => "IncrPeriod"},
+            {name => "IncrKeepCnt"},
+            {name => "IncrKeepCntMin"},
+            {name => "IncrAgeMax"},
 
-	    {text => "CfgEdit_Title_Blackouts"},
+            {text => "CfgEdit_Title_Blackouts"},
             {name => "BackupsDisable"},
             {name => "BlackoutBadPingLimit"},
             {name => "BlackoutGoodCnt"},
             {name => "BlackoutPeriods"},
 
-	    {text => "CfgEdit_Title_Other"},
-	    {name => "RestoreInfoKeepCnt"},
-	    {name => "ArchiveInfoKeepCnt"},
-	    {name => "BackupZeroFilesIsFatal"},
-	],
+            {text => "CfgEdit_Title_Other"},
+            {name => "RestoreInfoKeepCnt"},
+            {name => "ArchiveInfoKeepCnt"},
+            {name => "BackupZeroFilesIsFatal"},
+        ],
     },
     backup => {
-        text => "CfgEdit_Title_Backup_Settings",
+        text  => "CfgEdit_Title_Backup_Settings",
         param => [
-	    {text => "CfgEdit_Title_Client_Lookup"},
-	    {name => "ClientNameAlias"},
-	    {name => "NmbLookupCmd"},
-	    {name => "NmbLookupFindHostCmd"},
-	    {name => "FixedIPNetBiosNameCheck"},
-	    {name => "PingCmd"},
-	    {name => "PingMaxMsec"},
+            {text => "CfgEdit_Title_Client_Lookup"},
+            {name => "ClientNameAlias"},
+            {name => "NmbLookupCmd"},
+            {name => "NmbLookupFindHostCmd"},
+            {name => "FixedIPNetBiosNameCheck"},
+            {name => "PingCmd"},
+            {name => "PingMaxMsec"},
 
-	    {text => "CfgEdit_Title_Other"},
-	    {name => "ClientComment"},
-	    {name => "ClientTimeout"},
-	    {name => "MaxOldPerPCLogFiles"},
-	    {name => "CompressLevel"},
+            {text => "CfgEdit_Title_Other"},
+            {name => "ClientComment"},
+            {name => "ClientTimeout"},
+            {name => "MaxOldPerPCLogFiles"},
+            {name => "CompressLevel"},
 
-	    {text => "CfgEdit_Title_User_Commands"},
-	    {name => "DumpPreUserCmd"},
-	    {name => "DumpPostUserCmd"},
-	    {name => "DumpPreShareCmd"},
-	    {name => "DumpPostShareCmd"},
-	    {name => "RestorePreUserCmd"},
-	    {name => "RestorePostUserCmd"},
-	    {name => "ArchivePreUserCmd"},
-	    {name => "ArchivePostUserCmd"},
-	    {name => "UserCmdCheckStatus"},
-	],
+            {text => "CfgEdit_Title_User_Commands"},
+            {name => "DumpPreUserCmd"},
+            {name => "DumpPostUserCmd"},
+            {name => "DumpPreShareCmd"},
+            {name => "DumpPostShareCmd"},
+            {name => "RestorePreUserCmd"},
+            {name => "RestorePostUserCmd"},
+            {name => "ArchivePreUserCmd"},
+            {name => "ArchivePostUserCmd"},
+            {name => "UserCmdCheckStatus"},
+        ],
     },
     hosts => {
-        text => "CfgEdit_Title_Hosts",
+        text  => "CfgEdit_Title_Hosts",
         param => [
-	    {text    => "CfgEdit_Title_Hosts"},
-	    {name    => "Hosts",
-             comment => "CfgEdit_Hosts_Comment"},
+            {text => "CfgEdit_Title_Hosts"},
+            {
+                name    => "Hosts",
+                comment => "CfgEdit_Hosts_Comment"
+            },
         ],
     },
 );
 
 sub action
 {
+
     my $pc_dir = "$TopDir/pc";
     my($content, $contentHidden, $newConf, $override, $mainConf, $hostConf);
     my $errors = {};
 
-    my $host = $In{host};
-    my $menu = $In{menu} || "server";
+    my $host       = $In{host};
+    my $menu       = $In{menu} || "server";
     my $hosts_path = $Hosts;
-    my $config_path = $host eq "" ? "$TopDir/conf/config.pl"
-                                  : "$TopDir/pc/$host/config.pl";
+    my $config_path =
+      $host eq ""
+      ? "$TopDir/conf/config.pl"
+      : "$TopDir/pc/$host/config.pl";
 
     my $Privileged = CheckPermission($host)
-                       && ($PrivAdmin || $Conf{CgiUserConfigEditEnable});
+      && ($PrivAdmin || $Conf{CgiUserConfigEditEnable});
     my $userHost = 1 if ( defined($host) );
 
     $debugText = "";
@@ -406,14 +522,15 @@ sub action
     }
 
     if ( defined($In{menu}) || $In{saveAction} eq "Save" ) {
-	$errors = errorCheck();
-	if ( %$errors ) {
-	    #
-	    # If there are errors, then go back to the same menu
-	    #
-	    $In{saveAction} = "";
+        $errors = errorCheck();
+        if ( %$errors ) {
+            #
+            # If there are errors, then go back to the same menu
+            #
+            $In{saveAction} = "";
+
             #$In{newMenu} = "";
-	}
+        }
         if ( (my $var = $In{overrideUncheck}) ne "" ) {
             #
             # a compound variable was unchecked; delete or
@@ -428,33 +545,35 @@ sub action
                     $In{"v_$1"} = $In{$v};
                 }
             }
+
             #delete($In{"v_flds_$var"});
         }
 
         ($newConf, $override) = inputParse($bpc, $userHost);
-	$override = undef if ( $host eq "" );
+        $override = undef if ( $host eq "" );
 
     } else {
-	#
-	# First time: pick up the current config settings
-	#
-	$mainConf = $bpc->ConfigDataRead();
-	if ( $host ne "" ) {
-	    $hostConf = $bpc->ConfigDataRead($host);
-	    $override = {};
-	    foreach my $param ( sort(keys(%$hostConf)) ) {
-		$override->{$param} = 1;
-	    }
-	} else {
+        #
+        # First time: pick up the current config settings
+        #
+        $mainConf = $bpc->ConfigDataRead();
+        if ( $host ne "" ) {
+            $hostConf = $bpc->ConfigDataRead($host);
+            $override = {};
+            foreach my $param ( sort(keys(%$hostConf)) ) {
+                $override->{$param} = 1;
+            }
+        } else {
             my $hostInfo = $bpc->HostInfoRead();
-	    $hostConf = {};
+            $hostConf = {};
             $mainConf->{Hosts} = [map($hostInfo->{$_}, sort(keys(%$hostInfo)))];
-	}
-	$newConf = { %$mainConf, %$hostConf };
+        }
+        $newConf = {%$mainConf, %$hostConf};
     }
 
-    if ( $In{saveAction} ne "Save" && $In{newMenu} ne ""
-		    && defined($ConfigMenu{$In{newMenu}}) ) {
+    if (   $In{saveAction} ne "Save"
+        && $In{newMenu} ne ""
+        && defined($ConfigMenu{$In{newMenu}}) ) {
         $menu = $In{newMenu};
     }
 
@@ -468,24 +587,26 @@ sub action
         #
         foreach my $m ( sort(keys(%ConfigMenu)) ) {
             my $enabled = 0;
-            my $text = -1;
-            my $n = 0;
-            my @mask = ();
+            my $text    = -1;
+            my $n       = 0;
+            my @mask    = ();
 
             foreach my $paramInfo ( @{$ConfigMenu{$m}{param}} ) {
                 my $param = $paramInfo->{name};
                 if ( defined($paramInfo->{text}) ) {
                     $mask[$n] = 1;
-		    if ( ref($paramInfo->{visible}) ne "CODE"
-			    || &{$paramInfo->{visible}}($newConf, $bpc) ) {
-			$text = $n;
-		    }
+                    if ( ref($paramInfo->{visible}) ne "CODE"
+                        || &{$paramInfo->{visible}}($newConf, $bpc) ) {
+                        $text = $n;
+                    }
                 } else {
-                    if ( $bpc->{Conf}{CgiUserConfigEdit}{$param}
-                          || (defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
-                                && $PrivAdmin) ) {
+                    if (
+                        $bpc->{Conf}{CgiUserConfigEdit}{$param}
+                        || (defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                            && $PrivAdmin)
+                    ) {
                         $mask[$text] = 0 if ( $text >= 0 );
-                        $mask[$n] = 0;
+                        $mask[$n]    = 0;
                         $enabled ||= 1;
                     } else {
                         $mask[$n] = 1;
@@ -512,7 +633,7 @@ sub action
     my $groupText;
     foreach my $m ( sort(keys(%ConfigMenu)) ) {
         next if ( $menuDisable{$m}{top} );
-	my $text = eval("qq($Lang->{$ConfigMenu{$m}{text}})");
+        my $text = eval("qq($Lang->{$ConfigMenu{$m}{text}})");
         if ( $m eq $menu ) {
             $groupText .= <<EOF;
 <td class="editTabSel"><a href="javascript:menuSubmit('$m')"><b>$text</b></a></td>
@@ -525,9 +646,9 @@ EOF
     }
 
     if ( $host eq "" ) {
-	$content .= eval("qq($Lang->{CfgEdit_Header_Main})");
+        $content .= eval("qq($Lang->{CfgEdit_Header_Main})");
     } else {
-	$content .= eval("qq($Lang->{CfgEdit_Header_Host})");
+        $content .= eval("qq($Lang->{CfgEdit_Header_Host})");
     }
 
     my $saveStyle = "";
@@ -544,7 +665,7 @@ EOF
     # highlighted
     #
     my $url = "$MyURL?action=editConfig";
-    $url .= "&host=$host" if ( $host ne "" );
+    $url     .= "&host=$host" if ( $host ne "" );
     $content .= <<EOF;
 <table border="0" cellpadding="2">
 <tr>$groupText</tr>
@@ -733,20 +854,20 @@ EOF
 
     if ( !$isError && $In{saveAction} eq "Save" ) {
         my($mesg, $err);
-	if ( $host ne "" ) {
-	    $hostConf = $bpc->ConfigDataRead($host) if ( !defined($hostConf) );
+        if ( $host ne "" ) {
+            $hostConf = $bpc->ConfigDataRead($host) if ( !defined($hostConf) );
             my %hostConf2 = %$hostConf;
-	    foreach my $param ( sort(keys(%$newConf)) ) {
+            foreach my $param ( sort(keys(%$newConf)) ) {
                 if ( $override->{$param} ) {
-                    $hostConf->{$param} = $newConf->{$param}
+                    $hostConf->{$param} = $newConf->{$param};
                 } else {
                     delete($hostConf->{$param});
                 }
-	    }
+            }
             $mesg = configDiffMesg($host, \%hostConf2, $hostConf);
-	    $err .= $bpc->ConfigDataWrite($host, $hostConf);
-	} else {
-	    $mainConf = $bpc->ConfigDataRead() if ( !defined($mainConf) );
+            $err .= $bpc->ConfigDataWrite($host, $hostConf);
+        } else {
+            $mainConf = $bpc->ConfigDataRead() if ( !defined($mainConf) );
 
             my $hostsSave = [];
             my($hostsNew, $allHosts, $copyConf);
@@ -757,7 +878,7 @@ EOF
             }
             foreach my $entry ( @{$newConf->{Hosts}} ) {
                 next if ( $entry->{host} eq ""
-                           || defined($hostsNew->{lc($entry->{host})}) );
+                    || defined($hostsNew->{lc($entry->{host})}) );
                 if ( $entry->{host} =~ /(.+?)\s*=\s*(.+)/ ) {
                     if ( defined($allHosts->{$2}) ) {
                         $entry->{host} = $1;
@@ -787,10 +908,10 @@ EOF
 
             delete($newConf->{Hosts});
             $mesg .= configDiffMesg(undef, $mainConf, $newConf);
-	    $mainConf = { %$mainConf, %$newConf };
-	    $err .= $bpc->ConfigDataWrite(undef, $mainConf);
+            $mainConf = {%$mainConf, %$newConf};
+            $err .= $bpc->ConfigDataWrite(undef, $mainConf);
             $newConf->{Hosts} = $hostsSave;
-	}
+        }
         if ( defined($err) ) {
             $tblContent .= <<EOF;
 <tr><td colspan="2" class="border"><span class="editError">$err</span></td></tr>
@@ -799,10 +920,11 @@ EOF
         $bpc->ServerConnect();
         if ( $mesg ne "" ) {
             (my $mesgBR = $mesg) =~ s/\n/<br>\n/g;
-             # uncomment this if you want the changes to be displayed
-#            $tblContent .= <<EOF;
-#<tr><td colspan="2" class="border"><span class="editComment">$mesgBR</span></td></tr>
-#EOF
+
+            # uncomment this if you want the changes to be displayed
+            #            $tblContent .= <<EOF;
+            #<tr><td colspan="2" class="border"><span class="editComment">$mesgBR</span></td></tr>
+            #EOF
             foreach my $str ( split(/\n/, $mesg) ) {
                 $bpc->ServerMesg("log $str") if ( $str ne "" );
             }
@@ -823,43 +945,39 @@ EOF
 
         next if ( $disabled || $menuDisable{$menu}{top} );
         if ( ref($paramInfo->{visible}) eq "CODE"
-                        && !&{$paramInfo->{visible}}($newConf, $bpc) ) {
+            && !&{$paramInfo->{visible}}($newConf, $bpc) ) {
             next;
         }
 
-	if ( defined($paramInfo->{text}) ) {
+        if ( defined($paramInfo->{text}) ) {
             my $text = eval("qq($Lang->{$paramInfo->{text}})");
-	    $tblContent .= <<EOF;
+            $tblContent .= <<EOF;
 <tr><td colspan="2" class="editHeader">$text</td></tr>
 EOF
-	    next;
-	}
+            next;
+        }
 
-	#
-	# TODO: get parameter documentation
-	#
-	my $comment = "";
-	#$comment =~ s/\'//g;
-	#$comment =~ s/\"//g;
+        #
+        # TODO: get parameter documentation
+        #
+        my $comment = "";
+
+        #$comment =~ s/\'//g;
+        #$comment =~ s/\"//g;
         #$comment =~ s/\n/ /g;
 
         $doneParam->{$param} = 1;
 
-        $tblContent .= fieldEditBuild($ConfigMeta{$param},
-                              $param,
-                              $newConf->{$param},
-                              $errors,
-                              0,
-                              $comment,
-                              $isError,
-                              $paramInfo->{onchangeSubmit},
-		              defined($override) ? $param : undef,
-			      defined($override) ? $override->{$param} : undef
-                        );
+        $tblContent .= fieldEditBuild(
+            $ConfigMeta{$param}, $param, $newConf->{$param}, $errors, 0, $comment, $isError,
+            $paramInfo->{onchangeSubmit},
+            defined($override) ? $param              : undef,
+            defined($override) ? $override->{$param} : undef
+        );
         if ( defined($paramInfo->{comment}) ) {
             my $topDir = $bpc->TopDir;
-            my $text = eval("qq($Lang->{$paramInfo->{comment}})");
-	    $tblContent .= <<EOF;
+            my $text   = eval("qq($Lang->{$paramInfo->{comment}})");
+            $tblContent .= <<EOF;
 <tr><td colspan="2" class="editComment">$text</td></tr>
 EOF
         }
@@ -871,13 +989,13 @@ EOF
     my $errorTxt;
 
     if ( %$errors ) {
-	$errorTxt .= <<EOF;
+        $errorTxt .= <<EOF;
 <tr><td colspan="2" class="border"><span class="editError">$Lang->{CfgEdit_Error_No_Save}</span></td></tr>
 EOF
     }
 
     foreach my $param ( sort(keys(%$errors)) ) {
-	$errorTxt .= <<EOF;
+        $errorTxt .= <<EOF;
 <tr><td colspan="2" class="border"><span class="editError">$errors->{$param}</span></td></tr>
 EOF
     }
@@ -894,15 +1012,16 @@ EOF
     #
     foreach my $param ( sort(keys(%ConfigMeta)) ) {
         next if ( $doneParam->{$param} );
-        next if ( $userHost
-                      && (!defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
-                         || (!$PrivAdmin
-                             && !$bpc->{Conf}{CgiUserConfigEdit}{$param})) );
-        $content .= fieldHiddenBuild($ConfigMeta{$param},
-                            $param,
-                            $newConf->{$param},
-                            "v"
-                        );
+        next
+          if (
+            $userHost
+            && (
+                !defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                || (   !$PrivAdmin
+                    && !$bpc->{Conf}{CgiUserConfigEdit}{$param})
+            )
+          );
+        $content .= fieldHiddenBuild($ConfigMeta{$param}, $param, $newConf->{$param}, "v");
         if ( defined($override) ) {
             $content .= <<EOF;
 <input type="hidden" name="override_$param" value="$override->{$param}">
@@ -919,15 +1038,16 @@ EOF
             $doneParam = {};
             foreach my $param ( sort(keys(%ConfigMeta)) ) {
                 next if ( $doneParam->{$param} );
-                next if ( $userHost
-                          && (!defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
-                             || (!$PrivAdmin
-                                && !$bpc->{Conf}{CgiUserConfigEdit}{$param})) );
-                $contentHidden .= fieldHiddenBuild($ConfigMeta{$param},
-                                        $param,
-                                        $newConf->{$param},
-                                        "orig",
-                                    );
+                next
+                  if (
+                    $userHost
+                    && (
+                        !defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                        || (   !$PrivAdmin
+                            && !$bpc->{Conf}{CgiUserConfigEdit}{$param})
+                    )
+                  );
+                $contentHidden .= fieldHiddenBuild($ConfigMeta{$param}, $param, $newConf->{$param}, "orig",);
                 $doneParam->{$param} = 1;
                 $In{modified} = 0;
             }
@@ -943,25 +1063,26 @@ EOF
 EOF
                 }
             }
-	}
+        }
     } else {
-	#
-	# First time: emit all the original config settings
-	#
-	$doneParam = {};
+        #
+        # First time: emit all the original config settings
+        #
+        $doneParam = {};
         foreach my $param ( sort(keys(%ConfigMeta)) ) {
             next if ( $doneParam->{$param} );
-            next if ( $userHost
-                          && (!defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
-                             || (!$PrivAdmin
-                                && !$bpc->{Conf}{CgiUserConfigEdit}{$param})) );
-            $contentHidden .= fieldHiddenBuild($ConfigMeta{$param},
-                                    $param,
-                                    $mainConf->{$param},
-                                    "orig",
-                                );
+            next
+              if (
+                $userHost
+                && (
+                    !defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                    || (   !$PrivAdmin
+                        && !$bpc->{Conf}{CgiUserConfigEdit}{$param})
+                )
+              );
+            $contentHidden .= fieldHiddenBuild($ConfigMeta{$param}, $param, $mainConf->{$param}, "orig",);
             $doneParam->{$param} = 1;
-	}
+        }
     }
 
     $content .= <<EOF;
@@ -980,15 +1101,14 @@ sub fieldHiddenBuild
     my($type, $varName, $varValue, $prefix) = @_;
     my $content;
 
-    $type = { type => $type } if ( ref($type) ne "HASH" );
+    $type = {type => $type} if ( ref($type) ne "HASH" );
 
     if ( $type->{type} eq "list" ) {
-        $varValue = [] if ( !defined($varValue) );
+        $varValue = []          if ( !defined($varValue) );
         $varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
 
         for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
-            $content .= fieldHiddenBuild($type->{child}, "${varName}_zZ_$i",
-                                         $varValue->[$i], $prefix);
+            $content .= fieldHiddenBuild($type->{child}, "${varName}_zZ_$i", $varValue->[$i], $prefix);
         }
     } elsif ( $type->{type} eq "hash" || $type->{type} eq "horizHash" ) {
         $varValue = {} if ( ref($varValue) ne "HASH" );
@@ -1016,12 +1136,11 @@ sub fieldHiddenBuild
 <input type="hidden" name="${prefix}_flds_${varName}_zZ_$fldNum" value="${EscHTML($fld)}">
 EOF
             }
-            $content .= fieldHiddenBuild($childType, "${varName}_zZ_$fldNum",
-                                         $varValue->{$fld}, $prefix);
+            $content .= fieldHiddenBuild($childType, "${varName}_zZ_$fldNum", $varValue->{$fld}, $prefix);
         }
     } elsif ( $type->{type} eq "shortlist" ) {
-	$varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
-	$varValue = join(", ", @$varValue);
+        $varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
+        $varValue = join(", ", @$varValue);
         $content .= <<EOF;
 <input type="hidden" name="${prefix}_zZ_$varName" value="${EscHTML($varValue)}">
 EOF
@@ -1035,12 +1154,12 @@ EOF
 
 sub fieldEditBuild
 {
-    my($type, $varName, $varValue, $errors, $level, $comment, $isError,
-       $onchangeSubmit, $overrideVar, $overrideSet) = @_;
+    my($type, $varName, $varValue, $errors, $level, $comment, $isError, $onchangeSubmit, $overrideVar, $overrideSet) =
+      @_;
 
     my $content;
     my $size = 50 - 10 * $level;
-    $type = { type => $type } if ( ref($type) ne "HASH" );
+    $type = {type => $type} if ( ref($type) ne "HASH" );
 
     $size = $type->{size} if ( defined($type->{size}) );
 
@@ -1053,45 +1172,47 @@ sub fieldEditBuild
 
     if ( $level == 0 ) {
         my $lcVarName = lc($varName);
-	$content .= <<EOF;
+        $content .= <<EOF;
 <tr><td class="border"><a href="?action=view&type=docs#_conf_${lcVarName}_">$varName</a>
 EOF
-	if ( defined($overrideVar) ) {
-	    my $override_checked = "";
-	    if ( !$isError && $In{deleteVar}      =~ /^\Q${varName}_zZ_/
-		   || !$isError && $In{insertVar} =~ /^\Q${varName}\E(_zZ_|$)/
-		   || !$isError && $In{addVar}    =~ /^\Q${varName}\E(_zZ_|$)/ ) {
-		$overrideSet = 1;
-	    }
-	    if ( $overrideSet ) {
-		$override_checked = "checked";
-	    }
+        if ( defined($overrideVar) ) {
+            my $override_checked = "";
+            if (   !$isError && $In{deleteVar} =~ /^\Q${varName}_zZ_/
+                || !$isError && $In{insertVar} =~ /^\Q${varName}\E(_zZ_|$)/
+                || !$isError && $In{addVar} =~ /^\Q${varName}\E(_zZ_|$)/ ) {
+                $overrideSet = 1;
+            }
+            if ( $overrideSet ) {
+                $override_checked = "checked";
+            }
             $content .= <<EOF;
 <br><input type="checkbox" name="override_$varName" $override_checked value="1" onClick="checkboxChange('$varName')">\&nbsp;${EscHTML($Lang->{CfgEdit_Button_Override})}
 EOF
-	}
-	$content .= "</td>\n";
+        }
+        $content .= "</td>\n";
     }
 
     if ( $type->{type} eq "list" ) {
         $content .= "<td class=\"border\">\n";
-        $varValue = [] if ( !defined($varValue) );
+        $varValue = []          if ( !defined($varValue) );
         $varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
-        if ( !$isError && $In{deleteVar} =~ /^\Q${varName}_zZ_\E(\d+)$/
-                && $1 < @$varValue ) {
+        if (  !$isError
+            && $In{deleteVar} =~ /^\Q${varName}_zZ_\E(\d+)$/
+            && $1 < @$varValue ) {
             #
             # User deleted entry in this array
             #
             splice(@$varValue, $1, 1) if ( @$varValue > 1 || $type->{emptyOk} );
             $In{deleteVar} = "";
         }
-        if ( !$isError && $In{insertVar} =~ /^\Q${varName}_zZ_\E(\d+)$/
-                && $1 < @$varValue ) {
+        if (  !$isError
+            && $In{insertVar} =~ /^\Q${varName}_zZ_\E(\d+)$/
+            && $1 < @$varValue ) {
             #
             # User inserted entry in this array
             #
             splice(@$varValue, $1, 0, "")
-                        if ( @$varValue > 1 || $type->{emptyOk} );
+              if ( @$varValue > 1 || $type->{emptyOk} );
             $In{insertVar} = "";
         }
         if ( !$isError && $In{addVar} eq $varName ) {
@@ -1104,8 +1225,9 @@ EOF
         $content .= "<table border=\"1\" cellspacing=\"0\" class=\"editSubTable\">\n";
         my $colspan;
 
-        if ( ref($type) eq "HASH" && ref($type->{child}) eq "HASH"
-                    && $type->{child}{type} eq "horizHash" ) {
+        if (   ref($type) eq "HASH"
+            && ref($type->{child}) eq "HASH"
+            && $type->{child}{type} eq "horizHash" ) {
             my @order;
             if ( defined($type->{child}{order}) ) {
                 @order = @{$type->{child}{order}};
@@ -1127,10 +1249,11 @@ EOF
 </td>
 EOF
                 }
-                $content .= fieldEditBuild($type->{child}, "${varName}_zZ_$i",
-                                  $varValue->[$i], $errors, $level + 1, undef,
-                                  $isError, $onchangeSubmit,
-                                  $overrideVar, $overrideSet);
+                $content .= fieldEditBuild(
+                    $type->{child}, "${varName}_zZ_$i", $varValue->[$i], $errors,
+                    $level + 1,     undef,              $isError,        $onchangeSubmit,
+                    $overrideVar,   $overrideSet
+                );
                 $content .= "</tr>\n";
             }
         } else {
@@ -1147,10 +1270,11 @@ EOF
 EOF
                 }
                 $content .= "</td>\n";
-                $content .= fieldEditBuild($type->{child}, "${varName}_zZ_$i",
-                                    $varValue->[$i], $errors, $level + 1, undef,
-                                    $isError, $onchangeSubmit,
-                                    $overrideVar, $overrideSet);
+                $content .= fieldEditBuild(
+                    $type->{child}, "${varName}_zZ_$i", $varValue->[$i], $errors,
+                    $level + 1,     undef,              $isError,        $onchangeSubmit,
+                    $overrideVar,   $overrideSet
+                );
                 $content .= "</tr>\n";
             }
             $colspan = 2;
@@ -1166,23 +1290,25 @@ EOF
         $content .= "<table border=\"1\" cellspacing=\"0\" class=\"editSubTable\">\n";
         $varValue = {} if ( ref($varValue) ne "HASH" );
 
-        if ( !$isError && !$type->{noKeyEdit}
-                        && $In{deleteVar} !~ /^\Q${varName}_zZ_\E.*_zZ_/
-                        && $In{deleteVar} =~ /^\Q${varName}_zZ_\E(.*)$/ ) {
+        if (   !$isError
+            && !$type->{noKeyEdit}
+            && $In{deleteVar} !~ /^\Q${varName}_zZ_\E.*_zZ_/
+            && $In{deleteVar} =~ /^\Q${varName}_zZ_\E(.*)$/ ) {
             #
             # User deleted entry in this hash
             #
             delete($varValue->{$1}) if ( keys(%$varValue) > 1
-					    || $type->{emptyOk} );
+                || $type->{emptyOk} );
             $In{deleteVar} = "";
         }
-        if ( !$isError && !defined($type->{child})
-                        && $In{addVar} eq $varName ) {
+        if (   !$isError
+            && !defined($type->{child})
+            && $In{addVar} eq $varName ) {
             #
             # User added entry to this array
             #
             $varValue->{$In{"addVarKey_$varName"}} = ""
-                        if ( !defined($varValue->{$In{"addVarKey_$varName"}}) );
+              if ( !defined($varValue->{$In{"addVarKey_$varName"}}) );
             $In{addVar} = "";
         }
         my(@order, $childType);
@@ -1201,7 +1327,7 @@ EOF
 <tr><td class="border">$fld
 EOF
             if ( !$type->{noKeyEdit}
-		    && (keys(%$varValue) > 1 || $type->{emptyOk}) ) {
+                && (keys(%$varValue) > 1 || $type->{emptyOk}) ) {
                 $content .= <<EOF;
 <input type="button" name="del_${varName}_zZ_$fld" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
         onClick="deleteSubmit('${varName}_zZ_$fld')">
@@ -1220,10 +1346,11 @@ EOF
 EOF
             }
             $content .= "</td>\n";
-            $content .= fieldEditBuild($childType, "${varName}_zZ_$fldNum",
-                            $varValue->{$fld}, $errors, $level + 1, undef,
-			    $isError, $onchangeSubmit,
-			    $overrideVar, $overrideSet);
+            $content .= fieldEditBuild(
+                $childType,   "${varName}_zZ_$fldNum", $varValue->{$fld}, $errors,
+                $level + 1,   undef,                   $isError,          $onchangeSubmit,
+                $overrideVar, $overrideSet
+            );
             $content .= "</tr>\n";
         }
 
@@ -1264,10 +1391,11 @@ EOF
 <input type="hidden" name="v_flds_${varName}_zZ_$fldNum" value="${EscHTML($fld)}">
 EOF
             }
-            $content .= fieldEditBuild($childType, "${varName}_zZ_$fldNum",
-                            $varValue->{$fld}, $errors, $level + 1, undef,
-			    $isError, $onchangeSubmit,
-			    $overrideVar, $overrideSet);
+            $content .= fieldEditBuild(
+                $childType,   "${varName}_zZ_$fldNum", $varValue->{$fld}, $errors,
+                $level + 1,   undef,                   $isError,          $onchangeSubmit,
+                $overrideVar, $overrideSet
+            );
         }
     } else {
         $content .= "<td class=\"border\">\n";
@@ -1285,33 +1413,36 @@ EOF
 EOF
         }
         my $onChange;
-	if ( defined($overrideVar) ) {
+        if ( defined($overrideVar) ) {
             $onChange .= "checkboxSet('$overrideVar');";
-	} else {
+        } else {
             $onChange .= "varChange('$varName');";
-	}
+        }
         if ( $onchangeSubmit ) {
             $onChange .= "document.editForm.submit();";
         }
-	if ( $onChange ne "" ) {
+        if ( $onChange ne "" ) {
             $onChange = " onChange=\"$onChange\"";
-	}
-        if ( $varValue !~ /\n/ &&
-		($type->{type} eq "integer"
-		    || $type->{type} eq "string"
-		    || $type->{type} eq "execPath"
-		    || $type->{type} eq "shortlist"
-		    || $type->{type} eq "float") ) {
+        }
+        if (
+            $varValue !~ /\n/
+            && (   $type->{type} eq "integer"
+                || $type->{type} eq "string"
+                || $type->{type} eq "execPath"
+                || $type->{type} eq "shortlist"
+                || $type->{type} eq "float")
+        ) {
             # simple input box
-	    if ( $type->{type} eq "shortlist" ) {
-		$varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
-		$varValue = join(", ", @$varValue);
-	    }
+            if ( $type->{type} eq "shortlist" ) {
+                $varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
+                $varValue = join(", ", @$varValue);
+            }
             my $textType = ($varName =~ /Passwd/) ? "password" : "text";
             $content .= <<EOF;
 <input type="$textType" class="editTextInput" name="v_zZ_$varName" size="$size" maxlength="4096" value="${EscHTML($varValue)}"$onChange>
 EOF
         } elsif ( $type->{type} eq "boolean" ) {
+
             # checkbox
             my $checked = "checked" if ( $varValue );
             $content .= <<EOF;
@@ -1327,9 +1458,10 @@ EOF
             }
             $content .= "</select>\n";
         } else {
+
             # multi-line text area - count number of lines
-	    my $rowCnt = $varValue =~ tr/\n//;
-	    $rowCnt = 1 if ( $rowCnt < 1 );
+            my $rowCnt = $varValue =~ tr/\n//;
+            $rowCnt = 1 if ( $rowCnt < 1 );
             $content .= <<EOF;
 <textarea name="v_zZ_$varName" class="editTextArea" cols="$size" rows="$rowCnt"$onChange>${EscHTML($varValue)}</textarea>
 EOF
@@ -1353,7 +1485,7 @@ sub fieldErrorCheck
 {
     my($type, $varName, $errors) = @_;
 
-    $type = { type => $type } if ( ref($type) ne "HASH" );
+    $type = {type => $type} if ( ref($type) ne "HASH" );
 
     if ( $type->{type} eq "list" ) {
         for ( my $i = 0 ; ; $i++ ) {
@@ -1385,39 +1517,38 @@ sub fieldErrorCheck
         return $ret;
     } else {
         $In{"v_zZ_$varName"} = "0" if ( $type->{type} eq "boolean"
-                                        && $In{"v_zZ_$varName"} eq "" );
+            && $In{"v_zZ_$varName"} eq "" );
 
         return 1 if ( !exists($In{"v_zZ_$varName"}) );
 
         (my $var = $varName) =~ s/_zZ_/./g;
 
-        if ( $type->{type} eq "integer"
-                || $type->{type} eq "boolean" ) {
-            if ( $In{"v_zZ_$varName"} !~ /^-?\d+\s*$/s
-			    && $In{"v_zZ_$varName"} ne "" ) {
+        if (   $type->{type} eq "integer"
+            || $type->{type} eq "boolean" ) {
+            if (   $In{"v_zZ_$varName"} !~ /^-?\d+\s*$/s
+                && $In{"v_zZ_$varName"} ne "" ) {
                 $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_an_integer}}");
             }
         } elsif ( $type->{type} eq "float" ) {
-            if ( $In{"v_zZ_$varName"} !~ /^-?\d*(\.\d*)?\s*$/s
-			    && $In{"v_zZ_$varName"} ne "" ) {
-                $errors->{$varName}
-                        = eval("qq{$Lang->{CfgEdit_Error__must_be_real_valued_number}}");
+            if (   $In{"v_zZ_$varName"} !~ /^-?\d*(\.\d*)?\s*$/s
+                && $In{"v_zZ_$varName"} ne "" ) {
+                $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_real_valued_number}}");
             }
         } elsif ( $type->{type} eq "shortlist" ) {
-	    my @vals = split(/[,\s]+/, $In{"v_zZ_$varName"});
-	    for ( my $i = 0 ; $i < @vals ; $i++ ) {
-		if ( $type->{child} eq "integer"
-			&& $vals[$i] !~ /^-?\d+\s*$/s
-			&& $vals[$i] ne "" ) {
-		    my $k = $i + 1;
-		    $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__entry__must_be_an_integer}}");
-		} elsif ( $type->{child} eq "float"
-			&& $vals[$i] !~ /^-?\d*(\.\d*)?\s*$/s
-			&& $vals[$i] ne "" ) {
-		    my $k = $i + 1;
-		    $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__entry__must_be_real_valued_number}}");
-		}
-	    }
+            my @vals = split(/[,\s]+/, $In{"v_zZ_$varName"});
+            for ( my $i = 0 ; $i < @vals ; $i++ ) {
+                if (   $type->{child} eq "integer"
+                    && $vals[$i] !~ /^-?\d+\s*$/s
+                    && $vals[$i] ne "" ) {
+                    my $k = $i + 1;
+                    $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__entry__must_be_an_integer}}");
+                } elsif ( $type->{child} eq "float"
+                    && $vals[$i] !~ /^-?\d*(\.\d*)?\s*$/s
+                    && $vals[$i] ne "" ) {
+                    my $k = $i + 1;
+                    $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__entry__must_be_real_valued_number}}");
+                }
+            }
         } elsif ( $type->{type} eq "select" ) {
             my $match = 0;
             foreach my $option ( @{$type->{values}} ) {
@@ -1427,7 +1558,7 @@ sub fieldErrorCheck
                 }
             }
             $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_valid_option}}")
-                            if ( !$match );
+              if ( !$match );
         } elsif ( $type->{type} eq "execPath" ) {
             if ( $In{"v_zZ_$varName"} ne "" && !-x $In{"v_zZ_$varName"} ) {
                 $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_executable_program}}");
@@ -1449,10 +1580,15 @@ sub inputParse
 
     foreach my $param ( sort(keys(%ConfigMeta)) ) {
         my $value;
-        next if ( $userHost
-                      && (!defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
-                         || (!$PrivAdmin
-                            && !$bpc->{Conf}{CgiUserConfigEdit}{$param})) );
+        next
+          if (
+            $userHost
+            && (
+                !defined($bpc->{Conf}{CgiUserConfigEdit}{$param})
+                || (   !$PrivAdmin
+                    && !$bpc->{Conf}{CgiUserConfigEdit}{$param})
+            )
+          );
         fieldInputParse($ConfigMeta{$param}, $param, \$value);
         $conf->{$param}     = $value;
         $override->{$param} = $In{"override_$param"};
@@ -1464,7 +1600,7 @@ sub fieldInputParse
 {
     my($type, $varName, $value) = @_;
 
-    $type = { type => $type } if ( ref($type) ne "HASH" );
+    $type = {type => $type} if ( ref($type) ne "HASH" );
 
     if ( $type->{type} eq "list" ) {
         $$value = [];
@@ -1516,6 +1652,7 @@ sub fieldInputParse
             if ( $v =~ /^-?\d+\s*$/s || $v eq "" ) {
                 $$value = 0 + $v;
             } else {
+
                 # error value - keep in string form
                 $$value = $v;
             }
@@ -1523,6 +1660,7 @@ sub fieldInputParse
             if ( $v =~ /^-?\d*(\.\d*)?\s*$/s || $v eq "" ) {
                 $$value = 0 + $v;
             } else {
+
                 # error value - keep in string form
                 $$value = $v;
             }
@@ -1535,7 +1673,7 @@ sub fieldInputParse
                     }
                 }
             } elsif ( $type->{child} eq "integer"
-                        || $type->{child} eq "boolean" ) {
+                || $type->{child} eq "boolean" ) {
                 foreach ( @$$value ) {
                     if ( /^-?\d+\s*$/s || $v eq "" ) {
                         $_ += 0;
@@ -1545,6 +1683,7 @@ sub fieldInputParse
         } else {
             $$value = decode_utf8($In{"v_zZ_$varName"});
             $$value =~ s/\r\n/\n/g;
+
             # remove leading space from exec paths
             $$value =~ s/^\s+// if ( $type->{type} eq "execPath" );
         }

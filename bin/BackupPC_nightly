@@ -83,7 +83,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib qw( :BPC_DT_ALL );
 use BackupPC::XS;
@@ -139,21 +140,22 @@ if ( $opts{m} ) {
 ###########################################################################
 # V3 pool: get statistics, and remove files that have only one link.
 ###########################################################################
-my $fileCnt;       # total number of v3 files
-my $dirCnt;        # total number of v3 directories
-my $blkCnt;        # total block size of v3 files
-my $fileCntRm;     # total number of removed v3 files
-my $blkCntRm;      # total block size of removed v3 files
-my $fileCntRep;    # total number of v3 file names containing "_", ie: files
-                   # that have repeated md5 checksums
-my $fileRepMax;    # worse case number of v3 files that have repeated checksums
-                   # (ie: max(nnn+1) for all names xxxxxxxxxxxxxxxx_nnn)
-my $fileLinkMax;   # maximum number of hardlinks on a v3 pool file
-my $fileLinkTotal; # total number of hardlinks on entire v3 pool
-my $fileCntRename; # number of renamed v3 files (to keep file numbering
-                   # contiguous)
-my %FixList;       # list of v3 paths that need to be renamed to avoid
-                   # new holes
+my $fileCnt;          # total number of v3 files
+my $dirCnt;           # total number of v3 directories
+my $blkCnt;           # total block size of v3 files
+my $fileCntRm;        # total number of removed v3 files
+my $blkCntRm;         # total block size of removed v3 files
+my $fileCntRep;       # total number of v3 file names containing "_", ie: files
+                      # that have repeated md5 checksums
+my $fileRepMax;       # worse case number of v3 files that have repeated checksums
+                      # (ie: max(nnn+1) for all names xxxxxxxxxxxxxxxx_nnn)
+my $fileLinkMax;      # maximum number of hardlinks on a v3 pool file
+my $fileLinkTotal;    # total number of hardlinks on entire v3 pool
+my $fileCntRename;    # number of renamed v3 files (to keep file numbering
+                      # contiguous)
+my %FixList;          # list of v3 paths that need to be renamed to avoid
+                      # new holes
+
 if ( $Conf{PoolV3Enabled} ) {
     ScanAndCleanV3Pool();
 }
@@ -173,7 +175,9 @@ if ( $opts{r} ) {
     print("log BackupPC_nightly skipping BackupPC_refCountUpdate\n");
 } else {
     $opts{P} ||= 0;
-    print("log BackupPC_nightly now running BackupPC_refCountUpdate -m -s -c -P $opts{P} -r $poolRangeStart-$poolRangeEnd\n");
+    print(
+        "log BackupPC_nightly now running BackupPC_refCountUpdate -m -s -c -P $opts{P} -r $poolRangeStart-$poolRangeEnd\n"
+    );
     system("$BinDir/BackupPC_refCountUpdate -m -s -c -P $opts{P} -r $poolRangeStart-$poolRangeEnd");
 }
 
@@ -198,7 +202,7 @@ sub GetPoolStats_V3
     if ( -d _ ) {
         $dirCnt++;
         return;
-    } elsif ( ! -f _ ) {
+    } elsif ( !-f _ ) {
         return;
     }
     if ( $nlinks == 1 ) {
@@ -212,10 +216,12 @@ sub GetPoolStats_V3
         # pool files vs removing pool files.  (Other aspects of the
         # design should eliminate race conditions.)
         #
-        push(@PendingDelete, {
-                    inode => $inode,
-                    path  => $fullPath
-                }
+        push(
+            @PendingDelete,
+            {
+                inode => $inode,
+                path  => $fullPath
+            }
         );
         if ( @PendingDelete > $PendingDeleteMax ) {
             processPendingDeletes(0);
@@ -249,13 +255,14 @@ sub processPendingDeletes
     if ( !$doAll ) {
         @delete = splice(@PendingDelete, 0, $PendingDeleteMax / 2);
     } else {
-        @delete = @PendingDelete;
+        @delete        = @PendingDelete;
         @PendingDelete = ();
     }
-    for my $f ( sort({ $a->{inode} <=> $b->{inode} } @delete) ) {
+    for my $f ( sort({$a->{inode} <=> $b->{inode}} @delete) ) {
         my($nlinks) = (lstat($f->{path}))[3];
 
         next if ( $nlinks != 1 );
+
         # print("Deleting $f->{path} ($f->{inode})\n");
         unlink($f->{path});
     }
@@ -268,7 +275,8 @@ sub ScanAndCleanV3Pool()
     for my $pool ( qw(pool cpool) ) {
         print("__bpc_progress_state__ v3 $pool scan\n") if ( !$opts{p} );
         for ( my $i = $poolRangeStart ; $i <= $poolRangeEnd ; $i++ ) {
-            my $dir        = "$hexChars[int($i / 16)]/$hexChars[$i % 16]";
+            my $dir = "$hexChars[int($i / 16)]/$hexChars[$i % 16]";
+
             # print("Doing $pool/$dir\n") if ( ($i % 16) == 0 );
             $fileCnt       = 0;
             $dirCnt        = 0;
@@ -283,7 +291,7 @@ sub ScanAndCleanV3Pool()
             %FixList       = ();
             print("__bpc_progress_fileCnt__ $i/$poolRangeEnd\n") if ( !$opts{p} );
             BackupPC::DirOps::find($bpc, {wanted => \&GetPoolStats_V3}, "$TopDir/$pool/$dir")
-                                                if ( -d "$TopDir/$pool/$dir" );
+              if ( -d "$TopDir/$pool/$dir" );
             my $kb   = $blkCnt / 2;
             my $kbRm = $blkCntRm / 2;
 
@@ -296,7 +304,7 @@ sub ScanAndCleanV3Pool()
             # Also count the next level directories
             #
             $dirCnt++ if ( ($i % 16) == 0
-                           && -d "$TopDir/$pool/$hexChars[int($i / 16)]" );
+                && -d "$TopDir/$pool/$hexChars[int($i / 16)]" );
 
             #
             # We need to process all pending deletes before we do the
@@ -313,7 +321,7 @@ sub ScanAndCleanV3Pool()
             #
             foreach my $name ( sort(keys(%FixList)) ) {
                 my $rmCnt = $FixList{$name} + 1;
-                my $new = -1;
+                my $new   = -1;
                 for ( my $old = -1 ; ; $old++ ) {
                     my $oldName = $name;
                     $oldName .= "_$old" if ( $old >= 0 );
@@ -334,9 +342,9 @@ sub ScanAndCleanV3Pool()
                     $fileCntRename++;
                 }
             }
-            print("BackupPC_stats $i = $pool,$fileCnt,$dirCnt,$kb,$kbRm,"
-                                  . "$fileCntRm,$fileCntRep,$fileRepMax,"
-                                  . "$fileCntRename,$fileLinkMax,$fileLinkTotal\n");
+            print(  "BackupPC_stats $i = $pool,$fileCnt,$dirCnt,$kb,$kbRm,"
+                  . "$fileCntRm,$fileCntRep,$fileRepMax,"
+                  . "$fileCntRename,$fileLinkMax,$fileLinkTotal\n");
         }
     }
     sleep(1);
@@ -352,13 +360,14 @@ sub CleanV4PoolTempFiles
 {
     my $pidRunning = {};
     foreach my $pool ( qw(pool cpool) ) {
-	foreach my $e ( @{BackupPC::DirOps::dirRead($bpc, "$TopDir/$pool")} ) {
-	    next if ( $e->{name} !~ /^(\d+)\.\d+\.\d+$/ || !-f "$TopDir/$pool/$e->{name}" );
-	    my $pid = $1;
-	    $pidRunning->{$pid} = kill(0, $pid) ? 1 : 0 if ( !defined($pidRunning->{$pid} ) );
-	    next if ( $pidRunning->{$pid} );
-	    #print("pid $pid: unlink $TopDir/$pool/$e->{name}\n");
-	    unlink("$TopDir/$pool/$e->{name}");
-	}
+        foreach my $e ( @{BackupPC::DirOps::dirRead($bpc, "$TopDir/$pool")} ) {
+            next if ( $e->{name} !~ /^(\d+)\.\d+\.\d+$/ || !-f "$TopDir/$pool/$e->{name}" );
+            my $pid = $1;
+            $pidRunning->{$pid} = kill(0, $pid) ? 1 : 0 if ( !defined($pidRunning->{$pid}) );
+            next if ( $pidRunning->{$pid} );
+
+            #print("pid $pid: unlink $TopDir/$pool/$e->{name}\n");
+            unlink("$TopDir/$pool/$e->{name}");
+        }
     }
 }

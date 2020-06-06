@@ -55,7 +55,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 
 use IO::Socket;
@@ -89,31 +90,31 @@ use BackupPC::CGI::Summary;
 use BackupPC::CGI::View;
 
 my %ActionDispatch = (
-    "deleteBackup"               => "DeleteBackup",
-    "summary"                    => "Summary",
-    "Start_Incr_Backup"          => "StartStopBackup",
-    "Start_Full_Backup"          => "StartStopBackup",
-    "Stop_Dequeue_Backup"        => "StartStopBackup",
-    "Stop_Dequeue_Archive"       => "StartStopBackup",
-    "queue"                      => "Queue",
-    "view"                       => "View",
-    "LOGlist"                    => "LOGlist",
-    "emailSummary"               => "EmailSummary",
-    "browse"                     => "Browse",
-    "dirHistory"                 => "DirHistory",
-    "Restore"                    => "Restore",
-    "RestoreFile"                => "RestoreFile",
-    "hostInfo"                   => "HostInfo",
-    "generalInfo"                => "GeneralInfo",
-    "restoreInfo"                => "RestoreInfo",
-    "archiveInfo"                => "ArchiveInfo",
-    "Start_Archive"              => "Archive",
-    "Archive"                    => "Archive",
-    "Reload"                     => "ReloadServer",
-    "startServer"                => "StartServer",
-    "Stop"                       => "StopServer",
-    "adminOpts"                  => "AdminOptions",
-    "editConfig"                 => "EditConfig",
+    "deleteBackup"         => "DeleteBackup",
+    "summary"              => "Summary",
+    "Start_Incr_Backup"    => "StartStopBackup",
+    "Start_Full_Backup"    => "StartStopBackup",
+    "Stop_Dequeue_Backup"  => "StartStopBackup",
+    "Stop_Dequeue_Archive" => "StartStopBackup",
+    "queue"                => "Queue",
+    "view"                 => "View",
+    "LOGlist"              => "LOGlist",
+    "emailSummary"         => "EmailSummary",
+    "browse"               => "Browse",
+    "dirHistory"           => "DirHistory",
+    "Restore"              => "Restore",
+    "RestoreFile"          => "RestoreFile",
+    "hostInfo"             => "HostInfo",
+    "generalInfo"          => "GeneralInfo",
+    "restoreInfo"          => "RestoreInfo",
+    "archiveInfo"          => "ArchiveInfo",
+    "Start_Archive"        => "Archive",
+    "Archive"              => "Archive",
+    "Reload"               => "ReloadServer",
+    "startServer"          => "StartServer",
+    "Stop"                 => "StopServer",
+    "adminOpts"            => "AdminOptions",
+    "editConfig"           => "EditConfig",
 );
 my %ChildPid2Num;
 
@@ -141,11 +142,11 @@ my $LogLevel = 0;
 $Cgi = new CGI;
 
 die("BackupPC::Lib->new failed\n") if ( !($bpc = BackupPC::Lib->new) );
-$TopDir   = $bpc->TopDir();
-$LogDir   = $bpc->LogDir();
-$BinDir   = $bpc->BinDir();
-%Conf     = $bpc->Conf();
-$Lang     = $bpc->Lang();
+$TopDir      = $bpc->TopDir();
+$LogDir      = $bpc->LogDir();
+$BinDir      = $bpc->BinDir();
+%Conf        = $bpc->Conf();
+$Lang        = $bpc->Lang();
 $ConfigMTime = $bpc->ConfigMTime();
 umask($Conf{UmaskMode});
 
@@ -155,10 +156,12 @@ my $ChildExited = 0;
 
 $SIG{INT}  = \&childKill;
 $SIG{CHLD} = \&childCleanup;
-my $socket = IO::Socket::INET->new(Listen => 5, ReuseAddr => 1,
-                                   LocalAddr => 'localhost',
-                                   LocalPort => $Conf{SCGIServerPort} || 8199)
-                or die "cannot bind to port $Conf{SCGIServerPort}: $!";
+my $socket = IO::Socket::INET->new(
+    Listen    => 5,
+    ReuseAddr => 1,
+    LocalAddr => 'localhost',
+    LocalPort => $Conf{SCGIServerPort} || 8199
+) or die "cannot bind to port $Conf{SCGIServerPort}: $!";
 
 my $scgi = SCGI->new($socket, blocking => 1);
 
@@ -227,22 +230,22 @@ while ( 1 ) {
             # As we reap each child, we start another one in the same slot.
             #
             while ( (my $child = waitpid(-1, WNOHANG)) > 0 ) {
-               print("BackupPC_Admin_SCGI: child $child exited ($!)\n")
-                                               if ( $LogLevel >= 3 );
-               if ( defined($ChildPid2Num{$child}) ) {
-                   childRun($ChildPid2Num{$child});
-               }
+                print("BackupPC_Admin_SCGI: child $child exited ($!)\n")
+                  if ( $LogLevel >= 3 );
+                if ( defined($ChildPid2Num{$child}) ) {
+                    childRun($ChildPid2Num{$child});
+                }
             }
             next;
         }
         print("BackupPC_Admin_SCGI: parent lock failed ($!)... continuing\n")
-                                           if ( $LogLevel >= 3 );
+          if ( $LogLevel >= 3 );
         sleep(1);
         next;
     }
     BackupPC::XS::DirOps::unlockRangeFd($LockFdNum, 1, $MaxChild);
     print("BackupPC_Admin_SCGI: all children busy... starting a new child $MaxChild\n")
-                                       if ( $LogLevel >= 5 );
+      if ( $LogLevel >= 5 );
     if ( $MaxChild >= $LockFileSz - 2 ) {
         #
         # Need to extend the lock file size, since we need a lock byte for
@@ -252,7 +255,9 @@ while ( 1 ) {
         print("BackupPC_Admin_SCGI: extending $LockFile to length $LockFileSz\n");
         sysseek($LockFd, 0, 0);
         if ( syswrite($LockFd, chr(0) x $LockFileSz) != $LockFileSz ) {
-            print("BackupPC_Admin_SCGI: can't write $LockFileSz bytes to $LockFile; terminating children and exiting...\n");
+            print(
+                "BackupPC_Admin_SCGI: can't write $LockFileSz bytes to $LockFile; terminating children and exiting...\n"
+            );
             kill 2, keys(%ChildPid2Num);
             sleep(1);
             kill 9, keys(%ChildPid2Num);
@@ -312,12 +317,12 @@ sub childRun
         #
         if ( BackupPC::XS::DirOps::lockRangeFd($LockFdNum, 1 + $childNum, 1, 1) ) {
             print("BackupPC_Admin_SCGI: child $childNum failed to get idle lock ($!)\n")
-                                                           if ( $LogLevel >= 3 );
+              if ( $LogLevel >= 3 );
             sleep(1);
             next;
         }
         print("BackupPC_Admin_SCGI: child $childNum got idle lock\n")
-                                                   if ( $LogLevel >= 5 );
+          if ( $LogLevel >= 5 );
 
         if ( defined($fhWrite) ) {
             #
@@ -335,14 +340,14 @@ sub childRun
         #
         if ( BackupPC::XS::DirOps::lockRangeFd($LockFdNum, 0, 1, 1) ) {
             print("BackupPC_Admin_SCGI: child $childNum lock failed ($!)... continuing\n")
-                                                   if ( $LogLevel >= 3 );
+              if ( $LogLevel >= 3 );
             sleep(1);
             next;
         }
         print("BackupPC_Admin_SCGI: child $childNum got accept lock\n")
-                                                   if ( $LogLevel >= 5 );
+          if ( $LogLevel >= 5 );
         my $request = $scgi->accept;
-        BackupPC::XS::DirOps::unlockRangeFd($LockFdNum, 0, 1);
+        BackupPC::XS::DirOps::unlockRangeFd($LockFdNum, 0,             1);
         BackupPC::XS::DirOps::unlockRangeFd($LockFdNum, 1 + $childNum, 1);
 
         my $iaddr = $request->connection->peeraddr();
@@ -352,17 +357,17 @@ sub childRun
             #
             my $addrStr = join(".", unpack("C*", $iaddr));
             printf("BackupPC_Admin_SCGI: unexpected connection from $addrStr (%s) ignored\n",
-                                            gethostbyaddr($iaddr, AF_INET));
+                gethostbyaddr($iaddr, AF_INET));
             $request = undef;
             next;
         }
         print("BackupPC_Admin_SCGI: child $childNum processing request\n")
-                                               if ( $LogLevel >= 5 );
+          if ( $LogLevel >= 5 );
         handleRequest($request);
         $request = undef;
         select(STDOUT);
         print("BackupPC_Admin_SCGI: child $childNum finished request\n")
-                                               if ( $LogLevel >= 5 );
+          if ( $LogLevel >= 5 );
     }
 }
 
@@ -382,7 +387,8 @@ sub handleRequest
         open($fdDebug, ">", "$LogDir/request.txt");
         print $fdDebug "Environment: ", Dumper($request->env), "\n\n";
         print $fdDebug "Body: ", $body, "\n\n";
-        print $fdDebug "Other: ", "User = $User, MyURL = $MyURL, PID = $$, In = ", Dumper(\%In), "Conf = ", Dumper(\%Conf), "\n\n";
+        print $fdDebug "Other: ", "User = $User, MyURL = $MyURL, PID = $$, In = ", Dumper(\%In), "Conf = ",
+          Dumper(\%Conf), "\n\n";
         close($fdDebug);
     }
     if ( !defined($ActionDispatch{$In{action}}) ) {
@@ -416,11 +422,11 @@ sub NewRequest
 
     if ( $bpc->ConfigMTime() != $ConfigMTime ) {
         $bpc->ConfigRead();
-	$TopDir   = $bpc->TopDir();
-	$LogDir   = $bpc->LogDir();
-	$BinDir   = $bpc->BinDir();
-        %Conf     = $bpc->Conf();
-        $Lang     = $bpc->Lang();
+        $TopDir      = $bpc->TopDir();
+        $LogDir      = $bpc->LogDir();
+        $BinDir      = $bpc->BinDir();
+        %Conf        = $bpc->Conf();
+        $Lang        = $bpc->Lang();
         $ConfigMTime = $bpc->ConfigMTime();
         umask($Conf{UmaskMode});
     }
@@ -437,32 +443,32 @@ sub NewRequest
     # code if you are using some other type of authentication, and have
     # a different way of getting the user name.
     #
-    $MyURL  = $ENV{SCRIPT_NAME};
-    $User   = $ENV{REMOTE_USER};
+    $MyURL = $ENV{SCRIPT_NAME};
+    $User  = $ENV{REMOTE_USER};
 
     #
     # Handle LDAP uid=user when using mod_authz_ldap and otherwise untaint
     #
-    $User   = $1 if ( $User =~ /uid=([^,]+)/i || $User =~ /(.*)/ );
+    $User = $1 if ( $User =~ /uid=([^,]+)/i || $User =~ /(.*)/ );
 
     if ( !defined($Hosts) || $bpc->HostsMTime() != $HostsMTime ) {
-	$HostsMTime = $bpc->HostsMTime();
-	$Hosts = $bpc->HostInfoRead();
+        $HostsMTime = $bpc->HostsMTime();
+        $Hosts      = $bpc->HostInfoRead();
 
-	# turn moreUsers list into a hash for quick lookups
-	foreach my $host (keys %$Hosts) {
-	   $Hosts->{$host}{moreUsers} =
-	       {map {$_, 1} split(",", $Hosts->{$host}{moreUsers}) }
-	}
+        # turn moreUsers list into a hash for quick lookups
+        foreach my $host ( keys %$Hosts ) {
+            $Hosts->{$host}{moreUsers} =
+              {map {$_, 1} split(",", $Hosts->{$host}{moreUsers})};
+        }
     }
 
     #
     # Untaint the host name
     #
     if ( $In{host} =~ /^([\w.\s-]+)$/ ) {
-	$In{host} = $1;
+        $In{host} = $1;
     } else {
-	delete($In{host});
+        delete($In{host});
     }
 }
 

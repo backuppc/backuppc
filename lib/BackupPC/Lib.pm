@@ -68,8 +68,8 @@ sub new
     #
     # Set defaults for $topDir and $installDir.
     #
-    $topDir     = '__TOPDIR__' if ( $topDir eq "" );            # updated by makeDist
-    $installDir = '__INSTALLDIR__'    if ( $installDir eq "" ); # updated by makeDist
+    $topDir     = '__TOPDIR__'     if ( $topDir eq "" );        # updated by makeDist
+    $installDir = '__INSTALLDIR__' if ( $installDir eq "" );    # updated by makeDist
 
     #
     # Pick some initial defaults.  For FHS the only critical
@@ -81,7 +81,7 @@ sub new
             useFHS     => $useFHS,
             TopDir     => $topDir,
             InstallDir => $installDir,
-            ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir, # updated by makeDist
+            ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir,    # updated by makeDist
             LogDir     => '/var/log/BackupPC',
             RunDir     => '/var/run/BackupPC',
         };
@@ -97,8 +97,8 @@ sub new
     }
 
     my $bpc = bless {
-	%$paths,
-        Version => '4.3.3',     # updated by makeDist
+        %$paths,
+        Version => '4.3.3',    # updated by makeDist
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -120,22 +120,26 @@ sub new
         $paths->{$dir} = $bpc->{$dir} = $bpc->{Conf}{$dir};
     }
     $bpc->{storage}->setPaths($paths);
-    $bpc->{PoolDir}    = "$bpc->{TopDir}/pool";
-    $bpc->{CPoolDir}   = "$bpc->{TopDir}/cpool";
+    $bpc->{PoolDir}  = "$bpc->{TopDir}/pool";
+    $bpc->{CPoolDir} = "$bpc->{TopDir}/cpool";
 
     #
     # Verify we are running as the correct user
     #
-    if ( !$noUserCheck
-	    && $bpc->{Conf}{BackupPCUserVerify}
-	    && $> != (my $uid = getpwnam($bpc->{Conf}{BackupPCUser})) ) {
-	print(STDERR "$0: Wrong user: my userid is $>, instead of $uid"
-	    . " ($bpc->{Conf}{BackupPCUser})\n");
-	print(STDERR "Please 'su [-m | -s shell] $bpc->{Conf}{BackupPCUser}' first\n");
-	return;
+    if (  !$noUserCheck
+        && $bpc->{Conf}{BackupPCUserVerify}
+        && $> != (my $uid = getpwnam($bpc->{Conf}{BackupPCUser})) ) {
+        print(STDERR "$0: Wrong user: my userid is $>, instead of $uid" . " ($bpc->{Conf}{BackupPCUser})\n");
+        print(STDERR "Please 'su [-m | -s shell] $bpc->{Conf}{BackupPCUser}' first\n");
+        return;
     }
 
-    BackupPC::XS::Lib::ConfInit($bpc->{TopDir}, $bpc->{Conf}{HardLinkMax}, $bpc->{Conf}{PoolV3Enabled}, $bpc->{Conf}{XferLogLevel});
+    BackupPC::XS::Lib::ConfInit(
+        $bpc->{TopDir},
+        $bpc->{Conf}{HardLinkMax},
+        $bpc->{Conf}{PoolV3Enabled},
+        $bpc->{Conf}{XferLogLevel}
+    );
 
     return $bpc;
 }
@@ -149,7 +153,7 @@ sub TopDir
 sub PoolDir
 {
     my($bpc, $compress) = @_;
-    return $compress ? $bpc->{CPoolDir} : $bpc->{PoolDir}
+    return $compress ? $bpc->{CPoolDir} : $bpc->{PoolDir};
 }
 
 sub BinDir
@@ -250,11 +254,11 @@ sub sigName2num
     my($bpc, $sig) = @_;
 
     if ( !defined($bpc->{SigName2Num}) ) {
-	my $i = 0;
-	foreach my $name ( split(' ', $Config{sig_name}) ) {
-	    $bpc->{SigName2Num}{$name} = $i;
-	    $i++;
-	}
+        my $i = 0;
+        foreach my $name ( split(' ', $Config{sig_name}) ) {
+            $bpc->{SigName2Num}{$name} = $i;
+            $i++;
+        }
     }
     return $bpc->{SigName2Num}{$sig};
 }
@@ -267,11 +271,9 @@ sub sigName2num
 sub timeStamp
 {
     my($bpc, $t, $noPad) = @_;
-    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)
-              = localtime($t || time);
-    return sprintf("%04d-%02d-%02d %02d:%02d:%02d",
-		    $year + 1900, $mon + 1, $mday, $hour, $min, $sec)
-	     . ($noPad ? "" : " ");
+    my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime($t || time);
+    return
+      sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year + 1900, $mon + 1, $mday, $hour, $min, $sec) . ($noPad ? "" : " ");
 }
 
 sub BackupInfoRead
@@ -347,9 +349,9 @@ sub ConfigRead
     # Read host config file
     #
     if ( $host ne "" ) {
-	($mesg, $config) = $bpc->{storage}->ConfigDataRead($host, $config);
-	return $mesg if ( defined($mesg) );
-	$bpc->{Conf} = $config;
+        ($mesg, $config) = $bpc->{storage}->ConfigDataRead($host, $config);
+        return $mesg if ( defined($mesg) );
+        $bpc->{Conf} = $config;
     }
 
     #
@@ -361,7 +363,7 @@ sub ConfigRead
         # optional user-defined extensions.
         #
         $bpc->{Conf}{PerlModuleLoad} = [$bpc->{Conf}{PerlModuleLoad}]
-                    if ( ref($bpc->{Conf}{PerlModuleLoad}) ne "ARRAY" );
+          if ( ref($bpc->{Conf}{PerlModuleLoad}) ne "ARRAY" );
         foreach my $module ( @{$bpc->{Conf}{PerlModuleLoad}} ) {
             eval("use $module;");
         }
@@ -373,10 +375,10 @@ sub ConfigRead
     return "No language setting" if ( !defined($bpc->{Conf}{Language}) );
     my $langFile = "$bpc->{InstallDir}/lib/BackupPC/Lang/$bpc->{Conf}{Language}.pm";
     if ( !defined($ret = do $langFile) && ($! || $@) ) {
-	$mesg = "Couldn't open language file $langFile: $!" if ( $! );
-	$mesg = "Couldn't execute language file $langFile: $@" if ( $@ );
-	$mesg =~ s/[\n\r]+//;
-	return $mesg;
+        $mesg = "Couldn't open language file $langFile: $!"    if ( $! );
+        $mesg = "Couldn't execute language file $langFile: $@" if ( $@ );
+        $mesg =~ s/[\n\r]+//;
+        return $mesg;
     }
     $bpc->{Lang} = \%Lang;
 
@@ -438,18 +440,18 @@ sub ServerConnect
     # First try the unix-domain socket
     #
     my $sockFile = "$bpc->{RunDir}/BackupPC.sock";
-    socket(*FH, PF_UNIX, SOCK_STREAM, 0)     || return "unix socket: $!";
+    socket(*FH, PF_UNIX, SOCK_STREAM, 0) || return "unix socket: $!";
     if ( !connect(*FH, sockaddr_un($sockFile)) ) {
         my $err = "unix connect to $sockFile: $!";
         close(*FH);
         if ( $port > 0 ) {
             my $proto = getprotobyname('tcp');
-            my $iaddr = inet_aton($host)     || return "unknown host $host";
+            my $iaddr = inet_aton($host) || return "unknown host $host";
             my $paddr = sockaddr_in($port, $iaddr);
 
             socket(*FH, PF_INET, SOCK_STREAM, $proto)
-                                             || return "inet socket port $port: $!";
-            connect(*FH, $paddr)             || return "inet connect port $port: $!";
+              || return "inet socket port $port: $!";
+            connect(*FH, $paddr) || return "inet connect port $port: $!";
         } else {
             return $err;
         }
@@ -515,8 +517,7 @@ sub ServerMesg
     $mesg =~ s/\r/\\r/g;
     my $md5 = Digest::MD5->new;
     $mesg = encode_utf8($mesg);
-    $md5->add($bpc->{ServerSeed} . $bpc->{ServerMesgCnt}
-            . $bpc->{Conf}{ServerMesgSecret} . $mesg);
+    $md5->add($bpc->{ServerSeed} . $bpc->{ServerMesgCnt} . $bpc->{Conf}{ServerMesgSecret} . $mesg);
     print($fh $md5->b64digest . " $mesg\n");
     $bpc->{ServerMesgCnt}++;
     return <$fh>;
@@ -597,11 +598,8 @@ sub MD52Path
 
     my $b2 = vec($d, 0, 16);
     $poolDir = ($compress ? $bpc->{CPoolDir} : $bpc->{PoolDir})
-		    if ( !defined($poolDir) );
-    return sprintf("%s/%02x/%02x/%s", $poolDir,
-                     ($b2 >> 8) & 0xfe,
-                     ($b2 >> 0) & 0xfe,
-                     unpack("H*", $d));
+      if ( !defined($poolDir) );
+    return sprintf("%s/%02x/%02x/%s", $poolDir, ($b2 >> 8) & 0xfe, ($b2 >> 0) & 0xfe, unpack("H*", $d));
 }
 
 #
@@ -622,9 +620,9 @@ sub digestConcat
     my $ext = pack("N", $extCnt);
     $ext =~ s/^\x00+//;
     my $thisDigest = $digest . $ext;
-    my $poolName = $bpc->MD52Path($thisDigest, $compress);
+    my $poolName   = $bpc->MD52Path($thisDigest, $compress);
 
-    return($thisDigest, $poolName);
+    return ($thisDigest, $poolName);
 }
 
 #
@@ -668,11 +666,12 @@ sub File2MD5_v3
     $fileSize = (stat($name))[7];
     return ("", -1) if ( !-f _ );
     $name = $1 if ( $name =~ /(.*)/ );
-    return ("", 0) if ( $fileSize == 0 );
+    return ("", 0)  if ( $fileSize == 0 );
     return ("", -1) if ( !open(N, $name) );
     binmode(N);
     $md5->reset();
     $md5->add($fileSize);
+
     if ( $fileSize > 262144 ) {
         #
         # read the first and last 131072 bytes of the file,
@@ -681,7 +680,7 @@ sub File2MD5_v3
         my $seekPosn = ($fileSize > 1048576 ? 1048576 : $fileSize) - 131072;
         $md5->add($data) if ( sysread(N, $data, 131072) );
         $md5->add($data) if ( sysseek(N, $seekPosn, 0)
-                                && sysread(N, $data, 131072) );
+            && sysread(N, $data, 131072) );
     } else {
         #
         # read the whole file
@@ -719,7 +718,7 @@ sub Buffer2MD5_v3
         # up to 1MB.
         #
         my $seekPosn = ($fileSize > 1048576 ? 1048576 : $fileSize) - 131072;
-        $md5->add(substr($$dataRef, 0, 131072));
+        $md5->add(substr($$dataRef, 0,         131072));
         $md5->add(substr($$dataRef, $seekPosn, 131072));
     } else {
         #
@@ -744,7 +743,7 @@ sub MD52Path_v3
 
     return if ( $d !~ m{(.)(.)(.)(.*)} );
     $poolDir = ($compress ? $bpc->{CPoolDir} : $bpc->{PoolDir})
-		    if ( !defined($poolDir) );
+      if ( !defined($poolDir) );
     return "$poolDir/$1/$2/$3/$1$2$3$4";
 }
 
@@ -771,7 +770,7 @@ sub MakeFileLink
         $rawFile .= "_$i" if ( $i >= 0 );
         if ( -f $rawFile ) {
             if ( (stat(_))[3] < $bpc->{Conf}{HardLinkMax}
-                    && !compare($name, $rawFile) ) {
+                && !compare($name, $rawFile) ) {
                 unlink($name);
                 return -3 if ( !link($rawFile, $name) );
                 return 1;
@@ -780,7 +779,7 @@ sub MakeFileLink
             my($newDir);
             ($newDir = $rawFile) =~ s{(.*)/.*}{$1};
             if ( !-d $newDir ) {
-                eval { mkpath($newDir, 0, 0777) };
+                eval {mkpath($newDir, 0, 0777)};
                 return -5 if ( $@ );
             }
             return -4 if ( !link($name, $rawFile) );
@@ -827,14 +826,13 @@ sub CheckHostAlive
     # Return success if the ping cmd is undefined or empty.
     #
     if ( $bpc->{Conf}{PingCmd} eq "" ) {
-	print(STDERR "CheckHostAlive: return ok because \$Conf{PingCmd}"
-	           . " is empty\n") if ( $bpc->{verbose} );
-	return 0;
+        print(STDERR "CheckHostAlive: return ok because \$Conf{PingCmd}" . " is empty\n") if ( $bpc->{verbose} );
+        return 0;
     }
 
     my $args = {
-	pingPath => $bpc->getPingPathByAddressType($host),
-	host     => $host,
+        pingPath => $bpc->getPingPathByAddressType($host),
+        host     => $host,
     };
     $pingCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{PingCmd}, $args);
 
@@ -844,9 +842,9 @@ sub CheckHostAlive
     $s = $bpc->cmdSystemOrEval($pingCmd, undef, $args);
     if ( $? ) {
         my $str = $bpc->execCmd2ShellCmd(@$pingCmd);
-	print(STDERR "CheckHostAlive: first ping ($str) failed ($?, $!)\n")
-			if ( $bpc->{verbose} );
-	return -1;
+        print(STDERR "CheckHostAlive: first ping ($str) failed ($?, $!)\n")
+          if ( $bpc->{verbose} );
+        return -1;
     }
 
     #
@@ -855,24 +853,23 @@ sub CheckHostAlive
     $s = $bpc->cmdSystemOrEval($pingCmd, undef, $args);
     if ( $? ) {
         my $str = $bpc->execCmd2ShellCmd(@$pingCmd);
-	print(STDERR "CheckHostAlive: second ping ($str) failed ($?, $!)\n")
-			if ( $bpc->{verbose} );
-	return -1;
+        print(STDERR "CheckHostAlive: second ping ($str) failed ($?, $!)\n")
+          if ( $bpc->{verbose} );
+        return -1;
     }
     if ( $s =~ /rtt\s*min\/avg\/max\/mdev\s*=\s*[\d.]+\/([\d.]+)\/[\d.]+\/[\d.]+\s*(ms|usec)/i ) {
         $ret = $1;
         $ret /= 1000 if ( lc($2) eq "usec" );
     } elsif ( $s =~ /time=([\d.]+)\s*(ms|usec)/i ) {
-	$ret = $1;
+        $ret = $1;
         $ret /= 1000 if ( lc($2) eq "usec" );
     } else {
-	print(STDERR "CheckHostAlive: can't extract round-trip time"
-	           . " (not fatal)\n") if ( $bpc->{verbose} );
-	$ret = 0;
+        print(STDERR "CheckHostAlive: can't extract round-trip time" . " (not fatal)\n") if ( $bpc->{verbose} );
+        $ret = 0;
     }
     if ( $bpc->{verbose} ) {
         my $str = $bpc->execCmd2ShellCmd(@$pingCmd);
-        print(STDERR "CheckHostAlive: ran '$str'; returning $ret\n")
+        print(STDERR "CheckHostAlive: ran '$str'; returning $ret\n");
     }
     return $ret;
 }
@@ -886,11 +883,11 @@ sub CheckFileSystemUsage
 
     return 0 if ( $bpc->{Conf}{$cmd} eq "" );
     my $args = {
-	dfPath   => $bpc->{Conf}{DfPath},
-	topDir   => $bpc->{TopDir},
+        dfPath => $bpc->{Conf}{DfPath},
+        topDir => $bpc->{TopDir},
     };
     $dfCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{$cmd}, $args);
-    $s = $bpc->cmdSystemOrEval($dfCmd, undef, $args);
+    $s     = $bpc->cmdSystemOrEval($dfCmd, undef, $args);
     return 0 if ( $? || $s !~ /(\d+)%/s );
     return $1;
 }
@@ -903,20 +900,20 @@ sub NetBiosInfoGet
 {
     my($bpc, $host) = @_;
     my($netBiosHostName, $netBiosUserName);
-    my($s, $nmbCmd);
+    my($s,               $nmbCmd);
 
     #
     # Skip NetBios check if NmbLookupCmd is empty
     #
     if ( $bpc->{Conf}{NmbLookupCmd} eq "" ) {
-	print(STDERR "NetBiosInfoGet: return $host because \$Conf{NmbLookupCmd}"
-	           . " is empty\n") if ( $bpc->{verbose} );
-	return ($host, undef);
+        print(STDERR "NetBiosInfoGet: return $host because \$Conf{NmbLookupCmd}" . " is empty\n")
+          if ( $bpc->{verbose} );
+        return ($host, undef);
     }
 
     my $args = {
-	nmbLookupPath => $bpc->{Conf}{NmbLookupPath},
-	host	      => $host,
+        nmbLookupPath => $bpc->{Conf}{NmbLookupPath},
+        host          => $host,
     };
     $nmbCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{NmbLookupCmd}, $args);
     foreach ( split(/[\n\r]+/, $bpc->cmdSystemOrEval($nmbCmd, undef, $args)) ) {
@@ -925,18 +922,18 @@ sub NetBiosInfoGet
         #
         next if ( /<\w{2}> - <GROUP>/i );
         next if ( !/^\s*([\w\s-]+?)\s*<(\w{2})\> - .*<ACTIVE>/i );
-        $netBiosHostName ||= $1 if ( $2 eq "00" );  # host is first 00
-        $netBiosUserName   = $1 if ( $2 eq "03" );  # user is last 03
+        $netBiosHostName ||= $1 if ( $2 eq "00" );    # host is first 00
+        $netBiosUserName = $1 if ( $2 eq "03" );      # user is last 03
     }
     if ( !defined($netBiosHostName) ) {
-	print(STDERR "NetBiosInfoGet: failed: can't parse return string\n")
-			if ( $bpc->{verbose} );
-	return;
+        print(STDERR "NetBiosInfoGet: failed: can't parse return string\n")
+          if ( $bpc->{verbose} );
+        return;
     }
     $netBiosHostName = lc($netBiosHostName);
     $netBiosUserName = lc($netBiosUserName);
-    print(STDERR "NetBiosInfoGet: success, returning host $netBiosHostName,"
-               . " user $netBiosUserName\n") if ( $bpc->{verbose} );
+    print(STDERR "NetBiosInfoGet: success, returning host $netBiosHostName," . " user $netBiosUserName\n")
+      if ( $bpc->{verbose} );
     return ($netBiosHostName, $netBiosUserName);
 }
 
@@ -957,37 +954,33 @@ sub NetBiosHostIPFind
     # Skip NetBios lookup if NmbLookupFindHostCmd is empty
     #
     if ( $bpc->{Conf}{NmbLookupFindHostCmd} eq "" ) {
-	print(STDERR "NetBiosHostIPFind: return $host because"
-	    . " \$Conf{NmbLookupFindHostCmd} is empty\n")
-		if ( $bpc->{verbose} );
-	return $host;
+        print(STDERR "NetBiosHostIPFind: return $host because" . " \$Conf{NmbLookupFindHostCmd} is empty\n")
+          if ( $bpc->{verbose} );
+        return $host;
     }
 
     my $args = {
-	nmbLookupPath => $bpc->{Conf}{NmbLookupPath},
-	host	      => $host,
+        nmbLookupPath => $bpc->{Conf}{NmbLookupPath},
+        host          => $host,
     };
     $nmbCmd = $bpc->cmdVarSubstitute($bpc->{Conf}{NmbLookupFindHostCmd}, $args);
-    foreach my $resp ( split(/[\n\r]+/, $bpc->cmdSystemOrEval($nmbCmd, undef,
-							      $args) ) ) {
-	if ( $resp =~ /querying\s+\Q$host\E\s+on\s+(\d+\.\d+\.\d+\.\d+)/i ) {
-	    $subnet = $1;
-	    $subnet = $1 if ( $subnet =~ /^(.*?)(\.255)+$/ );
-	} elsif ( $resp =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+\Q$host/ ) {
-	    my $ip = $1;
-	    $firstIpAddr = $ip if ( !defined($firstIpAddr) );
-	    $ipAddr      = $ip if ( !defined($ipAddr) && $ip =~ /^\Q$subnet/ );
-	}
+    foreach my $resp ( split(/[\n\r]+/, $bpc->cmdSystemOrEval($nmbCmd, undef, $args)) ) {
+        if ( $resp =~ /querying\s+\Q$host\E\s+on\s+(\d+\.\d+\.\d+\.\d+)/i ) {
+            $subnet = $1;
+            $subnet = $1 if ( $subnet =~ /^(.*?)(\.255)+$/ );
+        } elsif ( $resp =~ /^\s*(\d+\.\d+\.\d+\.\d+)\s+\Q$host/ ) {
+            my $ip = $1;
+            $firstIpAddr = $ip if ( !defined($firstIpAddr) );
+            $ipAddr      = $ip if ( !defined($ipAddr) && $ip =~ /^\Q$subnet/ );
+        }
     }
     $ipAddr = $firstIpAddr if ( !defined($ipAddr) );
     if ( defined($ipAddr) ) {
-	print(STDERR "NetBiosHostIPFind: found IP address $ipAddr for"
-	           . " host $host\n") if ( $bpc->{verbose} );
-	return $ipAddr;
+        print(STDERR "NetBiosHostIPFind: found IP address $ipAddr for" . " host $host\n") if ( $bpc->{verbose} );
+        return $ipAddr;
     } else {
-	print(STDERR "NetBiosHostIPFind: couldn't find IP address for"
-	           . " host $host\n") if ( $bpc->{verbose} );
-	return;
+        print(STDERR "NetBiosHostIPFind: couldn't find IP address for" . " host $host\n") if ( $bpc->{verbose} );
+        return;
     }
 }
 
@@ -1053,8 +1046,8 @@ sub execCmd2ShellCmd
     my $str;
 
     foreach my $a ( @args ) {
-	$str .= " " if ( $str ne "" );
-	$str .= $bpc->shellEscape($a);
+        $str .= " " if ( $str ne "" );
+        $str .= $bpc->shellEscape($a);
     }
     return $str;
 }
@@ -1095,13 +1088,13 @@ sub cmdVarSubstitute
         return ref($template) eq "ARRAY" ? $template : [$template];
     }
     if ( ref($template) ne "ARRAY" ) {
-	#
-	# Split at white space, except if escaped by \
-	#
-	$template = [split(/(?<!\\)\s+/, $template)];
-	#
-	# Remove the \ that escaped white space.
-	#
+        #
+        # Split at white space, except if escaped by \
+        #
+        $template = [split(/(?<!\\)\s+/, $template)];
+        #
+        # Remove the \ that escaped white space.
+        #
         foreach ( @$template ) {
             s{\\(\s)}{$1}g;
         }
@@ -1155,22 +1148,21 @@ sub cmdExecOrEval
 
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", @$cmd) if ( ref($cmd) eq "ARRAY" );
-	print(STDERR "cmdExecOrEval: about to eval perl code $cmd\n")
-			if ( $bpc->{verbose} );
+        print(STDERR "cmdExecOrEval: about to eval perl code $cmd\n")
+          if ( $bpc->{verbose} );
         eval($cmd);
         print(STDERR "Perl code fragment for exec shouldn't return!!\n");
         POSIX::_exit(1);
     } else {
         $cmd = [split(/\s+/, $cmd)] if ( ref($cmd) ne "ARRAY" );
-	print(STDERR "cmdExecOrEval: about to exec ",
-	      $bpc->execCmd2ShellCmd(@$cmd), "\n")
-			if ( $bpc->{verbose} );
-	alarm(0);
-	$cmd = [map { m/(.*)/ } @$cmd];		# untaint
-	#
-	# force list-form of exec(), ie: no shell even for 1 arg
-	#
-        exec { $cmd->[0] } @$cmd;
+        print(STDERR "cmdExecOrEval: about to exec ", $bpc->execCmd2ShellCmd(@$cmd), "\n")
+          if ( $bpc->{verbose} );
+        alarm(0);
+        $cmd = [map {m/(.*)/} @$cmd];    # untaint
+                                         #
+                                         # force list-form of exec(), ie: no shell even for 1 arg
+                                         #
+        exec {$cmd->[0]} @$cmd;
         print(STDERR "Exec failed for @$cmd\n");
         POSIX::_exit(1);
     }
@@ -1197,10 +1189,10 @@ sub cmdSystemOrEvalLong
     $? = 0;
     if ( (ref($cmd) eq "ARRAY" ? $cmd->[0] : $cmd) =~ /^\&/ ) {
         $cmd = join(" ", @$cmd) if ( ref($cmd) eq "ARRAY" );
-	print("cmdSystemOrEval: about to eval perl code $cmd\n")
-			if ( $bpc->{verbose} );
+        print("cmdSystemOrEval: about to eval perl code $cmd\n")
+          if ( $bpc->{verbose} );
         $out = eval($cmd);
-	$$stdoutCB .= $out if ( ref($stdoutCB) eq 'SCALAR' );
+        $$stdoutCB .= $out if ( ref($stdoutCB) eq 'SCALAR' );
         if ( ref($stdoutCB) eq 'CODE' ) {
             if ( $out !~ /\n$/ ) {
                 if ( $@ ) {
@@ -1212,61 +1204,62 @@ sub cmdSystemOrEvalLong
                 &$stdoutCB($out);
             }
         }
-	#print(STDERR "cmdSystemOrEval: finished: got output $out\n")
-	#		if ( $bpc->{verbose} );
-	return $out    if ( !defined($stdoutCB) );
-	return;
+
+        #print(STDERR "cmdSystemOrEval: finished: got output $out\n")
+        #		if ( $bpc->{verbose} );
+        return $out if ( !defined($stdoutCB) );
+        return;
     } else {
         $cmd = [split(/\s+/, $cmd)] if ( ref($cmd) ne "ARRAY" );
-	print(STDERR "cmdSystemOrEval: about to system ",
-	      $bpc->execCmd2ShellCmd(@$cmd), "\n")
-			if ( $bpc->{verbose} );
+        print(STDERR "cmdSystemOrEval: about to system ", $bpc->execCmd2ShellCmd(@$cmd), "\n")
+          if ( $bpc->{verbose} );
         if ( !defined($pid = open(CHILD, "-|")) ) {
-	    my $err = "Can't fork to run @$cmd\n";
-	    $? = 1;
-	    $$stdoutCB .= $err if ( ref($stdoutCB) eq 'SCALAR' );
-	    &$stdoutCB($err)   if ( ref($stdoutCB) eq 'CODE' );
-	    return $err        if ( !defined($stdoutCB) );
-	    return;
-	}
-	if ( !$pid ) {
-	    #
-	    # This is the child
-	    #
+            my $err = "Can't fork to run @$cmd\n";
+            $? = 1;
+            $$stdoutCB .= $err if ( ref($stdoutCB) eq 'SCALAR' );
+            &$stdoutCB($err) if ( ref($stdoutCB) eq 'CODE' );
+            return $err      if ( !defined($stdoutCB) );
+            return;
+        }
+        if ( !$pid ) {
+            #
+            # This is the child
+            #
             close(STDERR);
-	    if ( $ignoreStderr ) {
-		open(STDERR, ">", "/dev/null");
-	    } else {
-		open(STDERR, ">&STDOUT");
-	    }
-	    alarm(0);
-	    $cmd = [map { m/(.*)/ } @$cmd];		# untaint
-	    #
-	    # force list-form of exec(), ie: no shell even for 1 arg
-	    #
-	    exec { $cmd->[0] } @$cmd;
+            if ( $ignoreStderr ) {
+                open(STDERR, ">", "/dev/null");
+            } else {
+                open(STDERR, ">&STDOUT");
+            }
+            alarm(0);
+            $cmd = [map {m/(.*)/} @$cmd];    # untaint
+                                             #
+                                             # force list-form of exec(), ie: no shell even for 1 arg
+                                             #
+            exec {$cmd->[0]} @$cmd;
             print(STDERR "Exec of @$cmd failed\n");
             POSIX::_exit(1);
-	}
+        }
 
-	#
-	# Notify caller of child's pid
-	#
-	&$pidHandlerCB($pid) if ( ref($pidHandlerCB) eq "CODE" );
+        #
+        # Notify caller of child's pid
+        #
+        &$pidHandlerCB($pid) if ( ref($pidHandlerCB) eq "CODE" );
 
-	#
-	# The parent gathers the output from the child
-	#
-	binmode(CHILD);
-	while ( <CHILD> ) {
-	    $$stdoutCB .= $_ if ( ref($stdoutCB) eq 'SCALAR' );
-	    &$stdoutCB($_)   if ( ref($stdoutCB) eq 'CODE' );
-	    $out .= $_ 	     if ( !defined($stdoutCB) );
-	    $allOut .= $_    if ( $bpc->{verbose} );
-	}
-	$? = 0;
-	close(CHILD);
+        #
+        # The parent gathers the output from the child
+        #
+        binmode(CHILD);
+        while ( <CHILD> ) {
+            $$stdoutCB .= $_ if ( ref($stdoutCB) eq 'SCALAR' );
+            &$stdoutCB($_) if ( ref($stdoutCB) eq 'CODE' );
+            $out    .= $_ if ( !defined($stdoutCB) );
+            $allOut .= $_ if ( $bpc->{verbose} );
+        }
+        $? = 0;
+        close(CHILD);
     }
+
     #print(STDERR "cmdSystemOrEval: finished: got output $allOut\n")
     #   		if ( $bpc->{verbose} );
     return $out;
@@ -1291,8 +1284,8 @@ sub backupFileConfFix
 {
     my($bpc, $conf, $shareName) = @_;
 
-    $conf->{$shareName} = [ $conf->{$shareName} ]
-                    if ( ref($conf->{$shareName}) ne "ARRAY" );
+    $conf->{$shareName} = [$conf->{$shareName}]
+      if ( ref($conf->{$shareName}) ne "ARRAY" );
     foreach my $param ( qw(BackupFilesOnly BackupFilesExclude) ) {
         next if ( !defined($conf->{$param}) );
         if ( ref($conf->{$param}) eq "HASH" ) {
@@ -1302,16 +1295,11 @@ sub backupFileConfFix
             # but still allow override of specific entries.
             #
             next if ( !defined($conf->{$param}{"*"}) );
-            $conf->{$param} = {
-                                    map({ $_ => $conf->{$param}{"*"} }
-                                            @{$conf->{$shareName}}),
-                                    %{$conf->{$param}}
-                              };
+            $conf->{$param} = {map({$_ => $conf->{$param}{"*"}} @{$conf->{$shareName}}), %{$conf->{$param}}};
         } else {
-            $conf->{$param} = [ $conf->{$param} ]
-                                    if ( ref($conf->{$param}) ne "ARRAY" );
-            $conf->{$param} = { map { $_ => $conf->{$param} }
-                                    @{$conf->{$shareName}} };
+            $conf->{$param} = [$conf->{$param}]
+              if ( ref($conf->{$param}) ne "ARRAY" );
+            $conf->{$param} = {map {$_ => $conf->{$param}} @{$conf->{$shareName}}};
         }
     }
 }
@@ -1384,7 +1372,7 @@ sub sortedPCLogFiles
 sub openPCLogFile
 {
     my($bpc, $client) = @_;
-    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+    my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime(time);
     my $logPath = sprintf("%s/pc/%s/LOG.%02d%04d", $bpc->{TopDir}, $client, $mon + 1, $year + 1900);
     my $logFd;
 
@@ -1400,10 +1388,7 @@ sub openPCLogFile
             }
             $lastLog--;
             next if ( $file =~ /\.z$/ || !$bpc->{Conf}{CompressLevel} );
-            BackupPC::XS::compressCopy($file,
-                                        "$file.z",
-                                        undef,
-                                        $bpc->{Conf}{CompressLevel}, 1);
+            BackupPC::XS::compressCopy($file, "$file.z", undef, $bpc->{Conf}{CompressLevel}, 1);
         }
     }
     open($logFd, ">>", $logPath);
@@ -1415,28 +1400,29 @@ sub openPCLogFile
 #
 sub glob2re
 {
-    my ( $bpc, $glob ) = @_;
-    my ( $char, $subst );
+    my($bpc, $glob) = @_;
+    my($char, $subst);
 
     # $escapeChars escapes characters with no special glob meaning but
     # have meaning in regexps.
-    my $escapeChars = [ '.', '/', ];
+    my $escapeChars = ['.', '/',];
 
     # $charMap is where we implement the special meaning of glob
     # patterns and translate them to regexps.
     my $charMap = {
-                    '?' => '[^/]',
-                    '*' => '[^/]*', };
+        '?' => '[^/]',
+        '*' => '[^/]*',
+    };
 
     # multiple forward slashes are equivalent to one slash.  We should
     # never have to use this.
     $glob =~ s/\/+/\//;
 
-    foreach $char (@$escapeChars) {
+    foreach $char ( @$escapeChars ) {
         $glob =~ s/\Q$char\E/\\$char/g;
     }
 
-    while ( ( $char, $subst ) = each(%$charMap) ) {
+    while ( ($char, $subst) = each(%$charMap) ) {
         $glob =~ s/(?<!\\)\Q$char\E/$subst/g;
     }
 
@@ -1461,7 +1447,7 @@ sub getHostAddrInfo
 {
     my($bpc, $host) = @_;
     my($err, @addrs);
-    eval { ($err, @addrs) = Socket::getaddrinfo($host) };
+    eval {($err, @addrs) = Socket::getaddrinfo($host)};
     if ( $@ || $err || !@addrs ) {
         return defined(gethostbyname($host)) ? 4 : undef;
     }

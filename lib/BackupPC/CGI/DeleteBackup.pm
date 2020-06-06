@@ -42,15 +42,16 @@ use warnings;
 use BackupPC::CGI::Lib qw(:all);
 use Encode qw(decode_utf8);
 
-sub action {
-    my ( $str, $reply );
+sub action
+{
+    my($str, $reply);
     my $host = $In{host};
 
     my $Privileged = CheckPermission($host)
-                           && ($PrivAdmin || $Conf{CgiUserDeleteBackupEnable} > 0);
+      && ($PrivAdmin || $Conf{CgiUserDeleteBackupEnable} > 0);
     $Privileged = 0 if ( $Conf{CgiUserDeleteBackupEnable} < 0 );
     if ( !$Privileged ) {
-        ErrorExit( eval("qq{$Lang->{Only_privileged_users_can_delete_backups}}") );
+        ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_delete_backups}}"));
     }
     if ( $In{num} !~ /^\d+$/ || $In{type} !~ /^\w*$/ || $In{nofill} !~ /^\d*$/ ) {
         ErrorExit("Backup number ${EscHTML($In{num})} for host ${EscHTML($host)} does not exist.");
@@ -60,17 +61,16 @@ sub action {
     my $type   = $Lang->{$In{type}};
     ServerConnect();
     if ( $In{doit} ) {
-        $str   = eval("qq{$Lang->{Delete_requested_for_backup_of__host_by__User}}");
+        $str = eval("qq{$Lang->{Delete_requested_for_backup_of__host_by__User}}");
         $bpc->ServerMesg("log $str");
 
         $reply = $bpc->ServerMesg("delete $User ${EscURI($host)} $num -r");
 
         my $content = eval("qq{$Lang->{REPLY_FROM_SERVER}}");
-        Header( eval("qq{$Lang->{BackupPC__Delete_Requested_for_a_backup_of__host}}"), $content );
-    }
-    else {
+        Header(eval("qq{$Lang->{BackupPC__Delete_Requested_for_a_backup_of__host}}"), $content);
+    } else {
         my $content = eval("qq{$Lang->{Are_you_sure_delete}}");
-        Header( eval("qq{$Lang->{BackupPC__Delete_Backup_Confirm__num_of__host}}"), $content );
+        Header(eval("qq{$Lang->{BackupPC__Delete_Backup_Confirm__num_of__host}}"), $content);
     }
     Trailer();
 }

@@ -42,7 +42,7 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
 
 use lib "/usr/local/BackupPC/lib";
 use Compress::Zlib;
@@ -80,7 +80,9 @@ if ( @ARGV ) {
         #
         # second case is a path that exists
         #
-        if ( !defined($opts{h}) && -f $file && defined(my $fh = BackupPC::XS::FileZIO::open($file, 0, $Conf{CompressLevel})) ) {
+        if (   !defined($opts{h})
+            && -f $file
+            && defined(my $fh = BackupPC::XS::FileZIO::open($file, 0, $Conf{CompressLevel})) ) {
             $ret ||= zcat($fh, $file);
             next;
         }
@@ -106,12 +108,12 @@ if ( @ARGV ) {
                 print(STDERR "BackupPC_zcat: can't find $file\n");
                 exit(1);
             }
-            $Host   = $opts{h};
-            $Num    = $opts{n};
-            $Share  = $opts{s};
+            $Host  = $opts{h};
+            $Num   = $opts{n};
+            $Share = $opts{s};
         }
         @Backups = $bpc->BackupInfoRead($Host);
-        $Num = $Backups[@Backups + $Num]{num} if ( -@Backups <= $Num && $Num < 0 );
+        $Num     = $Backups[@Backups + $Num]{num} if ( -@Backups <= $Num && $Num < 0 );
         for ( $i = 0 ; $i < @Backups ; $i++ ) {
             last if ( $Backups[$i]{num} == $Num );
         }
@@ -156,7 +158,7 @@ sub zcat
     }
     if ( $r < 0 ) {
         print(STDERR "$0: can't uncompress $fileName\n");
-	$ret = 1;
+        $ret = 1;
     }
     $fh->close();
     return $ret;

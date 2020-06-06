@@ -49,35 +49,36 @@ sub useTar
 
 sub start
 {
-    my($t) = @_;
-    my $bpc = $t->{bpc};
+
+    my($t)   = @_;
+    my $bpc  = $t->{bpc};
     my $conf = $t->{conf};
     my(@fileList, $tarClientCmd, $logMsg, $incrDate);
     local(*TAR);
     my $shareNamePath = $t->shareName2Path($t->{shareName});
 
     if ( $t->{type} eq "restore" ) {
-	$tarClientCmd = $conf->{TarClientRestoreCmd};
-        $logMsg  = "restore started below directory $t->{shareName}";
-	#
-	# restores are considered to work unless we see they fail
-	# (opposite to backups...)
-	#
-	$t->{xferOK} = 1;
+        $tarClientCmd = $conf->{TarClientRestoreCmd};
+        $logMsg       = "restore started below directory $t->{shareName}";
+        #
+        # restores are considered to work unless we see they fail
+        # (opposite to backups...)
+        #
+        $t->{xferOK} = 1;
     } else {
-	#
-	# Turn $conf->{BackupFilesOnly} and $conf->{BackupFilesExclude}
-	# into a hash of arrays of files, and $conf->{TarShareName}
-	# to an array
-	#
-	$bpc->backupFileConfFix($conf, "TarShareName");
+        #
+        # Turn $conf->{BackupFilesOnly} and $conf->{BackupFilesExclude}
+        # into a hash of arrays of files, and $conf->{TarShareName}
+        # to an array
+        #
+        $bpc->backupFileConfFix($conf, "TarShareName");
 
         if ( defined($conf->{BackupFilesExclude}{$t->{shareName}}) ) {
             foreach my $file2 ( @{$conf->{BackupFilesExclude}{$t->{shareName}}} ) {
                 my $file = $file2;
                 $file = "./$2" if ( $file =~ m{^(\./+|/+)(.*)}s );
                 $file = encode($conf->{ClientCharset}, $file)
-                            if ( $conf->{ClientCharset} ne "" );
+                  if ( $conf->{ClientCharset} ne "" );
                 push(@fileList, "--exclude=$file");
             }
         }
@@ -85,31 +86,32 @@ sub start
             foreach my $file2 ( @{$conf->{BackupFilesOnly}{$t->{shareName}}} ) {
                 my $file = $file2;
                 $file = $2 if ( $file =~ m{^(\./+|/+)(.*)}s );
-		$file = "./$file";
+                $file = "./$file";
                 $file = encode($conf->{ClientCharset}, $file)
-                            if ( $conf->{ClientCharset} ne "" );
+                  if ( $conf->{ClientCharset} ne "" );
                 push(@fileList, $file);
             }
         } else {
-	    push(@fileList, ".");
+            push(@fileList, ".");
         }
-	if ( ref($conf->{TarClientCmd}) eq "ARRAY" ) {
-	    $tarClientCmd = $conf->{TarClientCmd};
-	} else {
-	    $tarClientCmd = [split(/ +/, $conf->{TarClientCmd})];
-	}
-	my $args;
+        if ( ref($conf->{TarClientCmd}) eq "ARRAY" ) {
+            $tarClientCmd = $conf->{TarClientCmd};
+        } else {
+            $tarClientCmd = [split(/ +/, $conf->{TarClientCmd})];
+        }
+        my $args;
         if ( $t->{type} eq "full" ) {
-	    $args = $conf->{TarFullArgs};
+            $args   = $conf->{TarFullArgs};
             $logMsg = "full backup started for directory $t->{shareName}";
         } else {
             $incrDate = $bpc->timeStamp($t->{incrBaseTime} - 3600, 1);
-	    $args = $conf->{TarIncrArgs};
-            $logMsg = "incr backup started back to $incrDate"
-                    . " (backup #$t->{incrBaseBkupNum}) for directory"
-                    . " $t->{shareName}";
+            $args     = $conf->{TarIncrArgs};
+            $logMsg =
+                "incr backup started back to $incrDate"
+              . " (backup #$t->{incrBaseBkupNum}) for directory"
+              . " $t->{shareName}";
         }
-	push(@$tarClientCmd, split(/ +/, $args));
+        push(@$tarClientCmd, split(/ +/, $args));
     }
     $logMsg .= " (client path $shareNamePath)" if ( $t->{shareName} ne $shareNamePath );
     #
@@ -122,12 +124,12 @@ sub start
         incrDate      => $incrDate,
         shareNameOrig => $t->{shareName},
         shareName     => $shareNamePath,
-	fileList      => \@fileList,
+        fileList      => \@fileList,
         tarPath       => $conf->{TarClientPath},
         sshPath       => $conf->{SshPath},
     };
     from_to($args->{shareName}, "utf8", $conf->{ClientCharset})
-                            if ( $conf->{ClientCharset} ne "" );
+      if ( $conf->{ClientCharset} ne "" );
     $tarClientCmd = $bpc->cmdVarSubstitute($tarClientCmd, $args);
     if ( !defined($t->{xferPid} = open(TAR, "-|")) ) {
         $t->{_errStr} = "Can't fork to run tar";
@@ -138,7 +140,7 @@ sub start
         #
         # This is the tar child.
         #
-        setpgrp 0,0;
+        setpgrp 0, 0;
         if ( $t->{type} eq "restore" ) {
             #
             # For restores, close the write end of the pipe,
@@ -162,15 +164,16 @@ sub start
         #
         # Run the tar command
         #
-	alarm(0);
-	$bpc->cmdExecOrEval($tarClientCmd, $args);
+        alarm(0);
+        $bpc->cmdExecOrEval($tarClientCmd, $args);
+
         # should not be reached, but just in case...
         $t->{_errStr} = "Can't exec @$tarClientCmd";
         return;
     }
     my $str = $bpc->execCmd2ShellCmd(@$tarClientCmd);
     from_to($str, $conf->{ClientCharset}, "utf8")
-                            if ( $conf->{ClientCharset} ne "" );
+      if ( $conf->{ClientCharset} ne "" );
     $t->{XferLOG}->write(\"Running: $str\n");
     alarm($conf->{ClientTimeout});
     $t->{_errStr} = undef;
@@ -192,7 +195,7 @@ sub readOutput
     if ( vec($rout, fileno($t->{pipeTar}), 1) ) {
         my $mesg;
 
-	$! = 0;
+        $! = 0;
         if ( sysread($t->{pipeTar}, $mesg, 8192) <= 0 ) {
             if ( $! == EWOULDBLOCK ) {
                 $t->{XferLOG}->write(\"readOutput: no bytes read (EWOULDBLOCK); continuing\n");
@@ -218,7 +221,7 @@ sub readOutput
         $_ = $1;
         $t->{tarOut} = $2;
         from_to($_, $conf->{ClientCharset}, "utf8")
-                            if ( $conf->{ClientCharset} ne "" );
+          if ( $conf->{ClientCharset} ne "" );
         #
         # refresh our inactivity alarm
         #
@@ -238,25 +241,28 @@ sub readOutput
                 $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
                 $t->{xferErrCnt}++;
             }
-	    #
-	    # If tar encounters a minor error, it will exit with a non-zero
-	    # status.  We still consider that ok.  Remember if tar prints
-	    # this message indicating a non-fatal error.
-	    #
-	    $t->{tarBadExitOk} = 1
-		    if ( $t->{xferOK} && /Error exit delayed from previous / );
+            #
+            # If tar encounters a minor error, it will exit with a non-zero
+            # status.  We still consider that ok.  Remember if tar prints
+            # this message indicating a non-fatal error.
+            #
+            $t->{tarBadExitOk} = 1
+              if ( $t->{xferOK} && /Error exit delayed from previous / );
             #
             # Also remember files that had read errors
             #
             if ( /: \.\/(.*): Read error at byte / ) {
                 my $badFile = $1;
-                push(@{$t->{badFiles}}, {
+                push(
+                    @{$t->{badFiles}},
+                    {
                         share => $t->{shareName},
                         file  => $badFile
-                    });
+                    }
+                );
             }
 
-	}
+        }
     }
     return 1;
 }

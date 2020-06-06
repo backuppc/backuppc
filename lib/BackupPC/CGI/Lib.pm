@@ -45,70 +45,68 @@ use vars qw( @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS );
 
 use vars qw($Cgi %In $MyURL $User %Conf $TopDir $LogDir $BinDir $bpc);
 use vars qw(%Status %Info %Jobs @BgQueue @UserQueue @CmdQueue
-            %QueueLen %StatusHost);
+  %QueueLen %StatusHost);
 use vars qw($Hosts $HostsMTime $ConfigMTime $PrivAdmin);
 use vars qw(%UserEmailInfo $UserEmailInfoMTime %RestoreReq %ArchiveReq);
 use vars qw($Lang);
 
 @ISA = qw(Exporter);
 
-@EXPORT    = qw( );
+@EXPORT = qw( );
 
 @EXPORT_OK = qw(
-		    timeStamp2
-		    HostLink
-		    UserLink
-		    EscHTML
-		    EscURI
-		    ErrorExit
-		    ServerConnect
-		    GetStatusInfo
-		    ReadUserEmailInfo
-		    CheckPermission
-		    GetUserHosts
-		    ConfirmIPAddress
-		    Header
-		    Trailer
-		    NavSectionTitle
-		    NavSectionStart
-		    NavSectionEnd
-		    NavLink
-		    h1
-		    h2
-		    $Cgi %In $MyURL $User %Conf $TopDir $LogDir $BinDir $bpc
-		    %Status %Info %Jobs @BgQueue @UserQueue @CmdQueue
-		    %QueueLen %StatusHost
-		    $Hosts $HostsMTime $ConfigMTime $PrivAdmin
-		    %UserEmailInfo $UserEmailInfoMTime %RestoreReq %ArchiveReq
-		    $Lang
-             );
-
-%EXPORT_TAGS = (
-    'all'    => [ @EXPORT_OK ],
+  timeStamp2
+  HostLink
+  UserLink
+  EscHTML
+  EscURI
+  ErrorExit
+  ServerConnect
+  GetStatusInfo
+  ReadUserEmailInfo
+  CheckPermission
+  GetUserHosts
+  ConfirmIPAddress
+  Header
+  Trailer
+  NavSectionTitle
+  NavSectionStart
+  NavSectionEnd
+  NavLink
+  h1
+  h2
+  $Cgi %In $MyURL $User %Conf $TopDir $LogDir $BinDir $bpc
+  %Status %Info %Jobs @BgQueue @UserQueue @CmdQueue
+  %QueueLen %StatusHost
+  $Hosts $HostsMTime $ConfigMTime $PrivAdmin
+  %UserEmailInfo $UserEmailInfoMTime %RestoreReq %ArchiveReq
+  $Lang
 );
+
+%EXPORT_TAGS = ('all' => [@EXPORT_OK],);
 
 sub NewRequest
 {
     $Cgi = new CGI;
-    %In = $Cgi->Vars;
+    %In  = $Cgi->Vars;
 
     if ( !defined($bpc) ) {
-	ErrorExit($Lang->{BackupPC__Lib__new_failed__check_apache_error_log})
-	    if ( !($bpc = BackupPC::Lib->new(undef, undef, undef, 1)) );
-	$TopDir = $bpc->TopDir();
-	$LogDir = $bpc->LogDir();
-	$BinDir = $bpc->BinDir();
-	%Conf   = $bpc->Conf();
-	$Lang   = $bpc->Lang();
-	$ConfigMTime = $bpc->ConfigMTime();
+        ErrorExit($Lang->{BackupPC__Lib__new_failed__check_apache_error_log})
+          if ( !($bpc = BackupPC::Lib->new(undef, undef, undef, 1)) );
+        $TopDir      = $bpc->TopDir();
+        $LogDir      = $bpc->LogDir();
+        $BinDir      = $bpc->BinDir();
+        %Conf        = $bpc->Conf();
+        $Lang        = $bpc->Lang();
+        $ConfigMTime = $bpc->ConfigMTime();
         umask($Conf{UmaskMode});
     } elsif ( $bpc->ConfigMTime() != $ConfigMTime ) {
         $bpc->ConfigRead();
-	$TopDir = $bpc->TopDir();
-	$LogDir = $bpc->LogDir();
-	$BinDir = $bpc->BinDir();
-        %Conf   = $bpc->Conf();
-        $Lang   = $bpc->Lang();
+        $TopDir      = $bpc->TopDir();
+        $LogDir      = $bpc->LogDir();
+        $BinDir      = $bpc->BinDir();
+        %Conf        = $bpc->Conf();
+        $Lang        = $bpc->Lang();
         $ConfigMTime = $bpc->ConfigMTime();
         umask($Conf{UmaskMode});
     }
@@ -125,13 +123,13 @@ sub NewRequest
     # code if you are using some other type of authentication, and have
     # a different way of getting the user name.
     #
-    $MyURL  = $ENV{SCRIPT_NAME};
-    $User   = $ENV{REMOTE_USER};
+    $MyURL = $ENV{SCRIPT_NAME};
+    $User  = $ENV{REMOTE_USER};
 
     #
     # Handle LDAP uid=user when using mod_authz_ldap and otherwise untaint
     #
-    $User   = $1 if ( $User =~ /uid=([^,]+)/i || $User =~ /(.*)/ );
+    $User = $1 if ( $User =~ /uid=([^,]+)/i || $User =~ /(.*)/ );
 
     #
     # Clean up %ENV for taint checking
@@ -142,9 +140,9 @@ sub NewRequest
     #
     # Verify we are running as the correct user
     #
-    if ( $Conf{BackupPCUserVerify}
-	    && $> != (my $uid = getpwnam($Conf{BackupPCUser})) ) {
-	ErrorExit(eval("qq{$Lang->{Wrong_user__my_userid_is___}}"), <<EOF);
+    if (   $Conf{BackupPCUserVerify}
+        && $> != (my $uid = getpwnam($Conf{BackupPCUser})) ) {
+        ErrorExit(eval("qq{$Lang->{Wrong_user__my_userid_is___}}"), <<EOF);
 This script needs to run as the user specified in \$Conf{BackupPCUser},
 which is set to $Conf{BackupPCUser}.
 <p>
@@ -157,31 +155,30 @@ EOF
     }
 
     if ( !defined($Hosts) || $bpc->HostsMTime() != $HostsMTime ) {
-	$HostsMTime = $bpc->HostsMTime();
-	$Hosts = $bpc->HostInfoRead();
+        $HostsMTime = $bpc->HostsMTime();
+        $Hosts      = $bpc->HostInfoRead();
 
-	# turn moreUsers list into a hash for quick lookups
-	foreach my $host (keys %$Hosts) {
-	   $Hosts->{$host}{moreUsers} =
-	       {map {$_, 1} split(",", $Hosts->{$host}{moreUsers}) }
-	}
+        # turn moreUsers list into a hash for quick lookups
+        foreach my $host ( keys %$Hosts ) {
+            $Hosts->{$host}{moreUsers} =
+              {map {$_, 1} split(",", $Hosts->{$host}{moreUsers})};
+        }
     }
 
     #
     # Untaint the host name
     #
     if ( $In{host} =~ /^([\w.\s-]+)$/ ) {
-	$In{host} = $1;
+        $In{host} = $1;
     } else {
-	delete($In{host});
+        delete($In{host});
     }
 }
 
 sub timeStamp2
 {
     my $now = $_[0] == 0 ? time : $_[0];
-    my($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst)
-              = localtime($now);
+    my($sec, $min, $hour, $mday, $mon, $year, $wday, $yday, $isdst) = localtime($now);
     $mon++;
     if ( $Conf{CgiDateFormatMMDD} == 2 ) {
         $year += 1900;
@@ -194,7 +191,7 @@ sub timeStamp2
             $year -= 100;
             return sprintf("$mon/$mday/%02d %02d:%02d", $year, $hour, $min);
         } else {
-        return sprintf("$mon/$mday %02d:%02d", $hour, $min);
+            return sprintf("$mon/$mday %02d:%02d", $hour, $min);
         }
     } else {
         #
@@ -203,9 +200,9 @@ sub timeStamp2
         if ( time - $now > 330 * 24 * 3600 ) {
             $year -= 100;
             return sprintf("$mday/$mon/%02d %02d:%02d", $year, $hour, $min);
-    } else {
-        return sprintf("$mday/$mon %02d:%02d", $hour, $min);
-    }
+        } else {
+            return sprintf("$mday/$mon %02d:%02d", $hour, $min);
+        }
     }
 }
 
@@ -227,12 +224,10 @@ sub UserLink
     my($s);
 
     return \$user if ( $user eq ""
-                    || $Conf{CgiUserUrlCreate} eq "" );
+        || $Conf{CgiUserUrlCreate} eq "" );
     if ( $Conf{CgiUserHomePageCheck} eq ""
-            || -f sprintf($Conf{CgiUserHomePageCheck}, $user, $user, $user) ) {
-        $s = "<a href=\""
-             . sprintf($Conf{CgiUserUrlCreate}, $user, $user, $user)
-             . "\">$user</a>";
+        || -f sprintf($Conf{CgiUserHomePageCheck}, $user, $user, $user) ) {
+        $s = "<a href=\"" . sprintf($Conf{CgiUserUrlCreate}, $user, $user, $user) . "\">$user</a>";
     } else {
         $s = $user;
     }
@@ -264,7 +259,7 @@ sub ErrorExit
     my($mesg) = join("</p>\n<p>", @mesg);
 
     if ( !defined($ENV{REMOTE_USER}) ) {
-	$mesg .= <<EOF;
+        $mesg .= <<EOF;
 <p>
 Note: \$ENV{REMOTE_USER} is not set, which could mean there is an
 installation problem.  BackupPC_Admin expects Apache to authenticate
@@ -274,7 +269,7 @@ EOF
     }
 
     $bpc->ServerMesg("log User $User (host=$In{host}) got CGI error: $head")
-                            if ( defined($bpc) );
+      if ( defined($bpc) );
     if ( !defined($Lang->{Error}) ) {
         $mesg = <<EOF if ( !defined($mesg) );
 There is some problem with the BackupPC installation.
@@ -285,11 +280,11 @@ ${h1("Error: Unable to read config.pl or language strings!!")}
 <p>$mesg</p>
 EOF
         Header("BackupPC: Error", $content);
-	Trailer();
+        Trailer();
     } else {
         my $content = eval("qq{$Lang->{Error____head}}");
         Header(eval("qq{$Lang->{Error}}"), $content);
-	Trailer();
+        Trailer();
     }
     exit(1);
 }
@@ -302,16 +297,18 @@ sub ServerConnect
     return if ( $bpc->ServerOK() );
     $bpc->ServerDisconnect();
     if ( my $err = $bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}) ) {
-        if ( CheckPermission()
-          && -f $Conf{ServerInitdPath}
-          && $Conf{ServerInitdStartCmd} ne "" ) {
+        if (   CheckPermission()
+            && -f $Conf{ServerInitdPath}
+            && $Conf{ServerInitdStartCmd} ne "" ) {
             my $content = eval("qq{$Lang->{Admin_Start_Server}}");
             Header(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"), $content);
             Trailer();
             exit(1);
         } else {
-            ErrorExit(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"),
-                      eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server_error_message}}"));
+            ErrorExit(
+                eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"),
+                eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server_error_message}}")
+            );
         }
     }
 }
@@ -320,16 +317,17 @@ sub GetStatusInfo
 {
     my($status) = @_;
     ServerConnect();
-    %Status = ()     if ( $status =~ /\bhosts\b/ );
+    %Status     = () if ( $status =~ /\bhosts\b/ );
     %StatusHost = () if ( $status =~ /\bhost\(/ );
     my $reply = $bpc->ServerMesg("status $status");
     $reply = $1 if ( $reply =~ /(.*)/s );
     eval($reply);
+
     # ignore status related to admin jobs
     if ( $status =~ /\bhosts\b/ ) {
-	foreach my $host ( grep(/admin/, keys(%Status)) ) {
-	    delete($Status{$host}) if ( $bpc->isAdminJob($host) );
-	}
+        foreach my $host ( grep(/admin/, keys(%Status)) ) {
+            delete($Status{$host}) if ( $bpc->isAdminJob($host) );
+        }
         delete($Status{$bpc->scgiJob});
     }
 }
@@ -356,11 +354,11 @@ sub CheckPermission
     my $Privileged = 0;
 
     return 0 if ( $User eq "" && $Conf{CgiAdminUsers} ne "*"
-	       || $host ne "" && !defined($Hosts->{$host}) );
+        || $host ne "" && !defined($Hosts->{$host}) );
     if ( $Conf{CgiAdminUserGroup} ne "" ) {
         for ( split(/\s+/, $Conf{CgiAdminUserGroup}) ) {
-            my ($n, $p, $gid, $mem) = getgrnam($_);
-            $Privileged ||= ( $mem =~ /\b\Q$User\E\b/ );
+            my($n, $p, $gid, $mem) = getgrnam($_);
+            $Privileged ||= ($mem =~ /\b\Q$User\E\b/);
             last if ( $Privileged );
         }
     }
@@ -390,8 +388,7 @@ sub GetUserHosts
     if ( $getAll && CheckPermission() ) {
         @hosts = sort keys %$Hosts;
     } else {
-        @hosts = sort grep { $Hosts->{$_}{user} eq $User ||
-                       defined($Hosts->{$_}{moreUsers}{$User}) } keys(%$Hosts);
+        @hosts = sort grep {$Hosts->{$_}{user} eq $User || defined($Hosts->{$_}{moreUsers}{$User})} keys(%$Hosts);
     }
     return @hosts;
 }
@@ -408,25 +405,24 @@ sub ConfirmIPAddress
     my($host) = @_;
     my $ipAddr = $host;
 
-    if ( defined($Hosts->{$host}) && $Hosts->{$host}{dhcp}
-	       && $ENV{REMOTE_ADDR} =~ /^(\d+[\.\d]*)$/ ) {
-	$ipAddr = $1;
-	my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($ipAddr);
-	if ( $netBiosHost ne $host ) {
-	    my($tryIP);
-	    GetStatusInfo("host(${EscURI($host)})");
-	    if ( defined($StatusHost{dhcpHostIP})
-			&& $StatusHost{dhcpHostIP} ne $ipAddr ) {
-		$tryIP = eval("qq{$Lang->{tryIP}}");
-		($netBiosHost, $netBiosUser)
-			= $bpc->NetBiosInfoGet($StatusHost{dhcpHostIP});
-	    }
-	    if ( $netBiosHost ne $host ) {
-		ErrorExit(eval("qq{$Lang->{Can_t_find_IP_address_for}}"),
-		          eval("qq{$Lang->{host_is_a_DHCP_host}}"));
-	    }
-	    $ipAddr = $StatusHost{dhcpHostIP};
-	}
+    if (   defined($Hosts->{$host})
+        && $Hosts->{$host}{dhcp}
+        && $ENV{REMOTE_ADDR} =~ /^(\d+[\.\d]*)$/ ) {
+        $ipAddr = $1;
+        my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($ipAddr);
+        if ( $netBiosHost ne $host ) {
+            my($tryIP);
+            GetStatusInfo("host(${EscURI($host)})");
+            if ( defined($StatusHost{dhcpHostIP})
+                && $StatusHost{dhcpHostIP} ne $ipAddr ) {
+                $tryIP = eval("qq{$Lang->{tryIP}}");
+                ($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($StatusHost{dhcpHostIP});
+            }
+            if ( $netBiosHost ne $host ) {
+                ErrorExit(eval("qq{$Lang->{Can_t_find_IP_address_for}}"), eval("qq{$Lang->{host_is_a_DHCP_host}}"));
+            }
+            $ipAddr = $StatusHost{dhcpHostIP};
+        }
     }
     return $ipAddr;
 }
@@ -439,23 +435,43 @@ sub Header
 {
     my($title, $content, $noBrowse, $contentSub, $contentPost) = @_;
     my @adminLinks = (
-        { link => "?action=status",        name => $Lang->{Status}},
-        { link => "?action=summary",       name => $Lang->{PC_Summary}},
-        { link => "?action=editConfig",    name => $Lang->{CfgEdit_Edit_Config},
-                                           priv => 1},
-        { link => "?action=editConfig&newMenu=hosts",
-                                           name => $Lang->{CfgEdit_Edit_Hosts},
-                                           priv => 1},
-        { link => "?action=adminOpts",     name => $Lang->{Admin_Options},
-                                           priv => 1},
-        { link => "?action=view&type=LOG", name => $Lang->{LOG_file},
-                                           priv => 1},
-        { link => "?action=LOGlist",       name => $Lang->{Old_LOGs},
-                                           priv => 1},
-        { link => "?action=emailSummary",  name => $Lang->{Email_summary},
-                                           priv => 1},
-        { link => "?action=queue",         name => $Lang->{Current_queues},
-                                           priv => 1},
+        {link => "?action=status",  name => $Lang->{Status}},
+        {link => "?action=summary", name => $Lang->{PC_Summary}},
+        {
+            link => "?action=editConfig",
+            name => $Lang->{CfgEdit_Edit_Config},
+            priv => 1
+        },
+        {
+            link => "?action=editConfig&newMenu=hosts",
+            name => $Lang->{CfgEdit_Edit_Hosts},
+            priv => 1
+        },
+        {
+            link => "?action=adminOpts",
+            name => $Lang->{Admin_Options},
+            priv => 1
+        },
+        {
+            link => "?action=view&type=LOG",
+            name => $Lang->{LOG_file},
+            priv => 1
+        },
+        {
+            link => "?action=LOGlist",
+            name => $Lang->{Old_LOGs},
+            priv => 1
+        },
+        {
+            link => "?action=emailSummary",
+            name => $Lang->{Email_summary},
+            priv => 1
+        },
+        {
+            link => "?action=queue",
+            name => $Lang->{Current_queues},
+            priv => 1
+        },
         @{$Conf{CgiNavBarLinks} || []},
     );
     my $host = $In{host};
@@ -485,53 +501,51 @@ $Conf{CgiHeaders}
 EOF
 
     if ( defined($Hosts) && defined($host) && defined($Hosts->{$host}) ) {
-	print "<div class=\"NavMenu section-title\">";
-	NavSectionTitle("${EscHTML($host)}");
-	print <<EOF;
+        print "<div class=\"NavMenu section-title\">";
+        NavSectionTitle("${EscHTML($host)}");
+        print <<EOF;
 </div>
 <div class="NavMenu host">
 EOF
-	NavLink("?host=${EscURI($host)}",
-		"$host $Lang->{Home}", " class=\"navbar\"");
-	NavLink("?action=browse&host=${EscURI($host)}",
-		$Lang->{Browse}, " class=\"navbar\"") if ( !$noBrowse );
-	NavLink("?action=view&type=LOG&host=${EscURI($host)}",
-		$Lang->{LOG_file}, " class=\"navbar\"");
-	NavLink("?action=LOGlist&host=${EscURI($host)}",
-		$Lang->{LOG_files}, " class=\"navbar\"");
-	if ( -f "$TopDir/pc/$host/SmbLOG.bad"
-		    || -f "$TopDir/pc/$host/SmbLOG.bad.z"
-		    || -f "$TopDir/pc/$host/XferLOG.bad"
-		    || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
-	   NavLink("?action=view&type=XferLOGbad&host=${EscURI($host)}",
-		    $Lang->{Last_bad_XferLOG}, " class=\"navbar\"");
-	   NavLink("?action=view&type=XferErrbad&host=${EscURI($host)}",
-		    $Lang->{Last_bad_XferLOG_errors_only},
-		    " class=\"navbar\"");
-	}
-        if ( $Conf{CgiUserConfigEditEnable} || $PrivAdmin ) {
-            NavLink("?action=editConfig&host=${EscURI($host)}",
-                    $Lang->{CfgEdit_Edit_Config}, " class=\"navbar\"");
-        } elsif ( -f "$TopDir/pc/$host/config.pl"
-                    || ($host ne "config" && -f "$TopDir/conf/$host.pl") ) {
-            NavLink("?action=view&type=config&host=${EscURI($host)}",
-                    $Lang->{Config_file}, " class=\"navbar\"");
+        NavLink("?host=${EscURI($host)}",               "$host $Lang->{Home}", " class=\"navbar\"");
+        NavLink("?action=browse&host=${EscURI($host)}", $Lang->{Browse},       " class=\"navbar\"") if ( !$noBrowse );
+        NavLink("?action=view&type=LOG&host=${EscURI($host)}", $Lang->{LOG_file},  " class=\"navbar\"");
+        NavLink("?action=LOGlist&host=${EscURI($host)}",       $Lang->{LOG_files}, " class=\"navbar\"");
+        if (   -f "$TopDir/pc/$host/SmbLOG.bad"
+            || -f "$TopDir/pc/$host/SmbLOG.bad.z"
+            || -f "$TopDir/pc/$host/XferLOG.bad"
+            || -f "$TopDir/pc/$host/XferLOG.bad.z" ) {
+            NavLink(
+                "?action=view&type=XferLOGbad&host=${EscURI($host)}",
+                $Lang->{Last_bad_XferLOG},
+                " class=\"navbar\""
+            );
+            NavLink(
+                "?action=view&type=XferErrbad&host=${EscURI($host)}",
+                $Lang->{Last_bad_XferLOG_errors_only},
+                " class=\"navbar\""
+            );
         }
-	print "</div>\n";
+        if ( $Conf{CgiUserConfigEditEnable} || $PrivAdmin ) {
+            NavLink("?action=editConfig&host=${EscURI($host)}", $Lang->{CfgEdit_Edit_Config}, " class=\"navbar\"");
+        } elsif ( -f "$TopDir/pc/$host/config.pl"
+            || ($host ne "config" && -f "$TopDir/conf/$host.pl") ) {
+            NavLink("?action=view&type=config&host=${EscURI($host)}", $Lang->{Config_file}, " class=\"navbar\"");
+        }
+        print "</div>\n";
     }
     print <<EOF;
 <div class="NavMenu" id="NavMenu">
 EOF
     my $hostSelectbox = "<option value=\"#\">$Lang->{Select_a_host}</option>";
-    my @hosts = GetUserHosts($Conf{CgiNavBarAdminAllHosts});
+    my @hosts         = GetUserHosts($Conf{CgiNavBarAdminAllHosts});
     NavSectionTitle($Lang->{Hosts});
     if ( defined($Hosts) && %$Hosts > 0 && @hosts ) {
         foreach my $host ( @hosts ) {
-	    NavLink("?host=${EscURI($host)}", $host)
-		    if ( @hosts < $Conf{CgiNavBarAdminAllHosts} );
-	    my $sel = " selected" if ( $host eq $In{host} );
-	    $hostSelectbox .= "<option value=\"?host=${EscURI($host)}\"$sel>"
-			    . "$host</option>";
+            NavLink("?host=${EscURI($host)}", $host)
+              if ( @hosts < $Conf{CgiNavBarAdminAllHosts} );
+            my $sel = " selected" if ( $host eq $In{host} );
+            $hostSelectbox .= "<option value=\"?host=${EscURI($host)}\"$sel>" . "$host</option>";
         }
     }
     if ( @hosts >= $Conf{CgiNavBarAdminAllHosts} ) {
@@ -564,9 +578,9 @@ EOF
 
     print("<div id=\"Content\">\n$content\n");
     if ( defined($contentSub) && ref($contentSub) eq "CODE" ) {
-	while ( (my $s = &$contentSub()) ne "" ) {
-	    print($s);
-	}
+        while ( (my $s = &$contentSub()) ne "" ) {
+            print($s);
+        }
     }
     print($contentPost) if ( defined($contentPost) );
 }
@@ -577,7 +591,6 @@ sub Trailer
 </body></html>
 EOF
 }
-
 
 sub NavSectionTitle
 {
@@ -601,9 +614,9 @@ sub NavLink
     if ( defined($link) ) {
         my($class);
         $class = " class=\"NavCurrent\""
-                if ( length($link) && $ENV{REQUEST_URI} =~ /\Q$link\E$/
-                    || length($link) && $link =~ /\&host=/ && $ENV{REQUEST_URI} =~ /\Q$link\E/
-                    || $link eq "" && $ENV{REQUEST_URI} !~ /\?/ );
+          if ( length($link) && $ENV{REQUEST_URI} =~ /\Q$link\E$/
+            || length($link) && $link =~ /\&host=/ && $ENV{REQUEST_URI} =~ /\Q$link\E/
+            || $link eq "" && $ENV{REQUEST_URI} !~ /\?/ );
         $link = "$MyURL$link" if ( $link eq "" || $link =~ /^\?/ );
         print <<EOF;
 <a href="$link"$class>$text</a>

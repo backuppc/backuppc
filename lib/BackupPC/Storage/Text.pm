@@ -49,10 +49,7 @@ sub new
     my $class = shift;
     my($flds, $paths) = @_;
 
-    my $s = bless {
-	%$flds,
-	%$paths,
-    }, $class;
+    my $s = bless {%$flds, %$paths,}, $class;
     return $s;
 }
 
@@ -76,7 +73,7 @@ sub BackupInfoRead
         $locked = 1;
     }
     if ( open($bkFd, "$s->{TopDir}/pc/$host/backups") ) {
-	binmode($bkFd);
+        binmode($bkFd);
         while ( <$bkFd> ) {
             s/[\n\r]+//;
             next if ( !/^(\d+\t(incr|full|partial|active).*)/ );
@@ -133,7 +130,7 @@ sub RestoreInfoRead
         $locked = 1;
     }
     if ( open($resFd, "$s->{TopDir}/pc/$host/restores") ) {
-	binmode($resFd);
+        binmode($resFd);
         while ( <$resFd> ) {
             s/[\n\r]+//;
             next if ( !/^(\d+.*)/ );
@@ -227,11 +224,11 @@ sub TextFileWrite
     (my $dir = $file) =~ s{(.+)/(.+)}{$1};
 
     if ( !-d $dir ) {
-        eval { mkpath($dir, 0, 0775) };
+        eval {mkpath($dir, 0, 0775)};
         return "TextFileWrite: can't create directory $dir" if ( $@ );
     }
     if ( open($fd, ">", "$file.new") ) {
-	binmode($fd);
+        binmode($fd);
         print $fd $contents;
         close($fd);
         #
@@ -255,8 +252,8 @@ sub TextFileWrite
             flock($lockFd, LOCK_EX);
         }
         if ( -s "$file" ) {
-            unlink("$file.old")           if ( -f "$file.old" );
-            rename("$file", "$file.old")  if ( -f "$file" );
+            unlink("$file.old")          if ( -f "$file.old" );
+            rename("$file", "$file.old") if ( -f "$file" );
         } else {
             unlink("$file") if ( -f "$file" );
         }
@@ -280,9 +277,9 @@ sub ConfigPath
         return "$s->{ConfDir}/pc/$host.pl";
     } else {
         return "$s->{TopDir}/pc/$host/config.pl"
-            if ( -f "$s->{TopDir}/pc/$host/config.pl" );
+          if ( -f "$s->{TopDir}/pc/$host/config.pl" );
         return "$s->{ConfDir}/$host.pl"
-            if ( $host ne "config" && -f "$s->{ConfDir}/$host.pl" );
+          if ( $host ne "config" && -f "$s->{ConfDir}/$host.pl" );
         return "$s->{ConfDir}/pc/$host.pl";
     }
 }
@@ -295,14 +292,14 @@ sub ConfigDataRead
     #
     # TODO: add lock
     #
-    my $conf = $prevConfig || {};
+    my $conf       = $prevConfig || {};
     my $configPath = $s->ConfigPath($host);
 
     push(@configs, $configPath) if ( -f $configPath );
     foreach $config ( @configs ) {
         %Conf = %$conf;
         if ( !defined($ret = do $config) && ($! || $@) ) {
-            $mesg = "Couldn't open $config: $!" if ( $! );
+            $mesg = "Couldn't open $config: $!"    if ( $! );
             $mesg = "Couldn't execute $config: $@" if ( $@ );
             $mesg =~ s/[\n\r]+//;
             return ($mesg, $conf);
@@ -315,9 +312,9 @@ sub ConfigDataRead
     #
     foreach my $param ( qw(BackupFilesOnly BackupFilesExclude) ) {
         next if ( !defined($conf->{$param}) || ref($conf->{$param}) eq "HASH" );
-        $conf->{$param} = [ $conf->{$param} ]
-                                if ( ref($conf->{$param}) ne "ARRAY" );
-        $conf->{$param} = { "*" => $conf->{$param} };
+        $conf->{$param} = [$conf->{$param}]
+          if ( ref($conf->{$param}) ne "ARRAY" );
+        $conf->{$param} = {"*" => $conf->{$param}};
     }
 
     #
@@ -325,12 +322,13 @@ sub ConfigDataRead
     # BlackoutHourEnd, and BlackoutWeekDays parameters.
     #
     if ( defined($conf->{BlackoutHourBegin}) ) {
-        push(@{$conf->{BlackoutPeriods}},
-             {
-                 hourBegin => $conf->{BlackoutHourBegin},
-                 hourEnd   => $conf->{BlackoutHourEnd},
-                 weekDays  => $conf->{BlackoutWeekDays},
-             }
+        push(
+            @{$conf->{BlackoutPeriods}},
+            {
+                hourBegin => $conf->{BlackoutHourBegin},
+                hourEnd   => $conf->{BlackoutHourEnd},
+                weekDays  => $conf->{BlackoutWeekDays},
+            }
         );
         delete($conf->{BlackoutHourBegin});
         delete($conf->{BlackoutHourEnd});
@@ -340,20 +338,20 @@ sub ConfigDataRead
     #
     # Check that certain settings have valid values
     #
-    if ( $conf->{BackupPCNightlyPeriod} != 1
-	      && $conf->{BackupPCNightlyPeriod} != 2
-	      && $conf->{BackupPCNightlyPeriod} != 4
-	      && $conf->{BackupPCNightlyPeriod} != 8
-	      && $conf->{BackupPCNightlyPeriod} != 16 ) {
-	$conf->{BackupPCNightlyPeriod} = 1;
+    if (   $conf->{BackupPCNightlyPeriod} != 1
+        && $conf->{BackupPCNightlyPeriod} != 2
+        && $conf->{BackupPCNightlyPeriod} != 4
+        && $conf->{BackupPCNightlyPeriod} != 8
+        && $conf->{BackupPCNightlyPeriod} != 16 ) {
+        $conf->{BackupPCNightlyPeriod} = 1;
     }
-    if ( $conf->{PoolSizeNightlyUpdatePeriod} != 0
-	      && $conf->{PoolSizeNightlyUpdatePeriod} != 1
-	      && $conf->{PoolSizeNightlyUpdatePeriod} != 2
-	      && $conf->{PoolSizeNightlyUpdatePeriod} != 4
-	      && $conf->{PoolSizeNightlyUpdatePeriod} != 8
-	      && $conf->{PoolSizeNightlyUpdatePeriod} != 16 ) {
-	$conf->{PoolSizeNightlyUpdatePeriod} = 16;
+    if (   $conf->{PoolSizeNightlyUpdatePeriod} != 0
+        && $conf->{PoolSizeNightlyUpdatePeriod} != 1
+        && $conf->{PoolSizeNightlyUpdatePeriod} != 2
+        && $conf->{PoolSizeNightlyUpdatePeriod} != 4
+        && $conf->{PoolSizeNightlyUpdatePeriod} != 8
+        && $conf->{PoolSizeNightlyUpdatePeriod} != 16 ) {
+        $conf->{PoolSizeNightlyUpdatePeriod} = 16;
     }
 
     return (undef, $conf);
@@ -387,7 +385,7 @@ sub ConfigFileMerge
         # Match existing settings in current config file
         #
         open($configFd, $inFile)
-            || return ("ConfigFileMerge: can't open/read $inFile", undef);
+          || return ("ConfigFileMerge: can't open/read $inFile", undef);
         binmode($configFd);
 
         while ( <$configFd> ) {
@@ -409,9 +407,11 @@ sub ConfigFileMerge
             } else {
                 $contents .= $_;
             }
-            if ( defined($skipExpr)
-                    && ($skipExpr =~ /^\$fakeVar = *<</
-                        || $skipExpr =~ /;[\n\r]*$/) ) {
+            if (
+                defined($skipExpr)
+                && (   $skipExpr =~ /^\$fakeVar = *<</
+                    || $skipExpr =~ /;[\n\r]*$/)
+            ) {
                 #
                 # if we have a complete expression, then we are done
                 # skipping text from the original config file.
@@ -428,15 +428,15 @@ sub ConfigFileMerge
     # Add new entries not matched in current config file
     #
     foreach my $var ( sort(keys(%$newConf)) ) {
-	next if ( $done->{$var} );
-	my $d = Data::Dumper->new([$newConf->{$var}], [*value]);
-	$d->Indent(1);
-	$d->Terse(1);
+        next if ( $done->{$var} );
+        my $d = Data::Dumper->new([$newConf->{$var}], [*value]);
+        $d->Indent(1);
+        $d->Terse(1);
         $d->Sortkeys(1);
-	my $value = $d->Dump;
-	$value =~ s/(.*)\n/$1;\n/s;
-	$contents .= "\$Conf{$var} = " . $value;
-	$done->{$var} = 1;
+        my $value = $d->Dump;
+        $value =~ s/(.*)\n/$1;\n/s;
+        $contents .= "\$Conf{$var} = " . $value;
+        $done->{$var} = 1;
     }
     return (undef, $contents);
 }
@@ -457,9 +457,10 @@ sub StatusDataRead
 
     %Status = ();
     %Info   = ();
-    if ( -f "$s->{LogDir}/status.pl"
-            && !defined($ret = do "$s->{LogDir}/status.pl") && ($! || $@) ) {
-        $mesg = "Couldn't open $s->{LogDir}/status.pl: $!" if ( $! );
+    if (   -f "$s->{LogDir}/status.pl"
+        && !defined($ret = do "$s->{LogDir}/status.pl")
+        && ($! || $@) ) {
+        $mesg = "Couldn't open $s->{LogDir}/status.pl: $!"    if ( $! );
         $mesg = "Couldn't execute $s->{LogDir}/status.pl: $@" if ( $@ );
         $mesg =~ s/[\n\r]+//;
         rename("$s->{LogDir}/status.pl", "$s->{LogDir}/status.pl.bad");
@@ -472,9 +473,7 @@ sub StatusDataWrite
 {
     my($s, $status, $info) = @_;
 
-    my($dump) = Data::Dumper->new(
-                     [  $info, $status],
-                     [qw(*Info *Status)]);
+    my($dump) = Data::Dumper->new([$info, $status], [qw(*Info *Status)]);
     $dump->Indent(1);
     my $text = $dump->Dump;
     $s->TextFileWrite("$s->{LogDir}/status.pl", $text);
@@ -514,7 +513,7 @@ sub HostInfoRead
         #
         # Split on white space, except if preceded by \
         # using zero-width negative look-behind assertion
-	# (always wanted to use one of those).
+        # (always wanted to use one of those).
         #
         @fld = split(/(?<!\\)\s+/, $1);
         #
@@ -527,7 +526,7 @@ sub HostInfoRead
             if ( defined($host) ) {
                 next if ( lc($fld[0]) ne lc($host) );
                 @{$hosts{lc($fld[0])}}{@hdr} = @fld;
-		close($hostFd);
+                close($hostFd);
                 if ( $locked ) {
                     flock($lockFd, LOCK_UN);
                     close($lockFd);
@@ -565,9 +564,7 @@ sub HostInfoWrite
     }
     foreach my $host ( keys(%$hosts) ) {
         my $name = "$hosts->{$host}{host}";
-        my $rest = "\t$hosts->{$host}{dhcp}"
-                 . "\t$hosts->{$host}{user}"
-                 . "\t$hosts->{$host}{moreUsers}";
+        my $rest = "\t$hosts->{$host}{dhcp}" . "\t$hosts->{$host}{user}" . "\t$hosts->{$host}{moreUsers}";
         $name =~ s/ /\\ /g;
         $rest =~ s/ //g;
         $hostText->{$host} = $name . $rest;

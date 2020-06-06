@@ -51,19 +51,19 @@ sub new
 {
     my($class, $bpc, $host, $backups, $options) = @_;
     my $m = bless {
-        bpc       => $bpc,	# BackupPC::Lib object
-        host      => $host,	# host name
-        backups   => $backups,	# all backups for this host
-	num       => -1,	# backup number
-        idx       => -1,	# index into backups for backup
-				#   we are viewing
-        dirPath   => undef,	# path to current directory
-        dirAttr   => undef,	# attributes of current directory
-        dirOpts   => $options,  # $options is a hash of file attributes we need:
+        bpc     => $bpc,        # BackupPC::Lib object
+        host    => $host,       # host name
+        backups => $backups,    # all backups for this host
+        num     => -1,          # backup number
+        idx     => -1,          # index into backups for backup
+                                #   we are viewing
+        dirPath => undef,       # path to current directory
+        dirAttr => undef,       # attributes of current directory
+        dirOpts => $options,    # $options is a hash of file attributes we need:
                                 # type, inode, or nlink.  If set, these parameters
                                 # are added to the returned hash.
                                 # See BackupPC::DirOps::dirRead().
-        error     => [],
+        error   => [],
     }, $class;
     $m->{topDir} = $m->{bpc}->TopDir();
     return $m;
@@ -94,7 +94,7 @@ sub dirNotDeleted
             $dir  = $1;
             $file = $2;
             $p    = $topPath . $m->{bpc}->fileNameEltMangle($share);
-            $p   .= $m->{bpc}->fileNameMangle($dir) if ( length($dir) );
+            $p .= $m->{bpc}->fileNameMangle($dir) if ( length($dir) );
         } else {
             #
             # Check that the share exists in this backup;
@@ -122,13 +122,12 @@ sub hardLinkGet
     my($m, $a, $i) = @_;
 
     if ( !$m->{attribCache}[$i] ) {
-        $m->{attribCache}[$i] = BackupPC::XS::AttribCache::new($m->{host},
-                                      $m->{backups}[$i]{num}, "",
-                                      $m->{backups}[$i]{compress});
+        $m->{attribCache}[$i] =
+          BackupPC::XS::AttribCache::new($m->{host}, $m->{backups}[$i]{num}, "", $m->{backups}[$i]{compress});
     }
     my $newAttrib = $m->{attribCache}[$i]->getInode($a->{inode});
     return $a if ( !$newAttrib );
-    $newAttrib = { %$newAttrib };
+    $newAttrib = {%$newAttrib};
     $newAttrib->{name} = $a->{name};
     return $newAttrib;
 }
@@ -142,12 +141,12 @@ sub dirCache
     $dir = "/$dir" if ( $dir !~ m{^/} );
     $dir =~ s{/+$}{};
     return if ( $m->{num} == $backupNum
-                && $m->{share} eq $share
-                && defined($m->{dir})
-                && $m->{dir} eq $dir );
+        && $m->{share} eq $share
+        && defined($m->{dir})
+        && $m->{dir} eq $dir );
 
     $m->backupNumCache($backupNum) if ( $m->{num} != $backupNum );
-    return if ( $m->{idx} < 0 );
+    return                         if ( $m->{idx} < 0 );
 
     $m->{files} = {};
     $level = $m->{backups}[$m->{idx}]{level} + 1;
@@ -156,7 +155,7 @@ sub dirCache
     # Remember the requested share and dir
     #
     $m->{share} = $share;
-    $m->{dir} = $dir;
+    $m->{dir}   = $dir;
 
     if ( $m->{backups}[$m->{idx}]{version} < 4 ) {
         #
@@ -169,39 +168,42 @@ sub dirCache
         #
         $m->{mergeNums} = [];
         for ( $i = $m->{idx} ; $level > 0 && $i >= 0 ; $i-- ) {
+
             #print(STDERR "Do $i ($m->{backups}[$i]{noFill},$m->{backups}[$i]{level})\n");
             #
             # skip backups with the same or higher level
             #
             next if ( $m->{backups}[$i]{level} >= $level );
 
-            $level = $m->{backups}[$i]{level};
+            $level     = $m->{backups}[$i]{level};
             $backupNum = $m->{backups}[$i]{num};
             push(@{$m->{mergeNums}}, $backupNum);
-            my $mangle   = $m->{backups}[$i]{mangle};
-            my $compress = $m->{backups}[$i]{compress};
-            my $path     = "$m->{topDir}/pc/$m->{host}/$backupNum/";
+
+            my $mangle        = $m->{backups}[$i]{mangle};
+            my $compress      = $m->{backups}[$i]{compress};
+            my $path          = "$m->{topDir}/pc/$m->{host}/$backupNum/";
             my $legacyCharset = $m->{backups}[$i]{version} < 3.0;
             my $sharePathM;
+
             if ( $mangle ) {
-                $sharePathM = $m->{bpc}->fileNameEltMangle($share)
-                            . $m->{bpc}->fileNameMangle($dir);
+                $sharePathM = $m->{bpc}->fileNameEltMangle($share) . $m->{bpc}->fileNameMangle($dir);
             } else {
                 $sharePathM = $share . $dir;
             }
             $path .= $sharePathM;
+
             #print(STDERR "Opening $path (share=$share, mangle=$mangle)\n");
 
-            my $dirOpts      = { %{$m->{dirOpts} || {} } };
-            my $attribOpts   = { };
+            my $dirOpts    = {%{$m->{dirOpts} || {}}};
+            my $attribOpts = {};
             if ( $legacyCharset ) {
-                $dirOpts->{charsetLegacy}
-                        = $attribOpts->{charsetLegacy}
-                        = $m->{bpc}->{Conf}{ClientCharsetLegacy} || "iso-8859-1";
+                $dirOpts->{charsetLegacy} = $attribOpts->{charsetLegacy} =
+                  $m->{bpc}->{Conf}{ClientCharsetLegacy} || "iso-8859-1";
             }
 
             my $attr;
             if ( $mangle ) {
+
                 # TODO: removed charset attribOpts - need to do at this level?
                 $attr = BackupPC::XS::Attrib::new($compress);
                 if ( !$attr->read($path) ) {
@@ -224,19 +226,19 @@ sub dirCache
                     # always has the complete directory tree).
                     #
                     next if ( $i < $m->{idx} && $a->{type} == BPC_FTYPE_DIR );
+
                     #print(STDERR "Adding $fileUM with type $a->{type}\n");
                     if ( !$m->{files}{$fileUM} ) {
-                        $m->{files}{$fileUM}               = $a;
+                        $m->{files}{$fileUM} = $a;
                         $attr->delete($fileUM);
-                        ($m->{files}{$fileUM}{relPath}     = "$dir/$fileUM") =~ s{//+}{/}g;
+                        ($m->{files}{$fileUM}{relPath} = "$dir/$fileUM") =~ s{//+}{/}g;
                         if ( length($a->{digest}) ) {
-                            $m->{files}{$fileUM}{fullPath} = $m->{bpc}->MD52Path($a->{digest},
-                                                                                 $compress);
+                            $m->{files}{$fileUM}{fullPath} = $m->{bpc}->MD52Path($a->{digest}, $compress);
                         } else {
                             $m->{files}{$fileUM}{fullPath} = "/dev/null";
                         }
-                        $m->{files}{$fileUM}{backupNum}    = $backupNum;
-                        $m->{files}{$fileUM}{compress}     = $compress;
+                        $m->{files}{$fileUM}{backupNum} = $backupNum;
+                        $m->{files}{$fileUM}{compress}  = $compress;
                     }
                 }
             } else {
@@ -252,18 +254,19 @@ sub dirCache
                     next;
                 }
                 foreach my $entry ( @$dirInfo ) {
-                    my $file = $1 if ( $entry->{name} =~ /(.*)/s );
+                    my $file   = $1 if ( $entry->{name} =~ /(.*)/s );
                     my $fileUM = $file;
                     $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
                     #
                     # skip special files
                     #
-                    next if ( defined($m->{files}{$fileUM})
-                            || $file eq ".."
-                            || $file eq "."
-                            || $file eq "backupInfo"
-                            || $file eq "refCnt"
-                            || $mangle && $file =~ /^attrib/ );
+                    next
+                      if ( defined($m->{files}{$fileUM})
+                        || $file eq ".."
+                        || $file eq "."
+                        || $file eq "backupInfo"
+                        || $file eq "refCnt"
+                        || $mangle && $file =~ /^attrib/ );
 
                     if ( defined($attr) && defined(my $a = $attr->get($fileUM)) ) {
                         #
@@ -271,10 +274,12 @@ sub dirCache
                         # always has the complete directory tree).
                         #
                         next if ( $i < $m->{idx} && $a->{type} == BPC_FTYPE_DIR );
+
                         #print(STDERR "Adding $fileUM with type $a->{type}\n");
                         $m->{files}{$fileUM} ||= $a;
                         $attr->delete($fileUM);
                     } else {
+
                         #print(STDERR "No attrib; determining attribs of $fileUM\n");
                         #
                         # Very expensive in the non-attribute case when compresseion
@@ -284,7 +289,7 @@ sub dirCache
                         my $realPath = "$path/$file";
 
                         from_to($realPath, "utf8", $attribOpts->{charsetLegacy})
-                                        if ( $attribOpts->{charsetLegacy} ne "" );
+                          if ( $attribOpts->{charsetLegacy} ne "" );
 
                         my @s = stat($realPath);
                         next if ( $i < $m->{idx} && -d _ );
@@ -313,18 +318,17 @@ sub dirCache
                             }
                         }
                     }
-                    ($m->{files}{$fileUM}{relPath}    = "$dir/$fileUM") =~ s{//+}{/}g;
-                    ($m->{files}{$fileUM}{sharePathM} = "$sharePathM/$file")
-                                                                       =~ s{//+}{/}g;
-                    ($m->{files}{$fileUM}{fullPath}   = "$path/$file") =~ s{//+}{/}g;
+                    ($m->{files}{$fileUM}{relPath}    = "$dir/$fileUM")      =~ s{//+}{/}g;
+                    ($m->{files}{$fileUM}{sharePathM} = "$sharePathM/$file") =~ s{//+}{/}g;
+                    ($m->{files}{$fileUM}{fullPath}   = "$path/$file")       =~ s{//+}{/}g;
                     from_to($m->{files}{$fileUM}{fullPath}, "utf8", $attribOpts->{charsetLegacy})
-                                        if ( $attribOpts->{charsetLegacy} ne "" );
-                    $m->{files}{$fileUM}{backupNum}   = $backupNum;
-                    $m->{files}{$fileUM}{compress}    = $compress;
-                    $m->{files}{$fileUM}{nlink}       = $entry->{nlink}
-                                                            if ( $m->{dirOpts}{nlink} );
-                    $m->{files}{$fileUM}{inode}       = $entry->{inode}
-                                                            if ( $m->{dirOpts}{inode} );
+                      if ( $attribOpts->{charsetLegacy} ne "" );
+                    $m->{files}{$fileUM}{backupNum} = $backupNum;
+                    $m->{files}{$fileUM}{compress}  = $compress;
+                    $m->{files}{$fileUM}{nlink}     = $entry->{nlink}
+                      if ( $m->{dirOpts}{nlink} );
+                    $m->{files}{$fileUM}{inode} = $entry->{inode}
+                      if ( $m->{dirOpts}{inode} );
                 }
             }
             #
@@ -335,17 +339,17 @@ sub dirCache
                 foreach my $fileUM ( keys(%$a) ) {
                     next if ( $a->{$fileUM}{type} != BPC_FTYPE_DELETED );
                     my $file = $fileUM;
-                    $file = $m->{bpc}->fileNameMangle($fileUM) if ( $mangle );
+                    $file                            = $m->{bpc}->fileNameMangle($fileUM) if ( $mangle );
                     $m->{files}{$fileUM}             = $a->{$fileUM};
                     $m->{files}{$fileUM}{relPath}    = "$dir/$fileUM";
                     $m->{files}{$fileUM}{sharePathM} = "$sharePathM/$file";
                     $m->{files}{$fileUM}{fullPath}   = "$path/$file";
                     from_to($m->{files}{$fileUM}{fullPath}, "utf8", $attribOpts->{charsetLegacy})
-                                        if ( $attribOpts->{charsetLegacy} ne "" );
-                    $m->{files}{$fileUM}{backupNum}  = $backupNum;
-                    $m->{files}{$fileUM}{compress}   = $compress;
-                    $m->{files}{$fileUM}{nlink}      = 0;
-                    $m->{files}{$fileUM}{inode}      = 0;
+                      if ( $attribOpts->{charsetLegacy} ne "" );
+                    $m->{files}{$fileUM}{backupNum} = $backupNum;
+                    $m->{files}{$fileUM}{compress}  = $compress;
+                    $m->{files}{$fileUM}{nlink}     = 0;
+                    $m->{files}{$fileUM}{inode}     = 0;
                 }
             }
             #
@@ -377,20 +381,22 @@ sub dirCache
         $m->{mergeNums} = [];
         my $hardlinks = {};
         for ( $i = $oldestFilled ; $i >= $m->{idx} ; $i-- ) {
+
             #print(STDERR "Do $i ($m->{backups}[$i]{noFill},$m->{backups}[$i]{level})\n");
 
             $backupNum = $m->{backups}[$i]{num};
             push(@{$m->{mergeNums}}, $backupNum);
+
             my $mangle     = $m->{backups}[$i]{mangle};
             my $compress   = $m->{backups}[$i]{compress};
             my $topPath    = "$m->{topDir}/pc/$m->{host}/$backupNum/";
-            my $sharePathM = $m->{bpc}->fileNameEltMangle($share)
-                           . $m->{bpc}->fileNameMangle($dir);
-            my $path = $topPath . $sharePathM;
+            my $sharePathM = $m->{bpc}->fileNameEltMangle($share) . $m->{bpc}->fileNameMangle($dir);
+            my $path       = $topPath . $sharePathM;
+
             #print(STDERR "Opening $path (share=$share, mangle=$mangle)\n");
 
-            my $dirOpts      = { %{$m->{dirOpts} || {} } };
-            my $attribOpts   = { compress => $compress };
+            my $dirOpts    = {%{$m->{dirOpts} || {}}};
+            my $attribOpts = {compress => $compress};
 
             if ( !-d $path && $i == $oldestFilled ) {
                 #
@@ -407,6 +413,7 @@ sub dirCache
                     push(@{$m->{error}}, "Can't read attribute file in $path\n");
                 }
             } else {
+
                 #print(STDERR "Got attr\n");
                 my $idx = 0;
                 my $a;
@@ -415,6 +422,7 @@ sub dirCache
                     last if ( !defined($a) );
                     my $fileUM = $a->{name};
                     if ( $a->{type} == BPC_FTYPE_DELETED ) {
+
                         #print(STDERR "deleting $fileUM\n");
                         delete($m->{files}{$fileUM});
                         delete($hardlinks->{$fileUM});
@@ -425,17 +433,16 @@ sub dirCache
                         $hardlinks->{$fileUM} = 1;
                     }
 
-                    $m->{files}{$fileUM}               = $a;
-                    ($m->{files}{$fileUM}{relPath}     = "$dir/$fileUM") =~ s{//+}{/}g;
+                    $m->{files}{$fileUM} = $a;
+                    ($m->{files}{$fileUM}{relPath} = "$dir/$fileUM") =~ s{//+}{/}g;
                     if ( length($a->{digest}) ) {
-                        $m->{files}{$fileUM}{fullPath} = $m->{bpc}->MD52Path($a->{digest},
-                                                                             $compress);
+                        $m->{files}{$fileUM}{fullPath} = $m->{bpc}->MD52Path($a->{digest}, $compress);
                     } else {
                         $m->{files}{$fileUM}{fullPath} = "/dev/null";
                     }
-                    $m->{files}{$fileUM}{backupNum}    = $backupNum;
-                    $m->{files}{$fileUM}{compress}     = $compress;
-                    $m->{files}{$fileUM}{inode}        = $a->{inode};
+                    $m->{files}{$fileUM}{backupNum} = $backupNum;
+                    $m->{files}{$fileUM}{compress}  = $compress;
+                    $m->{files}{$fileUM}{inode}     = $a->{inode};
                 }
             }
 
@@ -447,15 +454,16 @@ sub dirCache
                 next if ( !$m->{files}{$f} || $m->{files}{$f}{backupNum} == $backupNum );
                 my $a = $m->hardLinkGet($m->{files}{$f}, $i);
                 next if ( $a == $m->{files}{$f} );
-                $m->{files}{$f} = { %{$m->{files}{$f}}, %$a };
+                $m->{files}{$f} = {%{$m->{files}{$f}}, %$a};
                 if ( length($a->{digest}) ) {
                     $m->{files}{$f}{fullPath} = $m->{bpc}->MD52Path($a->{digest}, $compress);
                 }
-                $m->{files}{$f}{backupNum}    = $backupNum;
-                $m->{files}{$f}{inode}        = $a->{inode};
+                $m->{files}{$f}{backupNum} = $backupNum;
+                $m->{files}{$f}{inode}     = $a->{inode};
             }
         }
     }
+
     #print STDERR "Returning:\n", Dumper($m->{files}) if ( length($dir) );
 }
 
@@ -468,23 +476,23 @@ sub shareList
     my @shareList;
 
     $m->backupNumCache($backupNum) if ( $m->{num} != $backupNum );
-    return if ( $m->{idx} < 0 );
+    return                         if ( $m->{idx} < 0 );
 
     if ( $m->{backups}[$m->{idx}]{version} < 4 ) {
         my $mangle = $m->{backups}[$m->{idx}]{mangle};
-        my $path = "$m->{topDir}/pc/$m->{host}/$backupNum/";
+        my $path   = "$m->{topDir}/pc/$m->{host}/$backupNum/";
         return if ( !opendir(DIR, $path) );
         my @dir = readdir(DIR);
         closedir(DIR);
         foreach my $file ( @dir ) {
             $file = $1 if ( $file =~ /(.*)/s );
-            next if ( $file =~ /^attrib/ && $mangle
-                   || $file eq "."
-                   || $file eq ".."
-                   || $file eq "backupInfo"
-                   || $file eq "inode"
-                   || $file eq "refCnt"
-                );
+            next
+              if ( $file =~ /^attrib/ && $mangle
+                || $file eq "."
+                || $file eq ".."
+                || $file eq "backupInfo"
+                || $file eq "inode"
+                || $file eq "refCnt" );
             my $fileUM = $file;
             $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
             push(@shareList, $fileUM);
@@ -531,6 +539,7 @@ sub fileAttrib
         $m->dirCache($backupNum, $share, $path);
         return $m->{files}{$file};
     } else {
+
         #print STDERR "Got empty $path\n";
         $m->dirCache($backupNum, "", "");
         my $attr = $m->{files}{$share};
@@ -574,13 +583,12 @@ sub backupList
     $dir =~ s{/+$}{};
 
     for ( $i = @{$m->{backups}} - 1 ; $i >= 0 ; $i-- ) {
-	my $backupNum = $m->{backups}[$i]{num};
-	my $mangle = $m->{backups}[$i]{mangle};
-	my $path   = "$m->{topDir}/pc/$m->{host}/$backupNum/";
+        my $backupNum = $m->{backups}[$i]{num};
+        my $mangle    = $m->{backups}[$i]{mangle};
+        my $path      = "$m->{topDir}/pc/$m->{host}/$backupNum/";
         my $sharePathM;
         if ( $mangle ) {
-            $sharePathM = $m->{bpc}->fileNameEltMangle($share)
-                        . $m->{bpc}->fileNameMangle($dir);
+            $sharePathM = $m->{bpc}->fileNameEltMangle($share) . $m->{bpc}->fileNameMangle($dir);
         } else {
             $sharePathM = $share . $dir;
         }
@@ -626,7 +634,7 @@ sub dirHistory
 {
     my($m, $share, $dir) = @_;
     my($i, $level);
-    my $files = {};
+    my $files     = {};
     my $hardlinks = {};
 
     $dir = "/$dir" if ( $dir !~ m{^/} );
@@ -637,48 +645,48 @@ sub dirHistory
     # the first one, and working forward.
     #
     for ( $i = 0 ; $i < @{$m->{backups}} ; $i++ ) {
-	$level        = $m->{backups}[$i]{level};
-	my $backupNum = $m->{backups}[$i]{num};
-	my $mangle    = $m->{backups}[$i]{mangle};
-	my $compress  = $m->{backups}[$i]{compress};
-	my $path      = "$m->{topDir}/pc/$m->{host}/$backupNum/";
-	my $legacyCharset = $m->{backups}[$i]{version} < 3.0;
+        $level = $m->{backups}[$i]{level};
+
+        my $backupNum     = $m->{backups}[$i]{num};
+        my $mangle        = $m->{backups}[$i]{mangle};
+        my $compress      = $m->{backups}[$i]{compress};
+        my $path          = "$m->{topDir}/pc/$m->{host}/$backupNum/";
+        my $legacyCharset = $m->{backups}[$i]{version} < 3.0;
         my $sharePathM;
 
         last if ( $m->{backups}[$i]{version} >= 4 );
 
         if ( $mangle ) {
-            $sharePathM = $m->{bpc}->fileNameEltMangle($share)
-                        . $m->{bpc}->fileNameMangle($dir);
+            $sharePathM = $m->{bpc}->fileNameEltMangle($share) . $m->{bpc}->fileNameMangle($dir);
         } else {
             $sharePathM = $share . $dir;
         }
         $path .= $sharePathM;
-	#print(STDERR "Opening $path (share=$share)\n");
 
-        my $dirOpts      = { %{$m->{dirOpts} || {} } };
-        my $attribOpts   = { compress => $compress };
+        #print(STDERR "Opening $path (share=$share)\n");
+
+        my $dirOpts    = {%{$m->{dirOpts} || {}}};
+        my $attribOpts = {compress => $compress};
         if ( $legacyCharset ) {
-            $dirOpts->{charsetLegacy}
-                    = $attribOpts->{charsetLegacy}
-                    = $m->{bpc}->{Conf}{ClientCharsetLegacy} || "iso-8859-1";
+            $dirOpts->{charsetLegacy} = $attribOpts->{charsetLegacy} =
+              $m->{bpc}->{Conf}{ClientCharsetLegacy} || "iso-8859-1";
         }
 
         my $dirInfo = BackupPC::DirOps::dirRead($m->{bpc}, $path, $dirOpts);
-	if ( !defined($dirInfo) ) {
-	    #
-	    # Oops, directory doesn't exist.
-	    #
-	    next;
+        if ( !defined($dirInfo) ) {
+            #
+            # Oops, directory doesn't exist.
+            #
+            next;
         }
         my $attr;
-	if ( $mangle ) {
-	    $attr = BackupPC::XS::Attrib::new($compress);
-	    if ( !$attr->read($path) ) {
+        if ( $mangle ) {
+            $attr = BackupPC::XS::Attrib::new($compress);
+            if ( !$attr->read($path) ) {
                 push(@{$m->{error}}, "Can't read attribute file in $path");
-		$attr = undef;
-	    }
-	}
+                $attr = undef;
+            }
+        }
         if ( $attr && length($attr->digest()) ) {
             #
             # new style V4 attributes - everything is in the attrib file
@@ -689,35 +697,36 @@ sub dirHistory
                 ($a, $idx) = $attr->iterate($idx);
                 last if ( !defined($a) );
                 my $fileUM = $a->{name};
-                $files->{$fileUM}[$i]               = $a;
+                $files->{$fileUM}[$i] = $a;
                 $attr->delete($fileUM);
-                ($files->{$fileUM}[$i]{relPath}     = "$dir/$fileUM") =~ s{//+}{/}g;
+                ($files->{$fileUM}[$i]{relPath} = "$dir/$fileUM") =~ s{//+}{/}g;
                 if ( length($a->{digest}) ) {
-                    $files->{$fileUM}[$i]{fullPath} = $m->{bpc}->MD52Path($a->{digest},
-                                                                         $compress);
+                    $files->{$fileUM}[$i]{fullPath} = $m->{bpc}->MD52Path($a->{digest}, $compress);
                 } else {
                     $files->{$fileUM}[$i]{fullPath} = "/dev/null";
                 }
-                $files->{$fileUM}[$i]{backupNum}    = $backupNum;
-                $files->{$fileUM}[$i]{compress}     = $compress;
+                $files->{$fileUM}[$i]{backupNum} = $backupNum;
+                $files->{$fileUM}[$i]{compress}  = $compress;
             }
         } else {
             foreach my $entry ( @$dirInfo ) {
-                my $file = $1 if ( $entry->{name} =~ /(.*)/s );
+                my $file   = $1 if ( $entry->{name} =~ /(.*)/s );
                 my $fileUM = $file;
                 $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
+
                 #print(STDERR "Doing $fileUM\n");
                 #
                 # skip special files
                 #
-                next if (  $file eq ".."
-                        || $file eq "."
-                        || $mangle && $file =~ /^attrib/
-                        || defined($files->{$fileUM}[$i]) );
+                next
+                  if ( $file eq ".."
+                    || $file eq "."
+                    || $mangle && $file =~ /^attrib/
+                    || defined($files->{$fileUM}[$i]) );
 
                 my $realPath = "$path/$file";
                 from_to($realPath, "utf8", $attribOpts->{charsetLegacy})
-                                if ( $attribOpts->{charsetLegacy} ne "" );
+                  if ( $attribOpts->{charsetLegacy} ne "" );
                 my @s = stat($realPath);
                 if ( defined($attr) && defined(my $a = $attr->get($fileUM)) ) {
                     $files->{$fileUM}[$i] = $a;
@@ -753,44 +762,44 @@ sub dirHistory
                         }
                     }
                 }
-                ($files->{$fileUM}[$i]{relPath}    = "$dir/$fileUM") =~ s{//+}{/}g;
-                ($files->{$fileUM}[$i]{sharePathM} = "$sharePathM/$file")
-                                                                    =~ s{//+}{/}g;
-                ($files->{$fileUM}[$i]{fullPath}   = "$path/$file") =~ s{//+}{/}g;
-                $files->{$fileUM}[$i]{backupNum}   = $backupNum;
-                $files->{$fileUM}[$i]{compress}    = $compress;
-                $files->{$fileUM}[$i]{nlink}       = $entry->{nlink}
-                                                        if ( $m->{dirOpts}{nlink} );
-                $files->{$fileUM}[$i]{inode}       = $entry->{inode}
-                                                        if ( $m->{dirOpts}{inode} );
+                ($files->{$fileUM}[$i]{relPath}    = "$dir/$fileUM")      =~ s{//+}{/}g;
+                ($files->{$fileUM}[$i]{sharePathM} = "$sharePathM/$file") =~ s{//+}{/}g;
+                ($files->{$fileUM}[$i]{fullPath}   = "$path/$file")       =~ s{//+}{/}g;
+                $files->{$fileUM}[$i]{backupNum} = $backupNum;
+                $files->{$fileUM}[$i]{compress}  = $compress;
+                $files->{$fileUM}[$i]{nlink}     = $entry->{nlink}
+                  if ( $m->{dirOpts}{nlink} );
+                $files->{$fileUM}[$i]{inode} = $entry->{inode}
+                  if ( $m->{dirOpts}{inode} );
             }
         }
-	#
-	# Flag deleted files
-	#
-	if ( defined($attr) ) {
-	    my $a = $attr->get;
-	    foreach my $fileUM ( keys(%$a) ) {
-		next if ( $a->{$fileUM}{type} != BPC_FTYPE_DELETED );
-		$files->{$fileUM}[$i]{type} = BPC_FTYPE_DELETED;
-	    }
-	}
+        #
+        # Flag deleted files
+        #
+        if ( defined($attr) ) {
+            my $a = $attr->get;
+            foreach my $fileUM ( keys(%$a) ) {
+                next if ( $a->{$fileUM}{type} != BPC_FTYPE_DELETED );
+                $files->{$fileUM}[$i]{type} = BPC_FTYPE_DELETED;
+            }
+        }
 
-	#
-	# Merge old backups.  Don't merge directories from old
-	# backups because every backup has an accurate directory
-	# tree.
-	#
-	for ( my $k = $i - 1 ; $level > 0 && $k >= 0 ; $k-- ) {
-	    next if ( $m->{backups}[$k]{level} >= $level );
-	    $level = $m->{backups}[$k]{level};
-	    foreach my $fileUM ( keys(%$files) ) {
-		next if ( !defined($files->{$fileUM}[$k])
-			|| defined($files->{$fileUM}[$i])
-			|| $files->{$fileUM}[$k]{type} == BPC_FTYPE_DIR );
-		$files->{$fileUM}[$i] = $files->{$fileUM}[$k];
-	    }
-	}
+        #
+        # Merge old backups.  Don't merge directories from old
+        # backups because every backup has an accurate directory
+        # tree.
+        #
+        for ( my $k = $i - 1 ; $level > 0 && $k >= 0 ; $k-- ) {
+            next if ( $m->{backups}[$k]{level} >= $level );
+            $level = $m->{backups}[$k]{level};
+            foreach my $fileUM ( keys(%$files) ) {
+                next
+                  if ( !defined($files->{$fileUM}[$k])
+                    || defined($files->{$fileUM}[$i])
+                    || $files->{$fileUM}[$k]{type} == BPC_FTYPE_DIR );
+                $files->{$fileUM}[$i] = $files->{$fileUM}[$k];
+            }
+        }
     }
 
     #
@@ -800,7 +809,7 @@ sub dirHistory
         last if ( $m->{backups}[$i]{version} >= 4 );
         foreach my $fileUM ( keys(%$files) ) {
             next if ( !defined($files->{$fileUM}[$i])
-                    || $files->{$fileUM}[$i]{type} != BPC_FTYPE_DELETED );
+                || $files->{$fileUM}[$i]{type} != BPC_FTYPE_DELETED );
             $files->{$fileUM}[$i] = undef;
         }
     }
@@ -814,6 +823,7 @@ sub dirHistory
     # some part of the backup has changed.
     #
     for ( $i = @{$m->{backups}} - 1 ; $i >= 0 ; $i-- ) {
+
         #print(STDERR "Do $i (num = $m->{backups}[$i]{num}, fill = $m->{backups}[$i]{noFill}, level = $m->{backups}[$i]{level})\n");
 
         last if ( $m->{backups}[$i]{version} < 4 );
@@ -823,7 +833,7 @@ sub dirHistory
             # Copy all the file information from $i + 1 to $i
             #
             foreach my $fileUM ( keys(%$files) ) {
-                $files->{$fileUM}[$i] = $files->{$fileUM}[$i+1];
+                $files->{$fileUM}[$i] = $files->{$fileUM}[$i + 1];
             }
         }
 
@@ -831,13 +841,13 @@ sub dirHistory
         my $mangle     = $m->{backups}[$i]{mangle};
         my $compress   = $m->{backups}[$i]{compress};
         my $topPath    = "$m->{topDir}/pc/$m->{host}/$backupNum/";
-        my $sharePathM = $m->{bpc}->fileNameEltMangle($share)
-                       . $m->{bpc}->fileNameMangle($dir);
-        my $path = $topPath . $sharePathM;
+        my $sharePathM = $m->{bpc}->fileNameEltMangle($share) . $m->{bpc}->fileNameMangle($dir);
+        my $path       = $topPath . $sharePathM;
+
         #print(STDERR "Opening $path (share=$share, mangle=$mangle)\n");
 
-        my $dirOpts      = { %{$m->{dirOpts} || {} } };
-        my $attribOpts   = { compress => $compress };
+        my $dirOpts    = {%{$m->{dirOpts} || {}}};
+        my $attribOpts = {compress => $compress};
 
         if ( !-d $path ) {
             #
@@ -877,15 +887,15 @@ sub dirHistory
                         $hardlinks->{$fileUM} = 1;
                     }
                     $files->{$fileUM}[$i] = $a;
-                    ($files->{$fileUM}[$i]{relPath}     = "$dir/$fileUM") =~ s{//+}{/}g;
+                    ($files->{$fileUM}[$i]{relPath} = "$dir/$fileUM") =~ s{//+}{/}g;
                     if ( length($a->{digest}) ) {
                         $files->{$fileUM}[$i]{fullPath} = $m->{bpc}->MD52Path($a->{digest}, $compress);
                     } else {
                         $files->{$fileUM}[$i]{fullPath} = "/dev/null";
                     }
-                    $files->{$fileUM}[$i]{backupNum}    = $backupNum;
-                    $files->{$fileUM}[$i]{compress}     = $compress;
-                    $files->{$fileUM}[$i]{inode}        = $a->{inode};
+                    $files->{$fileUM}[$i]{backupNum} = $backupNum;
+                    $files->{$fileUM}[$i]{compress}  = $compress;
+                    $files->{$fileUM}[$i]{inode}     = $a->{inode};
                 }
             }
         }
@@ -898,19 +908,18 @@ sub dirHistory
             next if ( !$files->{$f}[$i] || $files->{$f}[$i]{backupNum} == $backupNum );
             my $a = $m->hardLinkGet($files->{$f}[$i], $i);
             next if ( $a == $files->{$f}[$i] );
-            $files->{$f}[$i] = { %{$files->{$f}[$i]}, %$a };
+            $files->{$f}[$i] = {%{$files->{$f}[$i]}, %$a};
             if ( length($a->{digest}) ) {
                 $files->{$f}[$i]{fullPath} = $m->{bpc}->MD52Path($a->{digest}, $compress);
             }
-            $files->{$f}[$i]{backupNum}    = $backupNum;
-            $files->{$f}[$i]{inode}        = $a->{inode};
+            $files->{$f}[$i]{backupNum} = $backupNum;
+            $files->{$f}[$i]{inode}     = $a->{inode};
         }
     }
 
     #print STDERR "Returning:\n", Dumper($files);
     return $files;
 }
-
 
 #
 # Do a recursive find starting at the given path (either a file
@@ -935,8 +944,7 @@ sub find
     #
     # Now recurse into subdirectories
     #
-    $m->findRecurse($backupNum, $share, $path, $depth,
-		    $callback, @callbackArgs);
+    $m->findRecurse($backupNum, $share, $path, $depth, $callback, @callbackArgs);
 }
 
 #
@@ -956,8 +964,7 @@ sub findRecurse
         #
         # For depth-first, recurse as we hit each directory
         #
-        $m->findRecurse($backupNum, $share, "$path/$file", $depth,
-			     $callback, @callbackArgs);
+        $m->findRecurse($backupNum, $share, "$path/$file", $depth, $callback, @callbackArgs);
     }
     if ( $depth == 0 ) {
         #
@@ -965,8 +972,7 @@ sub findRecurse
         #
         foreach my $file ( sort(keys(%{$attr})) ) {
             next if ( $attr->{$file}{type} != BPC_FTYPE_DIR );
-            $m->findRecurse($backupNum, $share, "$path/$file", $depth,
-			    $callback, @callbackArgs);
+            $m->findRecurse($backupNum, $share, "$path/$file", $depth, $callback, @callbackArgs);
         }
     }
 }

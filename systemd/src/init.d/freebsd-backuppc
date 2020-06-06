@@ -63,7 +63,7 @@ backuppc_status()
     else
         echo "${name} running"
     fi
-}    
+}
 
 backuppc_reload()
 {

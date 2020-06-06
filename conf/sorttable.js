@@ -36,12 +36,12 @@ function ts_makeSortable(table) {
     var headerRowIdx = ts_getHeaderRowIdx(table);
     if (headerRowIdx === false) return;
     var headerRow = table.rows[headerRowIdx];
-    
+
     for (var i=0;i<headerRow.cells.length;i++) {
         var cell = headerRow.cells[i];
         var txt = ts_getInnerText(cell);
-        cell.innerHTML = '<a href="#" class="sortheader" '+ 
-        'onclick="ts_resortTable(this, '+i+');return false;">' + 
+        cell.innerHTML = '<a href="#" class="sortheader" '+
+        'onclick="ts_resortTable(this, '+i+');return false;">' +
         txt+'<span class="sortarrow">&nbsp;&nbsp;&nbsp;</span></a>';
     }
 }
@@ -55,7 +55,7 @@ function ts_getInnerText(el) {
     if (el.innerText) return el.innerText.trim();
 
 	var str = "";
-	
+
 	var cs = el.childNodes;
 	var l = cs.length;
 	for (var i = 0; i < l; i++) {
@@ -81,7 +81,7 @@ function ts_resortTable(lnk,clid) {
     var td = lnk.parentNode;
     SORT_COLUMN_INDEX = clid || td.cellIndex;
     var table = getParent(td,'TABLE');
-    
+
     // Work out a type for the column
     if (table.rows.length <= 1) return;
     var cell = table.rows[1].cells[SORT_COLUMN_INDEX];
@@ -115,13 +115,13 @@ function ts_resortTable(lnk,clid) {
         ARROW = '&nbsp;&nbsp;&darr;';
         span.setAttribute('sortdir','down');
     }
-    
+
     // We appendChild rows that already exist to the tbody, so it moves them rather than creating new ones
     // don't do sortbottom rows
     for (i=0;i<newRows.length;i++) { if (!newRows[i].className || (newRows[i].className && (newRows[i].className.indexOf('sortbottom') == -1))) table.tBodies[0].appendChild(newRows[i]);}
     // do sortbottom rows only
     for (i=0;i<newRows.length;i++) { if (newRows[i].className && (newRows[i].className.indexOf('sortbottom') != -1)) table.tBodies[0].appendChild(newRows[i]);}
-    
+
     // Delete any other arrows there may be showing
     var allspans = document.getElementsByTagName("span");
     for (var ci=0;ci<allspans.length;ci++) {
@@ -131,7 +131,7 @@ function ts_resortTable(lnk,clid) {
             }
         }
     }
-        
+
     span.innerHTML = ARROW;
 }
 

@@ -202,7 +202,7 @@ $Conf{BackupPCNightlyPeriod} = 1;
 # The total size of the files in the new V4 pool is updated every
 # night when BackupPC_nightly runs BackupPC_refCountUpdate.  Instead
 # of adding up the size of every pool file, it just updates the pool
-# size total when files are added to or removed from the pool. 
+# size total when files are added to or removed from the pool.
 #
 # To make sure these cumulative pool file sizes stay accurate, we
 # recompute the V4 pool size for a portion of the pool each night
@@ -531,7 +531,7 @@ $Conf{FillCycle} = 0;
 #
 #    full 0 19 weeks old   \
 #    full 1 15 weeks old    >---  3 backups at 4 * $Conf{FillCycle}
-#    full 2 11 weeks old   / 
+#    full 2 11 weeks old   /
 #    full 3  7 weeks old   \____  2 backups at 2 * $Conf{FillCycle}
 #    full 4  5 weeks old   /
 #    full 5  3 weeks old   \
@@ -545,7 +545,7 @@ $Conf{FillCycle} = 0;
 #
 #    full 0 16 weeks old   \
 #    full 1 12 weeks old    >---  3 backups at 4 * $Conf{FillCycle}
-#    full 2  8 weeks old   / 
+#    full 2  8 weeks old   /
 #    full 3  6 weeks old   \____  2 backups at 2 * $Conf{FillCycle}
 #    full 4  4 weeks old   /
 #    full 5  3 weeks old   \
@@ -850,7 +850,7 @@ $Conf{BackupZeroFilesIsFatal} = 1;
 #   - 'archive': host is a special archive host.  Backups are not done.
 #                An archive host is used to archive other host's backups
 #                to permanent media, such as tape, CDR or DVD.
-#               
+#
 #
 $Conf{XferMethod} = 'smb';
 
@@ -1530,10 +1530,10 @@ $Conf{ArchivePar} = 0;
 #
 # Archive Size Split
 #
-# Only for file archives. Splits the output into 
+# Only for file archives. Splits the output into
 # the specified size * 1,000,000.
 # e.g. to split into 650,000,000 bytes, specify 650 below.
-# 
+#
 # If the value is 0, or if $Conf{ArchiveDest} is an existing file or
 # device (e.g. a streaming tape drive), this feature is disabled.
 #
@@ -1952,9 +1952,9 @@ $Conf{EMailUserDestDomain} = '';
 #   To: $user$domain
 #   cc:
 #   Subject: $subj
-#   
+#
 #   Dear $userName,
-#   
+#
 #   This is a site-specific email message.
 #   EOF
 #
@@ -1980,9 +1980,9 @@ $Conf{EMailNotifyOldBackupDays} = 7.0;
 #   To: $user$domain
 #   cc:
 #   Subject: $subj
-#   
+#
 #   Dear $userName,
-#   
+#
 #   This is a site-specific email message.
 #   EOF
 #
@@ -2008,9 +2008,9 @@ $Conf{EMailNotifyOldOutlookDays} = 5.0;
 #   To: $user$domain
 #   cc:
 #   Subject: $subj
-#   
+#
 #   Dear $userName,
-#   
+#
 #   This is a site-specific email message.
 #   EOF
 #
@@ -2099,7 +2099,7 @@ $Conf{CgiURL} = '';
 #
 $Conf{RrdToolPath} = '';
 
-#   
+#
 # Language to use.  See lib/BackupPC/Lang for the list of supported
 # languages, which include English (en), French (fr), Spanish (es),
 # German (de), Italian (it), Dutch (nl), Polish (pl), Portuguese
@@ -2185,8 +2185,8 @@ $Conf{CgiStatusHilightColor} = {
     Reason_no_ping                 => '#ffff99',
     Reason_backup_canceled_by_user => '#ff9900',
     Status_backup_in_progress      => '#66cc99',
-    Disabled_OnlyManualBackups     => '#d1d1d1',   
-    Disabled_AllBackupsDisabled    => '#d1d1d1',          
+    Disabled_OnlyManualBackups     => '#d1d1d1',
+    Disabled_AllBackupsDisabled    => '#d1d1d1',
 };
 
 #

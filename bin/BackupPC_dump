@@ -1724,7 +1724,7 @@ sub BackupExpire
 	$oldestFull = (time - $Backups[$firstFull]{startTime}) / (24 * 3600)
                         if ( $cntFull > 0 );
 
-        
+
         if ( $XferLOG ) {
             my $logStr = "BackupExpire: cntFull = $cntFull, cntIncr = $cntIncr, firstFull = $firstFull,"
                        . " firstIncr = $firstIncr, oldestIncr = $oldestIncr, oldestFull = $oldestFull\n";

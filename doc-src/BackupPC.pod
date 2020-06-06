@@ -800,7 +800,7 @@ rsync on each client machine.  Version 3+ is strongly recommended, but
 earlier versions will work too. See L<http://rsync.samba.org>.
 Use "rsync --version" to check your version.
 
-For BackupPC to use Rsync you will also need to install rsync-bpc on 
+For BackupPC to use Rsync you will also need to install rsync-bpc on
 the server.
 
 =item *
@@ -1263,22 +1263,22 @@ correctly (eg: 'cp1252') so that the WinXX filename encoding is
 correctly converted to utf8.
 
 Otherwise, to use SMB, you can either create shares for the data you want
-to backup or your can use the existing C$ share.  To create a new 
+to backup or your can use the existing C$ share.  To create a new
 share, open "My Computer", right click on the drive (eg: C), and
 select "Sharing..." (or select "Properties" and select the "Sharing"
 tab). In this dialog box you can enable sharing, select the share name
 and permissions.
 
-All Windows NT based OS (NT, 2000, XP Pro), are configured by default 
-to share the entire C drive as C$.  This is a special share used for 
-various administration functions, one of which is to grant access to backup 
-operators. All you need to do is create a new domain user, specifically 
-for backup. Then add the new backup user to the built in "Backup 
-Operators" group. You now have backup capability for any directory on 
-any computer in the domain in one easy step. This avoids using 
-administrator accounts and only grants permission to do exactly what you 
+All Windows NT based OS (NT, 2000, XP Pro), are configured by default
+to share the entire C drive as C$.  This is a special share used for
+various administration functions, one of which is to grant access to backup
+operators. All you need to do is create a new domain user, specifically
+for backup. Then add the new backup user to the built in "Backup
+Operators" group. You now have backup capability for any directory on
+any computer in the domain in one easy step. This avoids using
+administrator accounts and only grants permission to do exactly what you
 want for the given user, i.e.: backup.
-Also, for additional security, you may wish to deny the ability for this 
+Also, for additional security, you may wish to deny the ability for this
 user to logon to computers in the default domain policy.
 
 If this machine uses DHCP you will also need to make sure the
@@ -1737,7 +1737,7 @@ Ports (eg: 80 is standard, 8080 is a typical alternative port accessed
 via http://yourhost.com:8080).
 
 Inside BackupPC's Apache http.conf file you should check the
-settings for ServerRoot, DocumentRoot, User, Group, and Port.  See 
+settings for ServerRoot, DocumentRoot, User, Group, and Port.  See
 L<http://httpd.apache.org/docs/server-wide.html> for more details.
 
 For mod_perl, BackupPC_Admin should not have setuid permission, so
@@ -1772,7 +1772,7 @@ this works (with tweaks from Michael Tuzi):
 	Options +ExecCGI
 	Order deny,allow
 	Deny from all
-	Allow from 192.168.0  
+	Allow from 192.168.0
 	AuthName "Backup Admin"
 	AuthType Basic
 	AuthUserFile /path/to/user_file
@@ -2186,7 +2186,7 @@ The usage is:
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the tar archive is created;
                        can be "*" to mean all shares.
-  
+
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -2222,7 +2222,7 @@ The usage is:
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the zip archive is created
-  
+
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -2301,14 +2301,14 @@ and customized as needed.
 To create an Archive Host, add it to the hosts file just as any other host
 and call it a name that best describes the type of archive, e.g. ArchiveDLT
 
-To tell BackupPC that the Host is for Archives, create a config.pl file in 
+To tell BackupPC that the Host is for Archives, create a config.pl file in
 the Archive Hosts's pc directory, adding the following line:
 
 $Conf{XferMethod} = 'archive';
 
 To further customise the archive's parameters you can add the changed
 parameters in the host's config.pl file. The parameters are explained in
-the config.pl file.  Parameters may be fixed or the user can be allowed 
+the config.pl file.  Parameters may be fixed or the user can be allowed
 to change them (eg: output device).
 
 The per-host archive command is $Conf{ArchiveClientCmd}.  By default
@@ -2502,7 +2502,7 @@ BackupPC_backupDuplicate and BackupPC_fsck.  Usage:
           -v     - verbose
       Notes: in case there are legacy (ie: <=4.0.0alpha3) unapplied poolCntDelta
       files in TopDir/pc/HOST/refCnt then the -f flag is turned on.
-  
+
     BackupPC_refCountUpdate -m [-f] [-p] [-c] [-r N-M] [-s] [-v] [-P phase]
           -m       Updates main count db, based on each HOST
           -f     - do an fsck on all the hosts, ignoring poolCntDelta files,
@@ -2857,7 +2857,7 @@ For example, if a file has an MD5 digest of 123456789abcdef0123456789abcdef0,
 the uncompressed file is stored in __TOPDIR__/pool/12/34/123456789abcdef0123456789abcdef0.
 
 Duplicates digest are represented with one (or more) hex byte extensions.
-So three colliding files would be stored as 
+So three colliding files would be stored as
 
 	__TOPDIR__/pool/12/34/123456789abcdef0123456789abcdef0
 	__TOPDIR__/pool/12/34/123456789abcdef0123456789abcdef000
@@ -3431,7 +3431,7 @@ multiple backups, which is common.
 BackupPC doesn't care about the access time of files in the pool
 since it saves attribute metadata separate from the files.  Since
 BackupPC mostly does reads from disk, maintaining the access time of
-files generates a lot of unnecessary disk writes.  So, provided 
+files generates a lot of unnecessary disk writes.  So, provided
 BackupPC has a dedicated data disk, you should consider mounting
 BackupPC's data directory with the noatime (or, with Linux kernels
 >=2.6.20, relatime) attribute (see mount(1)).
@@ -3477,7 +3477,7 @@ Upon startup.
 
 =item *
 
-When BackupPC is sent a HUP (-1) signal.  Assuming you installed the 
+When BackupPC is sent a HUP (-1) signal.  Assuming you installed the
 init.d script, you can also do this with "/etc/init.d/backuppc reload".
 
 =item *

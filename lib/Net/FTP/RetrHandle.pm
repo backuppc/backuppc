@@ -144,7 +144,7 @@ sub seek
 
 sub _newpos
 {
-  
+
   my($curpos,$size,$pos,$whence)=@_;
   if ($whence == 0) # seek_set
   {
@@ -218,12 +218,12 @@ sub read
 {
   my $self = shift;
 #  return $self->sysread(@_);
-  
+
   my(undef,$len,$offset)=@_;
   $offset ||= 0;
   warn "READ(buf,$len,$offset)\n"
     if ($ENV{DEBUG});
-  
+
   if (!defined($self->{_buf}) || length($self->{_buf}) <= 0)
   {
     $self->sysread($self->{_buf},_max($len,$self->{BlockSize}))
@@ -248,7 +248,7 @@ sub sysread
   {
     return 0;
   }
-  
+
   my(undef,$len,$offset) = @_;
   $offset ||= 0;
 
@@ -342,14 +342,14 @@ sub _at_eof
 #  $self->{ftp_data}->_close();
   $self->{ftp_running} = $self->{ftp_data} = undef;
 }
-  
+
 sub _finish_connection
 {
   my $self = shift;
   warn "_finish_connection\n"
     if ($ENV{DEBUG});
   return unless ($self->{ftp_running});
-  
+
   if ($self->{size} - $self->{pos} < $self->{MaxSkipSize})
   {
     warn "Skipping " . ($self->{size}-$self->{pos}) . " bytes\n"
@@ -634,16 +634,16 @@ Here's an example of listing a Zip file without downloading the whole
 thing:
 
     #!/usr/bin/perl
-    
+
     use warnings;
     use strict;
-    
+
     use Net::FTP;
     use Net::FTP::AutoReconnect;
     use Net::FTP::RetrHandle;
     use Archive::Zip;
-    
-    my $ftp = Net::FTP::AutoReconnect->new("ftp.info-zip.com", Debug => $ENV{DEBUG}) 
+
+    my $ftp = Net::FTP::AutoReconnect->new("ftp.info-zip.com", Debug => $ENV{DEBUG})
         or die "connect error\n";
     $ftp->login('anonymous','example@example.com')
         or die "login error\n";

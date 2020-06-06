@@ -173,7 +173,7 @@ EOF
 # two main directories (in addition to CGI and html pages)
 #
 #    TopDir       which includes subdirs conf, log, pc, pool, cpool
-#                
+#
 #    InstallDir   which includes subdirs bin, lib, share/doc/BackupPC
 #
 # With FHS enabled (which is the default for new installations)
@@ -612,7 +612,7 @@ if ( defined($Conf{BlackoutHourBegin}) ) {
 	     hourBegin => $Conf{BlackoutHourBegin},
 	     hourEnd   => $Conf{BlackoutHourEnd},
 	     weekDays  => $Conf{BlackoutWeekDays},
-	 } 
+	 }
     ];
     delete($Conf{BlackoutHourBegin});
     delete($Conf{BlackoutHourEnd});
@@ -1470,7 +1470,7 @@ questions that are normally prompted:
 
 For a batch upgrade, you only need to specify the path to the
 configuration file:
-        
+
     configure.pl --batch --config-path /data/BackupPC/conf/config.pl
 
 =head1 AUTHOR

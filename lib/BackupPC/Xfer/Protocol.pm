@@ -319,17 +319,17 @@ sub loadInclExclRegexps
    	    push @BackupFilesOnly, @{ $conf->{BackupFilesOnly}{$share} }
 	        if ( defined( $conf->{BackupFilesOnly}{$share} ) );
         }
-	
+
     } elsif ( ref( $conf->{BackupFilesOnly} ) eq "ARRAY" ) {
-	
+
         push( @BackupFilesOnly, @{ $conf->{BackupFilesOnly} } );
-	
+
     } elsif ( !defined( $conf->{BackupFilesOnly} ) ) {
 
         #
         # do nothing
         #
-	
+
     } else {
 
         #

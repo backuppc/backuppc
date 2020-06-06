@@ -864,7 +864,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
     function toggleThis(checkbox)
     {
        var cb = eval("document.form1."+checkbox);
-       cb.checked = !cb.checked;	
+       cb.checked = !cb.checked;
     }
 
 //-->
@@ -1540,4 +1540,3 @@ $Lang{CfgEdit_Log_Host_Add}
             = "\$User adicionado host \$host: \$value\n";
 
 #end of lang_pt_BR.pm
-

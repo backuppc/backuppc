@@ -2136,7 +2136,7 @@ Merged pull requests: #93, #94, #97, #102
 # Version 1.4.0, 16 Mar 2002
 #------------------------------------------------------------------------
 
-* BackupPC now supports tar (in addition to smb) for extracting host	
+* BackupPC now supports tar (in addition to smb) for extracting host
   data.  This is the most convenient option for linux/unix hosts.
   Tar can be configured to run over ssh, rsh or to backup a local
   nfs mount from the host.

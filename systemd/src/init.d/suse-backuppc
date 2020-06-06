@@ -29,22 +29,22 @@ fi
 case "$1" in
   start)
     echo -n "Starting $NAME: "
-    startproc -f  -p $RUNDIR/BackupPC.pid -u $USER $BINDIR/$DAEMON -d 
+    startproc -f  -p $RUNDIR/BackupPC.pid -u $USER $BINDIR/$DAEMON -d
     echo "ok."
     ;;
   stop)
     echo -n "Stopping $NAME: "
     start-stop-daemon --stop --pidfile $RUNDIR/BackupPC.pid -u $USER \
-			    --oknodo 
+			    --oknodo
     echo "ok."
       ;;
   restart)
     echo -n "Stopping $NAME: "
     start-stop-daemon --stop --pidfile $RUNDIR/BackupPC.pid -u $USER \
-			    --oknodo 
+			    --oknodo
     echo "ok."
     echo -n "Starting $NAME: "
-    startproc -f  -p $RUNDIR/BackupPC.pid -u $USER $BINDIR/$DAEMON -d 
+    startproc -f  -p $RUNDIR/BackupPC.pid -u $USER $BINDIR/$DAEMON -d
     echo "ok."
     ;;
   reload|force-reload)

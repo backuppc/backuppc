@@ -29,7 +29,7 @@ stop() {
 restart() {
     stop
     start
-}	
+}
 
 reload() {
     /usr/bin/pkill -1 -f "__INSTALLDIR__/bin/BackupPC -d"

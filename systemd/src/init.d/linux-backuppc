@@ -28,10 +28,10 @@ start() {
     # for normal users!  See the documentation for more information.
     #
     # Replace the daemon line below with this:
-    #   
+    #
     #  daemon --user __BACKUPPCUSER__ /usr/bin/env BPC_SMB_PASSWD=xxxxx \
     #				__INSTALLDIR__/bin/BackupPC -d
-    #   
+    #
     echo -n "Starting BackupPC: "
     daemon --user __BACKUPPCUSER__ __INSTALLDIR__/bin/BackupPC -d
     RETVAL=$?
@@ -39,7 +39,7 @@ start() {
     [ $RETVAL -eq 0 ] && touch /var/lock/subsys/backuppc || \
        RETVAL=1
     return $RETVAL
-}	
+}
 
 stop() {
     echo -n "Shutting down BackupPC: "
@@ -48,12 +48,12 @@ stop() {
     [ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/backuppc
     echo ""
     return $RETVAL
-}	
+}
 
 restart() {
     stop
     start
-}	
+}
 
 reload() {
     echo -n "Reloading config.pl file: "
@@ -61,7 +61,7 @@ reload() {
     RETVAL=$?
     echo
     return $RETVAL
-}	
+}
 
 rhstatus() {
     status __INSTALLDIR__/bin/BackupPC

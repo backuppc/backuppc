@@ -18,12 +18,12 @@ use utf8;
 
 # --------------------------------
 
-$Lang{Start_Archive} = "开始备档";
+$Lang{Start_Archive}        = "开始备档";
 $Lang{Stop_Dequeue_Archive} = "中止／取消备档";
-$Lang{Start_Full_Backup} = "开始完全备份";
-$Lang{Start_Incr_Backup} = "开始增量备份";
-$Lang{Stop_Dequeue_Backup} = "中止／取消备份";
-$Lang{Restore} = "恢复";
+$Lang{Start_Full_Backup}    = "开始完全备份";
+$Lang{Start_Incr_Backup}    = "开始增量备份";
+$Lang{Stop_Dequeue_Backup}  = "中止／取消备份";
+$Lang{Restore}              = "恢复";
 
 $Lang{Type_full} = "完全";
 $Lang{Type_incr} = "增量";
@@ -31,9 +31,9 @@ $Lang{Type_incr} = "增量";
 # -----
 
 $Lang{Only_privileged_users_can_view_admin_options} = "只有特权用户可以查看管理选项。";
-$Lang{H_Admin_Options} = "BackupPC 服务器：管理选项";
-$Lang{Admin_Options} = "管理选项";
-$Lang{Admin_Options_Page} = <<EOF;
+$Lang{H_Admin_Options}                              = "BackupPC 服务器：管理选项";
+$Lang{Admin_Options}                                = "管理选项";
+$Lang{Admin_Options_Page}                           = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
 \${h2("服务器控制")}
@@ -54,7 +54,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 -->
 EOF
 
-$Lang{Unable_to_connect_to_BackupPC_server} = "无法连接到 BackupPC 服务器";
+$Lang{Unable_to_connect_to_BackupPC_server}               = "无法连接到 BackupPC 服务器";
 $Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
 CGI 脚本程序 (\$MyURL) 无法连接到 BackupPC 服务器 \$Conf{ServerHost} 端口 \$Conf{ServerPort}。错误信息：\$err。
 可能 BackupPC 服务器没有运行，或者服务器配置不正确。请通知网络系统管理员。
@@ -75,7 +75,7 @@ EOF
 
 $Lang{H_BackupPC_Server_Status} = "BackupPC 服务器状态";
 
-$Lang{BackupPC_Server_Status_General_Info}= <<EOF;
+$Lang{BackupPC_Server_Status_General_Info} = <<EOF;
 \${h2(\"服务器总体信息\")}
 
 <ul>
@@ -139,8 +139,8 @@ EOF
 
 # --------------------------------
 $Lang{BackupPC__Server_Summary} = "BackupPC: 客户机报告";
-$Lang{BackupPC__Archive} = "BackupPC: 备档";
-$Lang{BackupPC_Summary} = <<EOF;
+$Lang{BackupPC__Archive}        = "BackupPC: 备档";
+$Lang{BackupPC_Summary}         = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
@@ -315,8 +315,9 @@ $Lang{Pool_Stat} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Backup_Requested_on__host} = "BackupPC: 客户机 \$host 有备份请求";
+$Lang{BackupPC__Backup_Requested_on__host}              = "BackupPC: 客户机 \$host 有备份请求";
 $Lang{BackupPC__Delete_Requested_for_a_backup_of__host} = "BackupPC: Delete Requested for a backup of \$host";
+
 # --------------------------------
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
@@ -325,8 +326,10 @@ $Lang{REPLY_FROM_SERVER} = <<EOF;
 <p>
 返回 <a href="\$MyURL?host=\$host">\$host 主页</a>。
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: 客户机 \$host 开始备份确认";
+
 # --------------------------------
 $Lang{Are_you_sure_start} = <<EOF;
 \${h1("确定？")}
@@ -345,8 +348,10 @@ $Lang{Are_you_sure_start} = <<EOF;
 <input type="submit" value="取消" name="ignore">
 </form>
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: 客户机 \$host 停止备份确认";
+
 # --------------------------------
 $Lang{Are_you_sure_stop} = <<EOF;
 
@@ -370,12 +375,16 @@ $Lang{Are_you_sure_stop} = <<EOF;
 </form>
 
 EOF
+
 # --------------------------------
 $Lang{Only_privileged_users_can_view_queues_} = "只有特权用户可以查看任务请求队列。";
+
 # --------------------------------
 $Lang{Only_privileged_users_can_archive} = "只有特权用户可以执行备档操作。";
+
 # --------------------------------
 $Lang{BackupPC__Queue_Summary} = "BackupPC: 队列报告";
+
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("备份请求队列报告")}
@@ -418,10 +427,11 @@ EOF
 
 # --------------------------------
 $Lang{Backup_PC__Log_File__file} = "BackupPC: 日志文件 \$file";
-$Lang{Log_File__file__comment} = <<EOF;
+$Lang{Log_File__file__comment}   = <<EOF;
 \${h1("日志文件 \$file \$comment")}
 <p>
 EOF
+
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
 日志文件 <tt>\$file</tt>， 修改时间 \$mtimeStr \$comment
@@ -429,12 +439,13 @@ EOF
 
 # --------------------------------
 $Lang{skipped__skipped_lines} = "[ 略过 \$skipped 行 ]\n";
+
 # --------------------------------
 $Lang{_pre___Can_t_open_log_file__file} = "<pre>\n无法打开日志文件 \$file\n";
 
 # --------------------------------
 $Lang{BackupPC__Log_File_History} = "BackupPC: 日志文件历史";
-$Lang{Log_File_History__hdr} = <<EOF;
+$Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("日志文件历史 \$hdr")}
 <p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
@@ -458,12 +469,11 @@ $Lang{Recent_Email_Summary} = <<EOF;
 </table>
 EOF
 
-
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: 浏览客户机 \$host 备份序列号 \$num";
 
 # ------------------------------
-$Lang{Restore_Options_for__host} = "BackupPC: 客户机 \$host 恢复选项";
+$Lang{Restore_Options_for__host}  = "BackupPC: 客户机 \$host 恢复选项";
 $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("客户机 \$host 恢复选项")}
 <p>
@@ -569,7 +579,6 @@ $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 </p>
 EOF
 
-
 # ------------------------------
 $Lang{Option_3__Download_Zip_archive} = <<EOF;
 \${h2("方法 3：下载 Tar 备档")}
@@ -592,7 +601,6 @@ $Lang{Option_3__Download_Zip_archive} = <<EOF;
 <input type="submit" value="下载 Tar 文件" name="ignore">
 </form>
 EOF
-
 
 # ------------------------------
 $Lang{Restore_Confirm_on__host} = "BackupPC: 客户机 \$host 开始恢复确认";
@@ -625,10 +633,9 @@ $Lang{Are_you_sure} = <<EOF;
 </form>
 EOF
 
-
 # --------------------------
 $Lang{Restore_Requested_on__hostDest} = "BackupPC: 客户机 \$hostDest 有恢复请求";
-$Lang{Reply_from_server_was___reply} = <<EOF;
+$Lang{Reply_from_server_was___reply}  = <<EOF;
 \${h1(\$str)}
 <p>
 服务器答复是：\$reply
@@ -642,12 +649,12 @@ $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
 服务器答复是：\$reply
 EOF
 
-
 # --------------------------------
 $Lang{BackupPC__Delete_Backup_Confirm__num_of__host} = "BackupPC: Delete Backup Confirm #\$num of \$host";
+
 # --------------------------------
-$Lang{A_filled} = "a filled";
-$Lang{An_unfilled} = "an unfilled";
+$Lang{A_filled}            = "a filled";
+$Lang{An_unfilled}         = "an unfilled";
 $Lang{Are_you_sure_delete} = <<EOF;
 \${h1("Are you sure?")}
 <p>
@@ -779,7 +786,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </table>
 EOF
 
-$Lang{Host__host_Archive_Summary} = "BackupPC: 客户机 \$host 备档报告";
+$Lang{Host__host_Archive_Summary}  = "BackupPC: 客户机 \$host 备档报告";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
 \${h1("客户机 \$host 备档报告")}
 <p>
@@ -807,7 +814,7 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 EOF
 
 # -------------------------
-$Lang{Error} = "BackupPC: 错误";
+$Lang{Error}         = "BackupPC: 错误";
 $Lang{Error____head} = <<EOF;
 \${h1("错误：\$head")}
 <p>\$mesg</p>
@@ -1001,54 +1008,39 @@ $Lang{Email_Summary} = "BackupPC: 电子邮件报告";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new 步骤失败：请检查 Apache 服务器日志\n";
-$Lang{Wrong_user__my_userid_is___} =
-              "错误用户：我的用户 ID 是 \$>, 不是 \$uid"
-            . "(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___}                       = "错误用户：我的用户 ID 是 \$>, 不是 \$uid" . "(\$Conf{BackupPCUser})\n";
+
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} =
-                  "只有特权用户可以执行备份的开始或停止操作于客户机"
-		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "无效数字 \${EscHTML(\$In{num})}";
-$Lang{Unable_to_open__file__configuration_problem} = "无法打开文件 \$file：配置有误？";
+$Lang{Only_privileged_users_can_stop_or_start_backups}    = "只有特权用户可以执行备份的开始或停止操作于客户机" . " \${EscHTML(\$host)}.";
+$Lang{Invalid_number__num}                                = "无效数字 \${EscHTML(\$In{num})}";
+$Lang{Unable_to_open__file__configuration_problem}        = "无法打开文件 \$file：配置有误？";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "只有特权用户可以查看日志或配置文件。";
-$Lang{Only_privileged_users_can_view_log_files} = "只有特权用户可以查看日志文件。";
-$Lang{Only_privileged_users_can_view_email_summaries} = "只有特权用户可以查看电子邮件报告。";
-$Lang{Only_privileged_users_can_browse_backup_files} = "只有特权用户可以浏览"
-                . "客户机 \${EscHTML(\$In{host})} 的备份文件。";
-$Lang{Only_privileged_users_can_delete_backups} = "Only privileged users can delete backups"
-                . " of host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "空客户机名。";
-$Lang{Directory___EscHTML} = "目录 \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
-		    . " 为空";
-$Lang{Can_t_browse_bad_directory_name2} = "无法浏览非法目录名"
-	            . " \${EscHTML(\$relDir)}";
-$Lang{Only_privileged_users_can_restore_backup_files} = "只有特权用户可以恢复"
-                . "客户机 \${EscHTML(\$In{host})} 的备份文件。";
-$Lang{Bad_host_name} = "错误客户机名 \${EscHTML(\$host)}";
-$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "你还没有选择任何文件；请返回上一页"
-                . "选择文件。";
-$Lang{You_haven_t_selected_any_hosts} = "你还没有选择任何客户机；请返回上一页"
-                . "选择客户机。";
-$Lang{Nice_try__but_you_can_t_put} = "对不起，文件名内不能包含 \'..\'";
-$Lang{Host__doesn_t_exist} = "客户机 \${EscHTML(\$In{hostDest})} 不存在";
-$Lang{You_don_t_have_permission_to_restore_onto_host} = "你没有权限恢复客户机"
-		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "无法打开／创建 "
-		. "\${EscHTML(\"\$openPath\")}";
-$Lang{Only_privileged_users_can_restore_backup_files2} = "只有特权用户可以恢复"
-                . "客户机 \${EscHTML(\$host)} 的备份文件。";
-$Lang{Empty_host_name} = "空客户机名";
-$Lang{Unknown_host_or_user} = "未知客户机或用户 \${EscHTML(\$host)}";
-$Lang{Only_privileged_users_can_view_information_about} = "只有特权用户可以查看"
-                . "客户机 \${EscHTML(\$host)} 的信息。" ;
+$Lang{Only_privileged_users_can_view_log_files}           = "只有特权用户可以查看日志文件。";
+$Lang{Only_privileged_users_can_view_email_summaries}     = "只有特权用户可以查看电子邮件报告。";
+$Lang{Only_privileged_users_can_browse_backup_files}      = "只有特权用户可以浏览" . "客户机 \${EscHTML(\$In{host})} 的备份文件。";
+$Lang{Only_privileged_users_can_delete_backups} =
+  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}                                    = "空客户机名。";
+$Lang{Directory___EscHTML}                                = "目录 \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " 为空";
+$Lang{Can_t_browse_bad_directory_name2}                   = "无法浏览非法目录名" . " \${EscHTML(\$relDir)}";
+$Lang{Only_privileged_users_can_restore_backup_files}     = "只有特权用户可以恢复" . "客户机 \${EscHTML(\$In{host})} 的备份文件。";
+$Lang{Bad_host_name}                                      = "错误客户机名 \${EscHTML(\$host)}";
+$Lang{You_haven_t_selected_any_files__please_go_Back_to}  = "你还没有选择任何文件；请返回上一页" . "选择文件。";
+$Lang{You_haven_t_selected_any_hosts}                     = "你还没有选择任何客户机；请返回上一页" . "选择客户机。";
+$Lang{Nice_try__but_you_can_t_put}                        = "对不起，文件名内不能包含 \'..\'";
+$Lang{Host__doesn_t_exist}                                = "客户机 \${EscHTML(\$In{hostDest})} 不存在";
+$Lang{You_don_t_have_permission_to_restore_onto_host}     = "你没有权限恢复客户机" . " \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath}                        = "无法打开／创建 " . "\${EscHTML(\"\$openPath\")}";
+$Lang{Only_privileged_users_can_restore_backup_files2}    = "只有特权用户可以恢复" . "客户机 \${EscHTML(\$host)} 的备份文件。";
+$Lang{Empty_host_name}                                    = "空客户机名";
+$Lang{Unknown_host_or_user}                               = "未知客户机或用户 \${EscHTML(\$host)}";
+$Lang{Only_privileged_users_can_view_information_about}   = "只有特权用户可以查看" . "客户机 \${EscHTML(\$host)} 的信息。";
 $Lang{Only_privileged_users_can_view_archive_information} = "只有特权用户可以查看备档信息。";
 $Lang{Only_privileged_users_can_view_restore_information} = "只有特权用户可以查看恢复信息。";
-$Lang{Restore_number__num_for_host__does_not_exist} = "客户机 \${EscHTML(\$host)} 恢复序列号 \$num "
-	        . "不存在。";
-$Lang{Archive_number__num_for_host__does_not_exist} = "客户机 \${EscHTML(\$host)} 备档序列号 \$num "
-	        . "不存在。";
-$Lang{Can_t_find_IP_address_for} = "客户机 \${EscHTML(\$host)} 的 IP 地址无法找到";
-$Lang{host_is_a_DHCP_host} = <<EOF;
+$Lang{Restore_number__num_for_host__does_not_exist}       = "客户机 \${EscHTML(\$host)} 恢复序列号 \$num " . "不存在。";
+$Lang{Archive_number__num_for_host__does_not_exist}       = "客户机 \${EscHTML(\$host)} 备档序列号 \$num " . "不存在。";
+$Lang{Can_t_find_IP_address_for}                          = "客户机 \${EscHTML(\$host)} 的 IP 地址无法找到";
+$Lang{host_is_a_DHCP_host}                                = <<EOF;
 客户机 \$host 的网络设置是使用动态 IP 地址（DHCP），现在它的 IP 地址未知。已经检查过 \$ENV{REMOTE_ADDR}\$tryIP 的 NETBIOS 名，但那台机器不是 \$host。
 <p>
 除非获得客户机 \$host 的动态 IP 地址，否则只能从客户主机上发出此任务请求。
@@ -1058,46 +1050,49 @@ EOF
 # !! Server Mesg !!
 # ------------------------------------
 
-$Lang{Backup_requested_on_DHCP__host} = "用户 \$User 从 \$ENV{REMOTE_ADDR} 发起请求备份使用动态 IP 的客户机 \$host (\$In{hostIP})";
+$Lang{Backup_requested_on_DHCP__host}     = "用户 \$User 从 \$ENV{REMOTE_ADDR} 发起请求备份使用动态 IP 的客户机 \$host (\$In{hostIP})";
 $Lang{Backup_requested_on__host_by__User} = "用户 \$User 发起请求备份客户机 \$host";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "用户 \$User 停止／取消了对客户机 \$host 的备份";
-$Lang{Restore_requested_to_host__hostDest__backup___num} = "用户 \$User 从 \$ENV{REMOTE_ADDR} 发起请求恢复客户机 \$hostDest，使用备份序列号 #\$num";
-$Lang{Delete_requested_for_backup_of__host_by__User} = "Delete requested for backup #\$num of \$host"
-             . " by \$User from \$ENV{REMOTE_ADDR}";
+$Lang{Restore_requested_to_host__hostDest__backup___num} =
+  "用户 \$User 从 \$ENV{REMOTE_ADDR} 发起请求恢复客户机 \$hostDest，使用备份序列号 #\$num";
+$Lang{Delete_requested_for_backup_of__host_by__User} =
+  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "用户 \$User 从 \$ENV{REMOTE_ADDR} 发起备档请求";
 
 # -------------------------------------------------
 # ------- Stuff that was forgotten ----------------
 # -------------------------------------------------
 
-$Lang{Status} = "状态";
-$Lang{PC_Summary} = "客户机报告";
-$Lang{LOG_file} = "日志文件";
-$Lang{LOG_files} = "日志文件列表";
-$Lang{Old_LOGs} = "旧日志";
+$Lang{Status}        = "状态";
+$Lang{PC_Summary}    = "客户机报告";
+$Lang{LOG_file}      = "日志文件";
+$Lang{LOG_files}     = "日志文件列表";
+$Lang{Old_LOGs}      = "旧日志";
 $Lang{Email_summary} = "电子邮件报告";
-$Lang{Config_file} = "配置文件";
+$Lang{Config_file}   = "配置文件";
+
 # $Lang{Hosts_file} = "Hosts file";
 $Lang{Current_queues} = "当前队列";
-$Lang{Documentation} = "文档资料";
+$Lang{Documentation}  = "文档资料";
 
 #$Lang{Host_or_User_name} = "<small>Host or User name:</small>";
-$Lang{Go} = "确定";
-$Lang{Hosts} = "客户机";
+$Lang{Go}            = "确定";
+$Lang{Hosts}         = "客户机";
 $Lang{Select_a_host} = "选择客户机名...";
 
-$Lang{There_have_been_no_archives} = "<h2> 这台机器还从来没有执行过备档操作！</h2>\n";
+$Lang{There_have_been_no_archives}      = "<h2> 这台机器还从来没有执行过备档操作！</h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> 这台机器还从来没有被备份过！！</h2>\n";
-$Lang{This_PC_is_used_by} = "<li>这台机器的用户包括 \${UserLink(\$user)}";
+$Lang{This_PC_is_used_by}               = "<li>这台机器的用户包括 \${UserLink(\$user)}";
 
 $Lang{Extracting_only_Errors} = "（只提取错误信息）";
-$Lang{XferLOG} = "传输日志";
-$Lang{Errors}  = "错误";
+$Lang{XferLOG}                = "传输日志";
+$Lang{Errors}                 = "错误";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
 <li>给用户 \${UserLink(\$user)} 的最近一封邮件送出于 \$mailTime，标题是"\$subj"。
 EOF
+
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
 <li>命令 \$cmd 正在为客户机 \$host 运行，开始于 \$startTime。
@@ -1183,9 +1178,9 @@ $Lang{fileHeader} = <<EOF;
     </tr>
 EOF
 
-$Lang{Home} = "主页";
-$Lang{Browse} = "浏览备份";
-$Lang{Last_bad_XferLOG} = "最近出错传输日志";
+$Lang{Home}                         = "主页";
+$Lang{Browse}                       = "浏览备份";
+$Lang{Last_bad_XferLOG}             = "最近出错传输日志";
 $Lang{Last_bad_XferLOG_errors_only} = "最近出错传输日志（只含错误）";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
@@ -1232,7 +1227,7 @@ EOF
 
 $Lang{BackupPC__Documentation} = "BackupPC: 文档资料";
 
-$Lang{No} = "否";
+$Lang{No}  = "否";
 $Lang{Yes} = "是";
 
 $Lang{The_directory_is_empty} = <<EOF;
@@ -1248,34 +1243,33 @@ $Lang{backupType_incr}    = "增量";
 $Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "部分";
 
-$Lang{failed} = "失败";
+$Lang{failed}  = "失败";
 $Lang{success} = "成功";
-$Lang{and} = "和";
+$Lang{and}     = "和";
 
 # ------
 # Hosts states and reasons
-$Lang{Status_idle} = "空闲";
-$Lang{Status_backup_starting} = "备份已开始";
-$Lang{Status_backup_in_progress} = "备份进行中";
-$Lang{Status_restore_starting} = "恢复已开始";
+$Lang{Status_idle}                = "空闲";
+$Lang{Status_backup_starting}     = "备份已开始";
+$Lang{Status_backup_in_progress}  = "备份进行中";
+$Lang{Status_restore_starting}    = "恢复已开始";
 $Lang{Status_restore_in_progress} = "恢复进行中";
-$Lang{Status_admin_pending} = "文件链接待建立";
-$Lang{Status_admin_running} = "文件链接建立中";
+$Lang{Status_admin_pending}       = "文件链接待建立";
+$Lang{Status_admin_running}       = "文件链接建立中";
 
-$Lang{Reason_backup_done}    = "完成";
-$Lang{Reason_restore_done}   = "恢复完成";
-$Lang{Reason_archive_done}   = "备档完成";
-$Lang{Reason_nothing_to_do}  = "空闲";
-$Lang{Reason_backup_failed}  = "备份失败";
-$Lang{Reason_restore_failed} = "恢复失败";
-$Lang{Reason_archive_failed} = "备档失败";
-$Lang{Reason_no_ping}        = "网络连接中断(no ping)";
+$Lang{Reason_backup_done}              = "完成";
+$Lang{Reason_restore_done}             = "恢复完成";
+$Lang{Reason_archive_done}             = "备档完成";
+$Lang{Reason_nothing_to_do}            = "空闲";
+$Lang{Reason_backup_failed}            = "备份失败";
+$Lang{Reason_restore_failed}           = "恢复失败";
+$Lang{Reason_archive_failed}           = "备档失败";
+$Lang{Reason_no_ping}                  = "网络连接中断(no ping)";
 $Lang{Reason_backup_canceled_by_user}  = "备份被用户取消";
 $Lang{Reason_restore_canceled_by_user} = "恢复被用户取消";
 $Lang{Reason_archive_canceled_by_user} = "备档被用户取消";
-$Lang{Disabled_OnlyManualBackups}  = "自动备份被关闭";
-$Lang{Disabled_AllBackupsDisabled} = "关闭";
-
+$Lang{Disabled_OnlyManualBackups}      = "自动备份被关闭";
+$Lang{Disabled_AllBackupsDisabled}     = "关闭";
 
 # ---------
 # Email messages
@@ -1365,7 +1359,7 @@ BackupPC Genie
 https://backuppc.github.io/backuppc
 EOF
 
-$Lang{howLong_not_been_backed_up} = "还从未被成功备份过";
+$Lang{howLong_not_been_backed_up}               = "还从未被成功备份过";
 $Lang{howLong_not_been_backed_up_for_days_days} = "已经有 \$days 天未被备份过";
 
 #######################################################################
@@ -1390,50 +1384,50 @@ EOF
 #######################################################################
 
 $Lang{Only_privileged_users_can_edit_config_files} = "只有特权用户可以编辑服务器配置。";
-$Lang{CfgEdit_Edit_Config} = "修改服务器配置";
-$Lang{CfgEdit_Edit_Hosts}  = "增删客户机";
+$Lang{CfgEdit_Edit_Config}                         = "修改服务器配置";
+$Lang{CfgEdit_Edit_Hosts}                          = "增删客户机";
 
-$Lang{CfgEdit_Title_Server} = "服务器";
-$Lang{CfgEdit_Title_General_Parameters} = "总体参数";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "唤醒调度";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "并行任务";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "备份池文件系统资源限制";
-$Lang{CfgEdit_Title_Other_Parameters} = "其它参数";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "远程 Apache 服务器设置";
-$Lang{CfgEdit_Title_Program_Paths} = "程序路径";
-$Lang{CfgEdit_Title_Install_Paths} = "安装路径";
-$Lang{CfgEdit_Title_Email} = "电子邮件";
-$Lang{CfgEdit_Title_Email_settings} = "电子邮件设置";
-$Lang{CfgEdit_Title_Email_User_Messages} = "用户邮件内容设置";
-$Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "管理特权";
-$Lang{CfgEdit_Title_Page_Rendering} = "网页外观";
-$Lang{CfgEdit_Title_Paths} = "路径";
-$Lang{CfgEdit_Title_User_URLs} = "用户 URLs";
-$Lang{CfgEdit_Title_User_Config_Editing} = "用户配置编辑";
-$Lang{CfgEdit_Title_Xfer} = "传输";
-$Lang{CfgEdit_Title_Xfer_Settings} = "传输设置";
-$Lang{CfgEdit_Title_Ftp_Settings} = "FTP 设置";
-$Lang{CfgEdit_Title_Smb_Settings} = "Smb 设置";
-$Lang{CfgEdit_Title_Tar_Settings} = "Tar 设置";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync 设置";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd 设置";
-$Lang{CfgEdit_Title_Archive_Settings} = "备档设置";
-$Lang{CfgEdit_Title_Include_Exclude} = "包含／排除";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb 路径／命令";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar 路径／命令";
+$Lang{CfgEdit_Title_Server}                    = "服务器";
+$Lang{CfgEdit_Title_General_Parameters}        = "总体参数";
+$Lang{CfgEdit_Title_Wakeup_Schedule}           = "唤醒调度";
+$Lang{CfgEdit_Title_Concurrent_Jobs}           = "并行任务";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits}    = "备份池文件系统资源限制";
+$Lang{CfgEdit_Title_Other_Parameters}          = "其它参数";
+$Lang{CfgEdit_Title_Remote_Apache_Settings}    = "远程 Apache 服务器设置";
+$Lang{CfgEdit_Title_Program_Paths}             = "程序路径";
+$Lang{CfgEdit_Title_Install_Paths}             = "安装路径";
+$Lang{CfgEdit_Title_Email}                     = "电子邮件";
+$Lang{CfgEdit_Title_Email_settings}            = "电子邮件设置";
+$Lang{CfgEdit_Title_Email_User_Messages}       = "用户邮件内容设置";
+$Lang{CfgEdit_Title_CGI}                       = "CGI";
+$Lang{CfgEdit_Title_Admin_Privileges}          = "管理特权";
+$Lang{CfgEdit_Title_Page_Rendering}            = "网页外观";
+$Lang{CfgEdit_Title_Paths}                     = "路径";
+$Lang{CfgEdit_Title_User_URLs}                 = "用户 URLs";
+$Lang{CfgEdit_Title_User_Config_Editing}       = "用户配置编辑";
+$Lang{CfgEdit_Title_Xfer}                      = "传输";
+$Lang{CfgEdit_Title_Xfer_Settings}             = "传输设置";
+$Lang{CfgEdit_Title_Ftp_Settings}              = "FTP 设置";
+$Lang{CfgEdit_Title_Smb_Settings}              = "Smb 设置";
+$Lang{CfgEdit_Title_Tar_Settings}              = "Tar 设置";
+$Lang{CfgEdit_Title_Rsync_Settings}            = "Rsync 设置";
+$Lang{CfgEdit_Title_Rsyncd_Settings}           = "Rsyncd 设置";
+$Lang{CfgEdit_Title_Archive_Settings}          = "备档设置";
+$Lang{CfgEdit_Title_Include_Exclude}           = "包含／排除";
+$Lang{CfgEdit_Title_Smb_Paths_Commands}        = "Smb 路径／命令";
+$Lang{CfgEdit_Title_Tar_Paths_Commands}        = "Tar 路径／命令";
 $Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync 路径／命令／参数";
-$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd 端口／参数";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "备档路径／命令";
-$Lang{CfgEdit_Title_Schedule} = "调度";
-$Lang{CfgEdit_Title_Full_Backups} = "完全备份";
-$Lang{CfgEdit_Title_Incremental_Backups} = "增量备份";
-$Lang{CfgEdit_Title_Blackouts} = "备份暂停期";
-$Lang{CfgEdit_Title_Other} = "其它";
-$Lang{CfgEdit_Title_Backup_Settings} = "备份设置";
-$Lang{CfgEdit_Title_Client_Lookup} = "客户机查找";
-$Lang{CfgEdit_Title_User_Commands} = "用户命令";
-$Lang{CfgEdit_Title_Hosts} = "客户机";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args}          = "Rsyncd 端口／参数";
+$Lang{CfgEdit_Title_Archive_Paths_Commands}    = "备档路径／命令";
+$Lang{CfgEdit_Title_Schedule}                  = "调度";
+$Lang{CfgEdit_Title_Full_Backups}              = "完全备份";
+$Lang{CfgEdit_Title_Incremental_Backups}       = "增量备份";
+$Lang{CfgEdit_Title_Blackouts}                 = "备份暂停期";
+$Lang{CfgEdit_Title_Other}                     = "其它";
+$Lang{CfgEdit_Title_Backup_Settings}           = "备份设置";
+$Lang{CfgEdit_Title_Client_Lookup}             = "客户机查找";
+$Lang{CfgEdit_Title_User_Commands}             = "用户命令";
+$Lang{CfgEdit_Title_Hosts}                     = "客户机";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 要增加一台新的备份客户机，请点击"添加"，然后在 "host" 列输入其主机名。
@@ -1465,44 +1459,29 @@ $Lang{CfgEdit_Header_Host} = <<EOF;
 <p>
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "保存";
-$Lang{CfgEdit_Button_Insert}   = "插入";
-$Lang{CfgEdit_Button_Delete}   = "删除";
-$Lang{CfgEdit_Button_Add}      = "添加";
-$Lang{CfgEdit_Button_Override} = "替换";
-$Lang{CfgEdit_Button_New_Key}  = "文件卷名(Windows Share)";
+$Lang{CfgEdit_Button_Save}      = "保存";
+$Lang{CfgEdit_Button_Insert}    = "插入";
+$Lang{CfgEdit_Button_Delete}    = "删除";
+$Lang{CfgEdit_Button_Add}       = "添加";
+$Lang{CfgEdit_Button_Override}  = "替换";
+$Lang{CfgEdit_Button_New_Key}   = "文件卷名(Windows Share)";
 $Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
-$Lang{CfgEdit_Error_No_Save}
-            = "错误：有误，无法保存";
-$Lang{CfgEdit_Error__must_be_an_integer}
-            = "错误：\$var 必须是整数";
-$Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "错误：\$var 必须是实数，不能是浮点数";
-$Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "错误：\$var 内容 \$k 必须是整数";
-$Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "错误：\$var 内容 \$k 必须是实数，不能是浮点数";
-$Lang{CfgEdit_Error__must_be_executable_program}
-            = "错误：\$var 必须是可执行程序";
-$Lang{CfgEdit_Error__must_be_valid_option}
-            = "错误：\$var 必须是合法选项";
-$Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "客户机 \$copyHost 不存在；生成全计算机名 \$fullHost。如果此客户机不是你想要的，请将它删除。";
+$Lang{CfgEdit_Error_No_Save}                            = "错误：有误，无法保存";
+$Lang{CfgEdit_Error__must_be_an_integer}                = "错误：\$var 必须是整数";
+$Lang{CfgEdit_Error__must_be_real_valued_number}        = "错误：\$var 必须是实数，不能是浮点数";
+$Lang{CfgEdit_Error__entry__must_be_an_integer}         = "错误：\$var 内容 \$k 必须是整数";
+$Lang{CfgEdit_Error__entry__must_be_real_valued_number} = "错误：\$var 内容 \$k 必须是实数，不能是浮点数";
+$Lang{CfgEdit_Error__must_be_executable_program}        = "错误：\$var 必须是可执行程序";
+$Lang{CfgEdit_Error__must_be_valid_option}              = "错误：\$var 必须是合法选项";
+$Lang{CfgEdit_Error_Copy_host_does_not_exist}           = "客户机 \$copyHost 不存在；生成全计算机名 \$fullHost。如果此客户机不是你想要的，请将它删除。";
 
-$Lang{CfgEdit_Log_Copy_host_config}
-            = "用户 \$User 拷贝了客户机 \$fromHost 的配置到客户机 \$host\n";
-$Lang{CfgEdit_Log_Delete_param}
-            = "用户 \$User 从配置 \$conf 中删除了 \$p\n";
-$Lang{CfgEdit_Log_Add_param_value}
-            = "用户 \$User 添加了 \$p 到配置 \$conf 中，值设为 \$value\n";
-$Lang{CfgEdit_Log_Change_param_value}
-            = "用户 \$User 将配置 \$conf 中的 \$p 从 \$valueOld 更改为 \$valueNew\n";
-$Lang{CfgEdit_Log_Host_Delete}
-            = "用户 \$User 删除了客户机 \$host\n";
-$Lang{CfgEdit_Log_Host_Change}
-            = "用户 \$User 将客户机 \$host 上的 \$key 从 \$valueOld 更改为 \$valueNew\n";
-$Lang{CfgEdit_Log_Host_Add}
-            = "用户 \$User 添加了客户机 \$host: \$value\n";
+$Lang{CfgEdit_Log_Copy_host_config}   = "用户 \$User 拷贝了客户机 \$fromHost 的配置到客户机 \$host\n";
+$Lang{CfgEdit_Log_Delete_param}       = "用户 \$User 从配置 \$conf 中删除了 \$p\n";
+$Lang{CfgEdit_Log_Add_param_value}    = "用户 \$User 添加了 \$p 到配置 \$conf 中，值设为 \$value\n";
+$Lang{CfgEdit_Log_Change_param_value} = "用户 \$User 将配置 \$conf 中的 \$p 从 \$valueOld 更改为 \$valueNew\n";
+$Lang{CfgEdit_Log_Host_Delete}        = "用户 \$User 删除了客户机 \$host\n";
+$Lang{CfgEdit_Log_Host_Change}        = "用户 \$User 将客户机 \$host 上的 \$key 从 \$valueOld 更改为 \$valueNew\n";
+$Lang{CfgEdit_Log_Host_Add}           = "用户 \$User 添加了客户机 \$host: \$value\n";
 
 #end of lang_zh_CN.pm

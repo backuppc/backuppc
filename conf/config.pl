@@ -372,12 +372,12 @@ $Conf{BackupPCUser} = '';
 # a symbolic link to the new location, or mount the new BackupPC
 # store at the existing $Conf{TopDir} setting.
 #
-$Conf{TopDir}      = '';
-$Conf{ConfDir}     = '';
-$Conf{LogDir}      = '';
-$Conf{RunDir}      = '';
-$Conf{InstallDir}  = '';
-$Conf{CgiDir}      = '';
+$Conf{TopDir}     = '';
+$Conf{ConfDir}    = '';
+$Conf{LogDir}     = '';
+$Conf{RunDir}     = '';
+$Conf{InstallDir} = '';
+$Conf{CgiDir}     = '';
 
 #
 # Whether BackupPC and the CGI script BackupPC_Admin verify that they
@@ -404,7 +404,7 @@ $Conf{HardLinkMax} = 31999;
 # Advanced option for asking BackupPC to load additional perl modules.
 # Can be a list (arrayref) of module names to load at startup.
 #
-$Conf{PerlModuleLoad}     = undef;
+$Conf{PerlModuleLoad} = undef;
 
 #
 # Path to init.d script and command to use that script to start the
@@ -426,7 +426,7 @@ $Conf{PerlModuleLoad}     = undef;
 # needs to be a full path and you can't include shell syntax like
 # redirection and pipes; put that in a script if you need it.
 #
-$Conf{ServerInitdPath} = '';
+$Conf{ServerInitdPath}     = '';
 $Conf{ServerInitdStartCmd} = '';
 
 ###########################################################################
@@ -809,9 +809,9 @@ $Conf{BlackoutGoodCnt}      = 7;
 #
 $Conf{BlackoutPeriods} = [
     {
-	hourBegin =>  7.0,
-	hourEnd   => 19.5,
-	weekDays  => [1, 2, 3, 4, 5],
+        hourBegin => 7.0,
+        hourEnd   => 19.5,
+        weekDays  => [1, 2, 3, 4, 5],
     },
 ];
 
@@ -921,7 +921,7 @@ $Conf{ClientCharsetLegacy} = 'iso-8859-1';
 # configuration setting (since rsyncd already supports mapping of share names
 # to paths in the client's rsyncd.conf).
 #
-$Conf{ClientShareName2Path} = { };
+$Conf{ClientShareName2Path} = {};
 
 ###########################################################################
 # Samba Configuration
@@ -990,9 +990,10 @@ $Conf{SmbClientPath} = '';
 # needs to be a full path and you can't include shell syntax like
 # redirection and pipes; put that in a script if you need it.
 #
-$Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
-	    . ' $I_option -U $userName -E -d 1'
-            . ' -c tarmode\\ full -mSMB3 -Tc$X_option - $fileList';
+$Conf{SmbClientFullCmd} =
+    '$smbClientPath \\\\$host\\$shareName'
+  . ' $I_option -U $userName -E -d 1'
+  . ' -c tarmode\\ full -mSMB3 -Tc$X_option - $fileList';
 
 #
 # Command to run smbclient for an incremental dump.
@@ -1004,9 +1005,10 @@ $Conf{SmbClientFullCmd} = '$smbClientPath \\\\$host\\$shareName'
 # needs to be a full path and you can't include shell syntax like
 # redirection and pipes; put that in a script if you need it.
 #
-$Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
-	    . ' $I_option -U $userName -E -d 1'
-	    . ' -c tarmode\\ full -mSMB3 -TcN$X_option $timeStampFile - $fileList';
+$Conf{SmbClientIncrCmd} =
+    '$smbClientPath \\\\$host\\$shareName'
+  . ' $I_option -U $userName -E -d 1'
+  . ' -c tarmode\\ full -mSMB3 -TcN$X_option $timeStampFile - $fileList';
 
 #
 # Command to run smbclient for a restore.
@@ -1022,9 +1024,8 @@ $Conf{SmbClientIncrCmd} = '$smbClientPath \\\\$host\\$shareName'
 # needs to be a full path and you can't include shell syntax like
 # redirection and pipes; put that in a script if you need it.
 #
-$Conf{SmbClientRestoreCmd} = '$smbClientPath \\\\$host\\$shareName'
-            . ' $I_option -U $userName -E -d 1'
-            . ' -c tarmode\\ full -mSMB3 -Tx -';
+$Conf{SmbClientRestoreCmd} =
+  '$smbClientPath \\\\$host\\$shareName' . ' $I_option -U $userName -E -d 1' . ' -c tarmode\\ full -mSMB3 -Tx -';
 
 ###########################################################################
 # Tar Configuration
@@ -1103,9 +1104,8 @@ $Conf{TarShareName} = '/';
 # needs to be a full path and you can't include shell syntax like
 # redirection and pipes; put that in a script if you need it.
 #
-$Conf{TarClientCmd} = '$sshPath -q -x -n -l root $host'
-                    . ' env LC_ALL=C $tarPath -c -v -f - -C $shareName+'
-                    . ' --totals';
+$Conf{TarClientCmd} =
+  '$sshPath -q -x -n -l root $host' . ' env LC_ALL=C $tarPath -c -v -f - -C $shareName+' . ' --totals';
 
 #
 # Extra tar arguments for full backups.  Several variables are substituted at
@@ -1164,9 +1164,10 @@ $Conf{TarIncrArgs} = '--newer=$incrDate+ $fileList+';
 # needs to be a full path and you can't include shell syntax like
 # redirection and pipes; put that in a script if you need it.
 #
-$Conf{TarClientRestoreCmd} = '$sshPath -q -x -l root $host'
-		   . ' env LC_ALL=C $tarPath -x -p --numeric-owner --same-owner'
-		   . ' -v -f - -C $shareName+';
+$Conf{TarClientRestoreCmd} =
+    '$sshPath -q -x -l root $host'
+  . ' env LC_ALL=C $tarPath -x -p --numeric-owner --same-owner'
+  . ' -v -f - -C $shareName+';
 
 #
 # Full path for tar on the client. Security caution: normal users should not
@@ -1214,9 +1215,7 @@ $Conf{RsyncBackupPCPath} = "";
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
-$Conf{RsyncSshArgs} = [
-        '-e', '$sshPath -l root',
-];
+$Conf{RsyncSshArgs} = ['-e', '$sshPath -l root',];
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should
@@ -1261,29 +1260,29 @@ $Conf{RsyncdPasswd} = '';
 # have a good understanding of rsync options.
 #
 $Conf{RsyncArgs} = [
-            '--super',
-            '--recursive',
-            '--protect-args',
-            '--numeric-ids',
-            '--perms',
-            '--owner',
-            '--group',
-            '-D',
-            '--times',
-            '--links',
-            '--hard-links',
-            '--delete',
-            '--delete-excluded',
-            '--one-file-system',
-            '--partial',
-            '--log-format=log: %o %i %B %8U,%8G %9l %f%L',
-            '--stats',
-	    #
-	    # Add additional arguments here, for example --acls or --xattrs
-            # if all the clients support them.
-	    #
-            #'--acls',
-            #'--xattrs',
+    '--super',
+    '--recursive',
+    '--protect-args',
+    '--numeric-ids',
+    '--perms',
+    '--owner',
+    '--group',
+    '-D',
+    '--times',
+    '--links',
+    '--hard-links',
+    '--delete',
+    '--delete-excluded',
+    '--one-file-system',
+    '--partial',
+    '--log-format=log: %o %i %B %8U,%8G %9l %f%L',
+    '--stats',
+    #
+    # Add additional arguments here, for example --acls or --xattrs
+    # if all the clients support them.
+    #
+    #'--acls',
+    #'--xattrs',
 ];
 
 #
@@ -1335,15 +1334,12 @@ $Conf{RsyncArgsExtra} = [];
 # which is a lot slower but a bit more conservative.  To get that
 # behavior, replace --checksum with --ignore-times.
 #
-$Conf{RsyncFullArgsExtra} = [
-            '--checksum',
-];
+$Conf{RsyncFullArgsExtra} = ['--checksum',];
 
 #
 # Additional arguments for an incremental rsync or rsyncd backup.
 #
-$Conf{RsyncIncrArgsExtra} = [
-];
+$Conf{RsyncIncrArgsExtra} = [];
 
 #
 # Arguments to rsync for restore.  Do not edit the first set unless you
@@ -1365,26 +1361,26 @@ $Conf{RsyncIncrArgsExtra} = [
 # Note: $Conf{RsyncArgsExtra} doesn't apply to $Conf{RsyncRestoreArgs}.
 #
 $Conf{RsyncRestoreArgs} = [
-            '--recursive',
-            '--super',
-            '--protect-args',
-            '--numeric-ids',
-            '--perms',
-            '--owner',
-            '--group',
-            '-D',
-            '--times',
-            '--links',
-            '--hard-links',
-            '--delete',
-            '--partial',
-            '--log-format=log: %o %i %B %8U,%8G %9l %f%L',
-            '--stats',
-	    #
-	    # Add additional arguments here
-	    #
-            #'--acls',
-            #'--xattrs',
+    '--recursive',
+    '--super',
+    '--protect-args',
+    '--numeric-ids',
+    '--perms',
+    '--owner',
+    '--group',
+    '-D',
+    '--times',
+    '--links',
+    '--hard-links',
+    '--delete',
+    '--partial',
+    '--log-format=log: %o %i %B %8U,%8G %9l %f%L',
+    '--stats',
+    #
+    # Add additional arguments here
+    #
+    #'--acls',
+    #'--xattrs',
 ];
 
 #
@@ -1392,8 +1388,7 @@ $Conf{RsyncRestoreArgs} = [
 #
 # This makes it easy to have per-client arguments.
 #
-$Conf{RsyncRestoreArgsExtra} = [
-];
+$Conf{RsyncRestoreArgsExtra} = [];
 
 ###########################################################################
 # FTP Configuration
@@ -1561,9 +1556,10 @@ $Conf{ArchiveSplit} = 0;
 # needs to be a full path and you can't include shell syntax like
 # redirection and pipes; put that in a script if you need it.
 #
-$Conf{ArchiveClientCmd} = '$Installdir/bin/BackupPC_archiveHost'
-	. ' $tarCreatePath $splitpath $parpath $host $backupnumber'
-	. ' $compression $compext $splitsize $archiveloc $parfile *';
+$Conf{ArchiveClientCmd} =
+    '$Installdir/bin/BackupPC_archiveHost'
+  . ' $tarCreatePath $splitpath $parpath $host $backupnumber'
+  . ' $compression $compext $splitsize $archiveloc $parfile *';
 
 #
 # Full path for ssh. Security caution: normal users should not
@@ -2164,15 +2160,15 @@ $Conf{CgiSearchBoxEnable} = 1;
 $Conf{CgiNavBarLinks} = [
     {
         link  => "?action=view&type=docs",
-        lname => "Documentation",    # actually displays $Lang->{Documentation}
+        lname => "Documentation",            # actually displays $Lang->{Documentation}
     },
     {
-        link  => "https://github.com/backuppc/backuppc/wiki",
-        name  => "Wiki",             # displays literal "Wiki"
+        link => "https://github.com/backuppc/backuppc/wiki",
+        name => "Wiki",                                        # displays literal "Wiki"
     },
     {
-        link  => "https://backuppc.github.io/backuppc",
-        name  => "Homepage",         # displays literal "Homepage"
+        link => "https://backuppc.github.io/backuppc",
+        name => "Homepage",                                    # displays literal "Homepage"
     },
 ];
 
@@ -2214,7 +2210,7 @@ $Conf{CgiImageDir} = '';
 #                 'pl'  => 'text/plain',
 #          };
 #
-$Conf{CgiExt2ContentType} = { };
+$Conf{CgiExt2ContentType} = {};
 
 #
 # URL (without the leading http://host) for BackupPC's image directory.
@@ -2262,100 +2258,100 @@ $Conf{CgiUserConfigEditEnable} = 1;
 # sorts of bad things.
 #
 $Conf{CgiUserConfigEdit} = {
-        ArchiveClientCmd          => 0,
-        ArchiveComp               => 1,
-        ArchiveDest               => 1,
-        ArchiveInfoKeepCnt        => 1,
-        ArchivePar                => 1,
-        ArchivePostUserCmd        => 0,
-        ArchivePreUserCmd         => 0,
-        ArchiveSplit              => 1,
-        BackupFilesExclude        => 1,
-        BackupFilesOnly           => 1,
-        BackupsDisable            => 1,
-        BackupZeroFilesIsFatal    => 1,
-        BlackoutBadPingLimit      => 1,
-        BlackoutGoodCnt           => 1,
-        BlackoutPeriods           => 1,
-        ClientCharset             => 1,
-        ClientCharsetLegacy       => 1,
-        ClientComment             => 1,
-        ClientNameAlias           => 1,
-        ClientShareName2Path      => 1,
-        ClientTimeout             => 1,
-        CompressLevel             => 1,
-        DumpPostShareCmd          => 0,
-        DumpPostUserCmd           => 0,
-        DumpPreShareCmd           => 0,
-        DumpPreUserCmd            => 0,
-        EMailAdminSubject         => 0,
-        EMailAdminUserName        => 0,
-        EMailFromUserName         => 1,
-        EMailHeaders              => 1,
-        EMailNoBackupEverMesg     => 1,
-        EMailNoBackupEverSubj     => 1,
-        EMailNoBackupRecentMesg   => 1,
-        EMailNoBackupRecentSubj   => 1,
-        EMailNotifyMinDays        => 1,
-        EMailNotifyOldBackupDays  => 1,
-        EMailNotifyOldOutlookDays => 1,
-        EMailOutlookBackupMesg    => 1,
-        EMailOutlookBackupSubj    => 1,
-        EMailUserDestDomain       => 1,
-        FillCycle                 => 1,
-        FixedIPNetBiosNameCheck   => 1,
-        FtpBlockSize              => 1,
-        FtpFollowSymlinks         => 1,
-        FtpPasswd                 => 1,
-        FtpPort                   => 1,
-        FtpRestoreEnabled         => 1,
-        FtpShareName              => 1,
-        FtpTimeout                => 1,
-        FtpUserName               => 1,
-        FullAgeMax                => 1,
-        FullKeepCnt               => 1,
-        FullKeepCntMin            => 1,
-        FullPeriod                => 1,
-        IncrAgeMax                => 1,
-        IncrKeepCnt               => 1,
-        IncrKeepCntMin            => 1,
-        IncrPeriod                => 1,
-        MaxOldPerPCLogFiles       => 1,
-        NmbLookupCmd              => 0,
-        NmbLookupFindHostCmd      => 0,
-        PingCmd                   => 0,
-        PingMaxMsec               => 1,
-        RefCntFsck                => 1,
-        RestoreInfoKeepCnt        => 1,
-        RestorePostUserCmd        => 0,
-        RestorePreUserCmd         => 0,
-        RsyncArgs                 => 1,
-        RsyncArgsExtra            => 1,
-        RsyncBackupPCPath         => 0,
-        RsyncClientPath           => 0,
-        RsyncdClientPort          => 1,
-        RsyncdPasswd              => 1,
-        RsyncdUserName            => 1,
-        RsyncFullArgsExtra        => 1,
-        RsyncIncrArgsExtra        => 1,
-        RsyncRestoreArgs          => 1,
-        RsyncRestoreArgsExtra     => 1,
-        RsyncShareName            => 1,
-        RsyncSshArgs              => 1,
-        SmbClientFullCmd          => 0,
-        SmbClientIncrCmd          => 0,
-        SmbClientPath             => 0,
-        SmbClientRestoreCmd       => 0,
-        SmbShareName              => 1,
-        SmbSharePasswd            => 1,
-        SmbShareUserName          => 1,
-        TarClientCmd              => 0,
-        TarClientPath             => 0,
-        TarClientRestoreCmd       => 0,
-        TarFullArgs               => 1,
-        TarIncrArgs               => 1,
-        TarShareName              => 1,
-        UserCmdCheckStatus        => 0,
-        XferLogLevel              => 1,
-        XferMethod                => 1,
+    ArchiveClientCmd          => 0,
+    ArchiveComp               => 1,
+    ArchiveDest               => 1,
+    ArchiveInfoKeepCnt        => 1,
+    ArchivePar                => 1,
+    ArchivePostUserCmd        => 0,
+    ArchivePreUserCmd         => 0,
+    ArchiveSplit              => 1,
+    BackupFilesExclude        => 1,
+    BackupFilesOnly           => 1,
+    BackupsDisable            => 1,
+    BackupZeroFilesIsFatal    => 1,
+    BlackoutBadPingLimit      => 1,
+    BlackoutGoodCnt           => 1,
+    BlackoutPeriods           => 1,
+    ClientCharset             => 1,
+    ClientCharsetLegacy       => 1,
+    ClientComment             => 1,
+    ClientNameAlias           => 1,
+    ClientShareName2Path      => 1,
+    ClientTimeout             => 1,
+    CompressLevel             => 1,
+    DumpPostShareCmd          => 0,
+    DumpPostUserCmd           => 0,
+    DumpPreShareCmd           => 0,
+    DumpPreUserCmd            => 0,
+    EMailAdminSubject         => 0,
+    EMailAdminUserName        => 0,
+    EMailFromUserName         => 1,
+    EMailHeaders              => 1,
+    EMailNoBackupEverMesg     => 1,
+    EMailNoBackupEverSubj     => 1,
+    EMailNoBackupRecentMesg   => 1,
+    EMailNoBackupRecentSubj   => 1,
+    EMailNotifyMinDays        => 1,
+    EMailNotifyOldBackupDays  => 1,
+    EMailNotifyOldOutlookDays => 1,
+    EMailOutlookBackupMesg    => 1,
+    EMailOutlookBackupSubj    => 1,
+    EMailUserDestDomain       => 1,
+    FillCycle                 => 1,
+    FixedIPNetBiosNameCheck   => 1,
+    FtpBlockSize              => 1,
+    FtpFollowSymlinks         => 1,
+    FtpPasswd                 => 1,
+    FtpPort                   => 1,
+    FtpRestoreEnabled         => 1,
+    FtpShareName              => 1,
+    FtpTimeout                => 1,
+    FtpUserName               => 1,
+    FullAgeMax                => 1,
+    FullKeepCnt               => 1,
+    FullKeepCntMin            => 1,
+    FullPeriod                => 1,
+    IncrAgeMax                => 1,
+    IncrKeepCnt               => 1,
+    IncrKeepCntMin            => 1,
+    IncrPeriod                => 1,
+    MaxOldPerPCLogFiles       => 1,
+    NmbLookupCmd              => 0,
+    NmbLookupFindHostCmd      => 0,
+    PingCmd                   => 0,
+    PingMaxMsec               => 1,
+    RefCntFsck                => 1,
+    RestoreInfoKeepCnt        => 1,
+    RestorePostUserCmd        => 0,
+    RestorePreUserCmd         => 0,
+    RsyncArgs                 => 1,
+    RsyncArgsExtra            => 1,
+    RsyncBackupPCPath         => 0,
+    RsyncClientPath           => 0,
+    RsyncdClientPort          => 1,
+    RsyncdPasswd              => 1,
+    RsyncdUserName            => 1,
+    RsyncFullArgsExtra        => 1,
+    RsyncIncrArgsExtra        => 1,
+    RsyncRestoreArgs          => 1,
+    RsyncRestoreArgsExtra     => 1,
+    RsyncShareName            => 1,
+    RsyncSshArgs              => 1,
+    SmbClientFullCmd          => 0,
+    SmbClientIncrCmd          => 0,
+    SmbClientPath             => 0,
+    SmbClientRestoreCmd       => 0,
+    SmbShareName              => 1,
+    SmbSharePasswd            => 1,
+    SmbShareUserName          => 1,
+    TarClientCmd              => 0,
+    TarClientPath             => 0,
+    TarClientRestoreCmd       => 0,
+    TarFullArgs               => 1,
+    TarIncrArgs               => 1,
+    TarShareName              => 1,
+    UserCmdCheckStatus        => 0,
+    XferLogLevel              => 1,
+    XferMethod                => 1,
 };

@@ -36,7 +36,7 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
 use lib "/usr/local/BackupPC/lib";
 
 use BackupPC::Lib;
@@ -44,6 +44,7 @@ use BackupPC::XS;
 use Data::Dumper;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
+
 my $TopDir = $bpc->TopDir();
 my $BinDir = $bpc->BinDir();
 my %Conf   = $bpc->Conf();
@@ -60,10 +61,10 @@ while ( my $poolCntFile = shift(@ARGV) ) {
             #
             # Print a specific digest count instead
             #
-            $digest = pack("H*", $poolCntFile);
+            $digest      = pack("H*", $poolCntFile);
             $poolCntFile = sprintf("%s/%02x/poolCnt",
-				   $Conf{CompressLevel} ? $bpc->{CPoolDir} : $bpc->{PoolDir},
-				   vec($digest, 0, 8) & 0xfe);
+                $Conf{CompressLevel} ? $bpc->{CPoolDir} : $bpc->{PoolDir},
+                vec($digest, 0, 8) & 0xfe);
         }
         if ( !-f $poolCntFile ) {
             print STDERR "$poolCntFile does not exist\n";

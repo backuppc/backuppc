@@ -41,7 +41,7 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
 use lib "/usr/local/BackupPC/lib";
 use Getopt::Std;
 use BackupPC::Lib;
@@ -81,30 +81,29 @@ for ( my $i = 2 ; $i < @ARGV ; $i++ ) {
         print(STDERR "$0: host $host doesn't have any backups... quitting\n");
         exit(1);
     }
-    push(@HostList, $host);
+    push(@HostList,   $host);
     push(@BackupList, $backups[$#backups]{num});
 }
 
 my $ReqFileName;
 for ( my $i = 0 ; ; $i++ ) {
-    $ReqFileName="archiveReq.$$.$i";
+    $ReqFileName = "archiveReq.$$.$i";
     last if ( !-f "$TopDir/pc/$ArchiveHost/$ReqFileName" );
 }
 my %ArchiveReq = (
     archiveloc  => $bpc->{Conf}{ArchiveDest},
     archtype    => 0,
     compression => $bpc->{Conf}{ArchiveComp} eq 'none' ? $bpc->{Conf}{CatPath}
-                    : ($bpc->{Conf}{ArchiveComp} eq 'gzip'
-                      ? $bpc->{Conf}{GzipPath} : $bpc->{Conf}{Bzip2Path}),
-    compext     => $bpc->{Conf}{ArchiveComp} eq 'none' ? ''
-                    : ($bpc->{Conf}{ArchiveComp} eq 'gzip' ? '.gz' : '.bz2'),
-    parfile     => $bpc->{Conf}{ArchivePar},
-    splitsize   => '0000000',
-    host        => $ArchiveHost,
-    HostList    => \@HostList,
-    BackupList  => \@BackupList,
-    user        => $UserName,
-    reqTime     => time,
+    : ($bpc->{Conf}{ArchiveComp} eq 'gzip' ? $bpc->{Conf}{GzipPath} : $bpc->{Conf}{Bzip2Path}),
+    compext => $bpc->{Conf}{ArchiveComp} eq 'none' ? ''
+    : ($bpc->{Conf}{ArchiveComp} eq 'gzip' ? '.gz' : '.bz2'),
+    parfile    => $bpc->{Conf}{ArchivePar},
+    splitsize  => '0000000',
+    host       => $ArchiveHost,
+    HostList   => \@HostList,
+    BackupList => \@BackupList,
+    user       => $UserName,
+    reqTime    => time,
 );
 my $archive = Data::Dumper->new([\%ArchiveReq], [qw(*ArchiveReq)]);
 $archive->Indent(1);

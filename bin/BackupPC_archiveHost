@@ -58,17 +58,18 @@ Usage: $0 tarCreatePath splitPath parPath host bkupNum \\
 EOF
     exit(1);
 }
-my $tarCreate    = $ARGV[0];
-my $splitPath    = $ARGV[1];
-my $parPath      = $ARGV[2];
-my $host         = $ARGV[3];
-my $bkupNum      = $ARGV[4];
-my $compPath     = $ARGV[5];
-my $fileExt      = $ARGV[6];
-my $splitSize    = $ARGV[7];
-my $outLoc       = $ARGV[8];
-my $parfile      = $ARGV[9];
-my $share        = $ARGV[10];
+
+my $tarCreate = $ARGV[0];
+my $splitPath = $ARGV[1];
+my $parPath   = $ARGV[2];
+my $host      = $ARGV[3];
+my $bkupNum   = $ARGV[4];
+my $compPath  = $ARGV[5];
+my $fileExt   = $ARGV[6];
+my $splitSize = $ARGV[7];
+my $outLoc    = $ARGV[8];
+my $parfile   = $ARGV[9];
+my $share     = $ARGV[10];
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 
@@ -89,13 +90,13 @@ my $mesg = "Writing tar archive for host $host, backup #$bkupNum";
 #
 # Build the command we will run
 #
-$share       = $bpc->shellEscape($share);
-$host        = $bpc->shellEscape($host);
-$bkupNum     = $bpc->shellEscape($bkupNum);
-$fileExt     = $bpc->shellEscape($fileExt);
-$splitSize   = $bpc->shellEscape($splitSize);
-$parfile     = $bpc->shellEscape($parfile);
-my $outLocE  = $bpc->shellEscape($outLoc);
+$share     = $bpc->shellEscape($share);
+$host      = $bpc->shellEscape($host);
+$bkupNum   = $bpc->shellEscape($bkupNum);
+$fileExt   = $bpc->shellEscape($fileExt);
+$splitSize = $bpc->shellEscape($splitSize);
+$parfile   = $bpc->shellEscape($parfile);
+my $outLocE = $bpc->shellEscape($outLoc);
 
 #
 # We prefer to use /bin/csh because the exit status of a pipeline
@@ -113,9 +114,9 @@ if ( -x "/bin/csh" ) {
     exit(1);
 }
 my $cmd = "$tarCreate -t -h $host -n $bkupNum -s $share . ";
-$cmd   .= "| $compPath " if ( $compPath ne "cat"
-                           && $compPath ne "/bin/cat"
-                           && $compPath ne "" );
+$cmd .= "| $compPath " if ( $compPath ne "cat"
+    && $compPath ne "/bin/cat"
+    && $compPath ne "" );
 if ( -b $outLoc || -c $outLoc || -f $outLoc ) {
     #
     # Output file is a device or a regular file, so don't use split
@@ -155,10 +156,11 @@ if ( $ret ) {
 if ( -d $outLoc && -x $parPath ) {
     if ( length($parfile) && $parfile != 0 ) {
         print("Running $parPath to create parity files\n");
-	my $parCmd = "$parPath c -r$parfile $outLocE/$host.$bkupNum.tar$fileExt.par2 $outLocE/$host.$bkupNum.tar$fileExt*";
+        my $parCmd =
+          "$parPath c -r$parfile $outLocE/$host.$bkupNum.tar$fileExt.par2 $outLocE/$host.$bkupNum.tar$fileExt*";
         $ret = system($parCmd);
         if ( $ret ) {
-	    print("Executing: $parCmd\n");
+            print("Executing: $parCmd\n");
             print("Error: $parPath failed\n");
             exit(1);
         }

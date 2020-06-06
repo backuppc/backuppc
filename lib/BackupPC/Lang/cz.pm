@@ -18,20 +18,21 @@ use utf8;
 
 # --------------------------------
 
-$Lang{Start_Archive} = "Spustit Archivaci";
+$Lang{Start_Archive}        = "Spustit Archivaci";
 $Lang{Stop_Dequeue_Archive} = "Ukončit/Odstranit z Fronty Archivaci";
-$Lang{Start_Full_Backup} = "Spustit Úplné Zálohování";
-$Lang{Start_Incr_Backup} = "Spustit Inkremetační Zálohování";
-$Lang{Stop_Dequeue_Backup} = "Ukončit/Odstranit z Fronty Zálohování";
-$Lang{Restore} = "Obnovit";
-$Lang{Type_full} = "úplný";
-$Lang{Type_incr} = "inkrementační";
+$Lang{Start_Full_Backup}    = "Spustit Úplné Zálohování";
+$Lang{Start_Incr_Backup}    = "Spustit Inkremetační Zálohování";
+$Lang{Stop_Dequeue_Backup}  = "Ukončit/Odstranit z Fronty Zálohování";
+$Lang{Restore}              = "Obnovit";
+$Lang{Type_full}            = "úplný";
+$Lang{Type_incr}            = "inkrementační";
 
 # -----
 
-$Lang{Only_privileged_users_can_view_admin_options} = "Pouze oprávnění uživatelé mají přístup k administračnímu nastavení.";
-$Lang{H_Admin_Options} = "BackupPC Server: Administrační nastavení";
-$Lang{Admin_Options} = "Administrační nastavení";
+$Lang{Only_privileged_users_can_view_admin_options} =
+  "Pouze oprávnění uživatelé mají přístup k administračnímu nastavení.";
+$Lang{H_Admin_Options}    = "BackupPC Server: Administrační nastavení";
+$Lang{Admin_Options}      = "Administrační nastavení";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
@@ -53,7 +54,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 -->
 EOF
 
-$Lang{Unable_to_connect_to_BackupPC_server} = "Není možné se připojit k BackupPC serveru";
+$Lang{Unable_to_connect_to_BackupPC_server}               = "Není možné se připojit k BackupPC serveru";
 $Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
 Tento CGI skript (\$MyURL) se není schopný připojit k BackupPC
 server na \$Conf{ServerHost} port \$Conf{ServerPort}.<br>
@@ -77,7 +78,7 @@ EOF
 
 $Lang{H_BackupPC_Server_Status} = "Status Serveru BackupPC";
 
-$Lang{BackupPC_Server_Status_General_Info}= <<EOF;
+$Lang{BackupPC_Server_Status_General_Info} = <<EOF;
 \${h2(\"Obecné Informace o Serveru\")}
 
 <ul>
@@ -141,8 +142,8 @@ EOF
 
 # --------------------------------
 $Lang{BackupPC__Server_Summary} = "BackupPC: Výpis Hostů";
-$Lang{BackupPC__Archive} = "BackupPC: Archiv";
-$Lang{BackupPC_Summary} = <<EOF;
+$Lang{BackupPC__Archive}        = "BackupPC: Archiv";
+$Lang{BackupPC_Summary}         = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
@@ -317,8 +318,9 @@ $Lang{Pool_Stat} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Backup_Requested_on__host} = "BackupPC:  Záloha vyžádána na \$host";
+$Lang{BackupPC__Backup_Requested_on__host}              = "BackupPC:  Záloha vyžádána na \$host";
 $Lang{BackupPC__Delete_Requested_for_a_backup_of__host} = "BackupPC: Delete Requested for a backup of \$host";
+
 # --------------------------------
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
@@ -327,8 +329,10 @@ Odpověď serveru na: \$reply
 <p>
 Vra se na <a href="\$MyURL?host=\$host">domovskou stránku \$host</a>.
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: Začátek zálohy potvrzen na \$host";
+
 # --------------------------------
 $Lang{Are_you_sure_start} = <<EOF;
 \${h1("Are you sure?")}
@@ -347,8 +351,10 @@ Opravdu to chcete provést?
 <input type="submit" value="No" name="ignore">
 </form>
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: Ukončit potvrzení kopie na \$host";
+
 # --------------------------------
 $Lang{Are_you_sure_stop} = <<EOF;
 
@@ -372,12 +378,16 @@ Opravdu to chcete provést?
 </form>
 
 EOF
+
 # --------------------------------
 $Lang{Only_privileged_users_can_view_queues_} = "Pouze oprávnění uživatelé mají přistup k frontám.";
+
 # --------------------------------
 $Lang{Only_privileged_users_can_archive} = "Pouze oprávnění uživatelé mohou archivovat.";
+
 # --------------------------------
 $Lang{BackupPC__Queue_Summary} = "BackupPC: Přehled front";
+
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Přehled fronty zálohování")}
@@ -420,10 +430,11 @@ EOF
 
 # --------------------------------
 $Lang{Backup_PC__Log_File__file} = "BackupPC: Soubor \$file";
-$Lang{Log_File__file__comment} = <<EOF;
+$Lang{Log_File__file__comment}   = <<EOF;
 \${h1("Soubor \$file \$comment")}
 <p>
 EOF
+
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
 Obsah souboru <tt>\$file</tt>, modifikován \$mtimeStr \$comment
@@ -431,12 +442,13 @@ EOF
 
 # --------------------------------
 $Lang{skipped__skipped_lines} = "[ přeskočeno \$skipped řádků ]\n";
+
 # --------------------------------
 $Lang{_pre___Can_t_open_log_file__file} = "<pre>\nNení možné otevřít log soubor \$file\n";
 
 # --------------------------------
 $Lang{BackupPC__Log_File_History} = "BackupPC: Historie Log Souboru";
-$Lang{Log_File_History__hdr} = <<EOF;
+$Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("Historie Log Souboru \$hdr")}
 <p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
@@ -460,12 +472,11 @@ $Lang{Recent_Email_Summary} = <<EOF;
 </table>
 EOF
 
-
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Prohlížet zálohu \$num pro \$host";
 
 # ------------------------------
-$Lang{Restore_Options_for__host} = "BackupPC: Obnovit nastavení pro \$host";
+$Lang{Restore_Options_for__host}  = "BackupPC: Obnovit nastavení pro \$host";
 $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("Obnovit nastavení pro \$host")}
 <p>
@@ -578,7 +589,6 @@ Požádejte systémového administrátora o instalaci Archive::Zip z
 </p>
 EOF
 
-
 # ------------------------------
 $Lang{Option_3__Download_Zip_archive} = <<EOF;
 \${h2("Možnost 3: Stáhnout Tar archiv")}
@@ -604,7 +614,6 @@ k \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 <input type="submit" value="Stánout Tar soubor" name="ignore">
 </form>
 EOF
-
 
 # ------------------------------
 $Lang{Restore_Confirm_on__host} = "BackupPC: Potvrzení obnovení na \$host";
@@ -638,10 +647,9 @@ Obravdu to chceş provést?
 </form>
 EOF
 
-
 # --------------------------
 $Lang{Restore_Requested_on__hostDest} = "BackupPC: Obnovit vyžádané na \$hostDest";
-$Lang{Reply_from_server_was___reply} = <<EOF;
+$Lang{Reply_from_server_was___reply}  = <<EOF;
 \${h1(\$str)}
 <p>
 Odpověď od serveru: \$reply
@@ -655,12 +663,12 @@ $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
 Odpověď od serveru: \$reply
 EOF
 
-
 # --------------------------------
 $Lang{BackupPC__Delete_Backup_Confirm__num_of__host} = "BackupPC: Delete Backup Confirm #\$num of \$host";
+
 # --------------------------------
-$Lang{A_filled} = "a filled";
-$Lang{An_unfilled} = "an unfilled";
+$Lang{A_filled}            = "a filled";
+$Lang{An_unfilled}         = "an unfilled";
 $Lang{Are_you_sure_delete} = <<EOF;
 \${h1("Are you sure?")}
 <p>
@@ -794,7 +802,7 @@ zkomprimované soubory.
 </table>
 EOF
 
-$Lang{Host__host_Archive_Summary} = "BackupPC: Přehled archivů hosta \$host ";
+$Lang{Host__host_Archive_Summary}  = "BackupPC: Přehled archivů hosta \$host ";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
 \${h1("Přehled archivů hosta \$host")}
 <p>
@@ -822,7 +830,7 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 EOF
 
 # -------------------------
-$Lang{Error} = "BackupPC: Chyba";
+$Lang{Error}         = "BackupPC: Chyba";
 $Lang{Error____head} = <<EOF;
 \${h1("Chyba: \$head")}
 <p>\$mesg</p>
@@ -1021,54 +1029,50 @@ $Lang{Email_Summary} = "BackupPC: Souhrn emailů";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: zkontroluj apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =
-              "Şpatný uživatel: moje userid je \$>, místo \$uid"
-            . "(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___} = "Şpatný uživatel: moje userid je \$>, místo \$uid" . "(\$Conf{BackupPCUser})\n";
+
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Pouze oprávnění uživatelé jsou oprávněni prohlížet souhrny PC.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-                  "Pouze oprávnění uživatelé mohou ukončit nebo spustit zálohování na"
-		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Şpatné číslo \${EscHTML(\$In{num})}";
+  "Pouze oprávnění uživatelé mohou ukončit nebo spustit zálohování na" . " \${EscHTML(\$host)}.";
+$Lang{Invalid_number__num}                         = "Şpatné číslo \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Nepodařilo se otevřít \$file: problém konfigurace?";
-$Lang{Only_privileged_users_can_view_log_or_config_files} = "Pouze oprávnění uživatelé mají přístup k log a konfiguračním souborům.";
-$Lang{Only_privileged_users_can_view_log_files} = "Pouze oprávnění uživatelé mají přístup k log souborům.";
+$Lang{Only_privileged_users_can_view_log_or_config_files} =
+  "Pouze oprávnění uživatelé mají přístup k log a konfiguračním souborům.";
+$Lang{Only_privileged_users_can_view_log_files}       = "Pouze oprávnění uživatelé mají přístup k log souborům.";
 $Lang{Only_privileged_users_can_view_email_summaries} = "Pouze oprávnění uživatelé mají přístup k souhrnu emailů.";
-$Lang{Only_privileged_users_can_browse_backup_files} = "Pouze oprávnění uživatelé mohou prohlížet soubory záloh"
-                . " pro host \${EscHTML(\$In{host})}.";
-$Lang{Only_privileged_users_can_delete_backups} = "Only privileged users can delete backups"
-                . " of host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "Prázdné jméno hosta.";
-$Lang{Directory___EscHTML} = "Adresář \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
-		    . " je prázdný";
-$Lang{Can_t_browse_bad_directory_name2} = "Není možné prohlížet - şpatný název adresáře"
-	            . " \${EscHTML(\$relDir)}";
-$Lang{Only_privileged_users_can_restore_backup_files} = "Pouze oprávnění uživatelé mohou obnovovat soubory zálohy"
-                . " pro hosta \${EscHTML(\$In{host})}.";
+$Lang{Only_privileged_users_can_browse_backup_files} =
+  "Pouze oprávnění uživatelé mohou prohlížet soubory záloh" . " pro host \${EscHTML(\$In{host})}.";
+$Lang{Only_privileged_users_can_delete_backups} =
+  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}                  = "Prázdné jméno hosta.";
+$Lang{Directory___EscHTML}              = "Adresář \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " je prázdný";
+$Lang{Can_t_browse_bad_directory_name2} = "Není možné prohlížet - şpatný název adresáře" . " \${EscHTML(\$relDir)}";
+$Lang{Only_privileged_users_can_restore_backup_files} =
+  "Pouze oprávnění uživatelé mohou obnovovat soubory zálohy" . " pro hosta \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Şpatné jméno hosta \${EscHTML(\$host)}";
-$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Nevybral jste žádný soubor; prosím jděte Zpět k"
-                . " výběru souborů.";
-$Lang{You_haven_t_selected_any_hosts} = "Nevybral jste žádného hosta; prosím jděte Zpět k"
-                . " výběru hostů.";
-$Lang{Nice_try__but_you_can_t_put} = "Nelze umístit \'..\' do názvu souboru";
-$Lang{Host__doesn_t_exist} = "Host \${EscHTML(\$In{hostDest})} neexistuje";
-$Lang{You_don_t_have_permission_to_restore_onto_host} = "Nemáte oprávnění k obnově na"
-		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "Nelze otevřít nebo vytvořit "
-		. "\${EscHTML(\"\$openPath\")}";
-$Lang{Only_privileged_users_can_restore_backup_files2} = "Pouze oprávnění uživatelé mohou obnovovat soubory zálohy"
-                . " pro hosta \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "Prázdné jméno hosta";
+$Lang{You_haven_t_selected_any_files__please_go_Back_to} =
+  "Nevybral jste žádný soubor; prosím jděte Zpět k" . " výběru souborů.";
+$Lang{You_haven_t_selected_any_hosts} = "Nevybral jste žádného hosta; prosím jděte Zpět k" . " výběru hostů.";
+$Lang{Nice_try__but_you_can_t_put}    = "Nelze umístit \'..\' do názvu souboru";
+$Lang{Host__doesn_t_exist}            = "Host \${EscHTML(\$In{hostDest})} neexistuje";
+$Lang{You_don_t_have_permission_to_restore_onto_host} = "Nemáte oprávnění k obnově na" . " \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath}                    = "Nelze otevřít nebo vytvořit " . "\${EscHTML(\"\$openPath\")}";
+$Lang{Only_privileged_users_can_restore_backup_files2} =
+  "Pouze oprávnění uživatelé mohou obnovovat soubory zálohy" . " pro hosta \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}      = "Prázdné jméno hosta";
 $Lang{Unknown_host_or_user} = "Neznámý host nebo uživatel \${EscHTML(\$host)}";
-$Lang{Only_privileged_users_can_view_information_about} = "Pouze oprávnění uživatelé mají přístup k informacím o"
-                . " hostu \${EscHTML(\$host)}." ;
-$Lang{Only_privileged_users_can_view_archive_information} = "Pouze oprávnění uživatelé mají přístup k informacím o archivaci.";
-$Lang{Only_privileged_users_can_view_restore_information} = "Pouze oprávnění uživatelé mají přístup k informacím o obnově.";
-$Lang{Restore_number__num_for_host__does_not_exist} = "Číslo obnovení \$num pro hosta \${EscHTML(\$host)}"
-	        . " neexsituje.";
-$Lang{Archive_number__num_for_host__does_not_exist} = "Číslo archivu \$num pro hosta \${EscHTML(\$host)}"
-                . " neexsituje.";
+$Lang{Only_privileged_users_can_view_information_about} =
+  "Pouze oprávnění uživatelé mají přístup k informacím o" . " hostu \${EscHTML(\$host)}.";
+$Lang{Only_privileged_users_can_view_archive_information} =
+  "Pouze oprávnění uživatelé mají přístup k informacím o archivaci.";
+$Lang{Only_privileged_users_can_view_restore_information} =
+  "Pouze oprávnění uživatelé mají přístup k informacím o obnově.";
+$Lang{Restore_number__num_for_host__does_not_exist} =
+  "Číslo obnovení \$num pro hosta \${EscHTML(\$host)}" . " neexsituje.";
+$Lang{Archive_number__num_for_host__does_not_exist} =
+  "Číslo archivu \$num pro hosta \${EscHTML(\$host)}" . " neexsituje.";
 $Lang{Can_t_find_IP_address_for} = "Nelze nalézt IP adresu pro \${EscHTML(\$host)}";
-$Lang{host_is_a_DHCP_host} = <<EOF;
+$Lang{host_is_a_DHCP_host}       = <<EOF;
 \$host je DHCP host, and není známa jeho IP adresa.  Zkontrolováno
 netbios jméno \$ENV{REMOTE_ADDR}\$tryIP, a zjiştěno, že zařízení
 není \$host.
@@ -1081,48 +1085,50 @@ EOF
 # !! Server Mesg !!
 # ------------------------------------
 
-$Lang{Backup_requested_on_DHCP__host} = "Záloha vyžádána z DHCP \$host (\$In{hostIP}) uživatelem"
-		                      . " \$User z \$ENV{REMOTE_ADDR}";
-$Lang{Backup_requested_on__host_by__User} = "Záloha vyžádána z \$host uživatelem \$User";
+$Lang{Backup_requested_on_DHCP__host} =
+  "Záloha vyžádána z DHCP \$host (\$In{hostIP}) uživatelem" . " \$User z \$ENV{REMOTE_ADDR}";
+$Lang{Backup_requested_on__host_by__User}        = "Záloha vyžádána z \$host uživatelem \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Záloha ukončena/vyřazena z fronty z \$host uživatelem \$User";
-$Lang{Restore_requested_to_host__hostDest__backup___num} = "Obnova vyžádána na hosta \$hostDest, obnova #\$num,"
-	     . " uživatelem \$User z \$ENV{REMOTE_ADDR}";
-$Lang{Delete_requested_for_backup_of__host_by__User} = "Delete requested for backup #\$num of \$host"
-             . " by \$User from \$ENV{REMOTE_ADDR}";
+$Lang{Restore_requested_to_host__hostDest__backup___num} =
+  "Obnova vyžádána na hosta \$hostDest, obnova #\$num," . " uživatelem \$User z \$ENV{REMOTE_ADDR}";
+$Lang{Delete_requested_for_backup_of__host_by__User} =
+  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivace vyžádána uživatelem \$User z \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------
 # ------- Stuff that was forgotten ----------------
 # -------------------------------------------------
 
-$Lang{Status} = "Stav";
-$Lang{PC_Summary} = "Souhrn hostů";
-$Lang{LOG_file} = "LOG soubor";
-$Lang{LOG_files} = "LOG soubory";
-$Lang{Old_LOGs} = "Staré LOGy";
+$Lang{Status}        = "Stav";
+$Lang{PC_Summary}    = "Souhrn hostů";
+$Lang{LOG_file}      = "LOG soubor";
+$Lang{LOG_files}     = "LOG soubory";
+$Lang{Old_LOGs}      = "Staré LOGy";
 $Lang{Email_summary} = "Souhrn emailů";
-$Lang{Config_file} = "Konfigurační soubor";
+$Lang{Config_file}   = "Konfigurační soubor";
+
 # $Lang{Hosts_file} = "Hosts soubor";
 $Lang{Current_queues} = "Aktuální fronty";
-$Lang{Documentation} = "Dokumentace";
+$Lang{Documentation}  = "Dokumentace";
 
 #$Lang{Host_or_User_name} = "<small>Jméno uživatele nebo hosta:</small>";
-$Lang{Go} = "Jdi";
-$Lang{Hosts} = "Hosts";
+$Lang{Go}            = "Jdi";
+$Lang{Hosts}         = "Hosts";
 $Lang{Select_a_host} = "Vyber hosta...";
 
-$Lang{There_have_been_no_archives} = "<h2> Nebyli žádné archivy </h2>\n";
+$Lang{There_have_been_no_archives}      = "<h2> Nebyli žádné archivy </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> Toto PC nebylo nikdy zálohováno!! </h2>\n";
-$Lang{This_PC_is_used_by} = "<li>Toto PC je používáno uživatelem \${UserLink(\$user)}";
+$Lang{This_PC_is_used_by}               = "<li>Toto PC je používáno uživatelem \${UserLink(\$user)}";
 
 $Lang{Extracting_only_Errors} = "(Rozbalování chyb)";
-$Lang{XferLOG} = "XferLOG";
-$Lang{Errors}  = "Chyby";
+$Lang{XferLOG}                = "XferLOG";
+$Lang{Errors}                 = "Chyby";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
 <li>Poslední email odeslán uživately \${UserLink(\$user)} byl v \$mailTime, předmět "\$subj".
 EOF
+
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
 <li>Příkaz \$cmd je aktuálně vykonáván pro \$host, spuştěn v \$startTime.
@@ -1209,9 +1215,9 @@ $Lang{fileHeader} = <<EOF;
     </tr>
 EOF
 
-$Lang{Home} = "Doma";
-$Lang{Browse} = "Prohlížení záloh";
-$Lang{Last_bad_XferLOG} = "Poslední şpatný XferLOG";
+$Lang{Home}                         = "Doma";
+$Lang{Browse}                       = "Prohlížení záloh";
+$Lang{Last_bad_XferLOG}             = "Poslední şpatný XferLOG";
 $Lang{Last_bad_XferLOG_errors_only} = "Poslední şpatný XferLOG (chyb&nbsp;pouze)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
@@ -1258,7 +1264,7 @@ EOF
 
 $Lang{BackupPC__Documentation} = "BackupPC: Documentace";
 
-$Lang{No} = "ne";
+$Lang{No}  = "ne";
 $Lang{Yes} = "ano";
 
 $Lang{The_directory_is_empty} = <<EOF;
@@ -1274,34 +1280,33 @@ $Lang{backupType_incr}    = "inkr";
 $Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "částečný";
 
-$Lang{failed} = "neúspěşný";
+$Lang{failed}  = "neúspěşný";
 $Lang{success} = "úspěşný";
-$Lang{and} = "a";
+$Lang{and}     = "a";
 
 # ------
 # Hosts states and reasons
-$Lang{Status_idle} = "nečinný";
-$Lang{Status_backup_starting} = "záloha se spouştí";
-$Lang{Status_backup_in_progress} = "záloha probíhá";
-$Lang{Status_restore_starting} = "obnovení se spouştí";
+$Lang{Status_idle}                = "nečinný";
+$Lang{Status_backup_starting}     = "záloha se spouştí";
+$Lang{Status_backup_in_progress}  = "záloha probíhá";
+$Lang{Status_restore_starting}    = "obnovení se spouştí";
 $Lang{Status_restore_in_progress} = "obnovení probíhá";
-$Lang{Status_admin_pending} = "link čeká";
-$Lang{Status_admin_running} = "link běží";
+$Lang{Status_admin_pending}       = "link čeká";
+$Lang{Status_admin_running}       = "link běží";
 
-$Lang{Reason_backup_done}    = "hotovo";
-$Lang{Reason_restore_done}   = "obnovení dokončeno";
-$Lang{Reason_archive_done}   = "archivace dokončena";
-$Lang{Reason_nothing_to_do}  = "nečinný";
-$Lang{Reason_backup_failed}  = "zálohování selhalo";
-$Lang{Reason_restore_failed} = "obnovení selhalo";
-$Lang{Reason_archive_failed} = "archivace selhala";
-$Lang{Reason_no_ping}        = "žádný ping";
+$Lang{Reason_backup_done}              = "hotovo";
+$Lang{Reason_restore_done}             = "obnovení dokončeno";
+$Lang{Reason_archive_done}             = "archivace dokončena";
+$Lang{Reason_nothing_to_do}            = "nečinný";
+$Lang{Reason_backup_failed}            = "zálohování selhalo";
+$Lang{Reason_restore_failed}           = "obnovení selhalo";
+$Lang{Reason_archive_failed}           = "archivace selhala";
+$Lang{Reason_no_ping}                  = "žádný ping";
 $Lang{Reason_backup_canceled_by_user}  = "zálohování zruşeno uživatelem";
 $Lang{Reason_restore_canceled_by_user} = "obnovení zruşeno uživatelem";
 $Lang{Reason_archive_canceled_by_user} = "archivace zruşena uživatelem";
-$Lang{Disabled_OnlyManualBackups}  = "automatické zálohování zakázáno";
-$Lang{Disabled_AllBackupsDisabled} = "zakázáno";
-
+$Lang{Disabled_OnlyManualBackups}      = "automatické zálohování zakázáno";
+$Lang{Disabled_AllBackupsDisabled}     = "zakázáno";
 
 # ---------
 # Email messages
@@ -1391,7 +1396,7 @@ BackupPC Genie
 https://backuppc.github.io/backuppc
 EOF
 
-$Lang{howLong_not_been_backed_up} = "nebylo zálohováno úspěşně";
+$Lang{howLong_not_been_backed_up}               = "nebylo zálohováno úspěşně";
 $Lang{howLong_not_been_backed_up_for_days_days} = "nebylo zálohováno \$days dní";
 
 #######################################################################
@@ -1416,50 +1421,50 @@ EOF
 #######################################################################
 
 $Lang{Only_privileged_users_can_edit_config_files} = "Pouze oprávnění uživatelé mohou editovat konfikuraci.";
-$Lang{CfgEdit_Edit_Config} = "Editovat konfiguraci";
-$Lang{CfgEdit_Edit_Hosts}  = "Editovat Hosty";
+$Lang{CfgEdit_Edit_Config}                         = "Editovat konfiguraci";
+$Lang{CfgEdit_Edit_Hosts}                          = "Editovat Hosty";
 
-$Lang{CfgEdit_Title_Server} = "Server";
-$Lang{CfgEdit_Title_General_Parameters} = "Hlavní parametry";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "Plán probuzení";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "Rovnocenné úlohy";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Limity úložiştě";
-$Lang{CfgEdit_Title_Other_Parameters} = "Ostatní paramtery";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Vzdálené nastavení Apache";
-$Lang{CfgEdit_Title_Program_Paths} = "Cesty programu";
-$Lang{CfgEdit_Title_Install_Paths} = "Instalační cesty";
-$Lang{CfgEdit_Title_Email} = "Email";
-$Lang{CfgEdit_Title_Email_settings} = "Nastavení emailu";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Nastavení emailu uživatelům";
-$Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "Administrační práva";
-$Lang{CfgEdit_Title_Page_Rendering} = "Renderování stránky";
-$Lang{CfgEdit_Title_Paths} = "Cesty";
-$Lang{CfgEdit_Title_User_URLs} = "Uživatelské URL";
-$Lang{CfgEdit_Title_User_Config_Editing} = "Editace konfigurace uživatelů";
-$Lang{CfgEdit_Title_Xfer} = "Xfer";
-$Lang{CfgEdit_Title_Xfer_Settings} = "Nastavení Xfer";
-$Lang{CfgEdit_Title_Ftp_Settings} = "Nastavení FTP";
-$Lang{CfgEdit_Title_Smb_Settings} = "Nastavení Smb";
-$Lang{CfgEdit_Title_Tar_Settings} = "Nastavení Tar";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Nastavení Rsync";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Nastavení Rsyncd";
-$Lang{CfgEdit_Title_Archive_Settings} = "Nastavení Archivace";
-$Lang{CfgEdit_Title_Include_Exclude} = "Zahrnout/Vyloučit";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Cesty/Příkazy";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Cesty/Příkazy";
+$Lang{CfgEdit_Title_Server}                    = "Server";
+$Lang{CfgEdit_Title_General_Parameters}        = "Hlavní parametry";
+$Lang{CfgEdit_Title_Wakeup_Schedule}           = "Plán probuzení";
+$Lang{CfgEdit_Title_Concurrent_Jobs}           = "Rovnocenné úlohy";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits}    = "Limity úložiştě";
+$Lang{CfgEdit_Title_Other_Parameters}          = "Ostatní paramtery";
+$Lang{CfgEdit_Title_Remote_Apache_Settings}    = "Vzdálené nastavení Apache";
+$Lang{CfgEdit_Title_Program_Paths}             = "Cesty programu";
+$Lang{CfgEdit_Title_Install_Paths}             = "Instalační cesty";
+$Lang{CfgEdit_Title_Email}                     = "Email";
+$Lang{CfgEdit_Title_Email_settings}            = "Nastavení emailu";
+$Lang{CfgEdit_Title_Email_User_Messages}       = "Nastavení emailu uživatelům";
+$Lang{CfgEdit_Title_CGI}                       = "CGI";
+$Lang{CfgEdit_Title_Admin_Privileges}          = "Administrační práva";
+$Lang{CfgEdit_Title_Page_Rendering}            = "Renderování stránky";
+$Lang{CfgEdit_Title_Paths}                     = "Cesty";
+$Lang{CfgEdit_Title_User_URLs}                 = "Uživatelské URL";
+$Lang{CfgEdit_Title_User_Config_Editing}       = "Editace konfigurace uživatelů";
+$Lang{CfgEdit_Title_Xfer}                      = "Xfer";
+$Lang{CfgEdit_Title_Xfer_Settings}             = "Nastavení Xfer";
+$Lang{CfgEdit_Title_Ftp_Settings}              = "Nastavení FTP";
+$Lang{CfgEdit_Title_Smb_Settings}              = "Nastavení Smb";
+$Lang{CfgEdit_Title_Tar_Settings}              = "Nastavení Tar";
+$Lang{CfgEdit_Title_Rsync_Settings}            = "Nastavení Rsync";
+$Lang{CfgEdit_Title_Rsyncd_Settings}           = "Nastavení Rsyncd";
+$Lang{CfgEdit_Title_Archive_Settings}          = "Nastavení Archivace";
+$Lang{CfgEdit_Title_Include_Exclude}           = "Zahrnout/Vyloučit";
+$Lang{CfgEdit_Title_Smb_Paths_Commands}        = "Smb Cesty/Příkazy";
+$Lang{CfgEdit_Title_Tar_Paths_Commands}        = "Tar Cesty/Příkazy";
 $Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync  Cesty/Příkazy/Argumenty";
-$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Port/Argumenty";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archivace Cesty/Příkazy";
-$Lang{CfgEdit_Title_Schedule} = "Plán";
-$Lang{CfgEdit_Title_Full_Backups} = "Plné zálohy";
-$Lang{CfgEdit_Title_Incremental_Backups} = "Inkrementační zálohy";
-$Lang{CfgEdit_Title_Blackouts} = "Přetížení";
-$Lang{CfgEdit_Title_Other} = "Ostatní";
-$Lang{CfgEdit_Title_Backup_Settings} = "Nastavení zálohování";
-$Lang{CfgEdit_Title_Client_Lookup} = "Vyhledávání klientůp";
-$Lang{CfgEdit_Title_User_Commands} = "Uživatelské příkazy";
-$Lang{CfgEdit_Title_Hosts} = "Hosti";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args}          = "Rsyncd Port/Argumenty";
+$Lang{CfgEdit_Title_Archive_Paths_Commands}    = "Archivace Cesty/Příkazy";
+$Lang{CfgEdit_Title_Schedule}                  = "Plán";
+$Lang{CfgEdit_Title_Full_Backups}              = "Plné zálohy";
+$Lang{CfgEdit_Title_Incremental_Backups}       = "Inkrementační zálohy";
+$Lang{CfgEdit_Title_Blackouts}                 = "Přetížení";
+$Lang{CfgEdit_Title_Other}                     = "Ostatní";
+$Lang{CfgEdit_Title_Backup_Settings}           = "Nastavení zálohování";
+$Lang{CfgEdit_Title_Client_Lookup}             = "Vyhledávání klientůp";
+$Lang{CfgEdit_Title_User_Commands}             = "Uživatelské příkazy";
+$Lang{CfgEdit_Title_Hosts}                     = "Hosti";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 K přidání nového hosta, vyberte Přidat a zadejte jméno. Pro
@@ -1485,44 +1490,30 @@ specifickou pro tohoto hosta.
 <p>
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "Uložit";
-$Lang{CfgEdit_Button_Insert}   = "Vložit";
-$Lang{CfgEdit_Button_Delete}   = "Smazat";
-$Lang{CfgEdit_Button_Add}      = "Přidat";
-$Lang{CfgEdit_Button_Override} = "Přepsat";
-$Lang{CfgEdit_Button_New_Key}  = "Nový klíč";
+$Lang{CfgEdit_Button_Save}      = "Uložit";
+$Lang{CfgEdit_Button_Insert}    = "Vložit";
+$Lang{CfgEdit_Button_Delete}    = "Smazat";
+$Lang{CfgEdit_Button_Add}       = "Přidat";
+$Lang{CfgEdit_Button_Override}  = "Přepsat";
+$Lang{CfgEdit_Button_New_Key}   = "Nový klíč";
 $Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
-$Lang{CfgEdit_Error_No_Save}
-            = "Chyba: Neuloženo z důvody chyb";
-$Lang{CfgEdit_Error__must_be_an_integer}
-            = "Chyba: \$var musí být celé číslo";
-$Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "Chyba: \$var musí být reálné číslo";
-$Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Chyba: vstup \$var \$k musí být celé číslo";
-$Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Chyba: vstup \$var \$k musí být reálné číslo";
-$Lang{CfgEdit_Error__must_be_executable_program}
-            = "Chyba: \$var musí být správná cesta";
-$Lang{CfgEdit_Error__must_be_valid_option}
-            = "Chyba: \$var musí být správná možnost";
-$Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "Kopie hosta \$copyHost neexistuje; vytvářím nový název hosta \$fullHost. Smažte tohota hosta, pokud to není to, co jste chtěl.";
+$Lang{CfgEdit_Error_No_Save}                            = "Chyba: Neuloženo z důvody chyb";
+$Lang{CfgEdit_Error__must_be_an_integer}                = "Chyba: \$var musí být celé číslo";
+$Lang{CfgEdit_Error__must_be_real_valued_number}        = "Chyba: \$var musí být reálné číslo";
+$Lang{CfgEdit_Error__entry__must_be_an_integer}         = "Chyba: vstup \$var \$k musí být celé číslo";
+$Lang{CfgEdit_Error__entry__must_be_real_valued_number} = "Chyba: vstup \$var \$k musí být reálné číslo";
+$Lang{CfgEdit_Error__must_be_executable_program}        = "Chyba: \$var musí být správná cesta";
+$Lang{CfgEdit_Error__must_be_valid_option}              = "Chyba: \$var musí být správná možnost";
+$Lang{CfgEdit_Error_Copy_host_does_not_exist} =
+  "Kopie hosta \$copyHost neexistuje; vytvářím nový název hosta \$fullHost. Smažte tohota hosta, pokud to není to, co jste chtěl.";
 
-$Lang{CfgEdit_Log_Copy_host_config}
-            = "\$User zkopíroval konfiguraci z hosta \$fromHost do \$host\n";
-$Lang{CfgEdit_Log_Delete_param}
-            = "\$User smazal \$p z \$conf\n";
-$Lang{CfgEdit_Log_Add_param_value}
-            = "\$User přidal \$p do \$conf, nastavil na \$value\n";
-$Lang{CfgEdit_Log_Change_param_value}
-            = "\$User změnil \$p v \$conf do \$valueNew z \$valueOld\n";
-$Lang{CfgEdit_Log_Host_Delete}
-            = "\$User smazal hosta \$host\n";
-$Lang{CfgEdit_Log_Host_Change}
-            = "\$User host \$host změnil \$key z \$valueOld na \$valueNew\n";
-$Lang{CfgEdit_Log_Host_Add}
-            = "\$User přidal host \$host: \$value\n";
+$Lang{CfgEdit_Log_Copy_host_config}   = "\$User zkopíroval konfiguraci z hosta \$fromHost do \$host\n";
+$Lang{CfgEdit_Log_Delete_param}       = "\$User smazal \$p z \$conf\n";
+$Lang{CfgEdit_Log_Add_param_value}    = "\$User přidal \$p do \$conf, nastavil na \$value\n";
+$Lang{CfgEdit_Log_Change_param_value} = "\$User změnil \$p v \$conf do \$valueNew z \$valueOld\n";
+$Lang{CfgEdit_Log_Host_Delete}        = "\$User smazal hosta \$host\n";
+$Lang{CfgEdit_Log_Host_Change}        = "\$User host \$host změnil \$key z \$valueOld na \$valueNew\n";
+$Lang{CfgEdit_Log_Host_Add}           = "\$User přidal host \$host: \$value\n";
 
 #end of lang_cz.pm

@@ -33,7 +33,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use Encode qw/from_to/;
 use BackupPC::Lib;
@@ -44,7 +45,7 @@ use Getopt::Std;
 use File::Path;
 use Data::Dumper;
 
-use constant S_IFMT => 0170000;   # type of file
+use constant S_IFMT => 0170000;    # type of file
 
 $SIG{BUS}  = \&confess;
 $SIG{SEGV} = \&confess;
@@ -73,14 +74,14 @@ EOF
 
 select(STDOUT); $| = 1;
 
-my $Full = $opts{f};
-my $FileCnt        = 0;
-my $FileCntPeriod  = 100;
+my $Full          = $opts{f};
+my $FileCnt       = 0;
+my $FileCntPeriod = 100;
 
 print("$0: got Full = $Full\n");
 
-if ( $opts{h} !~ /^([\w\.\s-]+)$/
-        || $opts{h} =~ m{(^|/)\.\.(/|$)} ) {
+if (   $opts{h} !~ /^([\w\.\s-]+)$/
+    || $opts{h} =~ m{(^|/)\.\.(/|$)} ) {
     print("$0: bad host name '$opts{h}'\n");
     exit(1);
 }
@@ -91,7 +92,7 @@ if ( $opts{s} eq "" || $opts{s} =~ m{(^|/)\.\.(/|$)} ) {
     exit(1);
 }
 my $ShareNameUM = $opts{s};
-my $ShareName = $bpc->fileNameEltMangle($ShareNameUM);
+my $ShareName   = $bpc->fileNameEltMangle($ShareNameUM);
 
 my $Abort = 0;
 my $AbortReason;
@@ -111,19 +112,18 @@ my @Backups = $bpc->BackupInfoRead($client);
 my($lastBkupIdx, $lastBkupNum, $newBkupNum, $newBkupIdx);
 my($PaxHdrGlobal);
 
-$newBkupIdx  = @Backups - 1;
-$newBkupNum  = $Backups[$newBkupIdx]{num};
+$newBkupIdx = @Backups - 1;
+$newBkupNum = $Backups[$newBkupIdx]{num};
 my $Compress = $Backups[$newBkupIdx]{compress};
 
 #
 # Cached attributes for the new backup and (if it exists)
 # the previous one
 #
-my($AttrNew, $AttrOld);
+my($AttrNew,  $AttrOld);
 my($DeltaNew, $DeltaOld);
 
-$AttrNew  = BackupPC::XS::AttribCache::new($client, $newBkupNum, $ShareNameUM,
-                                           $Backups[$newBkupIdx]{compress});
+$AttrNew  = BackupPC::XS::AttribCache::new($client, $newBkupNum, $ShareNameUM, $Backups[$newBkupIdx]{compress});
 $DeltaNew = BackupPC::XS::DeltaRefCnt::new("$TopDir/pc/$client/$newBkupNum");
 $AttrNew->setDeltaInfo($DeltaNew);
 
@@ -141,8 +141,7 @@ if ( !$Inplace ) {
         exit(1);
     }
     $lastBkupNum = $Backups[$lastBkupIdx]{num};
-    $AttrOld  = BackupPC::XS::AttribCache::new($client, $lastBkupNum, $ShareNameUM,
-                                               $Backups[$lastBkupIdx]{compress});
+    $AttrOld  = BackupPC::XS::AttribCache::new($client, $lastBkupNum, $ShareNameUM, $Backups[$lastBkupIdx]{compress});
     $DeltaOld = BackupPC::XS::DeltaRefCnt::new("$TopDir/pc/$client/$lastBkupNum");
     $AttrOld->setDeltaInfo($DeltaOld);
 }
@@ -155,14 +154,13 @@ if ( !$Inplace ) {
 # Archive::Tar is Copyright 1997 Calle Dybedahl. All rights reserved.
 #                 Copyright 1998 Stephen Zander. All rights reserved.
 #
-my $tar_unpack_header
-    = 'Z100 A8 A8 A8 a12 A12 A8 A1 Z100 A6 A2 Z32 Z32 A8 A8 A155 x12';
+my $tar_unpack_header = 'Z100 A8 A8 A8 a12 A12 A8 A1 Z100 A6 A2 Z32 Z32 A8 A8 A155 x12';
 my $tar_header_length = 512;
 
-my $BufSize       = 1048576;     # 1MB or 2^20
-my $MaxFiles      = 20;
-my $Errors        = 0;
-my $FatalErrors   = 0;
+my $BufSize     = 1048576;    # 1MB or 2^20
+my $MaxFiles    = 20;
+my $Errors      = 0;
+my $FatalErrors = 0;
 
 my $ExistFileCnt      = 0;
 my $ExistFileSize     = 0;
@@ -190,17 +188,17 @@ sub TarRead
     print("tarRead $totBytes\n") if ( $Conf{XferLogLevel} >= 9 );
 
     $data = "\0" x $totBytes;
-    $! = 0;
+    $!    = 0;
     while ( $numBytes < $totBytes ) {
-	return if ( $Abort );
-        $newBytes = sysread($fh,
-                        substr($data, $numBytes, $totBytes - $numBytes),
-                        $totBytes - $numBytes);
+        return if ( $Abort );
+        $newBytes = sysread($fh, substr($data, $numBytes, $totBytes - $numBytes), $totBytes - $numBytes);
         if ( $newBytes <= 0 ) {
-	    return if ( $TarReadHdrCnt == 1 );	 # empty tar file ok
-            print("Unexpected end of tar archive (tot = $totBytes,"
-                   . " num = $numBytes, errno = $!, posn = " . sysseek($fh, 0, 1) . ")\n");
-            $Abort = 1;
+            return if ( $TarReadHdrCnt == 1 );    # empty tar file ok
+            print(  "Unexpected end of tar archive (tot = $totBytes,"
+                  . " num = $numBytes, errno = $!, posn = "
+                  . sysseek($fh, 0, 1)
+                  . ")\n");
+            $Abort       = 1;
             $AbortReason = "Unexpected end of tar archive";
             $Errors++;
             $FatalErrors++;
@@ -233,79 +231,83 @@ sub TarReadFileInfo
 {
     my($fh) = @_;
     my($head, $longName, $longLink);
-    my($name, $mode, $uid, $gid, $size, $mtime, $chksum, $type,
-       $linkname, $magic, $version, $uname, $gname, $devmajor,
-       $devminor, $prefix);
+    my(
+        $name,     $mode,  $uid,     $gid,   $size,  $mtime,    $chksum,   $type,
+        $linkname, $magic, $version, $uname, $gname, $devmajor, $devminor, $prefix
+    );
     my $paxHdr = {};
 
     while ( 1 ) {
         $head = TarReadHeader($fh);
-        return if ( $Abort || $head eq ""
-			   || $head eq "\0" x $tar_header_length );
-        ($name,		# string
-            $mode,	# octal number
-            $uid,	# octal number
-            $gid,	# octal number
-            $size,	# octal number
-            $mtime,	# octal number
-            $chksum,	# octal number
-            $type,	# character
-            $linkname,	# string
-            $magic,	# string
-            $version,	# two bytes
-            $uname,	# string
-            $gname,	# string
-            $devmajor,	# octal number
-            $devminor,	# octal number
-            $prefix) = unpack($tar_unpack_header, $head);
+        return if ( $Abort
+            || $head eq ""
+            || $head eq "\0" x $tar_header_length );
+        (
+            $name,        # string
+            $mode,        # octal number
+            $uid,         # octal number
+            $gid,         # octal number
+            $size,        # octal number
+            $mtime,       # octal number
+            $chksum,      # octal number
+            $type,        # character
+            $linkname,    # string
+            $magic,       # string
+            $version,     # two bytes
+            $uname,       # string
+            $gname,       # string
+            $devmajor,    # octal number
+            $devminor,    # octal number
+            $prefix
+        ) = unpack($tar_unpack_header, $head);
 
-        $mode     = oct $mode;
-        $uid      = oct $uid;
-        $gid      = oct $gid;
-	if ( ord($size) == 128 ) {
-	    #
-	    # GNU tar extension: for >=8GB files the size is stored
-	    # in big endian binary.
-	    #
-	    $size = 65536 * 65536 * unpack("N", substr($size, 4, 4))
-				  + unpack("N", substr($size, 8, 4));
-	} else {
-	    #
-	    # We used to have a patch here for smbclient 2.2.x.  For file
-	    # sizes between 2 and 4GB it sent the wrong size.  But since
-	    # samba 3.0.0 has been released we no longer support this
-	    # patch since valid files could have sizes that start with
-	    # 6 or 7 in octal (eg: 6-8GB files).
-	    #
-	    # $size =~ s/^6/2/;       # fix bug in smbclient for >=2GB files
-	    # $size =~ s/^7/3/;       # fix bug in smbclient for >=2GB files
-	    #
-	    # To avoid integer overflow in case we are in the 4GB - 8GB
-	    # range, we do the conversion in two parts.
-	    #
+        $mode = oct $mode;
+        $uid  = oct $uid;
+        $gid  = oct $gid;
+        if ( ord($size) == 128 ) {
+            #
+            # GNU tar extension: for >=8GB files the size is stored
+            # in big endian binary.
+            #
+            $size = 65536 * 65536 * unpack("N", substr($size, 4, 4)) + unpack("N", substr($size, 8, 4));
+        } else {
+            #
+            # We used to have a patch here for smbclient 2.2.x.  For file
+            # sizes between 2 and 4GB it sent the wrong size.  But since
+            # samba 3.0.0 has been released we no longer support this
+            # patch since valid files could have sizes that start with
+            # 6 or 7 in octal (eg: 6-8GB files).
+            #
+            # $size =~ s/^6/2/;       # fix bug in smbclient for >=2GB files
+            # $size =~ s/^7/3/;       # fix bug in smbclient for >=2GB files
+            #
+            # To avoid integer overflow in case we are in the 4GB - 8GB
+            # range, we do the conversion in two parts.
+            #
             if ( $size =~ /([0-9]{9,})/ ) {
                 my $len = length($1);
-                $size = oct(substr($1, 0, $len - 8)) * (1 << 24)
-                      + oct(substr($1, $len - 8));
+                $size = oct(substr($1, 0, $len - 8)) * (1 << 24) + oct(substr($1, $len - 8));
             } else {
                 $size = oct($size);
             }
-	}
+        }
         $mtime    = oct $mtime;
         $chksum   = oct $chksum;
         $devmajor = oct $devmajor;
         $devminor = oct $devminor;
         $name     = "$prefix/$name" if $prefix;
         $prefix   = "";
-        substr ($head, 148, 8) = "        ";
-        if (unpack ("%16C*", $head) != $chksum) {
-           print("$name: checksum error at " . sysseek($fh, 0, 1) , "\n");
-           $Errors++;
-           $FatalErrors++;
+        substr($head, 148, 8) = "        ";
+
+        if ( unpack("%16C*", $head) != $chksum ) {
+            print("$name: checksum error at " . sysseek($fh, 0, 1), "\n");
+            $Errors++;
+            $FatalErrors++;
         }
 
         if ( $type eq "L" ) {
             $longName = TarRead($fh, $size) || return;
+
             # remove trailing NULL
             $paxHdr = {};
             $paxHdr->{path} = substr($longName, 0, $size - 1);
@@ -313,6 +315,7 @@ sub TarReadFileInfo
             next;
         } elsif ( $type eq "K" ) {
             $longLink = TarRead($fh, $size) || return;
+
             # remove trailing NULL
             $paxHdr->{linkpath} = substr($longLink, 0, $size - 1);
             TarFlush($fh, $size);
@@ -322,7 +325,7 @@ sub TarReadFileInfo
             $paxHdr = {};
             while ( $paxStr =~ /(\d+) / ) {
                 my $setting = substr($paxStr, 0, $1);
-                $paxStr  = substr($paxStr, $1);
+                $paxStr = substr($paxStr, $1);
                 $setting =~ s/\n$//;
                 if ( $setting =~ /\d+ (.*?)=(.*)/s ) {
                     $paxHdr->{$1} = $2;
@@ -332,7 +335,7 @@ sub TarReadFileInfo
             TarFlush($fh, $size);
             if ( $type eq "g" ) {
                 $PaxHdrGlobal = $paxHdr;
-                $paxHdr = {};
+                $paxHdr       = {};
             }
             next;
         }
@@ -340,27 +343,28 @@ sub TarReadFileInfo
         #
         # merge global headers if defined, then override extracted file meta data
         #
-        $paxHdr = { %$PaxHdrGlobal, %$paxHdr } if ( $PaxHdrGlobal );
-        $name     = $paxHdr->{path}     if ( defined($paxHdr->{path}) );
-        $linkname = $paxHdr->{linkpath} if ( defined($paxHdr->{linkpath}) );
-        $size     = $paxHdr->{size}     if ( defined($paxHdr->{size}) );
-        $mtime    = $paxHdr->{mtime}    if ( defined($paxHdr->{mtime}) );
-        $uid      = $paxHdr->{uid}      if ( defined($paxHdr->{uid}) );
-        $gid      = $paxHdr->{gid}      if ( defined($paxHdr->{gid}) );
-        $uname    = $paxHdr->{uname}    if ( defined($paxHdr->{uname}) );
-        $gname    = $paxHdr->{gname}    if ( defined($paxHdr->{gname}) );
+        $paxHdr   = {%$PaxHdrGlobal, %$paxHdr} if ( $PaxHdrGlobal );
+        $name     = $paxHdr->{path}            if ( defined($paxHdr->{path}) );
+        $linkname = $paxHdr->{linkpath}        if ( defined($paxHdr->{linkpath}) );
+        $size     = $paxHdr->{size}            if ( defined($paxHdr->{size}) );
+        $mtime    = $paxHdr->{mtime}           if ( defined($paxHdr->{mtime}) );
+        $uid      = $paxHdr->{uid}             if ( defined($paxHdr->{uid}) );
+        $gid      = $paxHdr->{gid}             if ( defined($paxHdr->{gid}) );
+        $uname    = $paxHdr->{uname}           if ( defined($paxHdr->{uname}) );
+        $gname    = $paxHdr->{gname}           if ( defined($paxHdr->{gname}) );
 
-        printf("Got file '%s', mode 0%o, size %g, type %d\n",
-                $name, $mode, $size, $type) if ( $Conf{XferLogLevel} >= 3 );
+        printf("Got file '%s', mode 0%o, size %g, type %d\n", $name, $mode, $size, $type)
+          if ( $Conf{XferLogLevel} >= 3 );
 
         #
         # Map client charset encodings to utf8
         #
         # printf("File %s (hex: %s)\n", $name, unpack("H*", $name));
         if ( $Conf{ClientCharset} ne "" ) {
-            from_to($name, $Conf{ClientCharset}, "utf8");
+            from_to($name,     $Conf{ClientCharset}, "utf8");
             from_to($linkname, $Conf{ClientCharset}, "utf8");
         }
+
         # printf("File now %s (hex: %s)\n", $name, unpack("H*", $name));
         my $xattr = {};
         foreach my $name ( keys(%$paxHdr) ) {
@@ -375,9 +379,9 @@ sub TarReadFileInfo
             }
         }
 
-        $name     =~ s{^\./+}{};
-        $name     =~ s{/+\.?$}{};
-        $name     =~ s{//+}{/}g;
+        $name =~ s{^\./+}{};
+        $name =~ s{/+\.?$}{};
+        $name =~ s{//+}{/}g;
         return {
             name       => $name,
             mangleName => $bpc->fileNameMangle($name),
@@ -427,30 +431,30 @@ sub moveFileToOld
         # A new file will be created, so add delete attribute to old
         #
         if ( $AttrOld ) {
-            $AttrOld->set($f->{name}, { type => BPC_FTYPE_DELETED });
+            $AttrOld->set($f->{name}, {type => BPC_FTYPE_DELETED});
             print("moveFileToOld: added $f->{name} as BPC_FTYPE_DELETED in old\n")
-                                                if ( $Conf{XferLogLevel} >= 5 );
+              if ( $Conf{XferLogLevel} >= 5 );
         }
         return;
     }
     print("moveFileToOld: $a->{name}, $f->{name}, links = $a->{nlinks}, type = $a->{type}\n")
-                                        if ( $Conf{XferLogLevel} >= 5 );
+      if ( $Conf{XferLogLevel} >= 5 );
     if ( $a->{type} != BPC_FTYPE_DIR ) {
         if ( $a->{nlinks} > 0 ) {
-	    if ( $AttrOld ) {
-		if ( !$AttrOld->getInode($a->{inode}) ) {
+            if ( $AttrOld ) {
+                if ( !$AttrOld->getInode($a->{inode}) ) {
                     #
                     # copy inode to old if it isn't already there
                     #
-		    $AttrOld->setInode($a->{inode}, $a);
-		    $DeltaOld->update($a->{compress}, $a->{digest}, 1);
-		}
+                    $AttrOld->setInode($a->{inode}, $a);
+                    $DeltaOld->update($a->{compress}, $a->{digest}, 1);
+                }
                 #
                 # copy to old - no need for refeence count update since
                 # inode is already there
                 #
-		$AttrOld->set($f->{name}, $a, 1) if ( !$AttrOld->get($f->{name}) );
-	    }
+                $AttrOld->set($f->{name}, $a, 1) if ( !$AttrOld->get($f->{name}) );
+            }
             $a->{nlinks}--;
             if ( $a->{nlinks} <= 0 ) {
                 $AttrNew->deleteInode($a->{inode});
@@ -472,7 +476,7 @@ sub moveFileToOld
             #
             my $pathNew = $AttrNew->getFullMangledPath($f->{name});
             print("moveFileToOld(..., $f->{name}): deleting $pathNew\n")
-                                         if ( $Conf{XferLogLevel} >= 3 );
+              if ( $Conf{XferLogLevel} >= 3 );
             BackupPC::DirOps::RmTreeQuiet($bpc, $pathNew, $a->{compress}, $DeltaNew, $AttrNew);
         } else {
             #
@@ -483,16 +487,16 @@ sub moveFileToOld
             my $pathNew = $AttrNew->getFullMangledPath($f->{name});
             my $pathOld = $AttrOld->getFullMangledPath($f->{name});
             print("moveFileToOld(..., $f->{name}): renaming $pathNew to $pathOld\n")
-                                     if ( $Conf{XferLogLevel} >= 3 );
+              if ( $Conf{XferLogLevel} >= 3 );
             pathCreate($pathOld);
             $AttrNew->flush(0, $f->{name});
             if ( !rename($pathNew, $pathOld) ) {
                 printf("moveFileToOld(..., %s: can't rename %s to %s ($!, %d, %d, %d)\n",
-			    $f->{name}, $pathNew, $pathOld, -e $pathNew, -e $pathOld, -d $pathOld);
+                    $f->{name}, $pathNew, $pathOld, -e $pathNew, -e $pathOld, -d $pathOld);
                 $Errors++;
             } else {
                 BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress}, -1, $DeltaNew);
-                BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress},  1, $DeltaOld);
+                BackupPC::XS::DirOps::refCountAll($pathOld, $a->{compress}, 1,  $DeltaOld);
                 copyInodes($f->{name});
                 $AttrOld->set($f->{name}, $a, 1);
             }
@@ -515,13 +519,14 @@ sub xattrEqual
 
 sub TarReadFile
 {
+
     my($fh) = @_;
     my $f = TarReadFileInfo($fh) || return;
     my($file, $exist, $digest);
 
-    my $a       = $AttrNew->get($f->{name});
-    my $aOld    = $AttrOld->get($f->{name}) if ( $AttrOld );
-    my $same    = 0;
+    my $a    = $AttrNew->get($f->{name});
+    my $aOld = $AttrOld->get($f->{name}) if ( $AttrOld );
+    my $same = 0;
 
     printProgress() if ( ($FileCnt % $FileCntPeriod) == 0 );
     $FileCnt++;
@@ -540,10 +545,10 @@ sub TarReadFile
         } else {
             if ( -e $pathNew ) {
                 print("TarReadFile: $pathNew ($f->{name}) isn't a directory... renaming and recreating\n")
-                                             if ( defined($a) && $Conf{XferLogLevel} >= 4 );
+                  if ( defined($a) && $Conf{XferLogLevel} >= 4 );
             } else {
                 print("TarReadFile: creating directory $pathNew ($f->{name})\n")
-                                             if ( defined($a) && $Conf{XferLogLevel} >= 3 );
+                  if ( defined($a) && $Conf{XferLogLevel} >= 3 );
             }
             moveFileToOld($a, $f);
             logFileAction("new", $f) if ( $Conf{XferLogLevel} >= 1 );
@@ -562,21 +567,21 @@ sub TarReadFile
                 my $a = $AttrNew->get($name);
                 last if ( defined($a) && $a->{type} == BPC_FTYPE_DIR );
                 print("TarReadFile: adding BPC_FTYPE_DIR attrib entry for $name\n")
-                                             if ( $Conf{XferLogLevel} >= 3 );
+                  if ( $Conf{XferLogLevel} >= 3 );
                 dirCacheNewDir($name);
                 my $fNew = {
-                                name     => $name,
-                                type     => BPC_FTYPE_DIR,
-                                mode     => $f->{mode},
-                                uid      => $f->{uid},
-                                gid      => $f->{gid},
-                                xattr    => $f->{xattr},
-                                size     => 0,
-                                mtime    => $f->{mtime},
-                                inode    => $Inode++,
-                                nlinks   => 0,
-                                compress => $Compress,
-                           };
+                    name     => $name,
+                    type     => BPC_FTYPE_DIR,
+                    mode     => $f->{mode},
+                    uid      => $f->{uid},
+                    gid      => $f->{gid},
+                    xattr    => $f->{xattr},
+                    size     => 0,
+                    mtime    => $f->{mtime},
+                    inode    => $Inode++,
+                    nlinks   => 0,
+                    compress => $Compress,
+                };
                 $AttrNew->set($name, $fNew);
                 moveFileToOld($a, $fNew);
             }
@@ -589,12 +594,12 @@ sub TarReadFile
         # Write the file
         #
         my($nRead);
+
         #print("Reading $f->{name}, $f->{size} bytes, type $f->{type}\n");
         my $poolWrite = BackupPC::XS::PoolWrite::new($Compress);
         while ( $nRead < $f->{size} ) {
-            my $thisRead = $f->{size} - $nRead < $BufSize
-                                ? $f->{size} - $nRead : $BufSize;
-            my $data = TarRead($fh, $thisRead);
+            my $thisRead = $f->{size} - $nRead < $BufSize ? $f->{size} - $nRead : $BufSize;
+            my $data     = TarRead($fh, $thisRead);
             if ( $data eq "" ) {
                 if ( !$Abort ) {
                     print("Unexpected end of tar archive during read\n");
@@ -604,7 +609,7 @@ sub TarReadFile
                 }
                 $Abort = 1;
                 print("Removing partial file $f->{name}\n")
-                                 if ( $Conf{XferLogLevel} >= 1 );
+                  if ( $Conf{XferLogLevel} >= 1 );
                 $AttrNew->delete($f->{name});
                 return;
             }
@@ -624,9 +629,9 @@ sub TarReadFile
     } elsif ( $f->{type} == BPC_FTYPE_HARDLINK ) {
         #
         # Hardlink to another file.  GNU tar is clever about files
-	# that are hardlinks to each other.  The first link will be
-	# sent as a regular file.  The additional links will be sent
-	# as this type.
+        # that are hardlinks to each other.  The first link will be
+        # sent as a regular file.  The additional links will be sent
+        # as this type.
         #
         # We promote the file to a hardlink by marking both as files
         # that have hardlinks (nlinks >= 2).
@@ -642,7 +647,8 @@ sub TarReadFile
         $target =~ s{//+}{/}g;
         my $aTarget = $AttrNew->get($target);
 
-        $aTarget->{poolPath} = $bpc->MD52Path($aTarget->{digest}, $aTarget->{compress}) if ( length($aTarget->{digest}) );
+        $aTarget->{poolPath} = $bpc->MD52Path($aTarget->{digest}, $aTarget->{compress})
+          if ( length($aTarget->{digest}) );
         if ( $aTarget ) {
             if ( $aTarget->{nlinks} == 0 ) {
                 #
@@ -654,13 +660,13 @@ sub TarReadFile
                 $AttrNew->set($target,    $aTarget);
                 $AttrNew->set($f->{name}, $aTarget);
                 $DeltaNew->update($aTarget->{compress}, $aTarget->{digest}, 1)
-                                                    if ( length($aTarget->{digest}) );
+                  if ( length($aTarget->{digest}) );
                 logFileAction("link", $f)
-                            if ( $Conf{XferLogLevel} >= 1 );
+                  if ( $Conf{XferLogLevel} >= 1 );
                 $NewFileCnt++;
                 $NewFileSize     += $f->{size};
                 $NewFileCompSize += -s $aTarget->{poolPath}
-                                        if ( -f $aTarget->{poolPath} );
+                  if ( -f $aTarget->{poolPath} );
             } else {
                 #
                 # Copy the target attributes
@@ -675,28 +681,29 @@ sub TarReadFile
                 $f->{nlinks} = $aTarget->{nlinks};
                 $f->{digest} = $aTarget->{digest};
                 $f->{xattr}  = $aTarget->{xattr};
-                if ( defined($a)
-                  && $a->{type}   == $f->{type}
-                  && $a->{mode}   == $f->{mode}
-                  && $a->{uid}    == $f->{uid}
-                  && $a->{gid}    == $f->{gid}
-                  && $a->{size}   == $f->{size}
-                  && $a->{mtime}  == $f->{mtime}
-                  && $a->{inode}  == $f->{inode}
-                  && $a->{nlinks} == $f->{nlinks}
-                  && $a->{digest} eq $f->{digest} ) {
+
+                if (   defined($a)
+                    && $a->{type} == $f->{type}
+                    && $a->{mode} == $f->{mode}
+                    && $a->{uid} == $f->{uid}
+                    && $a->{gid} == $f->{gid}
+                    && $a->{size} == $f->{size}
+                    && $a->{mtime} == $f->{mtime}
+                    && $a->{inode} == $f->{inode}
+                    && $a->{nlinks} == $f->{nlinks}
+                    && $a->{digest} eq $f->{digest} ) {
                     #
                     # already linked
                     #
                     $same = 1;
                     logFileAction("same", $f)
-                                if ( $Conf{XferLogLevel} >= 1 );
+                      if ( $Conf{XferLogLevel} >= 1 );
                 } else {
                     #
                     # make a new link
                     #
                     logFileAction("linkU", $f)
-                                if ( $Conf{XferLogLevel} >= 1 );
+                      if ( $Conf{XferLogLevel} >= 1 );
                     moveFileToOld($a, $f);
                     #
                     # Save the old inode, since the number of links will
@@ -712,7 +719,7 @@ sub TarReadFile
                 $ExistFileCnt++;
                 $ExistFileSize     += $f->{size};
                 $ExistFileCompSize += -s $aTarget->{poolPath}
-                                        if ( -f $aTarget->{poolPath} );
+                  if ( -f $aTarget->{poolPath} );
             }
         } else {
             print("Can't find hardlink target $target for $f->{name}\n");
@@ -739,7 +746,7 @@ sub TarReadFile
                 $ExistFileCnt++;
                 $ExistFileSize     += $f->{size};
                 $ExistFileCompSize += -s $a->{poolPath}
-                                          if ( -f $a->{poolPath} );
+                  if ( -f $a->{poolPath} );
                 $same = 1;
             }
         }
@@ -751,8 +758,8 @@ sub TarReadFile
             logFileAction($exist ? "pool" : "new", $f) if ( $Conf{XferLogLevel} >= 1 );
         }
     } elsif ( $f->{type} == BPC_FTYPE_CHARDEV
-           || $f->{type} == BPC_FTYPE_BLOCKDEV
-           || $f->{type} == BPC_FTYPE_FIFO ) {
+        || $f->{type} == BPC_FTYPE_BLOCKDEV
+        || $f->{type} == BPC_FTYPE_FIFO ) {
         #
         # Special files: for char and block special we write the
         # major and minor numbers to a plain file, that we pool
@@ -787,8 +794,8 @@ sub TarReadFile
         }
     } else {
         print("Got unknown type $f->{type} for $f->{name}\n")
-                                 if ( $Conf{XferLogLevel} >= 1 );
-	$Errors++;
+          if ( $Conf{XferLogLevel} >= 1 );
+        $Errors++;
     }
 
     $bpc->flushXSLibMesgs();
@@ -797,22 +804,22 @@ sub TarReadFile
     # are the same too.  If the file is newly written, we just write the
     # new attributes.
     #
-    my $attribSet = 1;
+    my $attribSet   = 1;
     my $newCompress = $Compress;
     $newCompress = $a->{compress} if ( $a && defined($a->{compress}) );
 
     printf("File %s: old digest %s, new digest %s\n", $f->{name}, unpack("H*", $a->{digest}), unpack("H*", $digest))
-                                    if ( $a && $Conf{XferLogLevel} >= 5 );
+      if ( $a && $Conf{XferLogLevel} >= 5 );
 
     if ( $same && $a ) {
-        if ( $a->{type}   == $f->{type}
-          && $a->{mode}   == $f->{mode}
-          && $a->{uid}    == $f->{uid}
-          && $a->{gid}    == $f->{gid}
-          && $a->{size}   == $f->{size}
-          && $a->{mtime}  == $f->{mtime}
-          && $a->{digest} eq $digest
-          && xattrEqual($a->{xattr}, $f->{xattr}) ) {
+        if (   $a->{type} == $f->{type}
+            && $a->{mode} == $f->{mode}
+            && $a->{uid} == $f->{uid}
+            && $a->{gid} == $f->{gid}
+            && $a->{size} == $f->{size}
+            && $a->{mtime} == $f->{mtime}
+            && $a->{digest} eq $digest
+            && xattrEqual($a->{xattr}, $f->{xattr}) ) {
             #
             # same contents, same attributes, so no need to rewrite
             #
@@ -835,7 +842,7 @@ sub TarReadFile
         # file is new or changed; update ref counts
         #
         $DeltaNew->update($newCompress, $digest, 1)
-                                                if ( $digest ne "" );
+          if ( $digest ne "" );
     }
 
     if ( $attribSet ) {
@@ -843,19 +850,22 @@ sub TarReadFile
         $newInode = $Inode++ if ( !defined($newInode) );
         my $nlinks = 0;
         $nlinks = $f->{nlinks} if ( defined($f->{nlinks}) );
-        $AttrNew->set($f->{name}, {
-                        type     => $f->{type},
-                        mode     => $f->{mode},
-                        uid      => $f->{uid},
-                        gid      => $f->{gid},
-                        size     => $f->{size},
-                        mtime    => $f->{mtime},
-                        inode    => $newInode,
-                        nlinks   => $nlinks,
-                        compress => $newCompress,
-                        digest   => $digest,
-                        xattr    => $f->{xattr},
-                   });
+        $AttrNew->set(
+            $f->{name},
+            {
+                type     => $f->{type},
+                mode     => $f->{mode},
+                uid      => $f->{uid},
+                gid      => $f->{gid},
+                size     => $f->{size},
+                mtime    => $f->{mtime},
+                inode    => $newInode,
+                nlinks   => $nlinks,
+                compress => $newCompress,
+                digest   => $digest,
+                xattr    => $f->{xattr},
+            }
+        );
     }
     $bpc->flushXSLibMesgs();
     return 1;
@@ -864,7 +874,7 @@ sub TarReadFile
 sub processClose
 {
     my($poolWrite, $origSize, $noStats, $noSizeStats) = @_;
-    my($exists, $digest, $outSize, $errs) = $poolWrite->close;
+    my($exists,    $digest,   $outSize, $errs)        = $poolWrite->close;
 
     $Errors += $errs;
     if ( !$noStats ) {
@@ -877,8 +887,8 @@ sub processClose
         } else {
             $NewFileCnt++;
             if ( !$noSizeStats ) {
-                $NewFileSize       += $origSize;
-                $NewFileCompSize   += $outSize;
+                $NewFileSize     += $origSize;
+                $NewFileCompSize += $outSize;
             }
         }
     }
@@ -892,21 +902,14 @@ sub logFileAction
 {
     my($action, $f) = @_;
     my $owner = "$f->{uid}/$f->{gid}";
-    my $name = $f->{name};
+    my $name  = $f->{name};
     $name = "." if ( $name eq "" );
     $name .= " -> " . $f->{linkname} if ( length($f->{linkname}) );
-    my $type  = (("", "p", "c", "", "d", "", "b", "", "", "", "l", "", "s"))
-		    [($f->{mode} & S_IFMT) >> 12];
+    my $type = (("", "p", "c", "", "d", "", "b", "", "", "", "l", "", "s"))[($f->{mode} & S_IFMT) >> 12];
     $type = "h" if ( $f->{type} == BPC_FTYPE_HARDLINK );
     $bpc->flushXSLibMesgs();
 
-    printf("  %-6s %1s%4o %9s %11.0f %s\n",
-				$action,
-				$type,
-				$f->{mode} & 07777,
-				$owner,
-				$f->{size},
-				$name);
+    printf("  %-6s %1s%4o %9s %11.0f %s\n", $action, $type, $f->{mode} & 07777, $owner, $f->{size}, $name);
 }
 
 #
@@ -921,11 +924,11 @@ sub pathCreate
     #
     # Get parent directory of $fullPath
     #
-    print("pathCreate: fullPath = $fullPath\n")  if ( $Conf{XferLogLevel} >= 6 );
-    $fullPath =~ s{/[^/]*$}{} if ( !$noStrip );
-    return 0 if ( -d $fullPath );
-    unlink($fullPath) if ( -e $fullPath );
-    eval { mkpath($fullPath, 0, 0777) };
+    print("pathCreate: fullPath = $fullPath\n") if ( $Conf{XferLogLevel} >= 6 );
+    $fullPath =~ s{/[^/]*$}{}                   if ( !$noStrip );
+    return 0                                    if ( -d $fullPath );
+    unlink($fullPath)                           if ( -e $fullPath );
+    eval {mkpath($fullPath, 0, 0777)};
     if ( $@ ) {
         print("Can't create $fullPath ($!)\n");
         $Errors++;
@@ -946,10 +949,10 @@ sub catch_signal
     #
     if ( !$Abort ) {
         print("BackupPC_tarExtract: got signal $sigName\n");
-	$Abort++;
-	$AbortReason = "received signal $sigName";
+        $Abort++;
+        $AbortReason = "received signal $sigName";
         $bpc->flushXSLibMesgs();
-	return;
+        return;
     }
 
     #
@@ -973,19 +976,19 @@ sub exitMesg
         #
         if ( !$AttrNew->get("/") ) {
             print("adding top-level attrib for share $ShareNameUM\n")
-                                 if ( $Conf{XferLogLevel} >= 4 );
+              if ( $Conf{XferLogLevel} >= 4 );
             my $fNew = {
-                        name     => $ShareNameUM,
-                        type     => BPC_FTYPE_DIR,
-                        mode     => 0775,
-                        uid      => 0,
-                        gid      => 0,
-                        size     => 0,
-                        mtime    => time(),
-                        inode    => $Inode++,
-                        nlinks   => 0,
-                        compress => $Compress,
-                   };
+                name     => $ShareNameUM,
+                type     => BPC_FTYPE_DIR,
+                mode     => 0775,
+                uid      => 0,
+                gid      => 0,
+                size     => 0,
+                mtime    => time(),
+                inode    => $Inode++,
+                nlinks   => 0,
+                compress => $Compress,
+            };
             $AttrNew->set("/", $fNew);
         }
 
@@ -1015,15 +1018,15 @@ sub exitMesg
     #
     # Report results to BackupPC_dump
     #
-    my $TotalFileCnt  = $ExistFileCnt  + $NewFileCnt;
+    my $TotalFileCnt  = $ExistFileCnt + $NewFileCnt;
     my $TotalFileSize = $ExistFileSize + $NewFileSize;
     $bpc->flushXSLibMesgs();
     $Errors += BackupPC::XS::Lib::logErrorCntGet();
     printProgress();
-    print("Done: $Errors errors,"
-        . " $ExistFileCnt filesExist, $ExistFileSize sizeExist, $ExistFileCompSize sizeExistComp,"
-        . " $TotalFileCnt filesTotal, $TotalFileSize sizeTotal,"
-        . " $NewFileCnt filesNew, $NewFileSize sizeNew, $NewFileCompSize sizeNewComp, $Inode inodeLast\n");
+    print(  "Done: $Errors errors,"
+          . " $ExistFileCnt filesExist, $ExistFileSize sizeExist, $ExistFileCompSize sizeExistComp,"
+          . " $TotalFileCnt filesTotal, $TotalFileSize sizeTotal,"
+          . " $NewFileCnt filesNew, $NewFileSize sizeNew, $NewFileCompSize sizeNewComp, $Inode inodeLast\n");
     exit($FatalErrors ? 1 : 0);
 }
 
@@ -1054,14 +1057,14 @@ sub dirCacheNewDir
     return if ( defined($DirCache{$dir}) );
 
     print("dirCacheNewDir: populating dir = $dir\n")
-                     if ( $Conf{XferLogLevel} >= 4 );
+      if ( $Conf{XferLogLevel} >= 4 );
 
     my $all = $AttrNew->getAll($dir);
     $bpc->flushXSLibMesgs();
     foreach my $name ( keys(%$all) ) {
         next if ( $name eq "." || $name eq ".." );
         print("dirCacheNewDir: populating dir = $dir with $name\n")
-                     if ( $Conf{XferLogLevel} >= 4 );
+          if ( $Conf{XferLogLevel} >= 4 );
         $DirCache{$dir}{$name} = 1;
     }
     dirCacheFlush($dir);
@@ -1091,7 +1094,7 @@ sub dirCacheNewFile
     $dir =~ s{^/+}{};
     $dir = "/$dir";
     print("dirCacheNewFile: path = $path: dir = $dir, file = $file\n")
-                     if ( $Conf{XferLogLevel} >= 5 );
+      if ( $Conf{XferLogLevel} >= 5 );
     dirCacheNewDir($dir) if ( !defined($DirCache{$dir}) );
     delete($DirCache{$dir}{$file});
 }
@@ -1118,10 +1121,10 @@ sub dirCacheFlush
         print("dirCacheFlush($dir): flushing $d\n") if ( $Conf{XferLogLevel} >= 5 );
         foreach my $file ( keys(%{$DirCache{$d}}) ) {
             my $name = "$d/$file";
-            my $a = $AttrNew->get($name);
+            my $a    = $AttrNew->get($name);
             if ( !$a ) {
                 print("dirCacheFlush($dir): skipping $d/$file since it has no attributes\n")
-                                                    if ( $Conf{XferLogLevel} >= 5 );
+                  if ( $Conf{XferLogLevel} >= 5 );
                 next;
             }
             if ( $a && $a->{inode} >= $Inode0 ) {
@@ -1130,7 +1133,7 @@ sub dirCacheFlush
                 # don't delete it
                 #
                 print("dirCacheFlush($dir): skipping $d/$file ($a->{inode} vs $Inode0)\n")
-                                                    if ( $Conf{XferLogLevel} >= 5 );
+                  if ( $Conf{XferLogLevel} >= 5 );
                 next;
             }
             #
@@ -1139,7 +1142,7 @@ sub dirCacheFlush
             #
             $name =~ s{//+}{/}g;
             $name =~ s{^\.?/+}{};
-            logFileAction("delete", { %$a, name => $name }) if ( $Conf{XferLogLevel} >= 1 );
+            logFileAction("delete", {%$a, name => $name}) if ( $Conf{XferLogLevel} >= 1 );
             if ( $a->{nlinks} > 0 ) {
                 my $aOld = $AttrOld->getInode($a->{inode}) if ( $AttrOld );
 
@@ -1148,7 +1151,7 @@ sub dirCacheFlush
                     # copy the inode to old
                     #
                     print("dirCacheFlush(): unlink($name) -> setting old inode (nlinks = $a->{nlinks})\n")
-                                                    if ( $Conf{XferLogLevel} >= 3 );
+                      if ( $Conf{XferLogLevel} >= 3 );
                     $AttrOld->setInode($a->{inode}, $a);
                     $DeltaOld->update($a->{compress}, $a->{digest}, 1);
                 }
@@ -1158,7 +1161,7 @@ sub dirCacheFlush
                 #
                 if ( $a && $a->{inode} < $Inode0 && $AttrOld && !$AttrOld->get($name) ) {
                     print("dirCacheFlush(): unlink($name) -> setting old file (nlinks = $a->{nlinks})\n")
-                                                    if ( $Conf{XferLogLevel} >= 3 );
+                      if ( $Conf{XferLogLevel} >= 3 );
                     $AttrOld->set($name, $a, 1);
                 }
 
@@ -1189,7 +1192,7 @@ sub copyInodes
 
     return if ( !defined($AttrOld) );
 
-    my $dirPath  = $AttrNew->getFullMangledPath($dirName);
+    my $dirPath = $AttrNew->getFullMangledPath($dirName);
 
     print("copyInodes: dirName = $dirName, dirPath = $dirPath\n") if ( $Conf{XferLogLevel} >= 4 );
 
@@ -1204,9 +1207,9 @@ sub copyInodes
     if ( defined(my $entries = BackupPC::DirOps::dirRead($bpc, $dirPath)) ) {
         foreach my $e ( @$entries ) {
             next if ( $e->{name} eq "."
-                   || $e->{name} eq ".."
-                   || $e->{name} eq "inode"
-                   || !-d "$dirPath/$e->{name}" );
+                || $e->{name} eq ".."
+                || $e->{name} eq "inode"
+                || !-d "$dirPath/$e->{name}" );
             my $fileUM = $bpc->fileNameUnmangle($e->{name});
             next if ( $attrAll && defined($attrAll->{$fileUM}) );
             $attrAll->{$fileUM} = {
@@ -1226,7 +1229,8 @@ sub copyInodes
             copyInodes("$dirName/$fileUM");
             next;
         }
-        print("copyInodes($dirName): $fileUM has inode=$a->{inode}, links = $a->{nlinks}\n") if ( $Conf{XferLogLevel} >= 6 );
+        print("copyInodes($dirName): $fileUM has inode=$a->{inode}, links = $a->{nlinks}\n")
+          if ( $Conf{XferLogLevel} >= 6 );
         next if ( $a->{nlinks} == 0 );
         #
         # Copy the inode if it doesn't exist in old and increment the

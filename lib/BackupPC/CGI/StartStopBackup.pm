@@ -43,10 +43,10 @@ sub action
     my($str, $reply);
 
     my $start = 1 if ( $In{action} eq "Start_Incr_Backup"
-                       || $In{action} eq "Start_Full_Backup" );
-    my $doFull = $In{action} eq "Start_Full_Backup" ? 1 : 0;
-    my $type = $doFull ? $Lang->{Type_full} : $Lang->{Type_incr};
-    my $host = $In{host};
+        || $In{action} eq "Start_Full_Backup" );
+    my $doFull = $In{action} eq "Start_Full_Backup" ? 1                  : 0;
+    my $type   = $doFull                            ? $Lang->{Type_full} : $Lang->{Type_incr};
+    my $host   = $In{host};
     my $Privileged = CheckPermission($host);
 
     if ( !$Privileged ) {
@@ -56,21 +56,19 @@ sub action
 
     if ( $In{doit} ) {
         if ( $start ) {
-	    if ( $Hosts->{$host}{dhcp} ) {
-		$reply = $bpc->ServerMesg("backup $In{hostIP} ${EscURI($host)}"
-				    . " $User $doFull");
-		$str = eval("qq{$Lang->{Backup_requested_on_DHCP__host}}");
-	    } else {
-		$reply = $bpc->ServerMesg("backup ${EscURI($host)}"
-				    . " ${EscURI($host)} $User $doFull");
-		$str = eval("qq{$Lang->{Backup_requested_on__host_by__User}}");
-	    }
+            if ( $Hosts->{$host}{dhcp} ) {
+                $reply = $bpc->ServerMesg("backup $In{hostIP} ${EscURI($host)}" . " $User $doFull");
+                $str   = eval("qq{$Lang->{Backup_requested_on_DHCP__host}}");
+            } else {
+                $reply = $bpc->ServerMesg("backup ${EscURI($host)}" . " ${EscURI($host)} $User $doFull");
+                $str   = eval("qq{$Lang->{Backup_requested_on__host_by__User}}");
+            }
         } else {
             $reply = $bpc->ServerMesg("stop ${EscURI($host)} $User $In{backoff}");
-            $str = eval("qq{$Lang->{Backup_stopped_dequeued_on__host_by__User}}");
+            $str   = eval("qq{$Lang->{Backup_stopped_dequeued_on__host_by__User}}");
         }
-    my $content = eval ("qq{$Lang->{REPLY_FROM_SERVER}}");
-        Header(eval ("qq{$Lang->{BackupPC__Backup_Requested_on__host}}"),$content);
+        my $content = eval("qq{$Lang->{REPLY_FROM_SERVER}}");
+        Header(eval("qq{$Lang->{BackupPC__Backup_Requested_on__host}}"), $content);
 
         Trailer();
     } else {
@@ -80,22 +78,20 @@ sub action
 
             my $checkHost = $host;
             $checkHost = $Conf{ClientNameAlias}
-                                if ( $Conf{ClientNameAlias} ne "" );
-	    my $ipAddr     = ConfirmIPAddress($checkHost);
+              if ( $Conf{ClientNameAlias} ne "" );
+            my $ipAddr     = ConfirmIPAddress($checkHost);
             my $buttonText = $Lang->{$In{action}};
-	    my $content = eval("qq{$Lang->{Are_you_sure_start}}");
-            Header(eval("qq{$Lang->{BackupPC__Start_Backup_Confirm_on__host}}"),$content);
+            my $content    = eval("qq{$Lang->{Are_you_sure_start}}");
+            Header(eval("qq{$Lang->{BackupPC__Start_Backup_Confirm_on__host}}"), $content);
         } else {
             my $backoff = "";
             GetStatusInfo("host(${EscURI($host)})");
             if ( $StatusHost{backoffTime} > time ) {
-                $backoff = sprintf("%.1f",
-                                  ($StatusHost{backoffTime} - time) / 3600);
+                $backoff = sprintf("%.1f", ($StatusHost{backoffTime} - time) / 3600);
             }
             my $buttonText = $Lang->{$In{action}};
-            my $content = eval ("qq{$Lang->{Are_you_sure_stop}}");
-            Header(eval("qq{$Lang->{BackupPC__Stop_Backup_Confirm_on__host}}"),
-                        $content);
+            my $content    = eval("qq{$Lang->{Are_you_sure_stop}}");
+            Header(eval("qq{$Lang->{BackupPC__Stop_Backup_Confirm_on__host}}"), $content);
         }
         Trailer();
     }

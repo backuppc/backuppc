@@ -59,7 +59,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use Archive::Zip qw(:ERROR_CODES);
 use File::Path;
@@ -119,21 +120,24 @@ if ( $opts{c} !~ /^(\d+)$/ ) {
     print(STDERR "$0: invalid compression level '$opts{c}'. 0=none, 9=max\n");
     exit(1);
 }
-if ( !$opts{m} && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
-              && (my $status = $bpc->ServerMesg("hostMutex $Host 1 BackupPC_zipCreate")) =~ /fail/ ) {
+if (   !$opts{m}
+    && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
+    && (my $status = $bpc->ServerMesg("hostMutex $Host 1 BackupPC_zipCreate")) =~ /fail/ ) {
     print(STDERR "$0: $status (use -m option to force running)\n");
     exit(1);
 }
+
 my $compLevel = $opts{c};
 
-my @Backups = $bpc->BackupInfoRead($Host);
-my $FileCnt = 0;
-my $ByteCnt = 0;
-my $DirCnt = 0;
+my @Backups    = $bpc->BackupInfoRead($Host);
+my $FileCnt    = 0;
+my $ByteCnt    = 0;
+my $DirCnt     = 0;
 my $SpecialCnt = 0;
-my $ErrorCnt = 0;
+my $ErrorCnt   = 0;
 
 my $i;
+
 $Num = $Backups[@Backups + $Num]{num} if ( -@Backups <= $Num && $Num < 0 );
 for ( $i = 0 ; $i < @Backups ; $i++ ) {
     last if ( $Backups[$i]{num} == $Num );
@@ -143,7 +147,7 @@ if ( $i >= @Backups ) {
     exit(1);
 }
 
-my $Charset = ""; # default: utf8
+my $Charset = "";    # default: utf8
 $Charset = $opts{e} if ( $opts{e} ne "" );
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
@@ -154,11 +158,12 @@ if ( $opts{s} =~ m{(^|/)\.\.(/|$)} ) {
 }
 my $ShareName = $opts{s};
 
-my $BufSize    = 1048576;     # 1MB or 2^20
+my $BufSize = 1048576;    # 1MB or 2^20
 my(%UidCache, %GidCache);
+
 #my $fh = *STDOUT;
 my $fh = new IO::Handle;
-$fh->fdopen(fileno(STDOUT),"w");
+$fh->fdopen(fileno(STDOUT), "w");
 my $zipfh = Archive::Zip->new();
 
 binmode(STDOUT);
@@ -174,24 +179,23 @@ sub archiveWrite
 
     if ( $dir =~ m{(^|/)\.\.(/|$)} || $dir !~ /^(.*)$/ ) {
         print(STDERR "$0: bad directory '$dir'\n");
-	$ErrorCnt++;
+        $ErrorCnt++;
         return;
     }
     $dir = "/" if ( $dir eq "." );
-    $view->find($Num, $ShareName, $dir, 0, \&ZipWriteFile,
-                $zipfh, $zipPathOverride);
+    $view->find($Num, $ShareName, $dir, 0, \&ZipWriteFile, $zipfh, $zipPathOverride);
 }
 
 # Create Zip file
 print STDERR "Can't write Zip file\n"
-     unless $zipfh->writeToFileHandle($fh, 0) == Archive::Zip::AZ_OK;
+  unless $zipfh->writeToFileHandle($fh, 0) == Archive::Zip::AZ_OK;
 
 #
 # print out totals if requested
 #
 if ( $opts{t} ) {
     print STDERR "Done: $FileCnt files, $ByteCnt bytes, $DirCnt dirs,",
-		 " $SpecialCnt specials ignored, $ErrorCnt errors\n";
+      " $SpecialCnt specials ignored, $ErrorCnt errors\n";
 }
 exit(0);
 
@@ -226,7 +230,7 @@ sub ZipWriteFile
     $tarPath = $zipPathOverride if ( defined($zipPathOverride) );
 
     if ( defined($PathRemove)
-            && substr($tarPath, 0, length($PathRemove)) eq $PathRemove ) {
+        && substr($tarPath, 0, length($PathRemove)) eq $PathRemove ) {
         substr($tarPath, 0, length($PathRemove)) = $PathAdd;
     }
     $tarPath = $1 if ( $tarPath =~ m{^\.?/+(.*)} );
@@ -234,7 +238,7 @@ sub ZipWriteFile
     $hdr->{name} = $tarPath;
     return if ( $tarPath eq "." || $tarPath eq "./" || $tarPath eq "" );
 
-    my $zipmember; # Container to hold the file/directory to zip.
+    my $zipmember;    # Container to hold the file/directory to zip.
 
     if ( $hdr->{type} == BPC_FTYPE_DIR ) {
         #
@@ -243,63 +247,59 @@ sub ZipWriteFile
         $hdr->{name} .= "/" if ( $hdr->{name} !~ m{/$} );
         from_to($hdr->{name}, "utf8", $Charset) if ( $Charset ne "" );
         $zipmember = Archive::Zip::Member->newDirectoryNamed($hdr->{name});
-	$DirCnt++;
+        $DirCnt++;
     } elsif ( $hdr->{type} == BPC_FTYPE_FILE ) {
         #
         # Regular file: write the header and file
         #
         from_to($hdr->{name}, "utf8", $Charset) if ( $Charset ne "" );
-        $zipmember = BackupPC::Zip::FileMember->newFromFileNamed(
-					    $hdr->{fullPath},
-					    $hdr->{name},
-					    $hdr->{size},
-					    $hdr->{compress}
-				    );
-	$FileCnt++;
-	$ByteCnt += $hdr->{size};
+        $zipmember =
+          BackupPC::Zip::FileMember->newFromFileNamed($hdr->{fullPath}, $hdr->{name}, $hdr->{size}, $hdr->{compress});
+        $FileCnt++;
+        $ByteCnt += $hdr->{size};
     } elsif ( $hdr->{type} == BPC_FTYPE_HARDLINK ) {
         #
         # Hardlink file: not supported by Zip, so just make a copy
-	# of the pointed-to file.
+        # of the pointed-to file.
         #
-	# Start by reading the contents of the link.
-	#
+        # Start by reading the contents of the link.
+        #
         my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
         if ( !defined($f) ) {
             print(STDERR "Unable to open file $hdr->{fullPath}\n");
             $ErrorCnt++;
-	    return;
+            return;
         }
         my $data;
         while ( $f->read(\$data, $BufSize) > 0 ) {
             $hdr->{linkname} .= $data;
         }
-	$f->close;
-	#
-	# Dump the original file.  Just call the top-level
-	# routine, so that we save the hassle of dealing with
-	# mangling, merging and attributes.
-	#
-	archiveWrite($zipfh, $hdr->{linkname}, $hdr->{name});
+        $f->close;
+        #
+        # Dump the original file.  Just call the top-level
+        # routine, so that we save the hassle of dealing with
+        # mangling, merging and attributes.
+        #
+        archiveWrite($zipfh, $hdr->{linkname}, $hdr->{name});
     } elsif ( $hdr->{type} == BPC_FTYPE_SYMLINK ) {
         #
         # Symlinks can't be Zipped. 8(
-	# We could zip the pointed-to dir/file (just like hardlink), but we
-	# have to avoid the infinite-loop case of a symlink pointed to a
-	# directory above us.  Ignore for now.  Could be a command-line
-	# option later.
-	#
-	$SpecialCnt++;
+        # We could zip the pointed-to dir/file (just like hardlink), but we
+        # have to avoid the infinite-loop case of a symlink pointed to a
+        # directory above us.  Ignore for now.  Could be a command-line
+        # option later.
+        #
+        $SpecialCnt++;
     } elsif ( $hdr->{type} == BPC_FTYPE_CHARDEV
-           || $hdr->{type} == BPC_FTYPE_BLOCKDEV
-           || $hdr->{type} == BPC_FTYPE_FIFO ) {
+        || $hdr->{type} == BPC_FTYPE_BLOCKDEV
+        || $hdr->{type} == BPC_FTYPE_FIFO ) {
         #
         # Special files can't be Zipped. 8(
-	#
-	$SpecialCnt++;
+        #
+        $SpecialCnt++;
     } else {
         print(STDERR "Got unknown type $hdr->{type} for $hdr->{name}\n");
-	$ErrorCnt++;
+        $ErrorCnt++;
     }
     return if ( !$zipmember );
 
@@ -312,17 +312,20 @@ sub ZipWriteFile
     $mtime = 315561600 if ( $mtime < 315561600 );
     $zipmember->setLastModFileDateTimeFromUnix($mtime);
     $zipmember->unixFileAttributes($hdr->{mode});
+
     # Zip files don't accept uid and gid, so we put them in the comment field.
-    $zipmember->fileComment("uid=".$hdr->{uid}." gid=".$hdr->{gid})
-	    if ( $hdr->{uid} || $hdr->{gid} );
+    $zipmember->fileComment("uid=" . $hdr->{uid} . " gid=" . $hdr->{gid})
+      if ( $hdr->{uid} || $hdr->{gid} );
 
     # Specify the compression level for this member
-    $zipmember->desiredCompressionLevel($compLevel) if ($compLevel =~ /[0-9]/);
+    $zipmember->desiredCompressionLevel($compLevel) if ( $compLevel =~ /[0-9]/ );
 
     if ( $Charset =~ /^(?:utf[-_]?8)?$/i ) {
+
         # Set general purpose bit 11 for UTF-8 code page
-        $zipmember->{bitFlag} = $zipmember->{bitFlag} | 0x0800 ;
+        $zipmember->{bitFlag} = $zipmember->{bitFlag} | 0x0800;
     } elsif ( $Charset =~ /^cp(?:437|720|737|775|85[02578]|86[069]|874|93[26]|949|950)$/i ) {
+
         # Set "version made by" field to 0 (MS-DOS) for OEM code pages
         $zipmember->fileAttributeFormat('FA_MSDOS');
     }

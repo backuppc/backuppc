@@ -43,7 +43,7 @@ sub action
     if ( defined($bpc) && $bpc->ServerOK() ) {
         $bpc->ServerMesg("log User $User requested server shutdown");
         $bpc->ServerMesg("server shutdown");
-        for ( my $i = 0; $i < 10; $i++ ) {
+        for ( my $i = 0 ; $i < 10 ; $i++ ) {
             last unless $bpc->ServerOK();
             sleep(1);
         }

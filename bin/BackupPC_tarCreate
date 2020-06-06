@@ -64,7 +64,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use File::Path;
 use Getopt::Std;
@@ -76,7 +77,7 @@ use BackupPC::XS qw( :all );
 use BackupPC::View;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
-my %Conf   = $bpc->Conf();
+my %Conf = $bpc->Conf();
 
 my %opts;
 
@@ -119,21 +120,24 @@ if ( $opts{n} !~ /^(-?\d+)$/ ) {
     print(STDERR "$0: bad dump number '$opts{n}'\n");
     exit(1);
 }
-if ( !$opts{m} && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
-              && (my $status = $bpc->ServerMesg("hostMutex $Host 1 BackupPC_tarCreate")) =~ /fail/ ) {
+if (   !$opts{m}
+    && !defined($bpc->ServerConnect($Conf{ServerHost}, $Conf{ServerPort}))
+    && (my $status = $bpc->ServerMesg("hostMutex $Host 1 BackupPC_tarCreate")) =~ /fail/ ) {
     print(STDERR "$0: $status (use -m option to force running)\n");
     exit(1);
 }
+
 my $Num = $opts{n};
 
-my @Backups = $bpc->BackupInfoRead($Host);
-my $FileCnt = 0;
-my $ByteCnt = 0;
-my $DirCnt = 0;
+my @Backups    = $bpc->BackupInfoRead($Host);
+my $FileCnt    = 0;
+my $ByteCnt    = 0;
+my $DirCnt     = 0;
 my $SpecialCnt = 0;
-my $ErrorCnt = 0;
+my $ErrorCnt   = 0;
 
 my $i;
+
 $Num = $Backups[@Backups + $Num]{num} if ( -@Backups <= $Num && $Num < 0 );
 for ( $i = 0 ; $i < @Backups ; $i++ ) {
     last if ( $Backups[$i]{num} == $Num );
@@ -144,8 +148,8 @@ if ( $i >= @Backups ) {
 }
 
 my $Charset = $Backups[$i]{charset};
-$Charset    = $opts{e} if ( $opts{e} ne "" );
-my $PreV4   = ($Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./) ? 1 : 0;
+$Charset = $opts{e} if ( $opts{e} ne "" );
+my $PreV4 = ($Backups[$i]{version} eq "" || $Backups[$i]{version} =~ /^[23]\./) ? 1 : 0;
 
 my $PathRemove = $1 if ( $opts{r} =~ /(.+)/ );
 my $PathAdd    = $1 if ( $opts{p} =~ /(.+)/ );
@@ -155,7 +159,7 @@ if ( $opts{s} =~ m{(^|/)\.\.(/|$)} ) {
 }
 
 our $ShareName = $opts{s};
-our $view = BackupPC::View->new($bpc, $Host, \@Backups);
+our $view      = BackupPC::View->new($bpc, $Host, \@Backups);
 
 #
 # This constant and the line of code below that uses it are borrowed
@@ -165,13 +169,11 @@ our $view = BackupPC::View->new($bpc, $Host, \@Backups);
 # Archive::Tar is Copyright 1997 Calle Dybedahl. All rights reserved.
 #                 Copyright 1998 Stephen Zander. All rights reserved.
 #
-my $tar_pack_header
-    = 'a100 a8 a8 a8 a12 a12 A8 a1 a100 a6 a2 a32 a32 a8 a8 a155 x12';
-my $tar_unpack_header
-    = 'Z100 A8 A8 A8 a12 A12 A8 A1 Z100 A6 A2 Z32 Z32 A8 A8 A155 x12';
+my $tar_pack_header   = 'a100 a8 a8 a8 a12 a12 A8 a1 a100 a6 a2 a32 a32 a8 a8 a155 x12';
+my $tar_unpack_header = 'Z100 A8 A8 A8 a12 A12 A8 A1 Z100 A6 A2 Z32 Z32 A8 A8 A155 x12';
 my $tar_header_length = 512;
 
-my $BufSize    = $opts{w} || 1048576;     # 1MB or 2^20
+my $BufSize    = $opts{w} || 1048576;                     # 1MB or 2^20
 my $WriteBuf   = "";
 my $WriteBufSz = ($opts{b} || 20) * $tar_header_length;
 
@@ -187,6 +189,7 @@ if ( $ShareName eq "*" ) {
     my $PathRemoveOrig = $PathRemove;
     my $PathAddOrig    = $PathAdd;
     foreach $ShareName ( $view->shareList($Num) ) {
+
         #print(STDERR "Doing share ($ShareName)\n");
         $PathRemove = "/" if ( !defined($PathRemoveOrig) );
         ($PathAdd = "/$ShareName/$PathAddOrig") =~ s{//+}{/}g;
@@ -216,8 +219,7 @@ if ( !$opts{l} && !$opts{L} ) {
 # print out totals if requested
 #
 if ( $opts{t} ) {
-    print STDERR "Done: $FileCnt files, $ByteCnt bytes, $DirCnt dirs,",
-		 " $SpecialCnt specials, $ErrorCnt errors\n";
+    print STDERR "Done: $FileCnt files, $ByteCnt bytes, $DirCnt dirs,", " $SpecialCnt specials, $ErrorCnt errors\n";
 }
 if ( $ErrorCnt && !$FileCnt && !$DirCnt ) {
     #
@@ -238,15 +240,15 @@ sub archiveWrite
 
     if ( $dir =~ m{(^|/)\.\.(/|$)} ) {
         print(STDERR "$0: bad directory '$dir'\n");
-	$ErrorCnt++;
+        $ErrorCnt++;
         return;
     }
     $dir = "/" if ( $dir eq "." );
+
     #print(STDERR "calling find with $Num, $ShareName, $dir\n");
-    if ( $view->find($Num, $ShareName, $dir, 0, \&TarWriteFile,
-                $fh, $tarPathOverride) < 0 ) {
+    if ( $view->find($Num, $ShareName, $dir, 0, \&TarWriteFile, $fh, $tarPathOverride) < 0 ) {
         print(STDERR "$0: bad share or directory '$ShareName/$dir'\n");
-	$ErrorCnt++;
+        $ErrorCnt++;
         return;
     }
 }
@@ -261,19 +263,18 @@ sub archiveWriteHardLinks
     return if ( !$PreV4 );
     foreach my $hdr ( @HardLinks ) {
         $hdr->{size} = 0;
-	my $name = $hdr->{linkname};
-	$name =~ s{^\./}{/};
-	if ( defined($HardLinkExtraFiles{$name}) ) {
+        my $name = $hdr->{linkname};
+        $name =~ s{^\./}{/};
+        if ( defined($HardLinkExtraFiles{$name}) ) {
             $hdr->{linkname} = $HardLinkExtraFiles{$name};
         }
         if ( defined($PathRemove)
-              && substr($hdr->{linkname}, 0, length($PathRemove)+1)
-                        eq ".$PathRemove" ) {
-            substr($hdr->{linkname}, 0, length($PathRemove)+1) = ".$PathAdd";
+            && substr($hdr->{linkname}, 0, length($PathRemove) + 1) eq ".$PathRemove" ) {
+            substr($hdr->{linkname}, 0, length($PathRemove) + 1) = ".$PathAdd";
         }
         TarWriteFileInfo($fh, $hdr);
     }
-    @HardLinks = ();
+    @HardLinks          = ();
     %HardLinkExtraFiles = ();
 }
 
@@ -312,14 +313,12 @@ sub TarWrite
         return;
     }
     my $done = $WriteBufSz - length($WriteBuf);
-    if ( syswrite($fh, $WriteBuf . substr($$dataRef, 0, $done))
-                                != $WriteBufSz ) {
+    if ( syswrite($fh, $WriteBuf . substr($$dataRef, 0, $done)) != $WriteBufSz ) {
         print(STDERR "Unable to write to output file ($!)\n");
         exit(1);
     }
     while ( $done + $WriteBufSz <= length($$dataRef) ) {
-        if ( syswrite($fh, substr($$dataRef, $done, $WriteBufSz))
-                            != $WriteBufSz ) {
+        if ( syswrite($fh, substr($$dataRef, $done, $WriteBufSz)) != $WriteBufSz ) {
             print(STDERR "Unable to write to output file ($!)\n");
             exit(1);
         }
@@ -344,60 +343,70 @@ sub TarWriteHeader
 
     $hdr->{uname} = UidLookup($hdr->{uid}) if ( !defined($hdr->{uname}) );
     $hdr->{gname} = GidLookup($hdr->{gid}) if ( !defined($hdr->{gname}) );
-    my $devmajor = defined($hdr->{devmajor}) ? sprintf("%07o", $hdr->{devmajor})
-                                             : "";
-    my $devminor = defined($hdr->{devminor}) ? sprintf("%07o", $hdr->{devminor})
-                                             : "";
-    my $data = pack($tar_pack_header,
-                     substr($hdr->{name}, 0, 99),
-                     sprintf("%07o", $hdr->{mode}),
-                     sprintf("%07o", $hdr->{uid}),
-                     sprintf("%07o", $hdr->{gid}),
-		     sprintf("%011o", $hdr->{size}),
-                     sprintf("%011o", $hdr->{mtime}),
-                     "",        #checksum field - space padded by pack("A8")
-                     $hdr->{type},
-                     substr($hdr->{linkname}, 0, 99),
-                     $hdr->{magic} || 'ustar ',
-                     $hdr->{version} || ' ',
-                     $hdr->{uname},
-                     $hdr->{gname},
-                     $devmajor,
-                     $devminor,
-                     ""         # prefix is empty
-                 );
+    my $devmajor =
+      defined($hdr->{devmajor})
+      ? sprintf("%07o", $hdr->{devmajor})
+      : "";
+    my $devminor =
+      defined($hdr->{devminor})
+      ? sprintf("%07o", $hdr->{devminor})
+      : "";
+    my $data = pack(
+        $tar_pack_header,
+        substr($hdr->{name}, 0, 99),
+        sprintf("%07o",  $hdr->{mode}),
+        sprintf("%07o",  $hdr->{uid}),
+        sprintf("%07o",  $hdr->{gid}),
+        sprintf("%011o", $hdr->{size}),
+        sprintf("%011o", $hdr->{mtime}),
+        "",    #checksum field - space padded by pack("A8")
+        $hdr->{type},
+        substr($hdr->{linkname}, 0, 99),
+        $hdr->{magic}   || 'ustar ',
+        $hdr->{version} || ' ',
+        $hdr->{uname},
+        $hdr->{gname},
+        $devmajor,
+        $devminor,
+        ""     # prefix is empty
+    );
     #
     # now unpack it to see which fields weren't represented correctly,
     # and if there are any we generate a pax header
     #
     my @paxFlds;
-    my($name,       # string
-	$mode,      # octal number
-	$uid,       # octal number
-	$gid,       # octal number
-	$size,      # octal number
-	$mtime,     # octal number
-	$chksum,    # octal number
-	$type,      # character
-	$linkname,  # string
-	$magic,     # string
-	$version,   # two bytes
-	$uname,     # string
-	$gname,     # string
-	$devmajor,  # octal number
-	$devminor,  # octal number
-	$prefix) = unpack($tar_unpack_header, $data);
-    push(@paxFlds, "path=$hdr->{name}")    if ( $name ne $hdr->{name} );
+    my(
+        $name,        # string
+        $mode,        # octal number
+        $uid,         # octal number
+        $gid,         # octal number
+        $size,        # octal number
+        $mtime,       # octal number
+        $chksum,      # octal number
+        $type,        # character
+        $linkname,    # string
+        $magic,       # string
+        $version,     # two bytes
+        $uname,       # string
+        $gname,       # string
+        $devmajor,    # octal number
+        $devminor,    # octal number
+        $prefix
+    ) = unpack($tar_unpack_header, $data);
+    push(@paxFlds, "path=$hdr->{name}")         if ( $name ne $hdr->{name} );
     push(@paxFlds, "linkpath=$hdr->{linkname}") if ( $linkname ne $hdr->{linkname} );
-    push(@paxFlds, "size=$hdr->{size}")    if ( oct($size) != $hdr->{size} );
-    push(@paxFlds, "mtime=$hdr->{mtime}")  if ( oct($mtime) != $hdr->{mtime} );
-    push(@paxFlds, "uid=$hdr->{uid}")      if ( oct($uid)  != $hdr->{uid} );
-    push(@paxFlds, "gid=$hdr->{gid}")      if ( oct($uid)  != $hdr->{gid} );
-    push(@paxFlds, "uname=$hdr->{uname}")  if ( $uname ne $hdr->{uname} );
-    push(@paxFlds, "gname=$hdr->{gname}")  if ( $gname ne $hdr->{gname} );
+    push(@paxFlds, "size=$hdr->{size}")         if ( oct($size) != $hdr->{size} );
+    push(@paxFlds, "mtime=$hdr->{mtime}")       if ( oct($mtime) != $hdr->{mtime} );
+    push(@paxFlds, "uid=$hdr->{uid}")           if ( oct($uid) != $hdr->{uid} );
+    push(@paxFlds, "gid=$hdr->{gid}")           if ( oct($uid) != $hdr->{gid} );
+    push(@paxFlds, "uname=$hdr->{uname}")       if ( $uname ne $hdr->{uname} );
+    push(@paxFlds, "gname=$hdr->{gname}")       if ( $gname ne $hdr->{gname} );
+
     if ( ref($hdr->{xattr}) eq 'HASH' ) {
+
         # include xattr and acl using gnu tar naming convention
         foreach my $name ( keys(%{$hdr->{xattr}}) ) {
+
             # Skip rsync acls; should try to figure out binary rsync acls, and map
             # then to ascii version used by tar...
             next if ( $name eq "user.rsync.%aacl" || $name eq "user.rsync.%dacl" );
@@ -416,39 +425,42 @@ sub TarWriteHeader
         #
         my $paxData;
         foreach my $fld ( @paxFlds ) {
+
             # the length includes the string length...
-            my $len = sprintf("%d", length($fld) + 3);                  # at least 1 digit + space + \n
-            my $len2 = sprintf("%d", length($fld) + length($len) + 2);  # + space + \n
+            my $len  = sprintf("%d", length($fld) + 3);                   # at least 1 digit + space + \n
+            my $len2 = sprintf("%d", length($fld) + length($len) + 2);    # + space + \n
             if ( length($len2) != length($len) ) {
+
                 # rollover: adding length requires one more digit in length
                 $len2 = sprintf("%d", length($fld) + length($len2) + 2);
             }
             $paxData .= "$len2 " . $fld . "\n";
         }
-        my $paxHdrData = pack($tar_pack_header,
-                         substr("./PaxHeaders/$hdr->{name}", 0, 99),
-                         sprintf("%07o", $hdr->{mode}),
-                         sprintf("%07o", $hdr->{uid}),
-                         sprintf("%07o", $hdr->{gid}),
-                         sprintf("%011o", length($paxData)),
-                         sprintf("%011o", $hdr->{mtime}),
-                         "",        #checksum field - space padded by pack("A8")
-                         "x",
-                         substr($hdr->{linkname}, 0, 99),
-                         $hdr->{magic} || 'ustar ',
-                         $hdr->{version} || ' ',
-                         $hdr->{uname},
-                         $hdr->{gname},
-                         $devmajor,
-                         $devminor,
-                         ""         # prefix is empty
-                     );
-        substr($paxHdrData, 148, 7) = sprintf("%06o\0", unpack("%16C*",$paxHdrData));
+        my $paxHdrData = pack(
+            $tar_pack_header,
+            substr("./PaxHeaders/$hdr->{name}", 0, 99),
+            sprintf("%07o",  $hdr->{mode}),
+            sprintf("%07o",  $hdr->{uid}),
+            sprintf("%07o",  $hdr->{gid}),
+            sprintf("%011o", length($paxData)),
+            sprintf("%011o", $hdr->{mtime}),
+            "",    #checksum field - space padded by pack("A8")
+            "x",
+            substr($hdr->{linkname}, 0, 99),
+            $hdr->{magic}   || 'ustar ',
+            $hdr->{version} || ' ',
+            $hdr->{uname},
+            $hdr->{gname},
+            $devmajor,
+            $devminor,
+            ""     # prefix is empty
+        );
+        substr($paxHdrData, 148, 7) = sprintf("%06o\0", unpack("%16C*", $paxHdrData));
         TarWrite($fh, \$paxHdrData);
         TarWrite($fh, \$paxData);
         TarWritePad($fh, length($paxData));
     }
-    substr($data, 148, 7) = sprintf("%06o\0", unpack("%16C*",$data));
+    substr($data, 148, 7) = sprintf("%06o\0", unpack("%16C*", $data));
     TarWrite($fh, \$data);
 }
 
@@ -477,11 +489,7 @@ sub TarWriteFileInfo
         }
         $name =~ s/\n/\\n/g;
 
-        printf("%6o %9s %11.0f %s\n",
-                                    $hdr->{mode},
-                                    $owner,
-                                    $hdr->{size},
-                                    $name);
+        printf("%6o %9s %11.0f %s\n", $hdr->{mode}, $owner, $hdr->{size}, $name);
         return;
     }
 
@@ -497,7 +505,7 @@ sub TarWriteFile
 
     $tarPath =~ s{//+}{/}g;
     if ( defined($PathRemove)
-            && substr($tarPath, 0, length($PathRemove)) eq $PathRemove ) {
+        && substr($tarPath, 0, length($PathRemove)) eq $PathRemove ) {
         substr($tarPath, 0, length($PathRemove)) = $PathAdd;
     }
     $tarPath = "./" . $tarPath if ( $tarPath !~ /^\.\// );
@@ -510,8 +518,8 @@ sub TarWriteFile
             # Later inodes: emit a hardlink to an existing file in the archive
             # TODO: do path rewrite on link path?
             #
-            $hdr->{size} = 0;
-            $hdr->{type} = BPC_FTYPE_HARDLINK;
+            $hdr->{size}     = 0;
+            $hdr->{type}     = BPC_FTYPE_HARDLINK;
             $hdr->{linkname} = $Inode2File{$hdr->{inode}}{name};
             TarWriteFileInfo($fh, $hdr);
             return;
@@ -520,7 +528,7 @@ sub TarWriteFile
             # First time: remember the data for this inode and dump
             # the file in its original form.
             #
-            $Inode2File{$hdr->{inode}} = { %$hdr };
+            $Inode2File{$hdr->{inode}} = {%$hdr};
         }
     }
 
@@ -530,7 +538,7 @@ sub TarWriteFile
         #
         $hdr->{name} .= "/" if ( $hdr->{name} !~ m{/$} );
         TarWriteFileInfo($fh, $hdr);
-	$DirCnt++;
+        $DirCnt++;
     } elsif ( $hdr->{type} == BPC_FTYPE_FILE ) {
         my($data, $size);
         #
@@ -540,7 +548,7 @@ sub TarWriteFile
         if ( !defined($f) ) {
             print(STDERR "Unable to open file $hdr->{fullPath} (for $hdr->{name})\n");
             $ErrorCnt++;
-	    return;
+            return;
         }
         TarWriteFileInfo($fh, $hdr);
         if ( $opts{l} || $opts{L} ) {
@@ -548,8 +556,7 @@ sub TarWriteFile
         } else {
             while ( $f->read(\$data, $BufSize) > 0 ) {
                 if ( $size + length($data) > $hdr->{size} ) {
-                    print(STDERR "Error: truncating $hdr->{fullPath} to"
-                               . " $hdr->{size} bytes (for $hdr->{name})\n");
+                    print(STDERR "Error: truncating $hdr->{fullPath} to" . " $hdr->{size} bytes (for $hdr->{name})\n");
                     $data = substr($data, 0, $hdr->{size} - $size);
                     $ErrorCnt++;
                 }
@@ -559,11 +566,11 @@ sub TarWriteFile
             $f->close;
             if ( $size != $hdr->{size} ) {
                 print(STDERR "Error: padding $hdr->{fullPath} to $hdr->{size}"
-                           . " bytes from $size bytes (for $hdr->{name})\n");
+                      . " bytes from $size bytes (for $hdr->{name})\n");
                 $ErrorCnt++;
                 while ( $size < $hdr->{size} ) {
                     my $len = $hdr->{size} - $size;
-                    $len = $BufSize if ( $len > $BufSize );
+                    $len  = $BufSize if ( $len > $BufSize );
                     $data = "\0" x $len;
                     TarWrite($fh, \$data);
                     $size += $len;
@@ -571,8 +578,8 @@ sub TarWriteFile
             }
             TarWritePad($fh, $size);
         }
-	$FileCnt++;
-	$ByteCnt += $size;
+        $FileCnt++;
+        $ByteCnt += $size;
     } elsif ( $PreV4 && $hdr->{type} == BPC_FTYPE_HARDLINK ) {
         #
         # Note: the meaning of this type changed between BackupPC <= v3.x
@@ -661,24 +668,22 @@ sub TarWriteFile
         $f->close;
         $hdr->{size} = 0;
         TarWriteFileInfo($fh, $hdr);
-	$SpecialCnt++;
+        $SpecialCnt++;
     } elsif ( $hdr->{type} == BPC_FTYPE_CHARDEV
-           || $hdr->{type} == BPC_FTYPE_BLOCKDEV
-           || $hdr->{type} == BPC_FTYPE_FIFO ) {
+        || $hdr->{type} == BPC_FTYPE_BLOCKDEV
+        || $hdr->{type} == BPC_FTYPE_FIFO ) {
         #
         # Special files: for char and block special we read the
         # major and minor numbers from a plain file.
         #
         if ( $hdr->{type} != BPC_FTYPE_FIFO ) {
-            my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0,
-						$hdr->{compress});
+            my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
             my $data;
             if ( !defined($f) || $f->read(\$data, $BufSize) < 0 ) {
-                print(STDERR "Unable to open/read char/block special file"
-                           . " $hdr->{fullPath} (for $hdr->{name})\n");
-		$f->close if ( defined($f) );
-		$ErrorCnt++;
-		return;
+                print(STDERR "Unable to open/read char/block special file" . " $hdr->{fullPath} (for $hdr->{name})\n");
+                $f->close if ( defined($f) );
+                $ErrorCnt++;
+                return;
             }
             $f->close;
             if ( $data =~ /(\d+),(\d+)/ ) {
@@ -688,15 +693,15 @@ sub TarWriteFile
         }
         $hdr->{size} = 0;
         TarWriteFileInfo($fh, $hdr);
-	$SpecialCnt++;
+        $SpecialCnt++;
     } elsif ( $hdr->{type} == BPC_FTYPE_SOCKET
-           || $hdr->{type} == BPC_FTYPE_UNKNOWN ) {
+        || $hdr->{type} == BPC_FTYPE_UNKNOWN ) {
         #
         # ignore these two file types - these are dynamic file types created
         # by applications as needed
         #
     } else {
         print(STDERR "Got unknown type $hdr->{type} for $hdr->{name}\n");
-	$ErrorCnt++;
+        $ErrorCnt++;
     }
 }

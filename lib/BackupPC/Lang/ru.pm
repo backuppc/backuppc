@@ -21,12 +21,12 @@ use utf8;
 
 # --------------------------------
 
-$Lang{Start_Archive} = "Начать Архивирование";
+$Lang{Start_Archive}        = "Начать Архивирование";
 $Lang{Stop_Dequeue_Archive} = "Остановить/Убрать из Очереди";
-$Lang{Start_Full_Backup} = "Начать Полн. Копирование";
-$Lang{Start_Incr_Backup} = "Начать Инкр. Копирование";
-$Lang{Stop_Dequeue_Backup} = "Остановить/Убрать из Очереди";
-$Lang{Restore} = "Восстановить";
+$Lang{Start_Full_Backup}    = "Начать Полн. Копирование";
+$Lang{Start_Incr_Backup}    = "Начать Инкр. Копирование";
+$Lang{Stop_Dequeue_Backup}  = "Остановить/Убрать из Очереди";
+$Lang{Restore}              = "Восстановить";
 
 $Lang{Type_full} = "полн.";
 $Lang{Type_incr} = "инкр.";
@@ -34,9 +34,9 @@ $Lang{Type_incr} = "инкр.";
 # -----
 
 $Lang{Only_privileged_users_can_view_admin_options} = "Only privileged users can view admin options.";
-$Lang{H_Admin_Options} = "BackupPC Server: Admin Options";
-$Lang{Admin_Options} = "Администрирование";
-$Lang{Admin_Options_Page} = <<EOF;
+$Lang{H_Admin_Options}                              = "BackupPC Server: Admin Options";
+$Lang{Admin_Options}                                = "Администрирование";
+$Lang{Admin_Options_Page}                           = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
 \${h2("Управление Сервером")}
@@ -57,7 +57,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 -->
 EOF
 
-$Lang{Unable_to_connect_to_BackupPC_server} = "Не могу подключиться к серверу BackupPC";
+$Lang{Unable_to_connect_to_BackupPC_server}               = "Не могу подключиться к серверу BackupPC";
 $Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
 This CGI script (\$MyURL) is unable to connect to the BackupPC
 server on \$Conf{ServerHost} port \$Conf{ServerPort}.<br>
@@ -81,7 +81,7 @@ EOF
 
 $Lang{H_BackupPC_Server_Status} = "Состояние Сервера BackupPC";
 
-$Lang{BackupPC_Server_Status_General_Info}= <<EOF;
+$Lang{BackupPC_Server_Status_General_Info} = <<EOF;
 \${h2(\"Общая Информация\")}
 
 <ul>
@@ -145,8 +145,8 @@ EOF
 
 # --------------------------------
 $Lang{BackupPC__Server_Summary} = "Сводка по Узлам";
-$Lang{BackupPC__Archive} = "Архивирование";
-$Lang{BackupPC_Summary} = <<EOF;
+$Lang{BackupPC__Archive}        = "Архивирование";
+$Lang{BackupPC_Summary}         = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
@@ -321,8 +321,9 @@ $Lang{Pool_Stat} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Backup_Requested_on__host} = "BackupPC: Backup Requested on \$host";
+$Lang{BackupPC__Backup_Requested_on__host}              = "BackupPC: Backup Requested on \$host";
 $Lang{BackupPC__Delete_Requested_for_a_backup_of__host} = "BackupPC: Delete Requested for a backup of \$host";
+
 # --------------------------------
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
@@ -331,8 +332,10 @@ $Lang{REPLY_FROM_SERVER} = <<EOF;
 <p>
 Вернуться на Главную страницу узла <a href="\$MyURL?host=\$host">\$host</a>.
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: Start Backup Confirm on \$host";
+
 # --------------------------------
 $Lang{Are_you_sure_start} = <<EOF;
 \${h1("Вы уверены?")}
@@ -351,8 +354,10 @@ $Lang{Are_you_sure_start} = <<EOF;
 <input type="submit" value="Нет" name="ignore">
 </form>
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: Stop Backup Confirm on \$host";
+
 # --------------------------------
 $Lang{Are_you_sure_stop} = <<EOF;
 
@@ -376,12 +381,16 @@ $Lang{Are_you_sure_stop} = <<EOF;
 </form>
 
 EOF
+
 # --------------------------------
 $Lang{Only_privileged_users_can_view_queues_} = "Only privileged users can view queues.";
+
 # --------------------------------
 $Lang{Only_privileged_users_can_archive} = "Only privileged users can Archive.";
+
 # --------------------------------
 $Lang{BackupPC__Queue_Summary} = "BackupPC: Queue Summary";
+
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Сводка по Очередям")}
@@ -424,10 +433,11 @@ EOF
 
 # --------------------------------
 $Lang{Backup_PC__Log_File__file} = "BackupPC: File \$file";
-$Lang{Log_File__file__comment} = <<EOF;
+$Lang{Log_File__file__comment}   = <<EOF;
 \${h1("Файл \$file \$comment")}
 <p>
 EOF
+
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
 Содержимое файла <tt>\$file</tt>, с последними изменениями от \$mtimeStr \$comment
@@ -435,12 +445,13 @@ EOF
 
 # --------------------------------
 $Lang{skipped__skipped_lines} = "[ пропущено \$skipped строк ]\n";
+
 # --------------------------------
 $Lang{_pre___Can_t_open_log_file__file} = "<pre>\nНе могу открыть журнальный файл \$file\n";
 
 # --------------------------------
 $Lang{BackupPC__Log_File_History} = "BackupPC: Log File History";
-$Lang{Log_File_History__hdr} = <<EOF;
+$Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("Архив Журналов \$hdr")}
 <p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
@@ -464,12 +475,11 @@ $Lang{Recent_Email_Summary} = <<EOF;
 </table>
 EOF
 
-
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Browse backup \$num for \$host";
 
 # ------------------------------
-$Lang{Restore_Options_for__host} = "BackupPC: Restore Options for \$host";
+$Lang{Restore_Options_for__host}  = "BackupPC: Restore Options for \$host";
 $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("Параметры Восстановления для Узла \$host")}
 <p>
@@ -582,7 +592,6 @@ Please ask your system adminstrator to install Archive::Zip from
 </p>
 EOF
 
-
 # ------------------------------
 $Lang{Option_3__Download_Zip_archive} = <<EOF;
 \${h2("Способ 3: Загрузка Tar-архива")}
@@ -609,7 +618,6 @@ $Lang{Option_3__Download_Zip_archive} = <<EOF;
 <input type="submit" value="Загрузить Tar-архив" name="ignore">
 </form>
 EOF
-
 
 # ------------------------------
 $Lang{Restore_Confirm_on__host} = "BackupPC: Restore Confirm on \$host";
@@ -642,10 +650,9 @@ $Lang{Are_you_sure} = <<EOF;
 </form>
 EOF
 
-
 # --------------------------
 $Lang{Restore_Requested_on__hostDest} = "BackupPC: Restore Requested on \$hostDest";
-$Lang{Reply_from_server_was___reply} = <<EOF;
+$Lang{Reply_from_server_was___reply}  = <<EOF;
 \${h1(\$str)}
 <p>
 Ответ с сервера: \$reply
@@ -659,12 +666,12 @@ $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
 Ответ с сервера: \$reply
 EOF
 
-
 # --------------------------------
 $Lang{BackupPC__Delete_Backup_Confirm__num_of__host} = "BackupPC: Delete Backup Confirm #\$num of \$host";
+
 # --------------------------------
-$Lang{A_filled} = "a filled";
-$Lang{An_unfilled} = "an unfilled";
+$Lang{A_filled}            = "a filled";
+$Lang{An_unfilled}         = "an unfilled";
 $Lang{Are_you_sure_delete} = <<EOF;
 \${h1("Are you sure?")}
 <p>
@@ -798,7 +805,7 @@ Empty files and SMB errors aren\'t counted in the reuse and new counts.
 </table>
 EOF
 
-$Lang{Host__host_Archive_Summary} = "BackupPC: Host \$host Archive Summary";
+$Lang{Host__host_Archive_Summary}  = "BackupPC: Host \$host Archive Summary";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
 \${h1("Сводка по Архиву \$host")}
 <p>
@@ -826,7 +833,7 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 EOF
 
 # -------------------------
-$Lang{Error} = "BackupPC: Error";
+$Lang{Error}         = "BackupPC: Error";
 $Lang{Error____head} = <<EOF;
 \${h1("Error: \$head")}
 <p>\$mesg</p>
@@ -1025,53 +1032,48 @@ $Lang{Email_Summary} = "BackupPC: Email Summary";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: check apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =
-              "Wrong user: my userid is \$>, instead of \$uid"
-            . "(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___} = "Wrong user: my userid is \$>, instead of \$uid" . "(\$Conf{BackupPCUser})\n";
+
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-                  "Only privileged users can stop or start backups on"
-		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "Invalid number \${EscHTML(\$In{num})}";
-$Lang{Unable_to_open__file__configuration_problem} = "Unable to open \$file: configuration problem?";
+  "Only privileged users can stop or start backups on" . " \${EscHTML(\$host)}.";
+$Lang{Invalid_number__num}                                = "Invalid number \${EscHTML(\$In{num})}";
+$Lang{Unable_to_open__file__configuration_problem}        = "Unable to open \$file: configuration problem?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Only privileged users can view log or config files.";
-$Lang{Only_privileged_users_can_view_log_files} = "Only privileged users can view log files.";
-$Lang{Only_privileged_users_can_view_email_summaries} = "Only privileged users can view email summaries.";
-$Lang{Only_privileged_users_can_browse_backup_files} = "Only privileged users can browse backup files"
-                . " for host \${EscHTML(\$In{host})}.";
-$Lang{Only_privileged_users_can_delete_backups} = "Only privileged users can delete backups"
-                . " of host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "Empty host name.";
-$Lang{Directory___EscHTML} = "Directory \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
-		    . " is empty";
-$Lang{Can_t_browse_bad_directory_name2} = "Не могу просмотреть каталог с неправильным названием"
-	            . " \${EscHTML(\$relDir)}";
-$Lang{Only_privileged_users_can_restore_backup_files} = "Only privileged users can restore backup files"
-                . " for host \${EscHTML(\$In{host})}.";
-$Lang{Bad_host_name} = "Bad host name \${EscHTML(\$host)}";
+$Lang{Only_privileged_users_can_view_log_files}           = "Only privileged users can view log files.";
+$Lang{Only_privileged_users_can_view_email_summaries}     = "Only privileged users can view email summaries.";
+$Lang{Only_privileged_users_can_browse_backup_files} =
+  "Only privileged users can browse backup files" . " for host \${EscHTML(\$In{host})}.";
+$Lang{Only_privileged_users_can_delete_backups} =
+  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}     = "Empty host name.";
+$Lang{Directory___EscHTML} = "Directory \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " is empty";
+$Lang{Can_t_browse_bad_directory_name2} =
+  "Не могу просмотреть каталог с неправильным названием" . " \${EscHTML(\$relDir)}";
+$Lang{Only_privileged_users_can_restore_backup_files} =
+  "Only privileged users can restore backup files" . " for host \${EscHTML(\$In{host})}.";
+$Lang{Bad_host_name}                                     = "Bad host name \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} = "Вы не выбрали ни один файл.";
-$Lang{You_haven_t_selected_any_hosts} = "You haven\'t selected any hosts; please go Back to"
-                . " select some hosts.";
-$Lang{Nice_try__but_you_can_t_put} = "Nice try, but you can\'t put \'..\' in any of the file names";
-$Lang{Host__doesn_t_exist} = "Host \${EscHTML(\$In{hostDest})} doesn\'t exist";
-$Lang{You_don_t_have_permission_to_restore_onto_host} = "You don\'t have permission to restore onto host"
-		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "Can\'t open/create "
-		. "\${EscHTML(\"\$openPath\")}";
-$Lang{Only_privileged_users_can_restore_backup_files2} = "Only privileged users can restore backup files"
-                . " for host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "Empty host name";
+$Lang{You_haven_t_selected_any_hosts} = "You haven\'t selected any hosts; please go Back to" . " select some hosts.";
+$Lang{Nice_try__but_you_can_t_put}    = "Nice try, but you can\'t put \'..\' in any of the file names";
+$Lang{Host__doesn_t_exist}            = "Host \${EscHTML(\$In{hostDest})} doesn\'t exist";
+$Lang{You_don_t_have_permission_to_restore_onto_host} =
+  "You don\'t have permission to restore onto host" . " \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath} = "Can\'t open/create " . "\${EscHTML(\"\$openPath\")}";
+$Lang{Only_privileged_users_can_restore_backup_files2} =
+  "Only privileged users can restore backup files" . " for host \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}      = "Empty host name";
 $Lang{Unknown_host_or_user} = "Неизвестный узел или пользователь \${EscHTML(\$host)}";
-$Lang{Only_privileged_users_can_view_information_about} = "Only privileged users can view information about"
-                . " host \${EscHTML(\$host)}." ;
+$Lang{Only_privileged_users_can_view_information_about} =
+  "Only privileged users can view information about" . " host \${EscHTML(\$host)}.";
 $Lang{Only_privileged_users_can_view_archive_information} = "Only privileged users can view archive information.";
 $Lang{Only_privileged_users_can_view_restore_information} = "Only privileged users can view restore information.";
-$Lang{Restore_number__num_for_host__does_not_exist} = "Restore number \$num for host \${EscHTML(\$host)} does"
-	        . " not exist.";
-$Lang{Archive_number__num_for_host__does_not_exist} = "Archive number \$num for host \${EscHTML(\$host)} does"
-                . " not exist.";
+$Lang{Restore_number__num_for_host__does_not_exist} =
+  "Restore number \$num for host \${EscHTML(\$host)} does" . " not exist.";
+$Lang{Archive_number__num_for_host__does_not_exist} =
+  "Archive number \$num for host \${EscHTML(\$host)} does" . " not exist.";
 $Lang{Can_t_find_IP_address_for} = "Can\'t find IP address for \${EscHTML(\$host)}";
-$Lang{host_is_a_DHCP_host} = <<EOF;
+$Lang{host_is_a_DHCP_host}       = <<EOF;
 \$host is a DHCP host, and I don\'t know its IP address.  I checked the
 netbios name of \$ENV{REMOTE_ADDR}\$tryIP, and found that that machine
 is not \$host.
@@ -1084,48 +1086,51 @@ EOF
 # !! Server Mesg !!
 # ------------------------------------
 
-$Lang{Backup_requested_on_DHCP__host} = "Резервное копирование DHCP узла \$host (\$In{hostIP}) запросил"
-		                      . " \$User с \$ENV{REMOTE_ADDR}";
+$Lang{Backup_requested_on_DHCP__host} =
+  "Резервное копирование DHCP узла \$host (\$In{hostIP}) запросил" . " \$User с \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User} = "Резервное копирование узла \$host запросил \$User";
-$Lang{Backup_stopped_dequeued_on__host_by__User} = "Резервное копирование для узла \$host остановил/убрал из очереди \$User";
-$Lang{Restore_requested_to_host__hostDest__backup___num} = "Восстановление на узел \$hostDest, копию № \$num,"
-	     . " запросил \$User с \$ENV{REMOTE_ADDR}";
-$Lang{Delete_requested_for_backup_of__host_by__User} = "Delete requested for backup #\$num of \$host"
-             . " by \$User from \$ENV{REMOTE_ADDR}";
+$Lang{Backup_stopped_dequeued_on__host_by__User} =
+  "Резервное копирование для узла \$host остановил/убрал из очереди \$User";
+$Lang{Restore_requested_to_host__hostDest__backup___num} =
+  "Восстановление на узел \$hostDest, копию № \$num," . " запросил \$User с \$ENV{REMOTE_ADDR}";
+$Lang{Delete_requested_for_backup_of__host_by__User} =
+  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Архивирование запросил \$User с \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------
 # ------- Stuff that was forgotten ----------------
 # -------------------------------------------------
 
-$Lang{Status} = "Состояние";
-$Lang{PC_Summary} = "Сводка по Узлам";
-$Lang{LOG_file} = "Журнал";
-$Lang{LOG_files} = "Старые журналы";
-$Lang{Old_LOGs} = "Старые журналы";
+$Lang{Status}        = "Состояние";
+$Lang{PC_Summary}    = "Сводка по Узлам";
+$Lang{LOG_file}      = "Журнал";
+$Lang{LOG_files}     = "Старые журналы";
+$Lang{Old_LOGs}      = "Старые журналы";
 $Lang{Email_summary} = "Сводка по Письмам";
-$Lang{Config_file} = "Config file";
+$Lang{Config_file}   = "Config file";
+
 # $Lang{Hosts_file} = "Hosts file";
 $Lang{Current_queues} = "Сводка по Очередям";
-$Lang{Documentation} = "Руководство";
+$Lang{Documentation}  = "Руководство";
 
 #$Lang{Host_or_User_name} = "<small>Host or User name:</small>";
-$Lang{Go} = "Найти";
-$Lang{Hosts} = "Узлы";
+$Lang{Go}            = "Найти";
+$Lang{Hosts}         = "Узлы";
 $Lang{Select_a_host} = "Выбрать узел ...";
 
-$Lang{There_have_been_no_archives} = "<h2> Архивы отсутствуют </h2>\n";
+$Lang{There_have_been_no_archives}      = "<h2> Архивы отсутствуют </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> Данный ПК ни разу не резервировался!! </h2>\n";
-$Lang{This_PC_is_used_by} = "<li>Данный ПК использует \${UserLink(\$user)}";
+$Lang{This_PC_is_used_by}               = "<li>Данный ПК использует \${UserLink(\$user)}";
 
 $Lang{Extracting_only_Errors} = "(Выбраны только ошибки)";
-$Lang{XferLOG} = "Весь";
-$Lang{Errors}  = "Только Ошибки";
+$Lang{XferLOG}                = "Весь";
+$Lang{Errors}                 = "Только Ошибки";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
 <li>Последнее письмо было отправлено \$mailTime, с темой "\$subj".
 EOF
+
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
 <li>Команда \$cmd выполняется для узла \$host, запущена \$startTime.
@@ -1212,9 +1217,9 @@ $Lang{fileHeader} = <<EOF;
     </tr>
 EOF
 
-$Lang{Home} = "Главная";
-$Lang{Browse} = "Просмотр резервной копии";
-$Lang{Last_bad_XferLOG} = "Последний журнал с ошибками";
+$Lang{Home}                         = "Главная";
+$Lang{Browse}                       = "Просмотр резервной копии";
+$Lang{Last_bad_XferLOG}             = "Последний журнал с ошибками";
 $Lang{Last_bad_XferLOG_errors_only} = "Последний журнал с ошибками (только&nbsp;ошибки)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
@@ -1261,7 +1266,7 @@ EOF
 
 $Lang{BackupPC__Documentation} = "BackupPC: Documentation";
 
-$Lang{No} = "нет";
+$Lang{No}  = "нет";
 $Lang{Yes} = "да";
 
 $Lang{The_directory_is_empty} = <<EOF;
@@ -1277,34 +1282,33 @@ $Lang{backupType_incr}    = "инкр.";
 $Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "частичный";
 
-$Lang{failed} = "неудачно";
+$Lang{failed}  = "неудачно";
 $Lang{success} = "успешно";
-$Lang{and} = "и";
+$Lang{and}     = "и";
 
 # ------
 # Hosts states and reasons
-$Lang{Status_idle} = "бездействует";
-$Lang{Status_backup_starting} = "началось копирование";
-$Lang{Status_backup_in_progress} = "в процессе копирования";
-$Lang{Status_restore_starting} = "началось восстановление";
+$Lang{Status_idle}                = "бездействует";
+$Lang{Status_backup_starting}     = "началось копирование";
+$Lang{Status_backup_in_progress}  = "в процессе копирования";
+$Lang{Status_restore_starting}    = "началось восстановление";
 $Lang{Status_restore_in_progress} = "в процессе восстановления";
-$Lang{Status_admin_pending} = "link pending";
-$Lang{Status_admin_running} = "link running";
+$Lang{Status_admin_pending}       = "link pending";
+$Lang{Status_admin_running}       = "link running";
 
-$Lang{Reason_backup_done}    = "копирование закончено";
-$Lang{Reason_restore_done}   = "восстановление закончено";
-$Lang{Reason_archive_done}   = "архивирование закончено";
-$Lang{Reason_nothing_to_do}  = "без работы";
-$Lang{Reason_backup_failed}  = "копирование не удалось";
-$Lang{Reason_restore_failed} = "восстановление не удалось";
-$Lang{Reason_archive_failed} = "архивирование не удалось";
-$Lang{Reason_no_ping}        = "не \'пингуется\'";
+$Lang{Reason_backup_done}              = "копирование закончено";
+$Lang{Reason_restore_done}             = "восстановление закончено";
+$Lang{Reason_archive_done}             = "архивирование закончено";
+$Lang{Reason_nothing_to_do}            = "без работы";
+$Lang{Reason_backup_failed}            = "копирование не удалось";
+$Lang{Reason_restore_failed}           = "восстановление не удалось";
+$Lang{Reason_archive_failed}           = "архивирование не удалось";
+$Lang{Reason_no_ping}                  = "не \'пингуется\'";
 $Lang{Reason_backup_canceled_by_user}  = "копирование прервано пользователем";
 $Lang{Reason_restore_canceled_by_user} = "восстановление прервано пользователем";
 $Lang{Reason_archive_canceled_by_user} = "восстановление прервано пользователем";
-$Lang{Disabled_OnlyManualBackups}  = "автозапрет";
-$Lang{Disabled_AllBackupsDisabled} = "запрещено";
-
+$Lang{Disabled_OnlyManualBackups}      = "автозапрет";
+$Lang{Disabled_AllBackupsDisabled}     = "запрещено";
 
 # ---------
 # Email messages
@@ -1398,7 +1402,7 @@ BackupPC Genie
 https://backuppc.github.io/backuppc
 EOF
 
-$Lang{howLong_not_been_backed_up} = "not been backed up successfully";
+$Lang{howLong_not_been_backed_up}               = "not been backed up successfully";
 $Lang{howLong_not_been_backed_up_for_days_days} = "not been backed up for \$days days";
 
 #######################################################################
@@ -1423,50 +1427,50 @@ EOF
 #######################################################################
 
 $Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuration settings.";
-$Lang{CfgEdit_Edit_Config} = "Редактирование Настроек";
-$Lang{CfgEdit_Edit_Hosts}  = "Редактирование Узлов";
+$Lang{CfgEdit_Edit_Config}                         = "Редактирование Настроек";
+$Lang{CfgEdit_Edit_Hosts}                          = "Редактирование Узлов";
 
-$Lang{CfgEdit_Title_Server} = "Сервер";
-$Lang{CfgEdit_Title_General_Parameters} = "Общие Параметры";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "Время Запуска Планировщика";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "Совмещение Заданий";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Лимиты Файловой Системы Пула";
-$Lang{CfgEdit_Title_Other_Parameters} = "Прочие Параметры";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Установки Удалённого Сервера Apache";
-$Lang{CfgEdit_Title_Program_Paths} = "Программные Пути";
-$Lang{CfgEdit_Title_Install_Paths} = "Установочные Пути";
-$Lang{CfgEdit_Title_Email} = "Почта";
-$Lang{CfgEdit_Title_Email_settings} = "Настройки Электронной Почты";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Настройки Письма Для Пользователя";
-$Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "Административные Привилегии";
-$Lang{CfgEdit_Title_Page_Rendering} = "Отображение Веб-Страницы";
-$Lang{CfgEdit_Title_Paths} = "Пути";
-$Lang{CfgEdit_Title_User_URLs} = "Пользовательские URL\'ы";
-$Lang{CfgEdit_Title_User_Config_Editing} = "Редактируемые Пользователем Настройки";
-$Lang{CfgEdit_Title_Xfer} = "Транспорт";
-$Lang{CfgEdit_Title_Xfer_Settings} = "Настройка Транспорта";
-$Lang{CfgEdit_Title_Ftp_Settings} = "Установки FTP";
-$Lang{CfgEdit_Title_Smb_Settings} = "Установки Smb";
-$Lang{CfgEdit_Title_Tar_Settings} = "Установки Tar";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Установки Rsync";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Установки Rsyncd";
-$Lang{CfgEdit_Title_Archive_Settings} = "Установки Archive";
-$Lang{CfgEdit_Title_Include_Exclude} = "Включить/Исключить";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Пути/Команды Smb";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Пути/Команды Tar";
+$Lang{CfgEdit_Title_Server}                    = "Сервер";
+$Lang{CfgEdit_Title_General_Parameters}        = "Общие Параметры";
+$Lang{CfgEdit_Title_Wakeup_Schedule}           = "Время Запуска Планировщика";
+$Lang{CfgEdit_Title_Concurrent_Jobs}           = "Совмещение Заданий";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits}    = "Лимиты Файловой Системы Пула";
+$Lang{CfgEdit_Title_Other_Parameters}          = "Прочие Параметры";
+$Lang{CfgEdit_Title_Remote_Apache_Settings}    = "Установки Удалённого Сервера Apache";
+$Lang{CfgEdit_Title_Program_Paths}             = "Программные Пути";
+$Lang{CfgEdit_Title_Install_Paths}             = "Установочные Пути";
+$Lang{CfgEdit_Title_Email}                     = "Почта";
+$Lang{CfgEdit_Title_Email_settings}            = "Настройки Электронной Почты";
+$Lang{CfgEdit_Title_Email_User_Messages}       = "Настройки Письма Для Пользователя";
+$Lang{CfgEdit_Title_CGI}                       = "CGI";
+$Lang{CfgEdit_Title_Admin_Privileges}          = "Административные Привилегии";
+$Lang{CfgEdit_Title_Page_Rendering}            = "Отображение Веб-Страницы";
+$Lang{CfgEdit_Title_Paths}                     = "Пути";
+$Lang{CfgEdit_Title_User_URLs}                 = "Пользовательские URL\'ы";
+$Lang{CfgEdit_Title_User_Config_Editing}       = "Редактируемые Пользователем Настройки";
+$Lang{CfgEdit_Title_Xfer}                      = "Транспорт";
+$Lang{CfgEdit_Title_Xfer_Settings}             = "Настройка Транспорта";
+$Lang{CfgEdit_Title_Ftp_Settings}              = "Установки FTP";
+$Lang{CfgEdit_Title_Smb_Settings}              = "Установки Smb";
+$Lang{CfgEdit_Title_Tar_Settings}              = "Установки Tar";
+$Lang{CfgEdit_Title_Rsync_Settings}            = "Установки Rsync";
+$Lang{CfgEdit_Title_Rsyncd_Settings}           = "Установки Rsyncd";
+$Lang{CfgEdit_Title_Archive_Settings}          = "Установки Archive";
+$Lang{CfgEdit_Title_Include_Exclude}           = "Включить/Исключить";
+$Lang{CfgEdit_Title_Smb_Paths_Commands}        = "Пути/Команды Smb";
+$Lang{CfgEdit_Title_Tar_Paths_Commands}        = "Пути/Команды Tar";
 $Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Пути/Команды/Аргументы Rsync";
-$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Порты/Аргументы Rsyncd";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Пути/Команды Archive";
-$Lang{CfgEdit_Title_Schedule} = "Планировщик";
-$Lang{CfgEdit_Title_Full_Backups} = "Полное Резервирование";
-$Lang{CfgEdit_Title_Incremental_Backups} = "Инкрементальное Резервирование";
-$Lang{CfgEdit_Title_Blackouts} = "Перерыв";
-$Lang{CfgEdit_Title_Other} = "Прочее";
-$Lang{CfgEdit_Title_Backup_Settings} = "Другое";
-$Lang{CfgEdit_Title_Client_Lookup} = "Поиск Клиента";
-$Lang{CfgEdit_Title_User_Commands} = "Пользовательские Команды";
-$Lang{CfgEdit_Title_Hosts} = "Узлы";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args}          = "Порты/Аргументы Rsyncd";
+$Lang{CfgEdit_Title_Archive_Paths_Commands}    = "Пути/Команды Archive";
+$Lang{CfgEdit_Title_Schedule}                  = "Планировщик";
+$Lang{CfgEdit_Title_Full_Backups}              = "Полное Резервирование";
+$Lang{CfgEdit_Title_Incremental_Backups}       = "Инкрементальное Резервирование";
+$Lang{CfgEdit_Title_Blackouts}                 = "Перерыв";
+$Lang{CfgEdit_Title_Other}                     = "Прочее";
+$Lang{CfgEdit_Title_Backup_Settings}           = "Другое";
+$Lang{CfgEdit_Title_Client_Lookup}             = "Поиск Клиента";
+$Lang{CfgEdit_Title_User_Commands}             = "Пользовательские Команды";
+$Lang{CfgEdit_Title_Hosts}                     = "Узлы";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 Чтобы добавить новый узел, нажмите на кнопку "Добавить" и введите имя узла.
@@ -1492,44 +1496,31 @@ $Lang{CfgEdit_Header_Host} = <<EOF;
 <p>
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "Сохранить";
-$Lang{CfgEdit_Button_Insert}   = "Вставить";
-$Lang{CfgEdit_Button_Delete}   = "Удалить";
-$Lang{CfgEdit_Button_Add}      = "Добавить";
-$Lang{CfgEdit_Button_Override} = "Заменить";
-$Lang{CfgEdit_Button_New_Key}  = "New Key";
+$Lang{CfgEdit_Button_Save}      = "Сохранить";
+$Lang{CfgEdit_Button_Insert}    = "Вставить";
+$Lang{CfgEdit_Button_Delete}    = "Удалить";
+$Lang{CfgEdit_Button_Add}       = "Добавить";
+$Lang{CfgEdit_Button_Override}  = "Заменить";
+$Lang{CfgEdit_Button_New_Key}   = "New Key";
 $Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
-$Lang{CfgEdit_Error_No_Save}
-            = "Ошибка: не сохранено из-за наличия ошибок";
-$Lang{CfgEdit_Error__must_be_an_integer}
-            = "Ошибка: \$var должно быть целым числом";
-$Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "Ошибка: \$var должно быть действительным числом";
-$Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Ошибка: \$var элемент \$k должен быть целым числом";
-$Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Ошибка: \$var элемент \$k должен быть действительным числом";
-$Lang{CfgEdit_Error__must_be_executable_program}
-            = "Ошибка: \$var должно быть действительным путём исполняемой программы";
-$Lang{CfgEdit_Error__must_be_valid_option}
-            = "Ошибка: \$var должно быть допустимой опцией";
-$Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "Копируемый узел \$copyHost отсутствует, создаётся узел \$fullHost. Удалите этот узел, если это не то, что Вам требуется.";
+$Lang{CfgEdit_Error_No_Save}                            = "Ошибка: не сохранено из-за наличия ошибок";
+$Lang{CfgEdit_Error__must_be_an_integer}                = "Ошибка: \$var должно быть целым числом";
+$Lang{CfgEdit_Error__must_be_real_valued_number}        = "Ошибка: \$var должно быть действительным числом";
+$Lang{CfgEdit_Error__entry__must_be_an_integer}         = "Ошибка: \$var элемент \$k должен быть целым числом";
+$Lang{CfgEdit_Error__entry__must_be_real_valued_number} = "Ошибка: \$var элемент \$k должен быть действительным числом";
+$Lang{CfgEdit_Error__must_be_executable_program} =
+  "Ошибка: \$var должно быть действительным путём исполняемой программы";
+$Lang{CfgEdit_Error__must_be_valid_option} = "Ошибка: \$var должно быть допустимой опцией";
+$Lang{CfgEdit_Error_Copy_host_does_not_exist} =
+  "Копируемый узел \$copyHost отсутствует, создаётся узел \$fullHost. Удалите этот узел, если это не то, что Вам требуется.";
 
-$Lang{CfgEdit_Log_Copy_host_config}
-            = "\$User copied config from host \$fromHost to \$host\n";
-$Lang{CfgEdit_Log_Delete_param}
-            = "\$User deleted \$p from \$conf\n";
-$Lang{CfgEdit_Log_Add_param_value}
-            = "\$User added \$p to \$conf, set to \$value\n";
-$Lang{CfgEdit_Log_Change_param_value}
-            = "\$User changed \$p in \$conf to \$valueNew from \$valueOld\n";
-$Lang{CfgEdit_Log_Host_Delete}
-            = "\$User deleted host \$host\n";
-$Lang{CfgEdit_Log_Host_Change}
-            = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
-$Lang{CfgEdit_Log_Host_Add}
-            = "\$User added host \$host: \$value\n";
+$Lang{CfgEdit_Log_Copy_host_config}   = "\$User copied config from host \$fromHost to \$host\n";
+$Lang{CfgEdit_Log_Delete_param}       = "\$User deleted \$p from \$conf\n";
+$Lang{CfgEdit_Log_Add_param_value}    = "\$User added \$p to \$conf, set to \$value\n";
+$Lang{CfgEdit_Log_Change_param_value} = "\$User changed \$p in \$conf to \$valueNew from \$valueOld\n";
+$Lang{CfgEdit_Log_Host_Delete}        = "\$User deleted host \$host\n";
+$Lang{CfgEdit_Log_Host_Change}        = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
+$Lang{CfgEdit_Log_Host_Add}           = "\$User added host \$host: \$value\n";
 
 #end of ru.pm

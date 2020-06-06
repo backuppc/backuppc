@@ -19,21 +19,22 @@ use utf8;
 #File:  nl.pm       version 1.5
 # --------------------------------
 
-$Lang{Start_Archive} = "Start Archivering";
+$Lang{Start_Archive}        = "Start Archivering";
 $Lang{Stop_Dequeue_Archive} = "Stop/Annuleer Archivering";
-$Lang{Start_Full_Backup} = "Start volledige backup";
-$Lang{Start_Incr_Backup} = "Start incrementele backup";
-$Lang{Stop_Dequeue_Backup} = "Stop/Annuleer backup";
-$Lang{Restore} = "Herstellen";
+$Lang{Start_Full_Backup}    = "Start volledige backup";
+$Lang{Start_Incr_Backup}    = "Start incrementele backup";
+$Lang{Stop_Dequeue_Backup}  = "Stop/Annuleer backup";
+$Lang{Restore}              = "Herstellen";
 
 $Lang{Type_full} = "volledig";
 $Lang{Type_incr} = "incrementeel";
 
 # -----
 
-$Lang{Only_privileged_users_can_view_admin_options} = "Alleen gebruikers met bijzondere rechten kunnen admin.-opties bekijken.";
-$Lang{H_Admin_Options} = "BackupPC Server: Admin Opties";
-$Lang{Admin_Options} = "Admin Opties";
+$Lang{Only_privileged_users_can_view_admin_options} =
+  "Alleen gebruikers met bijzondere rechten kunnen admin.-opties bekijken.";
+$Lang{H_Admin_Options}    = "BackupPC Server: Admin Opties";
+$Lang{Admin_Options}      = "Admin Opties";
 $Lang{Admin_Options_Page} = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
@@ -55,7 +56,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 -->
 EOF
 
-$Lang{Unable_to_connect_to_BackupPC_server} = "Verbinding met de BackupPC server is mislukt";
+$Lang{Unable_to_connect_to_BackupPC_server}               = "Verbinding met de BackupPC server is mislukt";
 $Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
 Dit CGI script (\$MyURL) kon geen verbinding maken met de BackupPC-server
 op \$Conf{ServerHost} poort \$Conf{ServerPort}.<br>
@@ -79,7 +80,7 @@ EOF
 
 $Lang{H_BackupPC_Server_Status} = "Overzicht BackupPC Server";
 
-$Lang{BackupPC_Server_Status_General_Info}= <<EOF;
+$Lang{BackupPC_Server_Status_General_Info} = <<EOF;
 \${h2(\"Algemene Serverinformatie\")}
 
 <ul>
@@ -143,8 +144,8 @@ EOF
 
 # --------------------------------
 $Lang{BackupPC__Server_Summary} = "BackupPC: Overzicht machines";
-$Lang{BackupPC__Archive} = "BackupPC: Archivering";
-$Lang{BackupPC_Summary}=<<EOF;
+$Lang{BackupPC__Archive}        = "BackupPC: Archivering";
+$Lang{BackupPC_Summary}         = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
@@ -320,8 +321,9 @@ $Lang{Pool_Stat} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Backup_Requested_on__host} = "BackupPC: backup aangevraagd van \$host";
+$Lang{BackupPC__Backup_Requested_on__host}              = "BackupPC: backup aangevraagd van \$host";
 $Lang{BackupPC__Delete_Requested_for_a_backup_of__host} = "BackupPC: Delete Requested for a backup of \$host";
+
 # --------------------------------
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
@@ -330,8 +332,10 @@ Antwoord van server was: \$reply
 <p>
 Terug naar <a href="\$MyURL?host=\$host">\$host hoofdpagina</a>.
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: Bevestiging start van de backup van \$host";
+
 # --------------------------------
 $Lang{Are_you_sure_start} = <<EOF;
 \${h1("Weet u het zeker?")}
@@ -350,8 +354,10 @@ Wilt u dat nu doen?
 <input type="submit" value="Neen" name="ignore">
 </form>
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: Bevestiging de annulering van de backup van \$host";
+
 # --------------------------------
 $Lang{Are_you_sure_stop} = <<EOF;
 
@@ -375,12 +381,16 @@ Wilt u dit nu bevestigen?
 </form>
 
 EOF
+
 # --------------------------------
 $Lang{Only_privileged_users_can_view_queues_} = "Enkel gebruikers met bijzondere rechten kunnen de wachtrij bekijken.";
+
 # --------------------------------
 $Lang{Only_privileged_users_can_archive} = "Enkel gebruikers met bijzondere rechten kunnen archiveren.";
+
 # --------------------------------
 $Lang{BackupPC__Queue_Summary} = "BackupPC: overzicht wachtrij";
+
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("Overzicht Wachtrij backup")}
@@ -423,10 +433,11 @@ EOF
 
 # --------------------------------
 $Lang{Backup_PC__Log_File__file} = "BackupPC: Bestand \$file";
-$Lang{Log_File__file__comment} = <<EOF;
+$Lang{Log_File__file__comment}   = <<EOF;
 \${h1("Bestand \$file \$comment")}
 <p>
 EOF
+
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
 Inhoud van bestand <tt>\$file</tt>, gewijzigd \$mtimeStr \$comment
@@ -434,12 +445,13 @@ EOF
 
 # --------------------------------
 $Lang{skipped__skipped_lines} = "[  \$skipped regels overgeslagen ]\n";
+
 # --------------------------------
 $Lang{_pre___Can_t_open_log_file__file} = "<pre>\nKan het logbestand \$file niet openen \n";
 
 # --------------------------------
 $Lang{BackupPC__Log_File_History} = "BackupPC: Geschiedenis Logbestand";
-$Lang{Log_File_History__hdr} = <<EOF;
+$Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("Geschiedenis Logbestand \$hdr")}
 <p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
@@ -463,12 +475,11 @@ $Lang{Recent_Email_Summary} = <<EOF;
 </table>
 EOF
 
-
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: Overzicht backup nummer \$num van pc \$host";
 
 # ------------------------------
-$Lang{Restore_Options_for__host} = "BackupPC: Opties voor het herstellen van bestanden van machine \$host";
+$Lang{Restore_Options_for__host}  = "BackupPC: Opties voor het herstellen van bestanden van machine \$host";
 $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("Opties voor het herstellen van bestanden van machine \$host")}
 <p>
@@ -582,7 +593,6 @@ Gelieve aan uw systeembeheerder te vragen om Archive::Zip te downloaden van
 </p>
 EOF
 
-
 # ------------------------------
 $Lang{Option_3__Download_Zip_archive} = <<EOF;
 \${h2("Optie 3: Download Tar-bestand")}
@@ -609,7 +619,6 @@ aan \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 <input type="submit" value="Download Tar-bestand" name="ignore">
 </form>
 EOF
-
 
 # ------------------------------
 $Lang{Restore_Confirm_on__host} = "BackupPC: Bevestig herstellen voor machine \$host";
@@ -643,10 +652,9 @@ Is dit wat u wilt doen? Gelieve te bevestigen.
 </form>
 EOF
 
-
 # --------------------------
 $Lang{Restore_Requested_on__hostDest} = "BackupPC: Herstellen aangevraagd van machine \$hostDest";
-$Lang{Reply_from_server_was___reply} = <<EOF;
+$Lang{Reply_from_server_was___reply}  = <<EOF;
 \${h1(\$str)}
 <p>
 Het antwoord van de server was: \$reply
@@ -660,12 +668,12 @@ $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
 Het antwoord van de server was: \$reply
 EOF
 
-
 # --------------------------------
 $Lang{BackupPC__Delete_Backup_Confirm__num_of__host} = "BackupPC: Delete Backup Confirm #\$num of \$host";
+
 # --------------------------------
-$Lang{A_filled} = "a filled";
-$Lang{An_unfilled} = "an unfilled";
+$Lang{A_filled}            = "a filled";
+$Lang{An_unfilled}         = "an unfilled";
 $Lang{Are_you_sure_delete} = <<EOF;
 \${h1("Are you sure?")}
 <p>
@@ -799,7 +807,7 @@ gecomprimeerde bestanden.
 </table>
 EOF
 
-$Lang{Host__host_Archive_Summary} = "BackupPC: Overzicht archivering machine \$host";
+$Lang{Host__host_Archive_Summary}  = "BackupPC: Overzicht archivering machine \$host";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
 \${h1("Overzicht archivering machine \$host")}
 <p>
@@ -827,7 +835,7 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 EOF
 
 # -------------------------
-$Lang{Error} = "BackupPC: Fout";
+$Lang{Error}         = "BackupPC: Fout";
 $Lang{Error____head} = <<EOF;
 \${h1("Fout: \$head")}
 <p>\$mesg</p>
@@ -953,6 +961,7 @@ alle backups heen:
 \$fileStr
 </table>
 EOF
+
 # ------------------------------
 $Lang{Restore___num_details_for__host} = "BackupPC: Details van herstel nr. #\$num van machine \$host";
 
@@ -1025,55 +1034,58 @@ $Lang{Email_Summary} = "BackupPC: Overzicht E-mail";
 # -----------------------------------
 #  !! ERROR messages !!
 # -----------------------------------
-$Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new mislukt: controleer de apache error_log\n";
+$Lang{BackupPC__Lib__new_failed__check_apache_error_log} =
+  "BackupPC::Lib->new mislukt: controleer de apache error_log\n";
 $Lang{Wrong_user__my_userid_is___} =
-              "Foutieve gebruiker: mijn userid is \$>, in plaats van \$uid"
-            . "(\$Conf{BackupPCUser})\n";
+  "Foutieve gebruiker: mijn userid is \$>, in plaats van \$uid" . "(\$Conf{BackupPCUser})\n";
+
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Enkel gebruikers met bijzondere rechten kunnen PC-overzichten bekijken.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-		  "Enkel gebruikers met bijzondere rechten kunnen backups stoppen of starten van machine"
-		. " \${EscHTML(\$host)}.";
+  "Enkel gebruikers met bijzondere rechten kunnen backups stoppen of starten van machine" . " \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Ongeldig of onjuist nummer \${EscHTML(\$In{num})}";
-$Lang{Unable_to_open__file__configuration_problem} = "Ik kan \$file niet openen: misschien problemen met de configuratie?";
-$Lang{Only_privileged_users_can_view_log_or_config_files} = "Enkel gebruikers met bijzondere rechten kunnen log- of configuratiebestanden bekijken.";
-$Lang{Only_privileged_users_can_view_log_files} = "Enkel gebruikers met bijzondere rechten kunnen logbestanden bekijken.";
-$Lang{Only_privileged_users_can_view_email_summaries} = "Enkel gebruikers met bijzondere rechten kunnen het e-mailoverzicht bekijken.";
-$Lang{Only_privileged_users_can_browse_backup_files} = "Enkel gebruikers met bijzondere rechten kunnen de backup "
-                . "van machine \${EscHTML(\$In{host})} bekijken.";
-$Lang{Only_privileged_users_can_delete_backups} = "Only privileged users can delete backups"
-                . " of host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "Geen of lege machinenaam.";
-$Lang{Directory___EscHTML} = "Map \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
-		    . " is leeg";
-$Lang{Can_t_browse_bad_directory_name2} = "Kan niet bladeren door foutieve mapnaam"
-	            . " \${EscHTML(\$relDir)}";
-$Lang{Only_privileged_users_can_restore_backup_files} = "Enkel gebruikers met bijzondere rechten kunnen backups"
-                . " van machine \${EscHTML(\$In{host})} terugzetten.";
+$Lang{Unable_to_open__file__configuration_problem} =
+  "Ik kan \$file niet openen: misschien problemen met de configuratie?";
+$Lang{Only_privileged_users_can_view_log_or_config_files} =
+  "Enkel gebruikers met bijzondere rechten kunnen log- of configuratiebestanden bekijken.";
+$Lang{Only_privileged_users_can_view_log_files} =
+  "Enkel gebruikers met bijzondere rechten kunnen logbestanden bekijken.";
+$Lang{Only_privileged_users_can_view_email_summaries} =
+  "Enkel gebruikers met bijzondere rechten kunnen het e-mailoverzicht bekijken.";
+$Lang{Only_privileged_users_can_browse_backup_files} =
+  "Enkel gebruikers met bijzondere rechten kunnen de backup " . "van machine \${EscHTML(\$In{host})} bekijken.";
+$Lang{Only_privileged_users_can_delete_backups} =
+  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}                  = "Geen of lege machinenaam.";
+$Lang{Directory___EscHTML}              = "Map \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " is leeg";
+$Lang{Can_t_browse_bad_directory_name2} = "Kan niet bladeren door foutieve mapnaam" . " \${EscHTML(\$relDir)}";
+$Lang{Only_privileged_users_can_restore_backup_files} =
+  "Enkel gebruikers met bijzondere rechten kunnen backups" . " van machine \${EscHTML(\$In{host})} terugzetten.";
 $Lang{Bad_host_name} = "Foutieve of ongeldige machinenaam \${EscHTML(\$host)}";
-$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "U hebt geen enkel bestand geselecteerd. Gelieve terug te gaan en"
-                . " selecteer een of meerdere bestanden.";
-$Lang{You_haven_t_selected_any_hosts} = "U hebt geen machine geselecteerd. Gelieve terug te gaan om"
-                . " een machine te selecteren.";
+$Lang{You_haven_t_selected_any_files__please_go_Back_to} =
+  "U hebt geen enkel bestand geselecteerd. Gelieve terug te gaan en" . " selecteer een of meerdere bestanden.";
+$Lang{You_haven_t_selected_any_hosts} =
+  "U hebt geen machine geselecteerd. Gelieve terug te gaan om" . " een machine te selecteren.";
 $Lang{Nice_try__but_you_can_t_put} = "Leuk geprobeerd, maar u kan geen \'..\' in de bestandsnamen plaatsen";
-$Lang{Host__doesn_t_exist} = "Machine \${EscHTML(\$In{hostDest})} bestaat niet.";
-$Lang{You_don_t_have_permission_to_restore_onto_host} = "U beschikt niet over de juiste rechten om bestanden te herstellen naar machine "
-		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "Ik kan "
-		. "\${EscHTML(\"\$openPath\")} niet openen of aanmaken";
-$Lang{Only_privileged_users_can_restore_backup_files2} = "Alleen gebruikers met bijzondere rechten kunnen bestanden herstellen"
-                . " naar machine \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "Lege machinenaam";
+$Lang{Host__doesn_t_exist}         = "Machine \${EscHTML(\$In{hostDest})} bestaat niet.";
+$Lang{You_don_t_have_permission_to_restore_onto_host} =
+  "U beschikt niet over de juiste rechten om bestanden te herstellen naar machine " . " \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath} = "Ik kan " . "\${EscHTML(\"\$openPath\")} niet openen of aanmaken";
+$Lang{Only_privileged_users_can_restore_backup_files2} =
+  "Alleen gebruikers met bijzondere rechten kunnen bestanden herstellen" . " naar machine \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}      = "Lege machinenaam";
 $Lang{Unknown_host_or_user} = "Onbekende machine of gebruiker \${EscHTML(\$host)}";
-$Lang{Only_privileged_users_can_view_information_about} = "Enkel gebruikers met bijzondere rechten kunnen informatie over"
-                . " machine \${EscHTML(\$host)} bekijken." ;
-$Lang{Only_privileged_users_can_view_archive_information} = "Enkel gebruikers met bijzondere rechten kunnen archiveringsinformatie bekijken.";
-$Lang{Only_privileged_users_can_view_restore_information} = "Enkel gebruikers met bijzondere rechten kunnen herstelinformatie bekijken.";
-$Lang{Restore_number__num_for_host__does_not_exist} = "Herstel nr.\$num van machine \${EscHTML(\$host)}"
-	        . " bestaat niet.";
-$Lang{Archive_number__num_for_host__does_not_exist} = "Archiveringsnr. \$num van machine \${EscHTML(\$host)}"
-                . " bestaat niet.";
+$Lang{Only_privileged_users_can_view_information_about} =
+  "Enkel gebruikers met bijzondere rechten kunnen informatie over" . " machine \${EscHTML(\$host)} bekijken.";
+$Lang{Only_privileged_users_can_view_archive_information} =
+  "Enkel gebruikers met bijzondere rechten kunnen archiveringsinformatie bekijken.";
+$Lang{Only_privileged_users_can_view_restore_information} =
+  "Enkel gebruikers met bijzondere rechten kunnen herstelinformatie bekijken.";
+$Lang{Restore_number__num_for_host__does_not_exist} =
+  "Herstel nr.\$num van machine \${EscHTML(\$host)}" . " bestaat niet.";
+$Lang{Archive_number__num_for_host__does_not_exist} =
+  "Archiveringsnr. \$num van machine \${EscHTML(\$host)}" . " bestaat niet.";
 $Lang{Can_t_find_IP_address_for} = "Ik kan het IP-adres van \${EscHTML(\$host)} niet vinden.";
-$Lang{host_is_a_DHCP_host} = <<EOF;
+$Lang{host_is_a_DHCP_host}       = <<EOF;
 \$host is een DHCP-machine en ik ken zijn IP-adres niet. Ik controleerde de
 netbios-naam van \$ENV{REMOTE_ADDR}\$tryIP, en ontdekte dat die machine
 niet dezelfde machine als \$host is.
@@ -1086,48 +1098,50 @@ EOF
 # !! Server Mesg !!
 # ------------------------------------
 
-$Lang{Backup_requested_on_DHCP__host} = "backup aangevraagd van DHCP \$host (\$In{hostIP}) door"
-		                      . " \$User vanaf \$ENV{REMOTE_ADDR}";
-$Lang{Backup_requested_on__host_by__User} = "backup aangevraagd van \$host door \$User";
+$Lang{Backup_requested_on_DHCP__host} =
+  "backup aangevraagd van DHCP \$host (\$In{hostIP}) door" . " \$User vanaf \$ENV{REMOTE_ADDR}";
+$Lang{Backup_requested_on__host_by__User}        = "backup aangevraagd van \$host door \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "backup geannuleerd van \$host door \$User";
-$Lang{Restore_requested_to_host__hostDest__backup___num} = "Herstel aangevraagd voor machine \$hostDest, backup nr.\$num,"
-	     . " door \$User vanaf \$ENV{REMOTE_ADDR}";
-$Lang{Delete_requested_for_backup_of__host_by__User} = "Delete requested for backup #\$num of \$host"
-             . " by \$User from \$ENV{REMOTE_ADDR}";
+$Lang{Restore_requested_to_host__hostDest__backup___num} =
+  "Herstel aangevraagd voor machine \$hostDest, backup nr.\$num," . " door \$User vanaf \$ENV{REMOTE_ADDR}";
+$Lang{Delete_requested_for_backup_of__host_by__User} =
+  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivering aangevraagd door \$User vanaf \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------
 # ------- Stuff that was forgotten ----------------
 # -------------------------------------------------
 
-$Lang{Status} = "Status";
-$Lang{PC_Summary} = "Overzicht machine";
-$Lang{LOG_file} = "LOG-bestand";
-$Lang{LOG_files} = "LOG-bestanden";
-$Lang{Old_LOGs} = "Oude LOGs";
+$Lang{Status}        = "Status";
+$Lang{PC_Summary}    = "Overzicht machine";
+$Lang{LOG_file}      = "LOG-bestand";
+$Lang{LOG_files}     = "LOG-bestanden";
+$Lang{Old_LOGs}      = "Oude LOGs";
 $Lang{Email_summary} = "E-mailoverzicht";
-$Lang{Config_file} = "Configuratiebest.";
+$Lang{Config_file}   = "Configuratiebest.";
+
 # $Lang{Hosts_file} = "Hosts-bestand";
 $Lang{Current_queues} = "Huidige wachtrij";
-$Lang{Documentation} = "Documentatie";
+$Lang{Documentation}  = "Documentatie";
 
 #$Lang{Host_or_User_name} = "<small>Machine of gebruikersnaam:</small>";
-$Lang{Go} = "Start";
-$Lang{Hosts} = "Machines";
+$Lang{Go}            = "Start";
+$Lang{Hosts}         = "Machines";
 $Lang{Select_a_host} = "Selecteer een machine...";
 
-$Lang{There_have_been_no_archives} = "<h2> Er waren (nog) geen archiveringen </h2>\n";
+$Lang{There_have_been_no_archives}      = "<h2> Er waren (nog) geen archiveringen </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> Deze PC werd (nog) nooit gebackupt !! </h2>\n";
-$Lang{This_PC_is_used_by} = "<li>Deze PC wordt gebruikt door \${UserLink(\$user)}";
+$Lang{This_PC_is_used_by}               = "<li>Deze PC wordt gebruikt door \${UserLink(\$user)}";
 
 $Lang{Extracting_only_Errors} = "(Enkel de foutmeldingen)";
-$Lang{XferLOG} = "OverdrachtsLOG";
-$Lang{Errors}  = "Foutmeldingen";
+$Lang{XferLOG}                = "OverdrachtsLOG";
+$Lang{Errors}                 = "Foutmeldingen";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
 <li>Meest recente e-mail die gezonden werd naar \${UserLink(\$user)} was op \$mailTime, onderwerp: "\$subj".
 EOF
+
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
 <li>De opdracht \$cmd loopt momenteel voor machine \$host sedert \$startTime.
@@ -1214,9 +1228,9 @@ $Lang{fileHeader} = <<EOF;
     </tr>
 EOF
 
-$Lang{Home} = "Home";
-$Lang{Browse} = "Bekijken backups";
-$Lang{Last_bad_XferLOG} = "Laaste overdr.LOG met fouten";
+$Lang{Home}                         = "Home";
+$Lang{Browse}                       = "Bekijken backups";
+$Lang{Last_bad_XferLOG}             = "Laaste overdr.LOG met fouten";
 $Lang{Last_bad_XferLOG_errors_only} = "Laaste overdr.LOG (enkel foutmeldingen)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
@@ -1263,7 +1277,7 @@ EOF
 
 $Lang{BackupPC__Documentation} = "BackupPC: Documentatie";
 
-$Lang{No} = "nee";
+$Lang{No}  = "nee";
 $Lang{Yes} = "ja";
 
 $Lang{The_directory_is_empty} = <<EOF;
@@ -1279,33 +1293,33 @@ $Lang{backupType_incr}    = "incrementeel";
 $Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "gedeeltelijk";
 
-$Lang{failed} = "mislukt";
+$Lang{failed}  = "mislukt";
 $Lang{success} = "succesvol";
-$Lang{and} = "en";
+$Lang{and}     = "en";
 
 # ------
 # Hosts states and reasons
-$Lang{Status_idle} = "inactief";
-$Lang{Status_backup_starting} = "backup start";
-$Lang{Status_backup_in_progress} = "backup bezig";
-$Lang{Status_restore_starting} = "herstel start";
+$Lang{Status_idle}                = "inactief";
+$Lang{Status_backup_starting}     = "backup start";
+$Lang{Status_backup_in_progress}  = "backup bezig";
+$Lang{Status_restore_starting}    = "herstel start";
 $Lang{Status_restore_in_progress} = "herstel bezig";
-$Lang{Status_admin_pending} = "wacht op linken";
-$Lang{Status_admin_running} = "linken is bezig";
+$Lang{Status_admin_pending}       = "wacht op linken";
+$Lang{Status_admin_running}       = "linken is bezig";
 
-$Lang{Reason_backup_done} = "backup voltooid";
-$Lang{Reason_restore_done} = "herstel voltooid";
-$Lang{Reason_archive_done}   = "archivering voltooid";
-$Lang{Reason_nothing_to_do} = "niets te doen";
-$Lang{Reason_backup_failed} = "backup mislukt";
-$Lang{Reason_restore_failed} = "herstel mislukt";
-$Lang{Reason_archive_failed} = "archivering mislukt";
-$Lang{Reason_no_ping} = "geen ping";
-$Lang{Reason_backup_canceled_by_user} = "backup geannuleerd door gebruiker";
+$Lang{Reason_backup_done}              = "backup voltooid";
+$Lang{Reason_restore_done}             = "herstel voltooid";
+$Lang{Reason_archive_done}             = "archivering voltooid";
+$Lang{Reason_nothing_to_do}            = "niets te doen";
+$Lang{Reason_backup_failed}            = "backup mislukt";
+$Lang{Reason_restore_failed}           = "herstel mislukt";
+$Lang{Reason_archive_failed}           = "archivering mislukt";
+$Lang{Reason_no_ping}                  = "geen ping";
+$Lang{Reason_backup_canceled_by_user}  = "backup geannuleerd door gebruiker";
 $Lang{Reason_restore_canceled_by_user} = "herstellen geannuleerd door gebruiker";
 $Lang{Reason_archive_canceled_by_user} = "archivering geannuleerd door gebruiker";
-$Lang{Disabled_OnlyManualBackups}  = "auto uitgeschakeld";
-$Lang{Disabled_AllBackupsDisabled} = "uitgeschakeld";
+$Lang{Disabled_OnlyManualBackups}      = "auto uitgeschakeld";
+$Lang{Disabled_AllBackupsDisabled}     = "uitgeschakeld";
 
 # ---------
 # Email messages
@@ -1412,7 +1426,7 @@ BackupPC Genie
 https://backuppc.github.io/backuppc
 EOF
 
-$Lang{howLong_not_been_backed_up} = "(nog) niet succesvol gebackupt";
+$Lang{howLong_not_been_backed_up}               = "(nog) niet succesvol gebackupt";
 $Lang{howLong_not_been_backed_up_for_days_days} = "reeds sedert \$days dagen niet gebackupt";
 
 #######################################################################
@@ -1436,51 +1450,52 @@ EOF
 # Configuration editor strings
 #######################################################################
 
-$Lang{Only_privileged_users_can_edit_config_files} = "Enkel gebruikers met bijzondere rechten kunnen de configuratie wijzigen.";
+$Lang{Only_privileged_users_can_edit_config_files} =
+  "Enkel gebruikers met bijzondere rechten kunnen de configuratie wijzigen.";
 $Lang{CfgEdit_Edit_Config} = "Wijzig Configuratie";
 $Lang{CfgEdit_Edit_Hosts}  = "Wijzig Machines";
 
-$Lang{CfgEdit_Title_Server} = "Server";
-$Lang{CfgEdit_Title_General_Parameters} = "Algemene Parameters";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "Wakeup planning";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "Parallelle Jobs";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "Pool Bestandssysteem Limieten";
-$Lang{CfgEdit_Title_Other_Parameters} = "Andere Parameters";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "Remote Apache Instellingen";
-$Lang{CfgEdit_Title_Program_Paths} = "Programmapaden";
-$Lang{CfgEdit_Title_Install_Paths} = "Installatiepaden";
-$Lang{CfgEdit_Title_Email} = "Email";
-$Lang{CfgEdit_Title_Email_settings} = "Email instellingen";
-$Lang{CfgEdit_Title_Email_User_Messages} = "Emailberichten Gebruikers";
-$Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "Admin rechten";
-$Lang{CfgEdit_Title_Page_Rendering} = "Pagina opbouw";
-$Lang{CfgEdit_Title_Paths} = "Paden";
-$Lang{CfgEdit_Title_User_URLs} = "Gebruiker URLs";
-$Lang{CfgEdit_Title_User_Config_Editing} = "Wijzigen gebruikersconfiguratie";
-$Lang{CfgEdit_Title_Xfer} = "Overdracht";
-$Lang{CfgEdit_Title_Xfer_Settings} = "Overdracht instellingen";
-$Lang{CfgEdit_Title_Ftp_Settings} = "FTP instellingen";
-$Lang{CfgEdit_Title_Smb_Settings} = "Smb instellingen";
-$Lang{CfgEdit_Title_Tar_Settings} = "Tar instellingen";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync instellingen";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd instellingen";
-$Lang{CfgEdit_Title_Archive_Settings} = "Archivering instellingen";
-$Lang{CfgEdit_Title_Include_Exclude} = "Inclusief/Exclusief";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smb Pad/Opdrachten";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tar Pad/Opdrachten";
+$Lang{CfgEdit_Title_Server}                    = "Server";
+$Lang{CfgEdit_Title_General_Parameters}        = "Algemene Parameters";
+$Lang{CfgEdit_Title_Wakeup_Schedule}           = "Wakeup planning";
+$Lang{CfgEdit_Title_Concurrent_Jobs}           = "Parallelle Jobs";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits}    = "Pool Bestandssysteem Limieten";
+$Lang{CfgEdit_Title_Other_Parameters}          = "Andere Parameters";
+$Lang{CfgEdit_Title_Remote_Apache_Settings}    = "Remote Apache Instellingen";
+$Lang{CfgEdit_Title_Program_Paths}             = "Programmapaden";
+$Lang{CfgEdit_Title_Install_Paths}             = "Installatiepaden";
+$Lang{CfgEdit_Title_Email}                     = "Email";
+$Lang{CfgEdit_Title_Email_settings}            = "Email instellingen";
+$Lang{CfgEdit_Title_Email_User_Messages}       = "Emailberichten Gebruikers";
+$Lang{CfgEdit_Title_CGI}                       = "CGI";
+$Lang{CfgEdit_Title_Admin_Privileges}          = "Admin rechten";
+$Lang{CfgEdit_Title_Page_Rendering}            = "Pagina opbouw";
+$Lang{CfgEdit_Title_Paths}                     = "Paden";
+$Lang{CfgEdit_Title_User_URLs}                 = "Gebruiker URLs";
+$Lang{CfgEdit_Title_User_Config_Editing}       = "Wijzigen gebruikersconfiguratie";
+$Lang{CfgEdit_Title_Xfer}                      = "Overdracht";
+$Lang{CfgEdit_Title_Xfer_Settings}             = "Overdracht instellingen";
+$Lang{CfgEdit_Title_Ftp_Settings}              = "FTP instellingen";
+$Lang{CfgEdit_Title_Smb_Settings}              = "Smb instellingen";
+$Lang{CfgEdit_Title_Tar_Settings}              = "Tar instellingen";
+$Lang{CfgEdit_Title_Rsync_Settings}            = "Rsync instellingen";
+$Lang{CfgEdit_Title_Rsyncd_Settings}           = "Rsyncd instellingen";
+$Lang{CfgEdit_Title_Archive_Settings}          = "Archivering instellingen";
+$Lang{CfgEdit_Title_Include_Exclude}           = "Inclusief/Exclusief";
+$Lang{CfgEdit_Title_Smb_Paths_Commands}        = "Smb Pad/Opdrachten";
+$Lang{CfgEdit_Title_Tar_Paths_Commands}        = "Tar Pad/Opdrachten";
 $Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsync Pad/Opdrachten/Parameters";
-$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncd Poort/Parameters";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "Archivering Pad/Opdrachten";
-$Lang{CfgEdit_Title_Schedule} = "Planning";
-$Lang{CfgEdit_Title_Full_Backups} = "Volledige Backups";
-$Lang{CfgEdit_Title_Incremental_Backups} = "Incrementele Backups";
-$Lang{CfgEdit_Title_Blackouts} = "Blackouts";
-$Lang{CfgEdit_Title_Other} = "Andere";
-$Lang{CfgEdit_Title_Backup_Settings} = "Backup instellingen";
-$Lang{CfgEdit_Title_Client_Lookup} = "Cli&euml;nt locatie";
-$Lang{CfgEdit_Title_User_Commands} = "Opdrachten van gebruiker";
-$Lang{CfgEdit_Title_Hosts} = "Machines";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args}          = "Rsyncd Poort/Parameters";
+$Lang{CfgEdit_Title_Archive_Paths_Commands}    = "Archivering Pad/Opdrachten";
+$Lang{CfgEdit_Title_Schedule}                  = "Planning";
+$Lang{CfgEdit_Title_Full_Backups}              = "Volledige Backups";
+$Lang{CfgEdit_Title_Incremental_Backups}       = "Incrementele Backups";
+$Lang{CfgEdit_Title_Blackouts}                 = "Blackouts";
+$Lang{CfgEdit_Title_Other}                     = "Andere";
+$Lang{CfgEdit_Title_Backup_Settings}           = "Backup instellingen";
+$Lang{CfgEdit_Title_Client_Lookup}             = "Cli&euml;nt locatie";
+$Lang{CfgEdit_Title_User_Commands}             = "Opdrachten van gebruiker";
+$Lang{CfgEdit_Title_Hosts}                     = "Machines";
 
 $Lang{CfgEdit_Hosts_Comment} = <<eof;
 Om een nieuwe machine toe te voegen: selecteer 'Toevoegen' en geef de naam op.
@@ -1509,44 +1524,31 @@ NB: Selecteer 'Overschrijven' als je een waarde wil wijzigen specifiek voor deze
 <p>
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "Bewaren";
-$Lang{CfgEdit_Button_Insert}   = "Invoegen";
-$Lang{CfgEdit_Button_Delete}   = "Verwijderen";
-$Lang{CfgEdit_Button_Add}      = "Toevoegen";
-$Lang{CfgEdit_Button_Override} = "Overschrijven";
-$Lang{CfgEdit_Button_New_Key}  = "Nieuwe sleutel";
+$Lang{CfgEdit_Button_Save}      = "Bewaren";
+$Lang{CfgEdit_Button_Insert}    = "Invoegen";
+$Lang{CfgEdit_Button_Delete}    = "Verwijderen";
+$Lang{CfgEdit_Button_Add}       = "Toevoegen";
+$Lang{CfgEdit_Button_Override}  = "Overschrijven";
+$Lang{CfgEdit_Button_New_Key}   = "Nieuwe sleutel";
 $Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
-$Lang{CfgEdit_Error_No_Save}
-            = "Fout: niet bewaard ten gevolge van fouten";
-$Lang{CfgEdit_Error__must_be_an_integer}
-            = "Fout: \$var moet een geheel getal zijn";
-$Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "Fout: \$var moet een re&euml;le waarde (nummer) zijn";
-$Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "Fout: \$var ingave \$k moet een geheel getal zijn";
-$Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "Fout: \$var ingave \$k moet een re&euml;le waarde (nummer) zijn";
-$Lang{CfgEdit_Error__must_be_executable_program}
-            = "Fout: \$var moet een geldig uitvoerbaar pad zijn";
-$Lang{CfgEdit_Error__must_be_valid_option}
-            = "Fout: \$var is geen geldige optie";
-$Lang{CfgEdit_Error_Copy_host_does_not_exist}
-	    = "Te kopi&euml;ren machine \$copyHost bestaat niet; Machine \$fullHost wordt aangemaakt. Verwijder deze machine indien dit niet is wat je wil.";
+$Lang{CfgEdit_Error_No_Save}                     = "Fout: niet bewaard ten gevolge van fouten";
+$Lang{CfgEdit_Error__must_be_an_integer}         = "Fout: \$var moet een geheel getal zijn";
+$Lang{CfgEdit_Error__must_be_real_valued_number} = "Fout: \$var moet een re&euml;le waarde (nummer) zijn";
+$Lang{CfgEdit_Error__entry__must_be_an_integer}  = "Fout: \$var ingave \$k moet een geheel getal zijn";
+$Lang{CfgEdit_Error__entry__must_be_real_valued_number} =
+  "Fout: \$var ingave \$k moet een re&euml;le waarde (nummer) zijn";
+$Lang{CfgEdit_Error__must_be_executable_program} = "Fout: \$var moet een geldig uitvoerbaar pad zijn";
+$Lang{CfgEdit_Error__must_be_valid_option}       = "Fout: \$var is geen geldige optie";
+$Lang{CfgEdit_Error_Copy_host_does_not_exist} =
+  "Te kopi&euml;ren machine \$copyHost bestaat niet; Machine \$fullHost wordt aangemaakt. Verwijder deze machine indien dit niet is wat je wil.";
 
-$Lang{CfgEdit_Log_Copy_host_config}
-	    = "\$User kopieerde de instellingen van machine \$fromHost naar \$host\n";
-$Lang{CfgEdit_Log_Delete_param}
-            = "\$User verwijderde \$p van \$conf\n";
-$Lang{CfgEdit_Log_Add_param_value}
-            = "\$User voegde \$p toe aan \$conf, met waarde \$value\n";
-$Lang{CfgEdit_Log_Change_param_value}
-            = "\$User wijzigde \$p in \$conf van \$valueOld naar \$valueNew \n";
-$Lang{CfgEdit_Log_Host_Delete}
-            = "\$User verwijderde machine \$host\n";
-$Lang{CfgEdit_Log_Host_Change}
-            = "\$User machine \$host wijzigde \$key van \$valueOld naar \$valueNew\n";
-$Lang{CfgEdit_Log_Host_Add}
-            = "\$User voegde machine \$host toe: \$value\n";
+$Lang{CfgEdit_Log_Copy_host_config}   = "\$User kopieerde de instellingen van machine \$fromHost naar \$host\n";
+$Lang{CfgEdit_Log_Delete_param}       = "\$User verwijderde \$p van \$conf\n";
+$Lang{CfgEdit_Log_Add_param_value}    = "\$User voegde \$p toe aan \$conf, met waarde \$value\n";
+$Lang{CfgEdit_Log_Change_param_value} = "\$User wijzigde \$p in \$conf van \$valueOld naar \$valueNew \n";
+$Lang{CfgEdit_Log_Host_Delete}        = "\$User verwijderde machine \$host\n";
+$Lang{CfgEdit_Log_Host_Change}        = "\$User machine \$host wijzigde \$key van \$valueOld naar \$valueNew\n";
+$Lang{CfgEdit_Log_Host_Add}           = "\$User voegde machine \$host toe: \$value\n";
 
 #end of lang_nl.pm

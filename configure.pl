@@ -43,7 +43,7 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
 use vars qw(%Conf %OrigConf $Upgrade);
 use lib "./lib";
 
@@ -52,11 +52,11 @@ use lib "./lib";
 # and libraries by makeDist.
 #
 my @ConfigureBinList = qw(
-        __CONFIGURE_BIN_LIST__
-    );
+  __CONFIGURE_BIN_LIST__
+);
 my @ConfigureLibList = qw(
-        __CONFIGURE_LIB_LIST__
-    );
+  __CONFIGURE_LIB_LIST__
+);
 
 #
 # Check that makeDist has been run; need to avoid having the magic string
@@ -71,13 +71,13 @@ EOF
 }
 
 my @Packages = qw(version Encode Socket File::Path File::Spec File::Copy
-                  Digest::MD5 Data::Dumper Getopt::Std Getopt::Long Pod::Usage
-                  File::Listing CGI BackupPC::XS BackupPC::Lib);
+  Digest::MD5 Data::Dumper Getopt::Std Getopt::Long Pod::Usage
+  File::Listing CGI BackupPC::XS BackupPC::Lib);
 
 my $PackageVersion = {
-        "Encode"       => "1.99",
-        "BackupPC::XS" => "0.53",
-    };
+    "Encode"       => "1.99",
+    "BackupPC::XS" => "0.53",
+};
 
 foreach my $pkg ( @Packages ) {
     eval "use $pkg";
@@ -119,35 +119,20 @@ EOF
 
 my %opts;
 $opts{"set-perms"} = 1;
-if ( !GetOptions(
-            \%opts,
-            "batch",
-            "backuppc-user=s",
-            "bin-path=s%",
-            "cgi-dir=s",
-            "compress-level=i",
-            "config-path=s",
-            "config-override=s%",
-            "config-dir=s",
-            "config-only",
-            "data-dir=s",
-            "dest-dir=s",
-            "fhs!",
-            "help|?",
-            "hostname=s",
-            "html-dir=s",
-            "html-dir-url=s",
-            "install-dir=s",
-            "log-dir=s",
-            "man",
-            "run-dir=s",
-            "scgi-port=i",
-            "set-perms!",
-            "uid-ignore!",
-        ) || @ARGV ) {
+if (
+    !GetOptions(
+        \%opts,           "batch",            "backuppc-user=s", "bin-path=s%",
+        "cgi-dir=s",      "compress-level=i", "config-path=s",   "config-override=s%",
+        "config-dir=s",   "config-only",      "data-dir=s",      "dest-dir=s",
+        "fhs!",           "help|?",           "hostname=s",      "html-dir=s",
+        "html-dir-url=s", "install-dir=s",    "log-dir=s",       "man",
+        "run-dir=s",      "scgi-port=i",      "set-perms!",      "uid-ignore!",
+    )
+    || @ARGV
+) {
     pod2usage(2);
 }
-pod2usage(1) if ( $opts{help} );
+pod2usage(1)                               if ( $opts{help} );
 pod2usage(-exitstatus => 0, -verbose => 2) if $opts{man};
 
 my $DestDir = $opts{"dest-dir"};
@@ -162,8 +147,7 @@ install directories, then it should be ok to proceed.  Otherwise,
 please quit and restart as root.
 
 EOF
-    exit(1) if ( prompt("--> Do you want to continue?",
-                       "y") !~ /y/i );
+    exit(1) if ( prompt("--> Do you want to continue?", "y") !~ /y/i );
     exit(1) if ( $opts{batch} && !$opts{"uid-ignore"} );
 }
 
@@ -190,12 +174,14 @@ EOF
 # Check if this is an upgrade, in which case read the existing
 # config file to get all the defaults.
 #
-my $ConfigDir = $opts{"config-dir"} || "/etc/BackupPC";
-my $ConfigPath = "";
+my $ConfigDir    = $opts{"config-dir"} || "/etc/BackupPC";
+my $ConfigPath   = "";
 my $ConfigFileOK = 1;
 while ( 1 ) {
-    if ( $ConfigFileOK && -f "$DestDir$ConfigDir/config.pl"
-            && (!defined($opts{fhs}) || $opts{fhs}) && !defined($opts{"config-path"}) ) {
+    if (   $ConfigFileOK
+        && -f "$DestDir$ConfigDir/config.pl"
+        && (!defined($opts{fhs}) || $opts{fhs})
+        && !defined($opts{"config-path"}) ) {
         $ConfigPath = "$ConfigDir/config.pl";
         $opts{fhs} = 1 if ( !defined($opts{fhs}) );
         print <<EOF;
@@ -214,18 +200,17 @@ configuration file (eg: $ConfigDir/config.pl).  Otherwise, just
 hit return.
 
 EOF
-        $ConfigPath = prompt("--> Full path to existing main config.pl",
-                             $ConfigPath,
-                             "config-path");
+        $ConfigPath = prompt("--> Full path to existing main config.pl", $ConfigPath, "config-path");
     }
     last if ( $ConfigPath eq ""
-            || ($ConfigPath =~ /^\// && -f "$DestDir$ConfigPath" && -w "$DestDir$ConfigPath") );
+        || ($ConfigPath =~ /^\// && -f "$DestDir$ConfigPath" && -w "$DestDir$ConfigPath") );
     my $problem = "is not an absolute path";
-    $problem = "is not writable"        if ( !-w $ConfigPath );
-    $problem = "is not readable"        if ( !-r $ConfigPath );
-    $problem = "is not a regular file"  if ( !-f $ConfigPath );
-    $problem = "doesn't exist"          if ( !-e $ConfigPath );
+    $problem = "is not writable"       if ( !-w $ConfigPath );
+    $problem = "is not readable"       if ( !-r $ConfigPath );
+    $problem = "is not a regular file" if ( !-f $ConfigPath );
+    $problem = "doesn't exist"         if ( !-e $ConfigPath );
     print("The file '$DestDir$ConfigPath' $problem.\n");
+
     if ( $opts{batch} ) {
         print("Need to specify a valid --config-path for upgrade\n");
         exit(1);
@@ -239,14 +224,13 @@ if ( $ConfigPath ne "" && -r "$DestDir$ConfigPath" ) {
     ($ConfigDir = $ConfigPath) =~ s{/[^/]+$}{};
 
     # In config-only mode use installed BackupPC if distribution files are not available.
-    my $libPath = ($opts{"config-only"} && ($INC{"BackupPC/Lib.pm"} ne "lib/BackupPC/Lib.pm"))
-                        ? "" : ".";
+    my $libPath = ($opts{"config-only"} && ($INC{"BackupPC/Lib.pm"} ne "lib/BackupPC/Lib.pm")) ? "" : ".";
 
     die("BackupPC::Lib->new failed\n")
-            if ( !($bpc = BackupPC::Lib->new(".", $libPath, "$DestDir$ConfigDir", 1)) );
-    %Conf = $bpc->Conf();
+      if ( !($bpc = BackupPC::Lib->new(".", $libPath, "$DestDir$ConfigDir", 1)) );
+    %Conf     = $bpc->Conf();
     %OrigConf = %Conf;
-    $Upgrade = 1;
+    $Upgrade  = 1;
     if ( !defined($opts{fhs}) ) {
         if ( $ConfigPath eq "$Conf{TopDir}/conf/config.pl" ) {
             $opts{fhs} = 0;
@@ -256,11 +240,11 @@ if ( $ConfigPath ne "" && -r "$DestDir$ConfigPath" ) {
     }
     if ( !$opts{fhs} ) {
         ($Conf{TopDir} = $ConfigPath) =~ s{/[^/]+/[^/]+$}{}
-                    if ( $Conf{TopDir} eq '' );
-        $bpc->{LogDir} = $Conf{LogDir}  = "$Conf{TopDir}/log"
-                    if ( $Conf{LogDir} eq '' );
-        $bpc->{RunDir} = $Conf{RunDir}  = "$Conf{TopDir}/log"
-                    if ( $Conf{RunDir} eq '' );
+          if ( $Conf{TopDir} eq '' );
+        $bpc->{LogDir} = $Conf{LogDir} = "$Conf{TopDir}/log"
+          if ( $Conf{LogDir} eq '' );
+        $bpc->{RunDir} = $Conf{RunDir} = "$Conf{TopDir}/log"
+          if ( $Conf{RunDir} eq '' );
     }
     $bpc->{ConfDir} = $Conf{ConfDir} = $ConfigDir;
     if ( !length($DestDir) ) {
@@ -282,38 +266,37 @@ EOF
 #
 # Create filesystem hierarchy defaults
 #
-$Conf{TopDir}       ||= $opts{"data-dir"}    || "/data/BackupPC";
-$Conf{InstallDir}   ||= $opts{"install-dir"} || "/usr/local/BackupPC";
+$Conf{TopDir}     ||= $opts{"data-dir"}    || "/data/BackupPC";
+$Conf{InstallDir} ||= $opts{"install-dir"} || "/usr/local/BackupPC";
 
 #
 # These are the programs whose paths we need to find
 #
 my %Programs = (
-    perl           => "PerlPath",
-    rsync_bpc      => "RsyncBackupPCPath",
-    'gtar/tar'     => "TarClientPath",
-    smbclient      => "SmbClientPath",
-    nmblookup      => "NmbLookupPath",
-    rsync          => "RsyncClientPath",
-    ping           => "PingPath",
-    ping6          => "Ping6Path",
-    df             => "DfPath",
-    'ssh/ssh2'     => "SshPath",
-    sendmail       => "SendmailPath",
-    hostname       => "HostnamePath",
-    split          => "SplitPath",
-    par2           => "ParPath",
-    cat            => "CatPath",
-    gzip           => "GzipPath",
-    bzip2          => "Bzip2Path",
-    rrdtool        => "RrdToolPath",
+    perl       => "PerlPath",
+    rsync_bpc  => "RsyncBackupPCPath",
+    'gtar/tar' => "TarClientPath",
+    smbclient  => "SmbClientPath",
+    nmblookup  => "NmbLookupPath",
+    rsync      => "RsyncClientPath",
+    ping       => "PingPath",
+    ping6      => "Ping6Path",
+    df         => "DfPath",
+    'ssh/ssh2' => "SshPath",
+    sendmail   => "SendmailPath",
+    hostname   => "HostnamePath",
+    split      => "SplitPath",
+    par2       => "ParPath",
+    cat        => "CatPath",
+    gzip       => "GzipPath",
+    bzip2      => "Bzip2Path",
+    rrdtool    => "RrdToolPath",
 );
 
 foreach my $prog ( sort(keys(%Programs)) ) {
     my $path;
     foreach my $subProg ( split(/\//, $prog) ) {
-        $path = FindProgram("$ENV{PATH}:/usr/bin:/bin:/sbin:/usr/sbin:/usr/local/bin",
-                            $subProg) if ( !length($path) );
+        $path = FindProgram("$ENV{PATH}:/usr/bin:/bin:/sbin:/usr/sbin:/usr/local/bin", $subProg) if ( !length($path) );
     }
     $Conf{$Programs{$prog}} = $path if ( !length($Conf{$Programs{$prog}}) );
 }
@@ -328,15 +311,13 @@ EOF
         printf("    %-12s => %s\n", $prog, $Conf{$Programs{$prog}});
     }
     print "\n";
-    last if (prompt('--> Are these paths correct?', 'y') =~ /^y/i);
+    last if ( prompt('--> Are these paths correct?', 'y') =~ /^y/i );
     foreach my $prog ( sort(keys(%Programs)) ) {
-        $Conf{$Programs{$prog}} = prompt("--> $prog path",
-                                         $Conf{$Programs{$prog}});
+        $Conf{$Programs{$prog}} = prompt("--> $prog path", $Conf{$Programs{$prog}});
     }
 }
 
-my $Perl58 = system($Conf{PerlPath}
-                        . q{ -e 'exit($^V && $^V ge v5.8.0 ? 1 : 0);'});
+my $Perl58 = system($Conf{PerlPath} . q{ -e 'exit($^V && $^V ge v5.8.0 ? 1 : 0);'});
 
 if ( !$Perl58 ) {
     print <<EOF;
@@ -355,10 +336,8 @@ Please tell me the hostname of the machine that BackupPC will run on.
 
 EOF
 chomp($Conf{ServerHost} = `$Conf{HostnamePath}`)
-        if ( defined($Conf{HostnamePath}) && !defined($Conf{ServerHost}) );
-$Conf{ServerHost} = prompt("--> BackupPC will run on host",
-                           $Conf{ServerHost},
-                           "hostname");
+  if ( defined($Conf{HostnamePath}) && !defined($Conf{ServerHost}) );
+$Conf{ServerHost} = prompt("--> BackupPC will run on host", $Conf{ServerHost}, "hostname");
 
 print <<EOF;
 
@@ -374,9 +353,7 @@ so group members can access backup files.
 EOF
 my($name, $passwd, $Uid, $Gid);
 while ( 1 ) {
-    $Conf{BackupPCUser} = prompt("--> BackupPC should run as user",
-                                 $Conf{BackupPCUser} || "backuppc",
-                                 "backuppc-user");
+    $Conf{BackupPCUser} = prompt("--> BackupPC should run as user", $Conf{BackupPCUser} || "backuppc", "backuppc-user");
     if ( $opts{"set-perms"} ) {
         ($name, $passwd, $Uid, $Gid) = getpwnam($Conf{BackupPCUser});
         last if ( $name ne "" );
@@ -400,9 +377,7 @@ BackupPC scripts, library and documentation will be installed.
 EOF
 
 while ( 1 ) {
-    $Conf{InstallDir} = prompt("--> Install directory (full path)",
-                               $Conf{InstallDir},
-                               "install-dir");
+    $Conf{InstallDir} = prompt("--> Install directory (full path)", $Conf{InstallDir}, "install-dir");
     last if ( $Conf{InstallDir} =~ /^\// );
     if ( $opts{batch} ) {
         print("Need to specify --install-dir for new installation\n");
@@ -420,9 +395,7 @@ per machine).
 EOF
 
 while ( 1 ) {
-    $Conf{TopDir} = prompt("--> Data directory (full path)",
-                           $Conf{TopDir},
-                           "data-dir");
+    $Conf{TopDir} = prompt("--> Data directory (full path)", $Conf{TopDir}, "data-dir");
     last if ( $Conf{TopDir} =~ /^\// );
     if ( $opts{batch} ) {
         print("Need to specify --data-dir for new installation\n");
@@ -431,17 +404,17 @@ while ( 1 ) {
 }
 
 if ( $opts{fhs} ) {
-    $Conf{ConfDir}      ||= $ConfigDir           || "/etc/BackupPC";
-    $Conf{LogDir}       ||= $opts{"log-dir"}     || "/var/log/BackupPC";
-    $Conf{RunDir}       ||= $opts{"run-dir"}     || "/var/run/BackupPC";
+    $Conf{ConfDir} ||= $ConfigDir       || "/etc/BackupPC";
+    $Conf{LogDir}  ||= $opts{"log-dir"} || "/var/log/BackupPC";
+    $Conf{RunDir}  ||= $opts{"run-dir"} || "/var/run/BackupPC";
 } else {
-    $Conf{ConfDir}      ||= $ConfigDir           || "$Conf{TopDir}/conf";
-    $Conf{LogDir}       ||= $opts{"log-dir"}     || "$Conf{TopDir}/log";
-    $Conf{RunDir}       ||= $opts{"run-dir"}     || "$Conf{TopDir}/log";
+    $Conf{ConfDir} ||= $ConfigDir       || "$Conf{TopDir}/conf";
+    $Conf{LogDir}  ||= $opts{"log-dir"} || "$Conf{TopDir}/log";
+    $Conf{RunDir}  ||= $opts{"run-dir"} || "$Conf{TopDir}/log";
 }
 
 $Conf{CompressLevel} = $opts{"compress-level"}
-                            if ( defined($opts{"compress-level"}) );
+  if ( defined($opts{"compress-level"}) );
 
 print <<EOF;
 
@@ -465,15 +438,11 @@ running as user $Conf{BackupPCUser}.
 
 EOF
 
-$Conf{SCGIServerPort} = prompt("--> SCGI port (-1 to disable)",
-                               $Conf{SCGIServerPort} || -1,
-                               "scgi-port");
+$Conf{SCGIServerPort} = prompt("--> SCGI port (-1 to disable)", $Conf{SCGIServerPort} || -1, "scgi-port");
 
 if ( $Conf{SCGIServerPort} < 0 ) {
     while ( 1 ) {
-        $Conf{CgiDir} = prompt("--> CGI bin directory (full path, or empty for no CGI)",
-                               $Conf{CgiDir},
-                               "cgi-dir");
+        $Conf{CgiDir} = prompt("--> CGI bin directory (full path, or empty for no CGI)", $Conf{CgiDir}, "cgi-dir");
         last if ( $Conf{CgiDir} =~ /^\// || $Conf{CgiDir} eq "" );
         if ( $opts{batch} ) {
             print("Need to specify --cgi-dir for new installation\n");
@@ -497,9 +466,8 @@ The URL for the image directory should start with a slash.
 
 EOF
     while ( 1 ) {
-        $Conf{CgiImageDir} = prompt("--> Apache image directory (full path, or empty for no S/CGI)",
-                                    $Conf{CgiImageDir},
-                                    "html-dir");
+        $Conf{CgiImageDir} =
+          prompt("--> Apache image directory (full path, or empty for no S/CGI)", $Conf{CgiImageDir}, "html-dir");
         last if ( $Conf{CgiImageDir} =~ /^\// || $Conf{CgiImageDir} eq "" );
         if ( $opts{batch} ) {
             print("Need to specify --html-dir for new installation\n");
@@ -507,9 +475,9 @@ EOF
         }
     }
     while ( 1 ) {
-        $Conf{CgiImageDirURL} = prompt("--> URL for image directory (omit http://host; starts with '/', or empty for no S/CGI)",
-                                        $Conf{CgiImageDirURL},
-                                        "html-dir-url");
+        $Conf{CgiImageDirURL} =
+          prompt("--> URL for image directory (omit http://host; starts with '/', or empty for no S/CGI)",
+            $Conf{CgiImageDirURL}, "html-dir-url");
         last if ( $Conf{CgiImageDirURL} =~ /^\// || $Conf{CgiImageDirURL} eq "" );
         if ( $opts{batch} ) {
             print("Need to specify --html-dir-url for new installation\n");
@@ -543,21 +511,22 @@ DoInstall() if ( !$opts{"config-only"} );
 
 print("Installing config.pl and hosts in $DestDir$Conf{ConfDir}\n");
 InstallFile("conf/hosts", "$DestDir$Conf{ConfDir}/hosts.sample", 0644)
-                    if ( !$opts{"config-only"} );
+  if ( !$opts{"config-only"} );
 my $hostsSample = $opts{"config-only"} ? "$DestDir$Conf{ConfDir}/hosts.sample" : "conf/hosts";
 InstallFile($hostsSample, "$DestDir$Conf{ConfDir}/hosts", 0644)
-                    if ( !-f "$DestDir$Conf{ConfDir}/hosts" );
+  if ( !-f "$DestDir$Conf{ConfDir}/hosts" );
 
 #
 # Now do the config file.  If there is an existing config file we
 # merge in the new config file, adding any new configuration
 # parameters and deleting ones that are no longer needed.
 #
-my $dest = "$DestDir$Conf{ConfDir}/config.pl";
+my $dest         = "$DestDir$Conf{ConfDir}/config.pl";
 my $configSample = $opts{"config-only"} ? "$DestDir$Conf{ConfDir}/config.pl.sample" : "conf/config.pl";
-my ($distConf, $distVars) = ConfigParse($configSample);
-my ($oldConf, $oldVars);
-my ($newConf, $newVars) = ($distConf, $distVars);
+my($distConf, $distVars) = ConfigParse($configSample);
+my($oldConf,  $oldVars);
+my($newConf,  $newVars)  = ($distConf, $distVars);
+
 if ( -f $dest ) {
     ($oldConf, $oldVars) = ConfigParse($dest);
     ($newConf, $newVars) = ConfigMerge($oldConf, $oldVars, $distConf, $distVars);
@@ -589,9 +558,8 @@ if ( $Conf{CgiURL} eq '' ) {
 if ( defined($Conf{SmbClientArgs}) ) {
     if ( $Conf{SmbClientArgs} ne "" ) {
         foreach my $param ( qw(SmbClientRestoreCmd SmbClientFullCmd
-                                SmbClientIncrCmd) ) {
-            $newConf->[$newVars->{$param}]{text}
-                            =~ s/(-E\s+-N)/$1 $Conf{SmbClientArgs}/;
+        SmbClientIncrCmd) ) {
+            $newConf->[$newVars->{$param}]{text} =~ s/(-E\s+-N)/$1 $Conf{SmbClientArgs}/;
         }
     }
     delete($Conf{SmbClientArgs});
@@ -607,13 +575,11 @@ delete($Conf{CSSstylesheet});
 # than three scalar parameters.
 #
 if ( defined($Conf{BlackoutHourBegin}) ) {
-    $Conf{BlackoutPeriods} = [
-	 {
-	     hourBegin => $Conf{BlackoutHourBegin},
-	     hourEnd   => $Conf{BlackoutHourEnd},
-	     weekDays  => $Conf{BlackoutWeekDays},
-	 }
-    ];
+    $Conf{BlackoutPeriods} = [{
+        hourBegin => $Conf{BlackoutHourBegin},
+        hourEnd   => $Conf{BlackoutHourEnd},
+        weekDays  => $Conf{BlackoutWeekDays},
+    }];
     delete($Conf{BlackoutHourBegin});
     delete($Conf{BlackoutHourEnd});
     delete($Conf{BlackoutWeekDays});
@@ -647,12 +613,12 @@ if ( defined($Conf{PingArgs}) ) {
     delete($Conf{PingArgs});
 } elsif ( $Upgrade && !defined($Conf{PingCmd}) ) {
     if ( $^O eq "solaris" || $^O eq "sunos" ) {
-	$Conf{PingCmd} = '$pingPath -s $host 56 1';
+        $Conf{PingCmd} = '$pingPath -s $host 56 1';
     } elsif ( ($^O eq "linux" || $^O eq "openbsd" || $^O eq "netbsd")
-	    && !system("$Conf{PingPath} -c 1 -w 3 localhost") ) {
-	$Conf{PingCmd} = '$pingPath -c 1 -w 3 $host';
+        && !system("$Conf{PingPath} -c 1 -w 3 localhost") ) {
+        $Conf{PingCmd} = '$pingPath -c 1 -w 3 $host';
     } else {
-	$Conf{PingCmd} = '$pingPath -c 1 $host';
+        $Conf{PingCmd} = '$pingPath -c 1 $host';
     }
 }
 
@@ -661,7 +627,7 @@ if ( defined($Conf{PingArgs}) ) {
 #
 if ( !defined($Conf{DfCmd}) ) {
     if ( $^O eq "solaris" || $^O eq "sunos" ) {
-	$Conf{DfCmd} = '$dfPath -k $topDir';
+        $Conf{DfCmd} = '$dfPath -k $topDir';
     }
 }
 
@@ -699,7 +665,7 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
     eval($str);
     foreach my $p ( keys(%$new) ) {
         $new->{$p} = $Conf{CgiUserConfigEdit}{$p}
-                if ( defined($Conf{CgiUserConfigEdit}{$p}) );
+          if ( defined($Conf{CgiUserConfigEdit}{$p}) );
     }
     $Conf{CgiUserConfigEdit} = $new;
     my $d = Data::Dumper->new([$new], [*value]);
@@ -708,8 +674,7 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
     $d->Sortkeys(1);
     my $value = $d->Dump;
     $value =~ s/(.*)\n/$1;\n/s;
-    $newConf->[$newVars->{CgiUserConfigEdit}]{text}
-            =~ s/^(\s*\$Conf\{.*?\}\s*=\s*).*/$1$value/ms;
+    $newConf->[$newVars->{CgiUserConfigEdit}]{text} =~ s/^(\s*\$Conf\{.*?\}\s*=\s*).*/$1$value/ms;
 }
 
 #
@@ -731,16 +696,17 @@ if ( $Upgrade && !defined($Conf{PoolV3Enabled}) ) {
     #
     if ( $Conf{RsyncClientCmd} =~ /(\$sshPath.* +-l +\S+)/ && defined($newVars->{RsyncSshArgs}) ) {
         my $value = "[\n    '-e', '$1',\n];\n\n";
-        $newConf->[$newVars->{RsyncSshArgs}]{text}
-                =~ s/^(\s*\$Conf\{RsyncSshArgs}\s*=\s*).*/$1$value/ms;
+        $newConf->[$newVars->{RsyncSshArgs}]{text} =~ s/^(\s*\$Conf\{RsyncSshArgs}\s*=\s*).*/$1$value/ms;
     }
 }
 
 #
 # Update $Conf{CgiNavBarLinks} with github URLs
 #
-$newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{http://backuppc.wiki.sourceforge.net}{https://github.com/backuppc/backuppc/wiki}g;
-$newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{http://backuppc.sourceforge.net}{https://backuppc.github.io/backuppc}g;
+$newConf->[$newVars->{CgiNavBarLinks}]{text} =~
+  s{http://backuppc.wiki.sourceforge.net}{https://github.com/backuppc/backuppc/wiki}g;
+$newConf->[$newVars->{CgiNavBarLinks}]{text} =~
+  s{http://backuppc.sourceforge.net}{https://backuppc.github.io/backuppc}g;
 $newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{SourceForge}{Homepage}g;
 
 #
@@ -748,10 +714,9 @@ $newConf->[$newVars->{CgiNavBarLinks}]{text} =~ s{SourceForge}{Homepage}g;
 #
 foreach my $param ( keys(%{$opts{"config-override"}}) ) {
     my $value = $opts{"config-override"}{$param};
-    my $val = eval { $value };
+    my $val   = eval {$value};
     if ( @$ ) {
-        printf("Can't eval --config-override setting %s=%s\n",
-                        $param, $opts{"config-override"}{$param});
+        printf("Can't eval --config-override setting %s=%s\n", $param, $opts{"config-override"}{$param});
         exit(1);
     }
     if ( !defined($newVars->{$param}) ) {
@@ -759,8 +724,7 @@ foreach my $param ( keys(%{$opts{"config-override"}}) ) {
         exit(1);
     }
     $value .= ";\n\n";
-    $newConf->[$newVars->{$param}]{text}
-            =~ s/^(\s*\$Conf\{$param}\s*=\s*).*/$1$value/ms;
+    $newConf->[$newVars->{$param}]{text} =~ s/^(\s*\$Conf\{$param}\s*=\s*).*/$1$value/ms;
 }
 
 #
@@ -777,18 +741,18 @@ if ( -f $dest && !-f $confCopy ) {
     my $uid  = $stat[4];
     my $gid  = $stat[5];
     die("can't copy($dest, $confCopy)\n")
-                                unless copy($dest, $confCopy);
+      unless copy($dest, $confCopy);
     die("can't chown $uid, $gid $confCopy\n")
-                                unless my_chown($uid, $gid, $confCopy);
+      unless my_chown($uid, $gid, $confCopy);
     die("can't chmod $mode $confCopy\n")
-                                unless my_chmod($mode, $confCopy);
+      unless my_chmod($mode, $confCopy);
 }
 open(OUT, ">", $dest) || die("can't open $dest for writing\n");
 binmode(OUT);
 my $blockComment;
 foreach my $var ( @$newConf ) {
     if ( length($blockComment)
-          && substr($var->{text}, 0, length($blockComment)) eq $blockComment ) {
+        && substr($var->{text}, 0, length($blockComment)) eq $blockComment ) {
         $var->{text} = substr($var->{text}, length($blockComment));
         $blockComment = undef;
     }
@@ -818,7 +782,7 @@ if ( !defined($oldConf) ) {
 }
 
 InstallFile($dest, "$DestDir$Conf{ConfDir}/config.pl.sample", 0644)
-            if ( !$opts{"config-only"} );
+  if ( !$opts{"config-only"} );
 
 print <<EOF;
 
@@ -876,20 +840,20 @@ sub DoInstall
     # Create install directories
     #
     foreach my $dir ( qw(bin
-                         share share/doc share/doc/BackupPC
-                         lib lib/BackupPC
-                         lib/BackupPC/CGI
-                         lib/BackupPC/Config
-                         lib/BackupPC/Lang
-                         lib/BackupPC/Storage
-                         lib/BackupPC/Xfer
-                         lib/BackupPC/Zip
-                         lib/Net lib/Net/FTP
-                     ) ) {
+        share share/doc share/doc/BackupPC
+        lib lib/BackupPC
+        lib/BackupPC/CGI
+        lib/BackupPC/Config
+        lib/BackupPC/Lang
+        lib/BackupPC/Storage
+        lib/BackupPC/Xfer
+        lib/BackupPC/Zip
+        lib/Net lib/Net/FTP
+    ) ) {
         next if ( -d "$DestDir$Conf{InstallDir}/$dir" );
         mkpath("$DestDir$Conf{InstallDir}/$dir", 0, 0755);
-        if ( !-d "$DestDir$Conf{InstallDir}/$dir"
-                || !my_chown($Uid, $Gid, "$DestDir$Conf{InstallDir}/$dir") ) {
+        if (   !-d "$DestDir$Conf{InstallDir}/$dir"
+            || !my_chown($Uid, $Gid, "$DestDir$Conf{InstallDir}/$dir") ) {
             die("Failed to create or chown $DestDir$Conf{InstallDir}/$dir\n");
         } else {
             print("Created $DestDir$Conf{InstallDir}/$dir\n");
@@ -913,17 +877,13 @@ sub DoInstall
     # Create other directories
     #
     foreach my $dir ( (
-                "$Conf{TopDir}",
-                "$Conf{TopDir}/pool",
-                "$Conf{TopDir}/cpool",
-                "$Conf{TopDir}/pc",
-                "$Conf{ConfDir}",
-                "$Conf{LogDir}",
-                "$Conf{RunDir}",
-            ) ) {
-        eval { mkpath("$DestDir$dir", 0, 0750) } if ( !-d "$DestDir$dir" );
-        if ( $@ || !-d "$DestDir$dir"
-                || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
+        "$Conf{TopDir}",  "$Conf{TopDir}/pool", "$Conf{TopDir}/cpool", "$Conf{TopDir}/pc",
+        "$Conf{ConfDir}", "$Conf{LogDir}",      "$Conf{RunDir}",
+    ) ) {
+        eval {mkpath("$DestDir$dir", 0, 0750)} if ( !-d "$DestDir$dir" );
+        if (   $@
+            || !-d "$DestDir$dir"
+            || !my_chown($Uid, $Gid, "$DestDir$dir") ) {
             if ( $dir eq $Conf{RunDir} ) {
                 print("Failed to create or chown $DestDir$dir... continuing\n");
             } else {
@@ -943,11 +903,11 @@ sub DoInstall
     # remove old pre-v4 programs
     #
     foreach my $prog ( qw(
-            bin/BackupPC_link
-            bin/BackupPC_tarPCCopy
-            bin/BackupPC_trashClean
-            bin/BackupPC_compressPool
-        ) ) {
+        bin/BackupPC_link
+        bin/BackupPC_tarPCCopy
+        bin/BackupPC_trashClean
+        bin/BackupPC_compressPool
+    ) ) {
         unlink("$DestDir$Conf{InstallDir}/$prog");
     }
 
@@ -960,13 +920,13 @@ sub DoInstall
     # remove old pre-v4 libraries
     #
     foreach my $lib ( qw(
-            lib/BackupPC/Attrib.pm
-            lib/BackupPC/Config.pm
-            lib/BackupPC/FileZIO.pm
-            lib/BackupPC/PoolWrite.pm
-            lib/BackupPC/Xfer/RsyncDigest.pm
-            lib/BackupPC/Xfer/RsyncFileIO.pm
-        ) ) {
+        lib/BackupPC/Attrib.pm
+        lib/BackupPC/Config.pm
+        lib/BackupPC/FileZIO.pm
+        lib/BackupPC/PoolWrite.pm
+        lib/BackupPC/Xfer/RsyncDigest.pm
+        lib/BackupPC/Xfer/RsyncFileIO.pm
+    ) ) {
         unlink("$DestDir$Conf{InstallDir}/$lib");
     }
 
@@ -984,14 +944,10 @@ sub DoInstall
         if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
             rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
         }
-        InstallFile("conf/BackupPC_stnd.css",
-                    "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", 0444, 0);
-        InstallFile("conf/BackupPC_retro_v2.css",
-                    "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v2.css", 0444, 0);
-        InstallFile("conf/BackupPC_retro_v3.css",
-                    "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v3.css", 0444, 0);
-        InstallFile("conf/sorttable.js",
-                    "$DestDir$Conf{CgiImageDir}/sorttable.js", 0444, 0);
+        InstallFile("conf/BackupPC_stnd.css",     "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css",     0444, 0);
+        InstallFile("conf/BackupPC_retro_v2.css", "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v2.css", 0444, 0);
+        InstallFile("conf/BackupPC_retro_v3.css", "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v3.css", 0444, 0);
+        InstallFile("conf/sorttable.js",          "$DestDir$Conf{CgiImageDir}/sorttable.js",          0444, 0);
     }
 
     print("Making systemd and init.d scripts\n");
@@ -1003,9 +959,9 @@ sub DoInstall
     }
     InstallFile("systemd/src/backuppc.service", "systemd/backuppc.service", 0644);
     foreach my $init ( qw(init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
-                          init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc
-                          init.d/freebsd-backuppc init.d/freebsd-backuppc2 init.d/suse-backuppc
-                          init.d/slackware-backuppc init.d/ubuntu-backuppc ) ) {
+        init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc
+        init.d/freebsd-backuppc init.d/freebsd-backuppc2 init.d/suse-backuppc
+    init.d/slackware-backuppc init.d/ubuntu-backuppc ) ) {
         InstallFile("systemd/src/$init", "systemd/$init", 0755);
     }
 
@@ -1028,8 +984,7 @@ sub DoInstall
     if ( $Conf{CgiDir} ne "" ) {
         print("Installing cgi script BackupPC_Admin in $DestDir$Conf{CgiDir}\n");
         mkpath("$DestDir$Conf{CgiDir}", 0, 0755);
-        InstallFile("cgi-bin/BackupPC_Admin", "$DestDir$Conf{CgiDir}/BackupPC_Admin",
-                    04554);
+        InstallFile("cgi-bin/BackupPC_Admin", "$DestDir$Conf{CgiDir}/BackupPC_Admin", 04554);
     }
 }
 
@@ -1060,39 +1015,40 @@ sub InstallFile
     }
     unlink($dest) if ( -f $dest );
     if ( $binary ) {
-	die("can't copy($prog, $dest)\n") unless copy($prog, $dest);
+        die("can't copy($prog, $dest)\n") unless copy($prog, $dest);
     } else {
-	open(PROG, $prog)     || die("can't open $prog for reading\n");
-	open(OUT, ">", $dest) || die("can't open $dest for writing\n");
-	binmode(PROG);
-	binmode(OUT);
-	while ( <PROG> ) {
-	    s/__INSTALLDIR__/$Conf{InstallDir}/g;
-	    s/__LOGDIR__/$Conf{LogDir}/g;
-	    s/__RUNDIR__/$Conf{RunDir}/g;
-	    s/__CONFDIR__/$Conf{ConfDir}/g;
-	    s/__TOPDIR__/$Conf{TopDir}/g;
+        open(PROG, $prog) || die("can't open $prog for reading\n");
+        open(OUT, ">", $dest) || die("can't open $dest for writing\n");
+        binmode(PROG);
+        binmode(OUT);
+        while ( <PROG> ) {
+            s/__INSTALLDIR__/$Conf{InstallDir}/g;
+            s/__LOGDIR__/$Conf{LogDir}/g;
+            s/__RUNDIR__/$Conf{RunDir}/g;
+            s/__CONFDIR__/$Conf{ConfDir}/g;
+            s/__TOPDIR__/$Conf{TopDir}/g;
             s/^(\s*my \$useFHS\s*=\s*)\d;/${1}$opts{fhs};/
-                                    if ( $prog =~ /Lib.pm/ );
-	    s/__BACKUPPCUSER__/$Conf{BackupPCUser}/g;
-	    s/__CGIDIR__/$Conf{CgiDir}/g;
+              if ( $prog =~ /Lib.pm/ );
+            s/__BACKUPPCUSER__/$Conf{BackupPCUser}/g;
+            s/__CGIDIR__/$Conf{CgiDir}/g;
             s/__IMAGEDIR__/$Conf{CgiImageDir}/g;
             s/__IMAGEDIRURL__/$Conf{CgiImageDirURL}/g;
-	    if ( $first && /^#.*bin\/perl/ ) {
-		#
-		# Fill in correct path to perl (no taint for >= 2.0.1).
-		#
-		print OUT "#!$Conf{PerlPath}\n";
-	    } else {
-		print OUT;
-	    }
-	    $first = 0;
-	}
-	close(PROG);
-	close(OUT);
+
+            if ( $first && /^#.*bin\/perl/ ) {
+                #
+                # Fill in correct path to perl (no taint for >= 2.0.1).
+                #
+                print OUT "#!$Conf{PerlPath}\n";
+            } else {
+                print OUT;
+            }
+            $first = 0;
+        }
+        close(PROG);
+        close(OUT);
     }
     die("can't chown $uid, $gid $dest") unless my_chown($uid, $gid, $dest);
-    die("can't chmod $mode $dest")      unless my_chmod($mode, $dest);
+    die("can't chmod $mode $dest") unless my_chmod($mode, $dest);
 }
 
 sub FindProgram
@@ -1125,41 +1081,50 @@ sub ConfigParse
             } else {
                 if ( $out ne "" ) {
                     $allVars->{$var} = @conf if ( defined($var) );
-                    push(@conf, {
-                        text => $out,
-                        var => $var,
-                    });
+                    push(
+                        @conf,
+                        {
+                            text => $out,
+                            var  => $var,
+                        }
+                    );
                 }
-                $var = undef;
+                $var     = undef;
                 $comment = 1;
-                $out = $_;
+                $out     = $_;
             }
         } elsif ( /^\s*\$Conf\{([^}]*)/ ) {
             $comment = 0;
             if ( defined($var) ) {
                 $allVars->{$var} = @conf if ( defined($var) );
-                push(@conf, {
-                    text => $out,
-                    var => $var,
-                });
+                push(
+                    @conf,
+                    {
+                        text => $out,
+                        var  => $var,
+                    }
+                );
                 $out = $_;
             } else {
                 $out .= $_;
             }
-            $var = $1;
-	    $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<(.*);/ );
-	    $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<'(.*)';/ );
+            $var     = $1;
+            $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<(.*);/ );
+            $endLine = $1 if ( /^\s*\$Conf\{[^}]*} *= *<<'(.*)';/ );
         } else {
-	    $endLine = undef if ( defined($endLine) && /^\Q$endLine\E[\n\r]*$/ );
+            $endLine = undef if ( defined($endLine) && /^\Q$endLine\E[\n\r]*$/ );
             $out .= $_;
         }
     }
     if ( $out ne "" ) {
         $allVars->{$var} = @conf if ( defined($var) );
-        push(@conf, {
-            text => $out,
-            var  => $var,
-        });
+        push(
+            @conf,
+            {
+                text => $out,
+                var  => $var,
+            }
+        );
     }
     close(C);
     return (\@conf, $allVars);
@@ -1176,6 +1141,7 @@ sub ConfigMerge
     #
     foreach my $var ( @$old ) {
         next if ( !defined($var->{var}) || defined($newVars->{$var->{var}}) );
+
         #print(STDERR "Deleting old config parameter $var->{var}\n");
         $var->{delete} = 1;
     }
@@ -1187,6 +1153,7 @@ sub ConfigMerge
         if ( defined($oldVars->{$var->{var}}) ) {
             $posn = $oldVars->{$var->{var}};
         } else {
+
             #print(STDERR "New config parameter $var->{var}: $var->{text}\n");
             push(@{$old->[$posn]{new}}, $var);
         }
@@ -1226,7 +1193,7 @@ sub my_chown
 
 sub my_chmod
 {
-    my ($mode, $file) = @_;
+    my($mode, $file) = @_;
 
     return 1 if ( !$opts{"set-perms"} );
     return chmod($mode, $file);

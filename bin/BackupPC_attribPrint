@@ -35,7 +35,7 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
 use lib "/usr/local/BackupPC/lib";
 
 use BackupPC::Lib;
@@ -57,8 +57,8 @@ my($dir, $file, $specificInode, $specificInodeHexStr);
 
 if ( $ARGV[0] =~ m{(.*/inode)/(\d+)$} ) {
     $specificInode = $2;
-    $dir  = sprintf("%s/%02x", $1, ($specificInode >> 17) & 0x7f);
-    $file = sprintf("attrib%02x", ($specificInode >> 10) & 0x7f);
+    $dir           = sprintf("%s/%02x", $1, ($specificInode >> 17) & 0x7f);
+    $file          = sprintf("attrib%02x", ($specificInode >> 10) & 0x7f);
     do {
         $specificInodeHexStr .= sprintf("%02x", $specificInode & 0xff);
         $specificInode = $specificInode >> 8;
@@ -68,10 +68,10 @@ if ( $ARGV[0] =~ m{(.*/inode)/(\d+)$} ) {
     $dir  = $1;
     $file = $2;
 } elsif ( -f $ARGV[0] || $ARGV[0] eq "attrib" ) {
-    $dir = ".";
+    $dir  = ".";
     $file = $ARGV[0];
 } else {
-    $dir = $ARGV[0];
+    $dir  = $ARGV[0];
     $file = "attrib";
 }
 
@@ -103,6 +103,7 @@ $Data::Dumper::Terse    = 1;
 my $idx = 0;
 my $info;
 print("\$attrib = {\n");
+
 while ( 1 ) {
     ($info, $idx) = $attrib->iterate($idx);
     last if ( !defined($info) );

@@ -36,7 +36,8 @@
 #========================================================================
 
 use strict;
-no  utf8;
+no utf8;
+
 use lib "/usr/local/BackupPC/lib";
 use BackupPC::Lib qw( :BPC_DT_ALL );
 use File::Path;
@@ -70,10 +71,10 @@ my $RRDFile = "$LogDir/poolUsage.rrd";
 
 if ( -f $RRDFile ) {
     my $lastUpdate = $bpc->cmdSystemOrEval([$Conf{RrdToolPath}, "last", $RRDFile]);
-    if ($?) {
+    if ( $? ) {
         print $lastUpdate;
         exit(1);
-    } elsif ($lastUpdate == $NowRnd1) {
+    } elsif ( $lastUpdate == $NowRnd1 ) {
         print "skipping repeated RRD update for the same day: last update time is $lastUpdate\n";
         exit(0);
     }
@@ -93,19 +94,17 @@ sub RRDUpdate
     # We store data in RRD with predicted time of next update.
     #
     if ( !-f $RRDFile ) {
-        if ( ($err = $bpc->cmdSystemOrEval(
-            [
-                $Conf{RrdToolPath},
-                "create", $RRDFile,
-                "--step", "86400",
-                "--start", "$NowRnd0 - 1d",
-                "DS:c3kB:GAUGE:172800:0:U",
-                "DS:tpkB:GAUGE:172800:0:U",
-                "DS:p3kB:GAUGE:172800:0:U",
-                "DS:p4kB:GAUGE:172800:0:U",
-                "DS:c4kB:GAUGE:172800:0:U",
+        if ( (
+            $err = $bpc->cmdSystemOrEval([
+                $Conf{RrdToolPath},         "create",
+                $RRDFile,                   "--step",
+                "86400",                    "--start",
+                "$NowRnd0 - 1d",            "DS:c3kB:GAUGE:172800:0:U",
+                "DS:tpkB:GAUGE:172800:0:U", "DS:p3kB:GAUGE:172800:0:U",
+                "DS:p4kB:GAUGE:172800:0:U", "DS:c4kB:GAUGE:172800:0:U",
                 "RRA:LAST:0:1:732"
-            ])) ) {
+            ])
+        ) ) {
             print "$err";
         }
     }
@@ -114,7 +113,7 @@ sub RRDUpdate
     # Calculate pool size totals prior to poolng and compression
     #
     my $sizeTot;
-    foreach my $host ( sort( keys( %{ $bpc->HostInfoRead() } ) ) ) {
+    foreach my $host ( sort(keys(%{$bpc->HostInfoRead()})) ) {
         my @Backups = $bpc->BackupInfoRead($host);
         for ( my $i = 0 ; $i < @Backups ; $i++ ) {
             $sizeTot += $Backups[$i]{size} || 0;
@@ -122,24 +121,23 @@ sub RRDUpdate
     }
     $sizeTot = $sizeTot / 1024;
 
-    if ( ($err = $bpc->cmdSystemOrEval(
-            [
-                $Conf{RrdToolPath},
-                "update", $RRDFile,
-                $NowRnd1           . ":"
-                . $Info{"cpoolKb"} . ":"
-                . $sizeTot         . ":"
-                . $Info{"poolKb"}  . ":"
-                . $Info{"pool4Kb"} . ":"
-                . $Info{"cpool4Kb"}
-            ])) ) {
-         print "$err";
-     } else {
-         printf("RRD updated:"
-              . " date %s; cpoolKb %f; total %f;"
-              . " poolKb %f; pool4Kb %f; cpool4Kb %f\n",
-                    $NowRnd1, $Info{"cpoolKb"}, $sizeTot,
-                    $Info{"poolKb"}, $Info{"pool4Kb"}, $Info{"cpool4Kb"});
+    if ( (
+        $err = $bpc->cmdSystemOrEval([
+            $Conf{RrdToolPath},
+            "update",
+            $RRDFile,
+            $NowRnd1 . ":"
+              . $Info{"cpoolKb"} . ":"
+              . $sizeTot . ":"
+              . $Info{"poolKb"} . ":"
+              . $Info{"pool4Kb"} . ":"
+              . $Info{"cpool4Kb"}
+        ])
+    ) ) {
+        print "$err";
+    } else {
+        printf("RRD updated:" . " date %s; cpoolKb %f; total %f;" . " poolKb %f; pool4Kb %f; cpool4Kb %f\n",
+            $NowRnd1, $Info{"cpoolKb"}, $sizeTot, $Info{"poolKb"}, $Info{"pool4Kb"}, $Info{"cpool4Kb"});
     }
 }
 
@@ -156,45 +154,44 @@ sub RRDGraph
     # Get each pool max value from RRD
     #
     $bpc->cmdSystemOrEvalLong(
-            [
-                $Conf{RrdToolPath},
-                "graphv", "-",
-                "--end=$NowRnd1", "--start=end-${weeks}w",
-                "DEF:p3kB=$RRDFile:p3kB:LAST",
-                "DEF:c3kB=$RRDFile:c3kB:LAST",
-                "DEF:p4kB=$RRDFile:p4kB:LAST",
-                "DEF:c4kB=$RRDFile:c4kB:LAST",
-                "PRINT:p3kB:MAX:%lf",
-                "PRINT:c3kB:MAX:%lf",
-                "PRINT:p4kB:MAX:%lf",
-                "PRINT:c4kB:MAX:%lf",
-            ], sub {
-                if ( $_[0] =~ /^print\[([0-3])\] = "([.,0-9]+)"$/ ) {
-                    $poolMax[$1] = $2 unless ( $2 == 0 );
-                }
-            }, 1, undef);
+        [
+            $Conf{RrdToolPath},            "graphv",
+            "-",                           "--end=$NowRnd1",
+            "--start=end-${weeks}w",       "DEF:p3kB=$RRDFile:p3kB:LAST",
+            "DEF:c3kB=$RRDFile:c3kB:LAST", "DEF:p4kB=$RRDFile:p4kB:LAST",
+            "DEF:c4kB=$RRDFile:c4kB:LAST", "PRINT:p3kB:MAX:%lf",
+            "PRINT:c3kB:MAX:%lf",          "PRINT:p4kB:MAX:%lf",
+            "PRINT:c4kB:MAX:%lf",
+        ],
+        sub {
+            if ( $_[0] =~ /^print\[([0-3])\] = "([.,0-9]+)"$/ ) {
+                $poolMax[$1] = $2 unless ( $2 == 0 );
+            }
+        },
+        1,
+        undef
+    );
 
     my $poolSizeGraph = [
-        "$Conf{RrdToolPath}",
-        "graph", "-",
-        "--end=$NowRnd1", "--start=end-${weeks}w",
-        "--title=BackupPC Pool Size (${weeks} weeks)",
-        "--vertical-label=",
-        "--width=600", "--height=100", "--rigid", "--alt-autoscale-max",
-        "--base=1024", "--logarithmic", "--units=si",
-        "--color", "BACK#FFFFFF", "--slope-mode", "--imgformat=PNG",
-        "--font", "TITLE:10:", "--font", "AXIS:8:", "--font", "LEGEND:8:", "--font", "UNIT:8:",
-        "--font-render-mode", "mono",
-        "DEF:p3kB=$RRDFile:p3kB:LAST",
-        "DEF:c3kB=$RRDFile:c3kB:LAST",
-        "DEF:p4kB=$RRDFile:p4kB:LAST",
-        "DEF:c4kB=$RRDFile:c4kB:LAST",
-        "DEF:tpkB=$RRDFile:tpkB:LAST",
-        "CDEF:p3B=p3kB,1024,*",
-        "CDEF:c3B=c3kB,1024,*",
-        "CDEF:p4B=p4kB,1024,*",
-        "CDEF:c4B=c4kB,1024,*",
-        "CDEF:tpB=tpkB,1024,*"
+        "$Conf{RrdToolPath}",          "graph",
+        "-",                           "--end=$NowRnd1",
+        "--start=end-${weeks}w",       "--title=BackupPC Pool Size (${weeks} weeks)",
+        "--vertical-label=",           "--width=600",
+        "--height=100",                "--rigid",
+        "--alt-autoscale-max",         "--base=1024",
+        "--logarithmic",               "--units=si",
+        "--color",                     "BACK#FFFFFF",
+        "--slope-mode",                "--imgformat=PNG",
+        "--font",                      "TITLE:10:",
+        "--font",                      "AXIS:8:",
+        "--font",                      "LEGEND:8:",
+        "--font",                      "UNIT:8:",
+        "--font-render-mode",          "mono",
+        "DEF:p3kB=$RRDFile:p3kB:LAST", "DEF:c3kB=$RRDFile:c3kB:LAST",
+        "DEF:p4kB=$RRDFile:p4kB:LAST", "DEF:c4kB=$RRDFile:c4kB:LAST",
+        "DEF:tpkB=$RRDFile:tpkB:LAST", "CDEF:p3B=p3kB,1024,*",
+        "CDEF:c3B=c3kB,1024,*",        "CDEF:p4B=p4kB,1024,*",
+        "CDEF:c4B=c4kB,1024,*",        "CDEF:tpB=tpkB,1024,*"
     ];
 
     #
@@ -204,29 +201,29 @@ sub RRDGraph
         'AREA:p3B#FFADA7:Pool  V3 in bytes               ',
         'GPRINT:p3B:LAST:Current\\:%8.2lf %s',
         'GPRINT:p3B:AVERAGE:Average\\:%8.2lf %s',
-        'GPRINT:p3B:MAX:Maximum\\:%8.2lf %s\n'
-    ) if $poolMax[0];
+        'GPRINT:p3B:MAX:Maximum\\:%8.2lf %s\n')
+      if $poolMax[0];
 
     push(@$poolSizeGraph,
         'AREA:c3B#FFDBA7:CPool V3 in bytes               :STACK',
         'GPRINT:c3B:LAST:Current\\:%8.2lf %s',
         'GPRINT:c3B:AVERAGE:Average\\:%8.2lf %s',
-        'GPRINT:c3B:MAX:Maximum\\:%8.2lf %s\n'
-    ) if $poolMax[1];
+        'GPRINT:c3B:MAX:Maximum\\:%8.2lf %s\n')
+      if $poolMax[1];
 
     push(@$poolSizeGraph,
         'AREA:p4B#97E7A5:Pool  V4 in bytes               :STACK',
         'GPRINT:p4B:LAST:Current\\:%8.2lf %s',
         'GPRINT:p4B:AVERAGE:Average\\:%8.2lf %s',
-        'GPRINT:p4B:MAX:Maximum\\:%8.2lf %s\n'
-    ) if $poolMax[2];
+        'GPRINT:p4B:MAX:Maximum\\:%8.2lf %s\n')
+      if $poolMax[2];
 
     push(@$poolSizeGraph,
         'AREA:c4B#95B8DB:CPool V4 in bytes               :STACK',
         'GPRINT:c4B:LAST:Current\\:%8.2lf %s',
         'GPRINT:c4B:AVERAGE:Average\\:%8.2lf %s',
-        'GPRINT:c4B:MAX:Maximum\\:%8.2lf %s\n'
-    ) if $poolMax[3];
+        'GPRINT:c4B:MAX:Maximum\\:%8.2lf %s\n')
+      if $poolMax[3];
 
     #
     # Draw total line graph
@@ -235,13 +232,12 @@ sub RRDGraph
         'LINE1:tpB#FF0000:Prior to pooling and compression',
         'GPRINT:tpB:LAST:Current\\:%8.2lf %s',
         'GPRINT:tpB:AVERAGE:Average\\:%8.2lf %s',
-        'GPRINT:tpB:MAX:Maximum\\:%8.2lf %s\\n'
-    );
+        'GPRINT:tpB:MAX:Maximum\\:%8.2lf %s\\n');
 
     if ( !open($fdOut, ">", "$LogDir/poolUsage$weeks.png") ) {
         print("Can't open/create $LogDir/poolUsage$weeks.png\n");
         return;
     }
-    $bpc->cmdSystemOrEvalLong($poolSizeGraph, sub { print $fdOut $_[0] }, 1, undef);
+    $bpc->cmdSystemOrEvalLong($poolSizeGraph, sub {print $fdOut $_[0]}, 1, undef);
     close($fdOut);
 }

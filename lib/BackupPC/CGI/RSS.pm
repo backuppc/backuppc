@@ -41,30 +41,33 @@ use XML::RSS;
 
 sub action
 {
-    my $protocol = $ENV{HTTPS} eq "on" ?  'https://' : 'http://';
+    my $protocol = $ENV{HTTPS} eq "on" ? 'https://' : 'http://';
     my $base_url = $protocol . $ENV{'SERVER_NAME'} . $ENV{SCRIPT_NAME};
 
-    my($fullTot, $fullSizeTot, $incrTot, $incrSizeTot, $str,
-       $strNone, $strGood, $hostCntGood, $hostCntNone);
+    my($fullTot, $fullSizeTot, $incrTot, $incrSizeTot, $str, $strNone, $strGood, $hostCntGood, $hostCntNone);
 
     binmode(STDOUT, ":utf8");
 
-    my $rss = new XML::RSS (version => '0.91',
-                            encoding => 'utf-8');
+    my $rss = new XML::RSS(
+        version  => '0.91',
+        encoding => 'utf-8'
+    );
 
-    $rss->channel( title => eval("qq{$Lang->{RSS_Doc_Title}}"),
-                   link => $base_url,
-                   language => $Conf{Language},
-                   description => eval("qq{$Lang->{RSS_Doc_Description}}"),
-               );
+    $rss->channel(
+        title       => eval("qq{$Lang->{RSS_Doc_Title}}"),
+        link        => $base_url,
+        language    => $Conf{Language},
+        description => eval("qq{$Lang->{RSS_Doc_Description}}"),
+    );
 
     $hostCntGood = $hostCntNone = 0;
     GetStatusInfo("hosts");
     my $Privileged = CheckPermission();
 
     foreach my $host ( GetUserHosts(1) ) {
+
         my($fullDur, $incrCnt, $incrAge, $fullSize, $fullRate, $reasonHilite);
-	my($shortErr);
+        my($shortErr);
         my @Backups = $bpc->BackupInfoRead($host);
         my $fullCnt = $incrCnt = 0;
         my $fullAge = $incrAge = -1;
@@ -93,12 +96,11 @@ sub action
             }
         }
         if ( $fullAge < 0 ) {
-            $fullAge = "";
+            $fullAge  = "";
             $fullRate = "";
         } else {
-            $fullAge = sprintf("%.1f", (time - $fullAge) / (24 * 3600));
-            $fullRate = sprintf("%.2f",
-                                $fullSize / ($fullDur <= 0 ? 1 : $fullDur));
+            $fullAge  = sprintf("%.1f", (time - $fullAge) / (24 * 3600));
+            $fullRate = sprintf("%.2f", $fullSize / ($fullDur <= 0 ? 1 : $fullDur));
         }
         if ( $incrAge < 0 ) {
             $incrAge = "";
@@ -107,37 +109,36 @@ sub action
         }
         $fullTot += $fullCnt;
         $incrTot += $incrCnt;
-        $fullSize = sprintf("%.2f", $fullSize / 1024);
-	$incrAge = "&nbsp;" if ( $incrAge eq "" );
-	$reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
-		      || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
-	$reasonHilite = " bgcolor=\"$reasonHilite\"" if ( $reasonHilite ne "" );
-        if ( $Status{$host}{state} ne "Status_backup_in_progress"
-		&& $Status{$host}{state} ne "Status_restore_in_progress"
-		&& $Status{$host}{error} ne "" ) {
-	    ($shortErr = $Status{$host}{error}) =~ s/(.{48}).*/$1.../;
-	    $shortErr = " ($shortErr)";
-	}
+        $fullSize     = sprintf("%.2f", $fullSize / 1024);
+        $incrAge      = "&nbsp;" if ( $incrAge eq "" );
+        $reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
+          || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
+        $reasonHilite = " bgcolor=\"$reasonHilite\"" if ( $reasonHilite ne "" );
+        if (   $Status{$host}{state} ne "Status_backup_in_progress"
+            && $Status{$host}{state} ne "Status_restore_in_progress"
+            && $Status{$host}{error} ne "" ) {
+            ($shortErr = $Status{$host}{error}) =~ s/(.{48}).*/$1.../;
+            $shortErr = " ($shortErr)";
+        }
 
-        my $host_state = $Lang->{$Status{$host}{state}};
-        my $host_last_attempt =  $Lang->{$Status{$host}{reason}} . $shortErr;
-        my $host_disabled = $Conf{BackupsDisable};
+        my $host_state        = $Lang->{$Status{$host}{state}};
+        my $host_last_attempt = $Lang->{$Status{$host}{reason}} . $shortErr;
+        my $host_disabled     = $Conf{BackupsDisable};
 
         $str = eval("qq{$Lang->{RSS_Host_Summary}}");
 
-        $rss->add_item(title => $host . ', ' .
-                                $host_state . ', ' .
-                                $host_last_attempt,
-                       link => $base_url . '?host=' . $host,
-                       description => $str);
+        $rss->add_item(
+            title       => $host . ', ' . $host_state . ', ' . $host_last_attempt,
+            link        => $base_url . '?host=' . $host,
+            description => $str
+        );
     }
 
     $fullSizeTot = sprintf("%.2f", $fullSizeTot / 1024);
     $incrSizeTot = sprintf("%.2f", $incrSizeTot / 1024);
-    my $now      = timeStamp2(time);
+    my $now = timeStamp2(time);
 
-    print 'Content-type: text/xml', "\r\n\r\n",
-          $rss->as_string;
+    print 'Content-type: text/xml', "\r\n\r\n", $rss->as_string;
 
 }
 

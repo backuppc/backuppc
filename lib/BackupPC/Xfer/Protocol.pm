@@ -108,7 +108,7 @@ sub start
 {
     my($t) = @_;
 
-    $t->{_errStr} = "start() not implemented by ".ref($t);
+    $t->{_errStr} = "start() not implemented by " . ref($t);
     return;
 }
 
@@ -119,7 +119,7 @@ sub run
 {
     my($t) = @_;
 
-    $t->{_errStr} = "run() not implemented by ".ref($t);
+    $t->{_errStr} = "run() not implemented by " . ref($t);
     return;
 }
 
@@ -198,7 +198,7 @@ sub xferPid
 #
 sub logMsg
 {
-    my ($t, $msg) = @_;
+    my($t, $msg) = @_;
 
     push(@{$t->{_logMsg}}, $msg);
 }
@@ -223,18 +223,18 @@ sub logMsgGet
 #
 sub getStats
 {
-    my ($t) = @_;
+    my($t) = @_;
 
     return {
-        map { $_ => $t->{$_} }
+        map {$_ => $t->{$_}}
           qw(byteCnt fileCnt xferErrCnt xferBadShareCnt xferBadFileCnt
-             xferOK hostAbort hostError lastOutputLine)
+          xferOK hostAbort hostError lastOutputLine)
     };
 }
 
 sub getBadFiles
 {
-    my ($t) = @_;
+    my($t) = @_;
 
     return @{$t->{badFiles}};
 }
@@ -265,7 +265,7 @@ sub logWrite
     my $XferLOG = $t->{XferLOG};
     $level = 3 if ( !defined($level) );
 
-    return ( $XferLOG->write(\$msg) ) if ( $level <= $t->{logLevel} );
+    return ($XferLOG->write(\$msg)) if ( $level <= $t->{logLevel} );
 }
 
 ##############################################################################
@@ -279,8 +279,9 @@ sub shareName2Path
 {
     my($t, $shareName) = @_;
 
-    return $shareName if ( ref($t->{conf}{ClientShareName2Path}) ne "HASH"
-                         || ($t->{conf}{ClientShareName2Path}{$shareName} eq "" && $t->{conf}{ClientShareName2Path}{"*"} eq "") );
+    return $shareName
+      if ( ref($t->{conf}{ClientShareName2Path}) ne "HASH"
+        || ($t->{conf}{ClientShareName2Path}{$shareName} eq "" && $t->{conf}{ClientShareName2Path}{"*"} eq "") );
     return $t->{conf}{ClientShareName2Path}{$shareName} if ( $t->{conf}{ClientShareName2Path}{$shareName} ne "" );
     return $t->{conf}{ClientShareName2Path}{"*"}        if ( $t->{conf}{ClientShareName2Path}{"*"} ne "" );
     return $shareName;
@@ -295,13 +296,14 @@ sub shareName2Path
 #
 sub loadInclExclRegexps
 {
-    my ( $t, $shareType ) = @_;
+
+    my($t, $shareType) = @_;
     my $bpc  = $t->{bpc};
     my $conf = $t->{conf};
 
     my @BackupFilesOnly    = ();
     my @BackupFilesExclude = ();
-    my ($shareName, $shareNameRE);
+    my($shareName, $shareNameRE);
 
     $shareName = $t->{shareName};
     $shareName =~ s/\/*$//;    # remove trailing slashes
@@ -313,18 +315,18 @@ sub loadInclExclRegexps
     #
     # load all relevant values into @BackupFilesOnly
     #
-    if ( ref( $conf->{BackupFilesOnly} ) eq "HASH" ) {
+    if ( ref($conf->{BackupFilesOnly}) eq "HASH" ) {
 
-        foreach my $share ( ( '*', $shareName ) ) {
-   	    push @BackupFilesOnly, @{ $conf->{BackupFilesOnly}{$share} }
-	        if ( defined( $conf->{BackupFilesOnly}{$share} ) );
+        foreach my $share ( ('*', $shareName) ) {
+            push @BackupFilesOnly, @{$conf->{BackupFilesOnly}{$share}}
+              if ( defined($conf->{BackupFilesOnly}{$share}) );
         }
 
-    } elsif ( ref( $conf->{BackupFilesOnly} ) eq "ARRAY" ) {
+    } elsif ( ref($conf->{BackupFilesOnly}) eq "ARRAY" ) {
 
-        push( @BackupFilesOnly, @{ $conf->{BackupFilesOnly} } );
+        push(@BackupFilesOnly, @{$conf->{BackupFilesOnly}});
 
-    } elsif ( !defined( $conf->{BackupFilesOnly} ) ) {
+    } elsif ( !defined($conf->{BackupFilesOnly}) ) {
 
         #
         # do nothing
@@ -343,28 +345,26 @@ sub loadInclExclRegexps
     #
     # load all relevant values into @BackupFilesExclude
     #
-    if ( ref( $conf->{BackupFilesExclude} ) eq "HASH" ) {
+    if ( ref($conf->{BackupFilesExclude}) eq "HASH" ) {
 
-        foreach my $share ( ( '*', $shareName ) ) {
-            push( @BackupFilesExclude,
+        foreach my $share ( ('*', $shareName) ) {
+            push(
+                @BackupFilesExclude,
                 map {
-                        ( $_ =~ /^\// )
-                      ? ( $t->{shareNameRE} . $bpc->glob2re($_) )
-                      : ( '.*\/' . $bpc->glob2re($_) . '(?=\/.*)?' )
-                  } @{ $conf->{BackupFilesExclude}{$share} }
-                ) if ( defined( $conf->{BackupFilesExclude}{$share} ) ) ;
+                        ($_ =~ /^\//)
+                      ? ($t->{shareNameRE} . $bpc->glob2re($_))
+                      : ('.*\/' . $bpc->glob2re($_) . '(?=\/.*)?')
+                } @{$conf->{BackupFilesExclude}{$share}}
+            ) if ( defined($conf->{BackupFilesExclude}{$share}) );
         }
 
-    } elsif ( ref( $conf->{BackupFilesExclude} ) eq "ARRAY" ) {
+    } elsif ( ref($conf->{BackupFilesExclude}) eq "ARRAY" ) {
 
-        push( @BackupFilesExclude,
-            map {
-                    ( $_ =~ /\// )
-                  ? ( $bpc->glob2re($_) )
-                  : ( '.*\/' . $bpc->glob2re($_) . '(?<=\/.*)?' )
-              } @{ $conf->{BackupFilesExclude} } );
+        push(@BackupFilesExclude,
+            map {($_ =~ /\//) ? ($bpc->glob2re($_)) : ('.*\/' . $bpc->glob2re($_) . '(?<=\/.*)?')}
+              @{$conf->{BackupFilesExclude}});
 
-    } elsif ( !defined( $conf->{BackupFilesOnly} ) ) {
+    } elsif ( !defined($conf->{BackupFilesOnly}) ) {
 
         #
         # do nothing here
@@ -375,55 +375,53 @@ sub loadInclExclRegexps
         #
         # not a legitimate entry for $conf->{BackupFilesExclude}
         #
-        $t->{_errStr} =
-          "Incorrect syntax in BackupFilesExclude for host $t->{Host}";
+        $t->{_errStr} = "Incorrect syntax in BackupFilesExclude for host $t->{Host}";
         return;
     }
 
     #
     # load the regular expressions into the xfer object
     #
-    $t->{BackupFilesOnly} = ( @BackupFilesOnly > 0 ) ? \@BackupFilesOnly : undef;
-    $t->{BackupFilesExclude} = ( @BackupFilesExclude > 0 ) ? \@BackupFilesExclude : undef;
+    $t->{BackupFilesOnly}    = (@BackupFilesOnly > 0)    ? \@BackupFilesOnly    : undef;
+    $t->{BackupFilesExclude} = (@BackupFilesExclude > 0) ? \@BackupFilesExclude : undef;
 
     return 1;
 }
 
-
 sub checkIncludeExclude
 {
-    my ($t, $file) = @_;
+    my($t, $file) = @_;
 
-    return ( $t->checkIncludeMatch($file) && !$t->checkExcludeMatch($file) );
+    return ($t->checkIncludeMatch($file) && !$t->checkExcludeMatch($file));
 }
 
 sub checkIncludeMatch
 {
-    my ($t, $file) = @_;
+    my($t, $file) = @_;
 
     my $shareName = $t->{shareName};
     my $includes  = $t->{BackupFilesOnly} || return 1;
-    my $match = "";
+    my $match     = "";
 
     foreach my $include ( @{$includes} ) {
 
         #
         # construct regexp elsewhere to avoid syntactical evil
         #
-        $match = '^' . quotemeta( $shareName . $include ) . '(?=\/.*)?';
+        $match = '^' . quotemeta($shareName . $include) . '(?=\/.*)?';
 
-	#
+        #
         # return true if the include folder is a parent of the file,
         # or the folder itself.
-	#
+        #
         return 1 if ( $file =~ /$match/ );
 
         $match = '^' . quotemeta($file) . '(?=\/.*)?';
 
-	#
+        #
         # return true if the file is a parent of the include folder,
         # or the folder itself.
-	#
+        #
         return 1 if ( "$shareName$include" =~ /$match/ );
     }
     return 0;
@@ -431,31 +429,31 @@ sub checkIncludeMatch
 
 sub checkExcludeMatch
 {
-    my ($t, $file) = @_;
+    my($t, $file) = @_;
 
     my $shareName = $t->{shareName};
     my $excludes  = $t->{BackupFilesExclude} || return 0;
-    my $match = "";
+    my $match     = "";
 
     foreach my $exclude ( @{$excludes} ) {
 
         #
         # construct regexp elsewhere to avoid syntactical evil
         #
-        $match = '^' . quotemeta( $shareName . $exclude ) . '(?=\/.*)?';
+        $match = '^' . quotemeta($shareName . $exclude) . '(?=\/.*)?';
 
-	#
+        #
         # return true if the exclude folder is a parent of the file,
         # or the folder itself.
-	#
+        #
         return 1 if ( $file =~ /$match/ );
 
         $match = '^' . quotemeta($file) . '(?=\/.*)?';
 
-	#
+        #
         # return true if the file is a parent of the exclude folder,
         # or the folder itself.
-	#
+        #
         return 1 if ( "$shareName$exclude" =~ /$match/ );
     }
     return 0;

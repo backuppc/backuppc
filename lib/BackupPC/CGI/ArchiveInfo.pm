@@ -41,8 +41,8 @@ use BackupPC::CGI::Lib qw(:all);
 sub action
 {
     my $Privileged = CheckPermission($In{host});
-    my $host = $1 if ( $In{host} =~ /(.*)/ );
-    my $num  = $In{num};
+    my $host       = $1 if ( $In{host} =~ /(.*)/ );
+    my $num        = $In{num};
     my $i;
 
     if ( !$Privileged ) {
@@ -61,18 +61,18 @@ sub action
 
     %ArchiveReq = ();
     do "$TopDir/pc/$host/ArchiveInfo.$Archives[$i]{num}"
-	    if ( -f "$TopDir/pc/$host/ArchiveInfo.$Archives[$i]{num}" );
+      if ( -f "$TopDir/pc/$host/ArchiveInfo.$Archives[$i]{num}" );
 
     my $startTime = timeStamp2($Archives[$i]{startTime});
     my $reqTime   = timeStamp2($ArchiveReq{reqTime});
     my $dur       = $Archives[$i]{endTime} - $Archives[$i]{startTime};
-    $dur          = 1 if ( $dur <= 0 );
-    my $duration  = sprintf("%.1f", $dur / 60);
+    $dur = 1 if ( $dur <= 0 );
+    my $duration = sprintf("%.1f", $dur / 60);
 
     my $HostListStr = "";
-    my $counter=0;
+    my $counter     = 0;
     foreach my $f ( @{$ArchiveReq{HostList}} ) {
-	$HostListStr .= <<EOF;
+        $HostListStr .= <<EOF;
 <tr><td>$f</td><td>@{$ArchiveReq{BackupList}}[$counter]</td></tr>
 EOF
         $counter++;

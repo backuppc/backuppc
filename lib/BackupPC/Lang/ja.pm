@@ -18,12 +18,12 @@ use utf8;
 
 # --------------------------------
 
-$Lang{Start_Archive} = "アーカイブ開始";
+$Lang{Start_Archive}        = "アーカイブ開始";
 $Lang{Stop_Dequeue_Archive} = "アーカイブ停止/デキュー";
-$Lang{Start_Full_Backup} = "フルバックアップ開始";
-$Lang{Start_Incr_Backup} = "増分バックアップ開始";
-$Lang{Stop_Dequeue_Backup} = "バックアップ停止/デキュー";
-$Lang{Restore} = "リストア";
+$Lang{Start_Full_Backup}    = "フルバックアップ開始";
+$Lang{Start_Incr_Backup}    = "増分バックアップ開始";
+$Lang{Stop_Dequeue_Backup}  = "バックアップ停止/デキュー";
+$Lang{Restore}              = "リストア";
 
 $Lang{Type_full} = "フル";
 $Lang{Type_incr} = "インクリメンタル";
@@ -31,9 +31,9 @@ $Lang{Type_incr} = "インクリメンタル";
 # -----
 
 $Lang{Only_privileged_users_can_view_admin_options} = "管理者オプションは権限があるユーザのみ見ることができます。";
-$Lang{H_Admin_Options} = "BackupPCサーバ: 管理者オプション";
-$Lang{Admin_Options} = "管理者オプション";
-$Lang{Admin_Options_Page} = <<EOF;
+$Lang{H_Admin_Options}                              = "BackupPCサーバ: 管理者オプション";
+$Lang{Admin_Options}                                = "管理者オプション";
+$Lang{Admin_Options_Page}                           = <<EOF;
 \${h1(qq{$Lang{Admin_Options}})}
 <br>
 \${h2("サーバ管理")}
@@ -54,7 +54,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 -->
 EOF
 
-$Lang{Unable_to_connect_to_BackupPC_server} = "BackupPCサーバへ接続できません";
+$Lang{Unable_to_connect_to_BackupPC_server}               = "BackupPCサーバへ接続できません";
 $Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
 このCGIスクリプト(\$MyURL)は、ホスト \$Conf{ServerHost} のポート \$Conf{ServerPort} で動作しているBackupPCサーバへ接続することができません。
 <br>
@@ -78,7 +78,7 @@ EOF
 
 $Lang{H_BackupPC_Server_Status} = "BackupPCサーバの状態";
 
-$Lang{BackupPC_Server_Status_General_Info}= <<EOF;
+$Lang{BackupPC_Server_Status_General_Info} = <<EOF;
 \${h2(\"一般サーバ情報\")}
 
 <ul>
@@ -142,8 +142,8 @@ EOF
 
 # --------------------------------
 $Lang{BackupPC__Server_Summary} = "BackupPC: ホストサマリ";
-$Lang{BackupPC__Archive} = "BackupPC: アーカイブ";
-$Lang{BackupPC_Summary} = <<EOF;
+$Lang{BackupPC__Archive}        = "BackupPC: アーカイブ";
+$Lang{BackupPC_Summary}         = <<EOF;
 
 \${h1(qq{$Lang{BackupPC__Server_Summary}})}
 <p>
@@ -316,8 +316,9 @@ $Lang{Pool_Stat} = <<EOF;
 EOF
 
 # --------------------------------
-$Lang{BackupPC__Backup_Requested_on__host} = "BackupPC: \$host のバックアップ要求";
+$Lang{BackupPC__Backup_Requested_on__host}              = "BackupPC: \$host のバックアップ要求";
 $Lang{BackupPC__Delete_Requested_for_a_backup_of__host} = "BackupPC: Delete Requested for a backup of \$host";
+
 # --------------------------------
 $Lang{REPLY_FROM_SERVER} = <<EOF;
 \${h1(\$str)}
@@ -326,8 +327,10 @@ $Lang{REPLY_FROM_SERVER} = <<EOF;
 <p>
 <a href="\$MyURL?host=\$host">\$host ホームページへ戻る</a>.
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Start_Backup_Confirm_on__host} = "BackupPC: バックアップ開始の確認 \$host";
+
 # --------------------------------
 $Lang{Are_you_sure_start} = <<EOF;
 \${h1("本当によいですか？")}
@@ -346,8 +349,10 @@ $Lang{Are_you_sure_start} = <<EOF;
 <input type="submit" value="いいえ" name="ignore">
 </form>
 EOF
+
 # --------------------------------
 $Lang{BackupPC__Stop_Backup_Confirm_on__host} = "BackupPC: バックアップ停止の確認 \$host";
+
 # --------------------------------
 $Lang{Are_you_sure_stop} = <<EOF;
 
@@ -370,12 +375,16 @@ $Lang{Are_you_sure_stop} = <<EOF;
 </form>
 
 EOF
+
 # --------------------------------
 $Lang{Only_privileged_users_can_view_queues_} = "権限があるユーザのみキューを見ることができます。";
+
 # --------------------------------
 $Lang{Only_privileged_users_can_archive} = "権限があるユーザのみアーカイブすることができます。";
+
 # --------------------------------
 $Lang{BackupPC__Queue_Summary} = "BackupPC: キューサマリ";
+
 # --------------------------------
 $Lang{Backup_Queue_Summary} = <<EOF;
 \${h1("バックアップキューサマリ")}
@@ -417,10 +426,11 @@ EOF
 
 # --------------------------------
 $Lang{Backup_PC__Log_File__file} = "BackupPC: ファイル \$file";
-$Lang{Log_File__file__comment} = <<EOF;
+$Lang{Log_File__file__comment}   = <<EOF;
 \${h1("ファイル \$file \$comment")}
 <p>
 EOF
+
 # --------------------------------
 $Lang{Contents_of_log_file} = <<EOF;
 ファイル<tt>\$file</tt>の内容 \$mtimeStr 更新 \$comment
@@ -428,12 +438,13 @@ EOF
 
 # --------------------------------
 $Lang{skipped__skipped_lines} = "[ \$skipped 行スキップしました。 ]\n";
+
 # --------------------------------
 $Lang{_pre___Can_t_open_log_file__file} = "<pre>\n\$file ログファイルを開くことができません。\n";
 
 # --------------------------------
 $Lang{BackupPC__Log_File_History} = "BackupPC: ログファイルの履歴";
-$Lang{Log_File_History__hdr} = <<EOF;
+$Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("ログファイル履歴 \$hdr")}
 <p>
 <table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
@@ -457,12 +468,11 @@ $Lang{Recent_Email_Summary} = <<EOF;
 </table>
 EOF
 
-
 # ------------------------------
 $Lang{Browse_backup__num_for__host} = "BackupPC: \$host \$num バックアップの閲覧";
 
 # ------------------------------
-$Lang{Restore_Options_for__host} = "BackupPC: \$host リストアオプション";
+$Lang{Restore_Options_for__host}  = "BackupPC: \$host リストアオプション";
 $Lang{Restore_Options_for__host2} = <<EOF;
 \${h1("\$host のリストアオプション")}
 <p>
@@ -570,7 +580,6 @@ Archive::Zip はインストールされていないのでZIPアーカイブを�
 </p>
 EOF
 
-
 # ------------------------------
 $Lang{Option_3__Download_Zip_archive} = <<EOF;
 \${h2("オプション３: Tarアーカイブのダウンロード")}
@@ -597,7 +606,6 @@ to \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 <input type="submit" value="Download Tar File" name="ignore">
 </form>
 EOF
-
 
 # ------------------------------
 $Lang{Restore_Confirm_on__host} = "BackupPC: \$host リストアの確認";
@@ -631,10 +639,9 @@ The following files will be restored to share \$In{shareDest}, from
 </form>
 EOF
 
-
 # --------------------------
 $Lang{Restore_Requested_on__hostDest} = "BackupPC: \$hostDest へリストア";
-$Lang{Reply_from_server_was___reply} = <<EOF;
+$Lang{Reply_from_server_was___reply}  = <<EOF;
 \${h1(\$str)}
 <p>
 サーバからの応答: \$reply
@@ -648,12 +655,12 @@ $Lang{BackupPC_Archive_Reply_from_server} = <<EOF;
 サーバからの応答: \$reply
 EOF
 
-
 # --------------------------------
 $Lang{BackupPC__Delete_Backup_Confirm__num_of__host} = "BackupPC: Delete Backup Confirm #\$num of \$host";
+
 # --------------------------------
-$Lang{A_filled} = "a filled";
-$Lang{An_unfilled} = "an unfilled";
+$Lang{A_filled}            = "a filled";
+$Lang{An_unfilled}         = "an unfilled";
 $Lang{Are_you_sure_delete} = <<EOF;
 \${h1("Are you sure?")}
 <p>
@@ -785,7 +792,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 </table>
 EOF
 
-$Lang{Host__host_Archive_Summary} = "BackupPC: ホスト \$host アーカイブサマリ";
+$Lang{Host__host_Archive_Summary}  = "BackupPC: ホスト \$host アーカイブサマリ";
 $Lang{Host__host_Archive_Summary2} = <<EOF;
 \${h1("ホスト \$host アーカイブサマリ")}
 <p>
@@ -813,7 +820,7 @@ $Lang{Host__host_Archive_Summary2} = <<EOF;
 EOF
 
 # -------------------------
-$Lang{Error} = "BackupPC: エラー";
+$Lang{Error}         = "BackupPC: エラー";
 $Lang{Error____head} = <<EOF;
 \${h1("エラー: \$head")}
 <p>\$mesg</p>
@@ -1008,54 +1015,47 @@ $Lang{Email_Summary} = "BackupPC: メールサマリ";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: check apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =
-              "Wrong user: my userid is \$>, instead of \$uid"
-            . "(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___} = "Wrong user: my userid is \$>, instead of \$uid" . "(\$Conf{BackupPCUser})\n";
+
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-                  "Only privileged users can stop or start backups on"
-		. " \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num} = "番号 \${EscHTML(\$In{num})} が不正です。";
-$Lang{Unable_to_open__file__configuration_problem} = "Unable to open \$file: configuration problem?";
+  "Only privileged users can stop or start backups on" . " \${EscHTML(\$host)}.";
+$Lang{Invalid_number__num}                                = "番号 \${EscHTML(\$In{num})} が不正です。";
+$Lang{Unable_to_open__file__configuration_problem}        = "Unable to open \$file: configuration problem?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Only privileged users can view log or config files.";
-$Lang{Only_privileged_users_can_view_log_files} = "Only privileged users can view log files.";
-$Lang{Only_privileged_users_can_view_email_summaries} = "Only privileged users can view email summaries.";
-$Lang{Only_privileged_users_can_browse_backup_files} = "Only privileged users can browse backup files"
-                . " ホスト \${EscHTML(\$In{host})}.";
-$Lang{Only_privileged_users_can_delete_backups} = "Only privileged users can delete backups"
-                . " of host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "ホスト名が空です。";
-$Lang{Directory___EscHTML} = "ディレクトリ \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}"
-		    . " は空です。";
-$Lang{Can_t_browse_bad_directory_name2} = "Can\'t browse bad directory name"
-	            . " \${EscHTML(\$relDir)}";
-$Lang{Only_privileged_users_can_restore_backup_files} = "Only privileged users can restore backup files"
-                . " for host \${EscHTML(\$In{host})}.";
-$Lang{Bad_host_name} = "\${EscHTML(\$host)} はホスト名が誤っています。";
-$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "何もファイルを選択していません。戻って"
-                . "いくつかファイルを選択してください。";
-$Lang{You_haven_t_selected_any_hosts} = "何もホストを選択していません。戻って"
-                . "いくつかのホストを選択してください。";
+$Lang{Only_privileged_users_can_view_log_files}           = "Only privileged users can view log files.";
+$Lang{Only_privileged_users_can_view_email_summaries}     = "Only privileged users can view email summaries.";
+$Lang{Only_privileged_users_can_browse_backup_files} =
+  "Only privileged users can browse backup files" . " ホスト \${EscHTML(\$In{host})}.";
+$Lang{Only_privileged_users_can_delete_backups} =
+  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}                  = "ホスト名が空です。";
+$Lang{Directory___EscHTML}              = "ディレクトリ \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " は空です。";
+$Lang{Can_t_browse_bad_directory_name2} = "Can\'t browse bad directory name" . " \${EscHTML(\$relDir)}";
+$Lang{Only_privileged_users_can_restore_backup_files} =
+  "Only privileged users can restore backup files" . " for host \${EscHTML(\$In{host})}.";
+$Lang{Bad_host_name}                                     = "\${EscHTML(\$host)} はホスト名が誤っています。";
+$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "何もファイルを選択していません。戻って" . "いくつかファイルを選択してください。";
+$Lang{You_haven_t_selected_any_hosts}                    = "何もホストを選択していません。戻って" . "いくつかのホストを選択してください。";
 $Lang{Nice_try__but_you_can_t_put} = "Nice try, but you can\'t put \'..\' in any of the file names";
-$Lang{Host__doesn_t_exist} = "Host \${EscHTML(\$In{hostDest})} doesn\'t exist";
-$Lang{You_don_t_have_permission_to_restore_onto_host} = "You don\'t have permission to restore onto host"
-		    . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "Can\'t open/create "
-		. "\${EscHTML(\"\$openPath\")}";
-$Lang{Only_privileged_users_can_restore_backup_files2} = "Only privileged users can restore backup files"
-                . " for host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name} = "ホスト名が空です。";
+$Lang{Host__doesn_t_exist}         = "Host \${EscHTML(\$In{hostDest})} doesn\'t exist";
+$Lang{You_don_t_have_permission_to_restore_onto_host} =
+  "You don\'t have permission to restore onto host" . " \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath} = "Can\'t open/create " . "\${EscHTML(\"\$openPath\")}";
+$Lang{Only_privileged_users_can_restore_backup_files2} =
+  "Only privileged users can restore backup files" . " for host \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}      = "ホスト名が空です。";
 $Lang{Unknown_host_or_user} = "Unknown host or user \${EscHTML(\$host)}";
-$Lang{Only_privileged_users_can_view_information_about} = "Only privileged users can view information about"
-                . " host \${EscHTML(\$host)}." ;
+$Lang{Only_privileged_users_can_view_information_about} =
+  "Only privileged users can view information about" . " host \${EscHTML(\$host)}.";
 $Lang{Only_privileged_users_can_view_archive_information} = "Only privileged users can view archive information.";
 $Lang{Only_privileged_users_can_view_restore_information} = "Only privileged users can view restore information.";
-$Lang{Restore_number__num_for_host__does_not_exist} = "Restore number \$num for host \${EscHTML(\$host)} does"
-	        . " not exist.";
-$Lang{Archive_number__num_for_host__does_not_exist} = "Archive number \$num for host \${EscHTML(\$host)} does"
-                . " not exist.";
+$Lang{Restore_number__num_for_host__does_not_exist} =
+  "Restore number \$num for host \${EscHTML(\$host)} does" . " not exist.";
+$Lang{Archive_number__num_for_host__does_not_exist} =
+  "Archive number \$num for host \${EscHTML(\$host)} does" . " not exist.";
 $Lang{Can_t_find_IP_address_for} = "Can\'t find IP address for \${EscHTML(\$host)}";
-$Lang{host_is_a_DHCP_host} = <<EOF;
+$Lang{host_is_a_DHCP_host}       = <<EOF;
 \$host is a DHCP host, and I don\'t know its IP address.  I checked the
 netbios name of \$ENV{REMOTE_ADDR}\$tryIP, and found that that machine
 is not \$host.
@@ -1068,48 +1068,49 @@ EOF
 # !! Server Mesg !!
 # ------------------------------------
 
-$Lang{Backup_requested_on_DHCP__host} = "バックアップ要求 on DHCP \$host (\$In{hostIP}) by"
-		                      . " \$User from \$ENV{REMOTE_ADDR}";
-$Lang{Backup_requested_on__host_by__User} = "\$User による \$host のバックアップ要求";
+$Lang{Backup_requested_on_DHCP__host} = "バックアップ要求 on DHCP \$host (\$In{hostIP}) by" . " \$User from \$ENV{REMOTE_ADDR}";
+$Lang{Backup_requested_on__host_by__User}        = "\$User による \$host のバックアップ要求";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "\$User による \$host のバックアップ中止/デキュー";
-$Lang{Restore_requested_to_host__hostDest__backup___num} = "ホスト\$hostDest のリストア要求 バックアップ #\$num,"
-	     . " by \$User from \$ENV{REMOTE_ADDR}";
-$Lang{Delete_requested_for_backup_of__host_by__User} = "Delete requested for backup #\$num of \$host"
-             . " by \$User from \$ENV{REMOTE_ADDR}";
+$Lang{Restore_requested_to_host__hostDest__backup___num} =
+  "ホスト\$hostDest のリストア要求 バックアップ #\$num," . " by \$User from \$ENV{REMOTE_ADDR}";
+$Lang{Delete_requested_for_backup_of__host_by__User} =
+  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "\$ENV{REMOTE_ADDR} から \$User によってアーカイブの要求がありました。";
 
 # -------------------------------------------------
 # ------- Stuff that was forgotten ----------------
 # -------------------------------------------------
 
-$Lang{Status} = "状態";
-$Lang{PC_Summary} = "ホストサマリ";
-$Lang{LOG_file} = "ログファイル";
-$Lang{LOG_files} = "全ログファイル";
-$Lang{Old_LOGs} = "旧ログ";
+$Lang{Status}        = "状態";
+$Lang{PC_Summary}    = "ホストサマリ";
+$Lang{LOG_file}      = "ログファイル";
+$Lang{LOG_files}     = "全ログファイル";
+$Lang{Old_LOGs}      = "旧ログ";
 $Lang{Email_summary} = "メールサマリ";
-$Lang{Config_file} = "設定ファイル";
+$Lang{Config_file}   = "設定ファイル";
+
 # $Lang{Hosts_file} = "ホストファイル";
 $Lang{Current_queues} = "現在のキュー";
-$Lang{Documentation} = "文章";
+$Lang{Documentation}  = "文章";
 
 #$Lang{Host_or_User_name} = "<small>ホストまたはユーザ名:</small>";
-$Lang{Go} = "実行";
-$Lang{Hosts} = "ホスト";
+$Lang{Go}            = "実行";
+$Lang{Hosts}         = "ホスト";
 $Lang{Select_a_host} = "ホストを選択";
 
-$Lang{There_have_been_no_archives} = "<h2> アーカイブはありません </h2>\n";
+$Lang{There_have_been_no_archives}      = "<h2> アーカイブはありません </h2>\n";
 $Lang{This_PC_has_never_been_backed_up} = "<h2> このPCはまだバックアップされたことがありません!! </h2>\n";
-$Lang{This_PC_is_used_by} = "<li>このPCは \${UserLink(\$user)} によって使用されています";
+$Lang{This_PC_is_used_by}               = "<li>このPCは \${UserLink(\$user)} によって使用されています";
 
 $Lang{Extracting_only_Errors} = "(エラーだけ抽出)";
-$Lang{XferLOG} = "転送ログ";
-$Lang{Errors}  = "エラー";
+$Lang{XferLOG}                = "転送ログ";
+$Lang{Errors}                 = "エラー";
 
 # ------------
 $Lang{Last_email_sent_to__was_at___subject} = <<EOF;
 <li>最後のメールは \$mailTime に件名"\$subj"で\${UserLink(\$user)}宛に送りました。
 EOF
+
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
 <li>\$startTime に開始されたコマンド \$cmd は現在 \$host では実行されていません。
@@ -1195,9 +1196,9 @@ $Lang{fileHeader} = <<EOF;
     </tr>
 EOF
 
-$Lang{Home} = "ホーム";
-$Lang{Browse} = "バックアップの閲覧";
-$Lang{Last_bad_XferLOG} = "最終失敗転送ログ";
+$Lang{Home}                         = "ホーム";
+$Lang{Browse}                       = "バックアップの閲覧";
+$Lang{Last_bad_XferLOG}             = "最終失敗転送ログ";
 $Lang{Last_bad_XferLOG_errors_only} = "最終失敗転送ログ(エラーのみ)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
@@ -1244,7 +1245,7 @@ EOF
 
 $Lang{BackupPC__Documentation} = "BackupPC: 文章";
 
-$Lang{No} = "いいえ";
+$Lang{No}  = "いいえ";
 $Lang{Yes} = "はい";
 
 $Lang{The_directory_is_empty} = <<EOF;
@@ -1260,34 +1261,33 @@ $Lang{backupType_incr}    = "増分";
 $Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "部分";
 
-$Lang{failed} = "失敗";
+$Lang{failed}  = "失敗";
 $Lang{success} = "成功";
-$Lang{and} = "と";
+$Lang{and}     = "と";
 
 # ------
 # Hosts states and reasons
-$Lang{Status_idle} = "待機";
-$Lang{Status_backup_starting} = "バックアップ開始";
-$Lang{Status_backup_in_progress} = "バックアップ中";
-$Lang{Status_restore_starting} = "リストア開始";
+$Lang{Status_idle}                = "待機";
+$Lang{Status_backup_starting}     = "バックアップ開始";
+$Lang{Status_backup_in_progress}  = "バックアップ中";
+$Lang{Status_restore_starting}    = "リストア開始";
 $Lang{Status_restore_in_progress} = "リストア中";
-$Lang{Status_admin_pending} = "リンク保留中";
-$Lang{Status_admin_running} = "リンク実行中";
+$Lang{Status_admin_pending}       = "リンク保留中";
+$Lang{Status_admin_running}       = "リンク実行中";
 
-$Lang{Reason_backup_done}    = "完了";
-$Lang{Reason_restore_done}   = "リストア完了";
-$Lang{Reason_archive_done}   = "アーカイブ完了";
-$Lang{Reason_nothing_to_do}  = "待機";
-$Lang{Reason_backup_failed}  = "バックアップ失敗";
-$Lang{Reason_restore_failed} = "リストア失敗";
-$Lang{Reason_archive_failed} = "アーカイブ失敗";
-$Lang{Reason_no_ping}        = "無応答";
+$Lang{Reason_backup_done}              = "完了";
+$Lang{Reason_restore_done}             = "リストア完了";
+$Lang{Reason_archive_done}             = "アーカイブ完了";
+$Lang{Reason_nothing_to_do}            = "待機";
+$Lang{Reason_backup_failed}            = "バックアップ失敗";
+$Lang{Reason_restore_failed}           = "リストア失敗";
+$Lang{Reason_archive_failed}           = "アーカイブ失敗";
+$Lang{Reason_no_ping}                  = "無応答";
 $Lang{Reason_backup_canceled_by_user}  = "ユーザによるバックアップ取消";
 $Lang{Reason_restore_canceled_by_user} = "ユーザによるリストア取消";
 $Lang{Reason_archive_canceled_by_user} = "ユーザによるアーカイブ取消";
-$Lang{Disabled_OnlyManualBackups}  = "自動無効化";
-$Lang{Disabled_AllBackupsDisabled} = "無効化";
-
+$Lang{Disabled_OnlyManualBackups}      = "自動無効化";
+$Lang{Disabled_AllBackupsDisabled}     = "無効化";
 
 # ---------
 # Email messages
@@ -1381,7 +1381,7 @@ BackupPC Genie
 https://backuppc.github.io/backuppc
 EOF
 
-$Lang{howLong_not_been_backed_up} = "not been backed up successfully";
+$Lang{howLong_not_been_backed_up}               = "not been backed up successfully";
 $Lang{howLong_not_been_backed_up_for_days_days} = "not been backed up for \$days days";
 
 #######################################################################
@@ -1406,50 +1406,50 @@ EOF
 #######################################################################
 
 $Lang{Only_privileged_users_can_edit_config_files} = "Only privileged users can edit configuration settings.";
-$Lang{CfgEdit_Edit_Config} = "設定の編集";
-$Lang{CfgEdit_Edit_Hosts}  = "ホストの編集";
+$Lang{CfgEdit_Edit_Config}                         = "設定の編集";
+$Lang{CfgEdit_Edit_Hosts}                          = "ホストの編集";
 
-$Lang{CfgEdit_Title_Server} = "サーバ";
-$Lang{CfgEdit_Title_General_Parameters} = "一般のパラメータ";
-$Lang{CfgEdit_Title_Wakeup_Schedule} = "起動スケジュール";
-$Lang{CfgEdit_Title_Concurrent_Jobs} = "並行ジョブ";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits} = "ファイルシステムのプール上限";
-$Lang{CfgEdit_Title_Other_Parameters} = "他のパラメータ";
-$Lang{CfgEdit_Title_Remote_Apache_Settings} = "リモートApache の設定";
-$Lang{CfgEdit_Title_Program_Paths} = "プログラムパス";
-$Lang{CfgEdit_Title_Install_Paths} = "インストールパス";
-$Lang{CfgEdit_Title_Email} = "メール";
-$Lang{CfgEdit_Title_Email_settings} = "メールの設定";
-$Lang{CfgEdit_Title_Email_User_Messages} = "メールユーザメッセージ";
-$Lang{CfgEdit_Title_CGI} = "CGI";
-$Lang{CfgEdit_Title_Admin_Privileges} = "管理者権限";
-$Lang{CfgEdit_Title_Page_Rendering} = "ページ描画";
-$Lang{CfgEdit_Title_Paths} = "パス";
-$Lang{CfgEdit_Title_User_URLs} = "ユーザURL";
-$Lang{CfgEdit_Title_User_Config_Editing} = "ユーザ設定の編集";
-$Lang{CfgEdit_Title_Xfer} = "転送";
-$Lang{CfgEdit_Title_Xfer_Settings} = "転送設定";
-$Lang{CfgEdit_Title_Ftp_Settings} = "FTP設定";
-$Lang{CfgEdit_Title_Smb_Settings} = "Smb設定";
-$Lang{CfgEdit_Title_Tar_Settings} = "Tar設定";
-$Lang{CfgEdit_Title_Rsync_Settings} = "Rsync設定";
-$Lang{CfgEdit_Title_Rsyncd_Settings} = "Rsyncd設定";
-$Lang{CfgEdit_Title_Archive_Settings} = "アーカイブの設定";
-$Lang{CfgEdit_Title_Include_Exclude} = "包含・除外";
-$Lang{CfgEdit_Title_Smb_Paths_Commands} = "Smbパス/コマンド";
-$Lang{CfgEdit_Title_Tar_Paths_Commands} = "Tarパス/コマンド";
+$Lang{CfgEdit_Title_Server}                    = "サーバ";
+$Lang{CfgEdit_Title_General_Parameters}        = "一般のパラメータ";
+$Lang{CfgEdit_Title_Wakeup_Schedule}           = "起動スケジュール";
+$Lang{CfgEdit_Title_Concurrent_Jobs}           = "並行ジョブ";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits}    = "ファイルシステムのプール上限";
+$Lang{CfgEdit_Title_Other_Parameters}          = "他のパラメータ";
+$Lang{CfgEdit_Title_Remote_Apache_Settings}    = "リモートApache の設定";
+$Lang{CfgEdit_Title_Program_Paths}             = "プログラムパス";
+$Lang{CfgEdit_Title_Install_Paths}             = "インストールパス";
+$Lang{CfgEdit_Title_Email}                     = "メール";
+$Lang{CfgEdit_Title_Email_settings}            = "メールの設定";
+$Lang{CfgEdit_Title_Email_User_Messages}       = "メールユーザメッセージ";
+$Lang{CfgEdit_Title_CGI}                       = "CGI";
+$Lang{CfgEdit_Title_Admin_Privileges}          = "管理者権限";
+$Lang{CfgEdit_Title_Page_Rendering}            = "ページ描画";
+$Lang{CfgEdit_Title_Paths}                     = "パス";
+$Lang{CfgEdit_Title_User_URLs}                 = "ユーザURL";
+$Lang{CfgEdit_Title_User_Config_Editing}       = "ユーザ設定の編集";
+$Lang{CfgEdit_Title_Xfer}                      = "転送";
+$Lang{CfgEdit_Title_Xfer_Settings}             = "転送設定";
+$Lang{CfgEdit_Title_Ftp_Settings}              = "FTP設定";
+$Lang{CfgEdit_Title_Smb_Settings}              = "Smb設定";
+$Lang{CfgEdit_Title_Tar_Settings}              = "Tar設定";
+$Lang{CfgEdit_Title_Rsync_Settings}            = "Rsync設定";
+$Lang{CfgEdit_Title_Rsyncd_Settings}           = "Rsyncd設定";
+$Lang{CfgEdit_Title_Archive_Settings}          = "アーカイブの設定";
+$Lang{CfgEdit_Title_Include_Exclude}           = "包含・除外";
+$Lang{CfgEdit_Title_Smb_Paths_Commands}        = "Smbパス/コマンド";
+$Lang{CfgEdit_Title_Tar_Paths_Commands}        = "Tarパス/コマンド";
 $Lang{CfgEdit_Title_Rsync_Paths_Commands_Args} = "Rsyncパス/コマンド/引数";
-$Lang{CfgEdit_Title_Rsyncd_Port_Args} = "Rsyncdポート/引数";
-$Lang{CfgEdit_Title_Archive_Paths_Commands} = "アーカイブパス/コマンド";
-$Lang{CfgEdit_Title_Schedule} = "スケジュール";
-$Lang{CfgEdit_Title_Full_Backups} = "フルバックアップ";
-$Lang{CfgEdit_Title_Incremental_Backups} = "増分バックアップ";
-$Lang{CfgEdit_Title_Blackouts} = "喪失";
-$Lang{CfgEdit_Title_Other} = "その他";
-$Lang{CfgEdit_Title_Backup_Settings} = "バックアップの設定";
-$Lang{CfgEdit_Title_Client_Lookup} = "クライアント探索";
-$Lang{CfgEdit_Title_User_Commands} = "ユーザコマンド";
-$Lang{CfgEdit_Title_Hosts} = "ホスト";
+$Lang{CfgEdit_Title_Rsyncd_Port_Args}          = "Rsyncdポート/引数";
+$Lang{CfgEdit_Title_Archive_Paths_Commands}    = "アーカイブパス/コマンド";
+$Lang{CfgEdit_Title_Schedule}                  = "スケジュール";
+$Lang{CfgEdit_Title_Full_Backups}              = "フルバックアップ";
+$Lang{CfgEdit_Title_Incremental_Backups}       = "増分バックアップ";
+$Lang{CfgEdit_Title_Blackouts}                 = "喪失";
+$Lang{CfgEdit_Title_Other}                     = "その他";
+$Lang{CfgEdit_Title_Backup_Settings}           = "バックアップの設定";
+$Lang{CfgEdit_Title_Client_Lookup}             = "クライアント探索";
+$Lang{CfgEdit_Title_User_Commands}             = "ユーザコマンド";
+$Lang{CfgEdit_Title_Hosts}                     = "ホスト";
 
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 新しいホストの追加は[追加]を選択し名前を入力します。
@@ -1473,44 +1473,30 @@ $Lang{CfgEdit_Header_Host} = <<EOF;
 <p>
 EOF
 
-$Lang{CfgEdit_Button_Save}     = "保存";
-$Lang{CfgEdit_Button_Insert}   = "挿入";
-$Lang{CfgEdit_Button_Delete}   = "削除";
-$Lang{CfgEdit_Button_Add}      = "追加";
-$Lang{CfgEdit_Button_Override} = "上書き";
-$Lang{CfgEdit_Button_New_Key}  = "新項目";
+$Lang{CfgEdit_Button_Save}      = "保存";
+$Lang{CfgEdit_Button_Insert}    = "挿入";
+$Lang{CfgEdit_Button_Delete}    = "削除";
+$Lang{CfgEdit_Button_Add}       = "追加";
+$Lang{CfgEdit_Button_Override}  = "上書き";
+$Lang{CfgEdit_Button_New_Key}   = "新項目";
 $Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
-$Lang{CfgEdit_Error_No_Save}
-            = "エラー: エラーのために保存されてません";
-$Lang{CfgEdit_Error__must_be_an_integer}
-            = "エラー: \$var は整数である必要があります";
-$Lang{CfgEdit_Error__must_be_real_valued_number}
-            = "エラー: \$var は実在する番号である必要があります";
-$Lang{CfgEdit_Error__entry__must_be_an_integer}
-            = "エラー: \$var エントリー \$k は整数である必要があります";
-$Lang{CfgEdit_Error__entry__must_be_real_valued_number}
-            = "エラー: \$var エントリー \$k は実在する番号である必要があります";
-$Lang{CfgEdit_Error__must_be_executable_program}
-            = "エラー: \$var は有効な実行可能なパスである必要があります";
-$Lang{CfgEdit_Error__must_be_valid_option}
-            = "エラー: \$var は有効なオプションである必要があります";
-$Lang{CfgEdit_Error_Copy_host_does_not_exist}
-            = "\$copyHost のコピーが存在しません。 creating full host name \$fullHost.  Delete this host if that is not what you wanted.";
+$Lang{CfgEdit_Error_No_Save}                            = "エラー: エラーのために保存されてません";
+$Lang{CfgEdit_Error__must_be_an_integer}                = "エラー: \$var は整数である必要があります";
+$Lang{CfgEdit_Error__must_be_real_valued_number}        = "エラー: \$var は実在する番号である必要があります";
+$Lang{CfgEdit_Error__entry__must_be_an_integer}         = "エラー: \$var エントリー \$k は整数である必要があります";
+$Lang{CfgEdit_Error__entry__must_be_real_valued_number} = "エラー: \$var エントリー \$k は実在する番号である必要があります";
+$Lang{CfgEdit_Error__must_be_executable_program}        = "エラー: \$var は有効な実行可能なパスである必要があります";
+$Lang{CfgEdit_Error__must_be_valid_option}              = "エラー: \$var は有効なオプションである必要があります";
+$Lang{CfgEdit_Error_Copy_host_does_not_exist} =
+  "\$copyHost のコピーが存在しません。 creating full host name \$fullHost.  Delete this host if that is not what you wanted.";
 
-$Lang{CfgEdit_Log_Copy_host_config}
-            = "\$User copied config from host \$fromHost to \$host\n";
-$Lang{CfgEdit_Log_Delete_param}
-            = "\$User deleted \$p from \$conf\n";
-$Lang{CfgEdit_Log_Add_param_value}
-            = "\$User added \$p to \$conf, set to \$value\n";
-$Lang{CfgEdit_Log_Change_param_value}
-            = "\$User changed \$p in \$conf to \$valueNew from \$valueOld\n";
-$Lang{CfgEdit_Log_Host_Delete}
-            = "\$User deleted host \$host\n";
-$Lang{CfgEdit_Log_Host_Change}
-            = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
-$Lang{CfgEdit_Log_Host_Add}
-            = "\$User added host \$host: \$value\n";
+$Lang{CfgEdit_Log_Copy_host_config}   = "\$User copied config from host \$fromHost to \$host\n";
+$Lang{CfgEdit_Log_Delete_param}       = "\$User deleted \$p from \$conf\n";
+$Lang{CfgEdit_Log_Add_param_value}    = "\$User added \$p to \$conf, set to \$value\n";
+$Lang{CfgEdit_Log_Change_param_value} = "\$User changed \$p in \$conf to \$valueNew from \$valueOld\n";
+$Lang{CfgEdit_Log_Host_Delete}        = "\$User deleted host \$host\n";
+$Lang{CfgEdit_Log_Host_Change}        = "\$User host \$host changed \$key from \$valueOld to \$valueNew\n";
+$Lang{CfgEdit_Log_Host_Add}           = "\$User added host \$host: \$value\n";
 
 #end of lang_ja.pm

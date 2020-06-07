@@ -68,13 +68,13 @@ sub new
     #
     # Set defaults for $topDir and $installDir.
     #
-    $topDir     = '__TOPDIR__'     if ( $topDir eq "" );       # updated by configure.pl
+    $topDir     = '__TOPDIR__'     if ( $topDir eq "" );        # updated by configure.pl
     $installDir = '__INSTALLDIR__' if ( $installDir eq "" );    # updated by configure.pl
 
     #
     # Pick some initial defaults.  For FHS the only critical
     # path is the ConfDir, since we get everything else out
-    # of the main config file.   
+    # of the main config file.
     #
     if ( $useFHS ) {
         $paths = {

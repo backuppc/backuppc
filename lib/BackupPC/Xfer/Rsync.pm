@@ -218,12 +218,16 @@ sub start
               sprintf("%d/%d/%d", $t->{backups}[$i]{num}, $t->{backups}[$i]{compress}, int($t->{backups}[$i]{version}));
         }
 
-        unshift(@$rsyncArgs,
-            '--bpc-top-dir',                  $conf->{TopDir},             '--bpc-host-name',
-            $t->{bkupSrcHost},                '--bpc-share-name',          $t->{bkupSrcShare},
-            '--bpc-bkup-num',                 $t->{backups}[$srcIdx]{num}, '--bpc-bkup-comp',
-            $t->{backups}[$srcIdx]{compress}, '--bpc-bkup-merge',          $mergeInfo,
-            '--bpc-attrib-new',               '--bpc-log-level',           $conf->{XferLogLevel},
+        unshift(
+            @$rsyncArgs,
+            '--bpc-top-dir',    $conf->{TopDir},                    # perltidy protect
+            '--bpc-host-name',  $t->{bkupSrcHost},
+            '--bpc-share-name', $t->{bkupSrcShare},
+            '--bpc-bkup-num',   $t->{backups}[$srcIdx]{num},
+            '--bpc-bkup-comp',  $t->{backups}[$srcIdx]{compress},
+            '--bpc-bkup-merge', $mergeInfo,
+            '--bpc-log-level',  $conf->{XferLogLevel},
+            '--bpc-attrib-new',
         );
 
         $logMsg = "restore started below directory $t->{shareName} to host $t->{host}";
@@ -421,17 +425,19 @@ sub start
             $inode0 = $t->{backups}[$i]{inodeLast} + 1 if ( $inode0 <= $t->{backups}[$i]{inodeLast} );
         }
 
-        unshift(@$rsyncArgs,
-            '--bpc-top-dir',       $conf->{TopDir},
-            '--bpc-host-name',     $t->{client},
-            '--bpc-share-name',    $t->{shareName},
-            '--bpc-bkup-num',      $t->{backups}[$t->{newBkupIdx}]{num},
-            '--bpc-bkup-comp',     $t->{backups}[$t->{newBkupIdx}]{compress},
+        unshift(
+            @$rsyncArgs,
+            '--bpc-top-dir',    $conf->{TopDir},                             # perltidy protect
+            '--bpc-host-name',  $t->{client},
+            '--bpc-share-name', $t->{shareName},
+            '--bpc-bkup-num',   $t->{backups}[$t->{newBkupIdx}]{num},
+            '--bpc-bkup-comp',  $t->{backups}[$t->{newBkupIdx}]{compress},
             '--bpc-bkup-prevnum',  defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{num} : -1,
             '--bpc-bkup-prevcomp', defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{compress} : -1,
             '--bpc-bkup-inode0',   $inode0,
-            '--bpc-attrib-new',    '--bpc-log-level',
-            $conf->{XferLogLevel});
+            '--bpc-log-level',     $conf->{XferLogLevel},
+            '--bpc-attrib-new',
+        );
     }
     $logMsg .= " (client path $shareNamePath)" if ( $t->{shareName} ne $shareNamePath );
 

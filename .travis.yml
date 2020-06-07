@@ -49,4 +49,4 @@ jobs:
     before_script: skip
     script:
       - pip3 install pre-commit
-      - pre-commit run --all --color always
+      - pre-commit run --all --color=always --show-diff-on-failure

@@ -631,7 +631,7 @@ if ( !defined($lastBkupNum) ) {
     $lastBkupNum = undef;
     $lastBkupIdx = undef;
     $type        = "full";
-} elsif ( ($lastBkupCompressLevel != 0) xor($Conf{CompressLevel} != 0) ) {
+} elsif ( ($lastBkupCompressLevel != 0) xor ($Conf{CompressLevel} != 0) ) {
     #
     # case 5: compress on/off toggled.  Do a brand new filled backup starting with an empty tree.
     #

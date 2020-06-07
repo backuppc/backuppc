@@ -49,7 +49,7 @@ sub new
     my $class = shift;
     my($flds, $paths) = @_;
 
-    my $s = bless {%$flds, %$paths,}, $class;
+    my $s = bless {%$flds, %$paths}, $class;
     return $s;
 }
 

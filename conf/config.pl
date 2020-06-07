@@ -1214,7 +1214,7 @@ $Conf{RsyncBackupPCPath} = "";
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
-$Conf{RsyncSshArgs} = ['-e', '$sshPath -l root',];
+$Conf{RsyncSshArgs} = ['-e', '$sshPath -l root'];
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should
@@ -1333,7 +1333,7 @@ $Conf{RsyncArgsExtra} = [];
 # which is a lot slower but a bit more conservative.  To get that
 # behavior, replace --checksum with --ignore-times.
 #
-$Conf{RsyncFullArgsExtra} = ['--checksum',];
+$Conf{RsyncFullArgsExtra} = ['--checksum'];
 
 #
 # Additional arguments for an incremental rsync or rsyncd backup.

@@ -51,7 +51,7 @@ use vars qw(%ConfigMeta);
   %ConfigMeta
 );
 
-%EXPORT_TAGS = ('all' => [@EXPORT_OK],);
+%EXPORT_TAGS = ('all' => [@EXPORT_OK]);
 
 #
 # Define the data types for all the config variables

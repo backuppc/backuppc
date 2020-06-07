@@ -490,7 +490,7 @@ print(  "Backup type: type = $type, needs_full = $needs_full, needs_incr = $need
 #
 # Create top-level directories if they don't exist
 #
-foreach my $dir ( ("$Conf{TopDir}/pool", "$Conf{TopDir}/cpool", $Dir, "$Dir/refCnt",) ) {
+foreach my $dir ( ("$Conf{TopDir}/pool", "$Conf{TopDir}/cpool", $Dir, "$Dir/refCnt") ) {
     next if ( -d $dir );
     mkpath($dir, 0, 0777);
     if ( !-d $dir ) {
@@ -1635,7 +1635,7 @@ sub BackupFailCleanup
             #
             print($LogFd $bpc->timeStamp, "Removing empty backup #$removeNum\n");
             $XferLOG->write(\"Removing empty backup #$removeNum\n");
-            push(@logRenames, {from => "$Dir/XferLOG.$newBkupNum$fileExt", to => "$Dir/XferLOG.bad$fileExt"},);
+            push(@logRenames, {from => "$Dir/XferLOG.$newBkupNum$fileExt", to => "$Dir/XferLOG.bad$fileExt"});
             BackupRemove($client, $removeIdx, 0);
         } else {
             $XferLOG->write(\"Keeping non-empty backup #$removeNum ($checkDir)\n");

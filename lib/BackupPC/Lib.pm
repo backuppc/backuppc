@@ -1405,7 +1405,7 @@ sub glob2re
 
     # $escapeChars escapes characters with no special glob meaning but
     # have meaning in regexps.
-    my $escapeChars = ['.', '/',];
+    my $escapeChars = ['.', '/'];
 
     # $charMap is where we implement the special meaning of glob
     # patterns and translate them to regexps.

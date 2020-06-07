@@ -431,7 +431,7 @@ sub start
             '--bpc-bkup-prevcomp', defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{compress} : -1,
             '--bpc-bkup-inode0',   $inode0,
             '--bpc-attrib-new',    '--bpc-log-level',
-            $conf->{XferLogLevel},);
+            $conf->{XferLogLevel});
     }
     $logMsg .= " (client path $shareNamePath)" if ( $t->{shareName} ne $shareNamePath );
 

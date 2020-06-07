@@ -1047,7 +1047,7 @@ EOF
                             && !$bpc->{Conf}{CgiUserConfigEdit}{$param})
                     )
                   );
-                $contentHidden .= fieldHiddenBuild($ConfigMeta{$param}, $param, $newConf->{$param}, "orig",);
+                $contentHidden .= fieldHiddenBuild($ConfigMeta{$param}, $param, $newConf->{$param}, "orig");
                 $doneParam->{$param} = 1;
                 $In{modified} = 0;
             }
@@ -1080,7 +1080,7 @@ EOF
                         && !$bpc->{Conf}{CgiUserConfigEdit}{$param})
                 )
               );
-            $contentHidden .= fieldHiddenBuild($ConfigMeta{$param}, $param, $mainConf->{$param}, "orig",);
+            $contentHidden .= fieldHiddenBuild($ConfigMeta{$param}, $param, $mainConf->{$param}, "orig");
             $doneParam->{$param} = 1;
         }
     }

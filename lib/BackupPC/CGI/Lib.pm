@@ -83,7 +83,7 @@ use vars qw($Lang);
   $Lang
 );
 
-%EXPORT_TAGS = ('all' => [@EXPORT_OK],);
+%EXPORT_TAGS = ('all' => [@EXPORT_OK]);
 
 sub NewRequest
 {

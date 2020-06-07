@@ -679,8 +679,7 @@ sub File2MD5_v3
         #
         my $seekPosn = ($fileSize > 1048576 ? 1048576 : $fileSize) - 131072;
         $md5->add($data) if ( sysread(N, $data, 131072) );
-        $md5->add($data) if ( sysseek(N, $seekPosn, 0)
-            && sysread(N, $data, 131072) );
+        $md5->add($data) if ( sysseek(N, $seekPosn, 0) && sysread(N, $data, 131072) );
     } else {
         #
         # read the whole file
@@ -769,8 +768,7 @@ sub MakeFileLink
         return -2 if ( !defined($rawFile = $bpc->MD52Path($d, $compress)) );
         $rawFile .= "_$i" if ( $i >= 0 );
         if ( -f $rawFile ) {
-            if ( (stat(_))[3] < $bpc->{Conf}{HardLinkMax}
-                && !compare($name, $rawFile) ) {
+            if ( (stat(_))[3] < $bpc->{Conf}{HardLinkMax} && !compare($name, $rawFile) ) {
                 unlink($name);
                 return -3 if ( !link($rawFile, $name) );
                 return 1;

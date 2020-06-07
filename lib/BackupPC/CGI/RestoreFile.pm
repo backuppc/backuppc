@@ -193,8 +193,7 @@ sub restoreFile
     print "Content-Type: $contentType\r\n";
     print "Content-Transfer-Encoding: binary\r\n";
 
-    if (   $ENV{HTTP_USER_AGENT} =~ /\bmsie\b/i
-        && $ENV{HTTP_USER_AGENT} !~ /\bopera\b/i ) {
+    if ( $ENV{HTTP_USER_AGENT} =~ /\bmsie\b/i && $ENV{HTTP_USER_AGENT} !~ /\bopera\b/i ) {
         #
         # Convert to cp1252 for MS IE.  TODO: find a way to get IE
         # to accept UTF8 encoding.  Firefox accepts inline encoding

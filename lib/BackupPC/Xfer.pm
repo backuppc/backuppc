@@ -143,8 +143,7 @@ sub getRestoreCmd
     } elsif ( $conf->{XferMethod} eq "ftp" ) {
         $restoreCmd = undef;
 
-    } elsif ( $conf->{XferMethod} eq "rsync"
-        || $conf->{XferMethod} eq "rsyncd" ) {
+    } elsif ( $conf->{XferMethod} eq "rsync" || $conf->{XferMethod} eq "rsyncd" ) {
         $restoreCmd = $conf->{RsyncRestoreArgs};
 
     } elsif ( $conf->{XferMethod} eq "tar" ) {

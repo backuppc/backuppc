@@ -95,8 +95,7 @@ my %Conf   = $bpc->Conf();
 #
 # Verify we are running as the correct user
 #
-if (   $Conf{BackupPCUserVerify}
-    && $> != (my $uid = (getpwnam($Conf{BackupPCUser}))[2]) ) {
+if ( $Conf{BackupPCUserVerify} && $> != (my $uid = (getpwnam($Conf{BackupPCUser}))[2]) ) {
     print(STDERR "Wrong user: my userid is $>, instead of $uid ($Conf{BackupPCUser}); exiting in 30s\n");
     sleep(30);
     exit(1);
@@ -740,8 +739,7 @@ sub Main_TryToRun_Bg_or_User_Queue
             }
         }
         $nJobs-- if ( defined($Jobs{$bpc->scgiJob}) );
-        if (   $nJobs < $Conf{MaxBackups} + $Conf{MaxUserBackups}
-            && @UserQueue > 0 ) {
+        if ( $nJobs < $Conf{MaxBackups} + $Conf{MaxUserBackups} && @UserQueue > 0 ) {
             $req = pop(@UserQueue);
             if ( defined($Jobs{$req->{host}}) ) {
                 #
@@ -870,16 +868,11 @@ sub Main_Select
         foreach my $t ( @{$Conf{WakeupSchedule} || [0 .. 23]} ) {
             next if ( $t < 0 || $t > 24 );
             my $tomorrow = $t + 24;
-            if (
-                $delta < 0
-                || (   $tomorrow - $currHours > 0
-                    && $delta > $tomorrow - $currHours)
-            ) {
+            if ( $delta < 0 || ($tomorrow - $currHours > 0 && $delta > $tomorrow - $currHours) ) {
                 $delta       = $tomorrow - $currHours;
                 $FirstWakeup = $t == $Conf{WakeupSchedule}[0];
             }
-            if ( $delta < 0
-                || ($t - $currHours > 0 && $delta > $t - $currHours) ) {
+            if ( $delta < 0 || ($t - $currHours > 0 && $delta > $t - $currHours) ) {
                 $delta       = $t - $currHours;
                 $FirstWakeup = $t == $Conf{WakeupSchedule}[0];
             }
@@ -1108,9 +1101,7 @@ sub Main_Check_Job_Messages
                 }
                 $Status->{$host}{dhcpCheckCnt}--
                   if ( defined $Status->{$host}{dhcpCheckCnt} && $Status->{$host}{dhcpCheckCnt} > 0 );
-            } elsif ( $mesg =~ /^no ping response/
-                || $mesg =~ /^ping too slow/
-                || $mesg =~ /^host not found/ ) {
+            } elsif ( $mesg =~ /^no ping response/ || $mesg =~ /^ping too slow/ || $mesg =~ /^host not found/ ) {
                 $Status->{$host}{state} = "Status_idle";
                 if (   $Status->{$host}{userReq}
                     || $Status->{$host}{reason} ne "Reason_backup_failed"
@@ -1395,9 +1386,7 @@ sub Main_Check_Client_Messages
                 my $user    = $2;
                 my $backoff = $3;
                 $host = $bpc->uriUnesc($host);
-                if (   $CmdJob ne $host
-                    && defined($Status->{$host})
-                    && defined($Jobs{$host}) ) {
+                if ( $CmdJob ne $host && defined($Status->{$host}) && defined($Jobs{$host}) ) {
                     print(LOG $bpc->timeStamp,
                         "Stopping current $Jobs{$host}{type} of $host, request by $user (backoff=$backoff)\n");
                     kill($bpc->sigName2num("INT"), $Jobs{$host}{pid});
@@ -1892,8 +1881,7 @@ sub QueueOnePC
         #
         # this is a fixed ip host or DHCP ip address: queue it
         #
-        if (   $Info->{DUlastValue} > $Conf{DfMaxUsagePct}
-            || $Info->{DUInodelastValue} > $Conf{DfMaxInodeUsagePct} ) {
+        if ( $Info->{DUlastValue} > $Conf{DfMaxUsagePct} || $Info->{DUInodelastValue} > $Conf{DfMaxInodeUsagePct} ) {
             #
             # Since we are out of disk space, instead of queuing
             # a regular job, queue an expire check instead.  That
@@ -1969,9 +1957,7 @@ sub HostsUpdate
     #
     # Nothing to do if we already have the current hosts file
     #
-    return 1 if ( !$force
-        && defined($Hosts)
-        && $Info->{HostsModTime} == $bpc->HostsMTime() );
+    return 1 if ( !$force && defined($Hosts) && $Info->{HostsModTime} == $bpc->HostsMTime() );
     if ( !defined($newHosts = $bpc->HostInfoRead()) ) {
         print(LOG $bpc->timeStamp, "Can't read hosts file!\n");
         return;

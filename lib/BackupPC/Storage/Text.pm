@@ -407,11 +407,7 @@ sub ConfigFileMerge
             } else {
                 $contents .= $_;
             }
-            if (
-                defined($skipExpr)
-                && (   $skipExpr =~ /^\$fakeVar = *<</
-                    || $skipExpr =~ /;[\n\r]*$/)
-            ) {
+            if ( defined($skipExpr) && ($skipExpr =~ /^\$fakeVar = *<</ || $skipExpr =~ /;[\n\r]*$/) ) {
                 #
                 # if we have a complete expression, then we are done
                 # skipping text from the original config file.

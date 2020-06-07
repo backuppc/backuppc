@@ -165,8 +165,7 @@ sub printDir
         $str .= defined($attr->{xattr}) ? "+" : " ";
         $s = sprintf("%d/%d", $attr->{uid}, $attr->{gid});
         $str .= sprintf(" %8s", $s);
-        if ( ($attr->{type} == BPC_FTYPE_CHARDEV || $attr->{type} == BPC_FTYPE_BLOCKDEV)
-            && $fileData ne "" ) {
+        if ( ($attr->{type} == BPC_FTYPE_CHARDEV || $attr->{type} == BPC_FTYPE_BLOCKDEV) && $fileData ne "" ) {
             $str .= sprintf(" %10s", $fileData);
         } else {
             $str .= sprintf(" %10llu", $attr->{size});

@@ -125,13 +125,10 @@ sub action
     }
     my($contentPre, $contentSub, $contentPost);
     $contentPre .= eval("qq{$Lang->{Log_File__file__comment}}");
-    if ( $file ne ""
-        && defined($fh = BackupPC::XS::FileZIO::open($file, 0, $compress)) ) {
-
+    if ( $file ne "" && defined($fh = BackupPC::XS::FileZIO::open($file, 0, $compress)) ) {
         my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
 
         $contentPre .= eval("qq{$Lang->{Contents_of_log_file}}");
-
         $contentPre .= "<pre>";
         if (   $type eq "XferErr"
             || $type eq "XferErrbad"

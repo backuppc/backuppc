@@ -140,8 +140,7 @@ sub NewRequest
     #
     # Verify we are running as the correct user
     #
-    if (   $Conf{BackupPCUserVerify}
-        && $> != (my $uid = getpwnam($Conf{BackupPCUser})) ) {
+    if (   $Conf{BackupPCUserVerify} && $> != (my $uid = getpwnam($Conf{BackupPCUser})) ) {
         ErrorExit(eval("qq{$Lang->{Wrong_user__my_userid_is___}}"), <<EOF);
 This script needs to run as the user specified in \$Conf{BackupPCUser},
 which is set to $Conf{BackupPCUser}.
@@ -223,10 +222,8 @@ sub UserLink
     my($user) = @_;
     my($s);
 
-    return \$user if ( $user eq ""
-        || $Conf{CgiUserUrlCreate} eq "" );
-    if ( $Conf{CgiUserHomePageCheck} eq ""
-        || -f sprintf($Conf{CgiUserHomePageCheck}, $user, $user, $user) ) {
+    return \$user if ( $user eq "" || $Conf{CgiUserUrlCreate} eq "" );
+    if ( $Conf{CgiUserHomePageCheck} eq "" || -f sprintf($Conf{CgiUserHomePageCheck}, $user, $user, $user) ) {
         $s = "<a href=\"" . sprintf($Conf{CgiUserUrlCreate}, $user, $user, $user) . "\">$user</a>";
     } else {
         $s = $user;
@@ -353,8 +350,7 @@ sub CheckPermission
     my($host) = @_;
     my $Privileged = 0;
 
-    return 0 if ( $User eq "" && $Conf{CgiAdminUsers} ne "*"
-        || $host ne "" && !defined($Hosts->{$host}) );
+    return 0 if ( $User eq "" && $Conf{CgiAdminUsers} ne "*" || $host ne "" && !defined($Hosts->{$host}) );
     if ( $Conf{CgiAdminUserGroup} ne "" ) {
         for ( split(/\s+/, $Conf{CgiAdminUserGroup}) ) {
             my($n, $p, $gid, $mem) = getgrnam($_);
@@ -405,16 +401,13 @@ sub ConfirmIPAddress
     my($host) = @_;
     my $ipAddr = $host;
 
-    if (   defined($Hosts->{$host})
-        && $Hosts->{$host}{dhcp}
-        && $ENV{REMOTE_ADDR} =~ /^(\d+[\.\d]*)$/ ) {
+    if (   defined($Hosts->{$host}) && $Hosts->{$host}{dhcp} && $ENV{REMOTE_ADDR} =~ /^(\d+[\.\d]*)$/ ) {
         $ipAddr = $1;
         my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($ipAddr);
         if ( $netBiosHost ne $host ) {
             my($tryIP);
             GetStatusInfo("host(${EscURI($host)})");
-            if ( defined($StatusHost{dhcpHostIP})
-                && $StatusHost{dhcpHostIP} ne $ipAddr ) {
+            if ( defined($StatusHost{dhcpHostIP}) && $StatusHost{dhcpHostIP} ne $ipAddr ) {
                 $tryIP = eval("qq{$Lang->{tryIP}}");
                 ($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($StatusHost{dhcpHostIP});
             }
@@ -528,8 +521,7 @@ EOF
         }
         if ( $Conf{CgiUserConfigEditEnable} || $PrivAdmin ) {
             NavLink("?action=editConfig&host=${EscURI($host)}", $Lang->{CfgEdit_Edit_Config}, " class=\"navbar\"");
-        } elsif ( -f "$TopDir/pc/$host/config.pl"
-            || ($host ne "config" && -f "$TopDir/conf/$host.pl") ) {
+        } elsif ( -f "$TopDir/pc/$host/config.pl" || ($host ne "config" && -f "$TopDir/conf/$host.pl") ) {
             NavLink("?action=view&type=config&host=${EscURI($host)}", $Lang->{Config_file}, " class=\"navbar\"");
         }
         print "</div>\n";

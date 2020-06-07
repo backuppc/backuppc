@@ -267,9 +267,7 @@ if ( $Backups[$idx]{version} < 4 ) {
             $delPathM    =~ s{//+}{/};
         }
         logMsg("BackupPC_backupDelete: removing #$Backups[$idx]{num}$fullDelPath\n") if ( $LogLevel >= 1 );
-        if (   !defined($idxMerge)
-            || $Backups[$idxMerge]{version} < 4
-            || !$Backups[$idxMerge]{noFill} ) {
+        if ( !defined($idxMerge) || $Backups[$idxMerge]{version} < 4 || !$Backups[$idxMerge]{noFill} ) {
             #
             # Either this is oldest backup or prior is non-V4 or prior
             # is filled.  There is no need to merge into the prior backup,
@@ -492,9 +490,7 @@ sub mergeDir
     #
     if ( defined(my $entries = BackupPC::DirOps::dirRead($bpc, $delDir)) ) {
         foreach my $e ( @$entries ) {
-            next if ( $e->{name} eq "."
-                || $e->{name} eq ".."
-                || $e->{name} eq "inode" );
+            next if ( $e->{name} eq "." || $e->{name} eq ".." || $e->{name} eq "inode" );
             if ( $e->{name} =~ /^attrib/ ) {
                 if ( $e->{name} =~ /attrib_(.{16,})/ ) {
                     my $digest = pack("H*", $1);
@@ -543,8 +539,7 @@ sub mergeDir
             # If they are both directories, then don't do
             # anything for now
             #
-            if (   $a->{type} == BPC_FTYPE_DIR
-                && $aMerge->{type} == BPC_FTYPE_DIR ) {
+            if ( $a->{type} == BPC_FTYPE_DIR && $aMerge->{type} == BPC_FTYPE_DIR ) {
                 #
                 # if the deleted directory has real attributes, and the
                 # merge doesn't, then copy the attributes to merge

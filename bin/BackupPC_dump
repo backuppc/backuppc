@@ -350,9 +350,7 @@ if (   !$opts{i}
         # Allow blackout to span midnight (specified by hourBegin
         # being greater than hourEnd)
         #
-        next if ( ref($p->{weekDays}) ne "ARRAY"
-            || !defined($p->{hourBegin})
-            || !defined($p->{hourEnd}) );
+        next if ( ref($p->{weekDays}) ne "ARRAY" || !defined($p->{hourBegin}) || !defined($p->{hourEnd}) );
         my $matchWday = $wday;
         if ( $p->{hourBegin} > $p->{hourEnd} ) {
             $blackout = $p->{hourBegin} <= $currHours
@@ -471,13 +469,9 @@ my $needs_incr =
 
 $needs_full = 0 if ( $Conf{FullPeriod} == 0 );
 
-if (   $opts{f}
-    || (!$opts{i} && !$opts{I} && $needs_full)
-    || ($opts{F} && $needs_incr) ) {
+if ( $opts{f} || (!$opts{i} && !$opts{I} && $needs_full) || ($opts{F} && $needs_incr) ) {
     $type = "full";
-} elsif ( $opts{i}
-    || $needs_incr
-    || ($opts{I} && $needs_full) ) {
+} elsif ( $opts{i} || $needs_incr || ($opts{I} && $needs_full) ) {
     $type = "incr";
 } else {
     NothingToDo();
@@ -2071,9 +2065,7 @@ sub BackupRemove
 sub CorrectHostCheck
 {
     my($hostIP, $host) = @_;
-    return if ( $hostIP eq $host
-        || !$Conf{FixedIPNetBiosNameCheck}
-        || $Conf{NmbLookupCmd} eq "" );
+    return if ( $hostIP eq $host || !$Conf{FixedIPNetBiosNameCheck} || $Conf{NmbLookupCmd} eq "" );
     if ( ref($Conf{ClientNameAlias}) eq "ARRAY" ) {
         return if ( grep /^$hostIP$/, @{$Conf{ClientNameAlias}} );
     }

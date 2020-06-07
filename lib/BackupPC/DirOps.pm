@@ -125,9 +125,7 @@ sub dirRead
         }
         if ( opendir(my $fh, $bpc->{TopDir}) ) {
             foreach my $e ( readdirent($fh) ) {
-                if (   $e->{name} eq "."
-                    && $e->{type} == BPC_DT_DIR
-                    && $e->{inode} == (stat($bpc->{TopDir}))[1] ) {
+                if ( $e->{name} eq "." && $e->{type} == BPC_DT_DIR && $e->{inode} == (stat($bpc->{TopDir}))[1] ) {
                     $IODirentOk |= 0x1;
                 }
                 if (   $e->{name} eq $tempTestFile

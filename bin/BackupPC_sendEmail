@@ -95,8 +95,7 @@ EOF
 #
 my $oldFormat = 0;
 foreach my $user ( keys(%UserEmailInfo) ) {
-    if ( defined($UserEmailInfo{$user}{lastTime})
-        && ref($UserEmailInfo{$user}{lastTime}) ne 'HASH' ) {
+    if ( defined($UserEmailInfo{$user}{lastTime}) && ref($UserEmailInfo{$user}{lastTime}) ne 'HASH' ) {
         $oldFormat = 1;
         last;
     }
@@ -294,8 +293,7 @@ foreach my $host ( sort(keys(%Status)) ) {
         ) if ( !defined($Jobs{$host}) );
         next;
     }
-    if ( $numBadOutlook > 0
-        && time - $lastGoodOutlook > $HostConf{EMailNotifyOldOutlookDays} * 24 * 3600 ) {
+    if ( $numBadOutlook > 0 && time - $lastGoodOutlook > $HostConf{EMailNotifyOldOutlookDays} * 24 * 3600 ) {
         my($days, $howLong);
         if ( $lastGoodOutlook == 0 ) {
             $howLong = eval("qq{$Lang->{howLong_not_been_backed_up}}");

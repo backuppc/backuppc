@@ -692,8 +692,7 @@ sub TarWriteFile
         $hdr->{size} = 0;
         TarWriteFileInfo($fh, $hdr);
         $SpecialCnt++;
-    } elsif ( $hdr->{type} == BPC_FTYPE_SOCKET
-        || $hdr->{type} == BPC_FTYPE_UNKNOWN ) {
+    } elsif ( $hdr->{type} == BPC_FTYPE_SOCKET || $hdr->{type} == BPC_FTYPE_UNKNOWN ) {
         #
         # ignore these two file types - these are dynamic file types created
         # by applications as needed

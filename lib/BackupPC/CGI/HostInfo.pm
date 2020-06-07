@@ -56,8 +56,7 @@ sub action
         #
         if ( $host eq "" || !defined($Hosts->{$host}) ) {
             foreach my $h ( keys(%$Hosts) ) {
-                if ( $Hosts->{$h}{user} eq $host
-                    || lc($Hosts->{$h}{user}) eq lc($host) ) {
+                if ( $Hosts->{$h}{user} eq $host || lc($Hosts->{$h}{user}) eq lc($host) ) {
                     $host = $h;
                     last;
                 }
@@ -393,9 +392,7 @@ EOF
             my $blackoutStr;
             my $periodCnt = 0;
             foreach my $p ( @{$Conf{BlackoutPeriods}} ) {
-                next if ( ref($p->{weekDays}) ne "ARRAY"
-                    || !defined($p->{hourBegin})
-                    || !defined($p->{hourEnd}) );
+                next if ( ref($p->{weekDays}) ne "ARRAY" || !defined($p->{hourBegin}) || !defined($p->{hourEnd}) );
                 my $days = join(", ", @days[@{$p->{weekDays}}]);
                 my $t0   = sprintf("%d:%02d", $p->{hourBegin}, 60 * ($p->{hourBegin} - int($p->{hourBegin})));
                 my $t1   = sprintf("%d:%02d", $p->{hourEnd}, 60 * ($p->{hourEnd} - int($p->{hourEnd})));

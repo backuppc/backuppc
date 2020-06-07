@@ -456,8 +456,7 @@ exit(RestoreCleanup($client));
 sub CorrectHostCheck
 {
     my($hostIP, $host) = @_;
-    return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck}
-        || $Conf{NmbLookupCmd} eq "" );
+    return if ( $hostIP eq $host && !$Conf{FixedIPNetBiosNameCheck} || $Conf{NmbLookupCmd} eq "" );
     if ( ref($Conf{ClientNameAlias}) eq 'ARRAY' ) {
         return if ( grep /^$hostIP$/, @{$Conf{ClientNameAlias}} );
     }
@@ -529,9 +528,7 @@ sub RestoreCleanup
 {
     my($client) = @_;
 
-    $stat{xferOK} = 0 if ( $stat{hostError}
-        || $stat{hostAbort}
-        || $xferCreateErr );
+    $stat{xferOK} = 0 if ( $stat{hostError} || $stat{hostAbort} || $xferCreateErr );
 
     if ( !$stat{xferOK} ) {
         #

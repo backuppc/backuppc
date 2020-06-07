@@ -50,8 +50,7 @@ sub action
     my(%EmailStr, $str);
     foreach my $u ( keys(%UserEmailInfo) ) {
         my $info;
-        if ( defined($UserEmailInfo{$u}{lastTime})
-            && ref($UserEmailInfo{$u}{lastTime}) ne 'HASH' ) {
+        if ( defined($UserEmailInfo{$u}{lastTime}) && ref($UserEmailInfo{$u}{lastTime}) ne 'HASH' ) {
             #
             # old format $UserEmailInfo - pre 3.2.0.
             #

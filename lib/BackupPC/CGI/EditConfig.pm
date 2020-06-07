@@ -570,9 +570,7 @@ sub action
         $newConf = {%$mainConf, %$hostConf};
     }
 
-    if (   $In{saveAction} ne "Save"
-        && $In{newMenu} ne ""
-        && defined($ConfigMenu{$In{newMenu}}) ) {
+    if ( $In{saveAction} ne "Save" && $In{newMenu} ne "" && defined($ConfigMenu{$In{newMenu}}) ) {
         $menu = $In{newMenu};
     }
 
@@ -594,8 +592,7 @@ sub action
                 my $param = $paramInfo->{name};
                 if ( defined($paramInfo->{text}) ) {
                     $mask[$n] = 1;
-                    if ( ref($paramInfo->{visible}) ne "CODE"
-                        || &{$paramInfo->{visible}}($newConf, $bpc) ) {
+                    if ( ref($paramInfo->{visible}) ne "CODE" || &{$paramInfo->{visible}}($newConf, $bpc) ) {
                         $text = $n;
                     }
                 } else {
@@ -876,8 +873,7 @@ EOF
                 $allHosts->{$1} = 1 if ( $entry->{host} =~ /(.+?)\s*=/ );
             }
             foreach my $entry ( @{$newConf->{Hosts}} ) {
-                next if ( $entry->{host} eq ""
-                    || defined($hostsNew->{lc($entry->{host})}) );
+                next if ( $entry->{host} eq "" || defined($hostsNew->{lc($entry->{host})}) );
                 if ( $entry->{host} =~ /(.+?)\s*=\s*(.+)/ ) {
                     if ( defined($allHosts->{$2}) ) {
                         $entry->{host} = $1;
@@ -943,8 +939,7 @@ EOF
         my $disabled = shift(@mask);
 
         next if ( $disabled || $menuDisable{$menu}{top} );
-        if ( ref($paramInfo->{visible}) eq "CODE"
-            && !&{$paramInfo->{visible}}($newConf, $bpc) ) {
+        if ( ref($paramInfo->{visible}) eq "CODE" && !&{$paramInfo->{visible}}($newConf, $bpc) ) {
             next;
         }
 
@@ -1195,18 +1190,14 @@ EOF
         $content .= "<td class=\"border\">\n";
         $varValue = []          if ( !defined($varValue) );
         $varValue = [$varValue] if ( ref($varValue) ne "ARRAY" );
-        if (  !$isError
-            && $In{deleteVar} =~ /^\Q${varName}_zZ_\E(\d+)$/
-            && $1 < @$varValue ) {
+        if ( !$isError && $In{deleteVar} =~ /^\Q${varName}_zZ_\E(\d+)$/ && $1 < @$varValue ) {
             #
             # User deleted entry in this array
             #
             splice(@$varValue, $1, 1) if ( @$varValue > 1 || $type->{emptyOk} );
             $In{deleteVar} = "";
         }
-        if (  !$isError
-            && $In{insertVar} =~ /^\Q${varName}_zZ_\E(\d+)$/
-            && $1 < @$varValue ) {
+        if ( !$isError && $In{insertVar} =~ /^\Q${varName}_zZ_\E(\d+)$/ && $1 < @$varValue ) {
             #
             # User inserted entry in this array
             #
@@ -1224,9 +1215,7 @@ EOF
         $content .= "<table border=\"1\" cellspacing=\"0\" class=\"editSubTable\">\n";
         my $colspan;
 
-        if (   ref($type) eq "HASH"
-            && ref($type->{child}) eq "HASH"
-            && $type->{child}{type} eq "horizHash" ) {
+        if ( ref($type) eq "HASH" && ref($type->{child}) eq "HASH" && $type->{child}{type} eq "horizHash" ) {
             my @order;
             if ( defined($type->{child}{order}) ) {
                 @order = @{$type->{child}{order}};
@@ -1296,13 +1285,10 @@ EOF
             #
             # User deleted entry in this hash
             #
-            delete($varValue->{$1}) if ( keys(%$varValue) > 1
-                || $type->{emptyOk} );
+            delete($varValue->{$1}) if ( keys(%$varValue) > 1 || $type->{emptyOk} );
             $In{deleteVar} = "";
         }
-        if (   !$isError
-            && !defined($type->{child})
-            && $In{addVar} eq $varName ) {
+        if ( !$isError && !defined($type->{child}) && $In{addVar} eq $varName ) {
             #
             # User added entry to this array
             #
@@ -1515,35 +1501,27 @@ sub fieldErrorCheck
         }
         return $ret;
     } else {
-        $In{"v_zZ_$varName"} = "0" if ( $type->{type} eq "boolean"
-            && $In{"v_zZ_$varName"} eq "" );
+        $In{"v_zZ_$varName"} = "0" if ( $type->{type} eq "boolean" && $In{"v_zZ_$varName"} eq "" );
 
         return 1 if ( !exists($In{"v_zZ_$varName"}) );
 
         (my $var = $varName) =~ s/_zZ_/./g;
 
-        if (   $type->{type} eq "integer"
-            || $type->{type} eq "boolean" ) {
-            if (   $In{"v_zZ_$varName"} !~ /^-?\d+\s*$/s
-                && $In{"v_zZ_$varName"} ne "" ) {
+        if (   $type->{type} eq "integer" || $type->{type} eq "boolean" ) {
+            if ( $In{"v_zZ_$varName"} !~ /^-?\d+\s*$/s && $In{"v_zZ_$varName"} ne "" ) {
                 $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_an_integer}}");
             }
         } elsif ( $type->{type} eq "float" ) {
-            if (   $In{"v_zZ_$varName"} !~ /^-?\d*(\.\d*)?\s*$/s
-                && $In{"v_zZ_$varName"} ne "" ) {
+            if ( $In{"v_zZ_$varName"} !~ /^-?\d*(\.\d*)?\s*$/s && $In{"v_zZ_$varName"} ne "" ) {
                 $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_real_valued_number}}");
             }
         } elsif ( $type->{type} eq "shortlist" ) {
             my @vals = split(/[,\s]+/, $In{"v_zZ_$varName"});
             for ( my $i = 0 ; $i < @vals ; $i++ ) {
-                if (   $type->{child} eq "integer"
-                    && $vals[$i] !~ /^-?\d+\s*$/s
-                    && $vals[$i] ne "" ) {
+                if ( $type->{child} eq "integer" && $vals[$i] !~ /^-?\d+\s*$/s && $vals[$i] ne "" ) {
                     my $k = $i + 1;
                     $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__entry__must_be_an_integer}}");
-                } elsif ( $type->{child} eq "float"
-                    && $vals[$i] !~ /^-?\d*(\.\d*)?\s*$/s
-                    && $vals[$i] ne "" ) {
+                } elsif ( $type->{child} eq "float" && $vals[$i] !~ /^-?\d*(\.\d*)?\s*$/s && $vals[$i] ne "" ) {
                     my $k = $i + 1;
                     $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__entry__must_be_real_valued_number}}");
                 }
@@ -1671,8 +1649,7 @@ sub fieldInputParse
                         $_ += 0;
                     }
                 }
-            } elsif ( $type->{child} eq "integer"
-                || $type->{child} eq "boolean" ) {
+            } elsif ( $type->{child} eq "integer" || $type->{child} eq "boolean" ) {
                 foreach ( @$$value ) {
                     if ( /^-?\d+\s*$/s || $v eq "" ) {
                         $_ += 0;

@@ -265,8 +265,7 @@ sub readOutput
             $t->{xferOK}  = 1;
             $t->{byteCnt} = $1;
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
-        } elsif ( /^\s*tar: restored \d+ files/
-            || /^\s*tar:\d+\s*tar_process done, err = 0/ ) {
+        } elsif ( /^\s*tar: restored \d+ files/ || /^\s*tar:\d+\s*tar_process done, err = 0/ ) {
             $t->{xferOK} = 1;
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 0 );
         } elsif ( /^\s*read_socket_with_timeout: timeout read. /i ) {
@@ -294,8 +293,7 @@ sub readOutput
             $badDir =~ s{\\}{/}g;
             $badDir =~ s{/+}{/}g;
             $badDir =~ s{/\*$}{};
-            if ( $t->{hostError} eq ""
-                && ($badDir eq "" || $t->{fileIncludeHash}{$badDir}) ) {
+            if ( $t->{hostError} eq "" && ($badDir eq "" || $t->{fileIncludeHash}{$badDir}) ) {
                 $t->{XferLOG}->write(\"This backup will fail because: $_\n");
                 $t->{hostError} ||= $_;
             }

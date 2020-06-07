@@ -114,9 +114,7 @@ if ( -x "/bin/csh" ) {
     exit(1);
 }
 my $cmd = "$tarCreate -t -h $host -n $bkupNum -s $share . ";
-$cmd .= "| $compPath " if ( $compPath ne "cat"
-    && $compPath ne "/bin/cat"
-    && $compPath ne "" );
+$cmd .= "| $compPath " if ( $compPath ne "cat" && $compPath ne "/bin/cat" && $compPath ne "" );
 if ( -b $outLoc || -c $outLoc || -f $outLoc ) {
     #
     # Output file is a device or a regular file, so don't use split

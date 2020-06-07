@@ -303,8 +303,7 @@ sub ScanAndCleanV3Pool()
             #
             # Also count the next level directories
             #
-            $dirCnt++ if ( ($i % 16) == 0
-                && -d "$TopDir/$pool/$hexChars[int($i / 16)]" );
+            $dirCnt++ if ( ($i % 16) == 0 && -d "$TopDir/$pool/$hexChars[int($i / 16)]" );
 
             #
             # We need to process all pending deletes before we do the

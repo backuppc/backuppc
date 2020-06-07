@@ -204,9 +204,7 @@ sub poolCountUpdate
                 # a single chain.
                 #
                 foreach my $e ( sort { $b cmp $a } @$entries ) {
-                    next if ( $e->{name} eq "."
-                        || $e->{name} eq ".."
-                        || $e->{name} eq "LOCK" );
+                    next if ( $e->{name} eq "." || $e->{name} eq ".." || $e->{name} eq "LOCK" );
                     my $digest   = pack("H*", $e->{name});
                     my $poolFile = "$subPoolDir/$e->{name}";
                     #printf("Got %s, digest = %s\n", $e->{name}, unpack("H*", $digest));

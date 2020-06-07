@@ -796,8 +796,7 @@ sub dirHistory
     for ( $i = 0 ; $i < @{$m->{backups}} ; $i++ ) {
         last if ( $m->{backups}[$i]{version} >= 4 );
         foreach my $fileUM ( keys(%$files) ) {
-            next if ( !defined($files->{$fileUM}[$i])
-                || $files->{$fileUM}[$i]{type} != BPC_FTYPE_DELETED );
+            next if ( !defined($files->{$fileUM}[$i]) || $files->{$fileUM}[$i]{type} != BPC_FTYPE_DELETED );
             $files->{$fileUM}[$i] = undef;
         }
     }

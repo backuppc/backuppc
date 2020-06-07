@@ -172,12 +172,10 @@ EOF
             if ( $Conf{ArchiveClientCmd} =~ /\$compression\b/ ) {
                 $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_compression}}");
             }
-            if ( $Conf{ArchiveClientCmd} =~ /\$parfile\b/
-                && -x $Conf{ParPath} ) {
+            if ( $Conf{ArchiveClientCmd} =~ /\$parfile\b/ && -x $Conf{ParPath} ) {
                 $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_parity}}");
             }
-            if ( $Conf{ArchiveClientCmd} =~ /\$splitsize\b/
-                && -x $Conf{SplitPath} ) {
+            if ( $Conf{ArchiveClientCmd} =~ /\$splitsize\b/ && -x $Conf{SplitPath} ) {
                 $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_split}}");
             }
             my $content = eval("qq{$Lang->{BackupPC_Archive2}}");

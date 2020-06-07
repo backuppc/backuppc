@@ -40,9 +40,7 @@ use BackupPC::CGI::Lib qw(:all);
 
 sub action
 {
-    if (   -f $Conf{ServerInitdPath}
-        && $bpc->{Conf}{ServerInitdStartCmd} ne ""
-        && !$bpc->ServerOK() ) {
+    if ( -f $Conf{ServerInitdPath} && $bpc->{Conf}{ServerInitdStartCmd} ne "" && !$bpc->ServerOK() ) {
         my $args = {
             serverInitdPath => $bpc->{Conf}{ServerInitdPath},
             sshPath         => $bpc->{Conf}{SshPath},

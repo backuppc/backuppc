@@ -239,9 +239,7 @@ sub TarReadFileInfo
 
     while ( 1 ) {
         $head = TarReadHeader($fh);
-        return if ( $Abort
-            || $head eq ""
-            || $head eq "\0" x $tar_header_length );
+        return if ( $Abort || $head eq "" || $head eq "\0" x $tar_header_length );
         (
             $name,        # string
             $mode,        # octal number

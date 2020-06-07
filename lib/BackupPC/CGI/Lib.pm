@@ -475,7 +475,7 @@ sub Header
 <!doctype html public "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
 <title>$title</title>
-<link rel=stylesheet type="text/css" href="$Conf{CgiImageDirURL}/$Conf{CgiCSSFile}" title="CSSFile">
+<link rel=stylesheet type="text/css" href="$Conf{CgiImageDirURL}/$Conf{CgiCSSFile}?version=2" title="CSSFile">
 
 <link rel="apple-touch-icon" sizes="180x180" href="$Conf{CgiImageDirURL}/apple-touch-icon.png?v=2">
 <link rel="icon" type="image/png" sizes="32x32" href="$Conf{CgiImageDirURL}/favicon-32x32.png?v=2">

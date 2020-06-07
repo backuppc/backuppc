@@ -1008,36 +1008,33 @@ $Lang{Email_Summary} = "BackupPC: 电子邮件报告";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new 步骤失败：请检查 Apache 服务器日志\n";
-$Lang{Wrong_user__my_userid_is___} = "错误用户：我的用户 ID 是 \$>, 不是 \$uid(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___}                       = "错误用户：我的用户 ID 是 \$>, 不是 \$uid(\$Conf{BackupPCUser})\n";
 
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
-$Lang{Only_privileged_users_can_stop_or_start_backups} =
-  "只有特权用户可以执行备份的开始或停止操作于客户机 \${EscHTML(\$host)}.";
+$Lang{Only_privileged_users_can_stop_or_start_backups}    = "只有特权用户可以执行备份的开始或停止操作于客户机 \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num}                                = "无效数字 \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem}        = "无法打开文件 \$file：配置有误？";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "只有特权用户可以查看日志或配置文件。";
 $Lang{Only_privileged_users_can_view_log_files}           = "只有特权用户可以查看日志文件。";
 $Lang{Only_privileged_users_can_view_email_summaries}     = "只有特权用户可以查看电子邮件报告。";
-$Lang{Only_privileged_users_can_browse_backup_files} =
-  "只有特权用户可以浏览客户机 \${EscHTML(\$In{host})} 的备份文件。";
+$Lang{Only_privileged_users_can_browse_backup_files}      = "只有特权用户可以浏览客户机 \${EscHTML(\$In{host})} 的备份文件。";
 $Lang{Only_privileged_users_can_delete_backups} =
   "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name}                  = "空客户机名。";
-$Lang{Directory___EscHTML}              = "目录 \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} 为空";
-$Lang{Can_t_browse_bad_directory_name2} = "无法浏览非法目录名 \${EscHTML(\$relDir)}";
-$Lang{Only_privileged_users_can_restore_backup_files} =
-  "只有特权用户可以恢复客户机 \${EscHTML(\$In{host})} 的备份文件。";
-$Lang{Bad_host_name}                                     = "错误客户机名 \${EscHTML(\$host)}";
-$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "你还没有选择任何文件；请返回上一页选择文件。";
-$Lang{You_haven_t_selected_any_hosts}                    = "你还没有选择任何客户机；请返回上一页选择客户机。";
-$Lang{Nice_try__but_you_can_t_put}                       = "对不起，文件名内不能包含 \'..\'";
-$Lang{Host__doesn_t_exist}                               = "客户机 \${EscHTML(\$In{hostDest})} 不存在";
-$Lang{You_don_t_have_permission_to_restore_onto_host}    = "你没有权限恢复客户机 \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath}                       = "无法打开／创建 \${EscHTML(\"\$openPath\")}";
-$Lang{Only_privileged_users_can_restore_backup_files2}  = "只有特权用户可以恢复客户机 \${EscHTML(\$host)} 的备份文件。";
-$Lang{Empty_host_name}                                  = "空客户机名";
-$Lang{Unknown_host_or_user}                             = "未知客户机或用户 \${EscHTML(\$host)}";
-$Lang{Only_privileged_users_can_view_information_about} = "只有特权用户可以查看客户机 \${EscHTML(\$host)} 的信息。";
+$Lang{Empty_host_name}                                    = "空客户机名。";
+$Lang{Directory___EscHTML}                                = "目录 \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} 为空";
+$Lang{Can_t_browse_bad_directory_name2}                   = "无法浏览非法目录名 \${EscHTML(\$relDir)}";
+$Lang{Only_privileged_users_can_restore_backup_files}     = "只有特权用户可以恢复客户机 \${EscHTML(\$In{host})} 的备份文件。";
+$Lang{Bad_host_name}                                      = "错误客户机名 \${EscHTML(\$host)}";
+$Lang{You_haven_t_selected_any_files__please_go_Back_to}  = "你还没有选择任何文件；请返回上一页选择文件。";
+$Lang{You_haven_t_selected_any_hosts}                     = "你还没有选择任何客户机；请返回上一页选择客户机。";
+$Lang{Nice_try__but_you_can_t_put}                        = "对不起，文件名内不能包含 \'..\'";
+$Lang{Host__doesn_t_exist}                                = "客户机 \${EscHTML(\$In{hostDest})} 不存在";
+$Lang{You_don_t_have_permission_to_restore_onto_host}     = "你没有权限恢复客户机 \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath}                        = "无法打开／创建 \${EscHTML(\"\$openPath\")}";
+$Lang{Only_privileged_users_can_restore_backup_files2}    = "只有特权用户可以恢复客户机 \${EscHTML(\$host)} 的备份文件。";
+$Lang{Empty_host_name}                                    = "空客户机名";
+$Lang{Unknown_host_or_user}                               = "未知客户机或用户 \${EscHTML(\$host)}";
+$Lang{Only_privileged_users_can_view_information_about}   = "只有特权用户可以查看客户机 \${EscHTML(\$host)} 的信息。";
 $Lang{Only_privileged_users_can_view_archive_information} = "只有特权用户可以查看备档信息。";
 $Lang{Only_privileged_users_can_view_restore_information} = "只有特权用户可以查看恢复信息。";
 $Lang{Restore_number__num_for_host__does_not_exist}       = "客户机 \${EscHTML(\$host)} 恢复序列号 \$num 不存在。";
@@ -1053,9 +1050,8 @@ EOF
 # !! Server Mesg !!
 # ------------------------------------
 
-$Lang{Backup_requested_on_DHCP__host} =
-  "用户 \$User 从 \$ENV{REMOTE_ADDR} 发起请求备份使用动态 IP 的客户机 \$host (\$In{hostIP})";
-$Lang{Backup_requested_on__host_by__User}        = "用户 \$User 发起请求备份客户机 \$host";
+$Lang{Backup_requested_on_DHCP__host}     = "用户 \$User 从 \$ENV{REMOTE_ADDR} 发起请求备份使用动态 IP 的客户机 \$host (\$In{hostIP})";
+$Lang{Backup_requested_on__host_by__User} = "用户 \$User 发起请求备份客户机 \$host";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "用户 \$User 停止／取消了对客户机 \$host 的备份";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
   "用户 \$User 从 \$ENV{REMOTE_ADDR} 发起请求恢复客户机 \$hostDest，使用备份序列号 #\$num";
@@ -1478,8 +1474,7 @@ $Lang{CfgEdit_Error__entry__must_be_an_integer}         = "错误：\$var 内容
 $Lang{CfgEdit_Error__entry__must_be_real_valued_number} = "错误：\$var 内容 \$k 必须是实数，不能是浮点数";
 $Lang{CfgEdit_Error__must_be_executable_program}        = "错误：\$var 必须是可执行程序";
 $Lang{CfgEdit_Error__must_be_valid_option}              = "错误：\$var 必须是合法选项";
-$Lang{CfgEdit_Error_Copy_host_does_not_exist} =
-  "客户机 \$copyHost 不存在；生成全计算机名 \$fullHost。如果此客户机不是你想要的，请将它删除。";
+$Lang{CfgEdit_Error_Copy_host_does_not_exist}           = "客户机 \$copyHost 不存在；生成全计算机名 \$fullHost。如果此客户机不是你想要的，请将它删除。";
 
 $Lang{CfgEdit_Log_Copy_host_config}   = "用户 \$User 拷贝了客户机 \$fromHost 的配置到客户机 \$host\n";
 $Lang{CfgEdit_Log_Delete_param}       = "用户 \$User 从配置 \$conf 中删除了 \$p\n";

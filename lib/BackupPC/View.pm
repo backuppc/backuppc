@@ -146,7 +146,8 @@ sub dirCache
         && $m->{dir} eq $dir );
 
     $m->backupNumCache($backupNum) if ( $m->{num} != $backupNum );
-    return                         if ( $m->{idx} < 0 );
+
+    return if ( $m->{idx} < 0 );
 
     $m->{files} = {};
     $level = $m->{backups}[$m->{idx}]{level} + 1;
@@ -476,7 +477,8 @@ sub shareList
     my @shareList;
 
     $m->backupNumCache($backupNum) if ( $m->{num} != $backupNum );
-    return                         if ( $m->{idx} < 0 );
+
+    return if ( $m->{idx} < 0 );
 
     if ( $m->{backups}[$m->{idx}]{version} < 4 ) {
         my $mangle = $m->{backups}[$m->{idx}]{mangle};

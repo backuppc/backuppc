@@ -165,7 +165,8 @@ if ( defined($opts{h}) ) {
 }
 
 print("BackupPC_refCountUpdate total errors: $ErrorCnt\n") if ( $ErrorCnt > 0 || $Conf{XferLogLevel} >= 2 );
-print("__bpc_pidEnd__ $$\n")                               if ( !$opts{p} );
+
+print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
 exit($ErrorCnt ? 1 : 0);
 
 #

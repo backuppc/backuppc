@@ -137,8 +137,9 @@ foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
     my $bkupNum2LastInode = {};
     my $foundBackup       = 0;
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-        $Inode       = $Backups[$i]{inodeLast} + 1 if ( $Inode < $Backups[$i]{inodeLast} );
-        $foundBackup = 1                           if ( $opts{n} == $Backups[$i]{num} );
+        $Inode = $Backups[$i]{inodeLast} + 1 if ( $Inode < $Backups[$i]{inodeLast} );
+
+        $foundBackup = 1 if ( $opts{n} == $Backups[$i]{num} );
     }
     $Inode2MD5Digest = {};
     $BkupNum         = undef;
@@ -273,7 +274,8 @@ sub update_v3_dir
     my($name, $path) = @_;
 
     print("update_v3_dir name = $name, path = $path\n") if ( $LogLevel >= 6 );
-    return                                              if ( !-d $path );
+
+    return if ( !-d $path );
 
     $name = "attrib";
 

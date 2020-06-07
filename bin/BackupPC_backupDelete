@@ -390,7 +390,8 @@ if ( $doRefCountUpdate || $opts{r} ) {
 }
 
 logMsg("BackupPC_backupDelete: got $Errors errors\n") if ( $Errors > 0 || $LogLevel >= 2 );
-print("__bpc_pidEnd__ $$\n")                          if ( !$opts{p} );
+
+print("__bpc_pidEnd__ $$\n") if ( !$opts{p} );
 exit($Errors ? 1 : 0);
 
 sub copyInodes
@@ -398,7 +399,8 @@ sub copyInodes
     my($name, $path) = @_;
 
     logMsg("copyInodes: name = $name, path = $path\n") if ( $LogLevel >= 6 );
-    return                                             if ( $path !~ m{(.*)/(attrib[^/]*)$} );
+
+    return if ( $path !~ m{(.*)/(attrib[^/]*)$} );
 
     $path = $1;
     $name = $2;
@@ -423,7 +425,8 @@ sub copyInodes
         $FileCnt++;
         $DeltaMerge->update($a->{compress}, $a->{digest}, 1) if ( length($a->{digest}) );
         $DeltaDel->update($a->{compress}, $a->{digest}, -1)  if ( $DeltaDel && length($a->{digest}) );
-        next                                                 if ( $a->{nlinks} == 0 );
+
+        next if ( $a->{nlinks} == 0 );
         #
         # copy/update inode in merge, and reduce link count in delete backup
         #
@@ -686,7 +689,8 @@ sub mergeDir
             ($a, $idx) = $attr->iterate($idx);
             last if ( !defined($a) );
             my $fileUM = $a->{name};
-            next                                                           if ( $a->{type} != BPC_FTYPE_DELETED );
+            next if ( $a->{type} != BPC_FTYPE_DELETED );
+
             logMsg("removing attrib for deleted file $mergeDir/$fileUM\n") if ( $LogLevel >= 7 );
             $attr->delete($fileUM);
             $dirty = 1;

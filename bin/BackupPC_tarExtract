@@ -925,9 +925,10 @@ sub pathCreate
     # Get parent directory of $fullPath
     #
     print("pathCreate: fullPath = $fullPath\n") if ( $Conf{XferLogLevel} >= 6 );
-    $fullPath =~ s{/[^/]*$}{}                   if ( !$noStrip );
-    return 0                                    if ( -d $fullPath );
-    unlink($fullPath)                           if ( -e $fullPath );
+
+    $fullPath =~ s{/[^/]*$}{} if ( !$noStrip );
+    return 0                  if ( -d $fullPath );
+    unlink($fullPath)         if ( -e $fullPath );
     eval { mkpath($fullPath, 0, 0777) };
     if ( $@ ) {
         print("Can't create $fullPath ($!)\n");

@@ -140,7 +140,7 @@ sub NewRequest
     #
     # Verify we are running as the correct user
     #
-    if (   $Conf{BackupPCUserVerify} && $> != (my $uid = getpwnam($Conf{BackupPCUser})) ) {
+    if ( $Conf{BackupPCUserVerify} && $> != (my $uid = getpwnam($Conf{BackupPCUser})) ) {
         ErrorExit(eval("qq{$Lang->{Wrong_user__my_userid_is___}}"), <<EOF);
 This script needs to run as the user specified in \$Conf{BackupPCUser},
 which is set to $Conf{BackupPCUser}.
@@ -401,7 +401,7 @@ sub ConfirmIPAddress
     my($host) = @_;
     my $ipAddr = $host;
 
-    if (   defined($Hosts->{$host}) && $Hosts->{$host}{dhcp} && $ENV{REMOTE_ADDR} =~ /^(\d+[\.\d]*)$/ ) {
+    if ( defined($Hosts->{$host}) && $Hosts->{$host}{dhcp} && $ENV{REMOTE_ADDR} =~ /^(\d+[\.\d]*)$/ ) {
         $ipAddr = $1;
         my($netBiosHost, $netBiosUser) = $bpc->NetBiosInfoGet($ipAddr);
         if ( $netBiosHost ne $host ) {

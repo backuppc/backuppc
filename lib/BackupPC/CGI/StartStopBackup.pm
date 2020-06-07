@@ -42,10 +42,10 @@ sub action
 {
     my($str, $reply);
 
-    my $start = 1 if ( $In{action} eq "Start_Incr_Backup" || $In{action} eq "Start_Full_Backup" );
-    my $doFull = $In{action} eq "Start_Full_Backup" ? 1                  : 0;
-    my $type   = $doFull                            ? $Lang->{Type_full} : $Lang->{Type_incr};
-    my $host   = $In{host};
+    my $start      = 1 if ( $In{action} eq "Start_Incr_Backup" || $In{action} eq "Start_Full_Backup" );
+    my $doFull     = $In{action} eq "Start_Full_Backup" ? 1 : 0;
+    my $type       = $doFull ? $Lang->{Type_full} : $Lang->{Type_incr};
+    my $host       = $In{host};
     my $Privileged = CheckPermission($host);
 
     if ( !$Privileged ) {

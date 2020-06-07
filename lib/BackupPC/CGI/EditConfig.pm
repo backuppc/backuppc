@@ -1507,7 +1507,7 @@ sub fieldErrorCheck
 
         (my $var = $varName) =~ s/_zZ_/./g;
 
-        if (   $type->{type} eq "integer" || $type->{type} eq "boolean" ) {
+        if ( $type->{type} eq "integer" || $type->{type} eq "boolean" ) {
             if ( $In{"v_zZ_$varName"} !~ /^-?\d+\s*$/s && $In{"v_zZ_$varName"} ne "" ) {
                 $errors->{$varName} = eval("qq{$Lang->{CfgEdit_Error__must_be_an_integer}}");
             }

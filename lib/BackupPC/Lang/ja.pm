@@ -1034,12 +1034,11 @@ $Lang{Directory___EscHTML}              = "ディレクトリ \${EscHTML(\"\$Top
 $Lang{Can_t_browse_bad_directory_name2} = "Can\'t browse bad directory name \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} =
   "Only privileged users can restore backup files for host \${EscHTML(\$In{host})}.";
-$Lang{Bad_host_name} = "\${EscHTML(\$host)} はホスト名が誤っています。";
-$Lang{You_haven_t_selected_any_files__please_go_Back_to} =
-  "何もファイルを選択していません。戻っていくつかファイルを選択してください。";
-$Lang{You_haven_t_selected_any_hosts} = "何もホストを選択していません。戻っていくつかのホストを選択してください。";
-$Lang{Nice_try__but_you_can_t_put}    = "Nice try, but you can\'t put \'..\' in any of the file names";
-$Lang{Host__doesn_t_exist}            = "Host \${EscHTML(\$In{hostDest})} doesn\'t exist";
+$Lang{Bad_host_name}                                     = "\${EscHTML(\$host)} はホスト名が誤っています。";
+$Lang{You_haven_t_selected_any_files__please_go_Back_to} = "何もファイルを選択していません。戻っていくつかファイルを選択してください。";
+$Lang{You_haven_t_selected_any_hosts}                    = "何もホストを選択していません。戻っていくつかのホストを選択してください。";
+$Lang{Nice_try__but_you_can_t_put} = "Nice try, but you can\'t put \'..\' in any of the file names";
+$Lang{Host__doesn_t_exist}         = "Host \${EscHTML(\$In{hostDest})} doesn\'t exist";
 $Lang{You_don_t_have_permission_to_restore_onto_host} =
   "You don\'t have permission to restore onto host \${EscHTML(\$In{hostDest})}";
 $Lang{Can_t_open_create__openPath} = "Can\'t open/create \${EscHTML(\"\$openPath\")}";
@@ -1069,9 +1068,8 @@ EOF
 # !! Server Mesg !!
 # ------------------------------------
 
-$Lang{Backup_requested_on_DHCP__host} =
-  "バックアップ要求 on DHCP \$host (\$In{hostIP}) by \$User from \$ENV{REMOTE_ADDR}";
-$Lang{Backup_requested_on__host_by__User}        = "\$User による \$host のバックアップ要求";
+$Lang{Backup_requested_on_DHCP__host}     = "バックアップ要求 on DHCP \$host (\$In{hostIP}) by \$User from \$ENV{REMOTE_ADDR}";
+$Lang{Backup_requested_on__host_by__User} = "\$User による \$host のバックアップ要求";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "\$User による \$host のバックアップ中止/デキュー";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
   "ホスト\$hostDest のリストア要求 バックアップ #\$num, by \$User from \$ENV{REMOTE_ADDR}";
@@ -1483,14 +1481,13 @@ $Lang{CfgEdit_Button_Override}  = "上書き";
 $Lang{CfgEdit_Button_New_Key}   = "新項目";
 $Lang{CfgEdit_Button_New_Share} = "New ShareName or '*'";
 
-$Lang{CfgEdit_Error_No_Save}                     = "エラー: エラーのために保存されてません";
-$Lang{CfgEdit_Error__must_be_an_integer}         = "エラー: \$var は整数である必要があります";
-$Lang{CfgEdit_Error__must_be_real_valued_number} = "エラー: \$var は実在する番号である必要があります";
-$Lang{CfgEdit_Error__entry__must_be_an_integer}  = "エラー: \$var エントリー \$k は整数である必要があります";
-$Lang{CfgEdit_Error__entry__must_be_real_valued_number} =
-  "エラー: \$var エントリー \$k は実在する番号である必要があります";
-$Lang{CfgEdit_Error__must_be_executable_program} = "エラー: \$var は有効な実行可能なパスである必要があります";
-$Lang{CfgEdit_Error__must_be_valid_option}       = "エラー: \$var は有効なオプションである必要があります";
+$Lang{CfgEdit_Error_No_Save}                            = "エラー: エラーのために保存されてません";
+$Lang{CfgEdit_Error__must_be_an_integer}                = "エラー: \$var は整数である必要があります";
+$Lang{CfgEdit_Error__must_be_real_valued_number}        = "エラー: \$var は実在する番号である必要があります";
+$Lang{CfgEdit_Error__entry__must_be_an_integer}         = "エラー: \$var エントリー \$k は整数である必要があります";
+$Lang{CfgEdit_Error__entry__must_be_real_valued_number} = "エラー: \$var エントリー \$k は実在する番号である必要があります";
+$Lang{CfgEdit_Error__must_be_executable_program}        = "エラー: \$var は有効な実行可能なパスである必要があります";
+$Lang{CfgEdit_Error__must_be_valid_option}              = "エラー: \$var は有効なオプションである必要があります";
 $Lang{CfgEdit_Error_Copy_host_does_not_exist} =
   "\$copyHost のコピーが存在しません。 creating full host name \$fullHost.  Delete this host if that is not what you wanted.";
 

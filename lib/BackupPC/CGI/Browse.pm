@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.3.3, released 6 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -78,6 +78,7 @@ sub action
     my $backupTime = timeStamp2($Backups[$i]{startTime});
     my $backupAge  = sprintf("%.1f", (time - $Backups[$i]{startTime}) / (24 * 3600));
     my $view       = BackupPC::View->new($bpc, $host, \@Backups, {nlink => 1});
+    my $share2path = ref($Backups[$i]{share2path}) eq 'HASH' ? $Backups[$i]{share2path} : {};
 
     if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
         $attr = $view->dirAttrib($num, "", "");
@@ -112,9 +113,9 @@ sub action
         $fLast = $dirStr = "";
 
         #
-        # Loop over each of the files in this directory
+        # Loop over each of the files in this directory, putting the open directory first
         #
-        foreach my $f ( sort { uc($a) cmp uc($b) } keys(%$attr) ) {
+        foreach my $f ( sort { $currDir eq $a ? -1 : $currDir eq $b ? 1 : uc($a) cmp uc($b) } keys(%$attr) ) {
             my($dirOpen, $gotDir, $imgStr, $img, $path);
             my $fURI     = $f;        # URI escaped $f
             my $shareURI = $share;    # URI escaped $share
@@ -277,7 +278,7 @@ EOF
     #
     # allow each level of the directory path to be navigated to
     #
-    my($thisPath, $dirDisplay);
+    my($thisPath, $dirDisplay, $lastPath);
     my $dirClean = $dir;
     $dirClean =~ s{//+}{/}g;
     $dirClean =~ s{/+$}{};
@@ -296,9 +297,10 @@ EOF
         }
         my $thisPathURI = $thisPath;
         $thisPathURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-        $dirDisplay .= "/" if ( $dirDisplay ne "" );
+        $dirDisplay .= "/" if ( $dirDisplay ne "" & $lastPath !~ m{/$} );
         $dirDisplay .=
           "<a href=\"$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$thisPathURI\">${EscHTML($thisDir)}</a>";
+        $lastPath = $thisPath;
     }
 
     my $filledBackup;

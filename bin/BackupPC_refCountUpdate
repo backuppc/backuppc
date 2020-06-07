@@ -477,7 +477,7 @@ sub updateHostRefCounts
         }
     }
     if ( keys(%$needFsck) ) {
-        return [sort({$a <=> $b} keys(%$needFsck))];
+        return [sort({ $a <=> $b } keys(%$needFsck))];
     }
 }
 

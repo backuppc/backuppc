@@ -42,7 +42,7 @@ package BackupPC::Zip::FileMember;
 use vars qw( @ISA );
 @ISA = qw ( Archive::Zip::FileMember );
 
-BEGIN {use Archive::Zip qw( :CONSTANTS :ERROR_CODES :UTILITY_METHODS )}
+BEGIN { use Archive::Zip qw( :CONSTANTS :ERROR_CODES :UTILITY_METHODS ) }
 
 # Given a file name, set up for eventual writing.
 sub newFromFileNamed    # BackupPC::Zip::FileMember

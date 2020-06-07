@@ -140,7 +140,7 @@ foreach my $host ( @hostList ) {
     #
     # Read through LOG files from oldest to newest
     #
-    @LogFiles = sort({-M "$dir/$a" <=> -M "$dir/$b"} @LogFiles);
+    @LogFiles = sort({ -M "$dir/$a" <=> -M "$dir/$b" } @LogFiles);
     my $startTime;
     my $fillFromNum;
     foreach my $file ( @LogFiles ) {
@@ -234,7 +234,7 @@ foreach my $host ( @hostList ) {
     }
 
     if ( $changes ) {
-        @Backups = sort({$a->{num} <=> $b->{num}} @Backups);
+        @Backups = sort({ $a->{num} <=> $b->{num} } @Backups);
 
         # print Dumper \@Backups;
         $bpc->BackupInfoWrite($host, @Backups);

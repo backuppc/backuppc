@@ -258,7 +258,7 @@ sub processPendingDeletes
         @delete        = @PendingDelete;
         @PendingDelete = ();
     }
-    for my $f ( sort({$a->{inode} <=> $b->{inode}} @delete) ) {
+    for my $f ( sort({ $a->{inode} <=> $b->{inode} } @delete) ) {
         my($nlinks) = (lstat($f->{path}))[3];
 
         next if ( $nlinks != 1 );

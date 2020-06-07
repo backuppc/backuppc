@@ -153,7 +153,7 @@ EOF
         # Verify that Archive::Zip is available before showing the
         # zip restore option
         #
-        if ( eval {require Archive::Zip} ) {
+        if ( eval { require Archive::Zip } ) {
             $content .= eval("qq{$Lang->{Option_2__Download_Zip_archive}}");
         } else {
             $content .= eval("qq{$Lang->{Option_2__Download_Zip_archive2}}");
@@ -202,7 +202,7 @@ EOF
         #
         $bpc->cmdSystemOrEvalLong(
             ["$BinDir/BackupPC_tarCreate", "-h", $host, "-n", $num, "-s", $share, @pathOpts, @fileList],
-            sub {print(@_);},
+            sub { print(@_); },
             1,    # ignore stderr
         );
     } elsif ( $In{type} == 2 ) {
@@ -251,7 +251,7 @@ EOF
                 "$BinDir/BackupPC_zipCreate", "-h", $host, "-n", $num, "-c", $In{compressLevel}, "-s", $share,
                 "-e", $In{codePage}, @pathOpts, @fileList
             ],
-            sub {print(@_);},
+            sub { print(@_); },
             1,    # ignore stderr
         );
     } elsif ( $In{type} == 3 ) {
@@ -345,7 +345,7 @@ EOF
         my($dump) = Data::Dumper->new([\%restoreReq], [qw(*RestoreReq)]);
         $dump->Indent(1);
         $dump->Sortkeys(1);
-        eval {mkpath("$TopDir/pc/$hostDest", 0, 0777)}
+        eval { mkpath("$TopDir/pc/$hostDest", 0, 0777) }
           if ( !-d "$TopDir/pc/$hostDest" );
         my $openPath = "$TopDir/pc/$hostDest/$reqFileName";
         if ( open(REQ, ">", $openPath) ) {

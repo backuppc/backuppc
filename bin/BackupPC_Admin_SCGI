@@ -223,7 +223,7 @@ while ( 1 ) {
             $ChildExited = 0;
             #
             # If a second child dies while in the signal handler caused by the
-            # first death, we won’t get another signal. So we must do a non-blocking
+            # first death, we won't get another signal. So we must do a non-blocking
             # loop here else we will leave the unreaped child as a zombie. And
             # the next time two children die we get another zombie. And so on.
             #
@@ -458,7 +458,7 @@ sub NewRequest
         # turn moreUsers list into a hash for quick lookups
         foreach my $host ( keys %$Hosts ) {
             $Hosts->{$host}{moreUsers} =
-              {map {$_, 1} split(",", $Hosts->{$host}{moreUsers})};
+              {map { $_, 1 } split(",", $Hosts->{$host}{moreUsers})};
         }
     }
 

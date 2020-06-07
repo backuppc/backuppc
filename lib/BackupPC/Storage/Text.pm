@@ -224,7 +224,7 @@ sub TextFileWrite
     (my $dir = $file) =~ s{(.+)/(.+)}{$1};
 
     if ( !-d $dir ) {
-        eval {mkpath($dir, 0, 0775)};
+        eval { mkpath($dir, 0, 0775) };
         return "TextFileWrite: can't create directory $dir" if ( $@ );
     }
     if ( open($fd, ">", "$file.new") ) {

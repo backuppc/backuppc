@@ -779,7 +779,7 @@ sub MakeFileLink
             my($newDir);
             ($newDir = $rawFile) =~ s{(.*)/.*}{$1};
             if ( !-d $newDir ) {
-                eval {mkpath($newDir, 0, 0777)};
+                eval { mkpath($newDir, 0, 0777) };
                 return -5 if ( $@ );
             }
             return -4 if ( !link($name, $rawFile) );
@@ -1295,11 +1295,11 @@ sub backupFileConfFix
             # but still allow override of specific entries.
             #
             next if ( !defined($conf->{$param}{"*"}) );
-            $conf->{$param} = {map({$_ => $conf->{$param}{"*"}} @{$conf->{$shareName}}), %{$conf->{$param}}};
+            $conf->{$param} = {map({ $_ => $conf->{$param}{"*"} } @{$conf->{$shareName}}), %{$conf->{$param}}};
         } else {
             $conf->{$param} = [$conf->{$param}]
               if ( ref($conf->{$param}) ne "ARRAY" );
-            $conf->{$param} = {map {$_ => $conf->{$param}} @{$conf->{$shareName}}};
+            $conf->{$param} = {map { $_ => $conf->{$param} } @{$conf->{$shareName}}};
         }
     }
 }
@@ -1447,7 +1447,7 @@ sub getHostAddrInfo
 {
     my($bpc, $host) = @_;
     my($err, @addrs);
-    eval {($err, @addrs) = Socket::getaddrinfo($host)};
+    eval { ($err, @addrs) = Socket::getaddrinfo($host) };
     if ( $@ || $err || !@addrs ) {
         return defined(gethostbyname($host)) ? 4 : undef;
     }

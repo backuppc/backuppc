@@ -161,7 +161,7 @@ EOF
         # turn moreUsers list into a hash for quick lookups
         foreach my $host ( keys %$Hosts ) {
             $Hosts->{$host}{moreUsers} =
-              {map {$_, 1} split(",", $Hosts->{$host}{moreUsers})};
+              {map { $_, 1 } split(",", $Hosts->{$host}{moreUsers})};
         }
     }
 
@@ -388,7 +388,7 @@ sub GetUserHosts
     if ( $getAll && CheckPermission() ) {
         @hosts = sort keys %$Hosts;
     } else {
-        @hosts = sort grep {$Hosts->{$_}{user} eq $User || defined($Hosts->{$_}{moreUsers}{$User})} keys(%$Hosts);
+        @hosts = sort grep { $Hosts->{$_}{user} eq $User || defined($Hosts->{$_}{moreUsers}{$User}) } keys(%$Hosts);
     }
     return @hosts;
 }

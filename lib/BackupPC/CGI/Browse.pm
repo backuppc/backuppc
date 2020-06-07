@@ -114,7 +114,7 @@ sub action
         #
         # Loop over each of the files in this directory
         #
-        foreach my $f ( sort {uc($a) cmp uc($b)} keys(%$attr) ) {
+        foreach my $f ( sort { uc($a) cmp uc($b) } keys(%$attr) ) {
             my($dirOpen, $gotDir, $imgStr, $img, $path);
             my $fURI     = $f;        # URI escaped $f
             my $shareURI = $share;    # URI escaped $share

@@ -76,7 +76,7 @@ sub action
 EOF
         }
     }
-    foreach my $t ( sort({$b <=> $a} keys(%EmailStr)) ) {
+    foreach my $t ( sort({ $b <=> $a } keys(%EmailStr)) ) {
         $str .= $EmailStr{$t};
     }
     my $content = eval("qq{$Lang->{Recent_Email_Summary}}");

@@ -92,7 +92,7 @@ sub action
     #
     # So, if digests are defined, we use those.  Otherwise we used inodes.
     #
-    foreach my $f ( sort {uc($a) cmp uc($b)} keys(%$hist) ) {
+    foreach my $f ( sort { uc($a) cmp uc($b) } keys(%$hist) ) {
         my %inode2name;
         my %digest2name;
         my $nameCnt = 0;

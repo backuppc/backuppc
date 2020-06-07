@@ -119,7 +119,7 @@ C<seek>, C<setpos>, C<sysseek>, C<tell>, C<ungetc>, C<opened>.
 
 =cut ;
 
-sub opened {1;}
+sub opened { 1; }
 
 sub seek
 {
@@ -228,7 +228,7 @@ sub read
         $self->sysread($self->{_buf}, _max($len - length($self->{_buf}), $self->{BlockSize}), length($self->{_buf}));
     }
     my $ret = _min($len, length($self->{_buf}));
-    if ( !defined($_[0]) ) {$_[0] = ''}
+    if ( !defined($_[0]) ) { $_[0] = '' }
     substr($_[0], $offset) = substr($self->{_buf}, 0, $len, '');
     $self->{read_count}++;
 
@@ -303,7 +303,7 @@ sub sysread
         return $self->seterr();
     }
 
-    if ( !defined($_[0]) ) {$_[0] = ''}
+    if ( !defined($_[0]) ) { $_[0] = '' }
     substr($_[0], $offset) = $tmpbuf;
     $self->{pos}     += $rb;
     $self->{nextpos} += $rb;
@@ -346,7 +346,7 @@ sub _finish_connection
 
     my $closeret;
     {
-        eval {$closeret = $self->{ftp_data}->close();};
+        eval { $closeret = $self->{ftp_data}->close(); };
 
         # Work around a timeout bug in Net::FTP
         if ( $@ && $@ =~ /^Timeout / ) {
@@ -434,7 +434,7 @@ sub getline
         $rs = $/;
     }
     my $eol;
-    if ( !defined($self->{_buf}) ) {$self->{_buf} = ''}
+    if ( !defined($self->{_buf}) ) { $self->{_buf} = '' }
     while ( ($eol = index($self->{_buf}, $rs)) < $[ ) {
         if ( $self->{eof} ) {
 

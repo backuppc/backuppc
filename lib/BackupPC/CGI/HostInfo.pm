@@ -112,7 +112,7 @@ sub action
             $dur = 1 if ( $dur <= 0 );
             my $duration        = sprintf("%.1f", $dur / 60);
             my $Archives_Result = $Lang->{failed};
-            if ( $Archives[$i]{result} ne "failed" ) {$Archives_Result = $Lang->{success};}
+            if ( $Archives[$i]{result} ne "failed" ) { $Archives_Result = $Lang->{success}; }
             $ArchiveStr .= <<EOF;
 <tr><td align="center"><a href="$MyURL?action=archiveInfo&num=$Archives[$i]{num}&host=${EscURI($host)}">$Archives[$i]{num}</a> </td>
     <td align="center"> $Archives_Result </td>
@@ -236,8 +236,8 @@ EOF
 </tr>
 EOF
         my $is_compress = $Backups[$i]{compress} || $Lang->{off};
-        if ( !$ExistComp )   {$ExistComp   = "&nbsp;";}
-        if ( !$MBExistComp ) {$MBExistComp = "&nbsp;";}
+        if ( !$ExistComp )   { $ExistComp   = "&nbsp;"; }
+        if ( !$MBExistComp ) { $MBExistComp = "&nbsp;"; }
         push @compRows, <<EOF;
 <tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
     <td align="center" class="border"> $ltype </td>
@@ -279,7 +279,7 @@ EOF
         my $MB       = sprintf("%.1f", $Restores[$i]{size} / (1024 * 1024));
         my $MBperSec = sprintf("%.2f", $Restores[$i]{size} / (1024 * 1024 * $dur));
         my $Restores_Result = $Lang->{failed};
-        if ( $Restores[$i]{result} ne "failed" ) {$Restores_Result = $Lang->{success};}
+        if ( $Restores[$i]{result} ne "failed" ) { $Restores_Result = $Lang->{success}; }
         push @restoreRows, <<EOF;
 <tr><td align="center" class="border"><a href="$MyURL?action=restoreInfo&num=$Restores[$i]{num}&host=${EscURI($host)}">$Restores[$i]{num}</a> </td>
     <td align="center" class="border"> $Restores_Result </td>

@@ -928,7 +928,7 @@ sub pathCreate
     $fullPath =~ s{/[^/]*$}{}                   if ( !$noStrip );
     return 0                                    if ( -d $fullPath );
     unlink($fullPath)                           if ( -e $fullPath );
-    eval {mkpath($fullPath, 0, 0777)};
+    eval { mkpath($fullPath, 0, 0777) };
     if ( $@ ) {
         print("Can't create $fullPath ($!)\n");
         $Errors++;

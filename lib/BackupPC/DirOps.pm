@@ -148,10 +148,10 @@ sub dirRead
         }
     }
     if ( $IODirentOk ) {
-        @entries = sort({$a->{inode} <=> $b->{inode}} readdirent($fh));
-        map {$_->{type} = 0 + $_->{type}} @entries;    # make type numeric
+        @entries = sort({ $a->{inode} <=> $b->{inode} } readdirent($fh));
+        map { $_->{type} = 0 + $_->{type} } @entries;    # make type numeric
     } else {
-        @entries = map {{name => $_}} readdir($fh);
+        @entries = map { {name => $_} } readdir($fh);
     }
     closedir($fh);
     if ( defined($need) && %$need > 0 ) {
@@ -182,7 +182,7 @@ sub dirRead
     # Sort the entries if inodes were added (the IO::Dirent case already
     # sorted above)
     #
-    @entries = sort({$a->{inode} <=> $b->{inode}} @entries) if ( $addInode );
+    @entries = sort({ $a->{inode} <=> $b->{inode} } @entries) if ( $addInode );
     #
     # for browing pre-3.0.0 backups, map iso-8859-1 to utf8 if requested
     #
@@ -204,7 +204,7 @@ sub dirReadNames
 
     my $entries = BackupPC::DirOps::dirRead($bpc, $path, $need);
     return if ( !defined($entries) );
-    my @names = map {$_->{name}} @$entries;
+    my @names = map { $_->{name} } @$entries;
     return \@names;
 }
 

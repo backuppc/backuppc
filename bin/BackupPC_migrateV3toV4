@@ -448,7 +448,7 @@ sub update_v3_dir
                 $dir4 =~ s{(.*)/.*}{$1};
                 if ( !-d $dir4 ) {
                     print("Creating directory $dir4\n") if ( $LogLevel >= 5 );
-                    eval {mkpath($dir4, 0, 0777)};
+                    eval { mkpath($dir4, 0, 0777) };
                     if ( $@ ) {
                         print("BackupPC_migrateV3toV4: can't mkpath $dir4\n");
                         $ErrorCnt++;
@@ -505,7 +505,7 @@ sub update_v3_dir
         $Inode2MD5Digest->{$inode} = $digest4;
         $DeltaInfo->update($Compress, $digest4, 1) if ( length($digest4) );
     }
-    eval {mkpath("$DestDir/$path", 0, 0777)};
+    eval { mkpath("$DestDir/$path", 0, 0777) };
     if ( $@ ) {
         print("BackupPC_migrateV3toV4: can't mkpath $DestDir/$path\n");
         $ErrorCnt++;

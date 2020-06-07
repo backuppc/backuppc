@@ -758,6 +758,6 @@ sub logMsg
 #
 sub pidHandler
 {
-    my @pids = sort {$a <=> $b} @_;
+    my @pids = sort { $a <=> $b } @_;
     printf("xferPids %s\n", join(",", @pids));
 }

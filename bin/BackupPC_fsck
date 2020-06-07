@@ -203,7 +203,7 @@ sub poolCountUpdate
                 # traverse the files in reverse order, in case we can delete multiple files in
                 # a single chain.
                 #
-                foreach my $e ( sort {$b cmp $a} @$entries ) {
+                foreach my $e ( sort { $b cmp $a } @$entries ) {
                     next if ( $e->{name} eq "."
                         || $e->{name} eq ".."
                         || $e->{name} eq "LOCK" );

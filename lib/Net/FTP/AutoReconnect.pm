@@ -191,35 +191,35 @@ sub ascii
 {
     my $self = shift;
     $self->{mode} = 'ascii';
-    $self->_auto_reconnect(sub {$self->{ftp}->ascii()});
+    $self->_auto_reconnect(sub { $self->{ftp}->ascii() });
 }
 
 sub binary
 {
     my $self = shift;
     $self->{mode} = 'binary';
-    $self->_auto_reconnect(sub {$self->{ftp}->binary()});
+    $self->_auto_reconnect(sub { $self->{ftp}->binary() });
 }
 
 sub rename
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->rename(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->rename(@a) });
 }
 
 sub delete
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->delete(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->delete(@a) });
 }
 
 sub cwd
 {
     my $self = shift;
     my @a    = @_;
-    my $ret  = $self->_auto_reconnect(sub {$self->{ftp}->cwd(@a)});
+    my $ret  = $self->_auto_reconnect(sub { $self->{ftp}->cwd(@a) });
     if ( defined($ret) ) {
         $self->{cwd} = $self->{ftp}->pwd()
           or die "Couldn't get directory after cwd\n";
@@ -231,7 +231,7 @@ sub cdup
 {
     my $self = shift;
     my @a    = @_;
-    my $ret  = $self->_auto_reconnect(sub {$self->{ftp}->cdup(@a)});
+    my $ret  = $self->_auto_reconnect(sub { $self->{ftp}->cdup(@a) });
     if ( defined($ret) ) {
         $self->{cwd} = $self->{ftp}->pwd()
           or die "Couldn't get directory after cdup\n";
@@ -243,28 +243,28 @@ sub pwd
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->pwd(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->pwd(@a) });
 }
 
 sub rmdir
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->rmdir(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->rmdir(@a) });
 }
 
 sub mkdir
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->mkdir(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->mkdir(@a) });
 }
 
 sub ls
 {
     my $self = shift;
     my @a    = @_;
-    my $ret  = $self->_auto_reconnect(sub {$self->{ftp}->ls(@a)});
+    my $ret  = $self->_auto_reconnect(sub { $self->{ftp}->ls(@a) });
     return $ret ? (wantarray ? @$ret : $ret) : undef;
 }
 
@@ -272,7 +272,7 @@ sub dir
 {
     my $self = shift;
     my @a    = @_;
-    my $ret  = $self->_auto_reconnect(sub {$self->{ftp}->dir(@a)});
+    my $ret  = $self->_auto_reconnect(sub { $self->{ftp}->dir(@a) });
     return $ret ? (wantarray ? @$ret : $ret) : undef;
 }
 
@@ -288,28 +288,28 @@ sub retr
 {
     my $self = shift;
     my @a    = @_;
-    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->retr(@a)}));
+    $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->retr(@a) }));
 }
 
 sub get
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->get(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->get(@a) });
 }
 
 sub mdtm
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->mdtm(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->mdtm(@a) });
 }
 
 sub size
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->size(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->size(@a) });
 }
 
 sub abort
@@ -337,28 +337,28 @@ sub alloc
     my $self = shift;
     my @a    = @_;
     $self->{alloc} = \@a;
-    $self->_auto_reconnect(sub {$self->{ftp}->alloc(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->alloc(@a) });
 }
 
 sub put
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->put(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->put(@a) });
 }
 
 sub put_unique
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->put_unique(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->put_unique(@a) });
 }
 
 sub append
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->append(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->append(@a) });
 }
 
 sub unique_name
@@ -371,7 +371,7 @@ sub supported
 {
     my $self = shift;
     my @a    = @_;
-    $self->_auto_reconnect(sub {$self->{ftp}->supported(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->supported(@a) });
 }
 
 sub port
@@ -379,7 +379,7 @@ sub port
     my $self = shift;
     my @a    = @_;
     $self->{port} = \@a;
-    $self->_auto_reconnect(sub {$self->{ftp}->port(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->port(@a) });
 }
 
 sub pasv
@@ -387,35 +387,35 @@ sub pasv
     my $self = shift;
     my @a    = @_;
     $self->{pasv} = \@a;
-    $self->_auto_reconnect(sub {$self->{ftp}->pasv(@a)});
+    $self->_auto_reconnect(sub { $self->{ftp}->pasv(@a) });
 }
 
 sub nlst
 {
     my $self = shift;
     my @a    = @_;
-    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->nlst(@a)}));
+    $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->nlst(@a) }));
 }
 
 sub stou
 {
     my $self = shift;
     my @a    = @_;
-    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->stou(@a)}));
+    $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->stou(@a) }));
 }
 
 sub appe
 {
     my $self = shift;
     my @a    = @_;
-    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->appe(@a)}));
+    $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->appe(@a) }));
 }
 
 sub list
 {
     my $self = shift;
     my @a    = @_;
-    $self->_after_pcmd($self->_auto_reconnect(sub {$self->{ftp}->list(@a)}));
+    $self->_after_pcmd($self->_auto_reconnect(sub { $self->{ftp}->list(@a) }));
 }
 
 sub pasv_xfer

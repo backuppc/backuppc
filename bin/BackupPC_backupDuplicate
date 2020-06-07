@@ -235,7 +235,7 @@ sub copy_v4_file
       if ( $LogLevel >= 5 );
     if ( -d $path ) {
         print("Creating directory $DestDir/$path\n") if ( $LogLevel >= 4 );
-        eval {mkpath("$DestDir/$path", 0, 0777)};
+        eval { mkpath("$DestDir/$path", 0, 0777) };
         if ( $@ ) {
             print(STDERR "Can't mkpath $DestDir/$path ($@)\n");
             $ErrorCnt++;
@@ -283,7 +283,7 @@ sub copy_v3_file
     if ( $a->{type} == BPC_FTYPE_DIR ) {
         my $path = $ac->getFullMangledPath($a->{relPath});
         if ( !-d $path ) {
-            eval {mkpath($path, 0, 0777)};
+            eval { mkpath($path, 0, 0777) };
             if ( $@ ) {
                 print("Can't mkpath $path ($@)\n");
                 $ErrorCnt++;
@@ -428,7 +428,7 @@ sub copy_v3_file
                 $dir4 =~ s{(.*)/.*}{$1};
                 if ( !-d $dir4 ) {
                     print("Creating directory $dir4\n") if ( $LogLevel >= 5 );
-                    eval {mkpath($dir4, 0, 0777)};
+                    eval { mkpath($dir4, 0, 0777) };
                     if ( $@ ) {
                         print(STDERR "Can't mkpath $dir4 ($@)\n");
                         $ErrorCnt++;

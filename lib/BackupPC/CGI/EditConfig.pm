@@ -106,15 +106,15 @@ our %ConfigMenu = (
             #
             {
                 name    => "TopDir",
-                visible => sub {return $_[1]->useFHS();}
+                visible => sub { return $_[1]->useFHS(); }
             },
             {
                 name    => "LogDir",
-                visible => sub {return $_[1]->useFHS();}
+                visible => sub { return $_[1]->useFHS(); }
             },
             {
                 name    => "RunDir",
-                visible => sub {return $_[1]->useFHS();}
+                visible => sub { return $_[1]->useFHS(); }
             },
             {name => "CgiDir"},
             #
@@ -196,233 +196,233 @@ our %ConfigMenu = (
             ### Smb Settings
             {
                 text    => "CfgEdit_Title_Smb_Settings",
-                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+                visible => sub { return $_[0]->{XferMethod} eq "smb"; }
             },
             {
                 name    => "SmbShareName",
-                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+                visible => sub { return $_[0]->{XferMethod} eq "smb"; }
             },
             {
                 name    => "SmbShareUserName",
-                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+                visible => sub { return $_[0]->{XferMethod} eq "smb"; }
             },
             {
                 name    => "SmbSharePasswd",
-                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+                visible => sub { return $_[0]->{XferMethod} eq "smb"; }
             },
 
             ### Tar Settings
             {
                 text    => "CfgEdit_Title_Tar_Settings",
-                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+                visible => sub { return $_[0]->{XferMethod} eq "tar"; }
             },
             {
                 name    => "TarShareName",
-                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+                visible => sub { return $_[0]->{XferMethod} eq "tar"; }
             },
 
             ### Rsync Settings
             {
                 text    => "CfgEdit_Title_Rsync_Settings",
-                visible => sub {return $_[0]->{XferMethod} eq "rsync";}
+                visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
             },
             {
                 text    => "CfgEdit_Title_Rsyncd_Settings",
-                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; }
             },
             {
                 name    => "RsyncShareName",
-                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; }
             },
             {
                 name    => "RsyncdUserName",
-                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; }
             },
             {
                 name    => "RsyncdPasswd",
-                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; }
             },
 
             ### Ftp Settings
             {
                 text    => "CfgEdit_Title_Ftp_Settings",
-                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
             {
                 name    => "FtpShareName",
-                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
             {
                 name    => "FtpUserName",
-                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
             {
                 name    => "FtpPasswd",
-                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
             {
                 name    => "FtpPassive",
-                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
             {
                 name    => "FtpBlockSize",
-                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
             {
                 name    => "FtpPort",
-                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
             {
                 name    => "FtpTimeout",
-                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
             {
                 name    => "FtpFollowSymlinks",
-                visible => sub {return $_[0]->{XferMethod} eq "ftp";}
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
 
             ### Archive Settings
             {
                 text    => "CfgEdit_Title_Archive_Settings",
-                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+                visible => sub { return $_[0]->{XferMethod} eq "archive"; }
             },
             {
                 name    => "ArchiveDest",
-                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+                visible => sub { return $_[0]->{XferMethod} eq "archive"; }
             },
             {
                 name    => "ArchiveComp",
-                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+                visible => sub { return $_[0]->{XferMethod} eq "archive"; }
             },
             {
                 name    => "ArchivePar",
-                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+                visible => sub { return $_[0]->{XferMethod} eq "archive"; }
             },
             {
                 name    => "ArchiveSplit",
-                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+                visible => sub { return $_[0]->{XferMethod} eq "archive"; }
             },
 
             ### Include/Exclude Settings
             {
                 text    => "CfgEdit_Title_Include_Exclude",
-                visible => sub {return $_[0]->{XferMethod} ne "archive";}
+                visible => sub { return $_[0]->{XferMethod} ne "archive"; }
             },
             {
                 name    => "BackupFilesOnly",
-                visible => sub {return $_[0]->{XferMethod} ne "archive";}
+                visible => sub { return $_[0]->{XferMethod} ne "archive"; }
             },
             {
                 name    => "BackupFilesExclude",
-                visible => sub {return $_[0]->{XferMethod} ne "archive";}
+                visible => sub { return $_[0]->{XferMethod} ne "archive"; }
             },
 
             ### Samba paths and commands
             {
                 text    => "CfgEdit_Title_Smb_Paths_Commands",
-                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+                visible => sub { return $_[0]->{XferMethod} eq "smb"; }
             },
             {
                 name    => "SmbClientPath",
-                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+                visible => sub { return $_[0]->{XferMethod} eq "smb"; }
             },
             {
                 name    => "SmbClientFullCmd",
-                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+                visible => sub { return $_[0]->{XferMethod} eq "smb"; }
             },
             {
                 name    => "SmbClientIncrCmd",
-                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+                visible => sub { return $_[0]->{XferMethod} eq "smb"; }
             },
             {
                 name    => "SmbClientRestoreCmd",
-                visible => sub {return $_[0]->{XferMethod} eq "smb";}
+                visible => sub { return $_[0]->{XferMethod} eq "smb"; }
             },
 
             ### Tar paths and commands
             {
                 text    => "CfgEdit_Title_Tar_Paths_Commands",
-                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+                visible => sub { return $_[0]->{XferMethod} eq "tar"; }
             },
             {
                 name    => "TarClientPath",
-                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+                visible => sub { return $_[0]->{XferMethod} eq "tar"; }
             },
             {
                 name    => "TarClientCmd",
-                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+                visible => sub { return $_[0]->{XferMethod} eq "tar"; }
             },
             {
                 name    => "TarFullArgs",
-                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+                visible => sub { return $_[0]->{XferMethod} eq "tar"; }
             },
             {
                 name    => "TarIncrArgs",
-                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+                visible => sub { return $_[0]->{XferMethod} eq "tar"; }
             },
             {
                 name    => "TarClientRestoreCmd",
-                visible => sub {return $_[0]->{XferMethod} eq "tar";}
+                visible => sub { return $_[0]->{XferMethod} eq "tar"; }
             },
 
             ### Rsync paths and commands
             {
                 text    => "CfgEdit_Title_Rsync_Paths_Commands_Args",
-                visible => sub {return $_[0]->{XferMethod} eq "rsync";}
+                visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
             },
             {
                 text    => "CfgEdit_Title_Rsyncd_Port_Args",
-                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; }
             },
             {
                 name    => "RsyncBackupPCPath",
-                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; }
             },
             {
                 name    => "RsyncClientPath",
-                visible => sub {return $_[0]->{XferMethod} eq "rsync";}
+                visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
             },
             {
                 name    => "RsyncSshArgs",
-                visible => sub {return $_[0]->{XferMethod} eq "rsync";}
+                visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
             },
             {
                 name    => "RsyncdClientPort",
-                visible => sub {return $_[0]->{XferMethod} eq "rsyncd";}
+                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; }
             },
             {
                 name    => "RsyncArgs",
-                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; }
             },
             {
                 name    => "RsyncArgsExtra",
-                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; }
             },
             {
                 name    => "RsyncFullArgsExtra",
-                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; }
             },
             {
                 name    => "RsyncIncrArgsExtra",
-                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; }
             },
             {
                 name    => "RsyncRestoreArgs",
-                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; }
             },
             {
                 name    => "RsyncRestoreArgsExtra",
-                visible => sub {return $_[0]->{XferMethod} =~ /rsync/;}
+                visible => sub { return $_[0]->{XferMethod} =~ /rsync/; }
             },
 
             ### Archive paths and commands
             {
                 text    => "CfgEdit_Title_Archive_Paths_Commands",
-                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+                visible => sub { return $_[0]->{XferMethod} eq "archive"; }
             },
             {
                 name    => "ArchiveClientCmd",
-                visible => sub {return $_[0]->{XferMethod} eq "archive";}
+                visible => sub { return $_[0]->{XferMethod} eq "archive"; }
             },
 
         ],

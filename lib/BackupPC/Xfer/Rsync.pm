@@ -57,7 +57,6 @@ sub new
 
 sub start
 {
-
     my($t)   = @_;
     my $bpc  = $t->{bpc};
     my $conf = $t->{conf};
@@ -725,7 +724,7 @@ sub logSaveFlush
         #
         # prune the fileName logInfo array if it gets too big
         #
-        my @info = sort {$t->{logInfo}{$a}{seqNum} <=> $t->{logInfo}{$b}{seqNum}}
+        my @info = sort { $t->{logInfo}{$a}{seqNum} <=> $t->{logInfo}{$b}{seqNum} }
           keys(%{$t->{logInfo}});
         while ( @info > 500 ) {
             my $fileName = shift(@info);

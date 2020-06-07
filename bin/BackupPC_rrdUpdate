@@ -238,6 +238,6 @@ sub RRDGraph
         print("Can't open/create $LogDir/poolUsage$weeks.png\n");
         return;
     }
-    $bpc->cmdSystemOrEvalLong($poolSizeGraph, sub {print $fdOut $_[0]}, 1, undef);
+    $bpc->cmdSystemOrEvalLong($poolSizeGraph, sub { print $fdOut $_[0] }, 1, undef);
     close($fdOut);
 }

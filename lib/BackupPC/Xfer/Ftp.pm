@@ -185,7 +185,7 @@ sub start
     # Create the Net::FTP::AutoReconnect or Net::FTP object.
     #
     undef $@;
-    eval {$t->{ftp} = ($ARCLibOK) ? Net::FTP::AutoReconnect->new(%$args) : Net::FTP->new(%$args);};
+    eval { $t->{ftp} = ($ARCLibOK) ? Net::FTP::AutoReconnect->new(%$args) : Net::FTP->new(%$args); };
     if ( $@ || !defined($t->{ftp}) ) {
         $t->{_errStr} = "Can't open ftp connection to $args->{Host}: $!";
         $t->{xferErrCnt}++;
@@ -198,7 +198,7 @@ sub start
     #
     undef $@;
     my $ret;
-    eval {$ret = $t->{ftp}->login($conf->{FtpUserName}, $conf->{FtpPasswd});};
+    eval { $ret = $t->{ftp}->login($conf->{FtpUserName}, $conf->{FtpPasswd}); };
     if ( !$ret ) {
         $t->{_errStr} = "Can't ftp login to $args->{Host} (user = $conf->{FtpUserName}), $@";
         $t->{xferErrCnt}++;
@@ -206,7 +206,7 @@ sub start
     }
     $t->logWrite("Login successful to $conf->{FtpUserName}\@$args->{Host}\n", 2);
 
-    eval {$ret = $t->{ftp}->binary();};
+    eval { $ret = $t->{ftp}->binary(); };
     if ( !$ret ) {
         $t->{_errStr} =
           "Can't enable ftp binary transfer mode to $args->{Host}: " . $t->{ftp}->message();
@@ -215,7 +215,7 @@ sub start
     }
     $t->logWrite("Binary command successful\n", 2);
 
-    eval {$ret = $t->{ftp}->cwd($t->{shareNamePath});};
+    eval { $ret = $t->{ftp}->cwd($t->{shareNamePath}); };
     if ( !$ret ) {
         $t->{_errStr} =
           "Can't change working directory to $t->{shareNamePath}: " . $t->{ftp}->message();
@@ -391,7 +391,7 @@ sub restoreDir
     # Create the remote directory
     #
     undef $@;
-    eval {$ftp->mkdir($targetPath, 1);};
+    eval { $ftp->mkdir($targetPath, 1); };
     if ( $@ ) {
         $t->logFileAction("fail", $dirName, $dirAttr);
         return;
@@ -601,7 +601,9 @@ sub remotels
     $remoteDir = [];
     undef $@;
     $t->logWrite("remotels: about to list $name\n", 4);
-    eval {$dirContents = ($nameClient =~ /^\.?$/ || $nameClient =~ /^\/*$/) ? $ftp->dir() : $ftp->dir("$nameClient/");};
+    eval {
+        $dirContents = ($nameClient =~ /^\.?$/ || $nameClient =~ /^\/*$/) ? $ftp->dir() : $ftp->dir("$nameClient/");
+    };
     if ( !defined($dirContents) ) {
         $t->{xferErrCnt}++;
         $t->logWrite("remotels: can't retrieve remote directory contents of $name: $!\n", 1);
@@ -943,7 +945,7 @@ sub handleFile
     # TODO: convert back to local charset?
     #
     undef $@;
-    eval {tie(*FTP, 'Net::FTP::RetrHandle', $ftp, "$f->{name}");};
+    eval { tie(*FTP, 'Net::FTP::RetrHandle', $ftp, "$f->{name}"); };
     if ( !*FTP || $@ ) {
         $t->logFileAction("fail", $f->{name}, $f);
         $t->{xferBadFileCnt}++;
@@ -1319,7 +1321,7 @@ sub pathCreate
     $fullPath =~ s{/[^/]*$}{} if ( !$noStrip );
     return 0                  if ( -d $fullPath );
     unlink($fullPath)         if ( -e $fullPath );
-    eval {mkpath($fullPath, 0, 0777)};
+    eval { mkpath($fullPath, 0, 0777) };
     if ( $@ ) {
         $t->logWrite("Can't create $fullPath\n", 1);
         $t->{xferErrCnt}++;

@@ -713,7 +713,7 @@ if ( !defined($lastBkupNum) ) {
         # in case we exit without cleanup. Also add a flag that it's ok not
         # having any current poolCnt files.
         #
-        eval {mkpath("$Dir/$lastBkupNum/refCnt", 0, 0777)};
+        eval { mkpath("$Dir/$lastBkupNum/refCnt", 0, 0777) };
         if ( $@ ) {
             print($LogFd $bpc->timeStamp, "Can't create $Dir/$lastBkupNum/refCnt\n");
             print("Can't create backup directory $Dir/$lastBkupNum/refCnt")
@@ -852,7 +852,7 @@ if ( defined($newBkupNum) && !-d "$Dir/$newBkupNum" ) {
     #
     # Create the new backup directory
     #
-    eval {mkpath("$Dir/$newBkupNum", 0, 0777)};
+    eval { mkpath("$Dir/$newBkupNum", 0, 0777) };
     if ( $@ ) {
         print($LogFd $bpc->timeStamp, "Can't create $Dir/$newBkupNum\n");
         print("Can't create backup directory $Dir/$newBkupNum")
@@ -865,7 +865,7 @@ if ( defined($newBkupNum) && !-d "$Dir/$newBkupNum/refCnt" ) {
     # Create the new refCnt directory and flag it needing an fsck
     # in case we exit without cleanup.
     #
-    eval {mkpath("$Dir/$newBkupNum/refCnt", 0, 0777)};
+    eval { mkpath("$Dir/$newBkupNum/refCnt", 0, 0777) };
     if ( $@ ) {
         print($LogFd $bpc->timeStamp, "Can't create $Dir/$newBkupNum/refCnt\n");
         print("Can't create backup directory $Dir/$newBkupNum/refCnt")

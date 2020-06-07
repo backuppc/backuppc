@@ -223,7 +223,7 @@ EOF
             );
             my($archive) = Data::Dumper->new([\%ArchiveReq], [qw(*ArchiveReq)]);
             $archive->Indent(1);
-            eval {mkpath("$TopDir/pc/$archivehost", 0, 0777)}
+            eval { mkpath("$TopDir/pc/$archivehost", 0, 0777) }
               if ( !-d "$TopDir/pc/$archivehost" );
             my $openPath = "$TopDir/pc/$archivehost/$reqFileName";
             if ( open(REQ, ">", $openPath) ) {

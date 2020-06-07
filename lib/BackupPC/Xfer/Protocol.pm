@@ -226,7 +226,7 @@ sub getStats
     my($t) = @_;
 
     return {
-        map {$_ => $t->{$_}}
+        map { $_ => $t->{$_} }
           qw(byteCnt fileCnt xferErrCnt xferBadShareCnt xferBadFileCnt
           xferOK hostAbort hostError lastOutputLine)
     };
@@ -361,7 +361,7 @@ sub loadInclExclRegexps
     } elsif ( ref($conf->{BackupFilesExclude}) eq "ARRAY" ) {
 
         push(@BackupFilesExclude,
-            map {($_ =~ /\//) ? ($bpc->glob2re($_)) : ('.*\/' . $bpc->glob2re($_) . '(?<=\/.*)?')}
+            map { ($_ =~ /\//) ? ($bpc->glob2re($_)) : ('.*\/' . $bpc->glob2re($_) . '(?<=\/.*)?') }
               @{$conf->{BackupFilesExclude}});
 
     } elsif ( !defined($conf->{BackupFilesOnly}) ) {

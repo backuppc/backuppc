@@ -880,7 +880,7 @@ sub DoInstall
         "$Conf{TopDir}",  "$Conf{TopDir}/pool", "$Conf{TopDir}/cpool", "$Conf{TopDir}/pc",
         "$Conf{ConfDir}", "$Conf{LogDir}",      "$Conf{RunDir}",
     ) ) {
-        eval {mkpath("$DestDir$dir", 0, 0750)} if ( !-d "$DestDir$dir" );
+        eval { mkpath("$DestDir$dir", 0, 0750) } if ( !-d "$DestDir$dir" );
         if (   $@
             || !-d "$DestDir$dir"
             || !my_chown($Uid, $Gid, "$DestDir$dir") ) {

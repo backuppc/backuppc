@@ -209,7 +209,6 @@ sub poolCountUpdate
                         || $e->{name} eq "LOCK" );
                     my $digest   = pack("H*", $e->{name});
                     my $poolFile = "$subPoolDir/$e->{name}";
-
                     #printf("Got %s, digest = %s\n", $e->{name}, unpack("H*", $digest));
                     my($nBlks, @s);
                     if ( $opts{s} ) {
@@ -285,7 +284,6 @@ sub poolCountUpdate
                 }
                 my $kb   = int($blkCnt / 2 + 0.5);
                 my $kbRm = int($blkCntRm / 2 + 0.5);
-
                 #print("BackupPC_stats4 $refCntFile = $poolName,$fileCnt,$dirCnt,$kb,$kbRm,"
                 #      . "$fileCntRm,$fileCntRep,$fileRepMax,$fileLinkMax,$fileLinkTotal\n");
                 my $chunk = int($refCntFile / 8);

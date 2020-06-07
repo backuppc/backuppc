@@ -136,7 +136,6 @@ sub dirCache
 {
     my($m, $backupNum, $share, $dir) = @_;
     my($i, $level);
-
     #print STDERR "dirCache($backupNum, $share, $dir)\n";
     $dir = "/$dir" if ( $dir !~ m{^/} );
     $dir =~ s{/+$}{};
@@ -169,7 +168,6 @@ sub dirCache
         #
         $m->{mergeNums} = [];
         for ( $i = $m->{idx} ; $level > 0 && $i >= 0 ; $i-- ) {
-
             #print(STDERR "Do $i ($m->{backups}[$i]{noFill},$m->{backups}[$i]{level})\n");
             #
             # skip backups with the same or higher level
@@ -192,7 +190,6 @@ sub dirCache
                 $sharePathM = $share . $dir;
             }
             $path .= $sharePathM;
-
             #print(STDERR "Opening $path (share=$share, mangle=$mangle)\n");
 
             my $dirOpts    = {%{$m->{dirOpts} || {}}};
@@ -227,7 +224,6 @@ sub dirCache
                     # always has the complete directory tree).
                     #
                     next if ( $i < $m->{idx} && $a->{type} == BPC_FTYPE_DIR );
-
                     #print(STDERR "Adding $fileUM with type $a->{type}\n");
                     if ( !$m->{files}{$fileUM} ) {
                         $m->{files}{$fileUM} = $a;
@@ -275,12 +271,10 @@ sub dirCache
                         # always has the complete directory tree).
                         #
                         next if ( $i < $m->{idx} && $a->{type} == BPC_FTYPE_DIR );
-
                         #print(STDERR "Adding $fileUM with type $a->{type}\n");
                         $m->{files}{$fileUM} ||= $a;
                         $attr->delete($fileUM);
                     } else {
-
                         #print(STDERR "No attrib; determining attribs of $fileUM\n");
                         #
                         # Very expensive in the non-attribute case when compresseion
@@ -382,7 +376,6 @@ sub dirCache
         $m->{mergeNums} = [];
         my $hardlinks = {};
         for ( $i = $oldestFilled ; $i >= $m->{idx} ; $i-- ) {
-
             #print(STDERR "Do $i ($m->{backups}[$i]{noFill},$m->{backups}[$i]{level})\n");
 
             $backupNum = $m->{backups}[$i]{num};
@@ -393,7 +386,6 @@ sub dirCache
             my $topPath    = "$m->{topDir}/pc/$m->{host}/$backupNum/";
             my $sharePathM = $m->{bpc}->fileNameEltMangle($share) . $m->{bpc}->fileNameMangle($dir);
             my $path       = $topPath . $sharePathM;
-
             #print(STDERR "Opening $path (share=$share, mangle=$mangle)\n");
 
             my $dirOpts    = {%{$m->{dirOpts} || {}}};
@@ -414,7 +406,6 @@ sub dirCache
                     push(@{$m->{error}}, "Can't read attribute file in $path\n");
                 }
             } else {
-
                 #print(STDERR "Got attr\n");
                 my $idx = 0;
                 my $a;
@@ -423,7 +414,6 @@ sub dirCache
                     last if ( !defined($a) );
                     my $fileUM = $a->{name};
                     if ( $a->{type} == BPC_FTYPE_DELETED ) {
-
                         #print(STDERR "deleting $fileUM\n");
                         delete($m->{files}{$fileUM});
                         delete($hardlinks->{$fileUM});
@@ -464,7 +454,6 @@ sub dirCache
             }
         }
     }
-
     #print STDERR "Returning:\n", Dumper($m->{files}) if ( length($dir) );
 }
 
@@ -541,7 +530,6 @@ sub fileAttrib
         $m->dirCache($backupNum, $share, $path);
         return $m->{files}{$file};
     } else {
-
         #print STDERR "Got empty $path\n";
         $m->dirCache($backupNum, "", "");
         my $attr = $m->{files}{$share};
@@ -664,7 +652,6 @@ sub dirHistory
             $sharePathM = $share . $dir;
         }
         $path .= $sharePathM;
-
         #print(STDERR "Opening $path (share=$share)\n");
 
         my $dirOpts    = {%{$m->{dirOpts} || {}}};
@@ -715,7 +702,6 @@ sub dirHistory
                 my $file   = $1 if ( $entry->{name} =~ /(.*)/s );
                 my $fileUM = $file;
                 $fileUM = $m->{bpc}->fileNameUnmangle($fileUM) if ( $mangle );
-
                 #print(STDERR "Doing $fileUM\n");
                 #
                 # skip special files
@@ -825,7 +811,6 @@ sub dirHistory
     # some part of the backup has changed.
     #
     for ( $i = @{$m->{backups}} - 1 ; $i >= 0 ; $i-- ) {
-
         #print(STDERR "Do $i (num = $m->{backups}[$i]{num}, fill = $m->{backups}[$i]{noFill}, level = $m->{backups}[$i]{level})\n");
 
         last if ( $m->{backups}[$i]{version} < 4 );
@@ -845,7 +830,6 @@ sub dirHistory
         my $topPath    = "$m->{topDir}/pc/$m->{host}/$backupNum/";
         my $sharePathM = $m->{bpc}->fileNameEltMangle($share) . $m->{bpc}->fileNameMangle($dir);
         my $path       = $topPath . $sharePathM;
-
         #print(STDERR "Opening $path (share=$share, mangle=$mangle)\n");
 
         my $dirOpts    = {%{$m->{dirOpts} || {}}};
@@ -918,7 +902,6 @@ sub dirHistory
             $files->{$f}[$i]{inode}     = $a->{inode};
         }
     }
-
     #print STDERR "Returning:\n", Dumper($files);
     return $files;
 }
@@ -933,7 +916,6 @@ sub dirHistory
 sub find
 {
     my($m, $backupNum, $share, $path, $depth, $callback, @callbackArgs) = @_;
-
     #print(STDERR "find: got $backupNum, $share, $path\n");
     #
     # First call the callback on the given $path

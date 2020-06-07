@@ -1852,7 +1852,6 @@ sub BackupExpire
 #
 sub BackupFullExpire
 {
-
     my($client, $Backups) = @_;
     my $fullCnt    = 0;
     my $fullPeriod = $Conf{FillCycle} <= 0 ? $Conf{FullPeriod} : $Conf{FillCycle};
@@ -1924,7 +1923,6 @@ sub BackupFullExpire
             #print("Deleting backup $Backups->[$i]{num} (i = $i, k = $k, nextFull = $nextFull, prevFull = $prevFull, fullKeepIdx = $fullKeepIdx, fullCnt = $fullCnt)\n");
             unshift(@delete, $i);
         } else {
-
             #printf("Keeping backup $Backups->[$i]{num} (i = $i, k = $k, nextFull = $nextFull, prevFull = $prevFull, fullKeepIdx = $fullKeepIdx, fullCnt = $fullCnt, keepPeriod = %.3g, delta = %.3g)\n", $keepPeriod / (24 * 3600), (time - $Backups->[$i]{startTime}) / (24 * 3600));
             $fullCnt++;
             $nextFull = $i;
@@ -1936,7 +1934,6 @@ sub BackupFullExpire
                 $fullCnt    = 0;
                 $fullPeriod = 2 * $fullPeriod;
             }
-
             #print("    (now nextFull = $nextFull, prevFull = $prevFull, fullKeepIdx = $fullKeepIdx, fullCnt = $fullCnt, fullPeriod = $fullPeriod, fullKeepCnt[idx] = $fullKeepCnt->[$fullKeepIdx])\n");
         }
     }
@@ -2015,7 +2012,6 @@ sub BackupSave
 #
 sub BackupRemove
 {
-
     my($client, $idx, $removeXferLOG, $shareName) = @_;
     my $t    = time;
     my $pids = {};

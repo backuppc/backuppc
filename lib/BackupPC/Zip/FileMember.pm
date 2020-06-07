@@ -47,7 +47,6 @@ BEGIN { use Archive::Zip qw( :CONSTANTS :ERROR_CODES :UTILITY_METHODS ) }
 # Given a file name, set up for eventual writing.
 sub newFromFileNamed    # BackupPC::Zip::FileMember
 {
-
     my $class    = shift;
     my $fileName = shift;
     my $newName  = shift || $fileName;

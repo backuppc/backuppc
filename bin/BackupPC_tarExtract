@@ -519,7 +519,6 @@ sub xattrEqual
 
 sub TarReadFile
 {
-
     my($fh) = @_;
     my $f = TarReadFileInfo($fh) || return;
     my($file, $exist, $digest);
@@ -594,7 +593,6 @@ sub TarReadFile
         # Write the file
         #
         my($nRead);
-
         #print("Reading $f->{name}, $f->{size} bytes, type $f->{type}\n");
         my $poolWrite = BackupPC::XS::PoolWrite::new($Compress);
         while ( $nRead < $f->{size} ) {

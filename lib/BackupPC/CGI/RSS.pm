@@ -139,7 +139,6 @@ sub action
     my $now = timeStamp2(time);
 
     print 'Content-type: text/xml', "\r\n\r\n", $rss->as_string;
-
 }
 
 1;

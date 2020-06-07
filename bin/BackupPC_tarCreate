@@ -189,7 +189,6 @@ if ( $ShareName eq "*" ) {
     my $PathRemoveOrig = $PathRemove;
     my $PathAddOrig    = $PathAdd;
     foreach $ShareName ( $view->shareList($Num) ) {
-
         #print(STDERR "Doing share ($ShareName)\n");
         $PathRemove = "/" if ( !defined($PathRemoveOrig) );
         ($PathAdd = "/$ShareName/$PathAddOrig") =~ s{//+}{/}g;
@@ -244,7 +243,6 @@ sub archiveWrite
         return;
     }
     $dir = "/" if ( $dir eq "." );
-
     #print(STDERR "calling find with $Num, $ShareName, $dir\n");
     if ( $view->find($Num, $ShareName, $dir, 0, \&TarWriteFile, $fh, $tarPathOverride) < 0 ) {
         print(STDERR "$0: bad share or directory '$ShareName/$dir'\n");

@@ -147,7 +147,6 @@ sub seek
 
 sub _newpos
 {
-
     my($curpos, $size, $pos, $whence) = @_;
     if ( $whence == 0 )    # seek_set
     {
@@ -582,7 +581,6 @@ sub EOF
 {
     my $self = shift;
     return $self->eof(@_);
-
 }
 
 sub UNTIE

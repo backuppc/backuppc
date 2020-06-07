@@ -1204,7 +1204,6 @@ sub cmdSystemOrEvalLong
                 &$stdoutCB($out);
             }
         }
-
         #print(STDERR "cmdSystemOrEval: finished: got output $out\n")
         #		if ( $bpc->{verbose} );
         return $out if ( !defined($stdoutCB) );
@@ -1233,9 +1232,10 @@ sub cmdSystemOrEvalLong
             }
             alarm(0);
             $cmd = [map {m/(.*)/} @$cmd];    # untaint
-                                             #
-                                             # force list-form of exec(), ie: no shell even for 1 arg
-                                             #
+
+            #
+            # force list-form of exec(), ie: no shell even for 1 arg
+            #
             exec {$cmd->[0]} @$cmd;
             print(STDERR "Exec of @$cmd failed\n");
             POSIX::_exit(1);
@@ -1259,7 +1259,6 @@ sub cmdSystemOrEvalLong
         $? = 0;
         close(CHILD);
     }
-
     #print(STDERR "cmdSystemOrEval: finished: got output $allOut\n")
     #   		if ( $bpc->{verbose} );
     return $out;

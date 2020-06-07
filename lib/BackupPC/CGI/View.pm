@@ -42,7 +42,6 @@ use Encode qw/decode_utf8/;
 
 sub action
 {
-
     my $Privileged = CheckPermission($In{host});
     my $compress   = 0;
     my $fh;

@@ -518,7 +518,6 @@ sub Main_TryToRun_nightly
                         $clear = ($i % $Conf{PoolSizeNightlyUpdatePeriod}) ==
                           ($Info->{PoolSizeNightlyPhase} % $Conf{PoolSizeNightlyUpdatePeriod});
                     }
-
                     #print(LOG $bpc->timeStamp, "updating $p size of $i (clear = $clear, phase = $Info->{PoolSizeNightlyPhase},"
                     #                         . " \$Conf{PoolSizeNightlyUpdatePeriod} = $Conf{PoolSizeNightlyUpdatePeriod})\n");
 
@@ -1224,7 +1223,6 @@ sub Main_Check_Job_Messages
                 $Status->{$host}{endTime} = time;
                 if ( $cmd =~ /^BackupPC_nightly\s/ ) {
                     $BackupPCNightlyJobs--;
-
                     #print(LOG $bpc->timeStamp, "BackupPC_nightly done; now"
                     #         . " have $BackupPCNightlyJobs running\n");
                     if ( $BackupPCNightlyJobs <= 0 ) {

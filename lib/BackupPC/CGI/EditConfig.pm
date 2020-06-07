@@ -498,7 +498,6 @@ our %ConfigMenu = (
 
 sub action
 {
-
     my $pc_dir = "$TopDir/pc";
     my($content, $contentHidden, $newConf, $override, $mainConf, $hostConf);
     my $errors = {};

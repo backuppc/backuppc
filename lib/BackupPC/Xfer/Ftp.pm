@@ -129,7 +129,6 @@ sub new
 #
 sub start
 {
-
     my($t) = @_;
 
     my $bpc    = $t->{bpc};
@@ -371,7 +370,6 @@ sub restore
 
 sub restoreDir
 {
-
     my($t, $dirName, $dirAttr) = @_;
 
     my $ftp  = $t->{ftp};
@@ -422,7 +420,6 @@ sub restoreDir
 
 sub restoreFile
 {
-
     my($t, $fileName, $fileAttr) = @_;
 
     my $conf   = $t->{conf};
@@ -582,7 +579,6 @@ sub getFTPArgs
 #
 sub remotels
 {
-
     my($t, $name) = @_;
 
     my $ftp        = $t->{ftp};
@@ -759,7 +755,6 @@ sub handleSymlink
 #
 sub handleDir
 {
-
     my($t, $f) = @_;
 
     my $ftp     = $t->{ftp};
@@ -904,7 +899,6 @@ sub handleDir
 #
 sub handleFile
 {
-
     my($t, $f) = @_;
 
     my $bpc   = $t->{bpc};
@@ -1058,7 +1052,6 @@ sub logFileAction
 #
 sub moveFileToOld
 {
-
     my($t, $a, $f) = @_;
     my $AttrNew  = $t->{AttrNew};
     my $AttrOld  = $t->{AttrOld};
@@ -1145,7 +1138,6 @@ sub moveFileToOld
 
 sub copyInodes
 {
-
     my($t, $dirName) = @_;
     my $AttrNew  = $t->{AttrNew};
     my $AttrOld  = $t->{AttrOld};

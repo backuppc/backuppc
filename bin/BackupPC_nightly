@@ -365,7 +365,6 @@ sub CleanV4PoolTempFiles
             my $pid = $1;
             $pidRunning->{$pid} = kill(0, $pid) ? 1 : 0 if ( !defined($pidRunning->{$pid}) );
             next if ( $pidRunning->{$pid} );
-
             #print("pid $pid: unlink $TopDir/$pool/$e->{name}\n");
             unlink("$TopDir/$pool/$e->{name}");
         }

@@ -175,7 +175,6 @@ exit($ErrorCnt ? 1 : 0);
 #
 sub updateHostPoolCnt
 {
-
     my($host, $forceLast2Fsck, $forceFullFsck, $compareCurr) = @_;
     my $pcDir        = "$TopDir/pc/$host";
     my $refCntDir    = "$pcDir/refCnt";
@@ -352,7 +351,6 @@ sub updateHostPoolCnt
 
 sub processOneHostBackup
 {
-
     my($host, $bkupNum, $fsck, $compress) = @_;
     my $pcDir         = "$TopDir/pc/$host";
     my $bkupRefCntDir = "$pcDir/$bkupNum/refCnt";

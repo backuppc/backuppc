@@ -296,7 +296,6 @@ sub shareName2Path
 #
 sub loadInclExclRegexps
 {
-
     my($t, $shareType) = @_;
     my $bpc  = $t->{bpc};
     my $conf = $t->{conf};

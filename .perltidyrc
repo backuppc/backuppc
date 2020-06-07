@@ -12,6 +12,7 @@
 --block-brace-tightness=2
 --keyword-paren-inner-tightness=0
 --nospace-after-keyword="my our local"
+--space-after-keyword=xor
 
 --weld-nested-containers
 --keep-interior-semicolons

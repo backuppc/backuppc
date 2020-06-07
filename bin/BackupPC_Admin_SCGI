@@ -90,7 +90,6 @@ use BackupPC::CGI::Summary;
 use BackupPC::CGI::View;
 
 my %ActionDispatch = (
-    "deleteBackup"         => "DeleteBackup",
     "summary"              => "Summary",
     "Start_Incr_Backup"    => "StartStopBackup",
     "Start_Full_Backup"    => "StartStopBackup",
@@ -115,6 +114,9 @@ my %ActionDispatch = (
     "Stop"                 => "StopServer",
     "adminOpts"            => "AdminOptions",
     "editConfig"           => "EditConfig",
+    "deleteBackup"         => "DeleteBackup",
+    "keepBackup"           => "HostInfo",
+    "rss"                  => "RSS",
 );
 my %ChildPid2Num;
 

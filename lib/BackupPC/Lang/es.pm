@@ -1036,11 +1036,11 @@ $Lang{Email_Summary} = "BackupPC: Resumen de Correos";
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} =
   "BackupPC::Lib->nuevo ha fallado: revise el error_log de apache\n";
 $Lang{Wrong_user__my_userid_is___} =
-  "Usuario err&oacute;neo: mi userid es \$>, en lugar de \$uid" . "(\$Conf{BackupPCUser})\n";
+  "Usuario err&oacute;neo: mi userid es \$>, en lugar de \$uid(\$Conf{BackupPCUser})\n";
 
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "S&oacute;lo los usuarios autorizados pueden ver los res&uacute;menes de PC's.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-  "S&oacute;lo los usuarios autorizados pueden iniciar o detener las copias de seguridad en" . " \${EscHTML(\$host)}.";
+  "S&oacute;lo los usuarios autorizados pueden iniciar o detener las copias de seguridad en \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num}                         = "N&uacute;mero no v&aacute;lido \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "No puedo abrir \$file: &iquest;problema de configuraci&oacute;n?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} =
@@ -1053,38 +1053,38 @@ $Lang{Only_privileged_users_can_browse_backup_files} =
     "S&oacute;lo los usuarios autorizados pueden revisar los archivos de las copias de seguridad"
   . " para el Host \${EscHTML(\$In{host})}.";
 $Lang{Only_privileged_users_can_delete_backups} =
-  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+  "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}     = "Nombre de Host vac&iacute;o.";
-$Lang{Directory___EscHTML} = "El directorio \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " est&aacute; vac&iacute;o";
+$Lang{Directory___EscHTML} = "El directorio \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} est&aacute; vac&iacute;o";
 $Lang{Can_t_browse_bad_directory_name2} =
-  "No puedo mostrar un nombre de directorio err&oacute;neo" . " \${EscHTML(\$relDir)}";
+  "No puedo mostrar un nombre de directorio err&oacute;neo \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} =
     "S&oacute;lo los usuarios autorizados pueden restaurar copias de seguridad"
   . " para el host \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Nombre de Host err&oacute;neo \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} =
-  "No ha seleccionado nig&uacute;n archivo; por favor, vuelva a" . " seleccione algunos archivos.";
+  "No ha seleccionado nig&uacute;n archivo; por favor, vuelva a seleccione algunos archivos.";
 $Lang{You_haven_t_selected_any_hosts} =
-  "No ha seleccionado ning&uacute;n host; por favor vuelva a" . " seleccione algunos hosts.";
+  "No ha seleccionado ning&uacute;n host; por favor vuelva a seleccione algunos hosts.";
 $Lang{Nice_try__but_you_can_t_put} = "Buen intento, pero no puede usar \'..\' en los nombres de archivo";
 $Lang{Host__doesn_t_exist}         = "El Host \${EscHTML(\$In{hostDest})} no existe";
 $Lang{You_don_t_have_permission_to_restore_onto_host} =
-  "No tiene autorizaci&oacute;n para restaurar en el host" . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "No puedo abrir/crear " . "\${EscHTML(\"\$openPath\")}";
+  "No tiene autorizaci&oacute;n para restaurar en el host \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath} = "No puedo abrir/crear \${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} =
-  "S&oacute;lo los usuarios autorizados pueden restaurar copias de seguridad" . " del host \${EscHTML(\$host)}.";
+  "S&oacute;lo los usuarios autorizados pueden restaurar copias de seguridad del host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}      = "Nombre de host vac&iacute;o";
 $Lang{Unknown_host_or_user} = "Host o usuario desconocido \${EscHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} =
-  "S&oacute;lo los usuarios autorizados pueden ver informaci&oacute;n del" . " host \${EscHTML(\$host)}.";
+  "S&oacute;lo los usuarios autorizados pueden ver informaci&oacute;n del host \${EscHTML(\$host)}.";
 $Lang{Only_privileged_users_can_view_archive_information} =
   "S&oacute;lo los usuarios autorizados pueden ver informaci&oacute;n de archivo.";
 $Lang{Only_privileged_users_can_view_restore_information} =
   "S&oacute;lo los usuarios autorizados pueden ver informaci&oacute;n de restauraci&oacute;n.";
 $Lang{Restore_number__num_for_host__does_not_exist} =
-  "El n&uacute;mero de restauraci&oacute;n \$num del host \${EscHTML(\$host)} " . " no existe.";
+  "El n&uacute;mero de restauraci&oacute;n \$num del host \${EscHTML(\$host)}  no existe.";
 $Lang{Archive_number__num_for_host__does_not_exist} =
-  "La copia de seguridad \$num del host \${EscHTML(\$host)} " . " no existe.";
+  "La copia de seguridad \$num del host \${EscHTML(\$host)}  no existe.";
 $Lang{Can_t_find_IP_address_for} = "No puedo encontrar la direcci&oacute;n IP de \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host}       = <<EOF;
 \$host es un host DHCP y no conozco su direcci&oacute;n IP. He comprobado el
@@ -1100,14 +1100,14 @@ EOF
 # ------------------------------------
 
 $Lang{Backup_requested_on_DHCP__host} =
-  "Copia de seguridad solicitada en DHCP \$host (\$In{hostIP}) por" . " \$User desde \$ENV{REMOTE_ADDR}";
+  "Copia de seguridad solicitada en DHCP \$host (\$In{hostIP}) por \$User desde \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User}        = "Copia de seguridad solicitada en \$host por \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Copia de seguridad detenida/desprogramada en \$host por \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
     "Restauraci&oacute;n solicitada para el host \$hostDest, copia de seguridad #\$num,"
   . " por \$User desde \$ENV{REMOTE_ADDR}";
 $Lang{Delete_requested_for_backup_of__host_by__User} =
-  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
+  "Delete requested for backup #\$num of \$host by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivo solicitado por \$User desde \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------

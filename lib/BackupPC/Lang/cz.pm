@@ -1029,11 +1029,11 @@ $Lang{Email_Summary} = "BackupPC: Souhrn emailů";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: zkontroluj apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} = "Şpatný uživatel: moje userid je \$>, místo \$uid" . "(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___} = "Şpatný uživatel: moje userid je \$>, místo \$uid(\$Conf{BackupPCUser})\n";
 
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Pouze oprávnění uživatelé jsou oprávněni prohlížet souhrny PC.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-  "Pouze oprávnění uživatelé mohou ukončit nebo spustit zálohování na" . " \${EscHTML(\$host)}.";
+  "Pouze oprávnění uživatelé mohou ukončit nebo spustit zálohování na \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num}                         = "Şpatné číslo \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Nepodařilo se otevřít \$file: problém konfigurace?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} =
@@ -1041,38 +1041,36 @@ $Lang{Only_privileged_users_can_view_log_or_config_files} =
 $Lang{Only_privileged_users_can_view_log_files}       = "Pouze oprávnění uživatelé mají přístup k log souborům.";
 $Lang{Only_privileged_users_can_view_email_summaries} = "Pouze oprávnění uživatelé mají přístup k souhrnu emailů.";
 $Lang{Only_privileged_users_can_browse_backup_files} =
-  "Pouze oprávnění uživatelé mohou prohlížet soubory záloh" . " pro host \${EscHTML(\$In{host})}.";
+  "Pouze oprávnění uživatelé mohou prohlížet soubory záloh pro host \${EscHTML(\$In{host})}.";
 $Lang{Only_privileged_users_can_delete_backups} =
-  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+  "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}                  = "Prázdné jméno hosta.";
-$Lang{Directory___EscHTML}              = "Adresář \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " je prázdný";
-$Lang{Can_t_browse_bad_directory_name2} = "Není možné prohlížet - şpatný název adresáře" . " \${EscHTML(\$relDir)}";
+$Lang{Directory___EscHTML}              = "Adresář \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} je prázdný";
+$Lang{Can_t_browse_bad_directory_name2} = "Není možné prohlížet - şpatný název adresáře \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} =
-  "Pouze oprávnění uživatelé mohou obnovovat soubory zálohy" . " pro hosta \${EscHTML(\$In{host})}.";
+  "Pouze oprávnění uživatelé mohou obnovovat soubory zálohy pro hosta \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Şpatné jméno hosta \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} =
-  "Nevybral jste žádný soubor; prosím jděte Zpět k" . " výběru souborů.";
-$Lang{You_haven_t_selected_any_hosts} = "Nevybral jste žádného hosta; prosím jděte Zpět k" . " výběru hostů.";
+  "Nevybral jste žádný soubor; prosím jděte Zpět k výběru souborů.";
+$Lang{You_haven_t_selected_any_hosts} = "Nevybral jste žádného hosta; prosím jděte Zpět k výběru hostů.";
 $Lang{Nice_try__but_you_can_t_put}    = "Nelze umístit \'..\' do názvu souboru";
 $Lang{Host__doesn_t_exist}            = "Host \${EscHTML(\$In{hostDest})} neexistuje";
-$Lang{You_don_t_have_permission_to_restore_onto_host} = "Nemáte oprávnění k obnově na" . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath}                    = "Nelze otevřít nebo vytvořit " . "\${EscHTML(\"\$openPath\")}";
+$Lang{You_don_t_have_permission_to_restore_onto_host} = "Nemáte oprávnění k obnově na \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath}                    = "Nelze otevřít nebo vytvořit \${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} =
-  "Pouze oprávnění uživatelé mohou obnovovat soubory zálohy" . " pro hosta \${EscHTML(\$host)}.";
+  "Pouze oprávnění uživatelé mohou obnovovat soubory zálohy pro hosta \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}      = "Prázdné jméno hosta";
 $Lang{Unknown_host_or_user} = "Neznámý host nebo uživatel \${EscHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} =
-  "Pouze oprávnění uživatelé mají přístup k informacím o" . " hostu \${EscHTML(\$host)}.";
+  "Pouze oprávnění uživatelé mají přístup k informacím o hostu \${EscHTML(\$host)}.";
 $Lang{Only_privileged_users_can_view_archive_information} =
   "Pouze oprávnění uživatelé mají přístup k informacím o archivaci.";
 $Lang{Only_privileged_users_can_view_restore_information} =
   "Pouze oprávnění uživatelé mají přístup k informacím o obnově.";
-$Lang{Restore_number__num_for_host__does_not_exist} =
-  "Číslo obnovení \$num pro hosta \${EscHTML(\$host)}" . " neexsituje.";
-$Lang{Archive_number__num_for_host__does_not_exist} =
-  "Číslo archivu \$num pro hosta \${EscHTML(\$host)}" . " neexsituje.";
-$Lang{Can_t_find_IP_address_for} = "Nelze nalézt IP adresu pro \${EscHTML(\$host)}";
-$Lang{host_is_a_DHCP_host}       = <<EOF;
+$Lang{Restore_number__num_for_host__does_not_exist} = "Číslo obnovení \$num pro hosta \${EscHTML(\$host)} neexsituje.";
+$Lang{Archive_number__num_for_host__does_not_exist} = "Číslo archivu \$num pro hosta \${EscHTML(\$host)} neexsituje.";
+$Lang{Can_t_find_IP_address_for}                    = "Nelze nalézt IP adresu pro \${EscHTML(\$host)}";
+$Lang{host_is_a_DHCP_host}                          = <<EOF;
 \$host je DHCP host, and není známa jeho IP adresa.  Zkontrolováno
 netbios jméno \$ENV{REMOTE_ADDR}\$tryIP, a zjiştěno, že zařízení
 není \$host.
@@ -1086,13 +1084,13 @@ EOF
 # ------------------------------------
 
 $Lang{Backup_requested_on_DHCP__host} =
-  "Záloha vyžádána z DHCP \$host (\$In{hostIP}) uživatelem" . " \$User z \$ENV{REMOTE_ADDR}";
+  "Záloha vyžádána z DHCP \$host (\$In{hostIP}) uživatelem \$User z \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User}        = "Záloha vyžádána z \$host uživatelem \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Záloha ukončena/vyřazena z fronty z \$host uživatelem \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
-  "Obnova vyžádána na hosta \$hostDest, obnova #\$num," . " uživatelem \$User z \$ENV{REMOTE_ADDR}";
+  "Obnova vyžádána na hosta \$hostDest, obnova #\$num, uživatelem \$User z \$ENV{REMOTE_ADDR}";
 $Lang{Delete_requested_for_backup_of__host_by__User} =
-  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
+  "Delete requested for backup #\$num of \$host by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivace vyžádána uživatelem \$User z \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------

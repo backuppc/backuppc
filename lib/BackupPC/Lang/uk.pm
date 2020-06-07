@@ -1031,12 +1031,11 @@ $Lang{Email_Summary} = "BackupPC: Зведена інформація по Email
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: check apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =
-  "Неправильний користувач: мій userid  \$>, а не \$uid" . "(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___} = "Неправильний користувач: мій userid  \$>, а не \$uid(\$Conf{BackupPCUser})\n";
 
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-  "Тільки привілейований користувач може запустити резевне копіювання на" . " \${EscHTML(\$host)}.";
+  "Тільки привілейований користувач може запустити резевне копіювання на \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num}                         = "Неправильнмй номер \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Неможливо відкрити \$file: проблеми з конфігурацією?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} =
@@ -1045,37 +1044,36 @@ $Lang{Only_privileged_users_can_view_log_files} = "Тільки привілей
 $Lang{Only_privileged_users_can_view_email_summaries} =
   "Тільки привілейований користувач може переглядати інформацію про email.";
 $Lang{Only_privileged_users_can_browse_backup_files} =
-  "Тільки привілейований користувач може переглядати файли резервних копій" . " для хосту \${EscHTML(\$In{host})}.";
+  "Тільки привілейований користувач може переглядати файли резервних копій для хосту \${EscHTML(\$In{host})}.";
 $Lang{Only_privileged_users_can_delete_backups} =
-  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+  "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}                  = "Порожнє ім\'я хоста.";
-$Lang{Directory___EscHTML}              = "Тека \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " порожня";
-$Lang{Can_t_browse_bad_directory_name2} = "Не вдається відкрити неправильну назву теки" . " \${EscHTML(\$relDir)}";
+$Lang{Directory___EscHTML}              = "Тека \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} порожня";
+$Lang{Can_t_browse_bad_directory_name2} = "Не вдається відкрити неправильну назву теки \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} =
-  "Тільки привілейований користувач може відновлювати файли з резервних копій" . " для хоста \${EscHTML(\$In{host})}.";
+  "Тільки привілейований користувач може відновлювати файли з резервних копій для хоста \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Неправильне ім\'я хоста \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} =
-  "Ви не обрали жодного файла; Будь ласка поверніться назад" . " та оберіть якийсь файл.";
+  "Ви не обрали жодного файла; Будь ласка поверніться назад та оберіть якийсь файл.";
 $Lang{You_haven_t_selected_any_hosts} =
-  "Ви не обрали жодного хоста; будь ласка поверніться назад" . " та оберіть якийсь хост.";
+  "Ви не обрали жодного хоста; будь ласка поверніться назад та оберіть якийсь хост.";
 $Lang{Nice_try__but_you_can_t_put} = "Добра спроба, але ви не можете вставити \'..\' у будь яке ім\'я файлу";
 $Lang{Host__doesn_t_exist}         = "Хост \${EscHTML(\$In{hostDest})} не існує";
 $Lang{You_don_t_have_permission_to_restore_onto_host} =
-  "У Вас немає прав відновлення на хост" . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "не можливо відкрити/створити " . "\${EscHTML(\"\$openPath\")}";
+  "У Вас немає прав відновлення на хост \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath} = "не можливо відкрити/створити \${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} =
-  "Тільки привілейований користувач може відновити резервну копію" . " для хоста \${EscHTML(\$host)}.";
+  "Тільки привілейований користувач може відновити резервну копію для хоста \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}      = "Порожнє ім\'я хоста";
 $Lang{Unknown_host_or_user} = "Невідомий хост або користувач \${EscHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} =
-  "Тільки привілейований користувач може переглядати інформацію про" . " хост \${EscHTML(\$host)}.";
+  "Тільки привілейований користувач може переглядати інформацію про хост \${EscHTML(\$host)}.";
 $Lang{Only_privileged_users_can_view_archive_information} =
   "Тільки привілейований користувач може переглядати інформацію про архівування.";
 $Lang{Only_privileged_users_can_view_restore_information} =
   "Тільки привілейований користувач може переглядати інформацію про відновлення.";
-$Lang{Restore_number__num_for_host__does_not_exist} =
-  "Номер відновлення \$num для хосту \${EscHTML(\$host)} не" . " існує.";
-$Lang{Archive_number__num_for_host__does_not_exist} = "Номер архіву \$num для хосту \${EscHTML(\$host)} не" . " існує.";
+$Lang{Restore_number__num_for_host__does_not_exist} = "Номер відновлення \$num для хосту \${EscHTML(\$host)} не існує.";
+$Lang{Archive_number__num_for_host__does_not_exist} = "Номер архіву \$num для хосту \${EscHTML(\$host)} не існує.";
 $Lang{Can_t_find_IP_address_for}                    = "Неможливо знайти IP адресу для \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host}                          = <<EOF;
 \$host отримує адресу по DHCP і я не знаю його IP адреси.  Я перевірив
@@ -1091,13 +1089,13 @@ EOF
 # ------------------------------------
 
 $Lang{Backup_requested_on_DHCP__host} =
-  "Запит на резерв. копіювання на DHCP \$host (\$In{hostIP}) від" . " \$User з \$ENV{REMOTE_ADDR}";
+  "Запит на резерв. копіювання на DHCP \$host (\$In{hostIP}) від \$User з \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User}        = "Запит на резерв. копіювання з \$host від \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Резерв. копіювання зупинено/виключено з черги на \$host від \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
-  "Запит на відновлення на \$hostDest, резерв. копія #\$num," . " від \$User на \$ENV{REMOTE_ADDR}";
+  "Запит на відновлення на \$hostDest, резерв. копія #\$num, від \$User на \$ENV{REMOTE_ADDR}";
 $Lang{Delete_requested_for_backup_of__host_by__User} =
-  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
+  "Delete requested for backup #\$num of \$host by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Запит на архів від \$User на \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------

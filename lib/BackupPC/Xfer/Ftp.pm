@@ -153,7 +153,7 @@ sub start
     # Net::FTP::RetrHandle is necessary.
     #
     if ( !$FTPLibOK ) {
-        $t->{_errStr} = "Error: FTP transfer selected but module" . " Net::FTP::RetrHandle is not installed.";
+        $t->{_errStr} = "Error: FTP transfer selected but module Net::FTP::RetrHandle is not installed.";
         $t->{xferErrCnt}++;
         return;
     }
@@ -228,13 +228,13 @@ sub start
     # log the beginning of action based on type
     #
     if ( $t->{type} eq 'restore' ) {
-        $logMsg = "ftp restore for host $t->{host} started on directory " . "$t->{shareName}";
+        $logMsg = "ftp restore for host $t->{host} started on directory $t->{shareName}";
 
     } elsif ( $t->{type} eq 'full' ) {
-        $logMsg = "ftp full backup for host $t->{host} started on directory " . "$t->{shareName}";
+        $logMsg = "ftp full backup for host $t->{host} started on directory $t->{shareName}";
 
     } elsif ( $t->{type} eq 'incr' ) {
-        $logMsg = "ftp incremental backup for $t->{host} started for directory " . "$t->{shareName}";
+        $logMsg = "ftp incremental backup for $t->{host} started for directory $t->{shareName}";
     }
     $logMsg .= " (client path $t->{shareNamePath})" if ( $t->{shareName} ne $t->{shareNamePath} );
     $t->logWrite($logMsg . "\n", 1);

@@ -1037,12 +1037,11 @@ $Lang{Email_Summary} = "BackupPC: E-Mailübersicht";
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} =
   "BackupPC::Lib->new failed: Überprüfen Sie das Apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} =
-  "Falscher Benutzer: Meine userid ist \$>, anstelle \$uid" . "(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___} = "Falscher Benutzer: Meine userid ist \$>, anstelle \$uid(\$Conf{BackupPCUser})\n";
 
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Nur berechtigte Benutzer können die Computer Übersicht einsehen.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-  "Nur berechtigte Benutzer können Backups starten und stoppen für" . " \${EscHTML(\$host)}.";
+  "Nur berechtigte Benutzer können Backups starten und stoppen für \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num}                         = "ungültige Nummer \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "kann Datei nicht öffnen \$file: Konfigurationsproblem?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} =
@@ -1051,38 +1050,37 @@ $Lang{Only_privileged_users_can_view_log_files} = "Nur berechtigte Benutzer kön
 $Lang{Only_privileged_users_can_view_email_summaries} =
   "Nur berechtigte Benutzer können die E-Mail Übersicht einsehen.";
 $Lang{Only_privileged_users_can_browse_backup_files} =
-  "Nur berechtigte Benutzer können Backup Dateien durchsuchen" . " für computer \${EscHTML(\$In{host})}.";
+  "Nur berechtigte Benutzer können Backup Dateien durchsuchen für computer \${EscHTML(\$In{host})}.";
 $Lang{Only_privileged_users_can_delete_backups} =
-  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name}     = "Kein Hostname.";
-$Lang{Directory___EscHTML} = "Verzeichnis \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " ist leer";
-$Lang{Can_t_browse_bad_directory_name2} =
-  "Kann fehlerhaften Verzeichnisnamen nicht durchsuchen" . " \${EscHTML(\$relDir)}";
+  "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}                  = "Kein Hostname.";
+$Lang{Directory___EscHTML}              = "Verzeichnis \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} ist leer";
+$Lang{Can_t_browse_bad_directory_name2} = "Kann fehlerhaften Verzeichnisnamen nicht durchsuchen \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} =
-  "Nur berechtigte Benutzer können Dateien wiederherstellen" . " für Computer \${EscHTML(\$In{host})}.";
+  "Nur berechtigte Benutzer können Dateien wiederherstellen für Computer \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Falscher Computer Name \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} =
-  "Sie haben keine Dateien selektiert; bitte gehen Sie zurück um" . " Dateien zu selektieren.";
+  "Sie haben keine Dateien selektiert; bitte gehen Sie zurück um Dateien zu selektieren.";
 $Lang{You_haven_t_selected_any_hosts} = "Sie haben keinen Computer gewählt, bitte zurück gehen um einen auszuwählen.";
 $Lang{Nice_try__but_you_can_t_put}    = "Sie dürfen \'..\' nicht in Dateinamen verwenden";
 $Lang{Host__doesn_t_exist}            = "Computer \${EscHTML(\$In{hostDest})} existiert nicht";
 $Lang{You_don_t_have_permission_to_restore_onto_host} =
-  "Sie haben keine Berechtigung zum Restore auf Computer" . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "Kann Datei nicht öffnen oder erstellen " . "\${EscHTML(\"\$openPath\")}";
+  "Sie haben keine Berechtigung zum Restore auf Computer \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath} = "Kann Datei nicht öffnen oder erstellen \${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} =
-  "Nur berechtigte Benutzer dürfen Backup und Restore von Dateien" . " für Computer \${EscHTML(\$host)} durchführen.";
+  "Nur berechtigte Benutzer dürfen Backup und Restore von Dateien für Computer \${EscHTML(\$host)} durchführen.";
 $Lang{Empty_host_name}      = "leerer Computer Name";
 $Lang{Unknown_host_or_user} = "Unbekannter Computer oder Benutzer \${EscHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} =
-  "Nur berechtigte Benutzer können Informationen sehen über" . " Computer \${EscHTML(\$host)}.";
+  "Nur berechtigte Benutzer können Informationen sehen über Computer \${EscHTML(\$host)}.";
 $Lang{Only_privileged_users_can_view_archive_information} =
   "Nur berechtigte Benutzer können Archiv Informationen einsehen.";
 $Lang{Only_privileged_users_can_view_restore_information} =
   "Nur berechtigte Benutzer können Restore Informationen einsehen.";
 $Lang{Restore_number__num_for_host__does_not_exist} =
-  "Restore Nummer \$num für Computer \${EscHTML(\$host)} existiert" . " nicht.";
+  "Restore Nummer \$num für Computer \${EscHTML(\$host)} existiert nicht.";
 $Lang{Archive_number__num_for_host__does_not_exist} =
-  "Archiv Nummer \$num für Computer \${EscHTML(\$host)} existiert" . " nicht.";
+  "Archiv Nummer \$num für Computer \${EscHTML(\$host)} existiert nicht.";
 $Lang{Can_t_find_IP_address_for} = "Kann IP-Adresse für \${EscHTML(\$host)} nicht finden";
 $Lang{host_is_a_DHCP_host}       = <<EOF;
 \$host ist ein DHCP Computer und ich kenne seine IP-Adresse nicht.  Ich prüfte den
@@ -1097,14 +1095,14 @@ EOF
 # ------------------------------------
 
 $Lang{Backup_requested_on_DHCP__host} =
-  "Backup angefordert für DHCP Computer \$host (\$In{hostIP}) durch" . " \$User von \$ENV{REMOTE_ADDR}";
+  "Backup angefordert für DHCP Computer \$host (\$In{hostIP}) durch \$User von \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User}        = "Backup angefordert für \$host durch \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Backup gestoppt/gelöscht für \$host durch \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
     "Restore beauftragt nach Computer \$hostDest, von Backup #\$num,"
   . " durch User \$User von Client \$ENV{REMOTE_ADDR}";
 $Lang{Delete_requested_for_backup_of__host_by__User} =
-  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
+  "Delete requested for backup #\$num of \$host by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivierung beauftragt durch \$User von \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------

@@ -73,7 +73,7 @@ sub action
         last if ( $Backups[$i]{num} == $num );
     }
     if ( $i >= @Backups || $num !~ /^\d+$/ ) {
-        ErrorExit("Backup number ${EscHTML($num)} for host ${EscHTML($host)} does" . " not exist.");
+        ErrorExit("Backup number ${EscHTML($num)} for host ${EscHTML($host)} does not exist.");
     }
     my $backupTime = timeStamp2($Backups[$i]{startTime});
     my $backupAge  = sprintf("%.1f", (time - $Backups[$i]{startTime}) / (24 * 3600));

@@ -133,7 +133,7 @@ sub action
                     $colSpan++;
                     next;
                 }
-                $fileStr .= "<td align=center colspan=$colSpan$tdClass>" . "$url</td>";
+                $fileStr .= "<td align=center colspan=$colSpan$tdClass>$url</td>";
                 $colSpan = 0;
                 $tdClass = ' class="histView"';
             }

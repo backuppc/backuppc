@@ -299,7 +299,7 @@ sub Main_Initialize
     SendmailPath SshPath RsyncBackupPCPath) ) {
         next if ( !defined $Conf{$progName} || $Conf{$progName} eq "" || -x $Conf{$progName} );
         print(STDERR $bpc->timeStamp,
-            "\$Conf{$progName} = '$Conf{$progName}' is not a" . " valid executable program; exiting\n");
+            "\$Conf{$progName} = '$Conf{$progName}' is not a valid executable program; exiting\n");
         exit(1);
     }
 
@@ -538,7 +538,7 @@ sub Main_TryToRun_nightly
         }
         print(LOG $bpc->timeStamp,
             sprintf(
-                "Running %d BackupPC_nightly jobs from %d..%d" . " (out of 0..15)\n",
+                "Running %d BackupPC_nightly jobs from %d..%d (out of 0..15)\n",
                 $Conf{MaxBackupPCNightlyJobs},
                 $start, $end - 1
             )
@@ -940,7 +940,7 @@ sub Main_Check_Timeout
         # and various house keeping.
         #
         $FirstWakeup = 0;
-        printf(LOG "%s24hr disk usage: %d%% max, %d%% recent; inode: %d%% max, %d%% recent; " . " %d skipped hosts\n",
+        printf(LOG "%s24hr disk usage: %d%% max, %d%% recent; inode: %d%% max, %d%% recent;  %d skipped hosts\n",
             $bpc->timeStamp,          $Info->{DUDailyMax},       $Info->{DUlastValue},
             $Info->{DUInodeDailyMax}, $Info->{DUInodelastValue}, $Info->{DUDailySkipHostCnt}
         );
@@ -959,7 +959,7 @@ sub Main_Check_Timeout
             print(LOG $bpc->timeStamp, "Removing $LogDir/LOG.$lastLog.z\n");
             unlink("$LogDir/LOG.$lastLog.z");
         }
-        print(LOG $bpc->timeStamp, "Aging LOG files, LOG -> LOG.0 -> " . "LOG.1 -> ... -> LOG.$lastLog\n");
+        print(LOG $bpc->timeStamp, "Aging LOG files, LOG -> LOG.0 -> LOG.1 -> ... -> LOG.$lastLog\n");
         close(STDERR);    # dup of LOG
         close(STDOUT);    # dup of LOG
         close(LOG);
@@ -1018,8 +1018,7 @@ sub Main_Check_Job_Messages
         #
         vec(my $readMask, $Jobs{$host}{fn}, 1) = 1;
         if ( !select($readMask, undef, undef, 0.0) ) {
-            print(LOG $bpc->timeStamp,
-                "Botch in Main_Check_Job_Messages:" . " nothing to read from $host.  Debug dump:\n");
+            print(LOG $bpc->timeStamp, "Botch in Main_Check_Job_Messages: nothing to read from $host.  Debug dump:\n");
             my($dump) =
               Data::Dumper->new([\%Clients, \%Jobs, \$FDread, \$fdRead], [qw(*Clients  *Jobs   *FDread   *fdRead)]);
             $dump->Indent(1);
@@ -1060,7 +1059,7 @@ sub Main_Check_Job_Messages
                 $Jobs{$host}{xferFileCnt} = $1;
             } elsif ( $mesg =~ /^started_restore/ ) {
                 $Jobs{$host}{type} = "restore";
-                print(LOG $bpc->timeStamp, "Started restore on $host" . " (pid=$Jobs{$host}{pid})\n");
+                print(LOG $bpc->timeStamp, "Started restore on $host (pid=$Jobs{$host}{pid})\n");
                 $Status->{$host}{state}     = "Status_restore_in_progress";
                 $Status->{$host}{reason}    = "";
                 $Status->{$host}{type}      = "restore";
@@ -1069,7 +1068,7 @@ sub Main_Check_Job_Messages
                 $Status->{$host}{aliveCnt}++;
             } elsif ( $mesg =~ /^started_archive/ ) {
                 $Jobs{$host}{type} = "archive";
-                print(LOG $bpc->timeStamp, "Started archive on $host" . " (pid=$Jobs{$host}{pid})\n");
+                print(LOG $bpc->timeStamp, "Started archive on $host (pid=$Jobs{$host}{pid})\n");
                 $Status->{$host}{state}     = "Status_archive_in_progress";
                 $Status->{$host}{reason}    = "";
                 $Status->{$host}{type}      = "archive";
@@ -1280,7 +1279,7 @@ sub Main_Check_Job_Messages
                                 $Info->{"${p}Time"} = $Info->{pool}{$p}[$i]{Time}
                                   if ( $Info->{"${p}Time"} < $Info->{pool}{$p}[$i]{Time} );
                             }
-                            printf(LOG "%s%s nightly clean removed %d files of" . " size %.2fGB\n",
+                            printf(LOG "%s%s nightly clean removed %d files of size %.2fGB\n",
                                 $bpc->timeStamp, ucfirst($p),
                                 $Info->{"${p}FileCntRm"},
                                 $Info->{"${p}KbRm"} / (1000 * 1024)
@@ -1356,7 +1355,7 @@ sub Main_Check_Client_Messages
         vec(my $readMask, $Clients{$client}{fn}, 1) = 1;
         if ( !select($readMask, undef, undef, 0.0) ) {
             print(LOG $bpc->timeStamp,
-                "Botch in Main_Check_Client_Messages:" . " nothing to read from $client.  Debug dump:\n");
+                "Botch in Main_Check_Client_Messages: nothing to read from $client.  Debug dump:\n");
             my($dump) =
               Data::Dumper->new([\%Clients, \%Jobs, \$FDread, \$fdRead], [qw(*Clients   *Jobs   *FDread   *fdRead)]);
             $dump->Indent(1);
@@ -1402,7 +1401,7 @@ sub Main_Check_Client_Messages
                     && defined($Status->{$host})
                     && defined($Jobs{$host}) ) {
                     print(LOG $bpc->timeStamp,
-                        "Stopping current $Jobs{$host}{type} of $host," . " request by $user (backoff=$backoff)\n");
+                        "Stopping current $Jobs{$host}{type} of $host, request by $user (backoff=$backoff)\n");
                     kill($bpc->sigName2num("INT"), $Jobs{$host}{pid});
                     #
                     # Don't close the pipe now; wait until the child
@@ -1426,14 +1425,14 @@ sub Main_Check_Client_Messages
                     $reply                      = "ok: $Jobs{$host}{type} of $host canceled";
                 } elsif ( $BgQueueOn{$host} || $UserQueueOn{$host} ) {
                     print(LOG $bpc->timeStamp,
-                        "Stopping pending backup of $host," . " request by $user (backoff=$backoff)\n");
+                        "Stopping pending backup of $host, request by $user (backoff=$backoff)\n");
                     @BgQueue   = grep($_->{host} ne $host, @BgQueue);
                     @UserQueue = grep($_->{host} ne $host, @UserQueue);
                     $BgQueueOn{$host} = $UserQueueOn{$host} = 0;
                     $reply = "ok: pending backup of $host canceled";
                 } else {
                     print(LOG $bpc->timeStamp,
-                        "Nothing to do for stop backup of $host," . " request by $user (backoff=$backoff)\n");
+                        "Nothing to do for stop backup of $host, request by $user (backoff=$backoff)\n");
                     $reply = "ok: no backup was pending or running";
                 }
                 if ( defined($Status->{$host}) && $backoff ne "" ) {
@@ -1472,7 +1471,7 @@ sub Main_Check_Client_Messages
                     if ( $backupType !~ /^doIncr|doFull|autoIncr|autoFull|auto$/i ) {
                         $reply = "error: unknown backup type $backupType";
                     } else {
-                        print(LOG $bpc->timeStamp, "User $user requested backup of $host" . " ($hostIP)\n");
+                        print(LOG $bpc->timeStamp, "User $user requested backup of $host ($hostIP)\n");
                         if ( $BgQueueOn{$hostIP} ) {
                             @BgQueue = grep($_->{host} ne $hostIP, @BgQueue);
                             $BgQueueOn{$hostIP} = 0;
@@ -1487,7 +1486,7 @@ sub Main_Check_Client_Messages
                         } elsif ( $status == 1 ) {
 
                             #should never see this we just dequeued it
-                            $reply = "warning: $host was already queued." . " Ignoring this request";
+                            $reply = "warning: $host was already queued. Ignoring this request";
                         } elsif ( $status == 2 ) {
                             print(LOG $bpc->timeStamp,
                                     "Disk too full (usage $Info->{DUlastValue}%; inode $Info->{DUInodelastValue}%)."
@@ -1517,10 +1516,10 @@ sub Main_Check_Client_Messages
                 my $reqFileName = $3;
                 $host = $bpc->uriUnesc($archivehost);
                 if ( !defined($Status->{$host}) ) {
-                    print(LOG $bpc->timeStamp, "User $user requested archive of unknown archive host" . " $host");
+                    print(LOG $bpc->timeStamp, "User $user requested archive of unknown archive host $host");
                     $reply = "archive error: unknown archive host $host";
                 } else {
-                    print(LOG $bpc->timeStamp, "User $user requested archive on $host" . " ($host)\n");
+                    print(LOG $bpc->timeStamp, "User $user requested archive on $host ($host)\n");
                     if ( defined($Jobs{$host}) ) {
                         $reply = "Archive currently running on $host, please try later";
                     } else {
@@ -1551,7 +1550,7 @@ sub Main_Check_Client_Messages
                     print(LOG $bpc->timeStamp, "User $user requested restore to unknown host $host\n");
                     $reply = "restore error: unknown host $host";
                 } else {
-                    print(LOG $bpc->timeStamp, "User $user requested restore to $host" . " ($hostIP)\n");
+                    print(LOG $bpc->timeStamp, "User $user requested restore to $host ($hostIP)\n");
                     unshift(
                         @UserQueue,
                         {

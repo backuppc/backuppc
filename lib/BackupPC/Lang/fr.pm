@@ -1032,11 +1032,11 @@ $Lang{Email_Summary} = "BackupPC: Résumé du courriel";
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} =
   "BackupPC::Lib->new a échoué: regardez le fichier error_log d\'apache\n";
 $Lang{Wrong_user__my_userid_is___} =
-  "Mauvais utilisateur: mon userid est \$>, à la place de \$uid " . "(\$Conf{BackupPCUser})\n";
+  "Mauvais utilisateur: mon userid est \$>, à la place de \$uid (\$Conf{BackupPCUser})\n";
 
 #$Lang{Only_privileged_users_can_view_PC_summaries} = "Seuls les utilisateurs privilégiés peuvent voir les résumés des machines.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-  "Seuls les utilisateurs privilégiés peuvent arrêter ou démarrer des sauvegardes sur " . " \${EscHTML(\$host)}.";
+  "Seuls les utilisateurs privilégiés peuvent arrêter ou démarrer des sauvegardes sur  \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num}                         = "Numéro invalide \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Impossible d\'ouvrir \$file : problème de configuration ?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} =
@@ -1049,30 +1049,29 @@ $Lang{Only_privileged_users_can_browse_backup_files} =
     "Seuls les utilisateurs privilégiés peuvent parcourir les fichiers de sauvegarde"
   . " pour l'hôte \${EscHTML(\$In{host})}.";
 $Lang{Only_privileged_users_can_delete_backups} =
-  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
-$Lang{Empty_host_name}     = "Nom d\'hôte vide.";
-$Lang{Directory___EscHTML} = "Le répertoire \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " est vide";
-$Lang{Can_t_browse_bad_directory_name2} =
-  "Ne peut pas parcourir " . " \${EscHTML(\$relDir)} : mauvais nom de répertoire";
+  "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
+$Lang{Empty_host_name}                  = "Nom d\'hôte vide.";
+$Lang{Directory___EscHTML}              = "Le répertoire \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} est vide";
+$Lang{Can_t_browse_bad_directory_name2} = "Ne peut pas parcourir  \${EscHTML(\$relDir)} : mauvais nom de répertoire";
 $Lang{Only_privileged_users_can_restore_backup_files} = "Seuls les utilisateurs privilégiés peuvent restaurer "
   . " des fichiers de sauvegarde pour l\'hôte \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Mauvais nom d\'hôte \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} =
-  "Vous n\'avez sélectionné aucun fichier ; " . "vous pouvez revenir en arrière pour sélectionner des fichiers.";
+  "Vous n\'avez sélectionné aucun fichier ; vous pouvez revenir en arrière pour sélectionner des fichiers.";
 $Lang{You_haven_t_selected_any_hosts} =
     "Vous n\'avez sélectionné aucun hôte ; veuillez retourner à la page précédente pour"
   . " faire la sélection d\'un hôte.";
 $Lang{Nice_try__but_you_can_t_put} = "Bien tenté, mais vous ne pouvez pas mettre \'..\' dans un nom de fichier.";
 $Lang{Host__doesn_t_exist}         = "L'hôte \${EscHTML(\$In{hostDest})} n\'existe pas.";
 $Lang{You_don_t_have_permission_to_restore_onto_host} =
-  "Vous n\'avez pas la permission de restaurer sur l\'hôte" . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath}                     = "Ne peut pas ouvrir/créer " . "\${EscHTML(\"\$openPath\")}";
+  "Vous n\'avez pas la permission de restaurer sur l\'hôte \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath}                     = "Ne peut pas ouvrir/créer \${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} = "Seuls les utilisateurs privilégiés peuvent restaurer"
   . " des fichiers de sauvegarde pour l\'hôte \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}      = "Nom d\'hôte vide";
 $Lang{Unknown_host_or_user} = "\${EscHTML(\$host)}, hôte ou utilisateur inconnu.";
 $Lang{Only_privileged_users_can_view_information_about} =
-  "Seuls les utilisateurs privilégiés peuvent accéder aux " . " informations sur l\'hôte \${EscHTML(\$host)}.";
+  "Seuls les utilisateurs privilégiés peuvent accéder aux  informations sur l\'hôte \${EscHTML(\$host)}.";
 $Lang{Only_privileged_users_can_view_archive_information} =
   "Seuls les utilisateurs privilégiés peuvent voir les informations d'archivage.";
 $Lang{Only_privileged_users_can_view_restore_information} =
@@ -1098,13 +1097,13 @@ EOF
 # ------------------------------------
 
 $Lang{Backup_requested_on_DHCP__host} =
-  "Demande de sauvegarde sur l\'hôte \$host (\$In{hostIP}) par" . " \$User depuis \$ENV{REMOTE_ADDR}";
+  "Demande de sauvegarde sur l\'hôte \$host (\$In{hostIP}) par \$User depuis \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User}        = "Sauvegarde demandée sur \$host par \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Sauvegarde arrêtée/déprogrammée pour \$host par \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
-  "Restauration demandée pour l\'hôte \$hostDest, " . "sauvegarde n°\$num, par \$User depuis \$ENV{REMOTE_ADDR}";
+  "Restauration demandée pour l\'hôte \$hostDest, sauvegarde n°\$num, par \$User depuis \$ENV{REMOTE_ADDR}";
 $Lang{Delete_requested_for_backup_of__host_by__User} =
-  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
+  "Delete requested for backup #\$num of \$host by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivage demandé par \$User de \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------

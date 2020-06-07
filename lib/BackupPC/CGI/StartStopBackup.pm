@@ -57,10 +57,10 @@ sub action
     if ( $In{doit} ) {
         if ( $start ) {
             if ( $Hosts->{$host}{dhcp} ) {
-                $reply = $bpc->ServerMesg("backup $In{hostIP} ${EscURI($host)}" . " $User $doFull");
+                $reply = $bpc->ServerMesg("backup $In{hostIP} ${EscURI($host)} $User $doFull");
                 $str   = eval("qq{$Lang->{Backup_requested_on_DHCP__host}}");
             } else {
-                $reply = $bpc->ServerMesg("backup ${EscURI($host)}" . " ${EscURI($host)} $User $doFull");
+                $reply = $bpc->ServerMesg("backup ${EscURI($host)} ${EscURI($host)} $User $doFull");
                 $str   = eval("qq{$Lang->{Backup_requested_on__host_by__User}}");
             }
         } else {

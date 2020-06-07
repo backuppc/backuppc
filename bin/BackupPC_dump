@@ -194,7 +194,7 @@ if ( $opts{d} ) {
     }
     ($client, $user) = $bpc->NetBiosInfoGet($hostIP);
     if ( $client !~ /^([\w\.\s-]+)$/ ) {
-        print("Exiting because NetBiosInfoGet($hostIP) returned" . " '$client', an invalid host name\n")
+        print("Exiting because NetBiosInfoGet($hostIP) returned '$client', an invalid host name\n")
           if ( $opts{v} );
         exit(1);
     }
@@ -204,7 +204,7 @@ if ( $opts{d} ) {
     $Hosts = $bpc->HostInfoRead($client);
 }
 if ( !defined($Hosts->{$client}) ) {
-    print("Exiting because host $client does not exist in the" . " hosts file\n") if ( $opts{v} );
+    print("Exiting because host $client does not exist in the hosts file\n") if ( $opts{v} );
     exit(1);
 }
 
@@ -324,7 +324,7 @@ $Conf{BackupsDisable} = -$Conf{FullPeriod}
 
 if (   $Conf{BackupsDisable} == 1 && !$opts{f} && !$opts{i}
     || $Conf{BackupsDisable} == 2 ) {
-    print("Exiting because backups are disabled with" . " \$Conf{BackupsDisable} = $Conf{BackupsDisable}\n")
+    print("Exiting because backups are disabled with \$Conf{BackupsDisable} = $Conf{BackupsDisable}\n")
       if ( $opts{v} );
     #
     # Tell BackupPC to ignore old failed backups on hosts that
@@ -758,7 +758,7 @@ my $fileExt = $Conf{CompressLevel} > 0 ? ".z" : "";
 unlink("$Dir/XferLOG.$newBkupNum$fileExt") if ( -e "$Dir/XferLOG.$newBkupNum$fileExt" );
 my $XferLOG = BackupPC::XS::FileZIO::open("$Dir/XferLOG.$newBkupNum$fileExt", 1, $Conf{CompressLevel});
 if ( !defined($XferLOG) ) {
-    print($LogFd $bpc->timeStamp, "dump failed: unable to open/create" . " $Dir/XferLOG.$newBkupNum$fileExt\n");
+    print($LogFd $bpc->timeStamp, "dump failed: unable to open/create $Dir/XferLOG.$newBkupNum$fileExt\n");
     print("dump failed: unable to open/create $Dir/XferLOG.$newBkupNum$fileExt\n");
     exit(1);
 }

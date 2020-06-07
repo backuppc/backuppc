@@ -1028,11 +1028,11 @@ $Lang{Email_Summary} = "BackupPC: Podsumowanie emailów";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: sprawdź apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} = "Zly użytkownik: mój userid to \$>, a nie \$uid" . "(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___} = "Zly użytkownik: mój userid to \$>, a nie \$uid(\$Conf{BackupPCUser})\n";
 
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Tylko uprzywilejowani użytkownicy mogą przegladać podsumowania.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-  "Tylko uprzywilejowani użytkownicy mogą dokonywać kopii na" . " \${EscHTML(\$host)}.";
+  "Tylko uprzywilejowani użytkownicy mogą dokonywać kopii na \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num}                         = "Zły numer \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Niemozna otworzyć \$file: problem z konfiguracja ?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} =
@@ -1041,38 +1041,37 @@ $Lang{Only_privileged_users_can_view_log_files} = "Tylko uprzywilejowani użytko
 $Lang{Only_privileged_users_can_view_email_summaries} =
   "Tylko uprzywilejowani użytkownicy mogą przeglądać podsumowania emaili.";
 $Lang{Only_privileged_users_can_browse_backup_files} =
-  "Tylko uprzywilejowani użytkownicy mogą przeglądać pliki kopii" . " for host \${EscHTML(\$In{host})}.";
+  "Tylko uprzywilejowani użytkownicy mogą przeglądać pliki kopii for host \${EscHTML(\$In{host})}.";
 $Lang{Only_privileged_users_can_delete_backups} =
-  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+  "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}                  = "Pusta nazwa hosta.";
-$Lang{Directory___EscHTML}              = "Adres \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " jest pusty";
-$Lang{Can_t_browse_bad_directory_name2} = "Nie można przeglądać - zła nazwa" . " \${EscHTML(\$relDir)}";
+$Lang{Directory___EscHTML}              = "Adres \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} jest pusty";
+$Lang{Can_t_browse_bad_directory_name2} = "Nie można przeglądać - zła nazwa \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} =
-  "Tylko uprzywilejowani użytkownicy mogą przywracać pliki kopii" . " dla hosta \${EscHTML(\$In{host})}.";
+  "Tylko uprzywilejowani użytkownicy mogą przywracać pliki kopii dla hosta \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "Zła nazwa hosta \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} =
-  "Nie zaznaczyłeś zadnych plików; proszę cofnąć sie do" . " zaznaczanych plików.";
-$Lang{You_haven_t_selected_any_hosts} =
-  "Nie zaznaczyłeś zadnego hosta; proszę cofnij sie" . " i zaznacz odpowiednie hosty.";
-$Lang{Nice_try__but_you_can_t_put} = "Nieźle , ale nie możesz umieścic \'..\' w nazwie pliku";
-$Lang{Host__doesn_t_exist}         = "Host \${EscHTML(\$In{hostDest})} nie istnieje";
+  "Nie zaznaczyłeś zadnych plików; proszę cofnąć sie do zaznaczanych plików.";
+$Lang{You_haven_t_selected_any_hosts} = "Nie zaznaczyłeś zadnego hosta; proszę cofnij sie i zaznacz odpowiednie hosty.";
+$Lang{Nice_try__but_you_can_t_put}    = "Nieźle , ale nie możesz umieścic \'..\' w nazwie pliku";
+$Lang{Host__doesn_t_exist}            = "Host \${EscHTML(\$In{hostDest})} nie istnieje";
 $Lang{You_don_t_have_permission_to_restore_onto_host} =
-  "Nie masz uprawnień do  przywracania danych na host" . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "Nie można otworzyć/stworzyć" . "\${EscHTML(\"\$openPath\")}";
+  "Nie masz uprawnień do  przywracania danych na host \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath} = "Nie można otworzyć/stworzyć\${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} =
-  "Tylko uprzywilejowani użytkownicy mogą przywracać pliki kopii" . " dla hosta \${EscHTML(\$host)}.";
+  "Tylko uprzywilejowani użytkownicy mogą przywracać pliki kopii dla hosta \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}      = "Pusta nazwa hosta";
 $Lang{Unknown_host_or_user} = "Nieznany host albo uzytwkonik \${EscHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} =
-  "Tylko uprzywilejowani użytkownicy mogą przeglądać informacje o" . " host \${EscHTML(\$host)}.";
+  "Tylko uprzywilejowani użytkownicy mogą przeglądać informacje o host \${EscHTML(\$host)}.";
 $Lang{Only_privileged_users_can_view_archive_information} =
   "Tylko uprzywilejowani użytkownicy mogą przeglądać informacje o archiwum.";
 $Lang{Only_privileged_users_can_view_restore_information} =
   "Tylko uprzywilejowani użytkownicy mogą przeglądać przywracać informacje.";
 $Lang{Restore_number__num_for_host__does_not_exist} =
-  "Punkt przywracania nr \$num dla hosta \${EscHTML(\$host)} nie" . " istnieje.";
+  "Punkt przywracania nr \$num dla hosta \${EscHTML(\$host)} nie istnieje.";
 $Lang{Archive_number__num_for_host__does_not_exist} =
-  "Archiwum numer \$num dla hosta \${EscHTML(\$host)} nie" . " istnieje.";
+  "Archiwum numer \$num dla hosta \${EscHTML(\$host)} nie istnieje.";
 $Lang{Can_t_find_IP_address_for} = "Nie moge znaleść adresu IP dla \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host}       = <<EOF;
 \$host jest hostem DHCP, i dlatego nie znam jego IP.  Sprawdziłem
@@ -1088,13 +1087,13 @@ EOF
 # ------------------------------------
 
 $Lang{Backup_requested_on_DHCP__host} =
-  "Kopia zaźądana na hoscie DHCP \$host (\$In{hostIP}) przez" . " \$User z \$ENV{REMOTE_ADDR}";
+  "Kopia zaźądana na hoscie DHCP \$host (\$In{hostIP}) przez \$User z \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User}        = "Kopia zażądana na  \$host przez \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "Kopia przerwana na \$host przez \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
-  "Przywrócenie na host \$hostDest, kopii nr #\$num," . " przez \$User z \$ENV{REMOTE_ADDR}";
+  "Przywrócenie na host \$hostDest, kopii nr #\$num, przez \$User z \$ENV{REMOTE_ADDR}";
 $Lang{Delete_requested_for_backup_of__host_by__User} =
-  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
+  "Delete requested for backup #\$num of \$host by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archiwum żądane przez \$User z \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------
@@ -1476,7 +1475,7 @@ Aby dodać nowego hosta, zaznacz "Dodaj" i podaj jego nazwę.  Aby
 skopiowac ustawienia z innego hosta, wpisz nazwę hosta jako
 NOWYHOST=KOPIOWANYHOST.  Takie ustawienie spowoduje nadpisanie
 konfiguracji dla NOWYHOST .  Możesz zrobic to także dla istniejacych
-już hostów.  Aby skasować hosta, po prostu naciśnij "Kasuj".  "Dodaj", "Skasuj",
+już hostów.  Aby skasować hosta, po prostu naciśnij "KasujDodaj", "Skasuj",
 oraz kopia konfiguracji, nie zadziała puki nie naciśniesz "Zapisz".
 Także zadna z usuniętych kopii hostów,więc jeżeli przypadkowo skasujesz coś,
 po prostu znowu ją dodaj.  Aby całkowicie usunąć kopie bezpieczeństwa

@@ -1015,46 +1015,46 @@ $Lang{Email_Summary} = "BackupPC: メールサマリ";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: check apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} = "Wrong user: my userid is \$>, instead of \$uid" . "(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___} = "Wrong user: my userid is \$>, instead of \$uid(\$Conf{BackupPCUser})\n";
 
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Only privileged users can view PC summaries.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-  "Only privileged users can stop or start backups on" . " \${EscHTML(\$host)}.";
+  "Only privileged users can stop or start backups on \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num}                                = "番号 \${EscHTML(\$In{num})} が不正です。";
 $Lang{Unable_to_open__file__configuration_problem}        = "Unable to open \$file: configuration problem?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} = "Only privileged users can view log or config files.";
 $Lang{Only_privileged_users_can_view_log_files}           = "Only privileged users can view log files.";
 $Lang{Only_privileged_users_can_view_email_summaries}     = "Only privileged users can view email summaries.";
 $Lang{Only_privileged_users_can_browse_backup_files} =
-  "Only privileged users can browse backup files" . " ホスト \${EscHTML(\$In{host})}.";
+  "Only privileged users can browse backup files ホスト \${EscHTML(\$In{host})}.";
 $Lang{Only_privileged_users_can_delete_backups} =
-  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+  "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}                  = "ホスト名が空です。";
-$Lang{Directory___EscHTML}              = "ディレクトリ \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " は空です。";
-$Lang{Can_t_browse_bad_directory_name2} = "Can\'t browse bad directory name" . " \${EscHTML(\$relDir)}";
+$Lang{Directory___EscHTML}              = "ディレクトリ \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} は空です。";
+$Lang{Can_t_browse_bad_directory_name2} = "Can\'t browse bad directory name \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} =
-  "Only privileged users can restore backup files" . " for host \${EscHTML(\$In{host})}.";
+  "Only privileged users can restore backup files for host \${EscHTML(\$In{host})}.";
 $Lang{Bad_host_name} = "\${EscHTML(\$host)} はホスト名が誤っています。";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} =
-  "何もファイルを選択していません。戻って" . "いくつかファイルを選択してください。";
-$Lang{You_haven_t_selected_any_hosts} = "何もホストを選択していません。戻って" . "いくつかのホストを選択してください。";
+  "何もファイルを選択していません。戻っていくつかファイルを選択してください。";
+$Lang{You_haven_t_selected_any_hosts} = "何もホストを選択していません。戻っていくつかのホストを選択してください。";
 $Lang{Nice_try__but_you_can_t_put}    = "Nice try, but you can\'t put \'..\' in any of the file names";
 $Lang{Host__doesn_t_exist}            = "Host \${EscHTML(\$In{hostDest})} doesn\'t exist";
 $Lang{You_don_t_have_permission_to_restore_onto_host} =
-  "You don\'t have permission to restore onto host" . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "Can\'t open/create " . "\${EscHTML(\"\$openPath\")}";
+  "You don\'t have permission to restore onto host \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath} = "Can\'t open/create \${EscHTML(\"\$openPath\")}";
 $Lang{Only_privileged_users_can_restore_backup_files2} =
-  "Only privileged users can restore backup files" . " for host \${EscHTML(\$host)}.";
+  "Only privileged users can restore backup files for host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}      = "ホスト名が空です。";
 $Lang{Unknown_host_or_user} = "Unknown host or user \${EscHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} =
-  "Only privileged users can view information about" . " host \${EscHTML(\$host)}.";
+  "Only privileged users can view information about host \${EscHTML(\$host)}.";
 $Lang{Only_privileged_users_can_view_archive_information} = "Only privileged users can view archive information.";
 $Lang{Only_privileged_users_can_view_restore_information} = "Only privileged users can view restore information.";
 $Lang{Restore_number__num_for_host__does_not_exist} =
-  "Restore number \$num for host \${EscHTML(\$host)} does" . " not exist.";
+  "Restore number \$num for host \${EscHTML(\$host)} does not exist.";
 $Lang{Archive_number__num_for_host__does_not_exist} =
-  "Archive number \$num for host \${EscHTML(\$host)} does" . " not exist.";
+  "Archive number \$num for host \${EscHTML(\$host)} does not exist.";
 $Lang{Can_t_find_IP_address_for} = "Can\'t find IP address for \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host}       = <<EOF;
 \$host is a DHCP host, and I don\'t know its IP address.  I checked the
@@ -1070,13 +1070,13 @@ EOF
 # ------------------------------------
 
 $Lang{Backup_requested_on_DHCP__host} =
-  "バックアップ要求 on DHCP \$host (\$In{hostIP}) by" . " \$User from \$ENV{REMOTE_ADDR}";
+  "バックアップ要求 on DHCP \$host (\$In{hostIP}) by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User}        = "\$User による \$host のバックアップ要求";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "\$User による \$host のバックアップ中止/デキュー";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
-  "ホスト\$hostDest のリストア要求 バックアップ #\$num," . " by \$User from \$ENV{REMOTE_ADDR}";
+  "ホスト\$hostDest のリストア要求 バックアップ #\$num, by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Delete_requested_for_backup_of__host_by__User} =
-  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
+  "Delete requested for backup #\$num of \$host by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "\$ENV{REMOTE_ADDR} から \$User によってアーカイブの要求がありました。";
 
 # -------------------------------------------------

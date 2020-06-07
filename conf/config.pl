@@ -1025,7 +1025,7 @@ $Conf{SmbClientIncrCmd} =
 # redirection and pipes; put that in a script if you need it.
 #
 $Conf{SmbClientRestoreCmd} =
-  '$smbClientPath \\\\$host\\$shareName' . ' $I_option -U $userName -E -d 1' . ' -c tarmode\\ full -mSMB3 -Tx -';
+  '$smbClientPath \\\\$host\\$shareName $I_option -U $userName -E -d 1 -c tarmode\\ full -mSMB3 -Tx -';
 
 ###########################################################################
 # Tar Configuration
@@ -1104,8 +1104,7 @@ $Conf{TarShareName} = '/';
 # needs to be a full path and you can't include shell syntax like
 # redirection and pipes; put that in a script if you need it.
 #
-$Conf{TarClientCmd} =
-  '$sshPath -q -x -n -l root $host' . ' env LC_ALL=C $tarPath -c -v -f - -C $shareName+' . ' --totals';
+$Conf{TarClientCmd} = '$sshPath -q -x -n -l root $host env LC_ALL=C $tarPath -c -v -f - -C $shareName+ --totals';
 
 #
 # Extra tar arguments for full backups.  Several variables are substituted at

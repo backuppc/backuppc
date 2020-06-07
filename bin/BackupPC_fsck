@@ -335,13 +335,13 @@ sub poolCountUpdate
                   if ( $Info->{"${p}Time"} < $Info->{pool}{$p}[$i]{Time} );
             }
             printf(
-                "%s%s BackupPC_fsck removed %d files of" . " size %.2fGB\n",
+                "%s%s BackupPC_fsck removed %d files of size %.2fGB\n",
                 $bpc->timeStamp, ucfirst($p),
                 $Info->{"${p}FileCntRm"},
                 $Info->{"${p}KbRm"} / (1000 * 1024)
             );
             printf(
-                "%s%s is %.2fGB, %d files (%d repeated, " . "%d max chain, %d max links), %d directories\n",
+                "%s%s is %.2fGB, %d files (%d repeated, %d max chain, %d max links), %d directories\n",
                 $bpc->timeStamp, ucfirst($p),
                 $Info->{"${p}Kb"} / (1000 * 1024),
                 $Info->{"${p}FileCnt"},

@@ -136,7 +136,7 @@ sub RRDUpdate
     ) ) {
         print "$err";
     } else {
-        printf("RRD updated:" . " date %s; cpoolKb %f; total %f;" . " poolKb %f; pool4Kb %f; cpool4Kb %f\n",
+        printf("RRD updated: date %s; cpoolKb %f; total %f; poolKb %f; pool4Kb %f; cpool4Kb %f\n",
             $NowRnd1, $Info{"cpoolKb"}, $sizeTot, $Info{"poolKb"}, $Info{"pool4Kb"}, $Info{"cpool4Kb"});
     }
 }

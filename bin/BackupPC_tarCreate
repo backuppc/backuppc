@@ -556,7 +556,7 @@ sub TarWriteFile
         } else {
             while ( $f->read(\$data, $BufSize) > 0 ) {
                 if ( $size + length($data) > $hdr->{size} ) {
-                    print(STDERR "Error: truncating $hdr->{fullPath} to" . " $hdr->{size} bytes (for $hdr->{name})\n");
+                    print(STDERR "Error: truncating $hdr->{fullPath} to $hdr->{size} bytes (for $hdr->{name})\n");
                     $data = substr($data, 0, $hdr->{size} - $size);
                     $ErrorCnt++;
                 }
@@ -680,7 +680,7 @@ sub TarWriteFile
             my $f = BackupPC::XS::FileZIO::open($hdr->{fullPath}, 0, $hdr->{compress});
             my $data;
             if ( !defined($f) || $f->read(\$data, $BufSize) < 0 ) {
-                print(STDERR "Unable to open/read char/block special file" . " $hdr->{fullPath} (for $hdr->{name})\n");
+                print(STDERR "Unable to open/read char/block special file $hdr->{fullPath} (for $hdr->{name})\n");
                 $f->close if ( defined($f) );
                 $ErrorCnt++;
                 return;

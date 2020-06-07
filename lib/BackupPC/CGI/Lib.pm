@@ -545,7 +545,7 @@ EOF
             NavLink("?host=${EscURI($host)}", $host)
               if ( @hosts < $Conf{CgiNavBarAdminAllHosts} );
             my $sel = " selected" if ( $host eq $In{host} );
-            $hostSelectbox .= "<option value=\"?host=${EscURI($host)}\"$sel>" . "$host</option>";
+            $hostSelectbox .= "<option value=\"?host=${EscURI($host)}\"$sel>$host</option>";
         }
     }
     if ( @hosts >= $Conf{CgiNavBarAdminAllHosts} ) {

@@ -355,7 +355,7 @@ EOF
         } else {
             ErrorExit(eval("qq{$Lang->{Can_t_open_create__openPath}}"));
         }
-        $reply = $bpc->ServerMesg("restore ${EscURI($ipAddr)}" . " ${EscURI($hostDest)} $User $reqFileName");
+        $reply = $bpc->ServerMesg("restore ${EscURI($ipAddr)} ${EscURI($hostDest)} $User $reqFileName");
         $str   = eval("qq{$Lang->{Restore_requested_to_host__hostDest__backup___num}}");
         my $content = eval("qq{$Lang->{Reply_from_server_was___reply}}");
         Header(eval("qq{$Lang->{Restore_Requested_on__hostDest}}"), $content);

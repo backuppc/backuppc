@@ -226,7 +226,7 @@ sub start
             '--bpc-attrib-new',               '--bpc-log-level',           $conf->{XferLogLevel},
         );
 
-        $logMsg = "restore started below directory $t->{shareName}" . " to host $t->{host}";
+        $logMsg = "restore started below directory $t->{shareName} to host $t->{host}";
     } else {
         #
         # Turn $conf->{BackupFilesOnly} and $conf->{BackupFilesExclude}

@@ -564,7 +564,7 @@ sub HostInfoWrite
     }
     foreach my $host ( keys(%$hosts) ) {
         my $name = "$hosts->{$host}{host}";
-        my $rest = "\t$hosts->{$host}{dhcp}" . "\t$hosts->{$host}{user}" . "\t$hosts->{$host}{moreUsers}";
+        my $rest = "\t$hosts->{$host}{dhcp}\t$hosts->{$host}{user}\t$hosts->{$host}{moreUsers}";
         $name =~ s/ /\\ /g;
         $rest =~ s/ //g;
         $hostText->{$host} = $name . $rest;

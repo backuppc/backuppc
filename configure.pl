@@ -62,7 +62,7 @@ my @ConfigureLibList = qw(
 # Check that makeDist has been run; need to avoid having the magic string
 # appear exactly (otherwise makeDist will replace it), so compute it instead
 #
-if ( $ConfigureBinList[0] eq "__" . "CONFIGURE_BIN_LIST__" ) {
+if ( $ConfigureBinList[0] eq "__CONFIGURE_BIN_LIST__" ) {
     die <<EOF;
 You need to run makeDist first to create a tarball release that includes an
 updated configure.pl.  After you unpack the tarball, run configure.pl from

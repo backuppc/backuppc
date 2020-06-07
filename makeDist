@@ -548,7 +548,7 @@ sub CheckMetaDataVsConfig
     }
     foreach my $p ( keys(%{$bpc->{Conf}{CgiUserConfigEdit}}) ) {
         if ( !defined($ConfigMeta{CgiUserConfigEdit}{child}{$p}) ) {
-            print("conf/config.pl CgiUserConfigEdit has $p, but" . " lib/BackupPC/Config/Meta.pm does not\n");
+            print("conf/config.pl CgiUserConfigEdit has $p, but lib/BackupPC/Config/Meta.pm does not\n");
             $errors++;
         }
     }

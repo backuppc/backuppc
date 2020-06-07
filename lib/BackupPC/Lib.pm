@@ -129,7 +129,7 @@ sub new
     if (  !$noUserCheck
         && $bpc->{Conf}{BackupPCUserVerify}
         && $> != (my $uid = getpwnam($bpc->{Conf}{BackupPCUser})) ) {
-        print(STDERR "$0: Wrong user: my userid is $>, instead of $uid" . " ($bpc->{Conf}{BackupPCUser})\n");
+        print(STDERR "$0: Wrong user: my userid is $>, instead of $uid ($bpc->{Conf}{BackupPCUser})\n");
         print(STDERR "Please 'su [-m | -s shell] $bpc->{Conf}{BackupPCUser}' first\n");
         return;
     }
@@ -826,7 +826,7 @@ sub CheckHostAlive
     # Return success if the ping cmd is undefined or empty.
     #
     if ( $bpc->{Conf}{PingCmd} eq "" ) {
-        print(STDERR "CheckHostAlive: return ok because \$Conf{PingCmd}" . " is empty\n") if ( $bpc->{verbose} );
+        print(STDERR "CheckHostAlive: return ok because \$Conf{PingCmd} is empty\n") if ( $bpc->{verbose} );
         return 0;
     }
 
@@ -864,7 +864,7 @@ sub CheckHostAlive
         $ret = $1;
         $ret /= 1000 if ( lc($2) eq "usec" );
     } else {
-        print(STDERR "CheckHostAlive: can't extract round-trip time" . " (not fatal)\n") if ( $bpc->{verbose} );
+        print(STDERR "CheckHostAlive: can't extract round-trip time (not fatal)\n") if ( $bpc->{verbose} );
         $ret = 0;
     }
     if ( $bpc->{verbose} ) {
@@ -906,7 +906,7 @@ sub NetBiosInfoGet
     # Skip NetBios check if NmbLookupCmd is empty
     #
     if ( $bpc->{Conf}{NmbLookupCmd} eq "" ) {
-        print(STDERR "NetBiosInfoGet: return $host because \$Conf{NmbLookupCmd}" . " is empty\n")
+        print(STDERR "NetBiosInfoGet: return $host because \$Conf{NmbLookupCmd} is empty\n")
           if ( $bpc->{verbose} );
         return ($host, undef);
     }
@@ -932,7 +932,7 @@ sub NetBiosInfoGet
     }
     $netBiosHostName = lc($netBiosHostName);
     $netBiosUserName = lc($netBiosUserName);
-    print(STDERR "NetBiosInfoGet: success, returning host $netBiosHostName," . " user $netBiosUserName\n")
+    print(STDERR "NetBiosInfoGet: success, returning host $netBiosHostName, user $netBiosUserName\n")
       if ( $bpc->{verbose} );
     return ($netBiosHostName, $netBiosUserName);
 }
@@ -954,7 +954,7 @@ sub NetBiosHostIPFind
     # Skip NetBios lookup if NmbLookupFindHostCmd is empty
     #
     if ( $bpc->{Conf}{NmbLookupFindHostCmd} eq "" ) {
-        print(STDERR "NetBiosHostIPFind: return $host because" . " \$Conf{NmbLookupFindHostCmd} is empty\n")
+        print(STDERR "NetBiosHostIPFind: return $host because \$Conf{NmbLookupFindHostCmd} is empty\n")
           if ( $bpc->{verbose} );
         return $host;
     }
@@ -976,7 +976,7 @@ sub NetBiosHostIPFind
     }
     $ipAddr = $firstIpAddr if ( !defined($ipAddr) );
     if ( defined($ipAddr) ) {
-        print(STDERR "NetBiosHostIPFind: found IP address $ipAddr for" . " host $host\n") if ( $bpc->{verbose} );
+        print(STDERR "NetBiosHostIPFind: found IP address $ipAddr for host $host\n") if ( $bpc->{verbose} );
         return $ipAddr;
     } else {
         print(STDERR "NetBiosHostIPFind: couldn't find IP address for" . " host $host\n") if ( $bpc->{verbose} );

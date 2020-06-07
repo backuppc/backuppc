@@ -1037,11 +1037,11 @@ $Lang{Email_Summary} = "BackupPC: Overzicht E-mail";
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} =
   "BackupPC::Lib->new mislukt: controleer de apache error_log\n";
 $Lang{Wrong_user__my_userid_is___} =
-  "Foutieve gebruiker: mijn userid is \$>, in plaats van \$uid" . "(\$Conf{BackupPCUser})\n";
+  "Foutieve gebruiker: mijn userid is \$>, in plaats van \$uid(\$Conf{BackupPCUser})\n";
 
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Enkel gebruikers met bijzondere rechten kunnen PC-overzichten bekijken.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
-  "Enkel gebruikers met bijzondere rechten kunnen backups stoppen of starten van machine" . " \${EscHTML(\$host)}.";
+  "Enkel gebruikers met bijzondere rechten kunnen backups stoppen of starten van machine \${EscHTML(\$host)}.";
 $Lang{Invalid_number__num} = "Ongeldig of onjuist nummer \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} =
   "Ik kan \$file niet openen: misschien problemen met de configuratie?";
@@ -1052,38 +1052,37 @@ $Lang{Only_privileged_users_can_view_log_files} =
 $Lang{Only_privileged_users_can_view_email_summaries} =
   "Enkel gebruikers met bijzondere rechten kunnen het e-mailoverzicht bekijken.";
 $Lang{Only_privileged_users_can_browse_backup_files} =
-  "Enkel gebruikers met bijzondere rechten kunnen de backup " . "van machine \${EscHTML(\$In{host})} bekijken.";
+  "Enkel gebruikers met bijzondere rechten kunnen de backup van machine \${EscHTML(\$In{host})} bekijken.";
 $Lang{Only_privileged_users_can_delete_backups} =
-  "Only privileged users can delete backups" . " of host \${EscHTML(\$host)}.";
+  "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}                  = "Geen of lege machinenaam.";
-$Lang{Directory___EscHTML}              = "Map \${EscHTML(\"\$TopDir/pc/\$host/\$num\")}" . " is leeg";
-$Lang{Can_t_browse_bad_directory_name2} = "Kan niet bladeren door foutieve mapnaam" . " \${EscHTML(\$relDir)}";
+$Lang{Directory___EscHTML}              = "Map \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} is leeg";
+$Lang{Can_t_browse_bad_directory_name2} = "Kan niet bladeren door foutieve mapnaam \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} =
-  "Enkel gebruikers met bijzondere rechten kunnen backups" . " van machine \${EscHTML(\$In{host})} terugzetten.";
+  "Enkel gebruikers met bijzondere rechten kunnen backups van machine \${EscHTML(\$In{host})} terugzetten.";
 $Lang{Bad_host_name} = "Foutieve of ongeldige machinenaam \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} =
-  "U hebt geen enkel bestand geselecteerd. Gelieve terug te gaan en" . " selecteer een of meerdere bestanden.";
+  "U hebt geen enkel bestand geselecteerd. Gelieve terug te gaan en selecteer een of meerdere bestanden.";
 $Lang{You_haven_t_selected_any_hosts} =
-  "U hebt geen machine geselecteerd. Gelieve terug te gaan om" . " een machine te selecteren.";
+  "U hebt geen machine geselecteerd. Gelieve terug te gaan om een machine te selecteren.";
 $Lang{Nice_try__but_you_can_t_put} = "Leuk geprobeerd, maar u kan geen \'..\' in de bestandsnamen plaatsen";
 $Lang{Host__doesn_t_exist}         = "Machine \${EscHTML(\$In{hostDest})} bestaat niet.";
 $Lang{You_don_t_have_permission_to_restore_onto_host} =
-  "U beschikt niet over de juiste rechten om bestanden te herstellen naar machine " . " \${EscHTML(\$In{hostDest})}";
-$Lang{Can_t_open_create__openPath} = "Ik kan " . "\${EscHTML(\"\$openPath\")} niet openen of aanmaken";
+  "U beschikt niet over de juiste rechten om bestanden te herstellen naar machine  \${EscHTML(\$In{hostDest})}";
+$Lang{Can_t_open_create__openPath} = "Ik kan \${EscHTML(\"\$openPath\")} niet openen of aanmaken";
 $Lang{Only_privileged_users_can_restore_backup_files2} =
-  "Alleen gebruikers met bijzondere rechten kunnen bestanden herstellen" . " naar machine \${EscHTML(\$host)}.";
+  "Alleen gebruikers met bijzondere rechten kunnen bestanden herstellen naar machine \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}      = "Lege machinenaam";
 $Lang{Unknown_host_or_user} = "Onbekende machine of gebruiker \${EscHTML(\$host)}";
 $Lang{Only_privileged_users_can_view_information_about} =
-  "Enkel gebruikers met bijzondere rechten kunnen informatie over" . " machine \${EscHTML(\$host)} bekijken.";
+  "Enkel gebruikers met bijzondere rechten kunnen informatie over machine \${EscHTML(\$host)} bekijken.";
 $Lang{Only_privileged_users_can_view_archive_information} =
   "Enkel gebruikers met bijzondere rechten kunnen archiveringsinformatie bekijken.";
 $Lang{Only_privileged_users_can_view_restore_information} =
   "Enkel gebruikers met bijzondere rechten kunnen herstelinformatie bekijken.";
-$Lang{Restore_number__num_for_host__does_not_exist} =
-  "Herstel nr.\$num van machine \${EscHTML(\$host)}" . " bestaat niet.";
+$Lang{Restore_number__num_for_host__does_not_exist} = "Herstel nr.\$num van machine \${EscHTML(\$host)} bestaat niet.";
 $Lang{Archive_number__num_for_host__does_not_exist} =
-  "Archiveringsnr. \$num van machine \${EscHTML(\$host)}" . " bestaat niet.";
+  "Archiveringsnr. \$num van machine \${EscHTML(\$host)} bestaat niet.";
 $Lang{Can_t_find_IP_address_for} = "Ik kan het IP-adres van \${EscHTML(\$host)} niet vinden.";
 $Lang{host_is_a_DHCP_host}       = <<EOF;
 \$host is een DHCP-machine en ik ken zijn IP-adres niet. Ik controleerde de
@@ -1099,13 +1098,13 @@ EOF
 # ------------------------------------
 
 $Lang{Backup_requested_on_DHCP__host} =
-  "backup aangevraagd van DHCP \$host (\$In{hostIP}) door" . " \$User vanaf \$ENV{REMOTE_ADDR}";
+  "backup aangevraagd van DHCP \$host (\$In{hostIP}) door \$User vanaf \$ENV{REMOTE_ADDR}";
 $Lang{Backup_requested_on__host_by__User}        = "backup aangevraagd van \$host door \$User";
 $Lang{Backup_stopped_dequeued_on__host_by__User} = "backup geannuleerd van \$host door \$User";
 $Lang{Restore_requested_to_host__hostDest__backup___num} =
-  "Herstel aangevraagd voor machine \$hostDest, backup nr.\$num," . " door \$User vanaf \$ENV{REMOTE_ADDR}";
+  "Herstel aangevraagd voor machine \$hostDest, backup nr.\$num, door \$User vanaf \$ENV{REMOTE_ADDR}";
 $Lang{Delete_requested_for_backup_of__host_by__User} =
-  "Delete requested for backup #\$num of \$host" . " by \$User from \$ENV{REMOTE_ADDR}";
+  "Delete requested for backup #\$num of \$host by \$User from \$ENV{REMOTE_ADDR}";
 $Lang{Archive_requested} = "Archivering aangevraagd door \$User vanaf \$ENV{REMOTE_ADDR}";
 
 # -------------------------------------------------

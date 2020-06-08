@@ -1,4 +1,5 @@
 # See https://perltidy.github.io/perltidy/stylekey.html
+--nouse-unicode-gcstring
 --iterations=2
 --maximum-line-length=120
 --nooutdent-long-lines
@@ -15,6 +16,7 @@
 --nospace-after-keyword="my our local"
 --space-after-keyword="xor"
 --freeze-blank-lines
+--use-unicode-gcstring
 
 --weld-nested-containers
 --keep-interior-semicolons

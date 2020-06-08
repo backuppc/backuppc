@@ -733,7 +733,7 @@ Click on the backup number to browse and restore backup files.
     <td align="center"> Age/days </td>
     <td align="center"> Keep </td>
     \$deleteHdrStr
-    <td align="center"> Server Backup Path </td>
+    <td align="center"> Comment </td>
 </tr>
 \$str
 </table>
@@ -872,22 +872,33 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
-<form name="form0" method="post" action="\$MyURL">
-<input type="hidden" name="num" value="\$num">
-<input type="hidden" name="host" value="\$host">
-<input type="hidden" name="share" value="\${EscHTML(\$share)}">
-<input type="hidden" name="action" value="browse">
 <ul>
 <li> You are browsing backup #\$num, which started around \$backupTime
         (\$backupAge days ago),
 \$filledBackup
-<li> Enter directory: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
+<li>
+<form name="formDir" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Enter directory: <input type="text" class="inputCompact" name="dir" size="60" maxlength="4096" value="\${EscHTML(\$dir)}">
+    <input type="submit" value="\$Lang->{Go}" name="Submit">
+</form>
+<li>
+<form name="formComment" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Comment: <input type="text" name="comment" class="inputCompact" size="60" maxlength="4096" value="\${EscHTML(\$comment)}">
+    <input type="submit" value="\$Lang->{CfgEdit_Button_Save}" name="SetComment">
+</form>
 <li> Click on a directory below to navigate into that directory,
 <li> Click on a file below to restore that file,
 <li> You can view the backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> of the current directory.
 \$share2pathStr
 </ul>
-</form>
 
 \${h2("Contents of \$dirDisplay")}
 <form name="form1" method="post" action="\$MyURL">
@@ -1233,7 +1244,7 @@ $Lang{This_display_is_merged_with_backup} = <<EOF;
 EOF
 
 $Lang{Visit_this_directory_in_backup} = <<EOF;
-<li> Select the backup you wish to view: <select onChange="window.location=this.value">\$otherDirs </select>
+<li> Select the backup you wish to view: <select class="inputCompact" onChange="window.location=this.value">\$otherDirs </select>
 EOF
 
 $Lang{Restore_Summary} = <<EOF;

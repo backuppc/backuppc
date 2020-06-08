@@ -744,7 +744,7 @@ Klicken Sie auf die Backupnummer um die Dateien zu durchsuchen und bei Bedarf wi
     <td align="center"> Alter/Tage </td>
     <td align="center"> Behalten </td>
     \$deleteHdrStr
-    <td align="center"> Serverbackuppfad </td>
+    <td align="center"> Kommentar </td>
 </tr>
 \$str
 </table>
@@ -882,16 +882,28 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
-<form name="form0" method="post" action="\$MyURL">
-<input type="hidden" name="num" value="\$num">
-<input type="hidden" name="host" value="\$host">
-<input type="hidden" name="share" value="\${EscHTML(\$share)}">
-<input type="hidden" name="action" value="browse">
 <ul>
 <li>Sie browsen das Backup #\$num, erstellt am \$backupTime
         (vor \$backupAge Tagen),
 \$filledBackup
-<li> Verzeichnis eingeben: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
+<li>
+<form name="formDir" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Verzeichnis eingeben: <input type="text" name="dir" size="60" maxlength="4096" value="\${EscHTML(\$dir)}">
+    <input type="submit" value="\$Lang->{Go}" name="Submit">
+</form>
+<li>
+<form name="formComment" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Kommentar: <input type="text" name="comment" class="inputCompact" size="60" maxlength="4096" value="\${EscHTML(\$comment)}">
+    <input type="submit" value="\$Lang->{CfgEdit_Button_Save}" name="SetComment">
+</form>
 <li> Klicken Sie auf ein Verzeichnis um dieses zu durchsuchen.
 <li> Klicken Sie auf eine Datei um diese per Download wiederherzustellen.
 <li> Einsehen der Backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">Historie</a> des aktuellen Verzeichnisses.

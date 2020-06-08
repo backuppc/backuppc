@@ -736,7 +736,7 @@ Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
     <td align="center"> Lftd. in dagen </td>
     <td align="center"> Houden </td>
     \$deleteHdrStr
-    <td align="center"> Plaats op de server </td>
+    <td align="center"> Commentaar </td>
 </tr>
 \$str
 </table>
@@ -875,16 +875,28 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
-<form name="form0" method="post" action="\$MyURL">
-<input type="hidden" name="num" value="\$num">
-<input type="hidden" name="host" value="\$host">
-<input type="hidden" name="share" value="\${EscHTML(\$share)}">
-<input type="hidden" name="action" value="browse">
 <ul>
 <li> U bekijkt nu backup nummer \$num, die gestart werd rond \$backupTime
         (\$backupAge dagen geleden),
 \$filledBackup
-<li> Ga naar map: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
+<li>
+<form name="formDir" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Ga naar map: <input type="text" name="dir" size="60" maxlength="4096" value="\${EscHTML(\$dir)}">
+    <input type="submit" value="\$Lang->{Go}" name="Submit">
+</form>
+<li>
+<form name="formComment" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Commentaar: <input type="text" name="comment" class="inputCompact" size="60" maxlength="4096" value="\${EscHTML(\$comment)}">
+    <input type="submit" value="\$Lang->{CfgEdit_Button_Save}" name="SetComment">
+</form>
 <li> Klik op een map hieronder om de inhoud van die map te bekijken,
 <li> Klik op een bestand hieronder om dat bestand terug te zetten.
 <li> U kan de <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">backupgeschiedenis</a> bekijken van de huidige map.

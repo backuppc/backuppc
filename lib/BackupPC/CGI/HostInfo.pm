@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.3.3, released 6 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -36,6 +36,7 @@
 package BackupPC::CGI::HostInfo;
 
 use strict;
+use Encode qw/decode_utf8/;
 use BackupPC::CGI::Lib qw(:all);
 
 sub action
@@ -87,8 +88,7 @@ sub action
                 if ( !$Backups[$i]{noFill} && $Backups[$i]{keep} != ($keep ? 1 : 0) ) {
                     $Backups[$i]{keep} = $keep ? 1 : 0;
                     $bpc->BackupInfoWrite($host, @Backups);
-                    BackupPC::Storage->backupInfoWrite($bpc->TopDir() . "/pc/$host", $Backups[$i]{num}, $Backups[$i],
-                        1);
+                    BackupPC::Storage->backupInfoWrite("$TopDir/pc/$host", $Backups[$i]{num}, $Backups[$i], 1);
                 }
                 last;
             }
@@ -210,6 +210,7 @@ EOF
 EOF
         }
         $keepOrDeleteStr .= "    </td>\n";
+        my $comment = decode_utf8($Backups[$i]{comment});
         push @bkpRows, <<EOF;
 <tr>
     <td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>
@@ -220,7 +221,7 @@ EOF
     <td align="right" class="border">  $duration </td>
     <td align="right" class="border">  $age </td>
     $keepOrDeleteStr
-    <td align="left" class="border">   <tt>$TopDir/pc/$host/$Backups[$i]{num}</tt> </td></tr>
+    <td align="left" class="border">   $comment </td></tr>
 EOF
         push @sizeRows, <<EOF;
 <tr><td align="center" class="border"> <a href="$browseURL">$Backups[$i]{num}</a> </td>

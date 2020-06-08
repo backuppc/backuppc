@@ -735,7 +735,7 @@ Haga click en el n&uacute;mero de copia de seguridad para revisar y restaurar ar
     <td align="center"> Antiguedad/d&iacute;as </td>
     <td align="center"> Mantener </td>
     \$deleteHdrStr
-    <td align="center"> Ruta a la Copia en Servidor </td>
+    <td align="center"> Comentario </td>
 </tr>
 \$str
 </table>
@@ -875,16 +875,28 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
-<form name="form0" method="post" action="\$MyURL">
-<input type="hidden" name="num" value="\$num">
-<input type="hidden" name="host" value="\$host">
-<input type="hidden" name="share" value="\${EscHTML(\$share)}">
-<input type="hidden" name="action" value="browse">
 <ul>
 <li> Est&aacute; revisando la copia de seguridad N&deg;\$num, que comenz&oacute; hacia las \$backupTime
         (hace \$backupAge d&iacute;as),
 \$filledBackup
-<li> Introduzca el directorio: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
+<li>
+<form name="formDir" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Introduzca el directorio: <input type="text" name="dir" size="60" maxlength="4096" value="\${EscHTML(\$dir)}">
+    <input type="submit" value="\$Lang->{Go}" name="Submit">
+</form>
+<li>
+<form name="formComment" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Comentario: <input type="text" name="comment" class="inputCompact" size="60" maxlength="4096" value="\${EscHTML(\$comment)}">
+    <input type="submit" value="\$Lang->{CfgEdit_Button_Save}" name="SetComment">
+</form>
 <li> Haga click en uno de los directorios de abajo para revisar sus contenidos,
 <li> Haga click en un archivo para restaurarlo,
 <li> Puede ver la <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> de la copia de seguridad del directorio actual.

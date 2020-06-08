@@ -723,7 +723,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
     <td align="center"> 経過(日) </td>
     <td align="center"> 保つ </td>
     \$deleteHdrStr
-    <td align="center"> サーババックアップパス </td>
+    <td align="center"> コメント </td>
 </tr>
 \$str
 </table>
@@ -860,15 +860,27 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
-<form name="form0" method="post" action="\$MyURL">
+<ul>
+<li>\$backupTime に開始したバックアップ #\$num (\$backupAge 日前) を閲覧しています。
+\$filledBackup
+<li>
+<form name="formDir" method="post" action="\$MyURL">
 <input type="hidden" name="num" value="\$num">
 <input type="hidden" name="host" value="\$host">
 <input type="hidden" name="share" value="\${EscHTML(\$share)}">
 <input type="hidden" name="action" value="browse">
-<ul>
-<li>\$backupTime に開始したバックアップ #\$num (\$backupAge 日前) を閲覧しています。
-\$filledBackup
-<li> ディレクトリを入力してください: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
+ディレクトリを入力してください: <input type="text" name="dir" size="60" maxlength="4096" value="\${EscHTML(\$dir)}">
+    <input type="submit" value="\$Lang->{Go}" name="Submit">
+</form>
+<li>
+<form name="formComment" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+コメント: <input type="text" name="comment" class="inputCompact" size="60" maxlength="4096" value="\${EscHTML(\$comment)}">
+    <input type="submit" value="\$Lang->{CfgEdit_Button_Save}" name="SetComment">
+</form>
 <li> 移動したいディレクトリを左下から選択してください
 <li> リストアするファイルを右下から選択してください
 <li> 現在のディレクトリのバックアップ<a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">履歴</a>を見ることができます。

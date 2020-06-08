@@ -109,6 +109,7 @@ sub BackupInfoRead
                 print(STDERR "BackupInfoRead: host $host: can't rebuild share2path from $str\n");
             }
         }
+        $Backups[$i]{comment} =~ s{%(..)}{chr(hex($1))}eg;
     }
     return @Backups;
 }
@@ -132,6 +133,7 @@ sub BackupInfoWrite
             $value =~ s{([%\t\n\r])}{sprintf("%%%02x", ord($1))}eg;
             $b{share2path} = $value;
         }
+        $b{comment} =~ s{([%\t\n\r])}{sprintf("%%%02x", ord($1))}eg;
         $contents .= join("\t", @b{@{$s->{BackupFields}}}) . "\n";
     }
 
@@ -264,6 +266,12 @@ sub TextFileWrite
             }
             close($fd);
         }
+        #
+        # use same gid as original file
+        #
+        my $uid = (stat("$file.new"))[4];
+        my $gid = (stat($file))[5];
+        chown($uid, $gid, "$file.new") if ( defined($uid) && defined($gid) );
     }
     if ( $fileOk ) {
         my($locked, $lockFd);

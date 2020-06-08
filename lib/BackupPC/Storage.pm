@@ -46,12 +46,11 @@ sub new
     my($paths) = @_;
     my $flds   = {
         BackupFields => [qw(
-            num type startTime endTime
-            nFiles size nFilesExist sizeExist nFilesNew sizeNew
-            xferErrs xferBadFile xferBadShare tarErrs
-            compress sizeExistComp sizeNewComp
-            noFill fillFromNum mangle xferMethod level
-            charset version inodeLast keep share2path
+            num type startTime endTime nFiles size nFilesExist sizeExist
+            nFilesNew sizeNew xferErrs xferBadFile xferBadShare tarErrs
+            compress sizeExistComp sizeNewComp noFill fillFromNum mangle
+            xferMethod level charset version inodeLast keep share2path
+            comment
         )],
         RestoreFields => [qw(
             num startTime endTime result errorMsg nFiles size

@@ -732,7 +732,7 @@ Cliquer sur le numéro de l\'archive pour naviguer et restaurer les fichiers de 
     <td align="center"> Âge (jours) </td>
     <td align="center"> Garder </td>
     \$deleteHdrStr
-    <td align="center"> Chemin d\'accès de la sauvegarde sur le serveur </td>
+    <td align="center"> Commentaire </td>
 </tr>
 \$str
 </table>
@@ -872,16 +872,28 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
-<form name="form0" method="post" action="\$MyURL">
-<input type="hidden" name="num" value="\$num">
-<input type="hidden" name="host" value="\$host">
-<input type="hidden" name="share" value="\${EscHTML(\$share)}">
-<input type="hidden" name="action" value="browse">
 <ul>
 <li> Vous naviguez dans la sauvegarde n°\$num, qui a commencé vers \$backupTime
         (il y a \$backupAge jours),
 \$filledBackup
-<li> Entrez le répertoire: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
+<li>
+<form name="formDir" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Entrez le répertoire: <input type="text" name="dir" size="60" maxlength="4096" value="\${EscHTML(\$dir)}">
+    <input type="submit" value="\$Lang->{Go}" name="Submit">
+</form>
+<li>
+<form name="formComment" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Commentaire: <input type="text" name="comment" class="inputCompact" size="60" maxlength="4096" value="\${EscHTML(\$comment)}">
+    <input type="submit" value="\$Lang->{CfgEdit_Button_Save}" name="SetComment">
+</form>
 <li> Cliquer sur un répertoire ci-dessous pour y naviguer,
 <li> Cliquer sur un fichier ci-dessous pour le restaurer,
 <li> Vous pouvez voir l'<a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">historique</a> des différentes sauvegardes du répertoire courant.

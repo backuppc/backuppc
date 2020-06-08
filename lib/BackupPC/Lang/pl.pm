@@ -733,7 +733,7 @@ Kliknij na numer kopii aby przeglądać i przywracać wybrane pliki/katalogi.
     <td align="center"> Wiek/dni </td>
     <td align="center"> Trzymać </td>
     \$deleteHdrStr
-    <td align="center"> Ścieżka serwera kopii </td>
+    <td align="center"> Komentarz </td>
 </tr>
 \$str
 </table>
@@ -871,16 +871,28 @@ $Lang{Backup_browse_for__host} = <<EOF;
 //-->
 </script>
 
-<form name="form0" method="post" action="\$MyURL">
-<input type="hidden" name="num" value="\$num">
-<input type="hidden" name="host" value="\$host">
-<input type="hidden" name="share" value="\${EscHTML(\$share)}">
-<input type="hidden" name="action" value="browse">
 <ul>
 <li> Przegladasz kopie nr #\$num, która zaczeła się około \$backupTime
         (\$backupAge dni temu),
 \$filledBackup
-<li> Wpisz adres: <input type="text" name="dir" size="50" maxlength="4096" value="\${EscHTML(\$dir)}"> <input type="submit" value="\$Lang->{Go}" name="Submit">
+<li>
+<form name="formDir" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Wpisz adres: <input type="text" name="dir" size="60" maxlength="4096" value="\${EscHTML(\$dir)}">
+    <input type="submit" value="\$Lang->{Go}" name="Submit">
+</form>
+<li>
+<form name="formComment" method="post" action="\$MyURL">
+<input type="hidden" name="num" value="\$num">
+<input type="hidden" name="host" value="\$host">
+<input type="hidden" name="share" value="\${EscHTML(\$share)}">
+<input type="hidden" name="action" value="browse">
+Komentarz: <input type="text" name="comment" class="inputCompact" size="60" maxlength="4096" value="\${EscHTML(\$comment)}">
+    <input type="submit" value="\$Lang->{CfgEdit_Button_Save}" name="SetComment">
+</form>
 <li> Wpisz adres aby przejść do niego,
 <li> Kliknij plik aby go przywrócić,
 <li> Możesz zobaczyć kopie <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> obecnego adresu.

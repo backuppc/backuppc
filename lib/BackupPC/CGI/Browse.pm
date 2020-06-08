@@ -75,10 +75,16 @@ sub action
     if ( $i >= @Backups || $num !~ /^\d+$/ ) {
         ErrorExit("Backup number ${EscHTML($num)} for host ${EscHTML($host)} does not exist.");
     }
+    if ( defined($In{comment}) && defined($In{SetComment}) && length($In{comment}) < 4096 ) {
+        $Backups[$i]{comment} = $In{comment};
+        $bpc->BackupInfoWrite($host, @Backups);
+        BackupPC::Storage->backupInfoWrite("$TopDir/pc/$host", $Backups[$i]{num}, $Backups[$i], 1);
+    }
     my $backupTime = timeStamp2($Backups[$i]{startTime});
     my $backupAge  = sprintf("%.1f", (time - $Backups[$i]{startTime}) / (24 * 3600));
     my $view       = BackupPC::View->new($bpc, $host, \@Backups, {nlink => 1});
     my $share2path = ref($Backups[$i]{share2path}) eq 'HASH' ? $Backups[$i]{share2path} : {};
+    my $comment    = $Backups[$i]{comment};
 
     if ( $dir eq "" || $dir eq "." || $dir eq ".." ) {
         $attr = $view->dirAttrib($num, "", "");
@@ -278,7 +284,7 @@ EOF
     #
     # allow each level of the directory path to be navigated to
     #
-    my($thisPath, $dirDisplay, $lastPath);
+    my($thisPath, $dirDisplay, $lastDir);
     my $dirClean = $dir;
     $dirClean =~ s{//+}{/}g;
     $dirClean =~ s{/+$}{};
@@ -297,10 +303,10 @@ EOF
         }
         my $thisPathURI = $thisPath;
         $thisPathURI =~ s/([^\w.\/-])/uc sprintf("%%%02x", ord($1))/eg;
-        $dirDisplay .= "/" if ( $dirDisplay ne "" & $lastPath !~ m{/$} );
+        $dirDisplay .= "/" if ( $dirDisplay ne "" && $lastDir !~ m{/$} );
         $dirDisplay .=
           "<a href=\"$MyURL?action=browse&host=${EscURI($host)}&num=$num&share=$shareURI&dir=$thisPathURI\">${EscHTML($thisDir)}</a>";
-        $lastPath = $thisPath;
+        $lastDir = $thisDir;
     }
 
     my $filledBackup;
@@ -360,6 +366,7 @@ EOF
     if ( $share2pathStr ne "" ) {
         $share2pathStr = eval("qq{$Lang->{Browse_ClientShareName2Path}}");
     }
+    $comment = decode_utf8($comment);
 
     my $content = eval("qq{$Lang->{Backup_browse_for__host}}");
     Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"), $content);

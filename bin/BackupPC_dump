@@ -1980,6 +1980,7 @@ sub BackupSave
     $Backups[$i]{inodeLast}     = $inodeLast;
     $Backups[$i]{keep}          = 0;
     $Backups[$i]{share2path}    = $Conf{ClientShareName2Path};
+    $Backups[$i]{comment}       = "";
 
     return if ( $noWrite );
     #

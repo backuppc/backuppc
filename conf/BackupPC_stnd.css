@@ -1,7 +1,7 @@
 /*
  * BackupPC modern CSS definitions
  *
- * Version 4.1.2, released 15 Apr 2017.
+ * Version 4.3.3, released 6 Jun 2020.
  *
  * See http: //backuppc.sourceforge.net.
  *
@@ -10,7 +10,7 @@
  *   Ernesto Carrea  <ernestocarrea@gmail.com>
  *
  * COPYRIGHT
- *   Copyright (C) 2004-2017  Craig Barratt
+ *   Copyright (C) 2004-2020  Craig Barratt
  */
 
 body {
@@ -62,11 +62,14 @@ input[type="text"], input[type="email"], input[type="password"], input[type="sea
     width: 90%;
 }
 
-
 input:focus, select:focus, textarea:focus {
     outline: none !important;
     border-color: #719ECE;
     box-shadow: 0 0 5px #719ECE;
+}
+
+input.inputCompact, select.inputCompact {
+    width: auto;
 }
 
 textarea {

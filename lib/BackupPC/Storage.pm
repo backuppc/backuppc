@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.3.3, released 6 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -51,7 +51,7 @@ sub new
             xferErrs xferBadFile xferBadShare tarErrs
             compress sizeExistComp sizeNewComp
             noFill fillFromNum mangle xferMethod level
-            charset version inodeLast keep
+            charset version inodeLast keep share2path
         )],
         RestoreFields => [qw(
             num startTime endTime result errorMsg nFiles size

@@ -886,6 +886,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Щёлкните на каталог, чтобы увидеть его содержимое.
 <li> Щёлкните на файл, чтобы восстановить его.
 <li> <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">История копий</a> текущего каталога.
+\$share2pathStr
 </ul>
 </form>
 
@@ -918,6 +919,13 @@ This is now in the checkAll row
 <input type="submit" name="Submit" value="Restore selected files">
 -->
 </form>
+EOF
+
+$Lang{Browse_ClientShareName2Path} = <<EOF;
+<li> Сопоставление имени общего ресурса с реальным клиентским путем (ClientShareName2Path):
+    <ul>
+\$share2pathStr
+    </ul>
 EOF
 
 # ------------------------------

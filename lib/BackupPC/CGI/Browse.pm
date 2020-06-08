@@ -347,6 +347,20 @@ EOF
     $dir   = decode_utf8($dir);
     $share = decode_utf8($share);
 
+    #
+    # add an optional bullet describing the share2path mapping
+    # (from $Conf{ClientShareName2Path} when the backup was done).
+    #
+    my $share2pathStr;
+    foreach my $share ( sort(keys(%$share2path)) ) {
+        my $shareUtf8 = decode_utf8($share);
+        my $pathUtf8  = decode_utf8($share2path->{$share});
+        $share2pathStr .= "    <li>$shareUtf8 &rarr; $pathUtf8</li>\n";
+    }
+    if ( $share2pathStr ne "" ) {
+        $share2pathStr = eval("qq{$Lang->{Browse_ClientShareName2Path}}");
+    }
+
     my $content = eval("qq{$Lang->{Backup_browse_for__host}}");
     Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"), $content);
     Trailer();

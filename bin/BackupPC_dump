@@ -90,7 +90,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.3.3, released 6 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -1979,6 +1979,7 @@ sub BackupSave
     $Backups[$i]{version}       = $bpc->Version();
     $Backups[$i]{inodeLast}     = $inodeLast;
     $Backups[$i]{keep}          = 0;
+    $Backups[$i]{share2path}    = $Conf{ClientShareName2Path};
 
     return if ( $noWrite );
     #

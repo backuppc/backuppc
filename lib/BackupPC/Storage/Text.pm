@@ -29,7 +29,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.3.3, released 6 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -86,16 +86,28 @@ sub BackupInfoRead
         flock($lockFd, LOCK_UN);
         close($lockFd);
     }
-    #
-    # Default the version field.  Prior to 3.0.0 the xferMethod
-    # field is empty, so we use that to figure out the version.
-    #
     for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-        next if ( $Backups[$i]{version} ne "" );
-        if ( $Backups[$i]{xferMethod} eq "" ) {
-            $Backups[$i]{version} = "2.1.2";
-        } else {
-            $Backups[$i]{version} = "3.0.0";
+        #
+        # Default the version field.  Prior to 3.0.0 the xferMethod
+        # field is empty, so we use that to figure out the version.
+        #
+        if ( $Backups[$i]{version} eq "" ) {
+            if ( $Backups[$i]{xferMethod} eq "" ) {
+                $Backups[$i]{version} = "2.1.2";
+            } else {
+                $Backups[$i]{version} = "3.0.0";
+            }
+        }
+        #
+        # Reconstitue share2path into a hash
+        #
+        if ( $Backups[$i]{share2path} ne "" ) {
+            my $str = $Backups[$i]{share2path};
+            $str =~ s{%(..)}{chr(hex($1))}eg;
+            $Backups[$i]{share2path} = eval $str;
+            if ( $@ ) {
+                print(STDERR "BackupInfoRead: host $host: can't rebuild share2path from $str\n");
+            }
         }
     }
     return @Backups;
@@ -111,6 +123,15 @@ sub BackupInfoWrite
     #
     for ( $i = 0 ; $i < @Backups ; $i++ ) {
         my %b = %{$Backups[$i]};
+        if ( ref($b{share2path}) eq 'HASH' ) {
+            my $dump = Data::Dumper->new([$b{share2path}]);
+            $dump->Indent(0);
+            $dump->Sortkeys(1);
+            $dump->Terse(1);
+            my $value = $dump->Dump;
+            $value =~ s{([%\t\n\r])}{sprintf("%%%02x", ord($1))}eg;
+            $b{share2path} = $value;
+        }
         $contents .= join("\t", @b{@{$s->{BackupFields}}}) . "\n";
     }
 

@@ -888,6 +888,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Klik op een map hieronder om de inhoud van die map te bekijken,
 <li> Klik op een bestand hieronder om dat bestand terug te zetten.
 <li> U kan de <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">backupgeschiedenis</a> bekijken van de huidige map.
+\$share2pathStr
 </ul>
 </form>
 
@@ -920,6 +921,13 @@ This is now in the checkAll row
 <input type="submit" name="Submit" value="Restore selected files">
 -->
 </form>
+EOF
+
+$Lang{Browse_ClientShareName2Path} = <<EOF;
+<li> Toewijzing van sharenaam aan echt cliëntpad (ClientShareName2Path):
+    <ul>
+\$share2pathStr
+    </ul>
 EOF
 
 # ------------------------------

@@ -895,6 +895,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Klicken Sie auf ein Verzeichnis um dieses zu durchsuchen.
 <li> Klicken Sie auf eine Datei um diese per Download wiederherzustellen.
 <li> Einsehen der Backup <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">Historie</a> des aktuellen Verzeichnisses.
+\$share2pathStr
 </ul>
 </form>
 
@@ -927,6 +928,13 @@ This is now in the checkAll row
 <input type="submit" name="Submit" value="Selektion wiederherstellen">
 -->
 </form>
+EOF
+
+$Lang{Browse_ClientShareName2Path} = <<EOF;
+<li> Zuordnung des Freigabenamens zum realen Clientpfad (ClientShareName2Path):
+    <ul>
+\$share2pathStr
+    </ul>
 EOF
 
 # ------------------------------

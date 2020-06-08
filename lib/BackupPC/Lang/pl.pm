@@ -884,6 +884,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Wpisz adres aby przejść do niego,
 <li> Kliknij plik aby go przywrócić,
 <li> Możesz zobaczyć kopie <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> obecnego adresu.
+\$share2pathStr
 </ul>
 </form>
 
@@ -916,6 +917,13 @@ This is now in the checkAll row
 <input type="submit" name="Submit" value="Restore selected files">
 -->
 </form>
+EOF
+
+$Lang{Browse_ClientShareName2Path} = <<EOF;
+<li> Mapowanie nazwy udziału na ścieżkę rzeczywistego klienta (ClientShareName2Path):
+    <ul>
+\$share2pathStr
+    </ul>
 EOF
 
 # ------------------------------

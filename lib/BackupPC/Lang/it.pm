@@ -901,6 +901,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li>Fare clic su una directory per aprirla
 <li>Fare clic su un file per ripristinarlo
 <li>&Egrave; possibile visualizzare la <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">cronologia</a> dei backup della directory corrente
+\$share2pathStr
 </ul>
 </form>
 
@@ -933,6 +934,13 @@ This is now in the checkAll row
 <input type="submit" name="Submit" value="Ripristina file selezionati">
 -->
 </form>
+EOF
+
+$Lang{Browse_ClientShareName2Path} = <<EOF;
+<li> Mappatura del nome della condivisione sul percorso del client reale (ClientShareName2Path):
+    <ul>
+\$share2pathStr
+    </ul>
 EOF
 
 # ------------------------------

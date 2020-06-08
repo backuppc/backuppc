@@ -867,6 +867,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> 点击目录名进入相应目录。
 <li> 点击文件名恢复相应文件。
 <li> 查看当前目录的备份<a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">历史</a>。
+\$share2pathStr
 </ul>
 </form>
 
@@ -899,6 +900,13 @@ This is now in the checkAll row
 <input type="submit" name="Submit" value="恢复被选择的文件">
 -->
 </form>
+EOF
+
+$Lang{Browse_ClientShareName2Path} = <<EOF;
+<li> 共享名到真实客户端路径的映射 (ClientShareName2Path):
+    <ul>
+\$share2pathStr
+    </ul>
 EOF
 
 # ------------------------------

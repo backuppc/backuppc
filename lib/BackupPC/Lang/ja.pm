@@ -872,6 +872,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> 移動したいディレクトリを左下から選択してください
 <li> リストアするファイルを右下から選択してください
 <li> 現在のディレクトリのバックアップ<a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">履歴</a>を見ることができます。
+\$share2pathStr
 </ul>
 </form>
 
@@ -904,6 +905,13 @@ This is now in the checkAll row
 <input type="submit" name="Submit" value="選択されたファイルをリストア">
 -->
 </form>
+EOF
+
+$Lang{Browse_ClientShareName2Path} = <<EOF;
+<li> 共有名の実際のクライアントパスへのマッピング (ClientShareName2Path):
+    <ul>
+\$share2pathStr
+    </ul>
 EOF
 
 # ------------------------------

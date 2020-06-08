@@ -883,6 +883,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <li> Klikni na adresář níže a pokračuj do něj,
 <li> Klikni na soubor níže a obnov ho,
 <li> Můžeş vidět zálohu <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> aktuálního adresáře.
+\$share2pathStr
 </ul>
 </form>
 
@@ -915,6 +916,13 @@ This is now in the checkAll row
 <input type="submit" name="Submit" value="Restore selected files">
 -->
 </form>
+EOF
+
+$Lang{Browse_ClientShareName2Path} = <<EOF;
+<li> Mapování názvu sdílené položky na skutečnou cestu klienta (ClientShareName2Path):
+    <ul>
+\$share2pathStr
+    </ul>
 EOF
 
 # ------------------------------

@@ -1048,7 +1048,7 @@ sub InstallFile
         close(OUT);
     }
     die("can't chown $uid, $gid $dest") unless my_chown($uid, $gid, $dest);
-    die("can't chmod $mode $dest") unless my_chmod($mode, $dest);
+    die("can't chmod $mode $dest")      unless my_chmod($mode, $dest);
 }
 
 sub FindProgram

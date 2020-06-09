@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_tarExtract: extract data from a dump

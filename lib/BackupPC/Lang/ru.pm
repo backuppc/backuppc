@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # by Sergei Butakov <sergei@bslos.com> (2011-05-1x - 2011-05-2x for V3.2.1)
 #

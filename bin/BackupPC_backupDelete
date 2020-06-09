@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_backupDelete: delete a V4 backup

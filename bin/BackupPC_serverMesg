@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_serverMesg: Send one or more commands to the BackupPC server.

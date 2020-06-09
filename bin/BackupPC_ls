@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_ls: emulate a simple subset of ls to make it easy to

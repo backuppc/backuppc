@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 # By Serhiy Yakimchuck yakim@yakim.org.ua 02 sept 2012 vor version 3.2.1
 #

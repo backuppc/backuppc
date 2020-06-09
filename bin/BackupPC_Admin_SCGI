@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #============================================================= -*-perl-*-
 #
 # BackupPC_Admin_SCGI: An SCGI implementation of the BackupPC

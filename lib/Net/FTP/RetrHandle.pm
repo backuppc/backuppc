@@ -593,7 +593,7 @@ sub UNTIE
 Here's an example of listing a Zip file without downloading the whole
 thing:
 
-    #!/usr/bin/perl
+    #!/usr/bin/env perl
 
     use warnings;
     use strict;

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # by Ralph Passgang <ralph@debianbase.de> (13.11.2006 for V3.0.0)
 # by Ralph Passgang <ralph@debianbase.de> (30.06.2006 for V3.0.0)

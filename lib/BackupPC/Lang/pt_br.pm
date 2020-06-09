@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 #
 # By Reginaldo Ferreira <reginaldo@lepper.com.br> (23.07.2004 for V2.1.10)
 #

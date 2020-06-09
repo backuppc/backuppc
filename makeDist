@@ -119,12 +119,12 @@ my @PerlSrc = qw(
   lib/BackupPC/CGI/HostInfo.pm
   lib/BackupPC/CGI/Lib.pm
   lib/BackupPC/CGI/LOGlist.pm
+  lib/BackupPC/CGI/Metrics.pm
   lib/BackupPC/CGI/Queue.pm
   lib/BackupPC/CGI/ReloadServer.pm
   lib/BackupPC/CGI/Restore.pm
   lib/BackupPC/CGI/RestoreFile.pm
   lib/BackupPC/CGI/RestoreInfo.pm
-  lib/BackupPC/CGI/RSS.pm
   lib/BackupPC/CGI/StartServer.pm
   lib/BackupPC/CGI/StartStopBackup.pm
   lib/BackupPC/CGI/StopServer.pm

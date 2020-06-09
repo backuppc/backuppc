@@ -1463,9 +1463,9 @@ Dimensione completi (GiB): \$fullSize;
 Velocit&agrave; (MB/s): \$fullRate;
 Incrementali: \$incrCnt;
 Et&agrave; incrementali (giorni): \$incrAge;
-Stato: \$host_state;
-Disabilitato: \$host_disabled;
-Ultimo tentativo: \$host_last_attempt;
+Stato: \$hostState;
+Disabilitato: \$hostDisabled;
+Ultimo tentativo: \$hostLastAttempt;
 EOF
 
 #######################################################################

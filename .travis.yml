@@ -44,6 +44,7 @@ jobs:
   - name: Lint
     language: python
     python: 3.8
+    cache: pip
     before_install: skip
     install: skip
     before_script: skip

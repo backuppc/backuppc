@@ -225,6 +225,21 @@ $Conf{BackupPCNightlyPeriod} = 1;
 $Conf{PoolSizeNightlyUpdatePeriod} = 16;
 
 #
+# Integrity check the pool files by confirming the md5 digest of the
+# contents matches their file name.  Because the pool is very large,
+# only check a small random percentage of the pool files each night.
+#
+# This is check if there has been any server file system corruption.
+#
+# The default value of 1% means approximately 30% of the pool files
+# will be checked each month, although the actual number will be a
+# bit less since some files might be checked more than once in that
+# time. If BackupPC_nightly takes too long, you could reduce this
+# value.
+#
+$Conf{PoolNightlyDigestCheckPercent} = 1;
+
+#
 # Reference counts of pool files are computed per backup by accumulating
 # the relative changes.  That means, however, that any error will never be
 # corrected.  To be more conservative, we do a periodic full-redo of the

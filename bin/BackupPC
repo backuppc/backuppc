@@ -105,8 +105,8 @@ if ( $Conf{BackupPCUserVerify} && $> != (my $uid = (getpwnam($Conf{BackupPCUser}
 # Ensure we don't have old versions of key libraries and executables
 ###########################################################################
 my $PackageVersion = {
-    'BackupPC::XS' => '0.60',
-    rsync_bpc      => '3.0.9.8',
+    'BackupPC::XS' => '0.61',
+    rsync_bpc      => '3.0.9.14',
 };
 
 if ( $BackupPC::XS::VERSION < $PackageVersion->{'BackupPC::XS'} ) {

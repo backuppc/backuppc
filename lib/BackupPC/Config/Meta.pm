@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.3.3, released 6 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -71,15 +71,16 @@ use vars qw(%ConfigMeta);
         type  => "shortlist",
         child => "float",
     },
-    PoolV3Enabled               => "boolean",
-    MaxBackups                  => "integer",
-    MaxUserBackups              => "integer",
-    MaxPendingCmds              => "integer",
-    MaxBackupPCNightlyJobs      => "integer",
-    BackupPCNightlyPeriod       => "integer",
-    PoolSizeNightlyUpdatePeriod => "integer",
-    MaxOldLogFiles              => "integer",
-    CmdQueueNice                => "integer",
+    PoolV3Enabled                 => "boolean",
+    MaxBackups                    => "integer",
+    MaxUserBackups                => "integer",
+    MaxPendingCmds                => "integer",
+    MaxBackupPCNightlyJobs        => "integer",
+    BackupPCNightlyPeriod         => "integer",
+    PoolSizeNightlyUpdatePeriod   => "integer",
+    PoolNightlyDigestCheckPercent => "integer",
+    MaxOldLogFiles                => "integer",
+    CmdQueueNice                  => "integer",
 
     SshPath         => {type => "execPath", undefIfEmpty => 1},
     NmbLookupPath   => {type => "execPath", undefIfEmpty => 1},

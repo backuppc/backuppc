@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.3.3, released 6 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -65,6 +65,7 @@ our %ConfigMenu = (
             {name => "MaxBackupPCNightlyJobs"},
             {name => "BackupPCNightlyPeriod"},
             {name => "PoolSizeNightlyUpdatePeriod"},
+            {name => "PoolNightlyDigestCheckPercent"},
 
             {text => "CfgEdit_Title_Pool_Filesystem_Limits"},
             {name => "DfCmd"},

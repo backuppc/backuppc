@@ -1,6 +1,4 @@
 #!/usr/bin/perl
-#============================================================= -*-perl-*-
-#
 # BackupPC_refCountUpdate: Pool reference count updater
 #
 # DESCRIPTION
@@ -812,6 +810,23 @@ sub updateTotalRefCnt
                         print("BackupPC_refCountUpdate: unexpected pool file $poolSubDir/$e->{name} removed\n");
                         unlink("$poolSubDir/$e->{name}");
                         next;
+                    }
+                    #
+                    # check a small random subset of the pool file's actual md5 against its file name
+                    #
+                    if ( rand(100) < $Conf{PoolNightlyDigestCheckPercent} ) {
+                        my $md5 = BackupPC::XS::FileDigest::digest("$poolSubDir/$e->{name}", $compress);
+                        if ( substr($d, 0, 16) ne $md5 ) {
+                            printf(
+                                "BackupPC_refCountUpdate: ERROR pool file %s has digest %s instead of %s\n",
+                                "$poolSubDir/$e->{name}",
+                                unpack("H*", $md5),
+                                unpack("H*", substr($d, 0, 16))
+                            );
+                        } else {
+                            print("BackupPC_refCountUpdate: pool file $poolSubDir/$e->{name} md5 digest verified\n")
+                              if ( $Conf{XferLogLevel} >= 5 );
+                        }
                     }
                     if ( !defined($count->get($d)) ) {
                         my @s = stat("$poolSubDir/$e->{name}");

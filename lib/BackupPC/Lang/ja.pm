@@ -1416,9 +1416,9 @@ Full Size/GiB: \$fullSize;
 Speed MB/sec: \$fullRate;
 Incr Count: \$incrCnt;
 Incr Age/Days: \$incrAge;
-State: \$host_state;
-Disabled: \$host_disabled;
-Last Attempt: \$host_last_attempt;
+State: \$hostState;
+Disabled: \$hostDisabled;
+Last Attempt: \$hostLastAttempt;
 EOF
 
 #######################################################################

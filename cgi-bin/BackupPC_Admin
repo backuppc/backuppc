@@ -83,7 +83,8 @@ my %ActionDispatch = (
     "editConfig"           => "EditConfig",
     "deleteBackup"         => "DeleteBackup",
     "keepBackup"           => "HostInfo",
-    "rss"                  => "RSS",
+    "rss"                  => "Metrics",
+    "metrics"              => "Metrics",
 );
 
 #

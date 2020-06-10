@@ -1429,9 +1429,9 @@ Celková velikost/GiB: \$fullSize;
 Rychlost MB/sec: \$fullRate;
 Počet inkr: \$incrCnt;
 Čas inkr/Dní: \$incrAge;
-Stav: \$host_state;
-Zakázáno: \$host_disabled;
-Poslední pokus: \$host_last_attempt;
+Stav: \$hostState;
+Zakázáno: \$hostDisabled;
+Poslední pokus: \$hostLastAttempt;
 EOF
 
 #######################################################################

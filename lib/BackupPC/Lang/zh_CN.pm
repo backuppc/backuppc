@@ -1394,9 +1394,9 @@ $Lang{RSS_Host_Summary}    = <<EOF;
 完全备份速度 (MB/sec)：\$fullRate;
 增量备份个数：\$incrCnt;
 最后一次增量备份 (天前)：\$incrAge;
-当前状态：\$host_state;
-残: \$host_disabled;
-最后一次备份结果：\$host_last_attempt;
+当前状态：\$hostState;
+残: \$hostDisabled;
+最后一次备份结果：\$hostLastAttempt;
 EOF
 
 #######################################################################

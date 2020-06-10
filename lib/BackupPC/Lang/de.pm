@@ -1452,9 +1452,9 @@ Größe/GiB: \$fullSize;
 MB/sek: \$fullRate;
 #Inkr: \$incrCnt;
 Alter/Tage: \$incrAge;
-Status: \$host_state;
-Deaktiviert: \$host_disabled;
-Letzte Aktion: \$host_last_attempt;
+Status: \$hostState;
+Deaktiviert: \$hostDisabled;
+Letzte Aktion: \$hostLastAttempt;
 EOF
 
 #######################################################################

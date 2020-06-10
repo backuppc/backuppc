@@ -1442,9 +1442,9 @@ Completo Tamanho/GiB: \$fullSize;
 Velocidade MB/sec: \$fullRate;
 #Incrementais: \$incrCnt;
 Incrementais Antig/Dias: \$incrAge;
-Estado: \$host_state;
-Desativado: \$host_disabled;
-Última Tentativa: \$host_last_attempt;
+Estado: \$hostState;
+Desativado: \$hostDisabled;
+Última Tentativa: \$hostLastAttempt;
 EOF
 
 #######################################################################

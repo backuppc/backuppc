@@ -1477,9 +1477,9 @@ Completo Tama&ntilde;o/GB: \$fullSize;
 Velocidad MB/sec: \$fullRate;
 #Incrementales: \$incrCnt;
 Incrementales Antig/D&iacute;as: \$incrAge;
-Estado: \$host_state;
-Discapacitado: \$host_disabled;
-Ultimo Intento: \$host_last_attempt;
+Estado: \$hostState;
+Discapacitado: \$hostDisabled;
+Ultimo Intento: \$hostLastAttempt;
 EOF
 
 #######################################################################

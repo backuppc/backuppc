@@ -78,6 +78,7 @@ use BackupPC::CGI::EmailSummary;
 use BackupPC::CGI::GeneralInfo;
 use BackupPC::CGI::HostInfo;
 use BackupPC::CGI::LOGlist;
+use BackupPC::CGI::Metrics;
 use BackupPC::CGI::Queue;
 use BackupPC::CGI::ReloadServer;
 use BackupPC::CGI::Restore;
@@ -116,7 +117,8 @@ my %ActionDispatch = (
     "editConfig"           => "EditConfig",
     "deleteBackup"         => "DeleteBackup",
     "keepBackup"           => "HostInfo",
-    "rss"                  => "RSS",
+    "rss"                  => "Metrics",
+    "metrics"              => "Metrics",
 );
 my %ChildPid2Num;
 
@@ -129,10 +131,6 @@ BEGIN {
         #
         sleep(60);
         exit(1);
-    }
-    eval "use BackupPC::CGI::RSS;";
-    if ( !$@ ) {
-        $ActionDispatch{rss} = "RSS";
     }
 }
 

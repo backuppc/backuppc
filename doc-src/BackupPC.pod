@@ -783,7 +783,7 @@ see L<http://www.cpan.org>.
 =item *
 
 The perl modules BackupPC::XS (version >= 0.50) is required, and
-several others, File::Listing, Archive::Zip, XML::RSS, Net::FTP,
+several others, File::Listing, Archive::Zip, XML::RSS, JSON::XS, Net::FTP,
 Net::FTP::RetrHandle, Net::FTP::AutoReconnect are recommended.
 
 Try "perldoc BackupPC::XS" and "perldoc Archive::Zip" to see if you have these
@@ -953,8 +953,15 @@ You can run "perldoc Archive::Zip" to see if this module is installed.
 =item XML::RSS
 
 To support the RSS feature you will need to install XML::RSS, also from
-L<http://www.cpan.org>.  There is not need to install this module if you
+L<http://www.cpan.org>. There is not need to install this module if you
 don't plan on using RSS. You can run "perldoc XML::RSS" to see if this
+module is installed.
+
+=item JSON::XS
+
+To support the JSON formated metrics you will need to install JSON::XS, also from
+L<http://www.cpan.org>. There is not need to install this module if you
+don't plan on using JSON formated metrics. You can run "perldoc JSON::XS" to see if this
 module is installed.
 
 =item CGI
@@ -2555,7 +2562,30 @@ of the Cmd configuration settings, otherwise they can specify
 an arbitrary command that will be executed as the BackupPC
 user.
 
+=head2 Metrics
+
+BackupPC supports a metrics endpoint that expose common information
+in a digest format. Allowed metrics formats are C<json> (default),
+C<prometheus> and C<rss>. Format should be specified using C<format>
+query parameter, a URL similar to this will provide metrics
+information:
+
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=json
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=prometheus
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=rss
+
+JSON format requires the JSON::XS module to be installed.
+RSS format requires the XML::RSS module to be installed.
+
+This feature is experimental. The information included will
+probably change.
+
 =head2 RSS
+
+The RSS feed has been merged in the metrics endpoint (see section above). Please
+use the metrics endpoint to access the RSS feed, as the old endpoint will be
+deprecated.
 
 BackupPC supports a very basic RSS feed.  Provided you have the
 XML::RSS perl module installed, a URL similar to this will

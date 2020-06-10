@@ -107,11 +107,8 @@ sub action
         return \%pool;
     }
 
-    my $poolRef  = generatePool("pool");
-    my $cpoolRef = generatePool("cpool");
-
-    $metrics{pool}  = $Info{pool4FileCnt} > 0  ? $poolRef  : undef;
-    $metrics{cpool} = $Info{cpool4FileCnt} > 0 ? $cpoolRef : undef;
+    $metrics{pool}  = $Info{pool4FileCnt} > 0  ? generatePool("pool")  : undef;
+    $metrics{cpool} = $Info{cpool4FileCnt} > 0 ? generatePool("cpool") : undef;
 
     #
     # Host metrics
@@ -292,7 +289,7 @@ sub action
             foreach my $entry ( sort keys %{$mapper{$section}} ) {
 
                 # Ignore empty pools
-                next if ( ($section eq "pool" or $section eq "cpool") and not $metrics{$section}{file_count} > 0 );
+                next if ( ($section eq "pool" or $section eq "cpool") and $metrics{$section}{file_count} <= 0 );
 
                 my $promKey = "backuppc_${section}_${entry}";
 

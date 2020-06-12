@@ -460,9 +460,10 @@ sub updateHostRefCounts
                         );
                         $needFsck->{$bkupNum}++;
                         $ErrorCnt++;
+                    } elsif ( $c > 0 ) {
+                        $count->incr($d, $c);
+                        $countDirty = 1;
                     }
-                    $count->incr($d, $c);
-                    $countDirty = 1;
                 }
             }
             if ( $countDirty && $count->write($poolCntFileNew) ) {
@@ -589,10 +590,11 @@ sub updateHostPoolOneDelta2Cnt
         }
         #
         # Apply the deltas and write the file back; it's an error for any count to
-        # be negative.
+        # be negative.  Remove zero counts.
         #
         foreach my $d ( keys(%{$delta->[$refCntFile]}) ) {
             my $c = $count->incr($d, $delta->[$refCntFile]{$d});
+            $count->delete($d) if ( $c == 0 );
             next if ( $c >= 0 );
             printf(
                 "BackupPC_refCountUpdate: got a negative count for %s processing %s; redoing #%d\n",

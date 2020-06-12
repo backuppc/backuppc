@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.3.3, released 6 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -111,7 +111,7 @@ if ( $opts{f} ) {
     #
     foreach my $host ( sort(keys(%$Hosts)) ) {
         print("BackupPC_fsck: Rebuilding count database for host $host\n");
-        $ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -h $host -f -p") );
+        $ErrorCnt++ if ( system("$BinDir/BackupPC_refCountUpdate -h $host -F -p") );
     }
 } else {
     #

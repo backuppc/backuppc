@@ -21,6 +21,78 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
+  #343, #344, #345, #347
+
+* Filled/Full backups can now be marked as "keep", which excludes them
+  from any expiry/deletion.  Also, a backup-specific comment can be added
+  to any backup if capture any important information about that backup
+  (eg, "pre-upgrade of xyz").
+
+* Added metrics CGI, which adds Prometheus support and replaces RSS,
+  by @joola (#344, #347)
+
+* Tar XferMethod now supports xattrs and acls; xattrs sbould be
+  compatible with rsync XferMethod, but acls are not
+
+* Sort open directories to top when browsing backup tree
+
+* Format code using perltidy, and included in pre-commit flow, by @joola
+  (#334, #337, #342, #343, #345).  Thanks to Jonas and Steve @XYZ
+  (perltidy author) for significant effort, plus improvements in
+  perltidy, to make this happen.
+
+* Added $Conf{PoolNightlyDigestCheckPercent}, which checks the md5
+  digest of this fraction of the pool files each night.
+
+* $Conf{ClientShareName2Path} is saved in backups file and the share
+  to client path mapping is now displayed when you browse a backup so
+  you know the actual client backup path for each share, if different
+  from the share name
+
+* Fixed host mutex handling for dhcp hosts; shifted initial mutex requests
+  to client programs
+
+* Updated webui icon, logo and favicon, by @moisseev (#325,
+  #326, #329, #330)
+
+* Added $Conf{RsyncRestoreArgsExtra} for host-specific restore
+  settings
+
+* Language files are now all use utf8 charsets
+
+* Bumped required version of BackupPC::XS to 0.62 and rsync-bpc
+  to 3.0.9.16.
+
+* Ping failure message only written to stdout only if verbose
+
+* BackupPC_backupDelete removes partial v3 backup in HOST/new;
+  fixes #324 reported by @thalueng
+
+* BackupPC_backupDelete adds -f option to over keep, if set
+
+* BackupPC_nightly: change -f to -F when running BackupPC_refCountUpdate
+  during fsck
+
+* Better formatting of eval cmd result in cmdSystemOrEvalLong()
+
+* Remove zero count entries in per-backup and per-host poolCnt
+  files
+
+* Add a fake version parameter to the CSS URL to overcome caching
+
+* lib/BackupPC/Xfer/Rsync.pm skips adding --iconv option when
+  $conf->{ClientCharset} is utf8 or empty, to avoid a long-standing
+  rsync bug.
+
+* lib/BackupPC/Xfer/Smb.pm recognizes NT_STATUS_LOGON_FAILURE error
+
+* Increase text length in config editor fields, by @moisseev (#336)
+
+* Typo fix in config.pl, by @cure (#338)
+
+* Minor documentation updates, removing old SourceForge links
+
 #------------------------------------------------------------------------
 # Version 4.3.2, 17 Feb 2020
 #------------------------------------------------------------------------

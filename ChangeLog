@@ -38,9 +38,9 @@ Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
 * Sort open directories to top when browsing backup tree
 
 * Format code using perltidy, and included in pre-commit flow, by @joola
-  (#334, #337, #342, #343, #345).  Thanks to Jonas and Steve @XYZ
-  (perltidy author) for significant effort, plus improvements in
-  perltidy, to make this happen.
+  (#334, #337, #342, #343, #345).  Thanks to @joola and @shancock9
+  (perltidy author) for significant effort and support, plus improvements
+  in perltidy, to make this happen.
 
 * Added $Conf{PoolNightlyDigestCheckPercent}, which checks the md5
   digest of this fraction of the pool files each night.

@@ -595,7 +595,7 @@ sub updateHostPoolOneDelta2Cnt
         foreach my $d ( keys(%{$delta->[$refCntFile]}) ) {
             my $c = $count->incr($d, $delta->[$refCntFile]{$d});
             $count->delete($d) if ( $c == 0 );
-            next if ( $c >= 0 );
+            next               if ( $c >= 0 );
             printf(
                 "BackupPC_refCountUpdate: got a negative count for %s processing %s; redoing #%d\n",
                 unpack("H*", $d),

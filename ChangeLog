@@ -26,7 +26,7 @@ Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
 
 * Filled/Full backups can now be marked as "keep", which excludes them
   from any expiry/deletion.  Also, a backup-specific comment can be added
-  to any backup if capture any important information about that backup
+  to any backup to capture any important information about that backup
   (eg, "pre-upgrade of xyz").
 
 * Added metrics CGI, which adds Prometheus support and replaces RSS,
@@ -49,6 +49,11 @@ Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
   to client path mapping is now displayed when you browse a backup so
   you know the actual client backup path for each share, if different
   from the share name
+
+* configure.pl now checks the per-host config.pl in a V3 upgrade to
+  warn the user if $Conf{RsyncClientCmd} or $Conf{RsyncClientRestoreCmd}
+  are used for that host, so that the new settings $Conf{RsyncSshArgs}
+  and $Conf{RsyncClientPath} can be manually updated.
 
 * Fixed host mutex handling for dhcp hosts; shifted initial mutex requests
   to client programs

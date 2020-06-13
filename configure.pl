@@ -76,7 +76,7 @@ my @Packages = qw(version Encode Socket File::Path File::Spec File::Copy
 
 my $PackageVersion = {
     "Encode"       => "1.99",
-    "BackupPC::XS" => "0.53",
+    "BackupPC::XS" => "0.61",
 };
 
 foreach my $pkg ( @Packages ) {
@@ -426,10 +426,10 @@ which handles the requests.  This allows Apache to run as a different user as
 $Conf{BackupPCUser}.  To use SCGI you need to set SCGIServerPort to any spare
 non-privileged TCP port number.  A negative value disables SCGI.
 
-Important security warning!!  The SCGIServerPort must not be accessible by
-anyone untrusted.  That means you can't allow untrusted users access to the
-BackupPC server, and you should block the SCGIServerPort TCP port from
-network access.
+** Important security warning!!  The SCGIServerPort must not be accessible by
+** anyone untrusted.  That means you can't allow untrusted users access to the
+** BackupPC server, and you should block the SCGIServerPort TCP port from
+** network access.
 
 The traditional alternative is to use CGI.  In this case, an executable needs
 to be installed Apache's cgi-bin directory.  This executable needs to run as
@@ -695,8 +695,41 @@ if ( $Upgrade && !defined($Conf{PoolV3Enabled}) ) {
     # If it exists, use $Conf{RsyncClientCmd} to create the default $Conf{RsyncSshArgs}.
     #
     if ( $Conf{RsyncClientCmd} =~ /(\$sshPath.* +-l +\S+)/ && defined($newVars->{RsyncSshArgs}) ) {
-        my $value = "[\n    '-e', '$1',\n];\n\n";
+        my $sshEArg = $1;
+        my $value   = "[\n    '-e', '$sshEArg',\n];\n\n";
         $newConf->[$newVars->{RsyncSshArgs}]{text} =~ s/^(\s*\$Conf\{RsyncSshArgs}\s*=\s*).*/$1$value/ms;
+        printf("** Warning: setting \$Conf{RsyncSshArgs} to ['-e', '%s'] based on deprecated V3 setting"
+              . " \$Conf{RsyncClientCmd} = '%s'; please"
+              . " check & fix \$Conf{RsyncClientPath} and \$Conf{RsyncSshArgs}\n",
+            $sshEArg, $Conf{RsyncClientCmd});
+    } else {
+        printf(
+            "** Warning: unable to set \$Conf{RsyncSshArgs} based on deprecated V3 setting"
+              . " \$Conf{RsyncClientCmd} = '%s'; please"
+              . " check & fix \$Conf{RsyncClientPath} and \$Conf{RsyncSshArgs}\n",
+            $Conf{RsyncClientCmd}
+        );
+    }
+    #
+    # check if any per-host config files have a $Conf{RsyncClientCmd} setting; if so
+    # warn the user they need to manually check/update them
+    #
+    my @hostConfigs = (
+        <$DestDir$Conf{ConfDir}/pc/*.pl>,         # FHS case
+        <$DestDir$Conf{TopDir}/pc/*/config.pl>    # non-FHS case
+    );
+    foreach my $hostConfigFile ( @hostConfigs ) {
+        next if ( !-f $hostConfigFile );
+        my($hostConf, $hostVars) = ConfigParse($hostConfigFile);
+        if ( defined($hostVars->{RsyncClientCmd}) ) {
+            print(  "** Warning: host config $hostConfigFile contains deprecated V3 \$Conf{RsyncClientCmd} setting;"
+                  . " you need to manually update \$Conf{RsyncClientPath} and \$Conf{RsyncSshArgs} for this host\n");
+        }
+        if ( defined($hostVars->{RsyncClientRestoreCmd}) ) {
+            print(
+                "** Warning: host config $hostConfigFile contains deprecated V3 \$Conf{RsyncClientRestoreCmd} setting;"
+                  . " you need to manually update \$Conf{RsyncClientPath} and \$Conf{RsyncSshArgs} for this host\n");
+        }
     }
 }
 
@@ -756,7 +789,7 @@ foreach my $var ( @$newConf ) {
         $var->{text} = substr($var->{text}, length($blockComment));
         $blockComment = undef;
     }
-    $blockComment = $1 if ( $var->{text} =~ /^([\s\n]*#{70}.*#{70}[\s\n]+)/s );
+    $blockComment = $1 if ( $var->{text} =~ /^(\s*#{70}.*#{70}\s+)/s );
     $var->{text} =~ s/^\s*\$Conf\{(.*?)\}(\s*=\s*['"]?)(.*?)(['"]?\s*;)/
                 my $varName  = $1;
                 my $a        = $2;
@@ -767,12 +800,11 @@ foreach my $var ( @$newConf ) {
                 ($a, $b) = GetQuotes($varName)
                               if ( (!defined($OrigConf{$varName}) || $OrigConf{$varName} eq "")
                                    && $Conf{$varName} ne $OrigConf{$varName} );
-
                 defined($Conf{$varName}) && ref($Conf{$varName}) eq ""
                                    && !defined($opts{"config-override"}{$varName})
                                    && $Conf{$varName} ne $OrigConf{$varName}
                                    ? "\$Conf{$varName}$a$Conf{$varName}$b"
-                                   : "\$Conf{$varName}$a$varValue$b"/emg;
+                                   : "\$Conf{$varName}$a$varValue$b"/emsg;
     print OUT $var->{text};
 }
 close(OUT);
@@ -1081,13 +1113,7 @@ sub ConfigParse
             } else {
                 if ( $out ne "" ) {
                     $allVars->{$var} = @conf if ( defined($var) );
-                    push(
-                        @conf,
-                        {
-                            text => $out,
-                            var  => $var,
-                        }
-                    );
+                    push(@conf, {text => $out, var => $var});
                 }
                 $var     = undef;
                 $comment = 1;
@@ -1097,13 +1123,7 @@ sub ConfigParse
             $comment = 0;
             if ( defined($var) ) {
                 $allVars->{$var} = @conf if ( defined($var) );
-                push(
-                    @conf,
-                    {
-                        text => $out,
-                        var  => $var,
-                    }
-                );
+                push(@conf, {text => $out, var => $var});
                 $out = $_;
             } else {
                 $out .= $_;
@@ -1118,13 +1138,7 @@ sub ConfigParse
     }
     if ( $out ne "" ) {
         $allVars->{$var} = @conf if ( defined($var) );
-        push(
-            @conf,
-            {
-                text => $out,
-                var  => $var,
-            }
-        );
+        push(@conf, {text => $out, var => $var});
     }
     close(C);
     return (\@conf, $allVars);
@@ -1141,7 +1155,6 @@ sub ConfigMerge
     #
     foreach my $var ( @$old ) {
         next if ( !defined($var->{var}) || defined($newVars->{$var->{var}}) );
-
         #print(STDERR "Deleting old config parameter $var->{var}\n");
         $var->{delete} = 1;
     }
@@ -1153,7 +1166,6 @@ sub ConfigMerge
         if ( defined($oldVars->{$var->{var}}) ) {
             $posn = $oldVars->{$var->{var}};
         } else {
-
             #print(STDERR "New config parameter $var->{var}: $var->{text}\n");
             push(@{$old->[$posn]{new}}, $var);
         }
@@ -1179,7 +1191,7 @@ sub GetQuotes
     my($varName) = @_;
 
     my $posn = $distVars->{$varName};
-    $distConf->[$posn]->{text} =~ /^\s*\$Conf\{.*?\}(\s*=\s*['"]?).*?(['"]?\s*;)/mg;
+    $distConf->[$posn]->{text} =~ /^\s*\$Conf\{.*?\}(\s*=\s*['"]?).*?(['"]?\s*;)/ms;
     return ($1, $2);
 }
 
@@ -1229,7 +1241,7 @@ also supports a batch mode where all the options can be specified
 via the command-line.
 
 For upgrading BackupPC you need to make sure that BackupPC is not
-running prior to running BackupPC.
+running prior to running configure.pl.
 
 Typically configure.pl needs to run as the super user (root).
 
@@ -1446,7 +1458,7 @@ Craig Barratt <cbarratt@users.sourceforge.net>
 
 =head1 COPYRIGHT
 
-Copyright (C) 2001-2010  Craig Barratt.
+Copyright (C) 2001-2020  Craig Barratt.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

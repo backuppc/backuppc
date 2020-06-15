@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.3.3, released 12 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -504,6 +504,11 @@ sub run
                 my $exitCode = $? >> 8;
                 if ( $exitCode == 23 || $exitCode == 24 || $exitCode == 25 ) {
                     $t->{rsyncOut} .= "rsync_bpc exited with benign status $exitCode ($?)\n";
+                    $t->{rsyncOut} .= "That means the client rsync had errors on some files.  Please check the XferLOG.\n";
+                    $t->{rsyncOut} .= "It likely means that rsync's delete cleanup (which deletes files on the backup\n";
+                    $t->{rsyncOut} .= "server that are no longer on the client) was skipped.  You should fix the error(s)\n";
+                    $t->{rsyncOut} .= "that rsync can run cleanly.  You can also specify the --ignore-errors option\n";
+                    $t->{rsyncOut} .= "which will still do the delete even if there are rsync errors, but do that with caution.\n";
                     $t->{xferOK} = 1;
                     $t->{stats}{xferErrs}++;
                 } else {
@@ -570,6 +575,9 @@ sub run
                 $t->{stats}{xferErrs}++;
             }
             if ( /^rsync error: / || /^rsync warning: / ) {
+                $t->{stats}{xferErrs}++;
+            }
+            if ( /^IO error encountered -- skipping file deletion/ ) {
                 $t->{stats}{xferErrs}++;
             }
             if ( /^rsync: send_files failed to open / || /^file has vanished: / ) {

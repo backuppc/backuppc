@@ -106,7 +106,7 @@ if ( $Conf{BackupPCUserVerify} && $> != (my $uid = (getpwnam($Conf{BackupPCUser}
 ###########################################################################
 my $PackageVersion = {
     'BackupPC::XS' => '0.62',
-    rsync_bpc      => '3.0.9.16',
+    rsync_bpc      => '3.0.9.15',
 };
 
 if ( $BackupPC::XS::VERSION < $PackageVersion->{'BackupPC::XS'} ) {

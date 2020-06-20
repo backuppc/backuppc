@@ -1435,7 +1435,7 @@ sub catch_signal
             # Send ALRMs to BackupPC_tarExtract if we are using it
             #
             if ( $tarPid > 0 ) {
-                kill($bpc->sigName2num("ARLM"), $tarPid);
+                kill($bpc->sigName2num("ALRM"), $tarPid);
             }
 
         } else {

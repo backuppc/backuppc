@@ -280,7 +280,7 @@ sub ArchiveCleanup
     if ( $NeedPostCmd ) {
         UserCommandRun("ArchivePostUserCmd");
         if ( $? && $Conf{UserCmdCheckStatus} ) {
-            $stat{hostError} = "RestorePreUserCmd returned error status $?";
+            $stat{hostError} = "ArchivePostUserCmd returned error status $?";
             $stat{xferOK}    = 0;
         }
     }

@@ -22,7 +22,7 @@
 #------------------------------------------------------------------------
 
 Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
-  #343, #344, #345, #347
+  #343, #344, #345, #347, #348, #349
 
 * Filled/Full backups can now be marked as "keep", which excludes them
   from any expiry/deletion.  Also, a backup-specific comment can be added
@@ -86,9 +86,18 @@ Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
 
 * Add a fake version parameter to the CSS URL to overcome caching
 
+* Fixed ALRM typo in BackupPC_dump, by @rhansen (#348)
+
+* Fixed command name in error message in BackupPC_archive,
+  by @rhansen (#349)
+
 * lib/BackupPC/Xfer/Rsync.pm skips adding --iconv option when
   $conf->{ClientCharset} is utf8 or empty, to avoid a long-standing
-  rsync bug.
+  rsync bug
+
+* lib/BackupPC/Xfer/Rsync.pm provides a more informative warning
+  when the client rsync exits with an IO error, and also includes
+  the IO error in the xferErr count
 
 * lib/BackupPC/Xfer/Smb.pm recognizes NT_STATUS_LOGON_FAILURE error
 

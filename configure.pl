@@ -76,7 +76,7 @@ my @Packages = qw(version Encode Socket File::Path File::Spec File::Copy
 
 my $PackageVersion = {
     "Encode"       => "1.99",
-    "BackupPC::XS" => "0.61",
+    "BackupPC::XS" => "0.62",
 };
 
 foreach my $pkg ( @Packages ) {

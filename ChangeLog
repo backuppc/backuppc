@@ -21,6 +21,10 @@
 # Version __VERSION__, __RELEASEDATE__
 #------------------------------------------------------------------------
 
+#------------------------------------------------------------------------
+# Version 4.4.0, 20 Jun 2020
+#------------------------------------------------------------------------
+
 Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
   #343, #344, #345, #347, #348, #349
 
@@ -696,7 +700,7 @@ Merged pull requests: #93, #94, #97, #102
 
 * Major changes.
 
-* Updated init.d/debian-backuppc from Eduardo DÌaz RodrÌguez.
+* Updated init.d/debian-backuppc from Eduardo D√≠az Rodr√≠guez.
 
 #------------------------------------------------------------------------
 # Version 3.3.0, 14 Apr 2013
@@ -956,7 +960,7 @@ Merged pull requests: #93, #94, #97, #102
   Proposed (with patch) by Raman Gupta.
 
 * Added Xfer error column to the host summary table in the CGI
-  interface.  Based on patch submitted by Jan KratochvÌl.
+  interface.  Based on patch submitted by Jan Kratochv√≠l.
 
 * Minor fix to sprintf arguments in BackupPC::Attrib, reported by
   Jonathan Kamens.
@@ -997,7 +1001,7 @@ Merged pull requests: #93, #94, #97, #102
 
 * lib/BackupPC/Xfer/Smb.pm now increments xferErrCnt on
   NT_STATUS_ACCESS_DENIED and ERRnoaccess errors from smbclient.
-  Reported by Jes˙s Martel.
+  Reported by Jes√∫s Martel.
 
 * Removed BackupPC_compressPool and BackupPC::Xfer::BackupPCd.
 
@@ -1244,7 +1248,7 @@ Merged pull requests: #93, #94, #97, #102
 * Fix for CGI editor when deleting hash entries whose keys are
   non alphanumeric.  Report by David Relson and Aaron Ciarlotta.
 
-* Two fixes to configure.pl from Andreas Vˆgele.
+* Two fixes to configure.pl from Andreas V√∂gele.
 
 #------------------------------------------------------------------------
 # Version 3.0.0beta2, 18 Nov 2006
@@ -1478,7 +1482,7 @@ Merged pull requests: #93, #94, #97, #102
   $Conf{FullKeepCnt} is changed.
 
 * Changed lib/BackupPC/CGI/Lib.pm so that link to "$TopDir/conf/$host.pl"
-  is displayed if it exists.  Patch from Andreas Vˆgele.
+  is displayed if it exists.  Patch from Andreas V√∂gele.
 
 * Applied daemonize patch to bin/BackupPC from:
         http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=301057
@@ -1495,7 +1499,7 @@ Merged pull requests: #93, #94, #97, #102
   suggested by Jon Hood.
 
 * Added $DestDir to the path of the CGI image directory in configure.pl.
-  Patch submitted by Andreas Vˆgele.
+  Patch submitted by Andreas V√∂gele.
 
 * Applied extensive patch to French translation from Frederic Lehobey.
 
@@ -1554,7 +1558,7 @@ Merged pull requests: #93, #94, #97, #102
   Reported by Tony Nelson and Jimmy Liang.
 
 * Explicitly untaint $In{host} in BackupPC::CGI::Lib to fix problem
-  reported by Thomas TempÈ.
+  reported by Thomas Temp√©.
 
 * Added newline to "...skipping because of user requested delay..."
   log message in BackupPC_dump.  Reported by Wayne Scott.
@@ -1665,24 +1669,24 @@ Merged pull requests: #93, #94, #97, #102
   an error.  Reported by Don Silvia.
 
 * Removed Browse Backups link from Nav Bar in Archive Info display.
-  Reported by Ralph Paﬂgang.
+  Reported by Ralph Pa√ügang.
 
-* Fixed documentation display for regular users.  Reported by Ralph Paﬂgang.
+* Fixed documentation display for regular users.  Reported by Ralph Pa√ügang.
 
 * Status and PC Summary now work for regular users and only show
   that user's hosts.  Server general status information only appears
-  for admins.  Suggested by Ralph Paﬂgang.
+  for admins.  Suggested by Ralph Pa√ügang.
 
 * Moved the last three navigation-bar links (docs, FAQ and SF) to
   a new config parameter $Conf{CgiNavBarLinks}.  This allows
   these links to be locally configured.  Based on a patch
-  submitted by Ralph Paﬂgang.
+  submitted by Ralph Pa√ügang.
 
 * Allow the navigation bar search box to be disabled by
   setting $Conf{CgiSearchBoxEnable} to 0.  Based on a patch
-  submitted by Ralph Paﬂgang.
+  submitted by Ralph Pa√ügang.
 
-* Updates to de.pm from Ralph Paﬂgang.
+* Updates to de.pm from Ralph Pa√ügang.
 
 * Made the BackupPC icon a link to the SF BackupPC project page.
 

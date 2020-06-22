@@ -2571,9 +2571,9 @@ query parameter, a URL similar to this will provide metrics
 information:
 
     http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics
-    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=json
-    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=prometheus
-    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=rss
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics&format=json
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics&format=prometheus
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics&format=rss
 
 JSON format requires the JSON::XS module to be installed.
 RSS format requires the XML::RSS module to be installed.

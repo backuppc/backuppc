@@ -36,7 +36,7 @@ Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
 * Added metrics CGI, which adds Prometheus support and replaces RSS,
   by @joola (#344, #347)
 
-* Tar XferMethod now supports xattrs and acls; xattrs sbould be
+* Tar XferMethod now supports xattrs and acls; xattrs should be
   compatible with rsync XferMethod, but acls are not
 
 * Sort open directories to top when browsing backup tree

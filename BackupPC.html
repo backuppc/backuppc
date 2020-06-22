@@ -101,6 +101,7 @@
   <li><a href="#Other-CGI-Functions">Other CGI Functions</a>
     <ul>
       <li><a href="#Configuration-and-Host-Editor">Configuration and Host Editor</a></li>
+      <li><a href="#Metrics">Metrics</a></li>
       <li><a href="#RSS">RSS</a></li>
     </ul>
   </li>
@@ -148,7 +149,7 @@
 <hr />
 <h1 id="BackupPC-Introduction">BackupPC Introduction</h1>
 
-<p>This documentation describes BackupPC version 4.3.2, released on 17 Feb 2020.</p>
+<p>This documentation describes BackupPC version 4.4.0, released on 20 Jun 2020.</p>
 
 <h2 id="Overview">Overview</h2>
 
@@ -501,10 +502,6 @@
     https://github.com/backuppc/backuppc-xs/releases
     https://github.com/backuppc/rsync-bpc/releases</code></pre>
 
-<p>or on SourceForge:</p>
-
-<pre><code>    https://sourceforge.net/projects/backuppc/files</code></pre>
-
 </dd>
 <dt id="BackupPC-Wiki">BackupPC Wiki</dt>
 <dd>
@@ -583,7 +580,7 @@
 <li><p>Perl version 5.8.0 or later. If you don&#39;t have perl, please see <a href="http://www.cpan.org">http://www.cpan.org</a>.</p>
 
 </li>
-<li><p>The perl modules BackupPC::XS (version &gt;= 0.50) is required, and several others, File::Listing, Archive::Zip, XML::RSS, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect are recommended.</p>
+<li><p>The perl modules BackupPC::XS (version &gt;= 0.50) is required, and several others, File::Listing, Archive::Zip, XML::RSS, JSON::XS, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect are recommended.</p>
 
 <p>Try &quot;perldoc BackupPC::XS&quot; and &quot;perldoc Archive::Zip&quot; to see if you have these modules. If not, fetch them from <a href="http://www.cpan.org">http://www.cpan.org</a> and see the instructions below for how to build and install them.</p>
 
@@ -651,8 +648,6 @@
 
 <pre><code>    https://github.com/backuppc/backuppc/releases</code></pre>
 
-<p>You can also download the distribution from <a href="https://sourceforge.net/projects/backuppc/files">https://sourceforge.net/projects/backuppc/files</a>.</p>
-
 <h2 id="Step-2:-Installing-the-distribution">Step 2: Installing the distribution</h2>
 
 <p>Note: most information in this step is only relevant if you build and install BackupPC yourself. If you use a package provided by a distribution, the package management system should take of installing any needed dependencies.</p>
@@ -681,6 +676,12 @@
 <dd>
 
 <p>To support the RSS feature you will need to install XML::RSS, also from <a href="http://www.cpan.org">http://www.cpan.org</a>. There is not need to install this module if you don&#39;t plan on using RSS. You can run &quot;perldoc XML::RSS&quot; to see if this module is installed.</p>
+
+</dd>
+<dt id="JSON::XS">JSON::XS</dt>
+<dd>
+
+<p>To support the JSON formated metrics you will need to install JSON::XS, also from <a href="http://www.cpan.org">http://www.cpan.org</a>. There is not need to install this module if you don&#39;t plan on using JSON formated metrics. You can run &quot;perldoc JSON::XS&quot; to see if this module is installed.</p>
 
 </dd>
 <dt id="CGI">CGI</dt>
@@ -730,10 +731,10 @@
     make
     make install</code></pre>
 
-<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.3.2.tar.gz, run these commands as root:</p>
+<p>Now let&#39;s move onto BackupPC itself. After fetching BackupPC-4.4.0.tar.gz, run these commands as root:</p>
 
-<pre><code>    tar zxf BackupPC-4.3.2.tar.gz
-    cd BackupPC-4.3.2
+<pre><code>    tar zxf BackupPC-4.4.0.tar.gz
+    cd BackupPC-4.4.0
     perl configure.pl</code></pre>
 
 <p>The configure.pl script also accepts command-line options if you wish to run it in a non-interactive manner. It has self-contained documentation for all the command-line options, which you can read with perldoc:</p>
@@ -907,7 +908,7 @@
 
 <p>One setup for WinXX clients is to set <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> to &quot;smb&quot;. Actually, rsyncd is the better method for WinXX if you are prepared to run rsync/cygwin on your WinXX client.</p>
 
-<p>If you want to use rsyncd for WinXX clients you can find a pre-packaged zip file on <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>. The package is called cygwin-rsync. It contains rsync.exe, template setup files and the minimal set of cygwin libraries for everything to run. The README file contains instructions for running rsync as a service, so it starts automatically everytime you boot your machine. If you use rsync to backup WinXX machines, be sure to set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> correctly (eg: &#39;cp1252&#39;) so that the WinXX filename encoding is correctly converted to utf8.</p>
+<p>If you want to use rsyncd for WinXX clients you can find a pre-packaged exe installer on <a href="https://github.com/backuppc/cygwin-rsyncd/releases">https://github.com/backuppc/cygwin-rsyncd/releases</a>. The package is called cygwin-rsync. It contains rsync.exe, template setup files and the minimal set of cygwin libraries for everything to run. The README file contains instructions for running rsync as a service, so it starts automatically everytime you boot your machine. If you use rsync to backup WinXX machines, be sure to set <a href="#_conf_clientcharset_">$Conf{ClientCharset}</a> correctly (eg: &#39;cp1252&#39;) so that the WinXX filename encoding is correctly converted to utf8.</p>
 
 <p>Otherwise, to use SMB, you can either create shares for the data you want to backup or your can use the existing C$ share. To create a new share, open &quot;My Computer&quot;, right click on the drive (eg: C), and select &quot;Sharing...&quot; (or select &quot;Properties&quot; and select the &quot;Sharing&quot; tab). In this dialog box you can enable sharing, select the share name and permissions.</p>
 
@@ -1225,7 +1226,7 @@
         Options +ExecCGI
         Order deny,allow
         Deny from all
-        Allow from 192.168.0  
+        Allow from 192.168.0
         AuthName &quot;Backup Admin&quot;
         AuthType Basic
         AuthUserFile /path/to/user_file
@@ -1496,7 +1497,7 @@
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the tar archive is created;
                        can be &quot;*&quot; to mean all shares.
-  
+
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -1527,7 +1528,7 @@
                        A negative number means relative to the end (eg -1
                        means the most recent dump, -2 2nd most recent etc).
        -s shareName    share name from which the zip archive is created
-  
+
     Other options:
        -t              print summary totals
        -r pathRemove   path prefix that will be replaced with pathAdd
@@ -1752,7 +1753,7 @@
           -v     - verbose
       Notes: in case there are legacy (ie: &lt;=4.0.0alpha3) unapplied poolCntDelta
       files in TopDir/pc/HOST/refCnt then the -f flag is turned on.
-  
+
     BackupPC_refCountUpdate -m [-f] [-p] [-c] [-r N-M] [-s] [-v] [-P phase]
           -m       Updates main count db, based on each HOST
           -f     - do an fsck on all the hosts, ignoring poolCntDelta files,
@@ -1786,7 +1787,22 @@
 
 <p>User&#39;s can edit their host-specific configuration if enabled via <a href="#_conf_cgiuserconfigeditenable_">$Conf{CgiUserConfigEditEnable}</a>. The specific subset of configuration settings that a user can edit is specified with <a href="#_conf_cgiuserconfigedit_">$Conf{CgiUserConfigEdit}</a>. It is recommended to make this list short as possible (you probably don&#39;t want your users saving dozens of backups) and it is essential that they can&#39;t edit any of the Cmd configuration settings, otherwise they can specify an arbitrary command that will be executed as the BackupPC user.</p>
 
+<h2 id="Metrics">Metrics</h2>
+
+<p>BackupPC supports a metrics endpoint that expose common information in a digest format. Allowed metrics formats are <code>json</code> (default), <code>prometheus</code> and <code>rss</code>. Format should be specified using <code>format</code> query parameter, a URL similar to this will provide metrics information:</p>
+
+<pre><code>    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=json
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=prometheus
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=rss</code></pre>
+
+<p>JSON format requires the JSON::XS module to be installed. RSS format requires the XML::RSS module to be installed.</p>
+
+<p>This feature is experimental. The information included will probably change.</p>
+
 <h2 id="RSS">RSS</h2>
+
+<p>The RSS feed has been merged in the metrics endpoint (see section above). Please use the metrics endpoint to access the RSS feed, as the old endpoint will be deprecated.</p>
 
 <p>BackupPC supports a very basic RSS feed. Provided you have the XML::RSS perl module installed, a URL similar to this will provide RSS information:</p>
 
@@ -2288,6 +2304,36 @@
 <p>The level of this dump. A full dump is level 0. Currently incrementals are 1. In V4+ multi-level incrementals are no longer supported, so this is just a 0 or 1.</p>
 
 </dd>
+<dt id="charset">charset</dt>
+<dd>
+
+<p>The client charset when this backup was made.</p>
+
+</dd>
+<dt id="version">version</dt>
+<dd>
+
+<p>The BackupPC version when this backup was made.</p>
+
+</dd>
+<dt id="inodeLast">inodeLast</dt>
+<dd>
+
+<p>The last inode number used in this backup.</p>
+
+</dd>
+<dt id="keep">keep</dt>
+<dd>
+
+<p>If set this backup won&#39;t be deleted.</p>
+
+</dd>
+<dt id="share2path">share2path</dt>
+<dd>
+
+<p>Saves the value of <a href="#_conf_clientsharename2path_">$Conf{ClientShareName2Path}</a> via Data::Dumper (with some tabs, newlines and % characters replaced with %xx) so that the actual client path for each share can be displayed when browsing.</p>
+
+</dd>
 </dl>
 
 </dd>
@@ -2522,11 +2568,11 @@
 
 <h2 id="Some-Limitations">Some Limitations</h2>
 
-<p>BackupPC isn&#39;t perfect (but it is getting better). Please see <a href="http://backuppc.sourceforge.net/faq/limitations.html">http://backuppc.sourceforge.net/faq/limitations.html</a> for a discussion of some of BackupPC&#39;s limitations. (Note, we should move this to the Github Wiki.)</p>
+<p>BackupPC isn&#39;t perfect (but it is getting better). Please see <a href="http://backuppc.sourceforge.net/faq/limitations.html">http://backuppc.sourceforge.net/faq/limitations.html</a> for a discussion of some of BackupPC&#39;s limitations. (Note, this is old and we should move this to the Github Wiki.)</p>
 
 <h2 id="Security-issues">Security issues</h2>
 
-<p>Please see <a href="http://backuppc.sourceforge.net/faq/security.html">http://backuppc.sourceforge.net/faq/security.html</a> for a discussion of some of various security issues. (Note, we should move this to the Github Wiki.)</p>
+<p>Please see <a href="http://backuppc.sourceforge.net/faq/security.html">http://backuppc.sourceforge.net/faq/security.html</a> for a discussion of some of various security issues. (Note, this is old and we should move this to the Github Wiki.)</p>
 
 <hr />
 <h1 id="Configuration-File">Configuration File</h1>
@@ -2690,6 +2736,16 @@
 <p>To make sure these cumulative pool file sizes stay accurate, we recompute the V4 pool size for a portion of the pool each night from scratch, ie: by checking every file in that portion of the pool.</p>
 
 <p><a href="#_conf_poolsizenightlyupdateperiod_">$Conf{PoolSizeNightlyUpdatePeriod}</a> sets how many nights it takes to completely update the V4 pool size. It can be set to: 0: never do a full refresh; simply maintain the cumulative sizes when files are added or deleted (fastest option) 1: recompute all the V4 pool size every night (slowest option) 2: recompute 1/2 the V4 pool size every night 4: recompute 1/4 the V4 pool size every night 8: recompute 1/8 the V4 pool size every night 16: recompute 1/16 the V4 pool size every night (2nd fastest option; ensures the pool files sizes stay accurate after a few day, in case the relative upgrades miss a file)</p>
+
+</dd>
+<strong><dt id="_conf_poolnightlydigestcheckpercent_">$Conf{PoolNightlyDigestCheckPercent}</a> = 1;</dt></strong>
+<dd>
+
+<p>Integrity check the pool files by confirming the md5 digest of the contents matches their file name. Because the pool is very large, only check a small random percentage of the pool files each night.</p>
+
+<p>This is check if there has been any server file system corruption.</p>
+
+<p>The default value of 1% means approximately 30% of the pool files will be checked each month, although the actual number will be a bit less since some files might be checked more than once in that time. If BackupPC_nightly takes too long, you could reduce this value.</p>
 
 </dd>
 <strong><dt id="_conf_refcntfsck_">$Conf{RefCntFsck}</a> = 1;</dt></strong>
@@ -3233,7 +3289,7 @@
 <p>Prior to 3.x no charset conversion was done by BackupPC. Backups were stored in whatever charset the XferMethod provided - typically utf8 for smbclient and the client&#39;s locale settings for rsync and tar (eg: cp1252 for rsync on WinXX and perhaps iso-8859-1 with rsync on linux). This setting tells BackupPC the charset that was used to store filenames in old backups taken with BackupPC 2.x, so that non-ascii filenames in old backups can be viewed and restored.</p>
 
 </dd>
-<strong><dt id="_conf_clientsharename2path_">$Conf{ClientShareName2Path}</a> = { };</dt></strong>
+<strong><dt id="_conf_clientsharename2path_">$Conf{ClientShareName2Path}</a> = {};</dt></strong>
 <dd>
 
 <p>Optionally map the share name to a different path on the client when the xfer program is run. This can be used if you create a snapshot on the client, which has a different path to the real share name. Or you could use simpler names for the share instead of a path (eg: root, home, usr) and map them to the real paths here.</p>
@@ -3286,7 +3342,7 @@
 <p>This setting only matters if <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;smb&#39;.</p>
 
 </dd>
-<strong><dt id="_conf_smbclientfullcmd_">$Conf{SmbClientFullCmd}</a> = &#39;$smbClientPath \\\\$host\\$shareName&#39; ...</dt></strong>
+<strong><dt id="_conf_smbclientfullcmd_">$Conf{SmbClientFullCmd}</a> = ...</dt></strong>
 <dd>
 
 <p>Command to run smbclient for a full dump. This setting only matters if <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;smb&#39;.</p>
@@ -3306,7 +3362,7 @@
 <p>Note: all Cmds are executed directly without a shell, so the prog name needs to be a full path and you can&#39;t include shell syntax like redirection and pipes; put that in a script if you need it.</p>
 
 </dd>
-<strong><dt id="_conf_smbclientincrcmd_">$Conf{SmbClientIncrCmd}</a> = &#39;$smbClientPath \\\\$host\\$shareName&#39; ...</dt></strong>
+<strong><dt id="_conf_smbclientincrcmd_">$Conf{SmbClientIncrCmd}</a> = ...</dt></strong>
 <dd>
 
 <p>Command to run smbclient for an incremental dump. This setting only matters if <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;smb&#39;.</p>
@@ -3316,7 +3372,7 @@
 <p>Note: all Cmds are executed directly without a shell, so the prog name needs to be a full path and you can&#39;t include shell syntax like redirection and pipes; put that in a script if you need it.</p>
 
 </dd>
-<strong><dt id="_conf_smbclientrestorecmd_">$Conf{SmbClientRestoreCmd}</a> = &#39;$smbClientPath \\\\$host\\$shareName&#39; ...</dt></strong>
+<strong><dt id="_conf_smbclientrestorecmd_">$Conf{SmbClientRestoreCmd}</a> = ...</dt></strong>
 <dd>
 
 <p>Command to run smbclient for a restore. This setting only matters if <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;smb&#39;.</p>
@@ -3354,7 +3410,7 @@
 <p>This setting only matters if <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;tar&#39;.</p>
 
 </dd>
-<strong><dt id="_conf_tarclientcmd_">$Conf{TarClientCmd}</a> = &#39;$sshPath -q -x -n -l root $host&#39; ...</dt></strong>
+<strong><dt id="_conf_tarclientcmd_">$Conf{TarClientCmd}</a> = &#39;$sshPath -q -x -n -l root $host env LC_ALL=C $tarPath -c -v -f - -C $shareName+ --totals&#39;;</dt></strong>
 <dd>
 
 <p>Command to run tar on the client. GNU tar is required. You will need to fill in the correct paths for ssh2 on the local host (server) and GNU tar on the client. Security caution: normal users should not allowed to write to these executable files or directories.</p>
@@ -3424,7 +3480,7 @@
 <p>This setting only matters if <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;tar&#39;.</p>
 
 </dd>
-<strong><dt id="_conf_tarclientrestorecmd_">$Conf{TarClientRestoreCmd}</a> = &#39;$sshPath -q -x -l root $host&#39; ...</dt></strong>
+<strong><dt id="_conf_tarclientrestorecmd_">$Conf{TarClientRestoreCmd}</a> = ...</dt></strong>
 <dd>
 
 <p>Full command to run tar for restore on the client. GNU tar is required. This can be the same as <a href="#_conf_tarclientcmd_">$Conf{TarClientCmd}</a>, with tar&#39;s -c replaced by -x and ssh&#39;s -n removed.</p>
@@ -3472,12 +3528,12 @@
 <p>Full path to rsync_bpc on the server. Rsync_bpc is the customized version of rsync that is used on the server for rsync and rsyncd transfers.</p>
 
 </dd>
-<strong><dt id="_conf_rsyncsshargs_">$Conf{RsyncSshArgs}</a> = [ ... ];</dt></strong>
+<strong><dt id="_conf_rsyncsshargs_">$Conf{RsyncSshArgs}</a> = [&#39;-e&#39;, &#39;$sshPath -l root&#39;];</dt></strong>
 <dd>
 
 <p>Ssh arguments for rsync to run ssh to connect to the client. Rather than permit root ssh on the client, it is more secure to just allow ssh via a low-privileged user, and use sudo in <a href="#_conf_rsyncclientpath_">$Conf{RsyncClientPath}</a>.</p>
 
-<p>The setting should only have two entries: &quot;-e&quot; and everything else; don&#39;t add additoinal array elements.</p>
+<p>The setting should only have two entries: &quot;-e&quot; and everything else; don&#39;t add additional array elements.</p>
 
 <p>This setting only matters if <a href="#_conf_xfermethod_">$Conf{XferMethod}</a> = &#39;rsync&#39;.</p>
 
@@ -3548,7 +3604,7 @@
     ];</code></pre>
 
 </dd>
-<strong><dt id="_conf_rsyncfullargsextra_">$Conf{RsyncFullArgsExtra}</a> = [ ... ];</dt></strong>
+<strong><dt id="_conf_rsyncfullargsextra_">$Conf{RsyncFullArgsExtra}</a> = [&#39;--checksum&#39;];</dt></strong>
 <dd>
 
 <p>Additional arguments for a full rsync or rsyncd backup.</p>
@@ -3558,7 +3614,7 @@
 <p>In V3, full backups applied the block rsync algorithm to every file, which is a lot slower but a bit more conservative. To get that behavior, replace --checksum with --ignore-times.</p>
 
 </dd>
-<strong><dt id="_conf_rsyncincrargsextra_">$Conf{RsyncIncrArgsExtra}</a> = [ ... ];</dt></strong>
+<strong><dt id="_conf_rsyncincrargsextra_">$Conf{RsyncIncrArgsExtra}</a> = [];</dt></strong>
 <dd>
 
 <p>Additional arguments for an incremental rsync or rsyncd backup.</p>
@@ -3580,6 +3636,14 @@
        $confDir      configuration directory path</code></pre>
 
 <p>Note: <a href="#_conf_rsyncargsextra_">$Conf{RsyncArgsExtra}</a> doesn&#39;t apply to <a href="#_conf_rsyncrestoreargs_">$Conf{RsyncRestoreArgs}</a>.</p>
+
+</dd>
+<strong><dt id="_conf_rsyncrestoreargsextra_">$Conf{RsyncRestoreArgsExtra}</a> = [];</dt></strong>
+<dd>
+
+<p>Additional arguments for an rsync or rsyncd restore.</p>
+
+<p>This makes it easy to have per-client arguments.</p>
 
 </dd>
 </dl>
@@ -3719,7 +3783,7 @@
 <p>If the value is 0, or if <a href="#_conf_archivedest_">$Conf{ArchiveDest}</a> is an existing file or device (e.g. a streaming tape drive), this feature is disabled.</p>
 
 </dd>
-<strong><dt id="_conf_archiveclientcmd_">$Conf{ArchiveClientCmd}</a> = &#39;$Installdir/bin/BackupPC_archiveHost&#39; ...</dt></strong>
+<strong><dt id="_conf_archiveclientcmd_">$Conf{ArchiveClientCmd}</a> = ...</dt></strong>
 <dd>
 
 <p>Archive Command</p>
@@ -4270,7 +4334,7 @@
 <pre><code>    <a href="#_conf_cgiimagedir_">$Conf{CgiImageDir}</a> = &#39;/var/www/htdocs/BackupPC&#39;;</code></pre>
 
 </dd>
-<strong><dt id="_conf_cgiext2contenttype_">$Conf{CgiExt2ContentType}</a> = { };</dt></strong>
+<strong><dt id="_conf_cgiext2contenttype_">$Conf{CgiExt2ContentType}</a> = {};</dt></strong>
 <dd>
 
 <p>Additional mappings of filename extensions to Content-Type for individual file restore. See $Ext2ContentType in BackupPC_Admin for the default setting. You can add additional settings here, or override any default settings. Example:</p>
@@ -4330,12 +4394,12 @@
 
 <p>Craig Barratt &lt;cbarratt@users.sourceforge.net&gt;</p>
 
-<p>See <a href="http://backuppc.sourceforge.net">http://backuppc.sourceforge.net</a>.</p>
+<p>See <a href="https://backuppc.github.io/backuppc/BackupPC.html">https://backuppc.github.io/backuppc/BackupPC.html</a>.</p>
 
 <hr />
 <h1 id="Copyright">Copyright</h1>
 
-<p>Copyright (C) 2001-2017 Craig Barratt</p>
+<p>Copyright (C) 2001-2020 Craig Barratt</p>
 
 <hr />
 <h1 id="Credits">Credits</h1>

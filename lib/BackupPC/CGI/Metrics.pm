@@ -117,7 +117,7 @@ sub action
         my($fullAge, $fullCount, $fullDuration, $fullRate, $fullSize, $incrAge, $incrCount, $incrDuration);
 
         $fullCount = $incrCount = 0;
-        $fullAge   = $incrAge   = -1;
+        $fullAge   = $incrAge   = $fullDuration = $incrDuration = -1;
 
         my @Backups = $bpc->BackupInfoRead($host);
         $bpc->ConfigRead($host);

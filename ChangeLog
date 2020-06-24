@@ -96,7 +96,7 @@ Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
   by @rhansen (#349)
 
 * lib/BackupPC/Xfer/Rsync.pm skips adding --iconv option when
-  $conf->{ClientCharset} is utf8 or empty, to avoid a long-standing
+  $Conf{ClientCharset} is utf8 or empty, to avoid a long-standing
   rsync bug
 
 * lib/BackupPC/Xfer/Rsync.pm provides a more informative warning

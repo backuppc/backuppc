@@ -68,7 +68,7 @@ Merged pull requests #325, #326, #329, #330, #334, #336, #337, #338, #342,
 * Added $Conf{RsyncRestoreArgsExtra} for host-specific restore
   settings
 
-* Language files are now all use utf8 charsets
+* Language files now all use utf8 charsets
 
 * Bumped required version of BackupPC::XS to 0.62 and rsync-bpc
   to 3.0.9.15.

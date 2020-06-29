@@ -17,6 +17,6 @@ repos:
       - id: trailing-whitespace
 
   - repo: "https://github.com/perltidy/perltidy"
-    rev: 20200619
+    rev: "20200619"
     hooks:
       - id: perltidy

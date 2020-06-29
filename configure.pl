@@ -524,8 +524,8 @@ InstallFile($hostsSample, "$DestDir$Conf{ConfDir}/hosts", 0644)
 my $dest         = "$DestDir$Conf{ConfDir}/config.pl";
 my $configSample = $opts{"config-only"} ? "$DestDir$Conf{ConfDir}/config.pl.sample" : "conf/config.pl";
 my($distConf, $distVars) = ConfigParse($configSample);
-my($oldConf,  $oldVars);
-my($newConf,  $newVars)  = ($distConf, $distVars);
+my($oldConf, $oldVars);
+my($newConf, $newVars) = ($distConf, $distVars);
 
 if ( -f $dest ) {
     ($oldConf, $oldVars) = ConfigParse($dest);

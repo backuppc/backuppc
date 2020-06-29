@@ -1413,10 +1413,10 @@ sub Main_Check_Client_Messages
                 } elsif ( $BgQueueOn{$host} || $UserQueueOn{$host} ) {
                     print(LOG $bpc->timeStamp,
                         "Stopping pending backup of $host, request by $user (backoff=$backoff)\n");
-                    @BgQueue   = grep($_->{host} ne $host, @BgQueue);
-                    @UserQueue = grep($_->{host} ne $host, @UserQueue);
+                    @BgQueue          = grep($_->{host} ne $host, @BgQueue);
+                    @UserQueue        = grep($_->{host} ne $host, @UserQueue);
                     $BgQueueOn{$host} = $UserQueueOn{$host} = 0;
-                    $reply = "ok: pending backup of $host canceled";
+                    $reply            = "ok: pending backup of $host canceled";
                 } else {
                     print(LOG $bpc->timeStamp,
                         "Nothing to do for stop backup of $host, request by $user (backoff=$backoff)\n");

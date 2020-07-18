@@ -90,8 +90,7 @@ sub action
         size                => "Kb",
     );
 
-    sub generatePool
-    {
+    my $generatePool = sub {
         my($name) = @_;
         my %pool = (time => $Info{"${name}Time"});
 
@@ -105,10 +104,10 @@ sub action
             }
         }
         return \%pool;
-    }
+    };
 
-    $metrics{pool}  = $Info{pool4FileCnt} > 0  ? generatePool("pool")  : undef;
-    $metrics{cpool} = $Info{cpool4FileCnt} > 0 ? generatePool("cpool") : undef;
+    $metrics{pool}  = $Info{pool4FileCnt} > 0  ? &$generatePool("pool")  : undef;
+    $metrics{cpool} = $Info{cpool4FileCnt} > 0 ? &$generatePool("cpool") : undef;
 
     #
     # Host metrics
@@ -223,9 +222,9 @@ sub action
                 $error = " ($error)";
             }
 
-            my $hostState       = $Lang->{$metrics{hosts}{$host}{state}};
-            my $hostLastAttempt = $Lang->{$metrics{hosts}{$host}{reason}} . $error;
-            my $hostDisabled    = $metrics{hosts}{$host}{disabled};
+            $hostState       = $Lang->{$metrics{hosts}{$host}{state}};
+            $hostLastAttempt = $Lang->{$metrics{hosts}{$host}{reason}} . $error;
+            $hostDisabled    = $metrics{hosts}{$host}{disabled};
 
             my $description = eval("qq{$Lang->{RSS_Host_Summary}}");
 
@@ -289,7 +288,9 @@ sub action
             foreach my $entry ( sort keys %{$mapper{$section}} ) {
 
                 # Ignore empty pools
-                next if ( ($section eq "pool" or $section eq "cpool") and $metrics{$section}{file_count} <= 0 );
+                next
+                  if (  ($section eq "pool" or $section eq "cpool")
+                    and (!defined($metrics{$section}{file_count}) or $metrics{$section}{file_count} <= 0) );
 
                 my $promKey = "backuppc_${section}_${entry}";
 
@@ -299,7 +300,7 @@ sub action
 
                 if ( $section eq "hosts" ) {
                     foreach my $host ( sort keys %{$metrics{hosts}} ) {
-                        if ( $mapper{hosts}{$entry}{kind} eq 'label' ) {
+                        if ( defined($mapper{hosts}{$entry}{kind}) and $mapper{hosts}{$entry}{kind} eq 'label' ) {
                             if ( $metrics{hosts}{$host}{$entry} ) {
                                 $content .= "${promKey}\{host=\"$host\",label=\"$metrics{hosts}{$host}{$entry}\"\} 1\n";
                             }

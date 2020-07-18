@@ -310,7 +310,13 @@ sub action
                     }
 
                 } else {
-                    $content .= "$promKey $metrics{$section}{$entry}\n";
+                    my $val;
+                    if ( ref($metrics{hosts}{$host}{$entry}) eq "ARRAY" ) {
+                        $val = @{$metrics{hosts}{$host}{$entry}};
+                    } else {
+                        $val = $metrics{hosts}{$host}{$entry};
+                    }
+                    $content .= "${promKey}\{host=\"$host\"\} $val\n";
                 }
 
                 $content .= "\n";

@@ -2045,7 +2045,7 @@
 
 <p>All uncompressed files from PC backups are stored below __TOPDIR__/pool. Each file&#39;s name is based on the MD5 hex digest of the file contents.</p>
 
-<p>For V4+, the digest is the MD5 digest of the full file contents (the length is not used). For V4+ the pool files are stored in a 2 level tree, using 7 bits from the top of the first two bytes of the digest. So there are 128 directories are each level, numbered evenly in hex from 0x00, 0x02, to 0xfe.</p>
+<p>For V4+, the digest is the MD5 digest of the full file contents (the length is not used). For V4+ the pool files are stored in a 2 level tree, using 7 bits from the top of the first two bytes of the digest. So there are 128 directories at each level, numbered evenly in hex from 0x00, 0x02, to 0xfe.</p>
 
 <p>For example, if a file has an MD5 digest of 123456789abcdef0123456789abcdef0, the uncompressed file is stored in __TOPDIR__/pool/12/34/123456789abcdef0123456789abcdef0.</p>
 

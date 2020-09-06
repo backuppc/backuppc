@@ -1461,4 +1461,42 @@ sub getPingPathByAddressType
     return ($at == 6) ? $bpc->{Conf}{Ping6Path} : $bpc->{Conf}{PingPath};
 }
 
+#
+# Return non-zero if $addr is a valid ipv6 address
+#
+sub check_valid_ipv6
+{
+    my($bpc, $addr) = @_;
+
+    my $numEntries = 0;
+    my $numEmpty = 0;
+    my $ok = 1;
+    foreach my $elt ( split(/:/, $addr) ) {
+        $numEntries++;
+        if ( $elt eq "" ) {
+            $numEmpty++;
+        } else {
+            $ok &&= $elt =~ /^[\da-f]{1,4}$/i;
+        }
+    }
+    #
+    # fix overcount of empty fields with starting or ending ::
+    #
+    if ( $addr =~ /^::/ || $addr =~ /::$/ ) {
+        $numEmpty--;
+        $numEntries--;
+    }
+    #
+    # leading or trailing solo ":" is invalid
+    #
+    $ok &&= $addr !~ /^:[^:]/ && $addr !~ /[^:]:$/;
+    #
+    # check for at most one empty field and at least two entries, and we need 8 entries
+    # unless there is an empty
+    #
+    $ok &&= $numEmpty <= 1 && $numEntries >= 2;
+    $ok &&= $numEmpty > 0 ? $numEntries <= 8 : $numEntries == 8;
+    return $ok;
+}
+
 1;

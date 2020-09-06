@@ -30,7 +30,7 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 12 Jun 2020.
+# Version 4.4.0, released 20 Jun 2020.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -65,6 +65,16 @@ sub start
     my $shareNamePath = $t->shareName2Path($t->{shareName});
 
     alarm(0);
+
+    #
+    # If it's an ipv6 address, put it inside square brackets when
+    # we use it for the rsync command line, since it's followed by
+    # a port number.
+    #
+    my $hostIP_protect = $t->{hostIP};
+    if ( $bpc->check_valid_ipv6($t->{hostIP}) ) {
+        $hostIP_protect = "[$t->{hostIP}]";
+    }
     #
     # We add a slash to the share name we pass to rsync
     #
@@ -129,7 +139,7 @@ sub start
               if ( $conf->{RsyncClientPath} ne "" );
             unshift(@$rsyncArgs, @{$conf->{RsyncSshArgs}})
               if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' );
-            push(@$rsyncArgs, @$srcList, "$t->{hostIP}:$remoteDir");
+            push(@$rsyncArgs, @$srcList, "$hostIP_protect:$remoteDir");
         } else {
             if ( length($conf->{RsyncdPasswd}) ) {
                 my($pwFd, $ok);
@@ -158,7 +168,7 @@ sub start
             if ( $conf->{ClientCharset} ne "" && $conf->{ClientCharset} ne "utf8" ) {
                 push(@$rsyncArgs, "--iconv=utf8,$conf->{ClientCharset}");
             }
-            push(@$rsyncArgs, @$srcList, "$conf->{RsyncdUserName}\@$t->{hostIP}::$remoteDir");
+            push(@$rsyncArgs, @$srcList, "$conf->{RsyncdUserName}\@$hostIP_protect::$remoteDir");
         }
 
         #
@@ -386,7 +396,7 @@ sub start
             #                    if ( $conf->{ClientCharset} ne "" );
 
             push(@$rsyncArgs, @fileList) if ( @fileList );
-            push(@$rsyncArgs, "$t->{hostIP}:$shareNameSlash", "/");
+            push(@$rsyncArgs, "$hostIP_protect:$shareNameSlash", "/");
         } else {
             my $pwFd;
             $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
@@ -411,7 +421,7 @@ sub start
             #from_to($shareName, "utf8", $conf->{ClientCharset})
             #                    if ( $conf->{ClientCharset} ne "" );
             push(@$rsyncArgs, @fileList) if ( @fileList );
-            push(@$rsyncArgs, "$conf->{RsyncdUserName}\@$t->{hostIP}::$shareName", "/");
+            push(@$rsyncArgs, "$conf->{RsyncdUserName}\@$hostIP_protect::$shareName", "/");
         }
         if ( $bpc->{PoolV3} ) {
             unshift(@$rsyncArgs,

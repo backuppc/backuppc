@@ -1386,13 +1386,16 @@ $Conf{RsyncRestoreArgs} = [
     '--times',
     '--links',
     '--hard-links',
-    '--delete',
     '--partial',
     '--log-format=log: %o %i %B %8U,%8G %9l %f%L',
     '--stats',
     #
     # Add additional arguments here
     #
+    # Starting >4.4.0 --delete was removed, since when restoring you usually
+    # wouldn't want existing files in the same directory to be removed.
+    #
+    #'--delete',
     #'--acls',
     #'--xattrs',
 ];

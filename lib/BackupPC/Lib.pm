@@ -1469,8 +1469,8 @@ sub check_valid_ipv6
     my($bpc, $addr) = @_;
 
     my $numEntries = 0;
-    my $numEmpty = 0;
-    my $ok = 1;
+    my $numEmpty   = 0;
+    my $ok         = 1;
     foreach my $elt ( split(/:/, $addr) ) {
         $numEntries++;
         if ( $elt eq "" ) {

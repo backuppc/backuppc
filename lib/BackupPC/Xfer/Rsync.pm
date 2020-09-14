@@ -139,7 +139,7 @@ sub start
               if ( $conf->{RsyncClientPath} ne "" );
             unshift(@$rsyncArgs, @{$conf->{RsyncSshArgs}})
               if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' );
-            push(@$rsyncArgs, @$srcList, "$hostIP_protect:$remoteDir");
+            push(@$rsyncArgs, @$srcList, "${hostIP_protect}:$remoteDir");
         } else {
             if ( length($conf->{RsyncdPasswd}) ) {
                 my($pwFd, $ok);
@@ -168,7 +168,7 @@ sub start
             if ( $conf->{ClientCharset} ne "" && $conf->{ClientCharset} ne "utf8" ) {
                 push(@$rsyncArgs, "--iconv=utf8,$conf->{ClientCharset}");
             }
-            push(@$rsyncArgs, @$srcList, "$conf->{RsyncdUserName}\@$hostIP_protect::$remoteDir");
+            push(@$rsyncArgs, @$srcList, "$conf->{RsyncdUserName}\@${hostIP_protect}::$remoteDir");
         }
 
         #
@@ -396,7 +396,7 @@ sub start
             #                    if ( $conf->{ClientCharset} ne "" );
 
             push(@$rsyncArgs, @fileList) if ( @fileList );
-            push(@$rsyncArgs, "$hostIP_protect:$shareNameSlash", "/");
+            push(@$rsyncArgs, "${hostIP_protect}:$shareNameSlash", "/");
         } else {
             my $pwFd;
             $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
@@ -421,7 +421,7 @@ sub start
             #from_to($shareName, "utf8", $conf->{ClientCharset})
             #                    if ( $conf->{ClientCharset} ne "" );
             push(@$rsyncArgs, @fileList) if ( @fileList );
-            push(@$rsyncArgs, "$conf->{RsyncdUserName}\@$hostIP_protect::$shareName", "/");
+            push(@$rsyncArgs, "$conf->{RsyncdUserName}\@${hostIP_protect}::$shareName", "/");
         }
         if ( $bpc->{PoolV3} ) {
             unshift(@$rsyncArgs,

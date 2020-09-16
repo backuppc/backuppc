@@ -3474,16 +3474,292 @@ BackupPC's data directory with the noatime (or, with Linux kernels
 
 =head2 Some Limitations
 
-BackupPC isn't perfect (but it is getting better). Please see
-L<http://backuppc.sourceforge.net/faq/limitations.html> for a
-discussion of some of BackupPC's limitations.
-(Note, this is old and we should move this to the Github Wiki.)
+=head3 Non-unix file attributes not backed up
+
+smbclient doesn't extract the WinXX ACLs, so file attributes other than
+the equivalent (as provided by smbclient) unix attributes are not backed up.
+
+=head3 Locked files are not backed up
+
+Under WinXX a locked file cannot be read by smbclient. Such files will
+not be backed up. This includes the WinXX system registry files.
+
+This is especially troublesome for Outlook, which stores all its data
+in a single large file and keeps it locked whenever it is running. Since
+many users keep Outlook running all the time their machine is up their
+Outlook file will not be backed up. Sadly, this file is the most important
+file to backup. As one workaround, Microsoft has a user-level application
+that periodically asks the user if they want to make a copy of their outlook.pst
+file. This copy can then be backed up by BackupPC. See L<http://office.microsoft.com/downloads/2002/pfbackup.aspx>.
+
+Similarly, all of the data for WinXX services like SQL databases, Exchange
+etc won't be backed up. If these applications support some kind of export or
+utility to save their data to disk then this can =used to create files that
+BackupPC can backup.
+
+So far, the best that BackupPC can do is send warning emails to the user saying
+that their outlook files haven't been backed up in X days. (X is configurable.)
+The message invites the user to exit Outlook and gives a URL to manually start a backup.
+
+With Windows 2003 and WinXP the Volume Shadow feature (VSS) allows open files to
+be copied. VSS is the capability that creates volume snapshots for backup purposes.
+See L<http://blogs.msdn.com/adioltean/archive/2005/01/05/346793.aspx>.
+
+Comment: two users have noted that there are commercial OFM (open file manager)
+products that are designed to solve this problem, for example from St. Bernard
+or Columbia Data Products. Apparently Veritas and Legato bundle this product with
+their commercial products. See for example L<http://www.stbernard.com/products/docs/ofm_whitepaperV8.pdf>.
+If anyone tries these programs with BackupPC please tell us whether or not they work.
+
+Comment: Bacula (open source backup to disk) has implemented support for VSS, allowing open file
+backup. The on-going development of the BackupPCd client should eventually include similar VSS support,
+finally providing an open-file backup solution in BackupPC.
+
+=head3 Don't expect to reconstruct a complete WinXX drive
+
+The conclusion from the last few items is that BackupPC is not intended to allow a complete WinXX
+disk to be re-imaged from the backup. Our approach to system restore in the event of
+catastrophic failure is to re-image a new disk from a generic master, and then use the BackupPC
+archive to restore user files.
+
+It is likely that linux/unix backups done using tar (rather than smb) can be used to reconstruct a complete file system, although I haven't tried it.
+
+=head3 Maximum Backup File Sizes
+
+BackupPC can backup and manage very large file sizes, probably as large as 2^51 bytes
+(when a double-precision number's mantissa can no longer represent an integer exactly).
+In practice, several things outside BackupPC limit the maximum individual file size. Any
+one of the following items will limit the maximum individual file size:
+
+B<Perl>
+
+=over 4
+
+Perl needs to be compiled with uselargefiles defined. Check your installation with:
+
+=over 4
+
+C<perl -V | egrep largefiles>
+
+=back
+
+Without this, the maximum file size will be 2GB.
+
+=back
+
+B<Filesystem>
+
+=over 4
+
+The BackupPC pool and data directories must be on a file system that supports large files.
+
+Without this, the maximum file size will be 2GB.
+
+=back
+
+B<Transport>
+
+=over 4
+
+The transport mechanism also limits the maximum individual file size. GNU tar
+maximum file size is limited by the tar header format. The tar header uses 11
+octal digits to represent the file size, which is 33 bits or 8GB. I vaguely
+recall (but I haven't recently checked) that GNU tar uses an extra octal
+digit (replacing a trailing delimiter) if necessary, allowing 64GB files.
+So tar transport limits the maximum file size to 8GB or perhaps 64GB. It is
+possible that files >= 8GB don't work; this needs to be looked into.
+
+Smbclient is limited to 4GB file sizes. Moreover, a bug in smbclient (mixing
+signed and unsigned 32 bit values) causes it to incorrectly do the tar octal
+conversion for file sizes from 2GB-4GB. BackupPC_tarExtract knows about this
+bug and can recover the correct file size. So smbclient transport works up
+to 4GB file sizes.
+
+Rsync running on Cygwin is limited to either 2GB or 4GB file sizes. More
+testing needs to be done to verify the file size limit for rsync on various
+platforms.
+
+=back
+
+=head3 Some tape backup systems aren't smart about hard links
+
+If you backup the BackupPC pool to tape you need to make sure that the tape
+backup system is smart about hard links. For example, if you simply try to
+tar the BackupPC pool to tape you will backup a lot more data than is necessary.
+
+Using the example at the start of the installation section, 65 hosts are
+backed up with each full backup averaging 3.2GB. Storing one full backup and
+two incremental backups per laptop is around 240GB of raw data. But because of
+the pooling of identical files, only 87GB is used (with compression the total
+is lower). If you run du or tar on the data directory, there will appear to be
+240GB of data, plus the size of the pool (around 87GB), or 327GB total.
+
+If your tape backup system is not smart about hard links an alternative is to
+periodically backup just the last successful backup for each host to tape. Another
+alternative is to do a low-level dump of the pool file system (ie: /dev/hda1 or similar)
+using dump(1).
+
+Supporting more efficient tape backup is an area for further development.
+
+=head3 Incremental backups might not be accurate
+
+An incremental backup with smbclient or tar backs up files based only on the
+mtime (modification time) of the files. Any files with modification times after
+1 hour prior to the last full backup are included in the incremental.
+
+This means that files that are deleted, renamed or extracted from an archive
+(preserving the original modification time) won't be backed up by an smbclient
+or tar incremental. Rsync, in contrast, inspects the complete list of files in
+an incremental and checks all the meta data: present or not, size, mtime, owner,
+group, permissions, and backs up all files with any changes to their meta data.
+Therefore, with rsync, incrementals are accurate, since any deleted, renamed or
+new files are correctly noticed.
+
+To make browsing and restoring backups easier, incremental backups are I<filled-in>
+from the last complete backup when the backup is browsed or restored.
+
+This means the incremental view presented by BackupPC might not be accurate for
+smbclient and tar: deleted files, renamed files or files extracted from archives
+since the last full backup won't be noticed or displayed.
+
+The solution for SMB is to replace smbclient with FileSys::SmbClient. This will give
+BackupPC full access to the file attributes on the client.
+
+Comments or suggestions on these issues are welcome.
 
 =head2 Security issues
 
-Please see L<http://backuppc.sourceforge.net/faq/security.html> for a
-discussion of some of various security issues.
-(Note, this is old and we should move this to the Github Wiki.)
+=head3 Smb share password
+
+An important security risk is the manner in which the smb share
+passwords are stored. They are in plain text. As described in
+L<Step 3: Setting up config.pl|"Step 3: Setting up config">, there are four ways to tell
+BackupPC the smb share password (manually setting an environment
+variable, setting the environment variable in /etc/init.d/backuppc,
+putting the password in __TOPDIR__/conf/config.pl, or putting the
+password in __TOPDIR__/pc/$host/config.pl). In the latter 3 cases
+the smb share password appears in plain text in a file.
+
+If you use any of the latter three methods please make sure that the
+file's permission is appropriately restricted. If you also use RCS
+or CVS, double check the file permissions of the config.pl,v file.
+
+In future versions there will probably be support for encryption of
+the smb share password, but a private key will still have to be
+stored in a protected place. Comments and suggestions are welcome.
+
+=head3 BackupPC socket server
+
+In v1.5.0 the primary method for communication between the CGI
+program (BackupPC_Admin) and the server (BackupPC) is via a unix-domain
+socket. Since this socket has restricted permissions, no local user
+should be able to connect to this port. No backup or restore data
+passes through this interface, but an attacker can start or stop
+backups and get status through this port.
+
+If the Apache server and BackupPC_Admin run on a different host to
+BackupPC then a TCP port must be enabled by setting $Conf{ServerPort}.
+Anyone can connect to this port. To avoid possible attacks via the TCP
+socket interface, every client message is protected by an MD5 digest.
+
+The MD5 digest includes four items:
+
+=over 4
+
+=item *
+
+seed that is sent to the client when the connection opens
+
+=item *
+
+sequence number that increments for each message
+
+=item *
+
+shared secret that is stored in $Conf{ServerMesgSecret}
+
+=item *
+
+the message itself.
+
+=back
+
+The message is sent in plain text preceded by the MD5 digest. A
+snooper can see the plain-text seed sent by BackupPC and plain-text
+message from the client, but cannot construct a valid MD5 digest
+since the secret in $Conf{ServerMesgSecret} is unknown. A replay
+attack is not possible since the seed changes on a per-connection
+and per-message basis.
+
+So if you do enable the TCP port, please set $Conf{ServerMesgSecret}
+to some hard-to-guess string. A denial-of-service attack is possible
+with the TCP port enabled. Someone could simply connect many times
+to this port, until BackupPC had exhausted all its file descriptors,
+and this would cause new backups and the CGI interface to fail. The
+most secure solution is to run BackupPC and Apache on the same
+machine and disable the TCP port.
+
+By the way, if you have upgraded from a version of BackupPC prior
+to v1.5.0 you should set $Conf{ServerPort} to -1 to disable the TCP port.
+
+=head3 Installation permissions
+
+It is important to check that the BackupPC scripts in __INSTALLDIR__/bin
+and __INSTALLDIR__/lib cannot be edited by normal users. Check the
+directory permissions too.
+
+=head3 Pool permissions
+
+It is important to check that the data files in __TOPDIR__/pool,
+__TOPDIR__/pc and __TOPDIR__/trash cannot be read by normal users. Normal
+users should not be able to see anything below __TOPDIR__.
+
+=head3 Host shares
+
+Enabling shares on hosts carries security risks. If you are on a private
+network and you generally trust your users then there should not be a problem.
+But if you have a laptop that is sometimes on public networks (eg: broadband
+or even dialup) you should be concerned. A conservative approach is to use
+firewall software, and only enable the netbios and smb ports (137 and 139)
+on connections from the host running BackupPC.
+
+=head3 SSH key security
+
+Using ssh for linux/unix clients is quite secure, but the security is only as
+good as the protection of ssh's private keys. If an attacker can devise a way
+to run a shell as the BackupPC user then they will have access to BackupPC's
+private ssh keys. They can then, in turn, ssh to any client machine as root
+(or whichever user you have configured BackupPC to use). This represents a
+serious compromise of your entire network. So in vulnerable networks, think
+carefully about how to protect the machine running BackupPC and how to prevent
+attackers from gaining shell access (as the BackupPC user) to the machine.
+
+=head3 CGI interface
+
+The CGI interface, __CGIDIR__/BackupPC_Admin, needs access to the pool files
+so it is installed setuid to __BACKUPPCUSER__. The permissions of this file
+need to checked carefully. It should be owned by __BACKUPPCUSER__ and have
+user and group (but not other) execute permission. To allow apache/httpd to
+execute it, the group ownership should be something that apache/httpd belongs to.
+
+The Apache configuration should be setup for AuthConfig style, using a .htaccess
+file so that the user's name is passed into the script as $ENV{REMOTE_USER}.
+
+If normal users could directly run BackupPC_Admin then there is a serious
+security hole: since it is setuid to __BACKUPPCUSER__ any user can browse and
+restore any backups. Be aware that anyone who is allowed to edit or create cgi
+scripts on your server can execute BackupPC_Admin as any user! They simply
+write a cgi script that sets $ENV{REMOTE_USER} and then execs BackupPC_Admin.
+The exec succeeds since httpd runs the first script as user httpd/apache, which
+in turn has group permission to execute BackupPC_Admin.
+
+While this setup should be safe, a more conservative approach is to run a
+dedicated Apache as user __BACKUPPCUSER__ on a different port. Then BackupPC_Admin
+no longer needs to be setuid, and the cgi directories can be locked down from
+normal users. Moreover, this setup is exactly the one used to support mod_perl,
+so this provides both the highest performance and the lowest security risk.
+
+Comments and suggestions are welcome.
 
 =head1 Configuration File
 

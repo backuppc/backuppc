@@ -3485,7 +3485,7 @@ discussion of some of BackupPC's limitations.
 
 An important security risk is the manner in which the smb share 
 passwords are stored. They are in plain text. As described in the 
-L<Step 3: Setting up config.pl>, there are 
+"step 3: setting up config.pl", there are 
 four ways to tell BackupPC the smb share password (manually setting 
 an environment variable, setting the environment variable in 
 /etc/init.d/backuppc, putting the password in __TOPDIR__/conf/config.pl, 
@@ -3499,6 +3499,118 @@ or CVS, double check the file permissions of the config.pl,v file.
 In future versions there will probably be support for encryption of 
 the smb share password, but a private key will still have to be 
 stored in a protected place. Comments and suggestions are welcome.
+
+=head3 BackupPC socket server
+
+In v1.5.0 the primary method for communication between the CGI 
+program (BackupPC_Admin) and the server (BackupPC) is via a unix-domain 
+socket. Since this socket has restricted permissions, no local user 
+should be able to connect to this port. No backup or restore data 
+passes through this interface, but an attacker can start or stop 
+backups and get status through this port.
+
+If the Apache server and BackupPC_Admin run on a different host to 
+BackupPC then a TCP port must be enabled by setting $Conf{ServerPort}. 
+Anyone can connect to this port. To avoid possible attacks via the TCP 
+socket interface, every client message is protected by an MD5 digest. 
+The MD5 digest includes four items:
+
+=over 4
+
+=item *
+
+seed that is sent to the client when the connection opens
+
+=item *
+
+sequence number that increments for each message
+
+=item *
+
+shared secret that is stored in $Conf{ServerMesgSecret}
+
+=item *
+
+the message itself.
+
+=back
+
+The message is sent in plain text preceded by the MD5 digest. A 
+snooper can see the plain-text seed sent by BackupPC and plain-text 
+message from the client, but cannot construct a valid MD5 digest 
+since the secret in $Conf{ServerMesgSecret} is unknown. A replay 
+attack is not possible since the seed changes on a per-connection 
+and per-message basis.
+
+So if you do enable the TCP port, please set $Conf{ServerMesgSecret} 
+to some hard-to-guess string. A denial-of-service attack is possible 
+with the TCP port enabled. Someone could simply connect many times 
+to this port, until BackupPC had exhausted all its file descriptors, 
+and this would cause new backups and the CGI interface to fail. The 
+most secure solution is to run BackupPC and Apache on the same 
+machine and disable the TCP port.
+
+By the way, if you have upgraded from a version of BackupPC prior 
+to v1.5.0 you should set $Conf{ServerPort} to -1 to disable the TCP port.
+
+=head3 Installation permissions
+
+It is important to check that the BackupPC scripts in __INSTALLDIR__/bin 
+and __INSTALLDIR__/lib cannot be edited by normal users. Check the 
+directory permissions too.
+
+=head3 Pool permissions
+
+It is important to check that the data files in __TOPDIR__/pool, 
+__TOPDIR__/pc and __TOPDIR__/trash cannot be read by normal users. Normal 
+users should not be able to see anything below __TOPDIR__.
+
+=head3 Host shares
+
+Enabling shares on hosts carries security risks. If you are on a private 
+network and you generally trust your users then there should not be a problem. 
+But if you have a laptop that is sometimes on public networks (eg: broadband 
+or even dialup) you should be concerned. A conservative approach is to use 
+firewall software, and only enable the netbios and smb ports (137 and 139) 
+on connections from the host running BackupPC.
+
+=head3 SSH key security
+
+Using ssh for linux/unix clients is quite secure, but the security is only as 
+good as the protection of ssh's private keys. If an attacker can devise a way 
+to run a shell as the BackupPC user then they will have access to BackupPC's 
+private ssh keys. They can then, in turn, ssh to any client machine as root 
+(or whichever user you have configured BackupPC to use). This represents a 
+serious compromise of your entire network. So in vulnerable networks, think 
+carefully about how to protect the machine running BackupPC and how to prevent 
+attackers from gaining shell access (as the BackupPC user) to the machine.
+
+=head3 CGI interface
+
+The CGI interface, __CGIDIR__/BackupPC_Admin, needs access to the pool files 
+so it is installed setuid to __BACKUPPCUSER__. The permissions of this file 
+need to checked carefully. It should be owned by __BACKUPPCUSER__ and have 
+user and group (but not other) execute permission. To allow apache/httpd to 
+execute it, the group ownership should be something that apache/httpd belongs to.
+
+The Apache configuration should be setup for AuthConfig style, using a .htaccess 
+file so that the user's name is passed into the script as $ENV{REMOTE_USER}.
+
+If normal users could directly run BackupPC_Admin then there is a serious 
+security hole: since it is setuid to __BACKUPPCUSER__ any user can browse and 
+restore any backups. Be aware that anyone who is allowed to edit or create cgi 
+scripts on your server can execute BackupPC_Admin as any user! They simply 
+write a cgi script that sets $ENV{REMOTE_USER} and then execs BackupPC_Admin. 
+The exec succeeds since httpd runs the first script as user httpd/apache, which 
+in turn has group permission to execute BackupPC_Admin.
+
+While this setup should be safe, a more conservative approach is to run a 
+dedicated Apache as user __BACKUPPCUSER__ on a different port. Then BackupPC_Admin 
+no longer needs to be setuid, and the cgi directories can be locked down from 
+normal users. Moreover, this setup is exactly the one used to support mod_perl, 
+so this provides both the highest performance and the lowest security risk.
+
+Comments and suggestions are welcome.
 
 =head1 Configuration File
 

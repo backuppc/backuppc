@@ -3484,13 +3484,13 @@ discussion of some of BackupPC's limitations.
 =head3 Smb share password
 
 An important security risk is the manner in which the smb share 
-passwords are stored. They are in plain text. As described in the 
-[Step 3: Setting up config.pl](#step-3-setting-up-configpl), there are 
-four ways to tell BackupPC the smb share password (manually setting 
-an environment variable, setting the environment variable in 
-/etc/init.d/backuppc, putting the password in __TOPDIR__/conf/config.pl, 
-or putting the password in __TOPDIR__/pc/$host/config.pl). In the 
-latter 3 cases the smb share password appears in plain text in a file.
+passwords are stored. They are in plain text. As described in  
+Step 3: Setting up config.pl, there are four ways to tell 
+BackupPC the smb share password (manually setting an environment 
+variable, setting the environment variable in /etc/init.d/backuppc, 
+putting the password in __TOPDIR__/conf/config.pl, or putting the 
+password in __TOPDIR__/pc/$host/config.pl). In the latter 3 cases 
+the smb share password appears in plain text in a file.
 
 If you use any of the latter three methods please make sure that the 
 file's permission is appropriately restricted. If you also use RCS 

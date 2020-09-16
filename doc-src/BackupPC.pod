@@ -3513,6 +3513,7 @@ If the Apache server and BackupPC_Admin run on a different host to
 BackupPC then a TCP port must be enabled by setting $Conf{ServerPort}. 
 Anyone can connect to this port. To avoid possible attacks via the TCP 
 socket interface, every client message is protected by an MD5 digest. 
+
 The MD5 digest includes four items:
 
 =over 4

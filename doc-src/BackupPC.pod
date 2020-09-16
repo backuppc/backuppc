@@ -3485,7 +3485,7 @@ discussion of some of BackupPC's limitations.
 
 An important security risk is the manner in which the smb share 
 passwords are stored. They are in plain text. As described in the 
-"step 3: setting up config.pl", there are 
+[Step 3: Setting up config.pl](#step-3-setting-up-configpl), there are 
 four ways to tell BackupPC the smb share password (manually setting 
 an environment variable, setting the environment variable in 
 /etc/init.d/backuppc, putting the password in __TOPDIR__/conf/config.pl, 

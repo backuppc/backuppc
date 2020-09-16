@@ -3502,15 +3502,8 @@ that their outlook files haven't been backed up in X days. (X is configurable.)
 The message invites the user to exit Outlook and gives a URL to manually start a backup.
 
 With Windows 2003 and WinXP the Volume Shadow feature (VSS) allows open files to 
-be copied. VSS is the capability that creates volume snapshots for backup purposes 
-
-See:
-
-=over 4
-
-L<http://blogs.msdn.com/adioltean/archive/2005/01/05/346793.aspx>
-
-=back
+be copied. VSS is the capability that creates volume snapshots for backup purposes. 
+See for example L<http://blogs.msdn.com/adioltean/archive/2005/01/05/346793.aspx>
 
 Comment: two users have noted that there are commercial OFM (open file manager) 
 products that are designed to solve this problem, for example from St. Bernard 

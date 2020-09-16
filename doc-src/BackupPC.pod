@@ -3481,9 +3481,24 @@ discussion of some of BackupPC's limitations.
 
 =head2 Security issues
 
-Please see L<http://backuppc.sourceforge.net/faq/security.html> for a
-discussion of some of various security issues.
-(Note, this is old and we should move this to the Github Wiki.)
+=head3 Smb share password
+
+An important security risk is the manner in which the smb share 
+passwords are stored. They are in plain text. As described in the 
+``Setting up config.pl'' section in the documentation>, there are 
+four ways to tell BackupPC the smb share password (manually setting 
+an environment variable, setting the environment variable in 
+/etc/init.d/backuppc, putting the password in __TOPDIR__/conf/config.pl, 
+or putting the password in __TOPDIR__/pc/$host/config.pl). In the 
+latter 3 cases the smb share password appears in plain text in a file.
+
+If you use any of the latter three methods please make sure that the 
+file's permission is appropriately restricted. If you also use RCS 
+or CVS, double check the file permissions of the config.pl,v file.
+
+In future versions there will probably be support for encryption of 
+the smb share password, but a private key will still have to be 
+stored in a protected place. Comments and suggestions are welcome.
 
 =head1 Configuration File
 

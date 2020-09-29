@@ -1,0 +1,380 @@
+/*
+ * BackupPC CSS definitions mod
+ *
+ * Version 1.0, released 29 Jun 2020.
+ *
+ *
+ * AUTHOR
+ *   Craig Barratt  <cbarratt@users.sourceforge.net>
+ *   Ernesto Carrea  <ernestocarrea@gmail.com>
+ *   Sergey Klochko <sergey@klochko.ru>
+ *
+ * COPYRIGHT
+ *   Copyright (C) 2004-2020  Craig Barratt
+ */
+
+body {
+    font-family: sans-serif,helvetica;
+    font-size: 11pt;
+    line-height: 1.3;
+    font-weight: 300;
+    background-color: white;
+    margin: 0;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    cursor: default;
+}
+
+#logo-container a img {
+    max-width: 90%;
+}
+
+button, input[type="button"], input[type="submit"] {
+    font-family: sans-serif,helvetica;
+    border: 1px solid #dfdfdf;
+    border-radius: 2px;
+    font-size: 12pt;
+    padding: 6px 12px;
+    -webkit-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+    outline: 0;
+    background-color: #005DEE;
+	color: white;
+}
+
+button:hover, input[type="button"]:hover, input[type="submit"]:hover {
+    background-color: #0088ce !important;
+    -webkit-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+    cursor: pointer;
+}
+
+input[type="text"], input[type="email"], input[type="password"], input[type="search"], input[type="number"], input[type="radio"], select, textarea {
+    background-color: white;
+    font-family: sans-serif,helvetica;
+    border: 1px solid #dfdfdf;
+    border-radius: 2px;
+    font-size: 11pt;
+    padding: 6px;
+    -webkit-transition: all .2s ease-in-out;
+    transition: all .2s ease-in-out;
+    outline: 0;
+    display: inline-block;
+    text-align: left;
+    width: 100%;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none !important;
+    border-color: #719ECE;
+    box-shadow: 0 0 5px #719ECE;
+}
+
+input.inputCompact, select.inputCompact {
+    width: auto;
+}
+
+textarea {
+    min-height: 64px;
+}
+
+h1, .h1 {
+    font-size: 20pt;
+    font-weight: 400;
+}
+
+h2, .h2 {
+    font-size: 14pt;
+    font-weight: 400;
+}
+
+a {
+    color: #0069ff;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #0088ce;
+}
+
+dt {
+    color: #3333ff
+}
+
+pre {
+    white-space: pre-wrap;       /* css-3 */
+    white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+    white-space: -pre-wrap;      /* Opera 4-6 */
+    white-space: -o-pre-wrap;    /* Opera 7 */
+    word-wrap: break-word;       /* Internet Explorer 5.5+ */
+    font-size: 10pt;
+}
+
+table {
+    width: 100%;
+    max-width: 1300px;
+    border-collapse: collapse;
+    font-size: 11pt;
+    border: none;
+}
+
+table td {
+    border: none;
+    padding: 4px;
+}
+
+.tableStnd, #host_summary_backups, #host_summary_nobackups {
+    width: 100%;
+    max-width: 1300px;
+    border-collapse: collapse;
+    font-size: 11pt;
+    font-weight: 300;
+}
+
+.tableStnd td, #host_summary_backups td, #host_summary_nobackups td {
+    padding: 4px;
+    text-align: left;
+    border: 1px solid #DBDBD0;
+}
+
+table th, .tableheader {
+    font-size: 11pt;
+    font-weight: 400;
+    background-color: #f8f8f4;
+}
+
+table.sortable a.sortheader {
+    background-color: #f8f8f4;
+    font-weight: 400;
+    text-decoration: none;
+    display: block;
+    margin-left: 8px;
+}
+
+table tr td.border {
+    padding: 6px 12px;
+
+}
+
+table tr td.border input[type="button"] {
+    padding: 6px 5px 5px;
+    margin: 4px 0 0;
+}
+
+.editError {
+    color: #ff0000;
+    font-weight: bold;
+}
+
+.editComment {
+    line-height: 1.5;
+	font-size: 14px;
+	padding-top: 10px !important;
+}
+
+.editTextInput {
+    font-family: courier;
+    font-size: 14px;
+}
+
+.fviewheader {
+    font-weight: 400;
+    font-size: 11pt;
+    background-color: #f8f8f4;
+    border-collapse: collapse;
+    border: 1px solid #DBDBD0;
+}
+
+.fviewborder {
+    border-collapse: collapse;
+    border: 1px solid #DBDBD0;
+    font-size: 10pt;
+}
+
+.fviewon, .fview, .fviewoff, .fviewbold {
+    padding: 0;
+}
+
+.fviewoff a, .fviewon a {
+    font-size: 10pt;
+    text-decoration: none;
+    line-height: 15px;
+    color: #0069ff;
+}
+
+.fviewon {
+    background-color: #f0f0e8;
+}
+
+.fviewbold {
+    font-size: 10pt;
+    text-decoration: none;
+    line-height: 15px;
+    font-weight: 700;
+}
+
+.histView {
+    border-bottom: 1px solid #000000;
+    border-left: 1px solid #000000;
+    background-color: #eeeeee;
+    font-size: 10pt;
+}
+
+.histViewMis {
+    border-bottom: 1px solid #000000;
+    border-left: 1px solid #000000;
+    background-color: #ffdddd;
+}
+
+#BpcLogo {
+    padding: 16px 8px 8px 24px;
+}
+
+#navigation-container {
+    position: fixed;
+    background-color: #f8f8f6;
+    padding: 20px 20px 0 20px;
+	width: 220px;
+}
+
+.NavMenu a {
+    display: block;
+    font-size: 11pt;
+    padding: 6px 0px 6px 12px;
+    text-decoration: none;
+    color: #0088ce;
+}
+.NavMenu a:hover {
+    color: #293552;
+    background-color: #def3ff;
+}
+.NavMenu a.NavCurrent {
+    color: white;
+    font-weight: 400;
+	background-color: #005DEE;
+}
+
+.NavMenu .NavTitle {
+    font-size: 14pt;
+    font-family: sans-serif,helvetica;
+    font-weight: 400;
+    padding: 4px 0px;
+    margin-bottom: 2px;
+}
+
+.NavMenu select {
+    width: 90%;
+}
+
+.BpcTableTabs {
+    width: 100%;
+    text-align: center;
+    border-bottom: 1px solid #E0E0D7;
+}
+
+.BpcTableTabsTab, .editTabSel, .editTabNoSel {
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    padding: 6px 12px;
+    min-height: 32px;
+    background-color: #f8f8f8;
+    border: 1px solid #eee;
+}
+
+.BpcTableTabsTab:hover, .editTabNoSel:hover {
+    background-color: #def3ff;
+    cursor: pointer;
+}
+
+.BpcTableTabsTab a, .editTabNoSel a {
+    display: block;
+    min-height: 14px;
+}
+
+.BpcTableTabsTab a:hover, .editTabNoSel a:hover {
+    color: #676767;
+}
+
+.BpcTableTabsTabActive, .editTabSel {
+    padding: 6px 12px;
+    font-weight: 400;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    background-color: #0088ce;
+}
+
+.BpcTableTabsTabActive:hover, .editTabSel:hover {
+    background-color: #0088ce;
+}
+
+.BpcTableTabsTabActive a, .editTabSel a {
+    display: block;
+    color: white;
+	min-height: 14px;
+}
+
+.BpcTableTabsTabActive a:hover, .editTabSel a:hover {
+    color: white;
+}
+
+.BpcTableFormRowHeader, .editHeader {
+    font-family: sans-serif,helvetica;
+    font-size: 12pt;
+    font-weight: 400;
+    border-bottom: 1px dotted #E0E0D7;
+    padding-top: 16px;
+}
+
+.editSubTable {
+    border: 1px solid #dfdfdf;
+}
+
+#BpcHostSearch input[type="text"], .NavMenu input[type="text"] {
+    width: 140px;
+    margin-bottom: 4px;
+}
+
+#BpcHostSearch input[type="submit"] {
+    padding: 4px;
+}
+
+.NavMenu form {
+    margin: 0;
+    padding: 0;
+}
+
+.NavMenu select {
+    padding: 4px;
+    margin-bottom: 4px;
+}
+
+#Content, BpcContentWrapper {
+    margin-left: 260px;
+    padding: 13px 20px 0 20px;
+}
+
+.NavMenu .NavTitle, button, input[type="button"], input[type="submit"] {
+	font-family: sans-serif,helvetica;
+}
+
+.NavMenu a, a{
+	color: #005DEE;
+}
+
+.BpcTableTabsTabActive a:hover, .editTabSel a:hover, .BpcTableTabsTabActive:hover a, .editTabSel:hover a {
+	color: white;
+}
+
+.NavMenu input[type="submit"] {
+	padding: 6px 6px 5px;
+	border: none;
+}
+
+input[type="submit"] {
+	text-transform: uppercase;
+}
+
+input[type="button"] {
+	text-transform: lowercase;
+}

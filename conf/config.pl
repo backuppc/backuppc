@@ -1229,7 +1229,7 @@ $Conf{RsyncBackupPCPath} = "";
 #
 # This setting only matters if $Conf{XferMethod} = 'rsync'.
 #
-$Conf{RsyncSshArgs} = ['-e', '$sshPath -l root'];
+$Conf{RsyncSshArgs} = ['-e', '$sshPath -l root -o ServerAliveInterval=60'];
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should

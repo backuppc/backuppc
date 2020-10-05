@@ -67,10 +67,12 @@ sub action
         $reply = $bpc->ServerMesg("delete $User ${EscURI($host)} $num -r");
 
         my $content = eval("qq{$Lang->{REPLY_FROM_SERVER}}");
-        Header(eval("qq{$Lang->{BackupPC__Delete_Requested_for_a_backup_of__host}}"), $content);
+        Header("DeleteBackup Delete_Requested_for_a_backup_of__host",
+            eval("qq{$Lang->{BackupPC__Delete_Requested_for_a_backup_of__host}}"), $content);
     } else {
         my $content = eval("qq{$Lang->{Are_you_sure_delete}}");
-        Header(eval("qq{$Lang->{BackupPC__Delete_Backup_Confirm__num_of__host}}"), $content);
+        Header("DeleteBackup Delete_Backup_Confirm__num_of__host",
+            eval("qq{$Lang->{BackupPC__Delete_Backup_Confirm__num_of__host}}"), $content);
     }
     Trailer();
 }

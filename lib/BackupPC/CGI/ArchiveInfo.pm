@@ -79,7 +79,7 @@ EOF
     }
 
     my $content = eval("qq{$Lang->{Archive___num_details_for__host2}}");
-    Header(eval("qq{$Lang->{Archive___num_details_for__host}}"), $content, 1);
+    Header("ArchiveInfo", eval("qq{$Lang->{Archive___num_details_for__host}}"), $content, 1);
     Trailer();
 }
 

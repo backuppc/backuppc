@@ -159,7 +159,7 @@ EOF
             $content .= eval("qq{$Lang->{Option_2__Download_Zip_archive2}}");
         }
         $content .= eval("qq{$Lang->{Option_3__Download_Zip_archive}}");
-        Header(eval("qq{$Lang->{Restore_Options_for__host}}"), $content);
+        Header("Restore Restore_Options_for__host", eval("qq{$Lang->{Restore_Options_for__host}}"), $content);
         Trailer();
     } elsif ( $In{type} == 1 ) {
         #
@@ -297,7 +297,7 @@ EOF
         $In{shareDest} = decode_utf8($In{shareDest});
         $In{pathHdr}   = decode_utf8($In{pathHdr});
         my $content = eval("qq{$Lang->{Are_you_sure}}");
-        Header(eval("qq{$Lang->{Restore_Confirm_on__host}}"), $content);
+        Header("Restore Restore_Confirm_on__host", eval("qq{$Lang->{Restore_Confirm_on__host}}"), $content);
         Trailer();
     } elsif ( $In{type} == 4 ) {
         if ( !defined($Hosts->{$In{hostDest}}) ) {
@@ -358,7 +358,7 @@ EOF
         $reply = $bpc->ServerMesg("restore ${EscURI($ipAddr)} ${EscURI($hostDest)} $User $reqFileName");
         $str   = eval("qq{$Lang->{Restore_requested_to_host__hostDest__backup___num}}");
         my $content = eval("qq{$Lang->{Reply_from_server_was___reply}}");
-        Header(eval("qq{$Lang->{Restore_Requested_on__hostDest}}"), $content);
+        Header("Restore Restore_Requested_on__hostDest", eval("qq{$Lang->{Restore_Requested_on__hostDest}}"), $content);
         Trailer();
     }
 }

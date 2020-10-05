@@ -90,7 +90,7 @@ EOF
     $RestoreReq{shareSrc}  = decode_utf8($RestoreReq{shareSrc});
     $RestoreReq{shareDest} = decode_utf8($RestoreReq{shareDest});
     my $content = eval("qq{$Lang->{Restore___num_details_for__host2}}");
-    Header(eval("qq{$Lang->{Restore___num_details_for__host}}"), $content);
+    Header(eval("RestoreInfo", "qq{$Lang->{Restore___num_details_for__host}}"), $content);
     Trailer();
 }
 

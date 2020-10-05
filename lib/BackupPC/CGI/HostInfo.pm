@@ -137,7 +137,7 @@ EOF
         }
 
         my $content = eval("qq{$Lang->{Host__host_Archive_Summary2}}");
-        Header(eval("qq{$Lang->{Host__host_Archive_Summary}}"), $content, 1);
+        Header("HostInfo host_Archive_Summary", eval("qq{$Lang->{Host__host_Archive_Summary}}"), $content, 1);
         Trailer();
         return;
     }
@@ -432,7 +432,7 @@ EOF
 
     $startIncrStr = eval("qq{$startIncrStr}");
     my $content = eval("qq{$Lang->{Host__host_Backup_Summary2}}");
-    Header(eval("qq{$Lang->{Host__host_Backup_Summary}}"), $content);
+    Header("HostInfo host_Backup_Summary", eval("qq{$Lang->{Host__host_Backup_Summary}}"), $content);
     Trailer();
 }
 

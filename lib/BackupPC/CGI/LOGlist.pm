@@ -69,7 +69,7 @@ sub action
 EOF
     }
     my $content = eval("qq{$Lang->{Log_File_History__hdr}}");
-    Header($Lang->{BackupPC__Log_File_History}, $content, !-f "$TopDir/pc/$host/backups");
+    Header("LOGlist", $Lang->{BackupPC__Log_File_History}, $content, !-f "$TopDir/pc/$host/backups");
     Trailer();
 }
 

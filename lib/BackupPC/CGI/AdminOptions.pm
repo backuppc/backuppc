@@ -44,7 +44,7 @@ sub action
         ErrorExit($Lang->{Only_privileged_users_can_view_admin_options});
     }
     my $content = eval("qq{$Lang->{Admin_Options_Page}}");
-    Header(eval("qq{$Lang->{H_Admin_Options}}"), $content);
+    Header("AdminOptions", eval("qq{$Lang->{H_Admin_Options}}"), $content);
     Trailer();
 }
 

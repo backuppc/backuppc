@@ -1087,7 +1087,7 @@ $contentHidden
 </table>
 EOF
 
-    Header("Config Edit", $content);
+    Header("EditConfig $menu", "Config Edit", $content);
     Trailer();
 }
 

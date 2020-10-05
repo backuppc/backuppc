@@ -148,7 +148,7 @@ EOF
     }
 
     my $content = eval("qq{$Lang->{BackupPC_Server_Status}}");
-    Header($Lang->{H_BackupPC_Server_Status}, $content);
+    Header("GeneralInfo", $Lang->{H_BackupPC_Server_Status}, $content);
     Trailer();
 }
 

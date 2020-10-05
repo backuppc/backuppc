@@ -239,7 +239,7 @@ sub action
             # Documentation has a different header and no pre or post text,
             # so just handle it here
             #
-            Header($Lang->{BackupPC__Documentation}, "", 0, $contentSub);
+            Header("View Documentation", $Lang->{BackupPC__Documentation}, "", 0, $contentSub);
             Trailer();
             return;
         } else {
@@ -267,6 +267,7 @@ sub action
     }
     $contentPost .= "</pre>\n" if ( $type ne "docs" );
     Header(
+        "View Log_File__file",
         eval("qq{$Lang->{Backup_PC__Log_File__file}}"),
         $contentPre, !-f "$TopDir/pc/$host/backups",
         $contentSub, $contentPost

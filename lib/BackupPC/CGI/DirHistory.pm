@@ -221,7 +221,7 @@ EOF
           "<a href=\"$MyURL?action=dirHistory&host=${EscURI($host)}&share=$shareURI&dir=$thisPathURI\">${EscHTML($thisDir)}</a>";
     }
     my $content = eval("qq{$Lang->{DirHistory_for__host}}");
-    Header(eval("qq{$Lang->{DirHistory_backup_for__host}}"), $content);
+    Header("DirHistory", eval("qq{$Lang->{DirHistory_backup_for__host}}"), $content);
     Trailer();
 }
 

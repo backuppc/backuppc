@@ -276,11 +276,11 @@ EOF
 ${h1("Error: Unable to read config.pl or language strings!!")}
 <p>$mesg</p>
 EOF
-        Header("BackupPC: Error", $content);
+        Header("Lib Error", "BackupPC: Error", $content);
         Trailer();
     } else {
         my $content = eval("qq{$Lang->{Error____head}}");
-        Header(eval("qq{$Lang->{Error}}"), $content);
+        Header("Lib Error", eval("qq{$Lang->{Error}}"), $content);
         Trailer();
     }
     exit(1);
@@ -298,7 +298,8 @@ sub ServerConnect
             && -f $Conf{ServerInitdPath}
             && $Conf{ServerInitdStartCmd} ne "" ) {
             my $content = eval("qq{$Lang->{Admin_Start_Server}}");
-            Header(eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"), $content);
+            Header("Lib Unable_to_connect_to_BackupPC_server",
+                eval("qq{$Lang->{Unable_to_connect_to_BackupPC_server}}"), $content);
             Trailer();
             exit(1);
         } else {
@@ -426,7 +427,7 @@ sub ConfirmIPAddress
 
 sub Header
 {
-    my($title, $content, $noBrowse, $contentSub, $contentPost) = @_;
+    my($class, $title, $content, $noBrowse, $contentSub, $contentPost) = @_;
     my @adminLinks = (
         {link => "?action=status",  name => $Lang->{Status}},
         {link => "?action=summary", name => $Lang->{PC_Summary}},
@@ -568,7 +569,7 @@ EOF
 </div> <!-- end #navigation-container -->
 EOF
 
-    print("<div id=\"Content\">\n$content\n");
+    print("<div class=\"$class\" id=\"Content\">\n$content\n");
     if ( defined($contentSub) && ref($contentSub) eq "CODE" ) {
         while ( (my $s = &$contentSub()) ne "" ) {
             print($s);

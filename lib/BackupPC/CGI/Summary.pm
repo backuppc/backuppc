@@ -170,7 +170,7 @@ EOF
 
     my $content = eval("qq{$Lang->{BackupPC_Summary}}");
 
-    Header($Lang->{BackupPC__Server_Summary}, $content);
+    Header("Summary", $Lang->{BackupPC__Server_Summary}, $content);
     Trailer();
 }
 

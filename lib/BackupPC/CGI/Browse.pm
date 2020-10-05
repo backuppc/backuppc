@@ -369,7 +369,7 @@ EOF
     $comment = decode_utf8($comment);
 
     my $content = eval("qq{$Lang->{Backup_browse_for__host}}");
-    Header(eval("qq{$Lang->{Browse_backup__num_for__host}}"), $content);
+    Header("Browse", eval("qq{$Lang->{Browse_backup__num_for__host}}"), $content);
     Trailer();
 }
 

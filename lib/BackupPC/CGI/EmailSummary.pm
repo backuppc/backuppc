@@ -79,7 +79,7 @@ EOF
         $str .= $EmailStr{$t};
     }
     my $content = eval("qq{$Lang->{Recent_Email_Summary}}");
-    Header($Lang->{Email_Summary}, $content);
+    Header("EmailSummary", $Lang->{Email_Summary}, $content);
     Trailer();
 }
 

@@ -94,7 +94,7 @@ EOF
 <input type="hidden" name="archivehost" value="$In{'archivehost'}">
 EOF
         my $content = eval("qq{$Lang->{BackupPC_Archive}}");
-        Header(eval("qq{$Lang->{BackupPC__Archive}}"), $content, 1);
+        Header("Archive", eval("qq{$Lang->{BackupPC__Archive}}"), $content, 1);
         Trailer();
     } else {
         my(@HostList, @BackupList, $HostListStr, $hiddenStr, $pathHdr, $badFileCnt, $reply, $str);
@@ -179,7 +179,7 @@ EOF
                 $paramStr .= eval("qq{$Lang->{BackupPC_Archive2_split}}");
             }
             my $content = eval("qq{$Lang->{BackupPC_Archive2}}");
-            Header(eval("qq{$Lang->{BackupPC__Archive}}"), $content, 1);
+            Header("Archive", eval("qq{$Lang->{BackupPC__Archive}}"), $content, 1);
             Trailer();
         } elsif ( $In{type} == 2 ) {
             my $reqFileName;
@@ -235,7 +235,7 @@ EOF
             $str   = eval("qq{$Lang->{Archive_requested}}");
 
             my $content = eval("qq{$Lang->{BackupPC_Archive_Reply_from_server}}");
-            Header(eval("qq{$Lang->{BackupPC__Archive}}"), $content, 1);
+            Header("Archive", eval("qq{$Lang->{BackupPC__Archive}}"), $content, 1);
             Trailer();
         }
     }

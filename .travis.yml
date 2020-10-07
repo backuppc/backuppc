@@ -26,7 +26,7 @@ before_install:
 install:
   - cpanm --quiet --installdeps --notest .
 before_script:
-  - ./makeDist --nosyntaxCheck --version HEAD
+  - ./makeDist --version HEAD
   - cd ./dist/BackupPC-HEAD
   - sudo useradd -s /usr/sbin/nologin -G travis backuppc
 script:

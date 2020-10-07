@@ -67,7 +67,8 @@ sub action
             $str   = eval("qq{$Lang->{Backup_stopped_dequeued_on__host_by__User}}");
         }
         my $content = eval("qq{$Lang->{REPLY_FROM_SERVER}}");
-        Header("StartStopBackup Backup_Requested_on__host", eval("qq{$Lang->{BackupPC__Backup_Requested_on__host}}"), $content);
+        Header("StartStopBackup Backup_Requested_on__host",
+            eval("qq{$Lang->{BackupPC__Backup_Requested_on__host}}"), $content);
 
         Trailer();
     } else {
@@ -81,7 +82,8 @@ sub action
             my $ipAddr     = ConfirmIPAddress($checkHost);
             my $buttonText = $Lang->{$In{action}};
             my $content    = eval("qq{$Lang->{Are_you_sure_start}}");
-            Header("StartStopBackup Start_Backup_Confirm_on__host", eval("qq{$Lang->{BackupPC__Start_Backup_Confirm_on__host}}"), $content);
+            Header("StartStopBackup Start_Backup_Confirm_on__host",
+                eval("qq{$Lang->{BackupPC__Start_Backup_Confirm_on__host}}"), $content);
         } else {
             my $backoff = "";
             GetStatusInfo("host(${EscURI($host)})");
@@ -90,7 +92,8 @@ sub action
             }
             my $buttonText = $Lang->{$In{action}};
             my $content    = eval("qq{$Lang->{Are_you_sure_stop}}");
-            Header("StartStopBackup Stop_Backup_Confirm_on__host", eval("qq{$Lang->{BackupPC__Stop_Backup_Confirm_on__host}}"), $content);
+            Header("StartStopBackup Stop_Backup_Confirm_on__host",
+                eval("qq{$Lang->{BackupPC__Stop_Backup_Confirm_on__host}}"), $content);
         }
         Trailer();
     }

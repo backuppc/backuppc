@@ -215,9 +215,9 @@ sub action
             $incrAge  = sprintf("%.1f", (time - $metrics{hosts}{$host}{incr_timestamp}) / (24 * 3600));
 
             my $error;
-            if (    $metrics{hosts}{$host}{state} ne "Status_backup_in_progress"
-                and $metrics{hosts}{$host}{state} ne "Status_restore_in_progress"
-                and $metrics{hosts}{$host}{error} ne "" ) {
+            if (   $metrics{hosts}{$host}{state} ne "Status_backup_in_progress"
+                && $metrics{hosts}{$host}{state} ne "Status_restore_in_progress"
+                && $metrics{hosts}{$host}{error} ne "" ) {
                 ($error = $metrics{hosts}{$host}{error}) =~ s/(.{48}).*/$1.../;
                 $error = " ($error)";
             }
@@ -289,8 +289,8 @@ sub action
 
                 # Ignore empty pools
                 next
-                  if (  ($section eq "pool" or $section eq "cpool")
-                    and (!defined($metrics{$section}{file_count}) or $metrics{$section}{file_count} <= 0) );
+                  if ( ($section eq "pool" || $section eq "cpool")
+                    && (!defined($metrics{$section}{file_count}) || $metrics{$section}{file_count} <= 0) );
 
                 my $promKey = "backuppc_${section}_${entry}";
 
@@ -300,23 +300,23 @@ sub action
 
                 if ( $section eq "hosts" ) {
                     foreach my $host ( sort keys %{$metrics{hosts}} ) {
-                        if ( defined($mapper{hosts}{$entry}{kind}) and $mapper{hosts}{$entry}{kind} eq 'label' ) {
+                        if ( defined($mapper{hosts}{$entry}{kind}) && $mapper{hosts}{$entry}{kind} eq 'label' ) {
                             if ( $metrics{hosts}{$host}{$entry} ) {
                                 $content .= "${promKey}\{host=\"$host\",label=\"$metrics{hosts}{$host}{$entry}\"\} 1\n";
                             }
                         } else {
-                            $content .= "${promKey}\{host=\"$host\"\} $metrics{hosts}{$host}{$entry}\n";
+                            my $val;
+                            if ( ref($metrics{hosts}{$host}{$entry}) eq "ARRAY" ) {
+                                $val = @{$metrics{hosts}{$host}{$entry}};
+                            } else {
+                                $val = $metrics{hosts}{$host}{$entry};
+                            }
+                            $content .= "${promKey}\{host=\"$host\"\} $val\n";
                         }
                     }
 
                 } else {
-                    my $val;
-                    if ( ref($metrics{hosts}{$host}{$entry}) eq "ARRAY" ) {
-                        $val = @{$metrics{hosts}{$host}{$entry}};
-                    } else {
-                        $val = $metrics{hosts}{$host}{$entry};
-                    }
-                    $content .= "${promKey}\{host=\"$host\"\} $val\n";
+                    $content .= "$promKey $metrics{$section}{$entry}\n";
                 }
 
                 $content .= "\n";

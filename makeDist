@@ -347,6 +347,7 @@ sub InstallFile
             s/__RELEASEDATE__/$ReleaseDate/g;
             s/^([#*\s]+)Copyright\s+\(C\)\s+(\d{4})-\d{4}\s+Craig\s+Barratt/$1Copyright (C) $2-$year  Craig Barratt/i;
             if ( $file =~ /BackupPC\.html$/ ) {
+                s/^<body>$/<body id="manual">/;
                 #
                 # fixup for conf links
                 #

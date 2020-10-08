@@ -247,7 +247,7 @@ sub copy_v4_file
         $FileCnt++;
         return;
     }
-    next if ( $path =~ m{^\./rsyncTmp\.\d+\.\d+\.\d+$} );   # skip rsyncTmp files
+    next if ( $path =~ m{^\./rsyncTmp\.\d+\.\d+\.\d+$} );    # skip rsyncTmp files
     if ( !copy($path, "$DestDir/$path") ) {
         print(STDERR "Can't copy $path to $DestDir/$path\n");
         $ErrorCnt++;

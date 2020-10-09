@@ -1232,7 +1232,7 @@ EOF
             for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
                 if ( @$varValue > 1 || $type->{emptyOk} ) {
                     $content .= <<EOF;
-<tr><td class="border">
+<tr><td class="border hasButtons">
 <input type="button" name="del_${varName}_zZ_$i" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
     onClick="deleteSubmit('${varName}_zZ_$i')">
 </td>
@@ -1248,7 +1248,7 @@ EOF
         } else {
             for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
                 $content .= <<EOF;
-<tr><td class="border">
+<tr><td class="border hasButtons">
 <input type="button" name="ins_${varName}_zZ_$i" value="${EscHTML($Lang->{CfgEdit_Button_Insert})}"
     onClick="insertSubmit('${varName}_zZ_$i')">
 EOF
@@ -1269,7 +1269,7 @@ EOF
             $colspan = 2;
         }
         $content .= <<EOF;
-<tr><td class="border" colspan="$colspan"><input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}"
+<tr><td class="border hasButtons" colspan="$colspan"><input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}"
     onClick="addSubmit('$varName')"></td></tr>
 </table>
 EOF
@@ -1310,7 +1310,7 @@ EOF
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {
             my $fld = $order[$fldNum];
             $content .= <<EOF;
-<tr><td class="border">$fld
+<tr><td class="border hasButtons">$fld
 EOF
             if ( !$type->{noKeyEdit}
                 && (keys(%$varValue) > 1 || $type->{emptyOk}) ) {
@@ -1343,7 +1343,7 @@ EOF
         if ( !$type->{noKeyEdit} ) {
             my $keyText = defined($type->{keyText}) ? $Lang->{$type->{keyText}} : $Lang->{CfgEdit_Button_New_Key};
             $content .= <<EOF;
-<tr><td class="border" colspan="2">
+<tr><td class="border hasButtons" colspan="2">
 $keyText: <input type="text" class="editTextInput" name="addVarKey_$varName" size="20" maxlength="256" value="">
 <input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}" onClick="addSubmit('$varName', 1)">
 </td></tr>

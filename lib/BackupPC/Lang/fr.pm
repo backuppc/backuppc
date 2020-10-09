@@ -41,7 +41,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
 <table class="tableStnd">
-  <tr><td>Recharger la configuration:<td><input type="button" value="Recharger"
+  <tr><td>Recharger la configuration:<td class="hasButtons"><input type="button" value="Recharger"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
 </table>

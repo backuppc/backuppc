@@ -42,7 +42,7 @@ $Lang{Admin_Options_Page} = <<EOF;
   <input type="hidden" name="action" value="">
   <table class="tableStnd">
     <tr>
-      <td>Wczytaj ponownie konfigurację serwera:<td>
+      <td>Wczytaj ponownie konfigurację serwera:<td class="hasButtons">
       <input type="button" value="Wczytaj ponownie" onClick="document.ReloadForm.action.value='Reload'; document.ReloadForm.submit();">
     </tr>
   </table>

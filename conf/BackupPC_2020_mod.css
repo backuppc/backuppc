@@ -1,60 +1,4 @@
-input::-webkit-inner-spin-button,
-input::-webkit-outer-spin-button {
-	-webkit-appearance: none
-}
-
-input[type=number] {
-	-moz-appearance: textfield
-}
-
-input[type=submit] {
-	-webkit-appearance: none;
-	-webkit-border-radius: 0;
-	cursor: pointer
-}
-
-input:focus {
-	outline-color: inherit;
-	outline-width: inherit
-}
-
-li {
-	list-style: none
-}
-
-a,
-a:active,
-a:hover {
-	text-decoration: none
-}
-
-html {
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
-	scroll-behavior: smooth
-}
-
-* {
-	margin: 0;
-	padding: 0;
-	-webkit-box-sizing: inherit;
-	box-sizing: inherit
-}
-
-::after,
-::before {
-	-webkit-box-sizing: inherit;
-	box-sizing: inherit
-}
-
-img {
-	width: 100%;
-	height: auto;
-	display: block
-}
-
-
-/*!
+/*
   "2020 look" - BackupPC CSS definitions mod
   Version 1.0, released 6 Oct 2020.
 
@@ -64,606 +8,668 @@ img {
   COPYRIGHT
     Copyright (C) 2020 Sergey Klochko */
 
+input::-webkit-inner-spin-button,
+input::-webkit-outer-spin-button {
+  -webkit-appearance: none
+}
+
+input[type=number] {
+  -moz-appearance: textfield
+}
+
+input[type=submit] {
+  -webkit-appearance: none;
+  -webkit-border-radius: 0;
+  border-radius: 0;
+  cursor: pointer
+}
+
+input:focus {
+  outline-color: inherit;
+  outline-width: inherit
+}
+
+li {
+  list-style: none
+}
+
+a,
+a:active,
+a:hover {
+  text-decoration: none
+}
+
+html {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  scroll-behavior: smooth
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  -webkit-box-sizing: inherit;
+  box-sizing: inherit
+}
+
+::after,
+::before {
+  -webkit-box-sizing: inherit;
+  box-sizing: inherit
+}
+
+img {
+  width: 100%;
+  height: auto;
+  display: block
+}
+
 .row {
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-orient: horizontal;
-	-webkit-box-direction: normal;
-	-ms-flex-direction: row;
-	flex-direction: row;
-	display: flex
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  display: flex
 }
 
 .row-reverse {
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-orient: horizontal;
-	-webkit-box-direction: reverse;
-	-ms-flex-direction: row-reverse;
-	flex-direction: row-reverse;
-	display: flex
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: reverse;
+  -ms-flex-direction: row-reverse;
+  flex-direction: row-reverse;
+  display: flex
 }
 
 .column {
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	display: flex;
-	-webkit-box-orient: vertical;
-	-webkit-box-direction: normal;
-	-ms-flex-direction: column;
-	flex-direction: column
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column
 }
 
 .column-reverse {
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	display: flex;
-	-webkit-box-orient: vertical;
-	-webkit-box-direction: reverse;
-	-ms-flex-direction: column-reverse;
-	flex-direction: column-reverse
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: reverse;
+  -ms-flex-direction: column-reverse;
+  flex-direction: column-reverse
 }
 
 .wrap {
-	-ms-flex-wrap: wrap;
-	flex-wrap: wrap
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap
 }
 
 .nowrap {
-	-ms-flex-wrap: nowrap;
-	flex-wrap: nowrap
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap
 }
 
 .inline {
-	display: inline
+  display: inline
 }
 
 .hide {
-	display: none
+  display: none
 }
 
 .absolute {
-	position: absolute
+  position: absolute
 }
 
 .relative {
-	position: relative
+  position: relative
 }
 
 .sticky {
-	position: -webkit-sticky;
-	position: sticky
+  position: -webkit-sticky;
+  position: sticky
 }
 
 [v-cloak] {
-	display: none
+  display: none
 }
 
 body {
-	font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-	background-color: #fff;
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-orient: horizontal;
-	-webkit-box-direction: normal;
-	-ms-flex-direction: row;
-	flex-direction: row;
-	padding: 0;
-	color: #333;
-	font-family: Roboto, Arial, Helvetica, sans-serif;
-	font-weight: 300;
-	font-size: 16px;
-	line-height: 24px
+  font-family: Roboto, -apple-system, BlinkMacSystemFont, 'Segoe UI', Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #fff;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  padding: 0;
+  color: #333;
+  font-family: Roboto, Arial, Helvetica, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 24px
 }
 
 h1 {
-	margin-top: 35px;
-	font-style: normal;
-	font-weight: 500;
-	font-size: 36px;
-	line-height: 42px;
-	border-bottom: 1px solid #333;
-	margin-bottom: 40px
+  margin-top: 35px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 42px;
+  border-bottom: 1px solid #333;
+  margin-bottom: 40px
 }
 
 td._podblock_ {
-	font-style: normal;
-	font-weight: 500;
-	font-size: 36px;
-	line-height: 42px;
-	border-bottom: 1px solid #333;
-	margin: 30px 0;
-	background-color: #fff!important;
-	display: block
+  font-style: normal;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 42px;
+  border-bottom: 1px solid #333;
+  margin: 30px 0;
+  background-color: #fff !important;
+  display: block
 }
 
 td._podblock_::first-letter {
-	margin-left: -10px
+  margin-left: -10px
 }
 
 h2 {
-	margin-top: 40px;
-	margin-bottom: 10px;
-	font-style: normal;
-	font-weight: 400;
-	font-size: 24px;
-	line-height: 1;
-	font-variant: all-petite-caps
+  margin-top: 40px;
+  margin-bottom: 10px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  font-variant: all-petite-caps
 }
 
 a {
-	color: #4983dd
+  color: #4983dd;
+  font-variant: initial
 }
 
 #Content a:hover {
-	text-decoration: underline
+  text-decoration: underline
 }
 
 #navigation-container {
-	background-color: #f0f2f8;
-	min-height: 100vh;
-	max-width: 260px;
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-orient: vertical;
-	-webkit-box-direction: normal;
-	-ms-flex-direction: column;
-	flex-direction: column;
-	-webkit-box-align: center;
-	-ms-flex-align: center;
-	align-items: center
+  background-color: #f0f2f8;
+  min-height: 100vh;
+  max-width: 260px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center
 }
 
 #navigation-container #logo-container {
-	padding: 0 30px;
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex
+  padding: 0 30px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex
 }
 
 #navigation-container #logo-container img {
-	width: 200px;
-	margin-top: 30px
+  width: 200px;
+  margin-top: 30px
+}
+
+.log {
+  font-size: 14px;
+  line-height: 1.5
 }
 
 .NavMenu.section-title {
-	overflow-x: hidden
+  overflow-x: hidden
 }
 
 .NavMenu.section-title h2 {
-	font-size: 18px;
-	overflow-wrap: anywhere;
-	text-transform: lowercase;
-	font-variant: inherit
+  font-size: 18px;
+  overflow-wrap: anywhere;
+  text-transform: lowercase;
+  font-variant: inherit
 }
 
 input[type=text] {
-	padding: 5px 10px;
-	max-width: 500px;
-	min-width: 40px;
-	width: 100%;
-	border: 1px solid #dfdfdf;
-	background-color: #fff;
-	color: #333
+  padding: 5px 10px;
+  max-width: 500px;
+  min-width: 40px;
+  width: 100%;
+  border: 1px solid #dfdfdf;
+  background-color: #fff;
+  color: #333
 }
 
 input[type=text]:hover {
-	cursor: pointer
+  cursor: pointer
 }
 
 textarea {
-	width: 100%;
-	max-width: 500px;
-	font-size: inherit;
-	padding: 5px 10px;
-	border: 1px solid #dfdfdf;
-	border-radius: 0;
-	font-family: inherit;
-	font-weight: inherit
+  width: 100%;
+  max-width: 500px;
+  font-size: inherit;
+  padding: 5px 10px;
+  border: 1px solid #dfdfdf;
+  border-radius: 0;
+  font-family: inherit;
+  font-weight: inherit
 }
 
 input[name=SetComment],
 input[type=button],
 input[type=submit] {
-	padding: 0 10px;
-	height: 30px;
-	min-width: 40px;
-	width: 100%;
-	text-transform: uppercase;
-	border: none;
-	border-radius: 4px;
-	background-color: #4983dd;
-	color: #fff
+  padding: 0 10px;
+  height: 30px;
+  min-width: 40px;
+  width: 100%;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 4px;
+  background-color: #4983dd;
+  color: #fff
 }
 
 input[name=SetComment]:hover,
 input[type=button]:hover,
 input[type=submit]:hover {
-	cursor: pointer;
-	background-color: #6c9eeb
+  cursor: pointer;
+  background-color: #6c9eeb
 }
 
 input[type=button],
 input[type=submit] {
-	width: auto
+  width: auto
 }
 
 input[value~=Save] {
-	background-color: #fff;
-	color: #4983dd;
-	font-variant: all-small-caps;
-	border: 1px solid #4983dd;
-	width: auto;
-	font-size: 18px
+  background-color: #fff;
+  color: #4983dd;
+  font-variant: all-small-caps;
+  border: 1px solid #4983dd;
+  width: auto;
+  font-size: 18px
 }
 
 input[value~=Add]:hover,
 input[value~=Insert]:hover,
 input[value~=Save]:hover {
-	background-color: #4983dd;
-	color: #fff
+  background-color: #4983dd;
+  color: #fff
 }
 
 input[value~=Delete] {
-	background-color: #fff;
-	color: #ff4b4b;
-	font-variant: all-small-caps;
-	border: 1px solid #ff4b4b;
-	width: auto
+  background-color: #fff;
+  color: #ff4b4b;
+  font-variant: all-small-caps;
+  border: 1px solid #ff4b4b;
+  width: auto
 }
 
 input[value~=Delete]:hover {
-	background-color: #ff4b4b;
-	color: #fff
+  background-color: #ff4b4b;
+  color: #fff
 }
 
 input[value~=Add],
 input[value~=Insert] {
-	background-color: #fff;
-	color: #4983dd;
-	font-variant: all-small-caps;
-	border: 1px solid #4983dd;
-	width: auto
+  background-color: #fff;
+  color: #4983dd;
+  font-variant: all-small-caps;
+  border: 1px solid #4983dd;
+  width: auto
 }
 
 input[name=SetComment] {
-	background-color: #4983dd!important;
-	color: #fff;
-	font-variant: none;
-	font-size: 13px
+  background-color: #4983dd !important;
+  color: #fff;
+  font-variant: none;
+  font-size: 13px
 }
 
 input[name=SetComment]:hover {
-	background-color: #6c9eeb!important
+  background-color: #6c9eeb !important
 }
 
 #NavMenu,
 .NavMenu {
-	width: 100%;
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-orient: vertical;
-	-webkit-box-direction: normal;
-	-ms-flex-direction: column;
-	flex-direction: column;
-	-ms-flex-item-align: normal;
-	align-self: normal
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -ms-flex-item-align: normal;
+  align-self: normal
 }
 
 #NavMenu h2,
 .NavMenu h2 {
-	margin: 20px 0 0;
-	padding: 15px 30px 10px;
-	max-width: 260px
+  margin: 20px 0 0;
+  padding: 15px 30px 10px;
+  max-width: 260px
 }
 
 #NavMenu input[type=text],
 #NavMenu select,
 .NavMenu input[type=text],
 .NavMenu select {
-	border: 1px solid #dfdfdf
+  border: 1px solid #dfdfdf
 }
 
 #NavMenu select,
 .NavMenu select {
-	margin: 0 30px 10px;
-	padding: 6px 10px;
-	height: 30px;
-	width: 200px
+  margin: 0 30px 10px;
+  padding: 6px 10px;
+  min-height: 30px;
+  width: 200px
 }
 
 #NavMenu input[type=text],
 .NavMenu input[type=text] {
-	margin-right: 2px;
-	height: 30px;
-	margin-left: 30px;
-	width: 153px;
-	padding: 6px 10px
+  margin-right: 2px;
+  height: 30px;
+  margin-left: 30px;
+  width: 153px;
+  padding: 6px 10px
 }
 
 #NavMenu a,
 .NavMenu a {
-	width: 100%;
-	padding: 5px 30px;
-	font-style: normal;
-	font-weight: 300;
-	font-size: 16px;
-	line-height: 19px;
-	font-variant: all-small-caps;
-	color: #333
+  width: 100%;
+  padding: 5px 30px;
+  font-style: normal;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 19px;
+  font-variant: all-small-caps;
+  color: #333
 }
 
 #NavMenu a:hover,
 .NavMenu a:hover {
-	background-color: #c8d6ec
+  background-color: #c8d6ec
 }
 
 .NavCurrent {
-	background-color: #4983dd!important;
-	color: #fff!important
+  background-color: #4983dd !important;
+  color: #fff !important
 }
 
 #Content {
-	padding: 0 30px;
-	width: 100%
+  padding: 0 30px;
+  width: 100%
 }
 
 h2+form br {
-	display: none
+  display: none
 }
 
 h2+form td:first-child {
-	border: none
+  border: none
 }
 
 h2+form td:last-child table td {
-	border: 1px solid #dfdfdf;
-	padding-right: 10px
+  border: 1px solid #dfdfdf;
+  padding-right: 10px
 }
 
 h2+form input[type=checkbox] {
-	margin-right: 10px
+  margin-right: 10px
 }
 
 h2+form img {
-	width: auto;
-	display: inline
+  width: auto;
+  display: inline
 }
 
 h2+form td br+table img {
-	margin-top: 3px;
-	margin-right: 5px
+  margin-top: 3px;
+  margin-right: 5px
 }
 
 h2+form table table:first-child td {
-	padding: 0;
-	line-height: 16px
+  padding: 0;
+  line-height: 16px
 }
 
 h2+form .fviewoff img {
-	width: auto!important
+  width: auto !important
 }
 
 h2+form .fviewoff a:last-child {
-	margin-left: 5px
+  margin-left: 5px
 }
 
 form[name~=formComment],
 form[name~=formDir] {
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-align: baseline;
-	-ms-flex-align: baseline;
-	align-items: baseline
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: baseline;
+  -ms-flex-align: baseline;
+  align-items: baseline
 }
 
 form[name~=formComment] input[type=text],
 form[name~=formDir] input[type=text] {
-	margin: 0 5px
+  margin: 0 5px
 }
 
 ul p img {
-	margin: 10px 0 10px 30px;
-	width: auto;
-	max-width: 687px
+  margin: 10px 0 10px 30px;
+  width: auto;
+  max-width: 687px
 }
 
 ul li ul {
-	margin-left: 30px
+  margin-left: 30px
 }
 
 li>form {
-	margin: 10px 0
+  margin: 10px 0
 }
 
 .tableStnd td {
-	border: 1px solid #dfdfdf;
-	padding: 5px 10px
+  border: 1px solid #dfdfdf;
+  padding: 5px 10px
 }
 
 table.sortable td,
 table.sortable td:last-child {
-	padding-left: 10px;
-	padding-right: 10px;
-	border: 1px solid #dfdfdf
+  padding-left: 10px;
+  padding-right: 10px;
+  border: 1px solid #dfdfdf
 }
 
 #host_summary_backups {
-	margin-top: 10px
+  margin-top: 10px
 }
 
 table {
-	font-size: inherit;
-	font-weight: inherit;
-	max-width: 100%;
-	width: 100%;
-	border: none;
-	border-left: 1px solid #fff;
-	border-right: 1px solid #fff;
-	border-collapse: collapse
+  font-size: inherit;
+  font-weight: inherit;
+  max-width: 100%;
+  width: 100%;
+  border: none;
+  border-left: 1px solid #fff;
+  border-right: 1px solid #fff;
+  border-collapse: collapse
 }
 
 table .fviewheader,
 table .tableheader {
-	background-color: #efefef;
-	font-weight: 300;
-	font-size: 16px;
-	line-height: 19px;
-	font-variant: all-small-caps;
-	border: 1px solid #fff
+  background-color: #efefef;
+  font-weight: 300;
+  font-size: 16px;
+  line-height: 19px;
+  font-variant: all-small-caps;
+  border: 1px solid #fff
 }
 
 table td {
-	padding: 5px 2px;
-	border: 1px solid #fff
+  padding: 5px 2px;
+  border: 1px solid #fff
 }
 
 table td:last-child {
-	padding: 5px 0 5px 2px
+  padding: 5px 0 5px 2px
 }
 
 table td input {
-	border: 1px solid #efefef;
-	line-height: 30px;
-	padding: 0 10px;
-	width: 100%;
-	cursor: pointer;
-	font-family: Roboto, Arial, Helvetica, sans-serif;
-	font-weight: 300
+  border: 1px solid #efefef;
+  line-height: 30px;
+  padding: 0 10px;
+  width: 100%;
+  cursor: pointer;
+  font-family: Roboto, Arial, Helvetica, sans-serif;
+  font-weight: 300
 }
 
 table td input[type=checkbox] {
-	width: auto;
-	margin-left: 10px
+  width: auto;
+  margin-left: 10px
 }
 
 table td td+input {
-	width: auto
+  width: auto
 }
 
 table .editTabSel {
-	background-color: #4983dd
+  background-color: #4983dd
 }
 
 table .editTabSel a {
-	color: #fff
+  color: #fff
 }
 
 table .editTabSel b {
-	font-weight: 300
+  font-weight: 300
 }
 
 table .editTabNoSel,
 table .editTabSel {
-	font-variant: all-small-caps;
-	cursor: pointer;
-	border-radius: 10px 10px 0 0;
-	border: 1px solid #fff;
-	padding-left: 10px
+  font-variant: all-small-caps;
+  cursor: pointer;
+  border-radius: 10px 10px 0 0;
+  border: 1px solid #fff;
+  padding-left: 10px
 }
 
 table .editTabNoSel:last-child,
 table .editTabSel:last-child {
-	padding-left: 10px
+  padding-left: 10px
 }
 
 table .editTabNoSel:hover,
 table .editTabSel {
-	border: none
+  border: none
 }
 
 table .editTabNoSel {
-	background-color: #dfdfdf
+  background-color: #dfdfdf
 }
 
 table .editTabNoSel:hover {
-	background-color: #c8d6ec;
-	border: 1px solid #fff
+  background-color: #c8d6ec;
+  border: 1px solid #fff
 }
 
 table .editTabNoSel a {
-	color: #333;
-	width: 100%;
-	display: block
+  color: #333;
+  width: 100%;
+  display: block
 }
 
 table .editTabNoSel a:hover {
-	text-decoration: none!important
+  text-decoration: none !important
 }
 
 td.editHeader {
-	border: none;
-	font-style: normal;
-	font-weight: 400;
-	font-size: 24px;
-	line-height: 1;
-	font-variant: all-petite-caps;
-	padding-top: 10px;
-	background-color: #f6f6f6
+  border: none;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 24px;
+  line-height: 1;
+  font-variant: all-petite-caps;
+  padding-top: 10px;
+  background-color: #f6f6f6
 }
 
 input+p+table {
-	border: none;
-	margin-top: 20px;
-	background-color: #fff
+  border: none;
+  margin-top: 20px;
+  background-color: #fff
 }
 
 input+p+table td {
-	border: none
+  border: none
 }
 
 td {
-	font-weight: 300
+  font-weight: 300
 }
 
 .editSubTable tr:first-child td:first-child {
-	border-right: 1px solid #f6f6f6
+  border-right: 1px solid #f6f6f6
 }
 
 .editSubTable td:first-child {
-	margin: 0 auto;
-	width: 80px
+  margin: 0 auto;
+  width: 80px
 }
 
 .editSubTable tr:first-child {
-	background-color: #f6f6f6;
-	border: 1px solid #f6f6f6;
-	padding-left: 10px
+  background-color: #f6f6f6;
+  border: 1px solid #f6f6f6;
+  padding-left: 10px
 }
 
 .editSubTable .tableheader {
-	background-color: #f6f6f6;
-	border: 1px solid #fff;
-	padding-left: 12px
+  background-color: #f6f6f6;
+  border: 1px solid #fff;
+  padding-left: 12px
 }
 
 tr td:first-child {
-	padding-left: 10px
+  padding-left: 10px
 }
 
 h1+br {
-	display: none
+  display: none
 }
 
 form[name=ReloadForm] .tableStnd {
-	display: block
+  display: block
 }
 
 form[name=ReloadForm] .tableStnd td {
-	border: none;
-	padding-left: 0
+  border: none;
+  padding-left: 0
 }
 
 pre {
-	margin: 30px 0
+  margin: 30px 0
 }
 
 #index~li,
@@ -671,106 +677,106 @@ pre {
 #index~ul li p,
 #manual p,
 dd p {
-	margin: 10px 0;
-	line-height: 1.5
+  margin: 10px 0;
+  line-height: 1.5
 }
 
 #manual ul li {
-	list-style: initial
+  list-style: initial
 }
 
 #index li ul {
-	margin-left: 30px
+  margin-left: 30px
 }
 
 #index li {
-	list-style: none!important
+  list-style: none !important
 }
 
 #index ul li {
-	list-style: none!important;
-	margin-top: 5px;
-	margin-bottom: 5px
+  list-style: none !important;
+  margin-top: 5px;
+  margin-bottom: 5px
 }
 
 #index~hr {
-	display: none
+  display: none
 }
 
 #index~h1 {
-	margin-top: 50px
+  margin-top: 50px
 }
 
 dt {
-	font-weight: 400;
-	margin: 10px 0 5px
+  font-weight: 400;
+  margin: 10px 0 5px
 }
 
 #index~ul li {
-	margin: 5px 0 5px 30px;
-	line-height: 1.5
+  margin: 5px 0 5px 30px;
+  line-height: 1.5
 }
 
 #index a:hover {
-	text-decoration: underline
+  text-decoration: underline
 }
 
 select {
-	font-size: inherit;
-	font-family: inherit;
-	font-weight: inherit;
-	padding: 6px 30px 6px 10px;
-	-webkit-box-sizing: border-box;
-	box-sizing: border-box;
-	margin: 0;
-	border: 1px solid #dfdfdf;
-	-moz-appearance: none;
-	-webkit-appearance: none;
-	appearance: none;
-	background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTQiIGhlaWdodD0iNTQiIHZpZXdCb3g9IjAgMCA5NCA1NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gPHBhdGggZD0iTTQ3IDU0TDkzLjc2NTQgMC43NUgwLjIzNDYyN0w0NyA1NFoiIGZpbGw9IiM0OTgzREQiLz4KPC9zdmc+Cg==) right 10px top 50% no-repeat, no-repeat #fff;
-	background-size: 10px auto, 100%
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  padding: 6px 30px 6px 10px;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  margin: 0;
+  border: 1px solid #dfdfdf;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iOTQiIGhlaWdodD0iNTQiIHZpZXdCb3g9IjAgMCA5NCA1NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4gPHBhdGggZD0iTTQ3IDU0TDkzLjc2NTQgMC43NUgwLjIzNDYyN0w0NyA1NFoiIGZpbGw9IiM0OTgzREQiLz4KPC9zdmc+Cg==) right 10px top 50% no-repeat, no-repeat #fff;
+  background-size: 10px auto, 100%
 }
 
 select::-ms-expand {
-	display: none
+  display: none
 }
 
 select:hover {
-	cursor: pointer
+  cursor: pointer
 }
 
 select:focus {
-	outline: 0
+  outline: 0
 }
 
 #Content>table:nth-child(5)>tbody>tr:nth-child(8)>td:nth-child(2)>table tr {
-	background-color: #fff;
-	border-top: 2px solid #dfdfdf
+  background-color: #fff;
+  border-top: 2px solid #dfdfdf
 }
 
 #Content>table:nth-child(5)>tbody>tr:nth-child(8)>td:nth-child(2)>table tr table>tbody>tr {
-	border: none
+  border: none
 }
 
 #Content>table:nth-child(5)>tbody>tr:nth-child(9)>td:nth-child(2)>table>tbody>tr {
-	background: #fff!important
+  background: #fff !important
 }
 
 #Content>table:nth-child(5)>tbody .editSubTable td,
 #Content>table:nth-child(5)>tbody .editSubTable tr {
-	border: none;
-	background: #fff!important
+  border: none;
+  background: #fff !important
 }
 
 #Content>table:nth-child(5)>tbody>tr:nth-child(8)>td:nth-child(2)>table input {
-	margin-top: 10px
+  margin-top: 10px
 }
 
 .fviewheader td,
 .fviewheader+.fviewheader~tr td {
-	border: 1px solid #dfdfdf
+  border: 1px solid #dfdfdf
 }
 
 td.histViewMis {
-	background-color: #fcc
+  background-color: #fcc
 }

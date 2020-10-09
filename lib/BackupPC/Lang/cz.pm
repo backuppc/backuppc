@@ -40,7 +40,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
 <table class="tableStnd">
-  <tr><td>Znovu nahrát konfiguraci serveru:<td><input type="button" value="Reload"
+  <tr><td>Znovu nahrát konfiguraci serveru:<td class="hasButtons"><input type="button" value="Reload"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
 </table>

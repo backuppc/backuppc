@@ -42,7 +42,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 \${h2("Керування сервером")}
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
-<table class="tableStnd">
+<table class="tableStnd tbl-Admin_Options_Page-reload">
   <tr><td>Перечитати налаштування сервера:<td class="hasButtons"><input type="button" value="Перечитати"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
@@ -112,7 +112,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("Запущені зараз завдання")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-jobs" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Хост </td>
     <td> Тип </td>
     <td> Користувач </td>
@@ -131,7 +131,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("Помилки, що потребують уваги")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-failures" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Хост </td>
     <td align="center"> Тип </td>
     <td align="center"> Користувач </td>
@@ -171,7 +171,7 @@ $Lang{BackupPC_Summary}         = <<EOF;
      (до об\'єднання та стискання).
 </ul>
 </p>
-<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_good_Backups" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Хост </td>
     <td align="center"> Користувач </td>
     <td align="center"> Коментар </td>
@@ -191,7 +191,7 @@ $Lang{BackupPC_Summary}         = <<EOF;
 <p>
 Загалом \$hostCntNone хостів без резервних копій.
 <p>
-<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_no_Backups" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Хост </td>
     <td align="center"> Користувач </td>
     <td align="center"> Коментар </td>
@@ -245,7 +245,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 <input type="hidden" name="type" value="1">
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="action" value="Archive">
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="tableStnd tbl-BackupPC_Archive-hosts" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> Host</td>
     <td align="center"> Користувач </td>
     <td align="center"> Розмір копії </td>
@@ -269,7 +269,7 @@ $Lang{BackupPC_Archive2} = <<EOF;
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="type" value="2">
 <input type="hidden" value="0" name="archive_type">
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd tbl-BackupPC_Archive-start" border cellspacing="1" cellpadding="3">
 \$paramStr
 <tr>
     <td colspan=2><input type="submit" value="Почати архівування" name="ignore"></td>
@@ -398,7 +398,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Наступні запити користувачів поставлені до черги:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-User_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Хост </td>
     <td> Action </td>
     <td> Час запиту </td>
@@ -410,7 +410,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Наступні фонові запити були поставлені до черги:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Background_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Хост </td>
     <td> Action </td>
     <td> Час запиту </td>
@@ -421,7 +421,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Наступні команди були поставлені до черги:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Command_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Хост </td>
     <td> Action </td>
     <td> Час запиту </td>
@@ -454,7 +454,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Історія лог-файлу"
 $Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("Історія лог-файлу \$hdr")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Log_File_History" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Файл </td>
     <td align="center"> Розмір </td>
     <td align="center"> Час зміни </td></tr>
@@ -466,7 +466,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Останні поштові відправлення (В зворотньому порядку)")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Recent_Email_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Отримувач </td>
     <td align="center"> Хост </td>
     <td align="center"> Час </td>
@@ -509,7 +509,7 @@ $Lang{Restore_Options_for__host_Option1} = <<EOF;
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_1" border="0">
 <tr>
     <td>Restore the files to host</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -565,7 +565,7 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
  \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (інакше архів буде містити повні шляхи).
 <br>
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_2" border="0">
 <tr>
     <td>Compression (0=off, 1=fast,...,9=best)</td>
     <td><input type="text" size="6" value="5" name="compressLevel"></td>
@@ -628,7 +628,7 @@ $Lang{Are_you_sure} = <<EOF;
 Наступні файли будуть відновлені до ресурсу \$In{shareDest}, з
 архівної копії номер \$num:
 <p>
-<table class="tableStnd" border>
+<table class="tableStnd tbl-Restore-location" border>
 <tr class="tableheader"><td>Original file/dir</td><td>Will be restored to</td></tr>
 \$fileListStr
 </table>
@@ -724,7 +724,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Натисніть на номер резервної копії для огляду та відновлення файлів з неї.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-host_Backup_Summary-backup" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Рез. Копія# </td>
     <td align="center"> тип </td>
     <td align="center"> Повний </td>
@@ -743,7 +743,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 \$restoreStr
 </p>
 \${h2("Зведена інформація про помилки Xfer")}
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-error" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Тип </td>
     <td align="center"> Журнал </td>
@@ -761,7 +761,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 що тільки-но додаються до пулу.
 Пусті файли та SMB-помилки не враховуються
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-reuse" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totals </td>
     <td align="center" colspan="2"> Existing Files </td>
@@ -785,7 +785,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Рівень стискання нових та існуючих файлів.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-compression" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Існуючі файли </td>
     <td align="center" colspan="3"> Нові файли </td>
@@ -909,15 +909,15 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="action" value="Restore">
 <br>
-<table width="100%">
+<table class="tbl-Backup_browse-contents" width="100%">
 <tr><td valign="top" width="30%">
-    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+    <table class="tbl-Backup_browse-tree" align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table class="tbl-Backup_browse-table" border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -971,7 +971,7 @@ $Lang{DirHistory_for__host} = <<EOF;
 \${h2("Історія \$dirDisplay")}
 
 <br>
-<table border cellspacing="2" cellpadding="3">
+<table class="tbl-DirHistory" border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>Backup number</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>Backup time</td>\$backupTimeStr</tr>
 \$fileStr
@@ -984,7 +984,7 @@ $Lang{Restore___num_details_for__host} = "BackupPC: Подробиці відн�
 $Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("Подробиці відновлення #\$num для \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
+<table class="tableStnd tbl-Restore___num_details-details" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> Номер </td><td class="border"> \$Restores[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Запит від </td><td class="border"> \$RestoreReq{user} </td></tr>
 <tr><td class="tableheader"> Час запиту </td><td class="border"> \$reqTime </td></tr>
@@ -1010,7 +1010,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 </p>
 \${h1("Файл/Список тек")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd tbl-Restore___num_details-fileList" border cellspacing="1" cellpadding="3" width="100%">
 <tr class="tableheader"><td>Original file/dir</td><td>Restored to</td></tr>
 \$fileListStr
 </table>
@@ -1022,7 +1022,7 @@ $Lang{Archive___num_details_for__host} = "BackupPC: Деталі архіву #\
 $Lang{Archive___num_details_for__host2} = <<EOF;
 \${h1("Archive #\$num Details for \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-details" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> Номер </td><td class="border"> \$Archives[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Запит від </td><td class="border"> \$ArchiveReq{user} </td></tr>
 <tr><td class="tableheader"> Час запиту </td><td class="border"> \$reqTime </td></tr>
@@ -1038,7 +1038,7 @@ $Lang{Archive___num_details_for__host2} = <<EOF;
 <p>
 \${h1("Host list")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-hostList" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td>Хост</td><td>Номер резерв. копії</td></tr>
 \$HostListStr
 </table>
@@ -1255,7 +1255,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Інформація про відновлення")}
 <p>
 Натисніть на номер для перегляду деталей.
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Restore_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Відновлення# </td>
     <td align="center"> Результат </td>
     <td align="right"> Дата початку</td>
@@ -1274,7 +1274,7 @@ $Lang{Archive_Summary} = <<EOF;
 \${h2("Інформація про архіви")}
 <p>
 Натисніть на номер архіву для перегляду деталей.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Архів# </td>
     <td align="center"> Результат </td>
     <td align="right"> Дата початку</td>

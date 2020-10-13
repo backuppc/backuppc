@@ -664,7 +664,7 @@ EOF
     my $url = "$MyURL?action=editConfig";
     $url     .= "&host=$host" if ( $host ne "" );
     $content .= <<EOF;
-<table border="0" cellpadding="2">
+<table class="tbl-EditConfig-tabs tbl-tab-$menu" border="0" cellpadding="2">
 <tr>$groupText</tr>
 <tr>
 <form method="post" name="editForm" action="$url">
@@ -825,7 +825,7 @@ EOF
 EOF
 
     $content .= <<EOF;
-<table border="1" cellspacing="0">
+<table class="tbl-EditConfig-settings tbl-settings-$menu" border="1" cellpadding="0">
 EOF
 
     my $doneParam = {};
@@ -1187,6 +1187,7 @@ EOF
         $content .= "</td>\n";
     }
 
+    (my $varClass = $varName) =~ s/_zZ_.+//;
     if ( $type->{type} eq "list" ) {
         $content .= "<td class=\"border\">\n";
         $varValue = []          if ( !defined($varValue) );
@@ -1213,7 +1214,7 @@ EOF
             push(@$varValue, undef);
             $In{addVar} = "";
         }
-        $content .= "<table border=\"1\" cellspacing=\"0\" class=\"editSubTable\">\n";
+        $content .= "<table border=\"1\" cellspacing=\"0\" class=\"editSubTable editSubTable-$varClass\">\n";
         my $colspan;
 
         if ( ref($type) eq "HASH" && ref($type->{child}) eq "HASH" && $type->{child}{type} eq "horizHash" ) {
@@ -1276,7 +1277,7 @@ EOF
         $content .= "</td>\n";
     } elsif ( $type->{type} eq "hash" ) {
         $content .= "<td class=\"border\">\n";
-        $content .= "<table border=\"1\" cellspacing=\"0\" class=\"editSubTable\">\n";
+        $content .= "<table border=\"1\" cellspacing=\"0\" class=\"editSubTable editSubTable-$varClass\">\n";
         $varValue = {} if ( ref($varValue) ne "HASH" );
 
         if (   !$isError

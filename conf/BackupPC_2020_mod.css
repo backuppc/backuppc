@@ -1,13 +1,3 @@
-/*
-  "2020 look" - BackupPC CSS definitions mod
-  Version 1.0, released 6 Oct 2020.
-
-  AUTHOR
-    Sergey Klochko <sergey@klochko.ru>
-
-  COPYRIGHT
-    Copyright (C) 2020 Sergey Klochko */
-
 input::-webkit-inner-spin-button,
 input::-webkit-outer-spin-button {
   -webkit-appearance: none
@@ -19,8 +9,6 @@ input[type=number] {
 
 input[type=submit] {
   -webkit-appearance: none;
-  -webkit-border-radius: 0;
-  border-radius: 0;
   cursor: pointer
 }
 
@@ -64,6 +52,15 @@ img {
   display: block
 }
 
+/*!
+  "2020 look" - BackupPC CSS definitions mod
+  Version 1.0, released 6 Oct 2020.
+
+  AUTHOR
+    Sergey Klochko <sergey@klochko.ru>
+
+  COPYRIGHT
+    Copyright (C) 2020 Sergey Klochko */
 .row {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -249,6 +246,7 @@ a {
   font-variant: inherit
 }
 
+input[type=password],
 input[type=text] {
   padding: 5px 10px;
   max-width: 500px;
@@ -256,9 +254,11 @@ input[type=text] {
   width: 100%;
   border: 1px solid #dfdfdf;
   background-color: #fff;
-  color: #333
+  color: #333;
+  font-size: inherit
 }
 
+input[type=password]:hover,
 input[type=text]:hover {
   cursor: pointer
 }
@@ -779,4 +779,23 @@ select:focus {
 
 td.histViewMis {
   background-color: #fcc
+}
+
+.editSubTable-BackupFilesExclude .editSubTable {
+  display: inline
+}
+
+.editSubTable-BackupFilesExclude .editSubTable .hasButtons {
+  display: inline;
+  padding: 10px 30px;
+  line-height: 50px
+}
+
+.editSubTable-BackupFilesExclude .editSubTable input[type=text] {
+  min-width: 377px
+}
+
+.EditConfig input[type=password],
+.EditConfig input[type=text] {
+  margin-right: 10px
 }

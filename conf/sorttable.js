@@ -84,7 +84,7 @@ function ts_resortTable(lnk,clid) {
 
     // Work out a type for the column
     if (table.rows.length <= 1) return;
-    var cell = table.rows[1].cells[SORT_COLUMN_INDEX];
+    var cell = table.rows[table.rows.length-1].cells[SORT_COLUMN_INDEX];
     var itm = ts_getInnerText(cell);
     var date_format = cell.dataset.date_format;    // Get date format from data-* attribute
 

@@ -129,7 +129,7 @@ sub action
         my $mtimeStr = $bpc->timeStamp((stat($file))[9], 1);
 
         $contentPre .= eval("qq{$Lang->{Contents_of_log_file}}");
-        $contentPre .= "<pre>";
+        $contentPre .= '<pre class="log">';
         if (   $type eq "XferErr"
             || $type eq "XferErrbad"
             || $type eq "RestoreErr"

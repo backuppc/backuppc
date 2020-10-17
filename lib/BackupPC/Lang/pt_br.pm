@@ -44,7 +44,7 @@ $Lang{Admin_Options_Page}                           = <<EOF;
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
 <table class="tableStnd">
-  <tr><td>Atualizar configurações do servidor:<td><input type="button" value="Reload"
+  <tr><td>Atualizar configurações do servidor:<td class="hasButtons"><input type="button" value="Reload"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
 </table>

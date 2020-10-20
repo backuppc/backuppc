@@ -131,6 +131,7 @@ our %ConfigMenu = (
         param => [
             {text => "CfgEdit_Title_Email_settings"},
             {name => "SendmailPath"},
+            {name => "SendmailArgs"},
             {name => "EMailNotifyMinDays"},
             {name => "EMailFromUserName"},
             {name => "EMailAdminUserName"},

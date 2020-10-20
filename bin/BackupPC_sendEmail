@@ -481,11 +481,12 @@ sub SendMail
         print $mesg;
         return;
     }
-    $from = "-f $from" if ( $from ne "" );
-    print("Sending test email using $Conf{SendmailPath} -t $from\n")
-      if ( $opts{u} ne "" );
-    if ( !open(MAIL, "|$Conf{SendmailPath} -t $from") ) {
-        print("Can't run sendmail ($Conf{SendmailPath}): $!\n");
+    my @sendmailCmd = ($Conf{SendmailPath}, "-t", @{$Conf{SendmailArgs}});
+    push (@sendmailCmd, ("-f", "$from")) if ( $from ne "" );
+    my $sendmailStr = $bpc->execCmd2ShellCmd(@sendmailCmd);
+    print("Sending test email using: $sendmailStr\n") if ( $opts{u} ne "" );
+    if ( !open(MAIL, "|$sendmailStr") ) {
+        print("Can't run sendmail ($sendmailStr): $!\n");
         return;
     }
     binmode(MAIL, ":utf8") if ( $utf8 );

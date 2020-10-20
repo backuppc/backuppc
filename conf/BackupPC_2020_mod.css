@@ -54,7 +54,7 @@ img {
 
 /*!
   "2020 look" - BackupPC CSS definitions mod
-  Version 1.0, released 6 Oct 2020.
+  Version 1.0, released 13 Oct 2020.
 
   AUTHOR
     Sergey Klochko <sergey@klochko.ru>
@@ -792,10 +792,30 @@ td.histViewMis {
 }
 
 .editSubTable-BackupFilesExclude .editSubTable input[type=text] {
-  min-width: 377px
+  min-width: 386px
 }
 
 .EditConfig input[type=password],
 .EditConfig input[type=text] {
   margin-right: 10px
+}
+
+.editSubTable-ClientNameAlias {
+  display: inline
+}
+
+.editSubTable-ClientNameAlias td:first-child,
+.editSubTable-ClientNameAlias tr:first-child {
+  border: 1px solid #fff !important;
+  background-color: #fff
+}
+
+.editSubTable-ClientNameAlias .hasButtons {
+  display: inline;
+  padding: 10px;
+  line-height: 50px
+}
+
+.editSubTable-ClientNameAlias input[type=text] {
+  min-width: 386px
 }

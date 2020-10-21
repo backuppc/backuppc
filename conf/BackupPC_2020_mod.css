@@ -636,7 +636,7 @@ td {
 
 .editSubTable td:first-child {
   margin: 0 auto;
-  width: 150px
+  width: auto
 }
 
 .editSubTable tr:first-child {

@@ -521,7 +521,7 @@ use vars qw(%ConfigMeta);
             DumpPostShareCmd          => "boolean",
             DumpPreShareCmd           => "boolean",
             UserCmdCheckStatus        => "boolean",
-            SendailArgs               => "boolean",
+            SendmailArgs              => "boolean",
             EMailNotifyMinDays        => "boolean",
             EMailFromUserName         => "boolean",
             EMailAdminSubject         => "boolean",

@@ -1912,7 +1912,7 @@ $Conf{ClientComment} = undef;
 #
 $Conf{SendmailPath} = '';
 # Extra arguments to sendmail (as array for exec not string) for example
-# $Conf{SendmailArgs} = [qw|-C /home/backuppc/.msmtprc|] 
+# $Conf{SendmailArgs} = ["-C", "/home/backuppc/.msmtprc"]
 $Conf{SendmailArgs} = [];
 
 #

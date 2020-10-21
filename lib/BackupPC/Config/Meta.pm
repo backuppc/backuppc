@@ -363,9 +363,9 @@ use vars qw(%ConfigMeta);
     ######################################################################
     SendmailPath              => {type => "execPath", undefIfEmpty => 1},
     SendmailArgs              => {
-        type => "list",
+        type    => "list",
         emptyOk => 1,
-        child => "string"
+        child   => "string"
     },
     EMailNotifyMinDays        => "float",
     EMailFromUserName         => "string",

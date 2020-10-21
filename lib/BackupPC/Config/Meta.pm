@@ -361,11 +361,11 @@ use vars qw(%ConfigMeta);
     # Email reminders, status and messages
     # (can be overridden in the per-PC config.pl)
     ######################################################################
-    SendmailPath              => {type => "execPath", undefIfEmpty => 1},
-    SendmailArgs              => {
+    SendmailPath => {type => "execPath", undefIfEmpty => 1},
+    SendmailArgs => {
         type    => "list",
         emptyOk => 1,
-        child   => "string"
+        child   => "string",
     },
     EMailNotifyMinDays        => "float",
     EMailFromUserName         => "string",

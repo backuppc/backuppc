@@ -1912,6 +1912,10 @@ $Conf{ClientComment} = undef;
 #
 $Conf{SendmailPath} = '';
 
+# Extra arguments to sendmail (as array for exec not string) for example
+# $Conf{SendmailArgs} = [qw|-C /home/backuppc/.msmtprc|] 
+$Conf{SendmailArgs} = [];
+
 #
 # Minimum period between consecutive emails to a single user.
 # This tries to keep annoying email to users to a reasonable

@@ -1911,7 +1911,6 @@ $Conf{ClientComment} = undef;
 # should not allowed to write to this file or directory.
 #
 $Conf{SendmailPath} = '';
-
 # Extra arguments to sendmail (as array for exec not string) for example
 # $Conf{SendmailArgs} = [qw|-C /home/backuppc/.msmtprc|] 
 $Conf{SendmailArgs} = [];

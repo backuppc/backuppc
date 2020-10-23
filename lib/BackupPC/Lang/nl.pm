@@ -41,7 +41,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 \${h2("Besturing van de server")}
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
-<table class="tableStnd">
+<table class="tableStnd tbl-Admin_Options_Page-reload">
   <tr><td>Herlaad de configuratie van de server:<td class="hasButtons"><input type="button" value="Herlaad"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
@@ -111,7 +111,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("Momenteel lopende jobs")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-jobs" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Machine </td>
     <td> Type </td>
     <td> Gebruiker </td>
@@ -130,7 +130,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("Opgetreden fouten die aandacht vragen")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-failures" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Machine </td>
     <td align="center"> Type </td>
     <td align="center"> Gebruiker </td>
@@ -170,7 +170,7 @@ Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
      (voor samenvoegen).
 </ul>
 </p>
-<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_good_Backups" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Machine </td>
     <td align="center"> Gebruiker </td>
     <td align="center"> Commentaar </td>
@@ -190,7 +190,7 @@ Er zijn \$hostCntGood hosts gebackupt, wat een totaal geeft van:
 <p>
 Er zijn \$hostCntNone hosts zonder backup.
 <p>
-<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_no_Backups" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Machine </td>
     <td align="center"> Gebruiker </td>
     <td align="center"> Commentaar </td>
@@ -244,7 +244,7 @@ Er zijn \$hostCntGood machines gebackupt die een totale grootte vertegenwoordige
 <input type="hidden" name="type" value="1">
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="action" value="Archive">
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="tableStnd tbl-BackupPC_Archive-hosts" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> Machine</td>
     <td align="center"> Gebruiker </td>
     <td align="center"> Backupgrootte </td>
@@ -268,7 +268,7 @@ Klaar om de volgende machines te archiveren
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="type" value="2">
 <input type="hidden" value="0" name="archive_type">
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd tbl-BackupPC_Archive-start" border cellspacing="1" cellpadding="3">
 \$paramStr
 <tr>
     <td colspan=2><input type="submit" value="Start de archivering" name="ignore"></td>
@@ -398,7 +398,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Deze aanvragen van gebruikers staan momenteel in de wachtrij:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-User_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Machine </td>
     <td> Action </td>
     <td> Aanvraagtijd </td>
@@ -410,7 +410,7 @@ Deze aanvragen van gebruikers staan momenteel in de wachtrij:
 <p>
 Deze aanvragen voor backups in de achtergrond staan momenteel in de wachtrij:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Background_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Machine </td>
     <td> Action </td>
     <td> Aanvraagtijd </td>
@@ -421,7 +421,7 @@ Deze aanvragen voor backups in de achtergrond staan momenteel in de wachtrij:
 <p>
 Deze aanvragen via opdracht staan momenteel in de wachtrij:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Command_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Machine </td>
     <td> Action </td>
     <td> Aanvraagtijd </td>
@@ -454,7 +454,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Geschiedenis Logbestand";
 $Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("Geschiedenis Logbestand \$hdr")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Log_File_History" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Bestand </td>
     <td align="center"> Grootte </td>
     <td align="center"> Laatste wijziging </td></tr>
@@ -466,7 +466,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Overzicht recente e-mail (Omgekeerde volgorde)")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Recent_Email_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Bestemming </td>
     <td align="center"> Machine </td>
     <td align="center"> Tijd </td>
@@ -509,7 +509,7 @@ overschreven worden!
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_1" border="0">
 <tr>
     <td>Zet de bestanden terug naar de pc</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -566,7 +566,7 @@ harde schijfruimte beschikken om het bestand te kunnen bevatten.
 aan \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (in het andere geval zal het archiefbestand volledige padnamen bevatten).
 <br>
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_2" border="0">
 <tr>
     <td>Compressie (0=uit, 1=snel,...,9=hoogst)</td>
     <td><input type="text" size="6" value="5" name="compressLevel"></td>
@@ -630,7 +630,7 @@ U hebt gevraagd om bestanden rechtstreeks terug te zetten op de machine \$In{hos
 De volgende bestanden zullen hersteld worden in share \$In{shareDest},
 uit backup nummer \$num:
 <p>
-<table class="tableStnd" border>
+<table class="tableStnd tbl-Restore-location" border>
 <tr class="tableheader"><td>Oorspronkelijk bestand/map</td><td>zal hersteld worden in</td></tr>
 \$fileListStr
 </table>
@@ -726,7 +726,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-host_Backup_Summary-backup" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> backup nr.</td>
     <td align="center"> Type </td>
     <td align="center"> Aangevuld </td>
@@ -745,7 +745,7 @@ Klik op het backupnummer om de inhoud te bekijken of om bestanden te herstellen.
 \$restoreStr
 </p>
 \${h2("Overzicht van fouten tijdens overdracht")}
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-error" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> backup nr. </td>
     <td align="center"> Type </td>
     <td align="center"> Bekijken </td>
@@ -763,7 +763,7 @@ Bestaande bestanden zijn bestanden die reeds aanwezig waren op de backupschijf.
 Nieuwe bestanden zijn bestanden die aan de schijf zijn toegevoegd.
 Lege bestanden en SMB-fouten worden niet geteld in de aantallen \'hergebruik\' en \'nieuw\'.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-reuse" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totalen </td>
     <td align="center" colspan="2"> Bestaande bestanden </td>
@@ -788,7 +788,7 @@ Lege bestanden en SMB-fouten worden niet geteld in de aantallen \'hergebruik\' e
 Compressie van bestanden die reeds op schijf stonden en van nieuw
 gecomprimeerde bestanden.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-compression" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Bestaande bestanden </td>
     <td align="center" colspan="3"> Nieuwe bestanden </td>
@@ -912,15 +912,15 @@ Commentaar: <input type="text" name="comment" class="inputCompact" size="60" max
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="action" value="Restore">
 <br>
-<table width="100%">
+<table class="tbl-Backup_browse-contents" width="100%">
 <tr><td valign="top" width="30%">
-    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+    <table class="tbl-Backup_browse-tree" align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table class="tbl-Backup_browse-table" border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -975,7 +975,7 @@ alle backups heen:
 \${h2("Geschiedenis van \$dirDisplay")}
 
 <br>
-<table border cellspacing="2" cellpadding="3">
+<table class="tbl-DirHistory" border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>backup nummer</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>backup moment</td>\$backupTimeStr</tr>
 \$fileStr
@@ -988,7 +988,7 @@ $Lang{Restore___num_details_for__host} = "BackupPC: Details van herstel nr. #\$n
 $Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("Details van herstel nr. #\$num van machine \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
+<table class="tableStnd tbl-Restore___num_details-details" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> Nummer </td><td class="border"> \$Restores[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Aangevraagd door </td><td class="border"> \$RestoreReq{user} </td></tr>
 <tr><td class="tableheader"> Aanvraagtijd </td><td class="border"> \$reqTime </td></tr>
@@ -1014,7 +1014,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 </p>
 \${h1("Lijst bestanden/mappen")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd tbl-Restore___num_details-fileList" border cellspacing="1" cellpadding="3" width="100%">
 <tr class="tableheader"><td>Oorspronkelijk bestand/map</td><td>hersteld naar</td></tr>
 \$fileListStr
 </table>
@@ -1026,7 +1026,7 @@ $Lang{Archive___num_details_for__host} = "BackupPC: Details van archivering nr. 
 $Lang{Archive___num_details_for__host2} = <<EOF;
 \${h1("Details van archivering nr. \$num van \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-details" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> Nummer </td><td class="border"> \$Archives[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Aangevraagd door </td><td class="border"> \$ArchiveReq{user} </td></tr>
 <tr><td class="tableheader"> Aanvraagtijd </td><td class="border"> \$reqTime </td></tr>
@@ -1042,7 +1042,7 @@ $Lang{Archive___num_details_for__host2} = <<EOF;
 <p>
 \${h1("Machinelijst")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-hostList" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td>Machine</td><td>backup nr.</td></tr>
 \$HostListStr
 </table>
@@ -1264,7 +1264,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Overzicht herstellingen")}
 <p>
 Klik op het nummer voor meer details.
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Restore_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Herstel nr.</td>
     <td align="center"> Resultaat </td>
     <td align="right"> Startdatum</td>
@@ -1283,7 +1283,7 @@ $Lang{Archive_Summary} = <<EOF;
 \${h2("Overzicht archiveringen")}
 <p>
 Klik op het archiveringsnummer voor meer details.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Archiveringsnr.</td>
     <td align="center"> Resultaat </td>
     <td align="right"> Startdatum</td>

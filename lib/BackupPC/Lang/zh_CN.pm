@@ -39,7 +39,7 @@ $Lang{Admin_Options_Page}                           = <<EOF;
 \${h2("服务器控制")}
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
-<table class="tableStnd">
+<table class="tableStnd tbl-Admin_Options_Page-reload">
   <tr><td>更新服务器配置：<td class="hasButtons"><input type="button" value="更新配置"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
@@ -106,7 +106,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("正在运行的任务")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-jobs" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> 客户机 </td>
     <td> 类型 </td>
     <td> 用户 </td>
@@ -125,7 +125,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("需要关注的错误")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-failures" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> 客户机 </td>
     <td align="center"> 类型 </td>
     <td align="center"> 用户 </td>
@@ -165,7 +165,7 @@ $Lang{BackupPC_Summary}         = <<EOF;
      （被压缩前值）。
 </ul>
 </p>
-<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_good_Backups" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> 客户机 </td>
     <td align="center"> 用户 </td>
     <td align="center"> 评论 </td>
@@ -185,7 +185,7 @@ $Lang{BackupPC_Summary}         = <<EOF;
 <p>
 有 \$hostCntNone 台客户机从未被备份过。
 <p>
-<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_no_Backups" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> 客户机 </td>
     <td align="center"> 用户 </td>
     <td align="center"> 评论 </td>
@@ -239,7 +239,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 <input type="hidden" name="type" value="1">
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="action" value="Archive">
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="tableStnd tbl-BackupPC_Archive-hosts" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> 客户机 </td>
     <td align="center"> 用户 </td>
     <td align="center"> 备份大小 </td>
@@ -263,7 +263,7 @@ $Lang{BackupPC_Archive2} = <<EOF;
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="type" value="2">
 <input type="hidden" value="0" name="archive_type">
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd tbl-BackupPC_Archive-start" border cellspacing="1" cellpadding="3">
 \$paramStr
 <tr>
     <td colspan=2><input type="submit" value="开始备档" name="ignore"></td>
@@ -392,7 +392,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 下列用户请求排在队列中：
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-User_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> 客户机 </td>
     <td> Action </td>
     <td> 请求时间 </td>
@@ -404,7 +404,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 下列后台请求排在队列中：
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Background_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> 客户机 </td>
     <td> Action </td>
     <td> 请求时间 </td>
@@ -415,7 +415,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 下列命令请求排在队列中：
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Command_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> 客户机 </td>
     <td> Action </td>
     <td> 请求时间 </td>
@@ -448,7 +448,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: 日志文件历史";
 $Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("日志文件历史 \$hdr")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Log_File_History" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 文件 </td>
     <td align="center"> 大小 </td>
     <td align="center"> 修改时间 </td></tr>
@@ -460,7 +460,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("最近电子邮件报告（最新排前）")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Recent_Email_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 收信人 </td>
     <td align="center"> 客户机 </td>
     <td align="center"> 时间 </td>
@@ -500,7 +500,7 @@ $Lang{Restore_Options_for__host_Option1} = <<EOF;
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_1" border="0">
 <tr>
     <td>恢复到客户机</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -553,7 +553,7 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
 <input type="checkbox" value="1" name="relative" checked> 备档中所有文件具有相对路径，在 \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)} 目录内
 （否则备档中文件具有完整路径）。
 <br>
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_2" border="0">
 <tr>
     <td>选择压缩比（0＝不压缩，1＝最低但速度快，...，9＝最高但速度慢）</td>
     <td><input type="text" size="6" value="5" name="compressLevel"></td>
@@ -611,7 +611,7 @@ $Lang{Are_you_sure} = <<EOF;
 你即将开始恢复数据直接到客户机 \$In{hostDest} 上。
 储存在备份号 \$num 中的下列文件将被恢复到卷 \$In{shareDest} 内：
 <p>
-<table class="tableStnd" border>
+<table class="tableStnd tbl-Restore-location" border>
 <tr class="tableheader"><td>原始文件／目录</td><td>将被恢复到</td></tr>
 \$fileListStr
 </table>
@@ -707,7 +707,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 点击备份序列号浏览和恢复文件。
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-host_Backup_Summary-backup" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> 备份序列号＃ </td>
     <td align="center"> 类型 </td>
     <td align="center"> 完整 </td>
@@ -726,7 +726,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 \$restoreStr
 </p>
 \${h2("传输错误报告")}
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-error" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 备份序列号＃ </td>
     <td align="center"> 类型 </td>
     <td align="center"> 查看 </td>
@@ -743,7 +743,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 "原有文件"是指原先已存在备份池中的文件；"新增文件"是指备份新写入池中的文件。
 空文件不被统计在内。
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-reuse" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> 合计 </td>
     <td align="center" colspan="2"> 原有文件 </td>
@@ -767,7 +767,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 备份池中原有文件和新增文件的压缩性能报告。
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-compression" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> 原有文件 </td>
     <td align="center" colspan="3"> 新增文件 </td>
@@ -891,15 +891,15 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="action" value="Restore">
 <br>
-<table width="100%">
+<table class="tbl-Backup_browse-contents" width="100%">
 <tr><td valign="top" width="30%">
-    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+    <table class="tbl-Backup_browse-tree" align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table class="tbl-Backup_browse-table" border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -948,7 +948,7 @@ $Lang{DirHistory_for__host} = <<EOF;
 \${h2("\$dirDisplay 的历史")}
 
 <br>
-<table border cellspacing="2" cellpadding="3">
+<table class="tbl-DirHistory" border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>备份序列号</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>备份时间</td>\$backupTimeStr</tr>
 \$fileStr
@@ -961,7 +961,7 @@ $Lang{Restore___num_details_for__host} = "BackupPC: 客户机 \$host 恢复 #\$n
 $Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("客户机 \$host 恢复 #\$num 详情")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
+<table class="tableStnd tbl-Restore___num_details-details" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> 恢复序列号 </td><td class="border"> \$Restores[\$i]{num} </td></tr>
 <tr><td class="tableheader"> 请求方 </td><td class="border"> \$RestoreReq{user} </td></tr>
 <tr><td class="tableheader"> 请求时间 </td><td class="border"> \$reqTime </td></tr>
@@ -987,7 +987,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 </p>
 \${h1("文件／目录列表")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd tbl-Restore___num_details-fileList" border cellspacing="1" cellpadding="3" width="100%">
 <tr class="tableheader"><td>原始文件／目录</td><td>恢复至</td></tr>
 \$fileListStr
 </table>
@@ -999,7 +999,7 @@ $Lang{Archive___num_details_for__host} = "BackupPC: 客户机 \$host 备档 #\$n
 $Lang{Archive___num_details_for__host2} = <<EOF;
 \${h1("客户机 \$host 备档 #\$num 详情")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-details" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> 备档序列号 </td><td class="border"> \$Archives[\$i]{num} </td></tr>
 <tr><td class="tableheader"> 请求方 </td><td class="border"> \$ArchiveReq{user} </td></tr>
 <tr><td class="tableheader"> 请求方 </td><td class="border"> \$reqTime </td></tr>
@@ -1015,7 +1015,7 @@ $Lang{Archive___num_details_for__host2} = <<EOF;
 <p>
 \${h1("客户机列表")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-hostList" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td>客户机</td><td>备份序列号</td></tr>
 \$HostListStr
 </table>
@@ -1215,7 +1215,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("恢复报告")}
 <p>
 点击恢复序列号获取详情。
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Restore_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 恢复序列号 </td>
     <td align="center"> 结果 </td>
     <td align="right"> 开始时间 </td>
@@ -1234,7 +1234,7 @@ $Lang{Archive_Summary} = <<EOF;
 \${h2("备档报告")}
 <p>
 点击备档序列号获取详情。
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 备档序列号 </td>
     <td align="center"> 结果 </td>
     <td align="right"> 开始时间 </td>

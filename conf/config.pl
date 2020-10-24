@@ -2358,6 +2358,7 @@ $Conf{CgiUserConfigEdit} = {
     RsyncRestoreArgsExtra     => 1,
     RsyncShareName            => 1,
     RsyncSshArgs              => 1,
+    SendmailArgs              => 0,
     SmbClientFullCmd          => 0,
     SmbClientIncrCmd          => 0,
     SmbClientPath             => 0,

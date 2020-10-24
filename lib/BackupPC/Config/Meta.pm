@@ -361,7 +361,12 @@ use vars qw(%ConfigMeta);
     # Email reminders, status and messages
     # (can be overridden in the per-PC config.pl)
     ######################################################################
-    SendmailPath              => {type => "execPath", undefIfEmpty => 1},
+    SendmailPath => {type => "execPath", undefIfEmpty => 1},
+    SendmailArgs => {
+        type    => "list",
+        emptyOk => 1,
+        child   => "string",
+    },
     EMailNotifyMinDays        => "float",
     EMailFromUserName         => "string",
     EMailAdminUserName        => "string",
@@ -516,6 +521,7 @@ use vars qw(%ConfigMeta);
             DumpPostShareCmd          => "boolean",
             DumpPreShareCmd           => "boolean",
             UserCmdCheckStatus        => "boolean",
+            SendmailArgs              => "boolean",
             EMailNotifyMinDays        => "boolean",
             EMailFromUserName         => "boolean",
             EMailAdminSubject         => "boolean",

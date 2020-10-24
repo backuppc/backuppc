@@ -1620,6 +1620,9 @@ to __BACKUPPCUSER__'s cron.
 The -t option to BackupPC_sendEmail causes it to print the email
 message instead of invoking sendmail to deliver the message.
 
+Other options can be added by setting SendMailArgs in __CONFDIR__/config.pl
+or on the email tab of the main configuration editor.
+
 =head2 Step 9: CGI interface
 
 The CGI interface script, BackupPC_Admin, is a powerful and flexible

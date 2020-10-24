@@ -1911,6 +1911,9 @@ $Conf{ClientComment} = undef;
 # should not allowed to write to this file or directory.
 #
 $Conf{SendmailPath} = '';
+# Extra arguments to sendmail (as array for exec not string) for example
+# $Conf{SendmailArgs} = ["-C", "/home/backuppc/.msmtprc"]
+$Conf{SendmailArgs} = [];
 
 #
 # Minimum period between consecutive emails to a single user.
@@ -2355,6 +2358,7 @@ $Conf{CgiUserConfigEdit} = {
     RsyncRestoreArgsExtra     => 1,
     RsyncShareName            => 1,
     RsyncSshArgs              => 1,
+    SendmailArgs              => 0,
     SmbClientFullCmd          => 0,
     SmbClientIncrCmd          => 0,
     SmbClientPath             => 0,

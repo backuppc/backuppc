@@ -39,7 +39,7 @@ $Lang{Admin_Options_Page}                           = <<EOF;
 \${h2("サーバ管理")}
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
-<table class="tableStnd">
+<table class="tableStnd tbl-Admin_Options_Page-reload">
   <tr><td>サーバ設定の再読込:<td class="hasButtons"><input type="button" value="再読込"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
@@ -109,7 +109,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("現在実行中のジョブ")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-jobs" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> ホスト </td>
     <td> 種別 </td>
     <td> ユーザ </td>
@@ -128,7 +128,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("注意する必要がある失敗")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-failures" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> ホスト </td>
     <td align="center"> 種別 </td>
     <td align="center"> ユーザ </td>
@@ -168,7 +168,7 @@ $Lang{BackupPC_Summary}         = <<EOF;
      (以前のプーリングと圧縮)
 </ul>
 </p>
-<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_good_Backups" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> ホスト </td>
     <td align="center"> ユーザ </td>
     <td align="center"> コメント </td>
@@ -188,7 +188,7 @@ $Lang{BackupPC_Summary}         = <<EOF;
 <p>
 \$hostCntNone 個のホストのバックアップが存在しません。
 <p>
-<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_no_Backups" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> ホスト </td>
     <td align="center"> ユーザ </td>
     <td align="center"> コメント </td>
@@ -241,7 +241,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 <input type="hidden" name="type" value="1">
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="action" value="Archive">
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="tableStnd tbl-BackupPC_Archive-hosts" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> ホスト </td>
     <td align="center"> ユーザ </td>
     <td align="center"> バックアップサイズ </td>
@@ -265,7 +265,7 @@ $Lang{BackupPC_Archive2} = <<EOF;
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="type" value="2">
 <input type="hidden" value="0" name="archive_type">
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd tbl-BackupPC_Archive-start" border cellspacing="1" cellpadding="3">
 \$paramStr
 <tr>
     <td colspan=2><input type="submit" value="アーカイブ開始" name="ignore"></td>
@@ -392,7 +392,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 現在キューイングされているユーザ要求は次のとおりです。
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-User_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> ホスト </td>
     <td> Action </td>
     <td> 要求時間 </td>
@@ -403,7 +403,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 \${h2("バックグラウンドキューサマリ")}
 <p>
 現在キューイングされているバックグラウンド要求は次のとおりです。</p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Background_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> ホスト </td>
     <td> Action </td>
     <td> 要求時間 </td>
@@ -414,7 +414,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 現在キューイングされているコマンド要求は次のとおりです。
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Command_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> ホスト </td>
     <td> Action </td>
     <td> 要求時間 </td>
@@ -447,7 +447,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: ログファイルの履歴";
 $Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("ログファイル履歴 \$hdr")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Log_File_History" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> ファイル </td>
     <td align="center"> サイズ </td>
     <td align="center"> 更新時間 </td></tr>
@@ -459,7 +459,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("最近のメールサマリ(日時降順)")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Recent_Email_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> 受信者 </td>
     <td align="center"> ホスト </td>
     <td align="center"> 日時 </td>
@@ -499,7 +499,7 @@ $Lang{Restore_Options_for__host_Option1} = <<EOF;
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_1" border="0">
 <tr>
     <td>ホストへファイルをリストア</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -555,7 +555,7 @@ space to store it.
 to \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (otherwise archive will contain full paths).
 <br>
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_2" border="0">
 <tr>
     <td>圧縮 (0=なし, 1=高速,...,9=最高)</td>
     <td><input type="text" size="6" value="5" name="compressLevel"></td>
@@ -617,7 +617,7 @@ You are about to start a restore directly to the machine \$In{hostDest}.
 The following files will be restored to share \$In{shareDest}, from
 バックアップ番号 \$num:
 <p>
-<table class="tableStnd" border>
+<table class="tableStnd tbl-Restore-location" border>
 <tr class="tableheader"><td>元のファイル/ディレクトリ</td><td>次の場所にリストアされます。</td></tr>
 \$fileListStr
 </table>
@@ -713,7 +713,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 閲覧・バックアップファイルのリストアを行いたいバックアップ番号をクリックしてください。
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-host_Backup_Summary-backup" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> バックアップ番号 </td>
     <td align="center"> 種別 </td>
     <td align="center"> フィルド </td>
@@ -732,7 +732,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 \$restoreStr
 </p>
 \${h2("転送エラーサマリ")}
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-error" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> バックアップ番号 </td>
     <td align="center"> 種別 </td>
     <td align="center"> ビュー </td>
@@ -749,7 +749,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 存在するファイルはプール内にすでにあります。次の新しいファイルはプールへ追加されます。
 空ファイルとSMBエラーは再利用にはカウントされません。
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-reuse" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> トータル </td>
     <td align="center" colspan="2"> 既存ファイル </td>
@@ -773,7 +773,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 すでにプールに入っているものと新しく圧縮されたファイルの圧縮パフォーマンス
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-compression" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> 既存ファイル </td>
     <td align="center" colspan="3"> 新ファイル </td>
@@ -896,15 +896,15 @@ $Lang{Backup_browse_for__host} = <<EOF;
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="action" value="Restore">
 <br>
-<table width="100%">
+<table class="tbl-Backup_browse-contents" width="100%">
 <tr><td valign="top" width="30%">
-    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+    <table class="tbl-Backup_browse-tree" align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table class="tbl-Backup_browse-table" border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -955,7 +955,7 @@ $Lang{DirHistory_for__host} = <<EOF;
 \${h2("\$dirDisplay の履歴")}
 
 <br>
-<table border cellspacing="2" cellpadding="3">
+<table class="tbl-DirHistory" border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>バックアップ番号</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>バックアップ日時</td>\$backupTimeStr</tr>
 \$fileStr
@@ -968,7 +968,7 @@ $Lang{Restore___num_details_for__host} = "BackupPC: リストア #\$num 詳細 \
 $Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("リストア #\$num 詳細 \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
+<table class="tableStnd tbl-Restore___num_details-details" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> 番号 </td><td class="border"> \$Restores[\$i]{num} </td></tr>
 <tr><td class="tableheader"> 要求元 </td><td class="border"> \$RestoreReq{user} </td></tr>
 <tr><td class="tableheader"> 要求時間 </td><td class="border"> \$reqTime </td></tr>
@@ -994,7 +994,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 </p>
 \${h1("ファイル/ディレクトリ一覧")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd tbl-Restore___num_details-fileList" border cellspacing="1" cellpadding="3" width="100%">
 <tr class="tableheader"><td>元のディレクトリ/ファイル</td><td>リストア</td></tr>
 \$fileListStr
 </table>
@@ -1006,7 +1006,7 @@ $Lang{Archive___num_details_for__host} = "BackupPC: アーカイブ #\$num 詳�
 $Lang{Archive___num_details_for__host2} = <<EOF;
 \${h1("アーカイブ #\$num 詳細 \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-details" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> 番号 </td><td class="border"> \$Archives[\$i]{num} </td></tr>
 <tr><td class="tableheader"> 要求元 </td><td class="border"> \$ArchiveReq{user} </td></tr>
 <tr><td class="tableheader"> 要求時間 </td><td class="border"> \$reqTime </td></tr>
@@ -1022,7 +1022,7 @@ $Lang{Archive___num_details_for__host2} = <<EOF;
 <p>
 \${h1("ホスト一覧")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-hostList" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td>ホスト</td><td>バックアップ番号</td></tr>
 \$HostListStr
 </table>
@@ -1233,7 +1233,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("リストアサマリ")}
 <p>
 詳細を閲覧したいリストア番号をクリックしてください。
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Restore_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> リストア番号 </td>
     <td align="center"> 結果 </td>
     <td align="right"> 開始日時</td>
@@ -1252,7 +1252,7 @@ $Lang{Archive_Summary} = <<EOF;
 \${h2("アーカイブサマリ")}
 <p>
 アーカイブ番号をクリックすると詳細が確認できます。
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> アーカイブ番号 </td>
     <td align="center"> 結果 </td>
     <td align="right"> 開始日時</td>

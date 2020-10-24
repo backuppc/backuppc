@@ -43,7 +43,7 @@ $Lang{Admin_Options_Page}                           = <<EOF;
 \${h2("Controle do Servidor")}
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
-<table class="tableStnd">
+<table class="tableStnd tbl-Admin_Options_Page-reload">
   <tr><td>Atualizar configurações do servidor:<td class="hasButtons"><input type="button" value="Reload"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
@@ -113,7 +113,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("Trabalhos em Execução")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-jobs" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Host </td>
     <td> Tipo </td>
     <td> Usuário </td>
@@ -132,7 +132,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("Falhas que Precisam de Atenção")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-failures" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Host </td>
     <td align="center"> Tipo </td>
     <td align="center"> Usuário </td>
@@ -172,7 +172,7 @@ Existem \$hostCntGood hosts com backup, de um total de :
      (antes de agrupar e comprimir).
 </ul>
 </p>
-<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_good_Backups" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Usuario </td>
     <td align="center"> Comente </td>
@@ -192,7 +192,7 @@ Existem \$hostCntGood hosts com backup, de um total de :
 <p>
 Existem \$hostCntNone hosts sem backups.
 <p>
-<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_no_Backups" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Usuario </td>
     <td align="center"> Comente </td>
@@ -246,7 +246,7 @@ Existem \$hostCntGood hosts que possuem backup com tamanho total de \${fullSizeT
 <input type="hidden" name="type" value="1">
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="action" value="Archive">
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="tableStnd tbl-BackupPC_Archive-hosts" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> Host</td>
     <td align="center"> Usuário </td>
     <td align="center"> Tamanho Backup </td>
@@ -270,7 +270,7 @@ Sobre o Backup dos seguintes Hosts
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="type" value="2">
 <input type="hidden" value="0" name="archive_type">
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd tbl-BackupPC_Archive-start" border cellspacing="1" cellpadding="3">
 \$paramStr
 <tr>
     <td colspan=2><input type="submit" value="Iniciar Archive" name="ignore"></td>
@@ -399,7 +399,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 As seguintes solicitações de usuários estão atualmente em fila:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-User_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Action </td>
     <td> Hora Sol. </td>
@@ -411,7 +411,7 @@ As seguintes solicitações de usuários estão atualmente em fila:
 <p>
 As seguintes solicitações em segundo plano estão atualmente em fila:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Background_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Action </td>
     <td> Hora Sol. </td>
@@ -422,7 +422,7 @@ As seguintes solicitações em segundo plano estão atualmente em fila:
 <p>
 Os seguintes comandos estão atualmente em fila:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Command_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Action </td>
     <td> Hora Sol. </td>
@@ -455,7 +455,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Histórico dos Logs de Registro";
 $Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("Histórico do Log de Registro \$hdr")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Log_File_History" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> File </td>
     <td align="center"> Tamanho </td>
     <td align="center"> Hora Modificação </td></tr>
@@ -467,7 +467,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Resumo de Emails Recentes (Ordem cronológica invertida)")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Recent_Email_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Destinatário </td>
     <td align="center"> Host </td>
     <td align="center"> Hora </td>
@@ -510,7 +510,7 @@ selecionado será sobrescrito!
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_1" border="0">
 <tr>
     <td>Restaurar os arquivos no host</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -567,7 +567,7 @@ local para armazená-lo.
 a \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (caso contrário o arquivo conterá os caminhos completos).
 <br>
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_2" border="0">
 <tr>
     <td>Compressão (0=desativada, 1=rápida,...,9=máxima)</td>
     <td><input type="text" size="6" value="5" name="compressLevel"></td>
@@ -631,7 +631,7 @@ Está prestes a començar uma restauração diretamente na máquina \$In{hostDes
 Os seguintes arquivos serão restaurados na unidade \$In{shareDest}, a partir
 do Backup número \$num:
 <p>
-<table class="tableStnd" border>
+<table class="tableStnd tbl-Restore-location" border>
 <tr class="tableheader"><td>Arquivo/Dir Original </td><td>Será restaurado em</td></tr>
 \$fileListStr
 </table>
@@ -727,7 +727,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Clique no número do Backup para revisar e restaurar arquivos.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-host_Backup_Summary-backup" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Cópia Nº </td>
     <td align="center"> Tipo </td>
     <td align="center"> Completo </td>
@@ -746,7 +746,7 @@ Clique no número do Backup para revisar e restaurar arquivos.
 \$restoreStr
 </p>
 \${h2("Resumo dos Erros de Transferência")}
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-error" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Copia Nº </td>
     <td align="center"> Tipo </td>
     <td align="center"> Ver </td>
@@ -765,7 +765,7 @@ aqueles que serão adicionados ao lote.
 Os arquivos vazios e os erros de SMB não contam nos valores de reutilizados
 nem nos de novos.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-reuse" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Totais </td>
     <td align="center" colspan="2"> Arquivos Existentes </td>
@@ -790,7 +790,7 @@ nem nos de novos.
 Performance de compresão para os arquivos já existentes no lote e nos
 arquivos novos comprimidos.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-compression" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Arquivos Existentes </td>
     <td align="center" colspan="3"> Arquivos Novos </td>
@@ -914,15 +914,15 @@ Comente: <input type="text" name="comment" class="inputCompact" size="60" maxlen
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="action" value="Restore">
 <br>
-<table width="100%">
+<table class="tbl-Backup_browse-contents" width="100%">
 <tr><td valign="top" width="30%">
-    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+    <table class="tbl-Backup_browse-tree" align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table class="tbl-Backup_browse-table" border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -975,7 +975,7 @@ Este quadro mostra cada versão única disponível nos diversos backups:
 \${h2("Histórico de \$dirDisplay")}
 
 <br>
-<table border cellspacing="2" cellpadding="3">
+<table class="tbl-DirHistory" border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>Backup numero</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>Backup time</td>\$backupTimeStr</tr>
 \$fileStr
@@ -988,7 +988,7 @@ $Lang{Restore___num_details_for__host} = "BackupPC: Detalhes da restauração N�
 $Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("Detalhes da restauração Nº\$num de \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
+<table class="tableStnd tbl-Restore___num_details-details" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> Número </td><td class="border"> \$Restores[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Solicitado por </td><td class="border"> \$RestoreReq{user} </td></tr>
 <tr><td class="tableheader"> Hora da Solicitação </td><td class="border"> \$reqTime </td></tr>
@@ -1014,7 +1014,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 </p>
 \${h1("Lista de Arquivos/Diretórios")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd tbl-Restore___num_details-fileList" border cellspacing="1" cellpadding="3" width="100%">
 <tr class="tableheader"><td>Dir/arquivo original</td><td>Restaurado a</td></tr>
 \$fileListStr
 </table>
@@ -1026,7 +1026,7 @@ $Lang{Archive___num_details_for__host} = "BackupPC: Archive #\$num Detalhes de \
 $Lang{Archive___num_details_for__host2} = <<EOF;
 \${h1("Archive #\$num Detalhes de \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-details" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> Número </td><td class="border"> \$Archives[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Solicitado por </td><td class="border"> \$ArchiveReq{user} </td></tr>
 <tr><td class="tableheader"> Hora da solicitação </td><td class="border"> \$reqTime </td></tr>
@@ -1042,7 +1042,7 @@ $Lang{Archive___num_details_for__host2} = <<EOF;
 <p>
 \${h1("Host list")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-hostList" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td>Host</td><td>Backup número</td></tr>
 \$HostListStr
 </table>
@@ -1257,7 +1257,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Resumo da Restauração")}
 <p>
 Clique no número da restauração para ver seus detalhes.
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Restore_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Restauração Nº </td>
     <td align="center"> Resultado </td>
     <td align="right"> Data Inicio</td>
@@ -1276,7 +1276,7 @@ $Lang{Archive_Summary} = <<EOF;
 \${h2("Archive Summary")}
 <p>
 Clique no número do arquivo para mais detalhes.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Archive# </td>
     <td align="center"> Resultado </td>
     <td align="right"> Hora início</td>

@@ -39,7 +39,7 @@ $Lang{Admin_Options_Page} = <<EOF;
 \${h2("Kontrola Serveru")}
 <form name="ReloadForm" action="\$MyURL" method="get">
 <input type="hidden" name="action" value="">
-<table class="tableStnd">
+<table class="tableStnd tbl-Admin_Options_Page-reload">
   <tr><td>Znovu nahrát konfiguraci serveru:<td class="hasButtons"><input type="button" value="Reload"
      onClick="document.ReloadForm.action.value='Reload';
               document.ReloadForm.submit();">
@@ -109,7 +109,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <p>
 \${h2("Probíhající úlohy")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-jobs" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td> Host </td>
     <td> Typ </td>
     <td> Uživatel </td>
@@ -128,7 +128,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 
 \${h2("Selhání, která vyžadují pozornost")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-BackupPC_Server_Status-failures" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Host </td>
     <td align="center"> Typ </td>
     <td align="center"> Uživatel </td>
@@ -168,7 +168,7 @@ $Lang{BackupPC_Summary}         = <<EOF;
      (před kompresí).
 </ul>
 </p>
-<table class="sortable" id="host_summary_backups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_good_Backups" id="host_summary_backups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Uživatel </td>
     <td align="center"> Poznámka </td>
@@ -188,7 +188,7 @@ $Lang{BackupPC_Summary}         = <<EOF;
 <p>
 \$hostCntNone hostů s žádnými zálohani.
 <p>
-<table class="sortable" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
+<table class="sortable tbl-BackupPC_Summary-Hosts_with_no_Backups" id="host_summary_nobackups" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td> Host </td>
     <td align="center"> Uživatel </td>
     <td align="center"> Poznámka </td>
@@ -242,7 +242,7 @@ $Lang{BackupPC_Archive} = <<EOF;
 <input type="hidden" name="type" value="1">
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="action" value="Archive">
-<table class="tableStnd" border cellpadding="3" cellspacing="1">
+<table class="tableStnd tbl-BackupPC_Archive-hosts" border cellpadding="3" cellspacing="1">
 <tr class="tableheader"><td align=center> Host</td>
     <td align="center"> Uživatel </td>
     <td align="center"> Velikost zálohy </td>
@@ -266,7 +266,7 @@ Nasledující hosté se chystají k archivaci
 <input type="hidden" name="host" value="\${EscHTML(\$archHost)}">
 <input type="hidden" name="type" value="2">
 <input type="hidden" value="0" name="archive_type">
-<table class="tableStnd" border cellspacing="1" cellpadding="3">
+<table class="tableStnd tbl-BackupPC_Archive-start" border cellspacing="1" cellpadding="3">
 \$paramStr
 <tr>
     <td colspan=2><input type="submit" value="Start the Archive" name="ignore"></td>
@@ -395,7 +395,7 @@ $Lang{Backup_Queue_Summary} = <<EOF;
 <p>
 Následující uživatelé jsou momentálně ve frontě:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-User_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Action </td>
     <td> Čas do </td>
@@ -407,7 +407,7 @@ Následující uživatelé jsou momentálně ve frontě:
 <p>
 Následující žádosti v pozadí jsou momentálně ve frontě:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Background_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Action </td>
     <td> Čas do </td>
@@ -418,7 +418,7 @@ Následující žádosti v pozadí jsou momentálně ve frontě:
 <p>
 Následující příkazy jsou momentálně ve frontě:
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Command_Queue_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td> Host </td>
     <td> Action </td>
     <td> Čas do </td>
@@ -451,7 +451,7 @@ $Lang{BackupPC__Log_File_History} = "BackupPC: Historie Log Souboru";
 $Lang{Log_File_History__hdr}      = <<EOF;
 \${h1("Historie Log Souboru \$hdr")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Log_File_History" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Soubor </td>
     <td align="center"> Velikost </td>
     <td align="center"> Čas modifikace </td></tr>
@@ -463,7 +463,7 @@ EOF
 $Lang{Recent_Email_Summary} = <<EOF;
 \${h1("Přehled nedávných emailů (Řazeno zpětně)")}
 <p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Recent_Email_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Příjemce </td>
     <td align="center"> Odesílatel </td>
     <td align="center"> Čas </td>
@@ -506,7 +506,7 @@ které máte vybrány bude smazán!
 <input type="hidden" name="type" value="3">
 \$hiddenStr
 <input type="hidden" value="\$In{action}" name="action">
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_1" border="0">
 <tr>
     <td>Obnovit souboru do hosta</td>
     <td><!--<input type="text" size="40" value="\${EscHTML(\$host)}"
@@ -562,7 +562,7 @@ minuty, a budete potřebovat dostatek místa na lokálním disku.
 k \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 (jinak bude archiv obsahovat plnou cestu).
 <br>
-<table class="tableStnd" border="0">
+<table class="tableStnd tbl-Restore_Option_2" border="0">
 <tr>
     <td>Komprese (0=off, 1=rychlá,...,9=nejlepşí)</td>
     <td><input type="text" size="6" value="5" name="compressLevel"></td>
@@ -625,7 +625,7 @@ Chystáte se zahájit obnovu přímo do počítače \$In{hostDest}.
 Následující soubory budou obnoveny do části \$In{shareDest}, ze
 zálohy číslo \$num:
 <p>
-<table class="tableStnd" border>
+<table class="tableStnd tbl-Restore-location" border>
 <tr class="tableheader"><td>Originální soubor/adresář</td><td>Bude obnoven do</td></tr>
 \$fileListStr
 </table>
@@ -721,7 +721,7 @@ $Lang{Host__host_Backup_Summary2} = <<EOF;
 <p>
 Klikněte na číslo zálohy pro prohlížení a obnovení zálohy.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3">
+<table class="tableStnd sortable tbl-host_Backup_Summary-backup" border cellspacing="1" cellpadding="3">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Vyplněno </td>
@@ -740,7 +740,7 @@ Klikněte na číslo zálohy pro prohlížení a obnovení zálohy.
 \$restoreStr
 </p>
 \${h2("Přehled Xfer chyb")}
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-error" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Backup# </td>
     <td align="center"> Typ </td>
     <td align="center"> Pohled </td>
@@ -758,7 +758,7 @@ Existující soubory jsou ty, které jsou již v úložişti; nové jsou přidan
 do úložiştě.
 Prázné soubory a SMB chyby nejsou počítány.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-reuse" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="2" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Celkově </td>
     <td align="center" colspan="2"> Existující soubory </td>
@@ -783,7 +783,7 @@ Prázné soubory a SMB chyby nejsou počítány.
 Výkon komprese pro soubory, které jsou již v úložişti a pro nově
 zkomprimované soubory.
 </p>
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-host_Backup_Summary-compression" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td colspan="3" bgcolor="#ffffff"></td>
     <td align="center" colspan="3"> Existující soubory </td>
     <td align="center" colspan="3"> Nové soubory </td>
@@ -907,15 +907,15 @@ Komentář: <input type="text" name="comment" class="inputCompact" size="60" max
 <input type="hidden" name="fcbMax" value="\$checkBoxCnt">
 <input type="hidden" name="action" value="Restore">
 <br>
-<table width="100%">
+<table class="tbl-Backup_browse-contents" width="100%">
 <tr><td valign="top" width="30%">
-    <table align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
+    <table class="tbl-Backup_browse-tree" align="left" border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff">
     \$dirStr
     </table>
 </td><td width="3%">
 </td><td valign="top">
     <br>
-        <table border width="100%" align="left" cellpadding="3" cellspacing="1">
+        <table class="tbl-Backup_browse-table" border width="100%" align="left" cellpadding="3" cellspacing="1">
         \$fileHeader
         \$topCheckAll
         \$fileStr
@@ -969,7 +969,7 @@ ze vşech záloh:
 \${h2("Historie \$dirDisplay")}
 
 <br>
-<table border cellspacing="2" cellpadding="3">
+<table class="tbl-DirHistory" border cellspacing="2" cellpadding="3">
 <tr class="fviewheader"><td>Číslo zálohy</td>\$backupNumStr</tr>
 <tr class="fviewheader"><td>Čas zálohy</td>\$backupTimeStr</tr>
 \$fileStr
@@ -982,7 +982,7 @@ $Lang{Restore___num_details_for__host} = "BackupPC: Obnovit #\$num detailů pro 
 $Lang{Restore___num_details_for__host2} = <<EOF;
 \${h1("Obnovit #\$num Detailů pro \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="90%">
+<table class="tableStnd tbl-Restore___num_details-details" border cellspacing="1" cellpadding="3" width="90%">
 <tr><td class="tableheader"> Číslo </td><td class="border"> \$Restores[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Vyžádal </td><td class="border"> \$RestoreReq{user} </td></tr>
 <tr><td class="tableheader"> Čas vyžádání </td><td class="border"> \$reqTime </td></tr>
@@ -1008,7 +1008,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 </p>
 \${h1("Seznam souborů/adresářů")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="100%">
+<table class="tableStnd tbl-Restore___num_details-fileList" border cellspacing="1" cellpadding="3" width="100%">
 <tr class="tableheader"><td>Originální soubor/adresář</td><td>Obnoven do</td></tr>
 \$fileListStr
 </table>
@@ -1020,7 +1020,7 @@ $Lang{Archive___num_details_for__host} = "BackupPC: Archivovat #\$num detailů p
 $Lang{Archive___num_details_for__host2} = <<EOF;
 \${h1("Archivovat #\$num Detailů pro \$host")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-details" border cellspacing="1" cellpadding="3" width="80%">
 <tr><td class="tableheader"> Číslo </td><td class="border"> \$Archives[\$i]{num} </td></tr>
 <tr><td class="tableheader"> Vyžádal </td><td class="border"> \$ArchiveReq{user} </td></tr>
 <tr><td class="tableheader"> Čas vyžádání </td><td class="border"> \$reqTime </td></tr>
@@ -1036,7 +1036,7 @@ $Lang{Archive___num_details_for__host2} = <<EOF;
 <p>
 \${h1("Seznam hostů")}
 <p>
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive___num_details-hostList" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td>Host</td><td>Číslo kopie</td></tr>
 \$HostListStr
 </table>
@@ -1250,7 +1250,7 @@ $Lang{Restore_Summary} = <<EOF;
 \${h2("Obnovit souhrn")}
 <p>
 Klikni na obnovení pro více detailů.
-<table class="tableStnd sortable" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd sortable tbl-Restore_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Obnovení # </td>
     <td align="center"> Výsledek </td>
     <td align="right"> Datum spuştení</td>
@@ -1269,7 +1269,7 @@ $Lang{Archive_Summary} = <<EOF;
 \${h2("Souhrn archivů")}
 <p>
 Klikni na číslo archivu pro více detailů.
-<table class="tableStnd" border cellspacing="1" cellpadding="3" width="80%">
+<table class="tableStnd tbl-Archive_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Archiv# </td>
     <td align="center"> Výsledek </td>
     <td align="right"> Datum spuştení</td>

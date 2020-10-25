@@ -573,7 +573,8 @@ table .editTabSel {
   cursor: pointer;
   border-radius: 10px 10px 0 0;
   border: 1px solid #fff;
-  padding-left: 10px
+  padding-left: 10px;
+  padding-right: 10px
 }
 
 table .editTabNoSel:last-child,
@@ -766,10 +767,6 @@ select:focus {
 #Content>table:nth-child(5)>tbody .editSubTable tr {
   border: none;
   background: #fff !important
-}
-
-#Content>table:nth-child(5)>tbody>tr:nth-child(8)>td:nth-child(2)>table input {
-  margin-top: 10px
 }
 
 .fviewheader td,

@@ -113,10 +113,12 @@ sub action
     # Host metrics
     #
     foreach my $host ( GetUserHosts(1) ) {
-        my($fullAge, $fullCount, $fullDuration, $fullRate, $fullSize, $incrAge, $incrCount, $incrDuration);
+        my($fullCount, $fullDuration, $fullRate, $fullSize);
+        my($incrCount, $incrDuration, $incrRate, $incrSize);
+        my($lastFullBackup, $lastIncrBackup);
 
         $fullCount = $incrCount = 0;
-        $fullAge   = $incrAge   = $fullDuration = $incrDuration = -1;
+        $$lastFullBackup->{StartTime} = $$lastIncrBackup->{StartTime} = -1;
 
         my @Backups = $bpc->BackupInfoRead($host);
         $bpc->ConfigRead($host);
@@ -126,45 +128,59 @@ sub action
         next if ( !$Privileged && !CheckPermission($host) );
 
         for ( my $i = 0 ; $i < @Backups ; $i++ ) {
-
             if ( $Backups[$i]{type} eq "full" ) {
                 $fullCount++;
-                if ( $fullAge < 0 || $Backups[$i]{startTime} > $fullAge ) {
-                    $fullAge      = $Backups[$i]{startTime};
-                    $fullDuration = $Backups[$i]{endTime} - $Backups[$i]{startTime};
-                    $fullSize     = $Backups[$i]{size};
+                if ( $$lastFullBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastFullBackup->{startTime} ) {
+                    $lastFullBackup = \$Backups[$i];
                 }
-
             } elsif ( $Backups[$i]{type} eq "incr" ) {
                 $incrCount++;
-                if ( $incrAge < 0 || $Backups[$i]{startTime} > $incrAge ) {
-                    $incrAge      = $Backups[$i]{startTime};
-                    $incrDuration = $Backups[$i]{endTime} - $Backups[$i]{startTime};
+                if ( $$lastIncrBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastIncrBackup->{startTime} ) {
+                    $lastIncrBackup = \$Backups[$i];
                 }
             }
         }
 
-        if ( $fullAge > 0 ) {
+        $fullSize     = $$lastFullBackup->{size};
+        $fullDuration = $$lastFullBackup->{endTime} - $$lastFullBackup->{startTime};
+        $incrSize     = $$lastIncrBackup->{size};
+        $incrDuration = $$lastIncrBackup->{endTime} - $$lastIncrBackup->{startTime};
+
+        if ( $$lastFullBackup->{startTime} > 0 ) {
             $fullRate = $fullSize / ($fullDuration <= 0 ? 1 : $fullDuration);
         }
 
+        if ( $$lastIncrBackup->{startTime} > 0 ) {
+            $incrRate = $incrSize / ($incrDuration <= 0 ? 1 : $incrDuration);
+        }
+
         $metrics{hosts}{$host} = {
-            full_age        => int($fullAge),
-            full_count      => $fullCount,
-            full_duration   => $fullDuration,
-            full_keep_count => $Conf{FullKeepCnt},
-            full_period     => $Conf{FullPeriod},
-            full_rate       => int($fullRate),
-            full_size       => int($fullSize),
-            incr_age        => int($incrAge),
-            incr_count      => $incrCount,
-            incr_duration   => $incrDuration,
-            incr_keep_count => $Conf{IncrKeepCnt},
-            incr_period     => $Conf{IncrPeriod},
-            error           => $Status{$host}{error},
-            reason          => $Status{$host}{reason},
-            state           => $Status{$host}{state},
-            disabled        => $Conf{BackupsDisable},
+            full_start_time   => int($$lastFullBackup->{startTime}),
+            full_count        => $fullCount,
+            full_duration     => int($fullDuration),
+            full_keep_count   => $Conf{FullKeepCnt},
+            full_period       => $Conf{FullPeriod},
+            full_rate         => int($fullRate),
+            full_size         => int($fullSize),
+            full_size_exist   => int($$lastFullBackup->{sizeExist}),
+            full_size_new     => int($$lastFullBackup->{sizeNew}),
+            full_nfiles_exist => int($$lastFullBackup->{nFilesExist}),
+            full_nfiles_new   => int($$lastFullBackup->{nFilesNew}),
+            incr_start_time   => int($$lastIncrBackup->{startTime}),
+            incr_count        => $incrCount,
+            incr_duration     => int($incrDuration),
+            incr_keep_count   => $Conf{IncrKeepCnt},
+            incr_period       => $Conf{IncrPeriod},
+            incr_rate         => int($incrRate),
+            incr_size         => int($incrSize),
+            incr_size_exist   => int($$lastIncrBackup->{sizeExist}),
+            incr_size_new     => int($$lastIncrBackup->{sizeNew}),
+            incr_nfiles_exist => int($$lastIncrBackup->{nFilesExist}),
+            incr_nfiles_new   => int($$lastIncrBackup->{nFilesNew}),
+            error             => $Status{$host}{error},
+            reason            => $Status{$host}{reason},
+            state             => $Status{$host}{state},
+            disabled          => $Conf{BackupsDisable},
         };
     }
 

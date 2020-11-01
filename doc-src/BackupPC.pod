@@ -2584,6 +2584,56 @@ RSS format requires the XML::RSS module to be installed.
 This feature is experimental. The information included will
 probably change.
 
+=item `server` section fields.
+
+    hostname           => Configured hostname of server in config.pl
+    pid                => PID of server process
+    version            => BackupPC version
+    start_time         => Server start in epoch time (seconds)
+    config_time        => Configuration last load time in epoch time (seconds)
+    next_wakeup_time   => Next wakeup time in epoch time (seconds)
+
+=item `disk` section fields.
+
+    usage              => Last disk usage percent value
+    inode_usage        => Last inode usage percent value
+
+=item `queues` section fields.
+
+    background_count   => Pending backup requests from last scheduled wakeup
+    command_count      => Pending user backup requests
+    user_count         => Pending command requests
+
+=item `hosts` section per host fields.
+
+    full_start_time    => Last full backup start in epoch time (seconds)
+    full_count         => Number of full backups for host
+    full_duration      => Last full backup duration in seconds
+    full_keep_count    => Configured full keep count for host
+    full_period        => Configured full perid for host (eg. 6.97)
+    full_rate          => Last full backup transfer rate (bytes/sec)
+    full_size          => Last full backup size
+    full_size_exist    => Last full backup existing file size
+    full_size_new      => Last full backup new file size
+    full_nfiles_exist  => Last full backup existing number of files
+    full_nfiles_new    => Last full backup new number of files
+    incr_start_time    => Same as full backup but for incremental backup
+    incr_count         => Same as full backup but for incremental backup
+    incr_duration      => Same as full backup but for incremental backup
+    incr_keep_count    => Same as full backup but for incremental backup
+    incr_period        => Same as full backup but for incremental backup
+    incr_rate          => Same as full backup but for incremental backup
+    incr_size          => Same as full backup but for incremental backup
+    incr_size_exist    => Same as full backup but for incremental backup
+    incr_size_new      => Same as full backup but for incremental backup
+    incr_nfiles_exist  => Same as full backup but for incremental backup
+    incr_nfiles_new    => Same as full backup but for incremental backup
+    error              => Host error. Normally empty/null
+    reason             => Host reason. Eg. "Reason_nothing_to_do"
+    state              => Host state. Eg. "Status_idle"
+    disabled           => If backups are disabled or not for this host.
+
+
 =head2 RSS
 
 The RSS feed has been merged in the metrics endpoint (see section above). Please

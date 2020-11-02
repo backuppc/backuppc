@@ -1,0 +1,17 @@
+; Run "tidyall -a" to process all files.
+; Run "tidyall -g" to process all added or modified files in the current git working directory.
+
+[PodChecker]
+select = **/*.{pl,pm,pod}
+
+;[PodSpell]
+;select = **/*.{pl,pm,pod}
+;argv = aspell --lang=en list
+
+;[PodTidy]
+;select = **/*.{pl,pm,pod}
+
+;[Test::Vars]
+;select = **/*.{pl,pm,t}
+;select = makeDist
+;select = makePatch

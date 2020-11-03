@@ -117,7 +117,7 @@ These methods are implemented: C<binmode>, C<clearerr>, C<close>, C<eof>,
 C<error>, C<getc>, C<getline>, C<getlines>, C<getpos>, C<read>,
 C<seek>, C<setpos>, C<sysseek>, C<tell>, C<ungetc>, C<opened>.
 
-=cut ;
+=cut
 
 sub opened { 1; }
 

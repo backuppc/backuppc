@@ -2584,6 +2584,8 @@ RSS format requires the XML::RSS module to be installed.
 This feature is experimental. The information included will
 probably change.
 
+=over
+
 =item `server` section fields.
 
     hostname           => Configured hostname of server in config.pl
@@ -2633,6 +2635,7 @@ probably change.
     state              => Host state. Eg. "Status_idle"
     disabled           => If backups are disabled or not for this host.
 
+=back
 
 =head2 RSS
 
@@ -3686,7 +3689,7 @@ Comments or suggestions on these issues are welcome.
 
 An important security risk is the manner in which the smb share
 passwords are stored. They are in plain text. As described in
-L<Step 3: Setting up config.pl|"Step 3: Setting up config">, there are four ways to tell
+L<Step 3: Setting up config.pl>, there are four ways to tell
 BackupPC the smb share password (manually setting an environment
 variable, setting the environment variable in /etc/init.d/backuppc,
 putting the password in __TOPDIR__/conf/config.pl, or putting the

@@ -1,0 +1,79 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: buildpack-deps:sid
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: v2-perl_modules-{{ checksum "cpanfile" }}
+      - run:
+          name: Installing cpanm
+          command: 'curl -L https://cpanmin.us | perl - App::cpanminus'
+      - run:
+          name: Installing CPAN dependencies
+          command: cpanm --quiet --installdeps --notest .
+      - save_cache:
+          key: v2-perl_modules-{{ checksum "cpanfile" }}
+          paths:
+            - ~/perl5
+
+      - run:
+          name: Adding backuppc user
+          command: useradd -s /usr/sbin/nologin backuppc
+      - run:
+          name: Building BackupPC distribution
+          command: ./makeDist --version HEAD
+      - run:
+          name: Installing BackupPC
+          command: |
+            cd ./dist/BackupPC-HEAD
+            ./configure.pl --batch
+      - run:
+          name: Starting BackupPC
+          command: su -m -s /bin/sh backuppc -c '/usr/local/BackupPC/bin/BackupPC -d'
+      - run:
+          name: Checking BackupPC log
+          command: >-
+            cat /var/log/BackupPC/LOG;
+            set +e;
+            egrep -v '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}(
+            Reading hosts file|
+            BackupPC HEAD \(Perl v5\.[0-9]{1,2}\.[0-9]\) started, pid [0-9]+|
+            Next wakeup is [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2})$'
+            /var/log/BackupPC/LOG; test $? -eq 1
+
+  tidy:
+    docker:
+      - image: buildpack-deps:sid
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: v2-tidyall_dependencies
+      - run:
+          name: Installing cpanm
+          command: 'curl -L https://cpanmin.us | perl - App::cpanminus'
+      - run:
+          name: Installing CPAN dependencies
+          command: |
+            cpanm --quiet --notest \
+              Code::TidyAll
+      - save_cache:
+          key: v2-tidyall_dependencies
+          paths:
+            - ~/perl5
+
+      - run:
+          name: Running tidyall
+          command: |
+            tidyall --version
+            tidyall -a --check-only || ( tidyall -a && git diff && false )
+
+workflows:
+  version: 2
+  build_and_tidy:
+    jobs:
+      - build
+      - tidy

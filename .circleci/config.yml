@@ -1,23 +1,24 @@
-version: 2
+version: 2.1
 jobs:
   build:
+    parameters:
+      perl-version:
+        default: "latest"
+        type: string
     docker:
-      - image: buildpack-deps:sid
+      - image: perl:<< parameters.perl-version >>
     steps:
       - checkout
 
       - restore_cache:
-          key: v2-perl_modules-{{ checksum "cpanfile" }}
-      - run:
-          name: Installing cpanm
-          command: 'curl -L https://cpanmin.us | perl - App::cpanminus'
+          key: v3-perl_modules-<< parameters.perl-version >>-{{ checksum "cpanfile" }}
       - run:
           name: Installing CPAN dependencies
           command: cpanm --quiet --installdeps --notest .
       - save_cache:
-          key: v2-perl_modules-{{ checksum "cpanfile" }}
+          key: v3-perl_modules-<< parameters.perl-version >>-{{ checksum "cpanfile" }}
           paths:
-            - ~/perl5
+            - /usr/local/lib/perl5/site_perl
 
       - run:
           name: Adding backuppc user
@@ -46,24 +47,22 @@ jobs:
 
   tidy:
     docker:
-      - image: buildpack-deps:sid
+      - image: perl:latest
     steps:
       - checkout
 
       - restore_cache:
-          key: v2-tidyall_dependencies
-      - run:
-          name: Installing cpanm
-          command: 'curl -L https://cpanmin.us | perl - App::cpanminus'
+          key: v4-tidyall_dependencies
       - run:
           name: Installing CPAN dependencies
           command: |
             cpanm --quiet --notest \
               Code::TidyAll
       - save_cache:
-          key: v2-tidyall_dependencies
+          key: v4-tidyall_dependencies
           paths:
-            - ~/perl5
+            - /usr/local/lib/perl5/site_perl
+            - /usr/local/bin/tidyall
 
       - run:
           name: Running tidyall
@@ -72,8 +71,17 @@ jobs:
             tidyall -a --check-only || ( tidyall -a && git diff && false )
 
 workflows:
-  version: 2
   build_and_tidy:
     jobs:
-      - build
+      - build:
+          matrix:
+            parameters:
+              # Perl version matrix follows versions still in use by popular
+              # distributions such as Debian or Ubuntu, see:
+              # - https://www.cpan.org/src/
+              # - https://packages.debian.org/search?keywords=perl
+              # - https://packages.ubuntu.com/search?keywords=perl
+              #
+              # Available Docker images are listed here: https://hub.docker.com/_/perl
+              perl-version: ["5.32", "5.30", "5.28", "5.26", "5.24", "5.22", "5.20"]
       - tidy

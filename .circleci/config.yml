@@ -1,4 +1,6 @@
 version: 2.1
+orbs:
+  linter: thekevjames/linter@1.1.15
 jobs:
   build:
     parameters:
@@ -84,4 +86,9 @@ workflows:
               #
               # Available Docker images are listed here: https://hub.docker.com/_/perl
               perl-version: ["5.32", "5.30", "5.28", "5.26", "5.24", "5.22", "5.20"]
+      - linter/pre-commit:
+          pre-steps:
+            - run:
+                name: Force colored Git output
+                command: git config --global color.ui always
       - tidy

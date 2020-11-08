@@ -17,42 +17,41 @@ use Scalar::Util;
 
 =head1 NAME
 
-Net::FTP::RetrHandle - Tied or IO::Handle-compatible interface to a file retrieved by FTP
+Net::FTP::RetrHandle - Tied or IO::Handle-compatible interface to a file
+retrieved by FTP
 
 =head1 SYNOPSIS
 
-Provides a file reading interface for reading all or parts of files
-located on a remote FTP server, including emulation of C<seek> and
-support for downloading only the parts of the file requested.
+Provides a file reading interface for reading all or parts of files located on
+a remote FTP server, including emulation of C<seek> and support for downloading
+only the parts of the file requested.
 
 =head1 DESCRIPTION
 
-Support for skipping the beginning of the file is implemented with the
-FTP C<REST> command, which starts a retrieval at any point in the
-file.  Support for skipping the end of the file is implemented with
-the FTP C<ABOR> command, which stops the transfer.  With these two
-commands and some careful tracking of the current file position, we're
-able to reliably emulate a C<seek/read> pair, and get only the parts
-of the file that are actually read.
+Support for skipping the beginning of the file is implemented with the FTP
+C<REST> command, which starts a retrieval at any point in the file.  Support
+for skipping the end of the file is implemented with the FTP C<ABOR> command,
+which stops the transfer.  With these two commands and some careful tracking of
+the current file position, we're able to reliably emulate a C<seek/read> pair,
+and get only the parts of the file that are actually read.
 
-This was originally designed for use with
-L<Archive::Zip|Archive::Zip>; it's reliable enough that the table of
-contents and individual files can be extracted from a remote ZIP
-archive without downloading the whole thing.  See L<EXAMPLES> below.
+This was originally designed for use with L<Archive::Zip|Archive::Zip>; it's
+reliable enough that the table of contents and individual files can be
+extracted from a remote ZIP archive without downloading the whole thing.  See
+L<EXAMPLES> below.
 
-An interface compatible with L<IO::Handle|IO::Handle> is provided,
-along with a C<tie>-based interface.
+An interface compatible with L<IO::Handle|IO::Handle> is provided, along with a
+C<tie>-based interface.
 
-Remember that an FTP server can only do one thing at a time, so make
-sure to C<close> your connection before asking the FTP server to do
-nything else.
+Remember that an FTP server can only do one thing at a time, so make sure to
+C<close> your connection before asking the FTP server to do nything else.
 
 =head1 CONSTRUCTOR
 
 =head2 new ( $ftp, $filename, options... )
 
-Creates a new L<IO::Handle|IO::Handle>-compatible object to fetch all
-or parts of C<$filename> using the FTP connection C<$ftp>.
+Creates a new L<IO::Handle|IO::Handle>-compatible object to fetch all or parts
+of C<$filename> using the FTP connection C<$ftp>.
 
 Available options:
 
@@ -60,23 +59,22 @@ Available options:
 
 =item MaxSkipSize => $size
 
-If we need to move forward in a file or close the connection,
-sometimes it's faster to just read the bytes we don't need than to
-abort the connection and restart. This setting tells how many
-unnecessary bytes we're willing to read rather than abort.  An
-appropriate setting depends on the speed of transferring files and the
-speed of reconnecting to the server.
+If we need to move forward in a file or close the connection, sometimes it's
+faster to just read the bytes we don't need than to abort the connection and
+restart. This setting tells how many unnecessary bytes we're willing to read
+rather than abort.  An appropriate setting depends on the speed of transferring
+files and the speed of reconnecting to the server.
 
 =item BlockSize => $size
 
-When doing buffered reads, how many bytes to read at once.  The
-default is the same as the default for L<Net::FTP|Net::FTP>, so it's
-generally best to leave it alone.
+When doing buffered reads, how many bytes to read at once.  The default is the
+same as the default for L<Net::FTP|Net::FTP>, so it's generally best to leave
+it alone.
 
 =item AlreadyBinary => $bool
 
-If set to a true value, we assume the server is already in binary
-mode, and don't try to set it.
+If set to a true value, we assume the server is already in binary mode, and
+don't try to set it.
 
 =back
 
@@ -114,8 +112,8 @@ Most of the methods implemented behave exactly like those from
 L<IO::Handle|IO::Handle>.
 
 These methods are implemented: C<binmode>, C<clearerr>, C<close>, C<eof>,
-C<error>, C<getc>, C<getline>, C<getlines>, C<getpos>, C<read>,
-C<seek>, C<setpos>, C<sysseek>, C<tell>, C<ungetc>, C<opened>.
+C<error>, C<getc>, C<getline>, C<getlines>, C<getpos>, C<read>, C<seek>,
+C<setpos>, C<sysseek>, C<tell>, C<ungetc>, C<opened>.
 
 =cut
 
@@ -514,9 +512,9 @@ sub DESTROY
 
 =head1 TIED INTERFACE
 
-Instead of a L<IO::Handle|IO::Handle>-compatible interface, you can
-use a C<tie>-based interface to use the standard Perl I/O operators.
-You can use it like this:
+Instead of a L<IO::Handle|IO::Handle>-compatible interface, you can use a
+C<tie>-based interface to use the standard Perl I/O operators. You can use it
+like this:
 
   use Net::FTP::RetrHandle;
   # Create FTP object in $ftp
@@ -590,8 +588,7 @@ sub UNTIE
 
 =head1 EXAMPLE
 
-Here's an example of listing a Zip file without downloading the whole
-thing:
+Here's an example of listing a Zip file without downloading the whole thing:
 
     #!/usr/bin/perl
 
@@ -626,16 +623,15 @@ Scott Gifford <sgifford@suspectclass.com>
 =head1 BUGS
 
 The distinction between tied filehandles and C<IO::Handle>-compatible
-filehandles should be blurrier.  It seems like other file handle
-objects you can freely mix method calls and traditional Perl
-operations, but I can't figure out how to do it.
+filehandles should be blurrier.  It seems like other file handle objects you
+can freely mix method calls and traditional Perl operations, but I can't figure
+out how to do it.
 
-Many FTP servers don't like frequent connection aborts.  If that's the
-case, try L<Net::FTP::AutoReconnect>, which will hide much of that
-from you.
+Many FTP servers don't like frequent connection aborts.  If that's the case,
+try L<Net::FTP::AutoReconnect>, which will hide much of that from you.
 
-If the filehandle is tied and created with C<gensym>, C<readline>
-doesn't work with older versions of Perl.  No idea why.
+If the filehandle is tied and created with C<gensym>, C<readline> doesn't work
+with older versions of Perl.  No idea why.
 
 =head1 SEE ALSO
 
@@ -643,9 +639,9 @@ L<Net::FTP>, L<Net::FTP::AutoReconnect>, L<IO::Handle>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2006 Scott Gifford. All rights reserved.  This program
-is free software; you can redistribute it and/or modify it under the
-same terms as Perl itself.
+Copyright (c) 2006 Scott Gifford. All rights reserved.  This program is free
+software; you can redistribute it and/or modify it under the same terms as Perl
+itself.
 
 =cut
 

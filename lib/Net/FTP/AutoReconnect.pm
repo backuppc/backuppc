@@ -12,62 +12,57 @@ Net::FTP::AutoReconnect - FTP client class with automatic reconnect on failure
 
 =head1 SYNOPSIS
 
-C<Net::FTP::AutoReconnect> is a wrapper module around C<Net::FTP>.
-For many commands, if anything goes wrong on the first try, it tries
-to disconnect and reconnect to the server, restore the state to the
-same as it was when the command was executed, then execute it again.
-The state includes login credentials, authorize credentials, transfer
-mode (ASCII or binary), current working directory, and any restart,
-passive, or port commands sent.
+C<Net::FTP::AutoReconnect> is a wrapper module around C<Net::FTP>. For many
+commands, if anything goes wrong on the first try, it tries to disconnect and
+reconnect to the server, restore the state to the same as it was when the
+command was executed, then execute it again. The state includes login
+credentials, authorize credentials, transfer mode (ASCII or binary), current
+working directory, and any restart, passive, or port commands sent.
 
 =head1 DESCRIPTION
 
-The goal of this method is to hide some implementation details of FTP
-server systems from the programmer.  In particular, many FTP systems
-will automatically disconnect a user after a relatively short idle
-time or after a transfer is aborted.  In this case,
-C<Net::FTP::AutoReconnect> will simply reconnect, send the commands
-necessary to return your session to its previous state, then resend
-the command.  If that fails, it will return the error.
+The goal of this method is to hide some implementation details of FTP server
+systems from the programmer.  In particular, many FTP systems will
+automatically disconnect a user after a relatively short idle time or after a
+transfer is aborted.  In this case, C<Net::FTP::AutoReconnect> will simply
+reconnect, send the commands necessary to return your session to its previous
+state, then resend the command.  If that fails, it will return the error.
 
-It makes no effort to determine what sorts of errors are likely to
-succeed when they're retried.  Partly that's because it's hard to
-know; if you're retrieving a file from an FTP site with several
-mirrors and the file is not found, for example, maybe on the next try
-you'll connect to a different server and find it.  But mostly it's
-from laziness; if you have some good ideas about how to determine when
-to retry and when not to bother, by all means send patches.
+It makes no effort to determine what sorts of errors are likely to succeed when
+they're retried.  Partly that's because it's hard to know; if you're retrieving
+a file from an FTP site with several mirrors and the file is not found, for
+example, maybe on the next try you'll connect to a different server and find
+it.  But mostly it's from laziness; if you have some good ideas about how to
+determine when to retry and when not to bother, by all means send patches.
 
-This module contains an instance of C<Net::FTP>, which it passes most
-method calls along to.
+This module contains an instance of C<Net::FTP>, which it passes most method
+calls along to.
 
-These methods also record their state: C<alloc>, C<ascii>,
-C<authorize>, C<binary>, C<cdup>, C<cwd>, C<hash>,
-C<login>,C<restart>, C<pasv>, C<port>.  Directory changing commands
-execute a C<pwd> afterwards and store their new working directory.
+These methods also record their state: C<alloc>, C<ascii>, C<authorize>,
+C<binary>, C<cdup>, C<cwd>, C<hash>, C<login>,C<restart>, C<pasv>, C<port>.
+Directory changing commands execute a C<pwd> afterwards and store their new
+working directory.
 
 These methods are automatically retried: C<alloc>, C<appe>, C<append>,
-C<ascii>, C<binary>, C<cdup>, C<cwd>, C<delete>, C<dir>, C<get>,
-C<list>, C<ls>, C<mdtm>, C<mkdir>, C<nlst>, C<pasv>, C<port>, C<put>,
-C<put_unique>, C<pwd>, C<rename>, C<retr>, C<rmdir>, C<size>, C<stou>,
-C<supported>.
+C<ascii>, C<binary>, C<cdup>, C<cwd>, C<delete>, C<dir>, C<get>, C<list>,
+C<ls>, C<mdtm>, C<mkdir>, C<nlst>, C<pasv>, C<port>, C<put>, C<put_unique>,
+C<pwd>, C<rename>, C<retr>, C<rmdir>, C<size>, C<stou>, C<supported>.
 
-These methods are tried just once: C<abort>, C<authorize>, C<hash>,
-C<login>, C<pasv_xfer>, C<pasv_xfer_unique>, C<pasv_wait>, C<quit>,
-C<restart>, C<site>, C<unique_name>.  From C<Net::Cmd>: C<code>,
-C<message>, C<ok>, C<status>.  C<restart> doesn't actually send any
-FTP commands (they're sent along with the command they apply to),
-which is why it's not restarted.
+These methods are tried just once: C<abort>, C<authorize>, C<hash>, C<login>,
+C<pasv_xfer>, C<pasv_xfer_unique>, C<pasv_wait>, C<quit>, C<restart>, C<site>,
+C<unique_name>.  From C<Net::Cmd>: C<code>, C<message>, C<ok>, C<status>.
+C<restart> doesn't actually send any FTP commands (they're sent along with the
+command they apply to), which is why it's not restarted.
 
-Any other commands are unimplemented (or possibly misdocumented); if I
-missed one you'd like, please send a patch.
+Any other commands are unimplemented (or possibly misdocumented); if I missed
+one you'd like, please send a patch.
 
 =head2 CONSTRUCTOR
 
 =head3 new
 
-All parameters are passed along verbatim to C<Net::FTP>, as well as
-stored in case we have to reconnect.
+All parameters are passed along verbatim to C<Net::FTP>, as well as stored in
+case we have to reconnect.
 
 =cut
 
@@ -85,13 +80,13 @@ sub new
 
 =head2 METHODS
 
-Most of the methods are those of L<Net::FTP|Net::FTP>.  One additional
-method is available:
+Most of the methods are those of L<Net::FTP|Net::FTP>.  One additional method
+is available:
 
 =head3 reconnect()
 
-Abandon the current FTP connection and create a new one, restoring all
-the state we can.
+Abandon the current FTP connection and create a new one, restoring all the
+state we can.
 
 =cut
 
@@ -468,14 +463,12 @@ Scott Gifford <sgifford@suspectclass.com>
 
 We should really be smarter about when to retry.
 
-We shouldn't be hardwired to use C<Net::FTP>, but any FTP-compatible
-class; that would allow all modules similar to this one to be chained
-together.
+We shouldn't be hardwired to use C<Net::FTP>, but any FTP-compatible class;
+that would allow all modules similar to this one to be chained together.
 
-Much of this is only lightly tested; it's hard to find an FTP server
-unreliable enough to test all aspects of it.  It's mostly been tested
-with a server that dicsonnects after an aborted transfer, and the
-module seems to work OK.
+Much of this is only lightly tested; it's hard to find an FTP server unreliable
+enough to test all aspects of it.  It's mostly been tested with a server that
+dicsonnects after an aborted transfer, and the module seems to work OK.
 
 =head1 SEE ALSO
 
@@ -483,9 +476,9 @@ L<Net::FTP>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2006 Scott Gifford. All rights reserved.  This program
-is free software; you can redistribute it and/or modify it under the
-same terms as Perl itself.
+Copyright (c) 2006 Scott Gifford. All rights reserved.  This program is free
+software; you can redistribute it and/or modify it under the same terms as Perl
+itself.
 
 =cut
 

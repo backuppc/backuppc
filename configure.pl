@@ -1236,12 +1236,12 @@ configure.pl [options]
 =head1 DESCRIPTION
 
 configure.pl is a script that is used to install or upgrade a BackupPC
-installation.  It is usually run interactively without arguments.  It
-also supports a batch mode where all the options can be specified
-via the command-line.
+installation.  It is usually run interactively without arguments.  It also
+supports a batch mode where all the options can be specified via the
+command-line.
 
-For upgrading BackupPC you need to make sure that BackupPC is not
-running prior to running configure.pl.
+For upgrading BackupPC you need to make sure that BackupPC is not running prior
+to running configure.pl.
 
 Typically configure.pl needs to run as the super user (root).
 
@@ -1251,27 +1251,26 @@ Typically configure.pl needs to run as the super user (root).
 
 =item B<--batch>
 
-Run configure.pl in batch mode.  configure.pl will run without
-prompting the user.  The other command-line options are used
-to specify the settings that the user is usually prompted for.
+Run configure.pl in batch mode.  configure.pl will run without prompting the
+user.  The other command-line options are used to specify the settings that the
+user is usually prompted for.
 
 =item B<--backuppc-user=USER>
 
-Specify the BackupPC user name that owns all the BackupPC
-files and runs the BackupPC programs.  Default is backuppc.
+Specify the BackupPC user name that owns all the BackupPC files and runs the
+BackupPC programs.  Default is backuppc.
 
 =item B<--bin-path PROG=PATH>
 
-Specify the path for various external programs that BackupPC
-uses.  Several --bin-path options may be specified.  configure.pl
-usually finds sensible defaults based on searching the PATH.
-The format is:
+Specify the path for various external programs that BackupPC uses.  Several
+--bin-path options may be specified.  configure.pl usually finds sensible
+defaults based on searching the PATH. The format is:
 
     --bin-path PROG=PATH
 
-where PROG is one of perl, tar, smbclient, nmblookup, rsync, rsync_bpc,
-ping, df, ssh, sendmail, hostname, split, par2, cat, gzip, bzip2 and
-PATH is that full path to that program.
+where PROG is one of perl, tar, smbclient, nmblookup, rsync, rsync_bpc, ping,
+df, ssh, sendmail, hostname, split, par2, cat, gzip, bzip2 and PATH is that
+full path to that program.
 
 Examples
 
@@ -1283,15 +1282,15 @@ Set the configuration compression level to N.  Default is 3.
 
 =item B<--config-dir CONFIG_DIR>
 
-Configuration directory.  Defaults to /etc/BackupPC with FHS.
-Automatically extracted from --config-path for existing installations.
+Configuration directory.  Defaults to /etc/BackupPC with FHS. Automatically
+extracted from --config-path for existing installations.
 
 =item B<--config-override name=value>
 
-Override a specific configuration parameter.  Can be specified multiple
-times.  "Name" is the parameter name and "value" is the exact text that
-is inserted in the config.pl file (so you will need to escape quotes etc).
-For example, to override $Conf{ServerHost} you would specify:
+Override a specific configuration parameter.  Can be specified multiple times.
+"Name" is the parameter name and "value" is the exact text that is inserted in
+the config.pl file (so you will need to escape quotes etc). For example, to
+override $Conf{ServerHost} you would specify:
 
     --config-override ServerHost=\"myhost\"
 
@@ -1299,10 +1298,10 @@ For example, to override $Conf{ServerHost} you would specify:
 
 Do not install anything else, just create or update the config.pl and hosts
 configuration files. This option can be used for automatic update of the
-configuration after upgrading BackupPC using a package. With this option enabled
-the configure.pl can be used separately from the rest of BackupPC distribution
-files. In this case you should tell it where to look for installed BackupPC
-files.
+configuration after upgrading BackupPC using a package. With this option
+enabled the configure.pl can be used separately from the rest of BackupPC
+distribution files. In this case you should tell it where to look for installed
+BackupPC files.
 
 So you will need to define the PERL5LIB environmental variable, for example for
 Bourne shell:
@@ -1316,27 +1315,25 @@ or specify the path via Perl -I flag:
 
 =item B<--config-path CONFIG_PATH>
 
-Path to the existing config.pl configuration file for BackupPC.
-This option should be specified for batch upgrades to an
-existing installation.  The option should be omitted when
-doing a batch new install.
+Path to the existing config.pl configuration file for BackupPC. This option
+should be specified for batch upgrades to an existing installation.  The option
+should be omitted when doing a batch new install.
 
 =item B<--cgi-dir CGI_DIR>
 
-Path to Apache's cgi-bin directory where the BackupPC_Admin
-script will be installed.  This option only needs to be
-specified for a batch new install.
+Path to Apache's cgi-bin directory where the BackupPC_Admin script will be
+installed.  This option only needs to be specified for a batch new install.
 
 =item B<--scgi-port N>
 
-Numeric TCP port that is used for communication between Apache
-and BackupPC_Admin_SCGI.  A negative value disables SCGI.
+Numeric TCP port that is used for communication between Apache and
+BackupPC_Admin_SCGI.  A negative value disables SCGI.
 
 =item B<--data-dir DATA_DIR>
 
-Path to the BackupPC data directory.  This is where all the backup
-data is stored, and it should be on a large file system. This option
-only needs to be specified for a batch new install.
+Path to the BackupPC data directory.  This is where all the backup data is
+stored, and it should be on a large file system. This option only needs to be
+specified for a batch new install.
 
 Example:
 
@@ -1344,21 +1341,20 @@ Example:
 
 =item B<--dest-dir DEST_DIR>
 
-An optional prefix to apply to all installation directories.  Usually this
-is not needed, but is used by package creators, or certain auto-installers
-that like to stage an install in a temporary directory, and then copy
-the files to their real destination.  This option can be used to specify
-the target directory prefix.  If you specify this option any existing
-installation should be ignored.  Note that BackupPC won't run correctly if
-you try to run it from below the --dest-dir directory, since all the paths
-are set assuming BackupPC is installed in the intended final locations.
+An optional prefix to apply to all installation directories.  Usually this is
+not needed, but is used by package creators, or certain auto-installers that
+like to stage an install in a temporary directory, and then copy the files to
+their real destination.  This option can be used to specify the target
+directory prefix.  If you specify this option any existing installation should
+be ignored.  Note that BackupPC won't run correctly if you try to run it from
+below the --dest-dir directory, since all the paths are set assuming BackupPC
+is installed in the intended final locations.
 
 =item B<--fhs>
 
-Use locations specified by the Filesystem Hierarchy Standard
-for installing BackupPC.  This is enabled by default for new
-installations.  To use the pre-3.0 installation locations,
-specify --no-fhs.
+Use locations specified by the Filesystem Hierarchy Standard for installing
+BackupPC.  This is enabled by default for new installations.  To use the
+pre-3.0 installation locations, specify --no-fhs.
 
 =item B<--help|?>
 
@@ -1366,15 +1362,15 @@ Print a brief help message and exits.
 
 =item B<--hostname HOSTNAME>
 
-Host name (this machine's name) on which BackupPC is being installed.
-This option only needs to be specified for a batch new install.
+Host name (this machine's name) on which BackupPC is being installed. This
+option only needs to be specified for a batch new install.
 
 =item B<--html-dir HTML_DIR>
 
-Path to an Apache html directory where various BackupPC image files
-and the CSS files will be installed.  This is typically a directory
-below Apache's DocumentRoot directory.  This option only needs to be
-specified for a batch new install.
+Path to an Apache html directory where various BackupPC image files and the CSS
+files will be installed.  This is typically a directory below Apache's
+DocumentRoot directory.  This option only needs to be specified for a batch new
+install.
 
 Example:
 
@@ -1383,8 +1379,8 @@ Example:
 =item B<--html-dir-url URL>
 
 The URL (without http://hostname) required to access the BackupPC html
-directory specified with the --html-dir option.  This option only needs
-to be specified for a batch new install.
+directory specified with the --html-dir option.  This option only needs to be
+specified for a batch new install.
 
 Example:
 
@@ -1392,9 +1388,8 @@ Example:
 
 =item B<--install-dir INSTALL_DIR>
 
-Installation directory for BackupPC scripts, libraries, and
-documentation.  This option only needs to be specified for a
-batch new install.
+Installation directory for BackupPC scripts, libraries, and documentation. This
+option only needs to be specified for a batch new install.
 
 Example:
 
@@ -1414,18 +1409,17 @@ Run directory.  Defaults to /var/run/BackupPC with FHS.
 
 =item B<--set-perms>
 
-When installing files and creating directories, chown them to
-the BackupPC user and chmod them too.  This is enabled by default.
-To disable (for example, if staging a destination directory)
-then specify --no-set-perms.
+When installing files and creating directories, chown them to the BackupPC user
+and chmod them too.  This is enabled by default. To disable (for example, if
+staging a destination directory) then specify --no-set-perms.
 
 =item B<--uid-ignore>
 
-configure.pl verifies that the script is being run as the super user
-(root).  Without the --uid-ignore option, in batch mode the script will
-exit with an error if not run as the super user, and in interactive mode
-the user will be prompted.  Specifying this option will cause the script
-to continue even if the user id is not root.
+configure.pl verifies that the script is being run as the super user (root).
+Without the --uid-ignore option, in batch mode the script will exit with an
+error if not run as the super user, and in interactive mode the user will be
+prompted.  Specifying this option will cause the script to continue even if the
+user id is not root.
 
 =back
 
@@ -1435,8 +1429,8 @@ For a standard interactive install, run without arguments:
 
     configure.pl
 
-For a batch new install you need to specify answers to all the
-questions that are normally prompted:
+For a batch new install you need to specify answers to all the questions that
+are normally prompted:
 
     configure.pl                                   \
         --batch                                    \
@@ -1447,8 +1441,8 @@ questions that are normally prompted:
         --html-dir-url /BackupPC                   \
         --install-dir /usr/local/BackupPC
 
-For a batch upgrade, you only need to specify the path to the
-configuration file:
+For a batch upgrade, you only need to specify the path to the configuration
+file:
 
     configure.pl --batch --config-path /data/BackupPC/conf/config.pl
 
@@ -1460,9 +1454,9 @@ Craig Barratt <cbarratt@users.sourceforge.net>
 
 Copyright (C) 2001-2020  Craig Barratt.
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 2 of the License, or
-(at your option) any later version.
+This program is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation; either version 2 of the License, or (at your option) any later
+version.
 
 =cut

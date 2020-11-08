@@ -106,6 +106,8 @@ workflows:
       - linter/pre-commit:
           pre-steps:
             - run:
-                name: Force colored Git output
-                command: git config --global color.ui always
+                name: Force colored Git output and disable pager
+                command: |
+                  git config --global core.pager ''
+                  git config --global color.ui always
       - tidy

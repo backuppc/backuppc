@@ -51,26 +51,43 @@ jobs:
     docker:
       - image: perl:latest
     steps:
+      - run:
+          name: Exporting env vars
+          command: |
+            cat >> $BASH_ENV \<<EOF
+            export PATH=$PATH:$HOME/perl5/bin
+            export PERL_CPANM_OPT=--local-lib=$HOME/perl5
+            export PERL5LIB=$HOME/perl5/lib/perl5:$PERL5LIB
+            EOF
       - checkout
 
       - restore_cache:
-          key: v4-tidyall_dependencies
+          key: v8-tidyall_dependencies
       - run:
           name: Installing CPAN dependencies
           command: |
             cpanm --quiet --notest \
-              Code::TidyAll
+              Code::TidyAll \
+              Pod::Tidy
       - save_cache:
-          key: v4-tidyall_dependencies
+          key: v8-tidyall_dependencies
           paths:
-            - /usr/local/lib/perl5/site_perl
-            - /usr/local/bin/tidyall
+            - ~/perl5
 
       - run:
           name: Running tidyall
           command: |
             tidyall --version
-            tidyall -a --check-only || ( tidyall -a && git diff && false )
+            tidyall -a --check-only
+      - run:
+          name: Tidiyng files
+          command: tidyall -a
+          when: on_fail
+      - run:
+          name: git diff
+          # Exit status is forced to expand command output in job log
+          command: tidyall -a && git --no-pager diff --color && false
+          when: on_fail
 
 workflows:
   build_and_tidy:

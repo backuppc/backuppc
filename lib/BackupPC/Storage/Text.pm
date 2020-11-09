@@ -515,7 +515,6 @@ sub HostInfoRead
 {
     my($s, $host) = @_;
     my(%hosts, @hdr, @fld, $hostFd, $lockFd, $locked);
-    my(@Backups, $bkFd);
 
     if ( open($lockFd, ">", "$s->{ConfDir}/LOCK") ) {
         flock($lockFd, LOCK_EX);

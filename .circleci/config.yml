@@ -62,15 +62,16 @@ jobs:
       - checkout
 
       - restore_cache:
-          key: v8-tidyall_dependencies
+          key: v9-tidyall_dependencies
       - run:
           name: Installing CPAN dependencies
           command: |
             cpanm --quiet --notest \
               Code::TidyAll \
+              Code::TidyAll::Plugin::Test::Vars \
               Pod::Tidy
       - save_cache:
-          key: v8-tidyall_dependencies
+          key: v9-tidyall_dependencies
           paths:
             - ~/perl5
 

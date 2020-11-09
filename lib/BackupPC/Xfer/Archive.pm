@@ -50,7 +50,7 @@ sub run
     my $bpc  = $t->{bpc};
     my $conf = $t->{conf};
 
-    my(@HostList, @BackupList, $archiveClientCmd, $archiveClientCmd2, $logMsg);
+    my(@HostList, @BackupList, $archiveClientCmd, $archiveClientCmd2);
 
     $archiveClientCmd = $conf->{ArchiveClientCmd};
     $t->{xferOK}      = 1;

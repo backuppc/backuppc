@@ -11,7 +11,7 @@ select = **/*.{pl,pm,pod}
 [PodTidy]
 select = **/*.{pl,pm,pod}
 
-;[Test::Vars]
-;select = **/*.{pl,pm,t}
-;select = makeDist
-;select = makePatch
+[Test::Vars]
+select = **/*.{pl,pm,t}
+select = makeDist
+select = makePatch

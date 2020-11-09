@@ -296,15 +296,14 @@ sub shareName2Path
 #
 sub loadInclExclRegexps
 {
-    my($t, $shareType) = @_;
+    my($t)   = @_;
     my $bpc  = $t->{bpc};
     my $conf = $t->{conf};
 
     my @BackupFilesOnly    = ();
     my @BackupFilesExclude = ();
-    my($shareName, $shareNameRE);
 
-    $shareName = $t->{shareName};
+    my $shareName = $t->{shareName};
     $shareName =~ s/\/*$//;    # remove trailing slashes
     $shareName = "/" if ( $shareName eq "" );
 

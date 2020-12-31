@@ -1357,7 +1357,8 @@ $Conf{RsyncIncrArgsExtra} = [];
 
 #
 # Arguments to rsync for restore.  Do not edit the first set unless you
-# have a thorough understanding of how File::RsyncP works.
+# have a thorough understanding of how rsync_bpc works. Many existing
+# rsync options might not work as expected.
 #
 # If you want to disable direct restores using rsync (eg: is the module
 # is read-only), you should set $Conf{RsyncRestoreArgs} to undef and

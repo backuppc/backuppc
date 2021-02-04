@@ -327,6 +327,9 @@ sub action
                             } else {
                                 $val = $metrics{hosts}{$host}{$entry};
                             }
+                            if ($val == '') {
+                                    $val = 0;
+                            }
                             $content .= "${promKey}\{host=\"$host\"\} $val\n";
                         }
                     }

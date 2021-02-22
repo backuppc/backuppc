@@ -2184,6 +2184,10 @@ $Conf{CgiNavBarLinks} = [
         lname => "Documentation",            # actually displays $Lang->{Documentation}
     },
     {
+        link  => "?action=check",
+        lname => "Check",            # displays BackupPC-Check module
+    },
+    {
         link => "https://github.com/backuppc/backuppc/wiki",
         name => "Wiki",                                        # displays literal "Wiki"
     },

@@ -11,7 +11,10 @@
 #
 #========================================================================
 #
-# Released November 2019 - firewall-services.com
+# firewall-services.com
+# Version 1.0.0, released Feb 2021.
+#
+# See https://git.fws.fr/fws/BackupPC-Check
 #
 #========================================================================
 

@@ -47,7 +47,7 @@ sub action
       next if ( $Conf{XferMethod} eq "archive" );
       next if ( !$Privileged && !CheckPermission($host) );
 
-      # Get number of total backups
+      # Get number of total backups (full + incr)
       for ( my $i = 0 ; $i < @Backups ; $i++ ) {
           if ( $Backups[$i]{type} eq "full" ) { $fullCnt++; }
           elsif ( $Backups[$i]{type} eq "incr" ) { $incrCnt++; }
@@ -129,7 +129,7 @@ sub action
         $toosmall = 1;
       }
 
-      # Get result, if we don't have enough backup (< 4) we can't calcul a realist average
+      # If we don't have enough backup (< 4) we can't calcul a realist average
       if ( not $nbBackups > 4) {
         $sizeConsistencyColor = "Gray";
         $sizeConsistency = "Not enough backups";
@@ -156,8 +156,8 @@ EOF
     # End loop
 
     # Time set
-    my $now            = timeStamp2(time);
-    my $DUmaxTime      = timeStamp2($Info{DUDailyMaxTime});
+    my $now = timeStamp2(time);
+    my $DUmaxTime = timeStamp2($Info{DUDailyMaxTime});
     my $DUInodemaxTime = timeStamp2($Info{DUInodeDailyMaxTime});
 
     # Show header
@@ -187,7 +187,6 @@ EOF
     \$str
     </table>
 EOF
-
 
     my $content = eval ("qq{$header}");
     Header("BackupPC: Check", $content);

@@ -137,7 +137,7 @@ sub action
       # Show summary
       $str .= <<EOF;
       <tr$reasonHilite>
-        <td class="border"><a href="$browseFile" target="_blank">$host ($idBackup)</a></td>
+        <td class="border"><a href="$browseFile">$host ($idBackup)</a></td>
         <td align="center" class="border" style="color:$lastAgeColor;">$lastAge <em>(Freq: $frequency)</em></td>
         <td align="center" class="border" style="color:$lastXferErrorsColor;">$lastXferErrors $ifErrors</td>
         <td align="center" class="border" style="color:$sizeConsistencyColor;">$sizeConsistency</td>

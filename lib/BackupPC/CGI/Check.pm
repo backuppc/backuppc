@@ -36,15 +36,23 @@ sub action
 
     # Start loop
     foreach my $host ( GetUserHosts(1) ) {
-      my($incrAge, $reasonHilite, $frequency, $lastAge, $lastAgeColor, $tempState, $tempReason, $lastXferErrors, $lastXferErrorsColor, $ifErrors, $sizeConsistency, $sizeConsistencyColor);
+      my($incrAge, $reasonHilite, $frequency, $lastAge, $lastAgeColor, $tempState, $tempReason, $lastXferErrors, $lastXferErrorsColor, $ifErrors, $sizeConsistency, $sizeConsistencyColor, $fullCnt, $incrCnt, $nbBackups);
       my($shortErr);
       my @Backups = $bpc->BackupInfoRead($host);
+      $fullCnt = $incrCnt = $nbBackups = 0;
 
       $bpc->ConfigRead($host);
       %Conf = $bpc->Conf();
 
       next if ( $Conf{XferMethod} eq "archive" );
       next if ( !$Privileged && !CheckPermission($host) );
+
+      # Get number of total backups
+      for ( my $i = 0 ; $i < @Backups ; $i++ ) {
+          if ( $Backups[$i]{type} eq "full" ) { $fullCnt++; }
+          elsif ( $Backups[$i]{type} eq "incr" ) { $incrCnt++; }
+      }
+      $nbBackups = $fullCnt + $incrCnt;
 
       # Get frequency for this host
       if ( $Conf{IncrPeriod} < $Conf{FullPeriod} ) {
@@ -122,7 +130,7 @@ sub action
       }
 
       # Get result, if we don't have enough backup (< 4) we can't calcul a realist average
-      if ( not $idBackup > 4) {
+      if ( not $nbBackups > 4) {
         $sizeConsistencyColor = "Gray";
         $sizeConsistency = "Not enough backups";
       }

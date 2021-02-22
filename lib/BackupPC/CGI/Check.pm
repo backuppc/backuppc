@@ -53,16 +53,16 @@ sub action
         $frequency = $Conf{FullPeriod};
       }
 
-      # ID
+      # Get ID of last backup
       my $idBackup = $Backups[@Backups-1]->{num} if ( @Backups );
 
-      # Age
+      # Get age of last backup
       my $lastBackup = ( $Backups[-1]->{type} =~ m/^full|incr$/ ) ? -1 : -2;
       $lastAge = sprintf("%.1f", (time - $Backups[$lastBackup]->{startTime}) / (24 * 3600));
 
-      # Color for age
+      # Color for age old
       if ( $lastAge < $frequency ) {
-          $lastAgeColor = "MediumSeaGreen";
+        $lastAgeColor = "MediumSeaGreen";
       } else {
         $lastAgeColor = "Tomato";
       }
@@ -70,24 +70,24 @@ sub action
       # Color and link for errors
       $lastXferErrors = $Backups[@Backups-1]->{xferErrs} if ( @Backups );
       if ( $lastXferErrors == 0 ) {
-          $lastXferErrorsColor = "MediumSeaGreen";
-          $ifErrors = "";
+        $lastXferErrorsColor = "MediumSeaGreen";
+        $ifErrors = "";
       } else {
         $lastXferErrorsColor = "Tomato";
         my $browseErrors = "?action=view&type=XferErr&num=$idBackup&host=$host";
         $ifErrors = "| <a href=\"$browseErrors\" target=\"_blank\"><strong>Read me !</strong></a>";
       }
 
-      # Colors statuts
+      # Colors statuts of backup
       $reasonHilite = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}} || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};
       $reasonHilite = " bgcolor=\"$reasonHilite\"" if ( $reasonHilite ne "" );
 
       # Check Size Consistency
-      my $new_size        = 0;
-      my $new_size_avg    = 0;
-      my $new_size_q1     = 0;
-      my $new_size_q3     = 0;
-      my $sizes           = new Statistics::Descriptive::Full;
+      my $new_size = 0;
+      my $new_size_avg = 0;
+      my $new_size_q1 = 0;
+      my $new_size_q3 = 0;
+      my $sizes = new Statistics::Descriptive::Full;
 
       foreach my $backup ( @Backups ) {
         my $idBackup = $Backups[@Backups-1]->{num} if ( @Backups );
@@ -99,29 +99,29 @@ sub action
 
         # Ignore the last backup if it's not full or incr (which means it's either partial or active)
         my $i = ( $Backups[-1]->{type} =~ m/^full|incr$/ ) ? -1 : -2;
-        $new_size          = $Backups[$i]->{sizeNew};
-        $new_size_avg      = int $sizes->mean;
-        $new_size_q1       = eval { int $sizes->quantile(1) } || 0;
-        $new_size_q3       = eval { int $sizes->quantile(3) } || 0;
+        $new_size = $Backups[$i]->{sizeNew};
+        $new_size_avg = int $sizes->mean;
+        $new_size_q1 = eval { int $sizes->quantile(1) } || 0;
+        $new_size_q3 = eval { int $sizes->quantile(3) } || 0;
       }
 
-      # Using a mathematical formula to calculate the consistency of the average size, for new files, on all backups
+      # Using a mathematical formula to calculate the consistency of the average size, for new files, on all backups :
       my $toobig = 0;
       my $toosmall = 0;
       my $sizeConsistencyColor = "Tomato";
       my $sizeConsistency = "<strong>ANOMALOUS</strong>";
 
-      # TOO BIG ? If the size is 3 times higher than usual :
+      # Too big ? If the size is 3 times higher than usual :
       if ( $new_size > ($new_size_q3 + ($new_size_q3 - $new_size_q1) ) * 1.5 and $new_size > $new_size_avg * 3 ) {
         $toobig = 1;
       }
 
-      # TOO SMALL ? If the size is 3 times lower than usual :
+      # Too small ? If the size is 3 times lower than usual :
       if ( $new_size < ($new_size_q1 - ($new_size_q3 - $new_size_q1) ) * 1.5 and $new_size < $new_size_avg / 3 ) {
         $toosmall = 1;
       }
 
-      # Get result
+      # Get result, if we don't have enough backup (< 4) we can't calcul a realist average
       if ( not $idBackup > 4) {
         $sizeConsistencyColor = "Gray";
         $sizeConsistency = "Not enough backups";
@@ -180,7 +180,7 @@ EOF
     </table>
 EOF
 
-    # Show page
+
     my $content = eval ("qq{$header}");
     Header("BackupPC: Check", $content);
     Trailer();

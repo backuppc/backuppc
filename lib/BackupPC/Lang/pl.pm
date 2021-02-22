@@ -1110,6 +1110,7 @@ $Lang{Config_file}   = "Plik Konfiguracyjny";
 # $Lang{Hosts_file} = "Plik Hostów";
 $Lang{Current_queues} = "Aktualne kolejki";
 $Lang{Documentation}  = "Dokumentacja";
+$Lang{Check}          = "Weryfikacja";
 
 #$Lang{Host_or_User_name} = "<small>Host lub nazwa użytkownika:</small>";
 $Lang{Go}            = "Idź";

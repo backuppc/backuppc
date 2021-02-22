@@ -1128,6 +1128,7 @@ $Lang{Config_file}   = "Konfigurační soubor";
 # $Lang{Hosts_file} = "Hosts soubor";
 $Lang{Current_queues} = "Aktuální fronty";
 $Lang{Documentation}  = "Dokumentace";
+$Lang{Check}          = "Ověření";
 
 #$Lang{Host_or_User_name} = "<small>Jméno uživatele nebo hosta:</small>";
 $Lang{Go}            = "Jdi";

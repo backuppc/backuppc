@@ -36,7 +36,7 @@ sub action
 
     # Start loop
     foreach my $host ( GetUserHosts(1) ) {
-      my($incrAge, $reasonHilite, $frequency, $idBackup, $lastAge, $lastAgeColor, $tempState, $tempReason, $lastXferErrors, $lastXferErrorsColor, $ifErrors, $sizeConsistency, $sizeConsistencyColor);
+      my($incrAge, $reasonHilite, $frequency, $lastAge, $lastAgeColor, $tempState, $tempReason, $lastXferErrors, $lastXferErrorsColor, $ifErrors, $sizeConsistency, $sizeConsistencyColor);
       my($shortErr);
       my @Backups = $bpc->BackupInfoRead($host);
 

@@ -869,9 +869,10 @@ inodes when the file system is built.  Use "df -i" to see your inode usage.
 Many linux distributions now include BackupPC, so installing BackupPC via your
 package manager is the best approach.
 
-For example, for Debian, supported by Ludovic Drolez, can be found at
-L<http://packages.debian.org/backuppc> and is included in the current stable
-Debian release.  On Debian, BackupPC can be installed with the command:
+For example, for Debian, supported by Axel Beckert, Jonathan Wiltshire and
+former Ludovic Drolez, can be found at L<http://packages.debian.org/backuppc>
+and is included in the current stable Debian release.  On Debian, BackupPC can
+be installed with the command:
 
     apt-get install backuppc
 
@@ -3791,7 +3792,8 @@ support fr.pm updates for each new version.
 
 Josh Marshall implemented the Archive feature in v2.1.0.
 
-Ludovic Drolez supports the BackupPC Debian package.
+Axel Beckert, Jonathan Wiltshire and former Ludovic Drolez supporting the
+BackupPC Debian package.
 
 Javier Gonzalez provided the Spanish translation, es.pm for v2.0.0.
 

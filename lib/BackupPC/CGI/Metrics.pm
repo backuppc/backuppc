@@ -259,7 +259,7 @@ sub action
             hosts => {
                 full_age        => {desc => "Age of the last full backup"},
                 full_count      => {desc => "Number of full backups"},
-                full_duration   => {desc => "Transfert time in seconds of the last full backup"},
+                full_duration   => {desc => "Transfer time in seconds of the last full backup"},
                 full_keep_count => {desc => "Number of full backups to keep"},
                 full_period     => {desc => "Minimum period in days between full backups"},
                 full_rate       => {desc => "Transfer rate in bytes/s of the last full backup"},

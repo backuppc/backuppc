@@ -34,7 +34,7 @@ The subdirectory src contains source versions of these scripts (before
 various absolute paths have been filled in), and the subdirectory init.d
 contains updated scripts with your settings merged in.
 
-Here are init.d instrcutions for different OSs.  Please submit additions
+Here are init.d instructions for different OSs.  Please submit additions
 or improvements to this list!
 
 RedHat Linux:
@@ -117,7 +117,7 @@ An alternative more compact script is freebsd-backuppc2, submitted
 by Dan Niles.
 
 Copy one of these scripts to /usr/local/etc/rc.d/backuppc and make
-execuatble.
+executable.
 
 Add the following line to /etc/rc.conf to enable BackupPC:
 

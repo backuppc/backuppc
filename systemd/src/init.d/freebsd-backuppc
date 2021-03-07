@@ -6,7 +6,7 @@
 # KEYWORD: shutdown
 
 #
-# Copy to /usr/local/etc/rc.d/backuppc and make execuatble
+# Copy to /usr/local/etc/rc.d/backuppc and make executable
 #
 # Add the following line to /etc/rc.conf to enable BackupPC:
 # backuppc_enable=(bool):   Set to "NO" by default.

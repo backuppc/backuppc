@@ -1,0 +1,4 @@
+# https://github.com/codespell-project/codespell
+[codespell]
+ignore-words = .codespellignore
+skip = ./lib/BackupPC/Lang

@@ -21,7 +21,7 @@
 #   Flags:
 #
 #     -m   Primary (master) BackupPC_nightly. Sends email.
-#          Otherise, BackupPC_nightly just does pool pruning.
+#          Otherwise, BackupPC_nightly just does pool pruning.
 #          Since several BackupPC_nightly processes might run
 #          concurrently, just the first one is given the -m flag
 #          by BackupPC.

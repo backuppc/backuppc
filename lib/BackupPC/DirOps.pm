@@ -182,7 +182,7 @@ sub dirRead
     #
     @entries = sort({ $a->{inode} <=> $b->{inode} } @entries) if ( $addInode );
     #
-    # for browing pre-3.0.0 backups, map iso-8859-1 to utf8 if requested
+    # for browsing pre-3.0.0 backups, map iso-8859-1 to utf8 if requested
     #
     if ( $need->{charsetLegacy} ne "" ) {
         for ( my $i = 0 ; $i < @entries ; $i++ ) {

@@ -622,7 +622,7 @@ sub remotels
 
         #
         # Try to extract number uid/gid, if present.  If there are special files (eg, devices or pipe) that are
-        # in the directoy listing, they won't be in $dirContents.  So $dirStr might not be the matching text
+        # in the directory listing, they won't be in $dirContents.  So $dirStr might not be the matching text
         # for $info.  So we peel off more elements if they don't appear to match.  This is very fragile.
         # Better solution would be to update $ftp->dir() to extract uid/gid if present.
         #

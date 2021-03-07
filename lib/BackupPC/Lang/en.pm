@@ -585,7 +585,7 @@ $Lang{Option_2__Download_Zip_archive2} = <<EOF;
 <p>
 Archive::Zip is not installed so you will not be able to download a
 zip archive.
-Please ask your system adminstrator to install Archive::Zip from
+Please ask your system administrator to install Archive::Zip from
 <a href="http://www.cpan.org">www.cpan.org</a>.
 </p>
 EOF
@@ -1497,7 +1497,7 @@ configuration for NEWHOST.  You can also do this for an existing
 host.  To delete a host, hit the Delete button.  For Add, Delete,
 and configuration copy, changes don't take effect until you select
 Save.  None of the deleted host's backups will be removed,
-so if you accidently delete a host, simply re-add it.  To completely
+so if you accidentally delete a host, simply re-add it.  To completely
 remove a host's backups, you need to manually remove the files
 below \$topDir/pc/HOST
 EOF

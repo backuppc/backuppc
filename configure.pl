@@ -753,7 +753,7 @@ foreach my $param ( keys(%{$opts{"config-override"}}) ) {
         exit(1);
     }
     if ( !defined($newVars->{$param}) ) {
-        printf("Unkown config parameter %s in --config-override\n", $param);
+        printf("Unknown config parameter %s in --config-override\n", $param);
         exit(1);
     }
     $value .= ";\n\n";

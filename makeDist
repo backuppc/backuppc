@@ -195,7 +195,7 @@ $ConfVars->{InstallDir}   = 2;
 $ConfVars->{CgiImageDir}  = 2;
 
 #
-# These config paramaters are used in the code
+# These config parameters are used in the code
 #
 $ConfVars->{ClientCharsetLegacy} = 2;
 $ConfVars->{DfCmd}               = 2;

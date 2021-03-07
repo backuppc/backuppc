@@ -623,7 +623,7 @@ Merged pull requests: #93, #94, #97, #102
   polo (#23)
 
 * Updates to bin/BackupPC_dump and lib/BackupPC/Xfer/Smb.pm from maksyms to fix
-  incompatabilities with Samba 4.3 (#22)
+  incompatibilities with Samba 4.3 (#22)
 
 * Applied IPv6 support (ping6) from felfert (#29).
 
@@ -789,7 +789,7 @@ Merged pull requests: #93, #94, #97, #102
 * Wrapped eval() around unpack() in lib/BackupPC/Attrib.pm to avoid
   failures on corrupted attrib files; patch from Tim Connors.
 
-* Applied documention patch from Alexander Moisseev.
+* Applied documentation patch from Alexander Moisseev.
 
 #------------------------------------------------------------------------
 # Version 3.2.0, 31 Jul 2010
@@ -825,7 +825,7 @@ Merged pull requests: #93, #94, #97, #102
 
 * Ignore fileType 8 and 9 in BackupPC_tarCreate rather than consider then
   errors.  These are sockets and unknown (eg: solaris door) files that
-  are created dynamicaly by applications - there is no meaningful restore
+  are created dynamically by applications - there is no meaningful restore
   for these file types.
 
 * Changed lib/BackupPC/Lib.pm and lib/BackupPC/Storage/Text.pm based on
@@ -1277,7 +1277,7 @@ Merged pull requests: #93, #94, #97, #102
 * Fixed error recovery case in BackupPC::PoolWrite, reported by
   Samuel Bancal.
 
-* Fixed table width in backup browsing to avoid Firefox layout anomoly,
+* Fixed table width in backup browsing to avoid Firefox layout anomaly,
   provided by Jono Woodhouse.
 
 * CSS file updates from Jono Woodhouse.  Prior (v2) version is included
@@ -1388,7 +1388,7 @@ Merged pull requests: #93, #94, #97, #102
 * Apply patch from Pete Wenzel to add smbClientPath => $Conf{SmbClientPath}
   to DumpPreUserCmd etc.
 
-* Added Portuguese Brazillian pt_br.pm from Reginaldo Ferreira.
+* Added Portuguese Brazilian pt_br.pm from Reginaldo Ferreira.
 
 * Jean-Michel Beuken reported several bugs in configure.pl in CVS 3.0.0.
 
@@ -1786,7 +1786,7 @@ Merged pull requests: #93, #94, #97, #102
   commented out.
 
 * Split BackupPC_Admin into a set of modules, one for each major action.
-  Each action is now a seperate module in lib/BackupPC/CGI.
+  Each action is now a separate module in lib/BackupPC/CGI.
 
 * Allow the blackout period begin/end to span midnight.  Adapted
   from patch submitted by David Smith.
@@ -1952,7 +1952,7 @@ Merged pull requests: #93, #94, #97, #102
 
 * Added untaint to exec in Lib.pm to avoid tainted errors.
 
-* Applied additional tweak to hilight patch from Tim Demarest.
+* Applied additional tweak to highlight patch from Tim Demarest.
 
 * $Conf{CgiAdminUsers} = '*' now allows privileged even with REMOTE_USER
   not set.
@@ -2052,7 +2052,7 @@ Merged pull requests: #93, #94, #97, #102
 * Added internationalization (i18n) code from Xavier Nicollet,
   with additions from Guillaume Filion.  Voila!  BackupPC_Admin
   now supports English and French, and adding more languages is
-  now easy.  New config paramater $Conf{Language} sets the language.
+  now easy.  New config parameter $Conf{Language} sets the language.
 
 * Added optional user-defined pre/post dump/restore commands, allowing
   things like database shutdown/startup for dumps.
@@ -2182,7 +2182,7 @@ Merged pull requests: #93, #94, #97, #102
 * Substantial additions to BackupPC_tarCreate to support restore,
   including modifying path names, handling hardlinks, fixing
   support of old backups without attributes (pre-v1.4.0).  Plus
-  BackupPC_tarCreate is now an offical part of the release.
+  BackupPC_tarCreate is now an official part of the release.
   (Lack of support for hardlinks was reported by John Stanley.)
 
 * BackupPC_tarExtract now supports hardlinks and fixed pooling of
@@ -2327,7 +2327,7 @@ Merged pull requests: #93, #94, #97, #102
   etc with minimum disk IO) to be used easily in multiple places (eg: it
   is now used for writing attribute files so they can be pooled).
 
-* Changed MD5 to Digest::MD5 to avoid use of the depreceated MD5 module.
+* Changed MD5 to Digest::MD5 to avoid use of the deprecated MD5 module.
 
 * Shortened default $Conf{MyPath} so that perl's taint mode is more likely
   to be happy.  The old $Conf{MyPath} contained /usr/local/bin, which

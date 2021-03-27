@@ -535,10 +535,17 @@ EOF
     NavSectionTitle($Lang->{Hosts});
     if ( defined($Hosts) && %$Hosts > 0 && @hosts ) {
         foreach my $host ( @hosts ) {
+            my $hostConf = $bpc->ConfigDataRead($host);
             NavLink("?host=${EscURI($host)}", $host)
               if ( @hosts < $Conf{CgiNavBarAdminAllHosts} );
             my $sel = " selected" if ( $host eq $In{host} );
-            $hostSelectbox .= "<option value=\"?host=${EscURI($host)}\"$sel>$host</option>";
+            $hostSelectbox .= "<option value=\"?host=${EscURI($host)}\"$sel>";
+            if ( defined($hostConf->{ClientDisplayName}) ) {
+                $hostSelectbox .= ${EscHTML($hostConf->{ClientDisplayName})} . ' (' . $host . ')';
+            } else {
+                $hostSelectbox .= $host;
+            }
+            $hostSelectbox .= "</option>"
         }
     }
     if ( @hosts >= $Conf{CgiNavBarAdminAllHosts} ) {

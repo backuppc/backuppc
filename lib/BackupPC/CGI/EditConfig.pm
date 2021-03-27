@@ -469,6 +469,7 @@ our %ConfigMenu = (
             {name => "PingMaxMsec"},
 
             {text => "CfgEdit_Title_Other"},
+            {name => "ClientDisplayName"},
             {name => "ClientComment"},
             {name => "ClientTimeout"},
             {name => "MaxOldPerPCLogFiles"},

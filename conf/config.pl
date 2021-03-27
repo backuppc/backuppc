@@ -1903,6 +1903,12 @@ $Conf{ClientNameAlias} = undef;
 #
 $Conf{ClientComment} = undef;
 
+#
+# User-definable comment string that appears in the host list.
+# The value is otherwise ignored by BackupPC.
+#
+$Conf{ClientDisplayName} = undef;
+
 ###########################################################################
 # Email reminders, status and messages
 # (can be overridden in the per-PC config.pl)
@@ -2297,6 +2303,7 @@ $Conf{CgiUserConfigEdit} = {
     ClientCharset             => 1,
     ClientCharsetLegacy       => 1,
     ClientComment             => 1,
+    ClientDisplayName         => 1,
     ClientNameAlias           => 1,
     ClientShareName2Path      => 1,
     ClientTimeout             => 1,

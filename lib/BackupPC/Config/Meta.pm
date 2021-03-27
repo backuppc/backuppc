@@ -329,6 +329,7 @@ use vars qw(%ConfigMeta);
     NmbLookupCmd         => "string",
     NmbLookupFindHostCmd => "string",
     ClientComment        => "string",
+    ClientDisplayName    => "string",
 
     FixedIPNetBiosNameCheck => "boolean",
     PingCmd                 => "string",
@@ -512,6 +513,7 @@ use vars qw(%ConfigMeta);
             CompressLevel             => "boolean",
             ClientNameAlias           => "boolean",
             ClientComment             => "boolean",
+            ClientDisplayName         => "boolean",
             DumpPreUserCmd            => "boolean",
             DumpPostUserCmd           => "boolean",
             RestorePreUserCmd         => "boolean",

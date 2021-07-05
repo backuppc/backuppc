@@ -1350,8 +1350,7 @@ On some new glibc versions (like in Ubuntu 20.10, Fedora 33beta) and rsync V3.2.
     rsync: [receiver] failed to set permissions on "/some_file2": Operation not supported (95)
     ...
 
-Solution :
-compile rsync Yourself on the backuppc clients, atm of this writing (2021-July-03) rsync version 3.2.4dev works fine.
+If You experience such errors, upgrade from rsync 3.2.3 to (atm of this writing 2021-July-03) at least 3.2.4dev, see https://github.com/WayneD/rsync/blob/master/INSTALL.md
 
 You can find more information about that issue at https://github.com/WayneD/rsync/issues/109
 
@@ -1380,8 +1379,7 @@ On some new glibc versions (like in Ubuntu 20.10, Fedora 33beta) and rsync V3.2.
     rsync: [receiver] failed to set permissions on "/some_file2": Operation not supported (95)
     ...
 
-Solution :
-compile rsync Yourself on the backuppc clients, atm of this writing (2021-July-03) rsync version 3.2.4dev works fine.
+If You experience such errors, upgrade from rsync 3.2.3 to (atm of this writing 2021-July-03) at least 3.2.4dev, see https://github.com/WayneD/rsync/blob/master/INSTALL.md
 
 You can find more information about that issue at https://github.com/WayneD/rsync/issues/109
 

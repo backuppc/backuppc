@@ -926,9 +926,9 @@ installed.
 
 =item JSON::XS
 
-To support the JSON formated metrics you will need to install JSON::XS, also
+To support the JSON formatted metrics you will need to install JSON::XS, also
 from L<http://www.cpan.org>. There is not need to install this module if you
-don't plan on using JSON formated metrics. You can run "perldoc JSON::XS" to
+don't plan on using JSON formatted metrics. You can run "perldoc JSON::XS" to
 see if this module is installed.
 
 =item CGI
@@ -1220,7 +1220,7 @@ installer on L<https://github.com/backuppc/cygwin-rsyncd/releases>. The package
 is called cygwin-rsync. It contains rsync.exe, template setup files and the
 minimal set of cygwin libraries for everything to run.  The README file
 contains instructions for running rsync as a service, so it starts
-automatically everytime you boot your machine.  If you use rsync to backup
+automatically every time you boot your machine.  If you use rsync to backup
 WinXX machines, be sure to set $Conf{ClientCharset} correctly (eg: 'cp1252') so
 that the WinXX filename encoding is correctly converted to utf8.
 

@@ -20,3 +20,10 @@ repos:
     rev: "20200619"
     hooks:
       - id: perltidy
+
+  - repo: "https://github.com/codespell-project/codespell"
+    rev: v2.0.0
+    hooks:
+      - id: codespell
+        always_run: true
+        pass_filenames: false

@@ -112,7 +112,7 @@ sub NewRequest
     }
 
     #
-    # Default REMOTE_USER so in a miminal installation the user
+    # Default REMOTE_USER so in a minimal installation the user
     # has a sensible default.
     #
     $ENV{REMOTE_USER} = $Conf{BackupPCUser} if ( $ENV{REMOTE_USER} eq "" );

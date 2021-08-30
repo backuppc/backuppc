@@ -1337,12 +1337,28 @@ The requirements for each Xfer Method are:
 
 To use rsync, you need rsync-bpc installed on the BackupPC server.
 
-On the client, you should have at least rsync 3.x.  Rsync is run on the remote
-client via ssh.
-
 The relevant configuration settings are $Conf{RsyncClientPath},
 $Conf{RsyncSshArgs}, $Conf{RsyncShareName}, $Conf{RsyncArgs},
 $Conf{RsyncArgsExtra}, $Conf{RsyncFullArgsExtra}, and $Conf{RsyncRestoreArgs}.
+
+On the client, you should have at least rsync 3.x.  Rsync is run on the remote
+client via ssh.
+
+On some new glibc versions (like in Ubuntu 20.10, Fedora 33beta) and rsync
+V3.2.3 there is a bug, which prevents to set the correct owner, group and
+permissions of restored files. You will find many of the following entries in
+rsync.log :
+
+    rsync: [receiver] failed to set permissions on "/some_file": Operation not supported (95)
+    rsync: [receiver] failed to set permissions on "/some_file2": Operation not supported (95)
+    ...
+
+If You experience such errors, upgrade from rsync 3.2.3 to (atm of this writing
+2021-July-03) at least 3.2.4dev, see
+L<https://github.com/WayneD/rsync/blob/master/INSTALL.md>
+
+You can find more information about that issue at
+L<https://github.com/WayneD/rsync/issues/109>
 
 =item rsyncd
 
@@ -1362,6 +1378,23 @@ not a file system path.
 Be aware that rsyncd will remove the leading '/' from path names in symbolic
 links if you specify "use chroot = no" in the rsynd.conf file. See the
 rsyncd.conf manual page for more information.
+
+On some new glibc versions (like in Ubuntu 20.10, Fedora 33beta) and rsync
+V3.2.3 there is a bug, which prevents to set the correct owner, group and
+permissions of restored files. You will find many of the following entries in
+rsync.log :
+
+    rsync: [receiver] failed to set permissions on "/some_file": Operation not supported (95)
+    rsync: [receiver] failed to set permissions on "/some_file2": Operation not supported (95)
+    ...
+
+If You experience such errors, upgrade from rsync 3.2.3 to (atm of this writing
+2021-July-03) at least 3.2.4dev, see
+L<https://github.com/WayneD/rsync/blob/master/INSTALL.md>
+
+You can find more information about that issue at
+L<https://github.com/WayneD/rsync/issues/109>
+
 
 =item tar
 

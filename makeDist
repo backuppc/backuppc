@@ -287,11 +287,13 @@ foreach my $file ( (
     <images/*.png>,
     <images/*.ico>,
     qw(
-    conf/config.pl
-    conf/hosts
-    conf/BackupPC_stnd.css
+    conf/BackupPC_2020_mod.css
+    conf/BackupPC_mod.css
     conf/BackupPC_retro_v2.css
     conf/BackupPC_retro_v3.css
+    conf/BackupPC_stnd.css
+    conf/config.pl
+    conf/hosts
     conf/sorttable.js
     systemd/README
     systemd/src/backuppc.service

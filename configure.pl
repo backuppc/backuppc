@@ -976,12 +976,16 @@ sub DoInstall
         if ( -f "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css" && !-f $cssBackup ) {
             rename("$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css", $cssBackup);
         }
-        InstallFile("conf/BackupPC_2020_mod.css", "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css",     0444, 0);
-        InstallFile("conf/BackupPC_mod.css",      "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css",     0444, 0);
-        InstallFile("conf/BackupPC_retro_v2.css", "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v2.css", 0444, 0);
-        InstallFile("conf/BackupPC_retro_v3.css", "$DestDir$Conf{CgiImageDir}/BackupPC_retro_v3.css", 0444, 0);
-        InstallFile("conf/BackupPC_stnd.css",     "$DestDir$Conf{CgiImageDir}/BackupPC_stnd.css",     0444, 0);
-        InstallFile("conf/sorttable.js",          "$DestDir$Conf{CgiImageDir}/sorttable.js",          0444, 0);
+        foreach my $file ( qw(
+            BackupPC_2020_mod.css
+            BackupPC_mod.css
+            BackupPC_retro_v2.css
+            BackupPC_retro_v3.css
+            BackupPC_stnd.css
+            sorttable.js
+        ) ) {
+            InstallFile("conf/$file", "$DestDir$Conf{CgiImageDir}/$file", 0444, 0);
+        }
     }
 
     print("Making systemd and init.d scripts\n");

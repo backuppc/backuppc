@@ -113,8 +113,8 @@ sub action
     # Host metrics
     #
     foreach my $host ( GetUserHosts(1) ) {
-        my($fullCount, $fullDuration, $fullRate, $fullSize);
-        my($incrCount, $incrDuration, $incrRate, $incrSize);
+        my($fullAge, $fullCount, $fullDuration, $fullRate, $fullSize);
+        my($incrAge ,$incrCount, $incrDuration, $incrRate, $incrSize);
         my($lastFullBackup, $lastIncrBackup);
 
         $fullCount = $incrCount = 0;
@@ -133,10 +133,20 @@ sub action
                 if ( $$lastFullBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastFullBackup->{startTime} ) {
                     $lastFullBackup = \$Backups[$i];
                 }
+                if ( $$lastFullBackup->{endTime} < 0 ) {
+                    $fullAge  = "";
+                } else {
+                    $fullAge  = time - $$lastFullBackup->{endTime};
+                }
             } elsif ( $Backups[$i]{type} eq "incr" ) {
                 $incrCount++;
                 if ( $$lastIncrBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastIncrBackup->{startTime} ) {
                     $lastIncrBackup = \$Backups[$i];
+                }
+                if ( $$lastIncrBackup->{endTime} < 0 ) {
+                    $incrAge = "";
+                } else {
+                    $incrAge = time - $$lastIncrBackup->{endTime};
                 }
             }
         }
@@ -155,10 +165,11 @@ sub action
         }
 
         $metrics{hosts}{$host} = {
+            full_age          => int($fullAge),
             full_start_time   => int($$lastFullBackup->{startTime}),
             full_count        => $fullCount,
             full_duration     => int($fullDuration),
-            full_keep_count   => $Conf{FullKeepCnt},
+            full_keep_count   => $Conf{FullKeepCnt}[0],
             full_period       => $Conf{FullPeriod},
             full_rate         => int($fullRate),
             full_size         => int($fullSize),
@@ -166,6 +177,7 @@ sub action
             full_size_new     => int($$lastFullBackup->{sizeNew}),
             full_nfiles_exist => int($$lastFullBackup->{nFilesExist}),
             full_nfiles_new   => int($$lastFullBackup->{nFilesNew}),
+            incr_age          => int($incrAge),
             incr_start_time   => int($$lastIncrBackup->{startTime}),
             incr_count        => $incrCount,
             incr_duration     => int($incrDuration),
@@ -258,6 +270,7 @@ sub action
         my %mapper = (
             hosts => {
                 full_age        => {desc => "Age of the last full backup"},
+                full_start_time => {desc => "Last full backup start in epoch time (seconds)"},
                 full_count      => {desc => "Number of full backups"},
                 full_duration   => {desc => "Transfer time in seconds of the last full backup"},
                 full_keep_count => {desc => "Number of full backups to keep"},
@@ -265,6 +278,7 @@ sub action
                 full_rate       => {desc => "Transfer rate in bytes/s of the last full backup"},
                 full_size       => {desc => "Size in bytes of the last full backup"},
                 incr_age        => {desc => "Age of the last incremental backup"},
+                incr_start_time => {desc => "Same as full backup but for incremental backup"},
                 incr_count      => {desc => "Number of incremental backups"},
                 incr_duration   => {desc => "Transfer time in seconds of the last incremental backup"},
                 incr_keep_count => {desc => "Number of incremental backups to keep"},

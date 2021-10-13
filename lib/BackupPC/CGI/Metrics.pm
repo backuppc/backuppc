@@ -132,20 +132,12 @@ sub action
                 $fullCount++;
                 if ( $$lastFullBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastFullBackup->{startTime} ) {
                     $lastFullBackup = \$Backups[$i];
-                }
-                if ( $$lastFullBackup->{endTime} < 0 ) {
-                    $fullAge  = "";
-                } else {
                     $fullAge  = time - $$lastFullBackup->{endTime};
                 }
             } elsif ( $Backups[$i]{type} eq "incr" ) {
                 $incrCount++;
                 if ( $$lastIncrBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastIncrBackup->{startTime} ) {
                     $lastIncrBackup = \$Backups[$i];
-                }
-                if ( $$lastIncrBackup->{endTime} < 0 ) {
-                    $incrAge = "";
-                } else {
                     $incrAge = time - $$lastIncrBackup->{endTime};
                 }
             }

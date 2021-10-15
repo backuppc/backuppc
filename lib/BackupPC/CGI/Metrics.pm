@@ -114,7 +114,7 @@ sub action
     #
     foreach my $host ( GetUserHosts(1) ) {
         my($fullAge, $fullCount, $fullDuration, $fullRate, $fullSize);
-        my($incrAge ,$incrCount, $incrDuration, $incrRate, $incrSize);
+        my($incrAge, $incrCount, $incrDuration, $incrRate, $incrSize);
         my($lastFullBackup, $lastIncrBackup);
 
         $fullCount = $incrCount = 0;
@@ -132,13 +132,13 @@ sub action
                 $fullCount++;
                 if ( $$lastFullBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastFullBackup->{startTime} ) {
                     $lastFullBackup = \$Backups[$i];
-                    $fullAge  = time - $$lastFullBackup->{endTime};
+                    $fullAge        = time - $$lastFullBackup->{endTime};
                 }
             } elsif ( $Backups[$i]{type} eq "incr" ) {
                 $incrCount++;
                 if ( $$lastIncrBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastIncrBackup->{startTime} ) {
                     $lastIncrBackup = \$Backups[$i];
-                    $incrAge = time - $$lastIncrBackup->{endTime};
+                    $incrAge        = time - $$lastIncrBackup->{endTime};
                 }
             }
         }

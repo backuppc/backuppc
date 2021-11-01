@@ -1792,9 +1792,9 @@
 <p>BackupPC supports a metrics endpoint that expose common information in a digest format. Allowed metrics formats are <code>json</code> (default), <code>prometheus</code> and <code>rss</code>. Format should be specified using <code>format</code> query parameter, a URL similar to this will provide metrics information:</p>
 
 <pre><code>    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics
-    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=json
-    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=prometheus
-    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics?format=rss</code></pre>
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics&format=json
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics&format=prometheus
+    http://localhost/cgi-bin/BackupPC/BackupPC_Admin?action=metrics&format=rss</code></pre>
 
 <p>JSON format requires the JSON::XS module to be installed. RSS format requires the XML::RSS module to be installed.</p>
 

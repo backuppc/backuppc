@@ -157,7 +157,7 @@ sub action
             $incrRate = $incrSize / ($incrDuration <= 0 ? 1 : $incrDuration);
         }
 
-        $fkc = 0;
+        my $fkc = 0;
         if (ref($Conf{FullKeepCnt}) eq "ARRAY") {
             if (looks_like_number($Conf{FullKeepCnt}[0]) > 0) {
                 $fkc = $Conf{FullKeepCnt}[0];

@@ -39,6 +39,7 @@ use strict;
 use warnings;
 
 use BackupPC::CGI::Lib qw(:all);
+use Scalar::Util 'looks_like_number';
 
 my $LoadErrorXMLRSS;
 my $LoadErrorJSONXS;
@@ -156,12 +157,25 @@ sub action
             $incrRate = $incrSize / ($incrDuration <= 0 ? 1 : $incrDuration);
         }
 
+        $fkc = 0;
+        if (ref($Conf{FullKeepCnt}) eq "ARRAY") {
+            if (looks_like_number($Conf{FullKeepCnt}[0]) > 0) {
+                $fkc = $Conf{FullKeepCnt}[0];
+            }
+        } elsif (ref($Conf{FullKeepCnt}) eq "HASHMAP") {
+            ;
+        } else {
+            if (looks_like_number($Conf{FullKeepCnt}) > 0) {
+                $fkc = $Conf{FullKeepCnt};
+            }
+        }
+
         $metrics{hosts}{$host} = {
             full_age          => int($fullAge),
             full_start_time   => int($$lastFullBackup->{startTime}),
             full_count        => $fullCount,
             full_duration     => int($fullDuration),
-            full_keep_count   => $Conf{FullKeepCnt}[0],
+            full_keep_count   => $fkc,
             full_period       => $Conf{FullPeriod},
             full_rate         => int($fullRate),
             full_size         => int($fullSize),

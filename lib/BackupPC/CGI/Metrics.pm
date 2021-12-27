@@ -159,13 +159,13 @@ sub action
 
         my $fkc = 0;
         if (ref($Conf{FullKeepCnt}) eq "ARRAY") {
-            if (looks_like_number($Conf{FullKeepCnt}[0]) > 0) {
+-            if (looks_like_number($Conf{FullKeepCnt}[0]) > 0) {
                 $fkc = $Conf{FullKeepCnt}[0];
             }
-        } elsif (ref($Conf{FullKeepCnt}) eq "HASHMAP") {
+        } elsif ( ref($Conf{FullKeepCnt}) eq "HASHMAP" ) {
             ;
         } else {
-            if (looks_like_number($Conf{FullKeepCnt}) > 0) {
+            if ( looks_like_number($Conf{FullKeepCnt}) > 0 ) {
                 $fkc = $Conf{FullKeepCnt};
             }
         }

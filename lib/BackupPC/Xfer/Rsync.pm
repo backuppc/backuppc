@@ -6,8 +6,6 @@
 #
 #   This library defines a BackupPC::Xfer::Rsync class for managing
 #   the rsync-based transport of backup data from/to the client.
-#   After generating the rsync arguments, it calls BackupPC_rsyncBackup
-#   or BackupPC_rsyncRestore to actually do the backup or restore.
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>

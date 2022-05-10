@@ -422,7 +422,7 @@ sub ConfigFileMerge
                 my $var = $1;
                 $skipExpr = "\$fakeVar = $2\n";
                 if ( exists($newConf->{$var}) ) {
-                    my $d = Data::Dumper->new([$newConf->{$var}], [*value]);
+                    my $d = Data::Dumper->new([$newConf->{$var}]);
                     $d->Indent(1);
                     $d->Terse(1);
                     $d->Sortkeys(1);
@@ -454,7 +454,7 @@ sub ConfigFileMerge
     #
     foreach my $var ( sort(keys(%$newConf)) ) {
         next if ( $done->{$var} );
-        my $d = Data::Dumper->new([$newConf->{$var}], [*value]);
+        my $d = Data::Dumper->new([$newConf->{$var}]);
         $d->Indent(1);
         $d->Terse(1);
         $d->Sortkeys(1);

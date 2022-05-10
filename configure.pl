@@ -668,7 +668,7 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
           if ( defined($Conf{CgiUserConfigEdit}{$p}) );
     }
     $Conf{CgiUserConfigEdit} = $new;
-    my $d = Data::Dumper->new([$new], [*value]);
+    my $d = Data::Dumper->new([$new]);
     $d->Indent(1);
     $d->Terse(1);
     $d->Sortkeys(1);

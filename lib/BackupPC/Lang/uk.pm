@@ -1133,6 +1133,7 @@ $Lang{Config_file}   = "Файл конфігурації";
 # $Lang{Hosts_file} = "Hosts file";
 $Lang{Current_queues} = "Поточні черги";
 $Lang{Documentation}  = "Документація (англ)";
+$Lang{Check}          = "Перевірка";
 
 #$Lang{Host_or_User_name} = "<small>Host or User name:</small>";
 $Lang{Go}            = "Перейти";

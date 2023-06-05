@@ -397,17 +397,19 @@ sub start
             push(@$rsyncArgs, "${hostIP_protect}:$shareNameSlash", "/");
         } else {
             if ( length($conf->{RsyncdPasswd}) ) {
-                my $pwFd;
+                my($pwFd, $ok);
                 $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
                 if ( open($pwFd, ">", $t->{pwFile}) ) {
-                    chmod(0400, $t->{pwFile});
-                    binmode($pwFd);
-                    syswrite($pwFd, $conf->{RsyncdPasswd});
-                    close($pwFd);
+                    $ok = 1;
+                    $ok = 0 if ( $ok && chmod(0400, $t->{pwFile}) != 1 );
+                    $ok = 0 if ( $ok && !binmode($pwFd) );
+                    $ok = 0 if ( $ok && syswrite($pwFd, $conf->{RsyncdPasswd}) != length($conf->{RsyncdPasswd}) );
+                    $ok = 0 if ( $ok && !close($pwFd) );
                     push(@$rsyncArgs, "--password-file=$t->{pwFile}");
-                } else {
-                    $t->{XferLOG}->write(\"Failed to open/create rsyncd pw file $t->{pwFile}\n");
-                    $t->{_errStr} = "Failed to open/create rsyncd pw file $t->{pwFile}";
+                }
+                if ( !$ok ) {
+                    $t->{XferLOG}->write(\"Failed to open/create rsyncd pw file $t->{pwFile} ($!)\n");
+                    $t->{_errStr} = "Failed to open/create rsyncd pw file $t->{pwFile} ($!)";
                     return;
                 }
             }

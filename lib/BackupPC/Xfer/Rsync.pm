@@ -139,6 +139,8 @@ sub start
               if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' );
             push(@$rsyncArgs, @$srcList, "${hostIP_protect}:$remoteDir");
         } else {
+            unshift(@$rsyncArgs, @{$conf->{RsyncSshArgs}})
+              if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' && $conf->{RsyncdSsh} );
             if ( length($conf->{RsyncdPasswd}) ) {
                 my($pwFd, $ok);
                 $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
@@ -366,6 +368,8 @@ sub start
             unshift(@$rsyncArgs, @{$conf->{RsyncSshArgs}})
               if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' );
         } else {
+            unshift(@$rsyncArgs, @{$conf->{RsyncSshArgs}})
+              if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' && $conf->{RsyncdSsh} );
             if ( $conf->{RsyncdClientPort} != 873 ) {
                 push(@$rsyncArgs, "--port=$conf->{RsyncdClientPort}");
             }

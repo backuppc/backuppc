@@ -247,15 +247,11 @@ use vars qw(%ConfigMeta);
     },
     RsyncBackupPCPath => {type => "execPath", undefIfEmpty => 1},
     RsyncClientPath   => {type => "string",   undefIfEmpty => 1},
-    RsyncSshArgs      => {
-        type    => "list",
-        emptyOk => 1,
-        child   => "string",
-    },
 
     ######################################################################
     # Rsyncd Configuration
     ######################################################################
+    RsyncdSsh        => "boolean",
     RsyncdClientPort => "integer",
     RsyncdUserName   => "string",
     RsyncdPasswd     => "string",
@@ -263,6 +259,11 @@ use vars qw(%ConfigMeta);
     ######################################################################
     # Rsync(d) Options
     ######################################################################
+    RsyncSshArgs => {
+        type    => "list",
+        emptyOk => 1,
+        child   => "string",
+    },
     RsyncArgs => {
         type    => "list",
         emptyOk => 1,
@@ -479,6 +480,7 @@ use vars qw(%ConfigMeta);
             RsyncShareName            => "boolean",
             RsyncBackupPCPath         => "boolean",
             RsyncdClientPort          => "boolean",
+            RsyncdSsh                 => "boolean",
             RsyncdUserName            => "boolean",
             RsyncdPasswd              => "boolean",
             RsyncArgs                 => "boolean",

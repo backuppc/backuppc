@@ -1227,9 +1227,18 @@ $Conf{RsyncBackupPCPath} = "";
 # The setting should only have two entries: "-e" and
 # everything else; don't add additional array elements.
 #
-# This setting only matters if $Conf{XferMethod} = 'rsync'.
+# This setting only matters if $Conf{XferMethod} = 'rsync', or if
+# $Conf{XferMethod} = 'rsyncd' and $Conf{RsyncdSsh} = 1.
 #
 $Conf{RsyncSshArgs} = ['-e', '$sshPath -l root -o ServerAliveInterval=60'];
+
+#
+# Whether to tell rsync to connect to the client's rsync daemon via ssh instead
+# of directly over TCP.  See $Conf{RsyncSshArgs}.
+#
+# This setting only matters if $Conf{XferMethod} = 'rsyncd'.
+#
+$Conf{RsyncdSsh} = 0;
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should
@@ -2352,6 +2361,7 @@ $Conf{CgiUserConfigEdit} = {
     RsyncClientPath           => 0,
     RsyncdClientPort          => 1,
     RsyncdPasswd              => 1,
+    RsyncdSsh                 => 1,
     RsyncdUserName            => 1,
     RsyncFullArgsExtra        => 1,
     RsyncIncrArgsExtra        => 1,

@@ -115,7 +115,7 @@ sub action
     foreach my $host ( GetUserHosts(1) ) {
         my($fullCount, $fullDuration, $fullRate, $fullSize);
         my($incrCount, $incrDuration, $incrRate, $incrSize);
-        my($lastFullBackup, $lastIncrBackup);
+        my($lastFullBackup, $lastIncrBackup, $fullKeepCount);
 
         $fullCount = $incrCount = 0;
         $$lastFullBackup->{StartTime} = $$lastIncrBackup->{StartTime} = -1;
@@ -154,11 +154,21 @@ sub action
             $incrRate = $incrSize / ($incrDuration <= 0 ? 1 : $incrDuration);
         }
 
+        if (ref($Conf{FullKeepCnt}) eq 'ARRAY') {
+            $fullKeepCount = 0;
+            my @fullKeepCountArray = @{ $Conf{FullKeepCnt} };
+            foreach (@fullKeepCountArray) {
+                $fullKeepCount += $_;
+            }
+        } else {
+            $fullKeepCnt = $Conf{FullKeepCnt};
+        }
+
         $metrics{hosts}{$host} = {
             full_start_time   => int($$lastFullBackup->{startTime}),
             full_count        => $fullCount,
             full_duration     => int($fullDuration),
-            full_keep_count   => $Conf{FullKeepCnt},
+            full_keep_count   => $fullKeepCount,
             full_period       => $Conf{FullPeriod},
             full_rate         => int($fullRate),
             full_size         => int($fullSize),

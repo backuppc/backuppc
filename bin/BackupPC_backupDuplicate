@@ -86,7 +86,7 @@ if (   $opts{h} !~ /^([\w\.\s-]+)$/
 }
 my $Host = $opts{h};
 if ( defined(my $error = $bpc->ConfigRead($Host)) ) {
-    print(STDERR "BackupPC_backupDuplicate: Can't read $Host's config file: $error\n");
+    print(STDERR "BackupPC_backupDuplicate: Can't read ${Host}'s config file: $error\n");
     exit(1);
 }
 %Conf = $bpc->Conf();

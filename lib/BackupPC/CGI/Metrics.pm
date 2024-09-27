@@ -257,14 +257,14 @@ sub action
 
         my %mapper = (
             hosts => {
-                full_age        => {desc => "Age of the last full backup"},
+                full_start_time => {desc => "Start time of the last full backup"},
                 full_count      => {desc => "Number of full backups"},
                 full_duration   => {desc => "Transfer time in seconds of the last full backup"},
                 full_keep_count => {desc => "Number of full backups to keep"},
                 full_period     => {desc => "Minimum period in days between full backups"},
                 full_rate       => {desc => "Transfer rate in bytes/s of the last full backup"},
                 full_size       => {desc => "Size in bytes of the last full backup"},
-                incr_age        => {desc => "Age of the last incremental backup"},
+                incr_start_time => {desc => "Start time of the last incremental backup"},
                 incr_count      => {desc => "Number of incremental backups"},
                 incr_duration   => {desc => "Transfer time in seconds of the last incremental backup"},
                 incr_keep_count => {desc => "Number of incremental backups to keep"},

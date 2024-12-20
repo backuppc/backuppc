@@ -39,7 +39,7 @@ use strict;
 no utf8;
 
 use lib "/usr/local/BackupPC/lib";
-use BackupPC::Lib qw( :BPC_DT_ALL );
+use BackupPC::Lib;
 use File::Path;
 use Data::Dumper;
 our(%Info);

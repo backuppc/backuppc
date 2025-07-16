@@ -86,7 +86,7 @@ use strict;
 no utf8;
 
 use lib "/usr/local/BackupPC/lib";
-use BackupPC::Lib qw( :BPC_DT_ALL );
+use BackupPC::Lib;
 use BackupPC::XS;
 use BackupPC::DirOps;
 use Getopt::Std;

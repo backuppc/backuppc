@@ -49,7 +49,7 @@ jobs:
 
   tidy:
     docker:
-      - image: perl:5.34
+      - image: perl:latest
     steps:
       - run:
           name: Exporting env vars

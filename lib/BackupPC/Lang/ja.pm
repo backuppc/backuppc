@@ -1112,6 +1112,7 @@ $Lang{Config_file}   = "設定ファイル";
 # $Lang{Hosts_file} = "ホストファイル";
 $Lang{Current_queues} = "現在のキュー";
 $Lang{Documentation}  = "文章";
+$Lang{Check}          = "検証";
 
 #$Lang{Host_or_User_name} = "<small>ホストまたはユーザ名:</small>";
 $Lang{Go}            = "実行";

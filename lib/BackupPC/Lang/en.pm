@@ -1374,7 +1374,7 @@ ago.  PC backups should occur automatically when your PC is connected
 to the network.
 
 If your PC has been connected for more than a few hours to the
-network during the last $days days you should contact IS to find
+network during the last $days days you should contact IT support to find
 out why backups are not working.
 
 Otherwise, if you are out of the office, there's not much you can

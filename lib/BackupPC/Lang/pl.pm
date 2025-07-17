@@ -1321,9 +1321,9 @@ $Lang{Disabled_AllBackupsDisabled}     = "wyłączony";
 # No backup ever
 $Lang{EMailNoBackupEverSubj} = "BackupPC: żadna kopia \$host nie powiodła się";
 $Lang{EMailNoBackupEverMesg} = <<'EOF';
-Do: $user$domain
+To: $user$domain
 cc:
-Temat: $subj
+Subject: $subj
 $headers
 Drogi $userName,
 
@@ -1348,9 +1348,9 @@ EOF
 # No recent backup
 $Lang{EMailNoBackupRecentSubj} = "BackupPC: żadnych nowych kopii na \$host";
 $Lang{EMailNoBackupRecentMesg} = <<'EOF';
-Do: $user$domain
+To: $user$domain
 cc:
-Temat: $subj
+Subject: $subj
 $headers
 Drogi $userName,
 

@@ -69,7 +69,8 @@ jobs:
             cpanm --quiet --notest \
               Code::TidyAll \
               Code::TidyAll::Plugin::Test::Vars \
-              Pod::Tidy
+              Pod::Tidy \
+              DAGOLDEN/Path-Tiny-0.130.tar.gz
       - save_cache:
           key: v9-tidyall_dependencies
           paths:

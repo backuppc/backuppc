@@ -58,6 +58,7 @@ use Data::Dumper;
 use lib "./lib";
 use BackupPC::Lib;
 use BackupPC::Config::Meta qw(:all);
+use Scalar::Util 'looks_like_number';
 
 my $bpc;
 

@@ -108,7 +108,7 @@ my($Host, $LogLevel, $Compress, $SrcDir, $DestDir, $BkupNum, $Inode, $DeltaInfo,
 foreach my $h ( defined($opts{h}) ? ($opts{h}) : sort(keys(%$Hosts)) ) {
     $Host = $h;
     if ( defined(my $error = $bpc->ConfigRead($Host)) ) {
-        print("BackupPC_migrateV3toV4: Can't read $Host's config file: $error\n");
+        print("BackupPC_migrateV3toV4: Can't read ${Host}'s config file: $error\n");
         exit(1);
     }
     #

@@ -385,8 +385,15 @@ our %ConfigMenu = (
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
             },
             {
+                name    => "RsyncdSsh",
+                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; }
+            },
+            {
                 name    => "RsyncSshArgs",
-                visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
+                visible => sub {
+                    return $_[0]->{XferMethod} eq "rsync"
+                      || ($_[0]->{XferMethod} eq "rsyncd" && $_[0]->{RsyncdSsh});
+                }
             },
             {
                 name    => "RsyncdClientPort",

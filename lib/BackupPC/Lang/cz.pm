@@ -59,7 +59,7 @@ $Lang{Unable_to_connect_to_BackupPC_server_error_message} = <<EOF;
 Tento CGI skript (\$MyURL) se není schopný připojit k BackupPC
 server na \$Conf{ServerHost} port \$Conf{ServerPort}.<br>
 Chyba: \$err.<br>
-Je možné, že BackupPC server není spuştěn nebo je chyba v konfiguraci.
+Je možné, že BackupPC server není spuštěn nebo je chyba v konfiguraci.
 Prosím oznamte to systémovému administrátorovi.
 EOF
 
@@ -67,7 +67,7 @@ $Lang{Admin_Start_Server} = <<EOF;
 \${h1(qq{$Lang{Unable_to_connect_to_BackupPC_server}})}
 <form action="\$MyURL" method="get">
 BackupPC server na <tt>\$Conf{ServerHost}</tt> port <tt>\$Conf{ServerPort}</tt>
-není momentálně spuştěn (možná jste ho ukončil nebo jeştě nespustil).<br>
+není momentálně spuštěn (možná jste ho ukončil nebo ještě nespustil).<br>
 Chceste ho spustit?
 <input type="hidden" name="action" value="startServer">
 <input type="submit" value="Spustit Server" name="ignore">
@@ -83,22 +83,22 @@ $Lang{BackupPC_Server_Status_General_Info} = <<EOF;
 
 <ul>
 <li> PID serveru je \$Info{pid},  na hostu \$Conf{ServerHost},
-     verze \$Info{Version}, spuştěný \$serverStartTime.
+     verze \$Info{Version}, spuštěný \$serverStartTime.
 <li> Vygenerování stavu : \$now.
 <li> Nahrání konfigurace : \$configLoadTime.
-<li> PC bude příştě ve frontě : \$nextWakeupTime.
-<li> Dalşí informace:
+<li> PC bude příště ve frontě : \$nextWakeupTime.
+<li> Další informace:
     <ul>
         <li>\$numBgQueue nevyřízených žádostí o zálohu z posledního naplánované probuzení,
         <li>\$numUserQueue nevyřízených žádostí o zálohu od uživatelů,
         <li>\$numCmdQueue pending command requests,
         \$poolInfo
-        <li>Stav úložiştě je \$Info{DUlastValue}%
-            (\$DUlastTime), dneşní maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
-                a včerejşí maximum bylo \$Info{DUDailyMaxPrev}%.
-        <li>Inode stav úložiştě je \$Info{DUInodelastValue}%
-            (\$DUlastTime), dneşní maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
-                a včerejşí maximum bylo \$Info{DUInodeDailyMaxPrev}%.
+        <li>Stav úložiště je \$Info{DUlastValue}%
+            (\$DUlastTime), dnešní maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
+                a včerejší maximum bylo \$Info{DUDailyMaxPrev}%.
+        <li>Inode stav úložiště je \$Info{DUInodelastValue}%
+            (\$DUlastTime), dnešní maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+                a včerejší maximum bylo \$Info{DUInodeDailyMaxPrev}%.
     </ul>
 </ul>
 EOF
@@ -113,7 +113,7 @@ $Lang{BackupPC_Server_Status} = <<EOF;
 <tr class="tableheader"><td> Host </td>
     <td> Typ </td>
     <td> Uživatel </td>
-    <td> Spuştěno </td>
+    <td> Spuštěno </td>
     <td> Příkaz </td>
     <td align="center"> PID </td>
     <td align="center"> Xfer PID </td>
@@ -149,18 +149,18 @@ $Lang{BackupPC_Summary}         = <<EOF;
 <p>
 <ul>
 <li>Tento stav byl vygenerován v \$now.
-<li>Stav úložiştě je \$Info{DUlastValue}%
-    (\$DUlastTime), dneşní maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
-    a včerejşí maximum bylo \$Info{DUDailyMaxPrev}%.
-<li>Inode stav úložiştě je \$Info{DUInodelastValue}%
-    (\$DUlastTime), dneşní maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
-    a včerejşí maximum bylo \$Info{DUInodeDailyMaxPrev}%.
+<li>Stav úložiště je \$Info{DUlastValue}%
+    (\$DUlastTime), dnešní maximum je \$Info{DUDailyMax}% (\$DUmaxTime)
+    a včerejší maximum bylo \$Info{DUDailyMaxPrev}%.
+<li>Inode stav úložiště je \$Info{DUInodelastValue}%
+    (\$DUlastTime), dnešní maximum je \$Info{DUInodeDailyMax}% (\$DUInodemaxTime)
+    a včerejší maximum bylo \$Info{DUInodeDailyMaxPrev}%.
 </ul>
 </p>
 
-\${h2("Hosté s úspěşně provedenými zálohami")}
+\${h2("Hosté s úspěšně provedenými zálohami")}
 <p>
-\$hostCntGood hostů bylo úspěşně zálohováno, v celkové velikost:
+\$hostCntGood hostů bylo úspěšně zálohováno, v celkové velikost:
 <ul>
 <li> \$fullTot úplných záloh v celkové velitosti \${fullSizeTot}GiB
      (před kompresí),
@@ -309,11 +309,11 @@ EOF
 
 # -----------------------------------
 $Lang{Pool_Stat} = <<EOF;
-        <li>V úložişti je \${poolSize}GiB zahrnujíc \$info->{"\${name}FileCnt"} souborů
+        <li>V úložišti je \${poolSize}GiB zahrnujíc \$info->{"\${name}FileCnt"} souborů
             a \$info->{"\${name}DirCnt"} adresářů (od \$poolTime),
-        <li>Hashování úložiştě dává \$info->{"\${name}FileCntRep"} opakujících se
-        souborů s nejdelşím řetězem \$info->{"\${name}FileRepMax"},
-        <li>Noční úklid úložiştě odstranil \$info->{"\${name}FileCntRm"} souborů
+        <li>Hashování úložiště dává \$info->{"\${name}FileCntRep"} opakujících se
+        souborů s nejdelším řetězem \$info->{"\${name}FileRepMax"},
+        <li>Noční úklid úložiště odstranil \$info->{"\${name}FileCntRm"} souborů
             velikosti \${poolRmSize}GiB (kolem \$poolTime),
 EOF
 
@@ -544,7 +544,7 @@ $Lang{Option_2__Download_Zip_archive} = <<EOF;
 <p>
 \${h2("Možnost 2: Stáhnout Zip archiv")}
 <p>
-Můžete stáhnout Zip archiv obsahující vşechny soubory/adresáře, které
+Můžete stáhnout Zip archiv obsahující všechny soubory/adresáře, které
 jste vybral.  Poté můžete použít aplikaci, např. WinZip, k zobrazení
 nebp rozbalení některého z těchto souborů.
 </p><p>
@@ -564,7 +564,7 @@ k \${EscHTML(\$pathHdr eq "" ? "/" : \$pathHdr)}
 <br>
 <table class="tableStnd tbl-Restore_Option_2" border="0">
 <tr>
-    <td>Komprese (0=off, 1=rychlá,...,9=nejlepşí)</td>
+    <td>Komprese (0=off, 1=rychlá,...,9=nejlepší)</td>
     <td><input type="text" size="6" value="5" name="compressLevel"></td>
 </tr><tr>
     <td>Code page (e.g. cp866)</td>
@@ -593,7 +593,7 @@ EOF
 $Lang{Option_3__Download_Zip_archive} = <<EOF;
 \${h2("Možnost 3: Stáhnout Tar archiv")}
 <p>
-Můžete stáhnout Tar archiv obsahující vşechny soubory/adresáře, které
+Můžete stáhnout Tar archiv obsahující všechny soubory/adresáře, které
 jste vybral.  Poté můžete použít aplikaci, např. tar nebo WinZip, k zobrazení
 nebp rozbalení některého z těchto souborů.
 </p><p>
@@ -639,7 +639,7 @@ zálohy číslo \$num:
 <input type="hidden" name="type" value="4">
 <input type="hidden" name="action" value="">
 \$hiddenStr
-Obravdu to chceş provést?
+Obravdu to chceš provést?
 <input type="button" value="\$Lang->{Restore}"
  onClick="document.RestoreForm.action.value='Restore';
           document.RestoreForm.submit();">
@@ -726,7 +726,7 @@ Klikněte na číslo zálohy pro prohlížení a obnovení zálohy.
     <td align="center"> Typ </td>
     <td align="center"> Vyplněno </td>
     <td align="center"> Úroveň </td>
-    <td align="center"> Datum spuştění </td>
+    <td align="center"> Datum spuštění </td>
     <td align="center"> Doba trvání/minuty </td>
     <td align="center"> Doba/dny </td>
     <td align="center"> Držet </td>
@@ -745,8 +745,8 @@ Klikněte na číslo zálohy pro prohlížení a obnovení zálohy.
     <td align="center"> Typ </td>
     <td align="center"> Pohled </td>
     <td align="center"> #Xfer chyby </td>
-    <td align="center"> #şpatné soubory </td>
-    <td align="center"> #şpatné části </td>
+    <td align="center"> #špatné soubory </td>
+    <td align="center"> #špatné části </td>
     <td align="center"> #tar chyby </td>
 </tr>
 \$errStr
@@ -754,8 +754,8 @@ Klikněte na číslo zálohy pro prohlížení a obnovení zálohy.
 
 \${h2("File Size/Count Reuse Summary")}
 <p>
-Existující soubory jsou ty, které jsou již v úložişti; nové jsou přidané
-do úložiştě.
+Existující soubory jsou ty, které jsou již v úložišti; nové jsou přidané
+do úložiště.
 Prázné soubory a SMB chyby nejsou počítány.
 </p>
 <table class="tableStnd sortable tbl-host_Backup_Summary-reuse" border cellspacing="1" cellpadding="3" width="80%">
@@ -780,7 +780,7 @@ Prázné soubory a SMB chyby nejsou počítány.
 
 \${h2("Přehled kompresí")}
 <p>
-Výkon komprese pro soubory, které jsou již v úložişti a pro nově
+Výkon komprese pro soubory, které jsou již v úložišti a pro nově
 zkomprimované soubory.
 </p>
 <table class="tableStnd sortable tbl-host_Backup_Summary-compression" border cellspacing="1" cellpadding="3" width="80%">
@@ -871,7 +871,7 @@ $Lang{Backup_browse_for__host} = <<EOF;
 </script>
 
 <ul>
-<li> Prohlížíte zálohu #\$num, která byla spuştěna kolem \$backupTime
+<li> Prohlížíte zálohu #\$num, která byla spuštěna kolem \$backupTime
         (\$backupAge dní zpět),
 \$filledBackup
 <li>
@@ -894,7 +894,7 @@ Komentář: <input type="text" name="comment" class="inputCompact" size="60" max
 </form>
 <li> Klikni na adresář níže a pokračuj do něj,
 <li> Klikni na soubor níže a obnov ho,
-<li> Můžeş vidět zálohu <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> aktuálního adresáře.
+<li> Můžeš vidět zálohu <a href="\$MyURL?action=dirHistory&host=\${EscURI(\$host)}&share=\$shareURI&dir=\$pathURI">history</a> aktuálního adresáře.
 \$share2pathStr
 </ul>
 </form>
@@ -951,7 +951,7 @@ $Lang{DirHistory_for__host} = <<EOF;
 \${h1("Historie záloh adresářů pro \$host")}
 <p>
 Tato obrazovka zobrazuje každou unikátní verzi souboru
-ze vşech záloh:
+ze všech záloh:
 <ul>
 <li> Klikni na číslo zálohy k návratu do prohlížeče záloh,
 <li> Klikni na odkaz adresáře (\$Lang->{DirHistory_dirLink}) k přechodu do
@@ -993,7 +993,7 @@ $Lang{Restore___num_details_for__host2} = <<EOF;
 <tr><td class="tableheader"> Zdrojová část </td><td class="border"> \$RestoreReq{shareSrc} </td></tr>
 <tr><td class="tableheader"> Cílový host </td><td class="border"> \$RestoreReq{hostDest} </td></tr>
 <tr><td class="tableheader"> Cílová část </td><td class="border"> \$RestoreReq{shareDest} </td></tr>
-<tr><td class="tableheader"> Čas spuştění </td><td class="border"> \$startTime </td></tr>
+<tr><td class="tableheader"> Čas spuštění </td><td class="border"> \$startTime </td></tr>
 <tr><td class="tableheader"> Doba trvání </td><td class="border"> \$duration min </td></tr>
 <tr><td class="tableheader"> Počet souborů </td><td class="border"> \$Restores[\$i]{nFiles} </td></tr>
 <tr><td class="tableheader"> Celková velikost </td><td class="border"> \${MB} MB </td></tr>
@@ -1049,12 +1049,12 @@ $Lang{Email_Summary} = "BackupPC: Souhrn emailů";
 #  !! ERROR messages !!
 # -----------------------------------
 $Lang{BackupPC__Lib__new_failed__check_apache_error_log} = "BackupPC::Lib->new failed: zkontroluj apache error_log\n";
-$Lang{Wrong_user__my_userid_is___} = "Şpatný uživatel: moje userid je \$>, místo \$uid(\$Conf{BackupPCUser})\n";
+$Lang{Wrong_user__my_userid_is___} = "špatný uživatel: moje userid je \$>, místo \$uid(\$Conf{BackupPCUser})\n";
 
 # $Lang{Only_privileged_users_can_view_PC_summaries} = "Pouze oprávnění uživatelé jsou oprávněni prohlížet souhrny PC.";
 $Lang{Only_privileged_users_can_stop_or_start_backups} =
   "Pouze oprávnění uživatelé mohou ukončit nebo spustit zálohování na \${EscHTML(\$host)}.";
-$Lang{Invalid_number__num}                         = "Şpatné číslo \${EscHTML(\$In{num})}";
+$Lang{Invalid_number__num}                         = "špatné číslo \${EscHTML(\$In{num})}";
 $Lang{Unable_to_open__file__configuration_problem} = "Nepodařilo se otevřít \$file: problém konfigurace?";
 $Lang{Only_privileged_users_can_view_log_or_config_files} =
   "Pouze oprávnění uživatelé mají přístup k log a konfiguračním souborům.";
@@ -1066,10 +1066,10 @@ $Lang{Only_privileged_users_can_delete_backups} =
   "Only privileged users can delete backups of host \${EscHTML(\$host)}.";
 $Lang{Empty_host_name}                  = "Prázdné jméno hosta.";
 $Lang{Directory___EscHTML}              = "Adresář \${EscHTML(\"\$TopDir/pc/\$host/\$num\")} je prázdný";
-$Lang{Can_t_browse_bad_directory_name2} = "Není možné prohlížet - şpatný název adresáře \${EscHTML(\$relDir)}";
+$Lang{Can_t_browse_bad_directory_name2} = "Není možné prohlížet - špatný název adresáře \${EscHTML(\$relDir)}";
 $Lang{Only_privileged_users_can_restore_backup_files} =
   "Pouze oprávnění uživatelé mohou obnovovat soubory zálohy pro hosta \${EscHTML(\$In{host})}.";
-$Lang{Bad_host_name} = "Şpatné jméno hosta \${EscHTML(\$host)}";
+$Lang{Bad_host_name} = "špatné jméno hosta \${EscHTML(\$host)}";
 $Lang{You_haven_t_selected_any_files__please_go_Back_to} =
   "Nevybral jste žádný soubor; prosím jděte Zpět k výběru souborů.";
 $Lang{You_haven_t_selected_any_hosts} = "Nevybral jste žádného hosta; prosím jděte Zpět k výběru hostů.";
@@ -1092,7 +1092,7 @@ $Lang{Archive_number__num_for_host__does_not_exist} = "Číslo archivu \$num pro
 $Lang{Can_t_find_IP_address_for}                    = "Nelze nalézt IP adresu pro \${EscHTML(\$host)}";
 $Lang{host_is_a_DHCP_host}                          = <<EOF;
 \$host je DHCP host, and není známa jeho IP adresa.  Zkontrolováno
-netbios jméno \$ENV{REMOTE_ADDR}\$tryIP, a zjiştěno, že zařízení
+netbios jméno \$ENV{REMOTE_ADDR}\$tryIP, a zjištěno, že zařízení
 není \$host.
 <p>
 Dokud nebude vidět \$host na vybrané DHCP adrese, můžete pouze
@@ -1149,7 +1149,7 @@ EOF
 
 # ------------
 $Lang{The_command_cmd_is_currently_running_for_started} = <<EOF;
-<li>Příkaz \$cmd je aktuálně vykonáván pro \$host, spuştěn v \$startTime.
+<li>Příkaz \$cmd je aktuálně vykonáván pro \$host, spuštěn v \$startTime.
 EOF
 
 # -----------
@@ -1164,7 +1164,7 @@ EOF
 
 # ---------
 $Lang{A_command_for_host_is_on_the_command_queue_will_run_soon} = <<EOF;
-<li>Příkaz pro \$host čeká ve frontě příkazů (bude brzy spuştěn).
+<li>Příkaz pro \$host čeká ve frontě příkazů (bude brzy spuštěn).
 EOF
 
 # --------
@@ -1187,7 +1187,7 @@ $Lang{Prior_to_that__pings} = "Předchozí pingy";
 
 # -----
 $Lang{priorStr_to_host_have_succeeded_StatusHostaliveCnt_consecutive_times} = <<EOF;
-<li>\$priorStr na \$host byli úspěşné \$StatusHost{aliveCnt}
+<li>\$priorStr na \$host byly úspěšné \$StatusHost{aliveCnt}
          za sebou.
 EOF
 
@@ -1199,7 +1199,7 @@ EOF
 $Lang{__time0_to__time1_on__days} = "\$t0 to \$t1 on \$days";
 
 $Lang{Backups_are_deferred_for_hours_hours_change_this_number} = <<EOF;
-<li>Zálohy byli odloženy na \$hours hodin
+<li>Zálohy byly odloženy na \$hours hodin
 (<a href=\"\$MyURL?action=Stop_Dequeue_Backup&host=\$host\">změn toto číslo</a>).
 EOF
 
@@ -1235,8 +1235,8 @@ EOF
 
 $Lang{Home}                         = "Doma";
 $Lang{Browse}                       = "Prohlížení záloh";
-$Lang{Last_bad_XferLOG}             = "Poslední şpatný XferLOG";
-$Lang{Last_bad_XferLOG_errors_only} = "Poslední şpatný XferLOG (chyb&nbsp;pouze)";
+$Lang{Last_bad_XferLOG}             = "Poslední špatný XferLOG";
+$Lang{Last_bad_XferLOG_errors_only} = "Poslední špatný XferLOG (chyb&nbsp;pouze)";
 
 $Lang{This_display_is_merged_with_backup} = <<EOF;
 <li> Toto zobrazení je sloučeno se zálohou #\$numF.
@@ -1253,7 +1253,7 @@ Klikni na obnovení pro více detailů.
 <table class="tableStnd sortable tbl-Restore_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Obnovení # </td>
     <td align="center"> Výsledek </td>
-    <td align="right"> Datum spuştení</td>
+    <td align="right"> Datum spuštení</td>
     <td align="right"> Doba trvání/minuty</td>
     <td align="right"> #souborů </td>
     <td align="right"> MB </td>
@@ -1272,7 +1272,7 @@ Klikni na číslo archivu pro více detailů.
 <table class="tableStnd tbl-Archive_Summary" border cellspacing="1" cellpadding="3" width="80%">
 <tr class="tableheader"><td align="center"> Archiv# </td>
     <td align="center"> Výsledek </td>
-    <td align="right"> Datum spuştení</td>
+    <td align="right"> Datum spuštení</td>
     <td align="right"> Doba trvání/minuty</td>
 </tr>
 \$ArchiveStr
@@ -1298,16 +1298,16 @@ $Lang{backupType_incr}    = "inkr";
 $Lang{backupType_active}  = "active";
 $Lang{backupType_partial} = "částečný";
 
-$Lang{failed}  = "neúspěşný";
-$Lang{success} = "úspěşný";
+$Lang{failed}  = "neúspěšný";
+$Lang{success} = "úspěšný";
 $Lang{and}     = "a";
 
 # ------
 # Hosts states and reasons
 $Lang{Status_idle}                = "nečinný";
-$Lang{Status_backup_starting}     = "záloha se spouştí";
+$Lang{Status_backup_starting}     = "záloha se spouští";
 $Lang{Status_backup_in_progress}  = "záloha probíhá";
-$Lang{Status_restore_starting}    = "obnovení se spouştí";
+$Lang{Status_restore_starting}    = "obnovení se spouští";
 $Lang{Status_restore_in_progress} = "obnovení probíhá";
 $Lang{Status_admin_pending}       = "link čeká";
 $Lang{Status_admin_running}       = "link běží";
@@ -1320,9 +1320,9 @@ $Lang{Reason_backup_failed}            = "zálohování selhalo";
 $Lang{Reason_restore_failed}           = "obnovení selhalo";
 $Lang{Reason_archive_failed}           = "archivace selhala";
 $Lang{Reason_no_ping}                  = "žádný ping";
-$Lang{Reason_backup_canceled_by_user}  = "zálohování zruşeno uživatelem";
-$Lang{Reason_restore_canceled_by_user} = "obnovení zruşeno uživatelem";
-$Lang{Reason_archive_canceled_by_user} = "archivace zruşena uživatelem";
+$Lang{Reason_backup_canceled_by_user}  = "zálohování zrušeno uživatelem";
+$Lang{Reason_restore_canceled_by_user} = "obnovení zrušeno uživatelem";
+$Lang{Reason_archive_canceled_by_user} = "archivace zrušena uživatelem";
 $Lang{Disabled_OnlyManualBackups}      = "automatické zálohování zakázáno";
 $Lang{Disabled_AllBackupsDisabled}     = "zakázáno";
 
@@ -1334,22 +1334,22 @@ $Lang{EMailNoBackupEverSubj} = "BackupPC: žadné zálohy hosta \$host se nezda�
 $Lang{EMailNoBackupEverMesg} = <<'EOF';
 To: $user$domain
 cc:
-Předmět: $subj
+Subject: $subj
 $headers
 Dear $userName,
 
-Vaşe PC ($host) nebylo nikdy úspěşně zálohováno naşím
-zálohovacím softwarem.  Zálohování PC by mělo být spuştěno
-automaticky, když je Vaşe PC připojeno do sítě. Mel by jste
-kontaktovat Vaşi podporu pokud:
+Vaše PC ($host) nebylo nikdy úspěšně zálohováno naším
+zálohovacím softwarem.  Zálohování PC by mělo být spuštěno
+automaticky, když je Vaše PC připojeno do sítě. Mel by jste
+kontaktovat Vaši podporu pokud:
 
-  - Vaşe PC bylo pravidelně připojováno do sítě, zřejmě
+  - Vaše PC bylo pravidelně připojováno do sítě, zřejmě
     je nějaký probém v nastavení nebo konfiguraci, který zabraňuje
     zálohování.
 
-  - Nechcete Vaşe PC zálohovat a chcete přestat dostávat tyto zprávy.
+  - Nechcete Vaše PC zálohovat a chcete přestat dostávat tyto zprávy.
 
-Ujistěte se, že je Vaşe PC připojeno do sítě, až budete příştě v kanceláři.
+Ujistěte se, že je Vaše PC připojeno do sítě, až budete příště v kanceláři.
 
 S pozdravem,
 BackupPC Genie
@@ -1361,23 +1361,23 @@ $Lang{EMailNoBackupRecentSubj} = "BackupPC: žádné nové zálohy pro \$host";
 $Lang{EMailNoBackupRecentMesg} = <<'EOF';
 To: $user$domain
 cc:
-Předmět: $subj
+Subject: $subj
 $headers
 Drahý $userName,
 
-Vaşe PC ($host) nebylo úspěşně zálohovýno již $days dní.
-Vaşe PC bylo korektně zálohováno $numBackups krát od $firstTime
+Vaše PC ($host) nebylo úspěšně zálohovýno již $days dní.
+Vaše PC bylo korektně zálohováno $numBackups krát od $firstTime
 do dne před $days dny.  Zálohování PC by se mělo spustit automaticky,
-když je Vaşe PC připojeno do sítě.
+když je Vaše PC připojeno do sítě.
 
-Pokud bylo Vaşe PC připojeno do sítě více než několik hodin v průběhu
-posledních $days dní, měl by jste kontaktovat Vaşi podporu k zjiştění,
+Pokud bylo Vaše PC připojeno do sítě více než několik hodin v průběhu
+posledních $days dní, měl by jste kontaktovat Vaši podporu k zjištění,
 proč zálohování nefunguje.
 
 Pokud jste mimo kancelář, nemůžete udělat nic jiného než zkopírovat kritické
-soubory na jiná media. Měl by jste mít na paměti, že vşechny soubory vytvořené
-nebo změněné v posledních $days dnech (i s vşemi novými emaily a přílohami)
-nebudou moci býti obnoveny, pokud se disk ve Vaşem počítači poşkodí.
+soubory na jiná media. Měl by jste mít na paměti, že všechny soubory vytvořené
+nebo změněné v posledních $days dnech (i s všemi novými emaily a přílohami)
+nebudou moci býti obnoveny, pokud se disk ve Vašem počítači poškodí.
 
 S pozdravem,
 BackupPC Genie
@@ -1389,32 +1389,32 @@ $Lang{EMailOutlookBackupSubj} = "BackupPC: Soubory programu Outlook na \$host je
 $Lang{EMailOutlookBackupMesg} = <<'EOF';
 To: $user$domain
 cc:
-Předmět: $subj
+Subject: $subj
 $headers
 Drahý $userName,
 
-Soubory programu Outlook na Vaşem PC mají $howLong.
-Tyto soubory obsahují vşechny Vaşe emaily, přílohy, kontakty a informace v
-kalendáři.  Vaşe PC bylo naposled korektně zálohováno $numBackups krát od
-$firstTime do $lastTime. Nicméně Outlook zamkne vşechny svoje soubory když
-je spuştěn a znemožňuje jejich zálohování.
+Soubory programu Outlook na Vašem PC mají $howLong.
+Tyto soubory obsahují všechny Vaše emaily, přílohy, kontakty a informace v
+kalendáři.  Vaše PC bylo naposled korektně zálohováno $numBackups krát od
+$firstTime do $lastTime. Nicméně Outlook zamkne všechny svoje soubory když
+je spuštěn a znemožňuje jejich zálohování.
 
 Doporučujeme Vám zálohovat soubory Outlooku, když jste připojen do sítě tak,
-že ukončíte program Outlook a vşechny ostatní aplikace a ve vaşem prohlížeči
+že ukončíte program Outlook a všechny ostatní aplikace a ve vašem prohlížeči
 otevřete tuto adresu:
 
     $CgiURL?host=$host
 
-Vyberte "Spustit inkrementační zálohování" dvakrát ke spuştení nového
+Vyberte "Spustit inkrementační zálohování" dvakrát ke spuštení nového
 zálohování. Můžete vybrat "Návrat na $host page" a poté stiknout "obnovit"
-ke zjiştění stavu zálohování. Dokončení může trvat několik minut.
+ke zjištění stavu zálohování. Dokončení může trvat několik minut.
 
 S pozdravem,
 BackupPC Genie
 https://backuppc.github.io/backuppc
 EOF
 
-$Lang{howLong_not_been_backed_up}               = "nebylo zálohováno úspěşně";
+$Lang{howLong_not_been_backed_up}               = "nebylo zálohováno úspěšně";
 $Lang{howLong_not_been_backed_up_for_days_days} = "nebylo zálohováno \$days dní";
 
 #######################################################################
@@ -1446,7 +1446,7 @@ $Lang{CfgEdit_Title_Server}                    = "Server";
 $Lang{CfgEdit_Title_General_Parameters}        = "Hlavní parametry";
 $Lang{CfgEdit_Title_Wakeup_Schedule}           = "Plán probuzení";
 $Lang{CfgEdit_Title_Concurrent_Jobs}           = "Rovnocenné úlohy";
-$Lang{CfgEdit_Title_Pool_Filesystem_Limits}    = "Limity úložiştě";
+$Lang{CfgEdit_Title_Pool_Filesystem_Limits}    = "Limity úložiště";
 $Lang{CfgEdit_Title_Other_Parameters}          = "Ostatní paramtery";
 $Lang{CfgEdit_Title_Remote_Apache_Settings}    = "Vzdálené nastavení Apache";
 $Lang{CfgEdit_Title_Program_Paths}             = "Cesty programu";
@@ -1487,7 +1487,7 @@ $Lang{CfgEdit_Title_Hosts}                     = "Hosti";
 $Lang{CfgEdit_Hosts_Comment} = <<EOF;
 K přidání nového hosta, vyberte Přidat a zadejte jméno. Pro
 konfiguraci hosta z jiného hosta, zadejte jméno hosta jako
-NEWHOST=COPYHOST. To přepíşe existující konfiguraci pro NEWHOST.
+NEWHOST=COPYHOST. To přepíše existující konfiguraci pro NEWHOST.
 Tento postup můžete použít i pto existujícího hosta.
 Hosta smažete stisknutím tlačítka delete. Přidání, smazání a kopírování
 konfigurace nanabude platnosti dokud nedojde k stisknutí tlačítka Uložit

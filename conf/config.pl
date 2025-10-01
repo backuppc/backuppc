@@ -1295,7 +1295,7 @@ $Conf{RsyncArgs} = [
     '--hard-links',
     '--delete',
     '--delete-excluded',
-    '--ignore-errors',				# 2025.10.01: Added ==GWH==
+    '--ignore-errors',
     '--one-file-system',
     '--partial',
     '--log-format=log: %o %i %B %8U,%8G %9l %f%L',

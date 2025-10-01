@@ -31,6 +31,8 @@
 # COPYRIGHT
 #   Copyright (C) 2001-2018  Craig Barratt
 #
+#   2025.10.01: Added '--ignore-errors' to default rsync options. ==GWH==
+#
 #   See https://backuppc.github.io/backuppc
 #
 #========================================================================
@@ -1272,6 +1274,12 @@ $Conf{RsyncdPasswd} = '';
 #
 # Arguments to rsync for backup.  Do not edit the first set unless you
 # have a good understanding of rsync options.
+# 2025.10.01: ==GWH==
+# Note that the argument '--ignore-errors' is only relevant to file
+# deletions; without this argument any I/O error during the backup
+# will have the undesirable effect of preventing deletions which
+# *should* have been performed.  See Github issues #87 and #534.
+# 2025.10.01: ==GWH==
 #
 $Conf{RsyncArgs} = [
     '--super',
@@ -1287,6 +1295,7 @@ $Conf{RsyncArgs} = [
     '--hard-links',
     '--delete',
     '--delete-excluded',
+    '--ignore-errors',				# 2025.10.01: Added ==GWH==
     '--one-file-system',
     '--partial',
     '--log-format=log: %o %i %B %8U,%8G %9l %f%L',

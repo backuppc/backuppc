@@ -65,10 +65,10 @@ use POSIX ":sys_wait_h";
 use CGI;
 
 # Configure Data::Dumper for consistent output with Perl 5.38+
-$Data::Dumper::Useqq = 1;
+$Data::Dumper::Useqq    = 1;
 $Data::Dumper::Sortkeys = 1;
-$Data::Dumper::Indent = 1;
-$Data::Dumper::Terse = 1;
+$Data::Dumper::Indent   = 1;
+$Data::Dumper::Terse    = 1;
 
 use BackupPC::Lib;
 use BackupPC::XS;
@@ -392,7 +392,7 @@ sub handleRequest
         my $fdDebug;
         open($fdDebug, ">", "$LogDir/request.txt");
         print $fdDebug "Environment: ", Dumper($request->env), "\n\n";
-        print $fdDebug "Body: ", $body, "\n\n";
+        print $fdDebug "Body: ",        $body,                 "\n\n";
         print $fdDebug "Other: ", "User = $User, MyURL = $MyURL, PID = $$, In = ", Dumper(\%In), "Conf = ",
           Dumper(\%Conf), "\n\n";
         close($fdDebug);

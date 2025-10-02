@@ -43,10 +43,10 @@ use Data::Dumper;
 use File::Path;
 
 # Configure Data::Dumper for consistent output with Perl 5.38+
-$Data::Dumper::Useqq = 1;
+$Data::Dumper::Useqq    = 1;
 $Data::Dumper::Sortkeys = 1;
-$Data::Dumper::Terse = 1;
-use Fcntl qw/:flock/;
+$Data::Dumper::Terse    = 1;
+use Fcntl    qw/:flock/;
 use Storable qw(store retrieve fd_retrieve store_fd);
 
 sub new
@@ -134,7 +134,7 @@ sub BackupInfoWrite
             $dump->Indent(0);
             $dump->Sortkeys(1);
             $dump->Terse(1);
-            $dump->Useqq(1);  # Ensure consistent quoting behavior
+            $dump->Useqq(1);    # Ensure consistent quoting behavior
             my $value = $dump->Dump;
             $value =~ s{([%\t\n\r])}{sprintf("%%%02x", ord($1))}eg;
             $b{share2path} = $value;
@@ -432,8 +432,8 @@ sub ConfigFileMerge
                     $d->Indent(1);
                     $d->Terse(1);
                     $d->Sortkeys(1);
-                    $d->Useqq(1);  # Ensure consistent quoting behavior for Perl 5.38+
-                    $d->Quotekeys(0);  # Don't quote keys unnecessarily
+                    $d->Useqq(1);        # Ensure consistent quoting behavior for Perl 5.38+
+                    $d->Quotekeys(0);    # Don't quote keys unnecessarily
                     my $value = $d->Dump;
                     $value =~ s/(.*)\n/$1;\n/s;
                     $contents .= "\$Conf{$var} = " . $value;
@@ -466,8 +466,8 @@ sub ConfigFileMerge
         $d->Indent(1);
         $d->Terse(1);
         $d->Sortkeys(1);
-        $d->Useqq(1);  # Ensure consistent quoting behavior for Perl 5.38+
-        $d->Quotekeys(0);  # Don't quote keys unnecessarily
+        $d->Useqq(1);        # Ensure consistent quoting behavior for Perl 5.38+
+        $d->Quotekeys(0);    # Don't quote keys unnecessarily
         my $value = $d->Dump;
         $value =~ s/(.*)\n/$1;\n/s;
         $contents .= "\$Conf{$var} = " . $value;

@@ -9,18 +9,18 @@ use warnings;
 use Data::Dumper;
 
 # Configure Data::Dumper for consistent output with Perl 5.38+
-$Data::Dumper::Useqq = 1;
+$Data::Dumper::Useqq    = 1;
 $Data::Dumper::Sortkeys = 1;
-$Data::Dumper::Terse = 1;
-$Data::Dumper::Indent = 1;
+$Data::Dumper::Terse    = 1;
+$Data::Dumper::Indent   = 1;
 
 # Test hash serialization (similar to config data)
 my %test_config = (
-    'BackupFilesOnly' => {'/' => ['etc', 'home', 'usr/local']},
-    'XferMethod' => 'rsync',
-    'RsyncArgs' => ['--numeric-ids', '--perms', '--owner', '--group'],
+    'BackupFilesOnly'       => {'/' => ['etc', 'home', 'usr/local']},
+    'XferMethod'            => 'rsync',
+    'RsyncArgs'             => ['--numeric-ids', '--perms', '--owner', '--group'],
     'BackupPCNightlyPeriod' => 1,
-    'MaxBackups' => 4,
+    'MaxBackups'            => 4,
 );
 
 print "=== Testing Data::Dumper configuration ===\n";
@@ -40,14 +40,14 @@ print "\n";
 
 # Test 2: Using global settings
 print "Test 2: Using global settings\n";
-my $d2 = Data::Dumper->new([\%test_config]);
+my $d2      = Data::Dumper->new([\%test_config]);
 my $output2 = $d2->Dump;
 print $output2;
 print "\n";
 
 # Test 3: Check consistency (both outputs should be identical)
 print "Test 3: Consistency check\n";
-if ($output1 eq $output2) {
+if ( $output1 eq $output2 ) {
     print "✓ PASS: Both outputs are identical\n";
 } else {
     print "✗ FAIL: Outputs differ\n";

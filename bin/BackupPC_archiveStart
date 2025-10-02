@@ -48,9 +48,9 @@ use Data::Dumper;
 use BackupPC::Lib;
 
 # Configure Data::Dumper for consistent output with Perl 5.38+
-$Data::Dumper::Useqq = 1;
+$Data::Dumper::Useqq    = 1;
 $Data::Dumper::Sortkeys = 1;
-$Data::Dumper::Terse = 1;
+$Data::Dumper::Terse    = 1;
 
 die("BackupPC::Lib->new failed\n") if ( !(my $bpc = BackupPC::Lib->new) );
 
@@ -113,8 +113,8 @@ my %ArchiveReq = (
 );
 my $archive = Data::Dumper->new([\%ArchiveReq], [qw(*ArchiveReq)]);
 $archive->Indent(1);
-$archive->Sortkeys(1);  # Ensure consistent key ordering for Perl 5.38+
-$archive->Useqq(1);     # Ensure consistent quoting behavior
+$archive->Sortkeys(1);    # Ensure consistent key ordering for Perl 5.38+
+$archive->Useqq(1);       # Ensure consistent quoting behavior
 if ( !open(REQ, ">", "$TopDir/pc/$ArchiveHost/$ReqFileName") ) {
     print(STDERR "$0: can't open/write request file $TopDir/pc/$ArchiveHost/$ReqFileName... quitting\n");
     exit(1);

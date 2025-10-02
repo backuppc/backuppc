@@ -46,6 +46,13 @@ use strict;
 no utf8;
 use vars qw(%Conf %OrigConf $Upgrade);
 use lib "./lib";
+use Data::Dumper;
+
+# Configure Data::Dumper for consistent output with Perl 5.38+
+$Data::Dumper::Useqq = 1;
+$Data::Dumper::Sortkeys = 1;
+$Data::Dumper::Indent = 1;
+$Data::Dumper::Terse = 1;
 
 #
 # The two strings below are replaced with the full list of BackupPC executables
@@ -672,6 +679,7 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
     $d->Indent(1);
     $d->Terse(1);
     $d->Sortkeys(1);
+    $d->Useqq(1);  # Ensure consistent quoting behavior for Perl 5.38+
     my $value = $d->Dump;
     $value =~ s/(.*)\n/$1;\n/s;
     $newConf->[$newVars->{CgiUserConfigEdit}]{text} =~ s/^(\s*\$Conf\{.*?\}\s*=\s*).*/$1$value/ms;

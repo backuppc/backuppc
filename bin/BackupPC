@@ -420,7 +420,12 @@ sub Main_Initialize
     # For now the workaround appears to be use the perl version of
     # XS Data::Dumper.
     #
+    # Configure Data::Dumper for consistent output with Perl 5.38+
+    #
     $Data::Dumper::Useqq = 1;
+    $Data::Dumper::Sortkeys = 1;
+    $Data::Dumper::Indent = 1;
+    $Data::Dumper::Terse = 1;
 }
 
 ############################################################################

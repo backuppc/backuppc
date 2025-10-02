@@ -113,8 +113,8 @@ sub action
     # Host metrics
     #
     foreach my $host ( GetUserHosts(1) ) {
-        my($fullCount, $fullDuration, $fullRate, $fullSize);
-        my($incrCount, $incrDuration, $incrRate, $incrSize);
+        my($fullCount,      $fullDuration, $fullRate, $fullSize);
+        my($incrCount,      $incrDuration, $incrRate, $incrSize);
         my($lastFullBackup, $lastIncrBackup);
 
         $fullCount = $incrCount = 0;

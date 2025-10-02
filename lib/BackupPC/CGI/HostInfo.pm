@@ -36,7 +36,7 @@
 package BackupPC::CGI::HostInfo;
 
 use strict;
-use Encode qw/decode_utf8/;
+use Encode             qw/decode_utf8/;
 use BackupPC::CGI::Lib qw(:all);
 
 sub action
@@ -275,9 +275,9 @@ EOF
         my $startTime = timeStamp2($Restores[$i]{startTime});
         my $dur       = $Restores[$i]{endTime} - $Restores[$i]{startTime};
         $dur = 1 if ( $dur <= 0 );
-        my $duration = sprintf("%.1f", $dur / 60);
-        my $MB       = sprintf("%.1f", $Restores[$i]{size} / (1024 * 1024));
-        my $MBperSec = sprintf("%.2f", $Restores[$i]{size} / (1024 * 1024 * $dur));
+        my $duration        = sprintf("%.1f", $dur / 60);
+        my $MB              = sprintf("%.1f", $Restores[$i]{size} / (1024 * 1024));
+        my $MBperSec        = sprintf("%.2f", $Restores[$i]{size} / (1024 * 1024 * $dur));
         my $Restores_Result = $Lang->{failed};
         if ( $Restores[$i]{result} ne "failed" ) { $Restores_Result = $Lang->{success}; }
         push @restoreRows, <<EOF;
@@ -396,7 +396,7 @@ EOF
                 next if ( ref($p->{weekDays}) ne "ARRAY" || !defined($p->{hourBegin}) || !defined($p->{hourEnd}) );
                 my $days = join(", ", @days[@{$p->{weekDays}}]);
                 my $t0   = sprintf("%d:%02d", $p->{hourBegin}, 60 * ($p->{hourBegin} - int($p->{hourBegin})));
-                my $t1   = sprintf("%d:%02d", $p->{hourEnd}, 60 * ($p->{hourEnd} - int($p->{hourEnd})));
+                my $t1   = sprintf("%d:%02d", $p->{hourEnd},   60 * ($p->{hourEnd} - int($p->{hourEnd})));
                 if ( $periodCnt ) {
                     $blackoutStr .= ", ";
                     if ( $periodCnt == @{$Conf{BlackoutPeriods}} - 1 ) {

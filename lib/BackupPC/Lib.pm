@@ -46,7 +46,7 @@ use Cwd;
 use Digest::MD5;
 use Config;
 use Encode qw/from_to encode_utf8/;
-use POSIX qw/_exit/;
+use POSIX  qw/_exit/;
 
 use BackupPC::Storage;
 use BackupPC::XS;
@@ -550,7 +550,7 @@ sub File2MD5
     my($data, $fileSize);
     local(*N);
 
-    $name = $1 if ( $name =~ /(.*)/ );
+    $name = $1   if ( $name =~ /(.*)/ );
     return undef if ( !open(N, $name) );
     binmode(N);
     $md5->reset();
@@ -665,7 +665,7 @@ sub File2MD5_v3
 
     $fileSize = (stat($name))[7];
     return ("", -1) if ( !-f _ );
-    $name = $1 if ( $name =~ /(.*)/ );
+    $name = $1      if ( $name =~ /(.*)/ );
     return ("", 0)  if ( $fileSize == 0 );
     return ("", -1) if ( !open(N, $name) );
     binmode(N);
@@ -765,7 +765,7 @@ sub MakeFileLink
 
     return -1 if ( !-f $name );
     for ( $i = -1 ; ; $i++ ) {
-        return -2 if ( !defined($rawFile = $bpc->MD52Path($d, $compress)) );
+        return -2         if ( !defined($rawFile = $bpc->MD52Path($d, $compress)) );
         $rawFile .= "_$i" if ( $i >= 0 );
         if ( -f $rawFile ) {
             if ( (stat(_))[3] < $bpc->{Conf}{HardLinkMax} && !compare($name, $rawFile) ) {
@@ -896,7 +896,7 @@ sub CheckFileSystemUsage
 #
 sub NetBiosInfoGet
 {
-    my($bpc, $host) = @_;
+    my($bpc,             $host) = @_;
     my($netBiosHostName, $netBiosUserName);
     my($s,               $nmbCmd);
 
@@ -918,10 +918,10 @@ sub NetBiosInfoGet
         #
         # skip <GROUP> and other non <ACTIVE> entries
         #
-        next if ( /<\w{2}> - <GROUP>/i );
-        next if ( !/^\s*([\w\s-]+?)\s*<(\w{2})\> - .*<ACTIVE>/i );
-        $netBiosHostName ||= $1 if ( $2 eq "00" );    # host is first 00
-        $netBiosUserName = $1 if ( $2 eq "03" );      # user is last 03
+        next                    if ( /<\w{2}> - <GROUP>/i );
+        next                    if ( !/^\s*([\w\s-]+?)\s*<(\w{2})\> - .*<ACTIVE>/i );
+        $netBiosHostName ||= $1 if ( $2 eq "00" );                                      # host is first 00
+        $netBiosUserName = $1   if ( $2 eq "03" );                                      # user is last 03
     }
     if ( !defined($netBiosHostName) ) {
         print(STDERR "NetBiosInfoGet: failed: can't parse return string\n")
@@ -944,9 +944,9 @@ sub NetBiosInfoGet
 #
 sub NetBiosHostIPFind
 {
-    my($bpc, $host) = @_;
+    my($bpc,             $host) = @_;
     my($netBiosHostName, $netBiosUserName);
-    my($s, $nmbCmd, $subnet, $ipAddr, $firstIpAddr);
+    my($s,               $nmbCmd, $subnet, $ipAddr, $firstIpAddr);
 
     #
     # Skip NetBios lookup if NmbLookupFindHostCmd is empty
@@ -1214,8 +1214,8 @@ sub cmdSystemOrEvalLong
             my $err = "Can't fork to run @$cmd\n";
             $? = 1;
             $$stdoutCB .= $err if ( ref($stdoutCB) eq 'SCALAR' );
-            &$stdoutCB($err) if ( ref($stdoutCB) eq 'CODE' );
-            return $err      if ( !defined($stdoutCB) );
+            &$stdoutCB($err)   if ( ref($stdoutCB) eq 'CODE' );
+            return $err        if ( !defined($stdoutCB) );
             return;
         }
         if ( !$pid ) {
@@ -1250,7 +1250,7 @@ sub cmdSystemOrEvalLong
         binmode(CHILD);
         while ( <CHILD> ) {
             $$stdoutCB .= $_ if ( ref($stdoutCB) eq 'SCALAR' );
-            &$stdoutCB($_) if ( ref($stdoutCB) eq 'CODE' );
+            &$stdoutCB($_)   if ( ref($stdoutCB) eq 'CODE' );
             $out    .= $_ if ( !defined($stdoutCB) );
             $allOut .= $_ if ( $bpc->{verbose} );
         }

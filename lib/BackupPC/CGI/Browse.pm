@@ -36,7 +36,7 @@
 package BackupPC::CGI::Browse;
 
 use strict;
-use Encode qw/decode_utf8/;
+use Encode             qw/decode_utf8/;
 use BackupPC::CGI::Lib qw(:all);
 use BackupPC::View;
 use BackupPC::XS qw(:all);

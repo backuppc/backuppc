@@ -39,8 +39,8 @@ package BackupPC::Xfer::Rsync;
 use strict;
 use BackupPC::View;
 use Encode qw/from_to encode/;
-use base qw(BackupPC::Xfer::Protocol);
-use Errno qw(EINTR);
+use base   qw(BackupPC::Xfer::Protocol);
+use Errno  qw(EINTR);
 
 sub new
 {
@@ -435,12 +435,12 @@ sub start
 
         unshift(
             @$rsyncArgs,
-            '--bpc-top-dir',    $conf->{TopDir},                             # perltidy protect
-            '--bpc-host-name',  $t->{client},
-            '--bpc-share-name', $t->{shareName},
-            '--bpc-bkup-num',   $t->{backups}[$t->{newBkupIdx}]{num},
-            '--bpc-bkup-comp',  $t->{backups}[$t->{newBkupIdx}]{compress},
-            '--bpc-bkup-prevnum',  defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{num} : -1,
+            '--bpc-top-dir',       $conf->{TopDir},                             # perltidy protect
+            '--bpc-host-name',     $t->{client},
+            '--bpc-share-name',    $t->{shareName},
+            '--bpc-bkup-num',      $t->{backups}[$t->{newBkupIdx}]{num},
+            '--bpc-bkup-comp',     $t->{backups}[$t->{newBkupIdx}]{compress},
+            '--bpc-bkup-prevnum',  defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{num}      : -1,
             '--bpc-bkup-prevcomp', defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{compress} : -1,
             '--bpc-bkup-inode0',   $inode0,
             '--bpc-log-level',     $conf->{XferLogLevel},

@@ -12,18 +12,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2                if ( exists($newConf->{$var}) ) {
-                    my $d = Data::Dumper->new([$newConf->{$var}]);
-                    $d->Indent(1);
-                    $d->Terse(1);
-                    $d->Sortkeys(1);
-                    $d->Useqq(1);  # Ensure consistent quoting behavior for Perl 5.38+
-                    $d->Quotekeys(0);  # Don't quote keys unnecessarily
-                    my $value = $d->Dump;
-                    $value =~ s/(.*)(\n)/$1;\n/s;
-                    $contents .= "\$Conf{$var} = " . $value;
-                    $done->{$var} = 1;
-                } Barratt
+#   Copyright (C) 2004-2020  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -443,6 +432,8 @@ sub ConfigFileMerge
                     $d->Indent(1);
                     $d->Terse(1);
                     $d->Sortkeys(1);
+                    $d->Useqq(1);  # Ensure consistent quoting behavior for Perl 5.38+
+                    $d->Quotekeys(0);  # Don't quote keys unnecessarily
                     my $value = $d->Dump;
                     $value =~ s/(.*)\n/$1;\n/s;
                     $contents .= "\$Conf{$var} = " . $value;
@@ -475,6 +466,8 @@ sub ConfigFileMerge
         $d->Indent(1);
         $d->Terse(1);
         $d->Sortkeys(1);
+        $d->Useqq(1);  # Ensure consistent quoting behavior for Perl 5.38+
+        $d->Quotekeys(0);  # Don't quote keys unnecessarily
         my $value = $d->Dump;
         $value =~ s/(.*)\n/$1;\n/s;
         $contents .= "\$Conf{$var} = " . $value;

@@ -1364,16 +1364,17 @@ L<https://github.com/WayneD/rsync/issues/109>
 
 To use rsync, you need rsync-bpc installed on the BackupPC server.
 
-On the client, you should have at least rsync 3.x. In this case the rsync
-daemon should be running on the client machine and BackupPC connects directly
-to it.
+On the client, you should have at least rsync 3.x. For this method, rsync
+should either be running as a daemon on the client machine, or automatically
+started in daemon mode (see rsync's C<--daemon> option) by something like inetd
+or sshd whenever BackupPC connects.
 
 The relevant configuration settings are $Conf{RsyncBackupPCPath},
-$Conf{RsyncdClientPort}, $Conf{RsyncdUserName}, $Conf{RsyncdPasswd},
-$Conf{RsyncShareName}, $Conf{RsyncArgs}, $Conf{RsyncArgsExtra}, and
-$Conf{RsyncRestoreArgs}. $Conf{RsyncShareName} is the name of an rsync module
-(ie: the thing in square brackets in rsyncd's conf file -- see rsyncd.conf),
-not a file system path.
+$Conf{RsyncdSsh}, $Conf{RsyncSshArgs}, $Conf{RsyncdClientPort},
+$Conf{RsyncdUserName}, $Conf{RsyncdPasswd}, $Conf{RsyncShareName},
+$Conf{RsyncArgs}, $Conf{RsyncArgsExtra}, and $Conf{RsyncRestoreArgs}.
+$Conf{RsyncShareName} is the name of an rsync module (ie: the thing in square
+brackets in rsyncd's conf file -- see rsyncd.conf), not a file system path.
 
 Be aware that rsyncd will remove the leading '/' from path names in symbolic
 links if you specify "use chroot = no" in the rsynd.conf file. See the

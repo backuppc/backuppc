@@ -40,6 +40,11 @@ use strict;
 use BackupPC::Storage::Text;
 use Data::Dumper;
 
+# Configure Data::Dumper for consistent output with Perl 5.38+
+$Data::Dumper::Useqq    = 1;
+$Data::Dumper::Sortkeys = 1;
+$Data::Dumper::Terse    = 1;
+
 sub new
 {
     my $class  = shift;
@@ -81,6 +86,7 @@ sub backupInfoWrite
     my($dump) = Data::Dumper->new([$bkupInfo], [qw(*backupInfo)]);
     $dump->Indent(1);
     $dump->Sortkeys(1);
+    $dump->Useqq(1);    # Ensure consistent quoting behavior for Perl 5.38+
     if ( open($bkupFd, ">", "$pcDir/$bkupNum/backupInfo") ) {
         print($bkupFd $dump->Dump);
         close($bkupFd);

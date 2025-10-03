@@ -105,7 +105,7 @@ sub action
         $fullTot += $fullCnt;
         $incrTot += $incrCnt;
         $fullSize       = sprintf("%.2f", $fullSize / 1024);
-        $incrAge        = "&nbsp;" if ( $incrAge eq "" );
+        $incrAge        = "&nbsp;"                         if ( $incrAge eq "" );
         $lastXferErrors = $Backups[@Backups - 1]{xferErrs} if ( @Backups );
         $reasonHilite   = $Conf{CgiStatusHilightColor}{$Status{$host}{reason}}
           || $Conf{CgiStatusHilightColor}{$Status{$host}{state}};

@@ -2543,6 +2543,7 @@ This feature is experimental. The information included will probably change.
 
 =item `hosts` section per host fields.
 
+    full_age           => Age of the last full backup (seconds)
     full_start_time    => Last full backup start in epoch time (seconds)
     full_count         => Number of full backups for host
     full_duration      => Last full backup duration in seconds
@@ -2554,6 +2555,7 @@ This feature is experimental. The information included will probably change.
     full_size_new      => Last full backup new file size
     full_nfiles_exist  => Last full backup existing number of files
     full_nfiles_new    => Last full backup new number of files
+    incr_age           => Age of the last incremental backup (seconds)
     incr_start_time    => Same as full backup but for incremental backup
     incr_count         => Same as full backup but for incremental backup
     incr_duration      => Same as full backup but for incremental backup

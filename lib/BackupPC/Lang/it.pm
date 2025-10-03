@@ -1155,6 +1155,7 @@ $Lang{Config_file}   = "File configurazione";
 # $Lang{Hosts_file} = "File host";
 $Lang{Current_queues} = "Code correnti";
 $Lang{Documentation}  = "Documentazione";
+$Lang{Check}          = "Verifica";
 
 #$Lang{Host_or_User_name} = "<small>Host o nome utente:</small>";
 $Lang{Go}            = "Vai";

@@ -37,7 +37,7 @@ package BackupPC::CGI::RestoreFile;
 
 use strict;
 use BackupPC::CGI::Lib qw(:all);
-use BackupPC::XS qw(:all);
+use BackupPC::XS       qw(:all);
 use BackupPC::View;
 use Encode qw/from_to decode_utf8/;
 
@@ -184,7 +184,7 @@ sub restoreFile
     }
     $bpc->ServerMesg("log User $User recovered file $host/$num:$share/$dir ($a->{fullPath})");
     $dir = $origName if ( defined($origName) );
-    my $ext = $1 if ( $dir =~ /\.([^\/\.]+)$/ );
+    my $ext         = $1 if ( $dir =~ /\.([^\/\.]+)$/ );
     my $contentType = $Ext2ContentType->{lc($ext)}
       || "application/octet-stream";
     my $fileName = $1 if ( $dir =~ /.*\/(.*)/ );

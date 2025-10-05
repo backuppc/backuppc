@@ -36,7 +36,7 @@
 package BackupPC::CGI::EditConfig;
 
 use strict;
-use BackupPC::CGI::Lib qw(:all);
+use BackupPC::CGI::Lib     qw(:all);
 use BackupPC::Config::Meta qw(:all);
 use BackupPC::Storage;
 use Data::Dumper;
@@ -385,8 +385,15 @@ our %ConfigMenu = (
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
             },
             {
+                name    => "RsyncdSsh",
+                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; }
+            },
+            {
                 name    => "RsyncSshArgs",
-                visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
+                visible => sub {
+                    return $_[0]->{XferMethod} eq "rsync"
+                      || ($_[0]->{XferMethod} eq "rsyncd" && $_[0]->{RsyncdSsh});
+                }
             },
             {
                 name    => "RsyncdClientPort",
@@ -1175,7 +1182,7 @@ EOF
             my $override_checked = "";
             if (   !$isError && $In{deleteVar} =~ /^\Q${varName}_zZ_/
                 || !$isError && $In{insertVar} =~ /^\Q${varName}\E(_zZ_|$)/
-                || !$isError && $In{addVar} =~ /^\Q${varName}\E(_zZ_|$)/ ) {
+                || !$isError && $In{addVar}    =~ /^\Q${varName}\E(_zZ_|$)/ ) {
                 $overrideSet = 1;
             }
             if ( $overrideSet ) {

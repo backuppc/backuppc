@@ -46,6 +46,13 @@ use strict;
 no utf8;
 use vars qw(%Conf %OrigConf $Upgrade);
 use lib "./lib";
+use Data::Dumper;
+
+# Configure Data::Dumper for consistent output with Perl 5.38+
+$Data::Dumper::Useqq    = 1;
+$Data::Dumper::Sortkeys = 1;
+$Data::Dumper::Indent   = 1;
+$Data::Dumper::Terse    = 1;
 
 #
 # The two strings below are replaced with the full list of BackupPC executables
@@ -524,8 +531,8 @@ InstallFile($hostsSample, "$DestDir$Conf{ConfDir}/hosts", 0644)
 my $dest         = "$DestDir$Conf{ConfDir}/config.pl";
 my $configSample = $opts{"config-only"} ? "$DestDir$Conf{ConfDir}/config.pl.sample" : "conf/config.pl";
 my($distConf, $distVars) = ConfigParse($configSample);
-my($oldConf,  $oldVars);
-my($newConf,  $newVars)  = ($distConf, $distVars);
+my($oldConf, $oldVars);
+my($newConf, $newVars) = ($distConf, $distVars);
 
 if ( -f $dest ) {
     ($oldConf, $oldVars) = ConfigParse($dest);
@@ -558,7 +565,7 @@ if ( $Conf{CgiURL} eq '' ) {
 if ( defined($Conf{SmbClientArgs}) ) {
     if ( $Conf{SmbClientArgs} ne "" ) {
         foreach my $param ( qw(SmbClientRestoreCmd SmbClientFullCmd
-        SmbClientIncrCmd) ) {
+            SmbClientIncrCmd) ) {
             $newConf->[$newVars->{$param}]{text} =~ s/(-E\s+-N)/$1 $Conf{SmbClientArgs}/;
         }
     }
@@ -672,6 +679,7 @@ if ( defined($Conf{CgiUserConfigEdit}) ) {
     $d->Indent(1);
     $d->Terse(1);
     $d->Sortkeys(1);
+    $d->Useqq(1);    # Ensure consistent quoting behavior for Perl 5.38+
     my $value = $d->Dump;
     $value =~ s/(.*)\n/$1;\n/s;
     $newConf->[$newVars->{CgiUserConfigEdit}]{text} =~ s/^(\s*\$Conf\{.*?\}\s*=\s*).*/$1$value/ms;
@@ -999,7 +1007,7 @@ sub DoInstall
     foreach my $init ( qw(init.d/gentoo-backuppc init.d/gentoo-backuppc.conf
         init.d/linux-backuppc init.d/solaris-backuppc init.d/debian-backuppc
         init.d/freebsd-backuppc init.d/freebsd-backuppc2 init.d/suse-backuppc
-    init.d/slackware-backuppc init.d/ubuntu-backuppc ) ) {
+        init.d/slackware-backuppc init.d/ubuntu-backuppc ) ) {
         InstallFile("systemd/src/$init", "systemd/$init", 0755);
     }
 

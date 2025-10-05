@@ -44,6 +44,11 @@ use Encode qw/from_to encode_utf8/;
 use Data::Dumper;
 use File::Path;
 
+# Configure Data::Dumper for consistent output with Perl 5.38+
+$Data::Dumper::Useqq    = 1;
+$Data::Dumper::Sortkeys = 1;
+$Data::Dumper::Terse    = 1;
+
 use BackupPC::XS;
 use BackupPC::Storage;
 

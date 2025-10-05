@@ -39,8 +39,8 @@ package BackupPC::Xfer::Rsync;
 use strict;
 use BackupPC::View;
 use Encode qw/from_to encode/;
-use base qw(BackupPC::Xfer::Protocol);
-use Errno qw(EINTR);
+use base   qw(BackupPC::Xfer::Protocol);
+use Errno  qw(EINTR);
 
 sub new
 {
@@ -139,6 +139,8 @@ sub start
               if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' );
             push(@$rsyncArgs, @$srcList, "${hostIP_protect}:$remoteDir");
         } else {
+            unshift(@$rsyncArgs, @{$conf->{RsyncSshArgs}})
+              if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' && $conf->{RsyncdSsh} );
             if ( length($conf->{RsyncdPasswd}) ) {
                 my($pwFd, $ok);
                 $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
@@ -366,6 +368,8 @@ sub start
             unshift(@$rsyncArgs, @{$conf->{RsyncSshArgs}})
               if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' );
         } else {
+            unshift(@$rsyncArgs, @{$conf->{RsyncSshArgs}})
+              if ( ref($conf->{RsyncSshArgs}) eq 'ARRAY' && $conf->{RsyncdSsh} );
             if ( $conf->{RsyncdClientPort} != 873 ) {
                 push(@$rsyncArgs, "--port=$conf->{RsyncdClientPort}");
             }
@@ -396,23 +400,22 @@ sub start
             push(@$rsyncArgs, @fileList) if ( @fileList );
             push(@$rsyncArgs, "${hostIP_protect}:$shareNameSlash", "/");
         } else {
-            my $pwFd;
-            $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
-            if ( !length($conf->{RsyncdPasswd}) ) {
-                $t->{XferLOG}->write(\"\$Conf{RsyncdPasswd} is empty; host's rsyncd auth will fail\n");
-                $t->{_errStr} = "\$Conf{RsyncdPasswd} is empty; host's rsyncd auth will fail";
-                return;
-            }
-            if ( open($pwFd, ">", $t->{pwFile}) ) {
-                chmod(0400, $t->{pwFile});
-                binmode($pwFd);
-                syswrite($pwFd, $conf->{RsyncdPasswd});
-                close($pwFd);
-                push(@$rsyncArgs, "--password-file=$t->{pwFile}");
-            } else {
-                $t->{XferLOG}->write(\"Failed to open/create rsyncd pw file $t->{pwFile}\n");
-                $t->{_errStr} = "Failed to open/create rsyncd pw file $t->{pwFile}";
-                return;
+            if ( length($conf->{RsyncdPasswd}) ) {
+                my($pwFd, $ok);
+                $t->{pwFile} = "$conf->{TopDir}/pc/$t->{client}/.rsyncdpw$$";
+                if ( open($pwFd, ">", $t->{pwFile}) ) {
+                    $ok = 1;
+                    $ok = 0 if ( $ok && chmod(0400, $t->{pwFile}) != 1 );
+                    $ok = 0 if ( $ok && !binmode($pwFd) );
+                    $ok = 0 if ( $ok && syswrite($pwFd, $conf->{RsyncdPasswd}) != length($conf->{RsyncdPasswd}) );
+                    $ok = 0 if ( $ok && !close($pwFd) );
+                    push(@$rsyncArgs, "--password-file=$t->{pwFile}");
+                }
+                if ( !$ok ) {
+                    $t->{XferLOG}->write(\"Failed to open/create rsyncd pw file $t->{pwFile} ($!)\n");
+                    $t->{_errStr} = "Failed to open/create rsyncd pw file $t->{pwFile} ($!)";
+                    return;
+                }
             }
             my $shareName = $shareNamePath;
 
@@ -435,12 +438,12 @@ sub start
 
         unshift(
             @$rsyncArgs,
-            '--bpc-top-dir',    $conf->{TopDir},                             # perltidy protect
-            '--bpc-host-name',  $t->{client},
-            '--bpc-share-name', $t->{shareName},
-            '--bpc-bkup-num',   $t->{backups}[$t->{newBkupIdx}]{num},
-            '--bpc-bkup-comp',  $t->{backups}[$t->{newBkupIdx}]{compress},
-            '--bpc-bkup-prevnum',  defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{num} : -1,
+            '--bpc-top-dir',       $conf->{TopDir},                             # perltidy protect
+            '--bpc-host-name',     $t->{client},
+            '--bpc-share-name',    $t->{shareName},
+            '--bpc-bkup-num',      $t->{backups}[$t->{newBkupIdx}]{num},
+            '--bpc-bkup-comp',     $t->{backups}[$t->{newBkupIdx}]{compress},
+            '--bpc-bkup-prevnum',  defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{num}      : -1,
             '--bpc-bkup-prevcomp', defined($t->{lastBkupIdx}) ? $t->{backups}[$t->{lastBkupIdx}]{compress} : -1,
             '--bpc-bkup-inode0',   $inode0,
             '--bpc-log-level',     $conf->{XferLogLevel},

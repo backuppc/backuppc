@@ -29,7 +29,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2018  Craig Barratt
+#   Copyright (C) 2001-2015  Craig Barratt
 #
 #   2025.10.01: Added '--ignore-errors' to default rsync options. ==GWH==
 #

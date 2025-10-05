@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2020  Craig Barratt
+#   Copyright (C) 2001-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.4.1, last modified 5 October 2025.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc
 #
 #========================================================================
 
@@ -114,10 +114,22 @@ sub new
 
     #
     # Update the paths based on the config file
+    #	2025.10.01: Modified to optionally enable the
+    #	setting of TopDir, InstallDir, and ConfDir when
+    #	initializing a new bpc class, see:
+    #	https://sourceforge.net/p/backuppc/mailman/message/58768598/
     #
-    foreach my $dir ( qw(TopDir ConfDir InstallDir LogDir RunDir) ) {
-        next if ( $bpc->{Conf}{$dir} eq "" );
-        $paths->{$dir} = $bpc->{$dir} = $bpc->{Conf}{$dir};
+    foreach my $dir ( qw(TopDir ConfDir InstallDir LogDir RunDir) )
+    {
+	if ($bpc->{Conf}{$dir} eq "" || defined(lcfirst($dir)))
+	{
+	    $bpc->{Conf}{$dir} = $bpc->{$dir};
+	}
+	else
+	{
+	    $bpc->{$dir} = $bpc->{Conf}{$dir};
+	}
+	$paths->{$dir} = $bpc->{$dir};
     }
     $bpc->{storage}->setPaths($paths);
     $bpc->{PoolDir}  = "$bpc->{TopDir}/pool";

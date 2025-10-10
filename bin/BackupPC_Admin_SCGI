@@ -125,6 +125,7 @@ my %ActionDispatch = (
     "keepBackup"           => "HostInfo",
     "rss"                  => "Metrics",
     "metrics"              => "Metrics",
+    "check"                => "Check",
 );
 my %ChildPid2Num;
 

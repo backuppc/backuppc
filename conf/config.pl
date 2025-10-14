@@ -26,10 +26,10 @@
 #   groups can be overridden by the per-PC config.pl file.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2015  Craig Barratt
+#   Copyright (C) 2001-2025  Craig Barratt
 #
 #   2025.10.01: Added '--ignore-errors' to default rsync options. ==GWH==
 #
@@ -221,7 +221,7 @@ $Conf{BackupPCNightlyPeriod} = 1;
 #   8:  recompute 1/8  the V4 pool size every night
 #   16: recompute 1/16 the V4 pool size every night
 #       (2nd fastest option; ensures the pool files sizes
-#        stay accurate after a few day, in case the relative
+#        stay accurate after a few days, in case the relative
 #        upgrades miss a file)
 #
 $Conf{PoolSizeNightlyUpdatePeriod} = 16;
@@ -231,7 +231,7 @@ $Conf{PoolSizeNightlyUpdatePeriod} = 16;
 # contents matches their file name.  Because the pool is very large,
 # only check a small random percentage of the pool files each night.
 #
-# This is check if there has been any server file system corruption.
+# This is to check if there has been any server file system corruption.
 #
 # The default value of 1% means approximately 30% of the pool files
 # will be checked each month, although the actual number will be a

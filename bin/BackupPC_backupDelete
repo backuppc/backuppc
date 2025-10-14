@@ -8,10 +8,10 @@
 #   BackupPC_backupDelete: delete a V4 backup
 #
 #   Usage:
-#       BackupPC_backupDelete -h host -n num [-p] [-l] [-r] [-s shareName [dirs...]]
+#       BackupPC_backupDelete -h host -n num [-f] [-L] [-l] [-m] [-p] [-r] [-s shareName [dirs...]]
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
 #   Copyright (C) 2001-2025  Craig Barratt
@@ -31,10 +31,10 @@
 #
 #========================================================================
 #
-# 17 Jul 2025, to be released with Version 4.4.1.
+# 14 Oct 2025, to be released with
+# Version 4.4.1.
 #
-# See
-# https://github.com/backuppc/backuppc/
+# See https://backuppc.github.io/backuppc/
 #
 #========================================================================
 
@@ -49,6 +49,7 @@ use Data::Dumper;
 
 use BackupPC::Lib;
 use BackupPC::XS qw( :all );
+use BackupPC::View;
 use BackupPC::DirOps qw( :BPC_DT_ALL );
 
 my $Errors = 0;
@@ -68,10 +69,7 @@ my $doRefCountUpdate;
 
 my %opts;
 
-if (   !getopts("flLpmrh:n:s:", \%opts)
-    || !defined($opts{h})
-    || !defined($opts{n})
-    || (!defined($opts{s}) && @ARGV >= 1) ) {
+if ( !getopts("flLpmrh:n:s:", \%opts) || !defined($opts{h}) || !defined($opts{n}) || (!defined($opts{s}) && @ARGV >= 1) ) {
     print STDERR <<EOF;
 usage: BackupPC_backupDelete -h host -n num [-f] [-l] [-L] [-m] [-p] [-r] [-s shareName [dirs...]]
   Options:
@@ -92,9 +90,7 @@ EOF
     exit(1);
 }
 
-if (   $opts{h} !~ /^([\w\.\s-]+)$/
-    || $opts{h} =~ m{(^|/)\.\.(/|$)}
-    || !defined($Hosts->{$opts{h}}) ) {
+if ( $opts{h} !~ /^([\w\.\s-]+)$/ || $opts{h} =~ m{(^|/)\.\.(/|$)} || !defined($Hosts->{$opts{h}}) ) {
     print(STDERR "BackupPC_backupDelete: bad host name '$opts{h}'\n");
     exit(1);
 }
@@ -134,9 +130,7 @@ my @Backups = $bpc->BackupInfoRead($Host);
 
 for ( my $i = 0 ; $i < @Backups ; $i++ ) {
     $idx      = $i if ( $opts{n} == $Backups[$i]{num} );
-    $idxMerge = $i
-      if ( $opts{n} > $Backups[$i]{num}
-        && (!defined($idxMerge) || $Backups[$i]{num} > $Backups[$idxMerge]{num}) );
+    $idxMerge = $i if ( $opts{n} > $Backups[$i]{num} && (!defined($idxMerge) || $Backups[$i]{num} > $Backups[$idxMerge]{num}) );
 }
 if ( !defined($idx) ) {
     print(STDERR "BackupPC_backupDelete: can't find backup number $opts{n} on host $Host\n");
@@ -213,6 +207,17 @@ my $ShareNameM  = $bpc->fileNameEltMangle($ShareName);
 
 if ( $Backups[$idx]{version} < 4 ) {
     if ( defined($ShareName) ) {
+	# 2025.10.09:  See Github issue #519.  Check that $ShareName exists in the backup.  ==GWH==
+	# If $ShareName is given but there is an undetected syntax error, the entire backup may be deleted accidentally.
+	my $shareFound = 0;
+	foreach my $tempName ( $View->shareList($opts{n}) ) {
+	#   printf( STDERR "Testing for share [%s] in V3 backup number %d\n", $tempName, $opts{n} );
+	    if ( $ShareName eq $tempName ) { $shareFound = 1; last; }
+	}
+	if ( !$shareFound ) {
+	    printf( STDERR "Share [%s] not found in V3 backup number %d\n", $ShareName, $opts{n} );
+	    exit(1);
+	}
         foreach my $delPath ( @$DelPaths ) {
             logMsg("BackupPC_backupDelete: removing pre-v4 path #$Backups[$idx]{num}/$ShareName/$delPath\n")
               if ( $LogLevel >= 1 );
@@ -237,6 +242,17 @@ if ( $Backups[$idx]{version} < 4 ) {
     }
 } else {
     if ( defined($ShareName) ) {
+	# 2025.10.09:  See Github issue #519.  Check that $ShareName exists in the backup.  ==GWH==
+	# If $ShareName is given but there is an undetected syntax error, the entire backup may be deleted accidentally.
+	my $shareFound = 0;
+	foreach my $tempName ( $View->shareList($opts{n}) ) {
+	#   printf( STDERR "Testing for share [%s] in V4 backup number %d\n", $tempName, $opts{n} );
+	    if ( $ShareName eq $tempName ) { $shareFound = 1; last; }
+	}
+	if ( !$shareFound ) {
+           printf( STDERR "Share [%s] not found in V4 backup number %d\n", $ShareName, $opts{n} );
+           exit(1);
+	}
         #
         # Since we are only deleting portions of the backup tree, we
         # need to update reference counts
@@ -292,8 +308,7 @@ if ( $Backups[$idx]{version} < 4 ) {
                     "__bpc_progress_state__ merge #$Backups[$idx]{num}$fullDelPath -> #$Backups[$idxMerge]{num}$fullDelPath\n"
                 );
             }
-            logMsg("BackupPC_backupDelete: Merge into backup $Backups[$idxMerge]{num}$fullDelPath\n")
-              if ( $LogLevel >= 1 );
+            logMsg("BackupPC_backupDelete: Merge into backup $Backups[$idxMerge]{num}$fullDelPath\n") if ( $LogLevel >= 1 );
             $Backups[$idxMerge]{noFill} = $Backups[$idx]{noFill};
 
             if (   ($Backups[$idx]{compress} == 0 && $Backups[$idxMerge]{compress} != 0)

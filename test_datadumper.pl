@@ -11,7 +11,7 @@ use Data::Dumper;
 # Configure Data::Dumper for consistent output with Perl 5.38+
 $Data::Dumper::Useqq    = 1;
 $Data::Dumper::Sortkeys = 1;
-$Data::Dumper::Terse    = 1;
+$Data::Dumper::Terse    = 0;
 $Data::Dumper::Indent   = 1;
 
 # Test hash serialization (similar to config data)

@@ -16,10 +16,10 @@
 #   The installation steps are described as the script runs.
 #
 # AUTHOR
-#   Craig Barratt <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2017  Craig Barratt
+#   Copyright (C) 2001-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@
 #
 # Version __VERSION__, released __RELEASEDATE__.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc/
 #
 #========================================================================
 
@@ -52,7 +52,7 @@ use Data::Dumper;
 $Data::Dumper::Useqq    = 1;
 $Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Indent   = 1;
-$Data::Dumper::Terse    = 1;
+$Data::Dumper::Terse    = 0;
 
 #
 # The two strings below are replaced with the full list of BackupPC executables

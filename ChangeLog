@@ -35,6 +35,9 @@ Merged pull requests #500, #501, #521, #527, #537, #548 for backuppc
   this check, if the share does not exist (for example because a typo)
   then an entire backup may be deleted by accident.  Fixes #519.
 
+* Web UI fixes: prevent too many RsyncSshArgs (fixes #509).
+  Fit the BackupPC logo into the allocated space.
+
 * Miscellaneous spelling etc. corrections.
 
 * Data::Dumper::Terse=0; everywhere.  Fixes #550.

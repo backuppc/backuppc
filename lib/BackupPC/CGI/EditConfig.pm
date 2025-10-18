@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# 16 Oct 2025, for release with
+# 18 Oct 2025, for release with
 # Version 4.4.1.
 #
 # See https://backuppc.github.io/backuppc/
@@ -1613,7 +1613,7 @@ sub fieldInputParse
             # Not strictly necessary if the buttons have been disabled as above. == GWH ==
             if ( !$type->{maxElements} or ($i < $type->{maxElements}) )
             {
-                print( STDERR "EditConfig.pm: Pushing value [$val] to [$varName] array\n" );
+                #print( STDERR "EditConfig.pm: Pushing value [$val] to [$varName] array\n" );
                 push(@$$value, $val);
             }
             else

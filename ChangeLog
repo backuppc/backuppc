@@ -30,8 +30,6 @@ Maintenance release.
 Merged pull requests #41, #46, #47 for rsync-bpc
 Merged pull requests #500, #501, #521, #527, #537, #548 for backuppc
 
-<<<<<<< HEAD
-=======
 * BackupPC_backupDelete: If a share name is given on the command line
   with the '-s' option, exit(1) if the share does not exist.  Without
   this check, if the share does not exist (for example because a typo)
@@ -44,7 +42,6 @@ Merged pull requests #500, #501, #521, #527, #537, #548 for backuppc
 
 * Data::Dumper::Terse=0; everywhere.  Fixes #550.
 
->>>>>>> ca7626f... Fixed Github issue #509.
 #------------------------------------------------------------------------
 # Version 4.4.0, 20 Jun 2020
 #------------------------------------------------------------------------

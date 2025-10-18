@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# 15 Oct 2025, for release with
+# 18 Oct 2025, for release with
 # Version 4.4.1.
 #
 # See https://backuppc.github.io/backuppc/
@@ -100,7 +100,7 @@ if ( length($attrib->digest()) ) {
 $Data::Dumper::Indent   = 1;
 $Data::Dumper::Sortkeys = 1;
 $Data::Dumper::Pad      = "  ";
-$Data::Dumper::Terse    = 0;
+$Data::Dumper::Terse    = 1;
 my $idx = 0;
 my $info;
 print("\$attrib = {\n");

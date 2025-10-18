@@ -1610,7 +1610,7 @@ sub fieldInputParse
             last if ( fieldInputParse($type->{child}, "${varName}_zZ_$i", \$val) );
             # 2025.10.16: Prevent adding elements if it would exceed a (possibly undefined) limit.
             # If maxElements is undefined (or the limit is set to 0) then no limit is effected.
-            # Not strictly necessary if the buttons have been diabled as above. == GWH ==
+            # Not strictly necessary if the buttons have been disabled as above. == GWH ==
             if ( !$type->{maxElements} or ($i < $type->{maxElements}) )
             {
                 print( STDERR "EditConfig.pm: Pushing value [$val] to [$varName] array\n" );

@@ -204,6 +204,7 @@ my $DelTopDir   = "$HostDir/$Backups[$idx]{num}";
 my $DelPaths    = @ARGV ? [@ARGV] : [undef];
 my $ShareName   = $opts{s};
 my $ShareNameM  = $bpc->fileNameEltMangle($ShareName);
+my $View = BackupPC::View->new($bpc, $Host, \@Backups);
 
 if ( $Backups[$idx]{version} < 4 ) {
     if ( defined($ShareName) ) {

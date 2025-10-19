@@ -8,10 +8,10 @@
 #   functions used by BackupPC.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2020  Craig Barratt
+#   Copyright (C) 2003-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,9 +28,10 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# 16 Oct 2025, for release with
+# Version 4.4.1.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc/
 #
 #========================================================================
 
@@ -490,7 +491,7 @@ $Conf{CgiHeaders}
 
 <div id="navigation-container">
 	<div id="logo-container">
-		<a href="https://backuppc.github.io/backuppc/"><img src="$Conf{CgiImageDirURL}/logo320.png"></a>
+		<a href="https://backuppc.github.io/backuppc/"><img style="max-width:100%" src="$Conf{CgiImageDirURL}/logo320.png"></a>
 	</div>
 EOF
 

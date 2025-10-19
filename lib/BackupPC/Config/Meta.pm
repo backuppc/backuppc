@@ -7,10 +7,10 @@
 #   This library defines a BackupPC::Config::Meta class.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2020  Craig Barratt
+#   Copyright (C) 2004-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,9 +27,10 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 6 Jun 2020.
+# 16 Oct 2025, for release with
+# Version 4.4.1.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc/
 #
 #========================================================================
 
@@ -263,6 +264,7 @@ use vars qw(%ConfigMeta);
         type    => "list",
         emptyOk => 1,
         child   => "string",
+        maxElements => 2,
     },
     RsyncArgs => {
         type    => "list",

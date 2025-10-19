@@ -8,10 +8,10 @@
 #   data like config, host info, backup and restore info.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2020  Craig Barratt
+#   Copyright (C) 2004-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,9 +28,10 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 6 Jun 2020.
+# For release in 2025 with
+# Version 4.4.1.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc
 #
 #========================================================================
 
@@ -43,7 +44,7 @@ use Data::Dumper;
 # Configure Data::Dumper for consistent output with Perl 5.38+
 $Data::Dumper::Useqq    = 1;
 $Data::Dumper::Sortkeys = 1;
-$Data::Dumper::Terse    = 1;
+$Data::Dumper::Terse    = 0;
 
 sub new
 {

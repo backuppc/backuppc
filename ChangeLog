@@ -40,7 +40,7 @@ Merged pull requests #500, #501, #521, #527, #537, #548 for backuppc
 
 * Miscellaneous spelling etc. corrections.
 
-* Data::Dumper::Terse=0; everywhere.  Fixes #550.
+* Fix #550: Data::Dumper::Terse=0 everywhere except BackupPC_attribPrint.
 
 #------------------------------------------------------------------------
 # Version 4.4.0, 20 Jun 2020

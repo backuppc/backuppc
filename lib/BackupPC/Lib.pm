@@ -11,7 +11,7 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2020  Craig Barratt
+#   Copyright (C) 2001-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,9 +28,9 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# Version 4.4.1, last modified 5 October 2025.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc
 #
 #========================================================================
 
@@ -46,7 +46,7 @@ use Cwd;
 use Digest::MD5;
 use Config;
 use Encode qw/from_to encode_utf8/;
-use POSIX qw/_exit/;
+use POSIX  qw/_exit/;
 
 use BackupPC::Storage;
 use BackupPC::XS;
@@ -114,10 +114,22 @@ sub new
 
     #
     # Update the paths based on the config file
+    #	2025.10.01: Modified to optionally enable the
+    #	setting of TopDir, InstallDir, and ConfDir when
+    #	initializing a new bpc class, see:
+    #	https://sourceforge.net/p/backuppc/mailman/message/58768598/
     #
-    foreach my $dir ( qw(TopDir ConfDir InstallDir LogDir RunDir) ) {
-        next if ( $bpc->{Conf}{$dir} eq "" );
-        $paths->{$dir} = $bpc->{$dir} = $bpc->{Conf}{$dir};
+    foreach my $dir ( qw(TopDir ConfDir InstallDir LogDir RunDir) )
+    {
+	if ($bpc->{Conf}{$dir} eq "" || defined(lcfirst($dir)))
+	{
+	    $bpc->{Conf}{$dir} = $bpc->{$dir};
+	}
+	else
+	{
+	    $bpc->{$dir} = $bpc->{Conf}{$dir};
+	}
+	$paths->{$dir} = $bpc->{$dir};
     }
     $bpc->{storage}->setPaths($paths);
     $bpc->{PoolDir}  = "$bpc->{TopDir}/pool";
@@ -550,7 +562,7 @@ sub File2MD5
     my($data, $fileSize);
     local(*N);
 
-    $name = $1 if ( $name =~ /(.*)/ );
+    $name = $1   if ( $name =~ /(.*)/ );
     return undef if ( !open(N, $name) );
     binmode(N);
     $md5->reset();
@@ -665,7 +677,7 @@ sub File2MD5_v3
 
     $fileSize = (stat($name))[7];
     return ("", -1) if ( !-f _ );
-    $name = $1 if ( $name =~ /(.*)/ );
+    $name = $1      if ( $name =~ /(.*)/ );
     return ("", 0)  if ( $fileSize == 0 );
     return ("", -1) if ( !open(N, $name) );
     binmode(N);
@@ -765,7 +777,7 @@ sub MakeFileLink
 
     return -1 if ( !-f $name );
     for ( $i = -1 ; ; $i++ ) {
-        return -2 if ( !defined($rawFile = $bpc->MD52Path($d, $compress)) );
+        return -2         if ( !defined($rawFile = $bpc->MD52Path($d, $compress)) );
         $rawFile .= "_$i" if ( $i >= 0 );
         if ( -f $rawFile ) {
             if ( (stat(_))[3] < $bpc->{Conf}{HardLinkMax} && !compare($name, $rawFile) ) {
@@ -896,7 +908,7 @@ sub CheckFileSystemUsage
 #
 sub NetBiosInfoGet
 {
-    my($bpc, $host) = @_;
+    my($bpc,             $host) = @_;
     my($netBiosHostName, $netBiosUserName);
     my($s,               $nmbCmd);
 
@@ -918,10 +930,10 @@ sub NetBiosInfoGet
         #
         # skip <GROUP> and other non <ACTIVE> entries
         #
-        next if ( /<\w{2}> - <GROUP>/i );
-        next if ( !/^\s*([\w\s-]+?)\s*<(\w{2})\> - .*<ACTIVE>/i );
-        $netBiosHostName ||= $1 if ( $2 eq "00" );    # host is first 00
-        $netBiosUserName = $1 if ( $2 eq "03" );      # user is last 03
+        next                    if ( /<\w{2}> - <GROUP>/i );
+        next                    if ( !/^\s*([\w\s-]+?)\s*<(\w{2})\> - .*<ACTIVE>/i );
+        $netBiosHostName ||= $1 if ( $2 eq "00" );                                      # host is first 00
+        $netBiosUserName = $1   if ( $2 eq "03" );                                      # user is last 03
     }
     if ( !defined($netBiosHostName) ) {
         print(STDERR "NetBiosInfoGet: failed: can't parse return string\n")
@@ -944,9 +956,9 @@ sub NetBiosInfoGet
 #
 sub NetBiosHostIPFind
 {
-    my($bpc, $host) = @_;
+    my($bpc,             $host) = @_;
     my($netBiosHostName, $netBiosUserName);
-    my($s, $nmbCmd, $subnet, $ipAddr, $firstIpAddr);
+    my($s,               $nmbCmd, $subnet, $ipAddr, $firstIpAddr);
 
     #
     # Skip NetBios lookup if NmbLookupFindHostCmd is empty
@@ -1214,8 +1226,8 @@ sub cmdSystemOrEvalLong
             my $err = "Can't fork to run @$cmd\n";
             $? = 1;
             $$stdoutCB .= $err if ( ref($stdoutCB) eq 'SCALAR' );
-            &$stdoutCB($err) if ( ref($stdoutCB) eq 'CODE' );
-            return $err      if ( !defined($stdoutCB) );
+            &$stdoutCB($err)   if ( ref($stdoutCB) eq 'CODE' );
+            return $err        if ( !defined($stdoutCB) );
             return;
         }
         if ( !$pid ) {
@@ -1250,7 +1262,7 @@ sub cmdSystemOrEvalLong
         binmode(CHILD);
         while ( <CHILD> ) {
             $$stdoutCB .= $_ if ( ref($stdoutCB) eq 'SCALAR' );
-            &$stdoutCB($_) if ( ref($stdoutCB) eq 'CODE' );
+            &$stdoutCB($_)   if ( ref($stdoutCB) eq 'CODE' );
             $out    .= $_ if ( !defined($stdoutCB) );
             $allOut .= $_ if ( $bpc->{verbose} );
         }

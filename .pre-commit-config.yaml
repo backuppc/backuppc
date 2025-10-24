@@ -16,11 +16,6 @@ repos:
       - id: pretty-format-json
       - id: trailing-whitespace
 
-  - repo: "https://github.com/perltidy/perltidy"
-    rev: "20200619"
-    hooks:
-      - id: perltidy
-
   - repo: "https://github.com/codespell-project/codespell"
     rev: v2.0.0
     hooks:

@@ -7,10 +7,10 @@
 #   This module implements the EditConfig action for the CGI interface.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2005-2020  Craig Barratt
+#   Copyright (C) 2005-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,16 +27,17 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 6 Jun 2020.
+# 19 Oct 2025, for release with
+# Version 4.4.1.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc/
 #
 #========================================================================
 
 package BackupPC::CGI::EditConfig;
 
 use strict;
-use BackupPC::CGI::Lib qw(:all);
+use BackupPC::CGI::Lib     qw(:all);
 use BackupPC::Config::Meta qw(:all);
 use BackupPC::Storage;
 use Data::Dumper;
@@ -385,8 +386,15 @@ our %ConfigMenu = (
                 visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
             },
             {
+                name    => "RsyncdSsh",
+                visible => sub { return $_[0]->{XferMethod} eq "rsyncd"; }
+            },
+            {
                 name    => "RsyncSshArgs",
-                visible => sub { return $_[0]->{XferMethod} eq "rsync"; }
+                visible => sub {
+                    return $_[0]->{XferMethod} eq "rsync"
+                      || ($_[0]->{XferMethod} eq "rsyncd" && $_[0]->{RsyncdSsh});
+                }
             },
             {
                 name    => "RsyncdClientPort",
@@ -1175,7 +1183,7 @@ EOF
             my $override_checked = "";
             if (   !$isError && $In{deleteVar} =~ /^\Q${varName}_zZ_/
                 || !$isError && $In{insertVar} =~ /^\Q${varName}\E(_zZ_|$)/
-                || !$isError && $In{addVar} =~ /^\Q${varName}\E(_zZ_|$)/ ) {
+                || !$isError && $In{addVar}    =~ /^\Q${varName}\E(_zZ_|$)/ ) {
                 $overrideSet = 1;
             }
             if ( $overrideSet ) {
@@ -1189,6 +1197,7 @@ EOF
     }
 
     (my $varClass = $varName) =~ s/_zZ_.+//;
+    my $permitListAdd = 1;
     if ( $type->{type} eq "list" ) {
         $content .= "<td class=\"border\">\n";
         $varValue = []          if ( !defined($varValue) );
@@ -1248,16 +1257,27 @@ EOF
                 $content .= "</tr>\n";
             }
         } else {
+            my $insertValue = ${EscHTML($Lang->{CfgEdit_Button_Insert})};
+            my $deleteValue = ${EscHTML($Lang->{CfgEdit_Button_Delete})};
             for ( my $i = 0 ; $i < @$varValue ; $i++ ) {
+                # 2025.10.16: Disable 'Insert' and 'Add' buttons if the permitted maximum
+                # number of elements is reached. Fixes Github issue #509.  == GWH ==
+                my $insertSubmit = "insertSubmit('${varName}_zZ_$i')";
+                # One day we may also for some reason want to prevent 'Delete' for
+                # certain elements( such as the first element of RsyncSshArgs).
+                my $deleteSubmit = "deleteSubmit('${varName}_zZ_$i')";
+                if ( $type->{maxElements} && (@$varValue >= $type->{maxElements}) ) {
+                    $permitListAdd = 0;
+                    $insertSubmit = "void(0)";
+                    $insertValue = "             ";
+                }
                 $content .= <<EOF;
 <tr><td class="border hasButtons">
-<input type="button" name="ins_${varName}_zZ_$i" value="${EscHTML($Lang->{CfgEdit_Button_Insert})}"
-    onClick="insertSubmit('${varName}_zZ_$i')">
+<input type="button" name="ins_${varName}_zZ_$i" value="$insertValue" onClick="$insertSubmit">
 EOF
                 if ( @$varValue > 1 || $type->{emptyOk} ) {
                     $content .= <<EOF;
-<input type="button" name="del_${varName}_zZ_$i" value="${EscHTML($Lang->{CfgEdit_Button_Delete})}"
-    onClick="deleteSubmit('${varName}_zZ_$i')">
+<input type="button" name="del_${varName}_zZ_$i" value="$deleteValue" onClick="$deleteSubmit">
 EOF
                 }
                 $content .= "</td>\n";
@@ -1270,12 +1290,13 @@ EOF
             }
             $colspan = 2;
         }
-        $content .= <<EOF;
-<tr><td class="border hasButtons" colspan="$colspan"><input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}"
-    onClick="addSubmit('$varName')"></td></tr>
-</table>
+        if( $permitListAdd )
+        {
+            $content .= <<EOF;
+<tr><td class="border hasButtons" colspan="$colspan"><input type="button" name="add_$varName" value="${EscHTML($Lang->{CfgEdit_Button_Add})}" onClick="addSubmit('$varName')"></td></tr>
 EOF
-        $content .= "</td>\n";
+        }
+        $content .= "</table></td>\n";
     } elsif ( $type->{type} eq "hash" ) {
         $content .= "<td class=\"border\">\n";
         $content .= "<table border=\"1\" cellspacing=\"0\" class=\"editSubTable editSubTable-$varClass\">\n";
@@ -1587,7 +1608,18 @@ sub fieldInputParse
         for ( my $i = 0 ; ; $i++ ) {
             my $val;
             last if ( fieldInputParse($type->{child}, "${varName}_zZ_$i", \$val) );
-            push(@$$value, $val);
+            # 2025.10.16: Prevent adding elements if it would exceed a (possibly undefined) limit.
+            # If maxElements is undefined (or the limit is set to 0) then no limit is effected.
+            # Not strictly necessary if the buttons have been disabled as above. == GWH ==
+            if ( !$type->{maxElements} or ($i < $type->{maxElements}) )
+            {
+                #print( STDERR "EditConfig.pm: Pushing value [$val] to [$varName] array\n" );
+                push(@$$value, $val);
+            }
+            else
+            {
+                print( STDERR "EditConfig.pm: Refusing to push element index [$i] to [$varName] array\n" );
+            }
         }
         $$value = undef if ( $type->{undefIfEmpty} && @$$value == 0 );
     } elsif ( $type->{type} eq "hash" || $type->{type} eq "horizHash" ) {

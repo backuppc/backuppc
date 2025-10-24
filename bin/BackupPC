@@ -24,10 +24,10 @@
 #   and user-initiated backup or backup cancel requests.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2020  Craig Barratt
+#   Copyright (C) 2001-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -44,9 +44,10 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# For release in 2025 with
+# Version 4.4.1.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc
 #
 #========================================================================
 
@@ -295,7 +296,7 @@ sub Main_Initialize
     }
 
     foreach my $progName ( qw(SmbClientPath NmbLookupPath PingPath DfPath
-    SendmailPath SshPath RsyncBackupPCPath) ) {
+        SendmailPath SshPath RsyncBackupPCPath) ) {
         next if ( !defined $Conf{$progName} || $Conf{$progName} eq "" || -x $Conf{$progName} );
         print(STDERR $bpc->timeStamp,
             "\$Conf{$progName} = '$Conf{$progName}' is not a valid executable program; exiting\n");
@@ -420,7 +421,12 @@ sub Main_Initialize
     # For now the workaround appears to be use the perl version of
     # XS Data::Dumper.
     #
-    $Data::Dumper::Useqq = 1;
+    # Configure Data::Dumper for consistent output with Perl 5.38+
+    #
+    $Data::Dumper::Useqq    = 1;
+    $Data::Dumper::Sortkeys = 1;
+    $Data::Dumper::Indent   = 1;
+    $Data::Dumper::Terse    = 0;
 }
 
 ############################################################################
@@ -1303,7 +1309,7 @@ sub Main_Check_Job_Messages
                 $Status->{$host}{state} = "Status_idle";
             }
             $Status->{$host}{activeJob} = 0 if ( defined($Status->{$host}) );
-            delete($Status->{$host}) if ( $Jobs{$host}{dhcp} );
+            delete($Status->{$host})        if ( $Jobs{$host}{dhcp} );
             delete($Jobs{$host});
         }
     }
@@ -1413,10 +1419,10 @@ sub Main_Check_Client_Messages
                 } elsif ( $BgQueueOn{$host} || $UserQueueOn{$host} ) {
                     print(LOG $bpc->timeStamp,
                         "Stopping pending backup of $host, request by $user (backoff=$backoff)\n");
-                    @BgQueue   = grep($_->{host} ne $host, @BgQueue);
-                    @UserQueue = grep($_->{host} ne $host, @UserQueue);
+                    @BgQueue          = grep($_->{host} ne $host, @BgQueue);
+                    @UserQueue        = grep($_->{host} ne $host, @UserQueue);
                     $BgQueueOn{$host} = $UserQueueOn{$host} = 0;
-                    $reply = "ok: pending backup of $host canceled";
+                    $reply            = "ok: pending backup of $host canceled";
                 } else {
                     print(LOG $bpc->timeStamp,
                         "Nothing to do for stop backup of $host, request by $user (backoff=$backoff)\n");

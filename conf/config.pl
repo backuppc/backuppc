@@ -29,7 +29,9 @@
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2018  Craig Barratt
+#   Copyright (C) 2001-2015  Craig Barratt
+#
+#   2025.10.01: Added '--ignore-errors' to default rsync options. ==GWH==
 #
 #   See https://backuppc.github.io/backuppc
 #
@@ -1227,9 +1229,18 @@ $Conf{RsyncBackupPCPath} = "";
 # The setting should only have two entries: "-e" and
 # everything else; don't add additional array elements.
 #
-# This setting only matters if $Conf{XferMethod} = 'rsync'.
+# This setting only matters if $Conf{XferMethod} = 'rsync', or if
+# $Conf{XferMethod} = 'rsyncd' and $Conf{RsyncdSsh} = 1.
 #
 $Conf{RsyncSshArgs} = ['-e', '$sshPath -l root -o ServerAliveInterval=60'];
+
+#
+# Whether to tell rsync to connect to the client's rsync daemon via ssh instead
+# of directly over TCP.  See $Conf{RsyncSshArgs}.
+#
+# This setting only matters if $Conf{XferMethod} = 'rsyncd'.
+#
+$Conf{RsyncdSsh} = 0;
 
 #
 # Share name to backup.  For $Conf{XferMethod} = "rsync" this should
@@ -1272,6 +1283,12 @@ $Conf{RsyncdPasswd} = '';
 #
 # Arguments to rsync for backup.  Do not edit the first set unless you
 # have a good understanding of rsync options.
+# 2025.10.01: ==GWH==
+# Note that the argument '--ignore-errors' is only relevant to file
+# deletions; without this argument any I/O error during the backup
+# will have the undesirable effect of preventing deletions which
+# *should* have been performed.  See Github issues #87 and #534.
+# 2025.10.01: ==GWH==
 #
 $Conf{RsyncArgs} = [
     '--super',
@@ -1287,6 +1304,7 @@ $Conf{RsyncArgs} = [
     '--hard-links',
     '--delete',
     '--delete-excluded',
+    '--ignore-errors',
     '--one-file-system',
     '--partial',
     '--log-format=log: %o %i %B %8U,%8G %9l %f%L',
@@ -2352,6 +2370,7 @@ $Conf{CgiUserConfigEdit} = {
     RsyncClientPath           => 0,
     RsyncdClientPort          => 1,
     RsyncdPasswd              => 1,
+    RsyncdSsh                 => 1,
     RsyncdUserName            => 1,
     RsyncFullArgsExtra        => 1,
     RsyncIncrArgsExtra        => 1,

@@ -43,7 +43,7 @@ use BackupPC::View;
 use BackupPC::DirOps;
 use BackupPC::XS qw(:all);
 
-use Encode qw/from_to encode/;
+use Encode        qw/from_to encode/;
 use File::Listing qw/parse_dir/;
 use Fcntl ':mode';
 use File::Path;
@@ -561,9 +561,9 @@ sub getFTPArgs
         Firewall     => undef,                                                      # not used
         FirewallType => undef,                                                      # not used
         BlockSize    => $conf->{FtpBlockSize} || 10240,
-        Port         => $conf->{FtpPort} || 21,
+        Port         => $conf->{FtpPort}      || 21,
         Timeout      => defined($conf->{FtpTimeout}) ? $conf->{FtpTimeout} : 120,
-        Debug        => $t->{logLevel} >= 5 ? 1 : 0,
+        Debug        => $t->{logLevel} >= 5          ? 1                   : 0,
         Passive      => (defined($conf->{FtpPassive}) ? $conf->{FtpPassive} : 1),
         Hash         => undef,                                                      # do not touch
     };
@@ -765,9 +765,9 @@ sub handleDir
     my $same    = 0;
     my $a       = $AttrNew->get($f->{name});
 
-    my($exists, $digest, $outSize, $errs);
+    my($exists,    $digest, $outSize, $errs);
     my($poolWrite, $poolFile);
-    my($localDir, $remoteDir, %expectedFiles);
+    my($localDir,  $remoteDir, %expectedFiles);
 
     $a->{poolPath} = $bpc->MD52Path($a->{digest}, $a->{compress}) if ( length($a->{digest}) );
 

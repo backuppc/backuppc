@@ -8,10 +8,10 @@
 #   directory utility functions used by BackupPC.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2020  Craig Barratt
+#   Copyright (C) 2001-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -28,7 +28,8 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 5 Apr 2020.
+# For release in 2025 with
+# Version 4.4.1.
 #
 # See http://backuppc.sourceforge.net.
 #
@@ -43,6 +44,11 @@ use Cwd;
 use Encode qw/from_to encode_utf8/;
 use Data::Dumper;
 use File::Path;
+
+# Configure Data::Dumper for consistent output with Perl 5.38+
+$Data::Dumper::Useqq    = 1;
+$Data::Dumper::Sortkeys = 1;
+$Data::Dumper::Terse    = 0;
 
 use BackupPC::XS;
 use BackupPC::Storage;

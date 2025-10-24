@@ -38,9 +38,9 @@ package BackupPC::Xfer::Tar;
 
 use strict;
 use Encode qw/from_to encode/;
-use base qw(BackupPC::Xfer::Protocol);
-use Fcntl qw(F_GETFL F_SETFL O_NONBLOCK);
-use Errno qw(EWOULDBLOCK);
+use base   qw(BackupPC::Xfer::Protocol);
+use Fcntl  qw(F_GETFL F_SETFL O_NONBLOCK);
+use Errno  qw(EWOULDBLOCK);
 
 sub useTar
 {
@@ -225,7 +225,7 @@ sub readOutput
         # refresh our inactivity alarm
         #
         alarm($conf->{ClientTimeout}) if ( !$t->{abort} );
-        $t->{lastOutputLine} = $_ if ( !/^$/ );
+        $t->{lastOutputLine} = $_     if ( !/^$/ );
         if ( /^Total bytes (written|read): / ) {
             $t->{XferLOG}->write(\"$_\n") if ( $t->{logLevel} >= 1 );
             $t->{xferOK} = 1;

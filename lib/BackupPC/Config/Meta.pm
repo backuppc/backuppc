@@ -7,10 +7,10 @@
 #   This library defines a BackupPC::Config::Meta class.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2004-2020  Craig Barratt
+#   Copyright (C) 2004-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,9 +27,10 @@
 #
 #========================================================================
 #
-# Version 4.3.3, released 6 Jun 2020.
+# 16 Oct 2025, for release with
+# Version 4.4.1.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc/
 #
 #========================================================================
 
@@ -82,13 +83,13 @@ use vars qw(%ConfigMeta);
     MaxOldLogFiles                => "integer",
     CmdQueueNice                  => "integer",
 
-    SshPath         => {type => "execPath", undefIfEmpty => 1},
-    NmbLookupPath   => {type => "execPath", undefIfEmpty => 1},
-    PingPath        => {type => "execPath", undefIfEmpty => 1},
-    Ping6Path       => {type => "execPath", undefIfEmpty => 1},
-    DfPath          => {type => "execPath", undefIfEmpty => 1},
-    DfCmd           => "string",
-    DfInodeUsageCmd => "string",
+    SshPath            => {type => "execPath", undefIfEmpty => 1},
+    NmbLookupPath      => {type => "execPath", undefIfEmpty => 1},
+    PingPath           => {type => "execPath", undefIfEmpty => 1},
+    Ping6Path          => {type => "execPath", undefIfEmpty => 1},
+    DfPath             => {type => "execPath", undefIfEmpty => 1},
+    DfCmd              => "string",
+    DfInodeUsageCmd    => "string",
     SplitPath          => {type => "execPath", undefIfEmpty => 1},
     ParPath            => {type => "execPath", undefIfEmpty => 1},
     CatPath            => {type => "execPath", undefIfEmpty => 1},
@@ -247,15 +248,11 @@ use vars qw(%ConfigMeta);
     },
     RsyncBackupPCPath => {type => "execPath", undefIfEmpty => 1},
     RsyncClientPath   => {type => "string",   undefIfEmpty => 1},
-    RsyncSshArgs      => {
-        type    => "list",
-        emptyOk => 1,
-        child   => "string",
-    },
 
     ######################################################################
     # Rsyncd Configuration
     ######################################################################
+    RsyncdSsh        => "boolean",
     RsyncdClientPort => "integer",
     RsyncdUserName   => "string",
     RsyncdPasswd     => "string",
@@ -263,6 +260,12 @@ use vars qw(%ConfigMeta);
     ######################################################################
     # Rsync(d) Options
     ######################################################################
+    RsyncSshArgs => {
+        type    => "list",
+        emptyOk => 1,
+        child   => "string",
+        maxElements => 2,
+    },
     RsyncArgs => {
         type    => "list",
         emptyOk => 1,
@@ -372,13 +375,13 @@ use vars qw(%ConfigMeta);
     EMailAdminUserName        => "string",
     EMailAdminSubject         => "string",
     EMailUserDestDomain       => "string",
-    EMailNoBackupEverSubj     => {type => "string", undefIfEmpty => 1},
+    EMailNoBackupEverSubj     => {type => "string",    undefIfEmpty => 1},
     EMailNoBackupEverMesg     => {type => "bigstring", undefIfEmpty => 1},
     EMailNotifyOldBackupDays  => "float",
-    EMailNoBackupRecentSubj   => {type => "string", undefIfEmpty => 1},
+    EMailNoBackupRecentSubj   => {type => "string",    undefIfEmpty => 1},
     EMailNoBackupRecentMesg   => {type => "bigstring", undefIfEmpty => 1},
     EMailNotifyOldOutlookDays => "float",
-    EMailOutlookBackupSubj    => {type => "string", undefIfEmpty => 1},
+    EMailOutlookBackupSubj    => {type => "string",    undefIfEmpty => 1},
     EMailOutlookBackupMesg    => {type => "bigstring", undefIfEmpty => 1},
     EMailHeaders              => {type => "bigstring", undefIfEmpty => 1},
 
@@ -479,6 +482,7 @@ use vars qw(%ConfigMeta);
             RsyncShareName            => "boolean",
             RsyncBackupPCPath         => "boolean",
             RsyncdClientPort          => "boolean",
+            RsyncdSsh                 => "boolean",
             RsyncdUserName            => "boolean",
             RsyncdPasswd              => "boolean",
             RsyncArgs                 => "boolean",

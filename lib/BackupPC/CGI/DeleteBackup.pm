@@ -40,7 +40,7 @@ package BackupPC::CGI::DeleteBackup;
 use strict;
 use warnings;
 use BackupPC::CGI::Lib qw(:all);
-use Encode qw(decode_utf8);
+use Encode             qw(decode_utf8);
 
 sub action
 {

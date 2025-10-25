@@ -38,7 +38,7 @@
 #
 # Version __VERSION__, released __RELEASEDATE__.
 #
-# See https://backuppc.github.io/backuppc/
+# See https://backuppc.github.io/backuppc
 #
 #========================================================================
 

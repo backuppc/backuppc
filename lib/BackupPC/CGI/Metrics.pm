@@ -39,6 +39,7 @@ use strict;
 use warnings;
 
 use BackupPC::CGI::Lib qw(:all);
+use Scalar::Util 'looks_like_number';
 
 my $LoadErrorXMLRSS;
 my $LoadErrorJSONXS;
@@ -113,8 +114,8 @@ sub action
     # Host metrics
     #
     foreach my $host ( GetUserHosts(1) ) {
-        my($fullCount,      $fullDuration, $fullRate, $fullSize);
-        my($incrCount,      $incrDuration, $incrRate, $incrSize);
+        my($fullAge, $fullCount, $fullDuration, $fullRate, $fullSize);
+        my($incrAge, $incrCount, $incrDuration, $incrRate, $incrSize);
         my($lastFullBackup, $lastIncrBackup);
 
         $fullCount = $incrCount = 0;
@@ -132,11 +133,13 @@ sub action
                 $fullCount++;
                 if ( $$lastFullBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastFullBackup->{startTime} ) {
                     $lastFullBackup = \$Backups[$i];
+                    $fullAge        = time - $$lastFullBackup->{endTime};
                 }
             } elsif ( $Backups[$i]{type} eq "incr" ) {
                 $incrCount++;
                 if ( $$lastIncrBackup->{startTime} < 0 || $Backups[$i]{startTime} > $$lastIncrBackup->{startTime} ) {
                     $lastIncrBackup = \$Backups[$i];
+                    $incrAge        = time - $$lastIncrBackup->{endTime};
                 }
             }
         }
@@ -154,11 +157,25 @@ sub action
             $incrRate = $incrSize / ($incrDuration <= 0 ? 1 : $incrDuration);
         }
 
+        my $fkc = 0;
+        if ( ref($Conf{FullKeepCnt}) eq "ARRAY" ) {
+            if ( looks_like_number($Conf{FullKeepCnt}[0]) > 0 ) {
+                $fkc = $Conf{FullKeepCnt}[0];
+            }
+        } elsif ( ref($Conf{FullKeepCnt}) eq "HASHMAP" ) {
+            ;
+        } else {
+            if ( looks_like_number($Conf{FullKeepCnt}) > 0 ) {
+                $fkc = $Conf{FullKeepCnt};
+            }
+        }
+
         $metrics{hosts}{$host} = {
+            full_age          => int($fullAge),
             full_start_time   => int($$lastFullBackup->{startTime}),
             full_count        => $fullCount,
             full_duration     => int($fullDuration),
-            full_keep_count   => $Conf{FullKeepCnt},
+            full_keep_count   => $fkc,
             full_period       => $Conf{FullPeriod},
             full_rate         => int($fullRate),
             full_size         => int($fullSize),
@@ -166,6 +183,7 @@ sub action
             full_size_new     => int($$lastFullBackup->{sizeNew}),
             full_nfiles_exist => int($$lastFullBackup->{nFilesExist}),
             full_nfiles_new   => int($$lastFullBackup->{nFilesNew}),
+            incr_age          => int($incrAge),
             incr_start_time   => int($$lastIncrBackup->{startTime}),
             incr_count        => $incrCount,
             incr_duration     => int($incrDuration),
@@ -257,14 +275,16 @@ sub action
 
         my %mapper = (
             hosts => {
-                full_age        => {desc => "Age of the last full backup"},
+                full_age        => {desc => "Age of the last full backup (seconds)"},
+                full_start_time => {desc => "Last full backup start in epoch time (seconds)"},
                 full_count      => {desc => "Number of full backups"},
                 full_duration   => {desc => "Transfer time in seconds of the last full backup"},
                 full_keep_count => {desc => "Number of full backups to keep"},
                 full_period     => {desc => "Minimum period in days between full backups"},
                 full_rate       => {desc => "Transfer rate in bytes/s of the last full backup"},
                 full_size       => {desc => "Size in bytes of the last full backup"},
-                incr_age        => {desc => "Age of the last incremental backup"},
+                incr_age        => {desc => "Age of the last incremental backup (seconds)"},
+                incr_start_time => {desc => "Same as full backup but for incremental backup"},
                 incr_count      => {desc => "Number of incremental backups"},
                 incr_duration   => {desc => "Transfer time in seconds of the last incremental backup"},
                 incr_keep_count => {desc => "Number of incremental backups to keep"},

@@ -28,7 +28,7 @@
 #
 #========================================================================
 #
-# 15 Oct 2025, for release with
+# For release in 2025 with
 # Version 4.4.1.
 #
 # See https://backuppc.github.io/backuppc/

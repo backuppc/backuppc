@@ -81,7 +81,7 @@ sub new
             useFHS     => $useFHS,
             TopDir     => $topDir,
             InstallDir => $installDir,
-            ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir,    # updated by configure.pl
+            ConfDir    => $confDir eq "" ? '/etc/BackupPC' : $confDir,    # updated by configure.pl
             LogDir     => '/var/log/BackupPC',
             RunDir     => '/var/run/BackupPC',
         };
@@ -98,7 +98,7 @@ sub new
 
     my $bpc = bless {
         %$paths,
-        Version => '4.3.3',    # updated by makeDist
+        Version => '4.4.1'    # updated by makeDist
     }, $class;
 
     $bpc->{storage} = BackupPC::Storage->new($paths);
@@ -121,15 +121,18 @@ sub new
     #
     foreach my $dir ( qw(TopDir ConfDir InstallDir LogDir RunDir) )
     {
-	if ($bpc->{Conf}{$dir} eq "" || defined(lcfirst($dir)))
-	{
-	    $bpc->{Conf}{$dir} = $bpc->{$dir};
-	}
-	else
-	{
-	    $bpc->{$dir} = $bpc->{Conf}{$dir};
-	}
-	$paths->{$dir} = $bpc->{$dir};
+        # If the config file did not set this directory (undefined or empty),
+        # use the default value established above.  Otherwise, prefer the
+        # value from the config file.  The previous code used
+        # defined(lcfirst($dir)) which is always true and caused config
+        # values to be overwritten by defaults.
+        if ( !defined($bpc->{Conf}{$dir}) || $bpc->{Conf}{$dir} eq "" ) {
+            $bpc->{Conf}{$dir} = $bpc->{$dir};
+        }
+        else {
+            $bpc->{$dir} = $bpc->{Conf}{$dir};
+        }
+        $paths->{$dir} = $bpc->{$dir};
     }
     $bpc->{storage}->setPaths($paths);
     $bpc->{PoolDir}  = "$bpc->{TopDir}/pool";

@@ -81,7 +81,7 @@ sub new
             useFHS     => $useFHS,
             TopDir     => $topDir,
             InstallDir => $installDir,
-            ConfDir    => $confDir eq "" ? '/etc/BackupPC' : $confDir,    # updated by configure.pl
+            ConfDir    => $confDir eq "" ? '__CONFDIR__' : $confDir, # updated by configure.pl
             LogDir     => '/var/log/BackupPC',
             RunDir     => '/var/run/BackupPC',
         };

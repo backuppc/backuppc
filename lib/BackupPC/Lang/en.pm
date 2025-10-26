@@ -1496,10 +1496,11 @@ as NEWHOST=COPYHOST.  This will overwrite any existing per-host
 configuration for NEWHOST.  You can also do this for an existing
 host.  To delete a host, hit the Delete button.  For Add, Delete,
 and configuration copy, changes don't take effect until you select
-Save.  None of the deleted host's backups will be removed,
-so if you accidentally delete a host, simply re-add it.  To completely
-remove a host's backups, you need to manually remove the files
-below \$topDir/pc/HOST
+Save.  The deleted host's backups will be not removed until the next
+time BackupPC_nightly runs, so if you accidentally delete a host you
+can simply re-add it.  To complete the removal of a host's backups
+you may manually remove the files below \$topDir/pc/HOST and the
+directory \$topDir/pc/HOST itself.
 EOF
 
 $Lang{CfgEdit_Header_Main} = <<EOF;

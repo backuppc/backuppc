@@ -1490,10 +1490,10 @@ konfiguraci hosta z jiného hosta, zadejte jméno hosta jako
 NEWHOST=COPYHOST. To přepíše existující konfiguraci pro NEWHOST.
 Tento postup můžete použít i pto existujícího hosta.
 Hosta smažete stisknutím tlačítka delete. Přidání, smazání a kopírování
-konfigurace nanabude platnosti dokud nedojde k stisknutí tlačítka Uložit
-Žádná ze záloh smazaných hostů nebude odstraněna, tedy pokud omylem
-so if you accidently delete a host, simply re-add it.  To completely
-smažete hostovy zálohy, musíte ručně smazat soubory v \$topDir/pc/HOST
+konfigurace nanabude platnosti dokud nedojde k stisknutí tlačítka Uložit.
+Žádná ze záloh smazaných hostů nebude odstraněna. Pokud omylem smažete
+Pokud omylem smažete hostitele, jednoduše jej nahraďte. Pro úplné smazání
+záloh hosta, musíte ručně smazat soubory v \$topDir/pc/HOST
 EOF
 
 $Lang{CfgEdit_Header_Main} = <<EOF;

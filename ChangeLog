@@ -42,6 +42,8 @@ Merged pull requests #500, #501, #521, #527, #537, #548 for backuppc
 
 * Fix #550: Data::Dumper::Terse=0 everywhere except BackupPC_attribPrint.
 
+* Fix (partially) #411: BackupPC_migrateV3toV4 optionally prints a timestamp.
+
 #------------------------------------------------------------------------
 # Version 4.4.0, 20 Jun 2020
 #------------------------------------------------------------------------

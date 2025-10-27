@@ -8,7 +8,7 @@
 #   BackupPC_migrateV3toV4: migrate a backup from V3 to V4 storage
 #
 #   Usage:
-#       BackupPC_migrateV3toV4 [-p] [-v] [-h host [-n V3backupNum]]
+#       BackupPC_migrateV3toV4 [-m] [-p[-t]] [-v] [[-a][-h host [-n V3backupNum]]
 #
 # AUTHOR
 #   Craig Barratt  <cbarratt@users.sourceforge.net>
@@ -31,9 +31,9 @@
 #
 #========================================================================
 #
-# 17 Jul 2025, to be released with Version 4.4.1.
+# 27 Oct 2025, to be released with Version 4.4.1.
 #
-# See http://github.com/backuppc/backuppc
+# See https://backuppc.github.io/backuppc
 #
 #========================================================================
 
@@ -65,13 +65,13 @@ my $Hosts  = $bpc->HostInfoRead();
 
 my %opts;
 
-if (   !getopts("ampvh:n:", \%opts)
+if (   !getopts("amptvh:n:", \%opts)
     || @ARGV >= 1
     || !(defined($opts{a}) xor defined($opts{h}))
     || (!defined($opts{h}) && defined($opts{n})) ) {
     print STDERR <<EOF;
-usage: BackupPC_migrateV3toV4 -a [-m] [-p] [-v]
-       BackupPC_migrateV3toV4 -h host [-n V3backupNum] [-m] [-p] [-v]
+usage:
+       BackupPC_migrateV3toV4 [-m] [-p[-t]] [-v] [[-a][-h host [-n V3backupNum]]]
   Options:
      -a              migrate all hosts and all backups
      -h host         migrate just a specific host
@@ -79,6 +79,7 @@ usage: BackupPC_migrateV3toV4 -a [-m] [-p] [-v]
                      for that host if not specified
      -m              don't migrate anything; just print what would be done
      -p              don't print progress information
+     -t              if progress information is printed, add a timestamp
      -v              verbose
 EOF
     exit(1);
@@ -545,7 +546,14 @@ sub printProgress
     return if ( $opts{p} );
     my $pctText = sprintf("%.1f", 100 * $FileCnt / ($FileCntTotal > 0 ? $FileCntTotal : 1));
     return if ( $pctText eq $FileCntPctTextLast );
-    print("$Host #$BkupNum: $pctText%\n");
+    my $timestamp = '';
+    if ( $opts{t} )
+    {
+	my @tm = gmtime;
+	$timestamp = sprintf( ' %4d%02d%02dT%02d%02d%02dZ', @tm[5]+1900, @tm[4]+1, @tm[3], @tm[2], @tm[1], @tm[0] );
+    }
+    my $printed_pctText = $pctText . '%' . $timestamp;
+    print("$Host #$BkupNum: $printed_pctText\n");
     $FileCntPctTextLast = $pctText;
 }
 

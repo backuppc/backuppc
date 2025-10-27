@@ -389,7 +389,7 @@ all the attrib files in each backup tree. The global reference count database
 is verified by combing all the per-host reference count databases and comparing
 them.
 
-BackupPC_fsck cannot run when BackupPC is.
+BackupPC_fsck cannot run when BackupPC is running.
 
 =item *
 
@@ -1089,7 +1089,7 @@ for new installations using command-line options.
 
 After running configure.pl, browse through the config file,
 __CONFDIR__/config.pl, and make sure all the default settings are correct. In
-particular, you will need to decide whether to use smb, tar,or rsync or ftp
+particular, you will need to decide whether to use smb, tar, rsync or ftp
 transport (or whether to set it on a per-PC basis) and set the relevant
 parameters for that transport method. See the section L<Step 5: Client Setup>
 for more details.

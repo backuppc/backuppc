@@ -1135,6 +1135,7 @@ $Lang{Config_file}   = "Arquivo configuração";
 # $Lang{Hosts_file} = "Arquivo Hosts";
 $Lang{Current_queues} = "Filas atuais";
 $Lang{Documentation}  = "Documentação";
+$Lang{Check}          = "Weryfikacja";
 
 #$Lang{Host_or_User_name} = "<small>Host ou usuário:</small>";
 $Lang{Go}            = "Aceitar";

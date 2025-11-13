@@ -27,7 +27,7 @@
 #
 #========================================================================
 #
-# 19 Oct 2025, for release with
+# 13 Nov 2025, for release with
 # Version 4.4.1.
 #
 # See https://backuppc.github.io/backuppc/
@@ -529,6 +529,10 @@ sub action
     if ( !$Privileged ) {
         ErrorExit(eval("qq{$Lang->{Only_privileged_users_can_edit_config_files}}"));
     }
+
+    # Editing ClientNameAlias is dangerous, disable it.  See
+    # https://sources.debian.org/src/backuppc/4.4.0-11/debian/patches/01-debian.patch
+    $bpc->{Conf}{CgiUserConfigEdit}{ClientNameAlias} = 0;
 
     if ( defined($In{menu}) || $In{saveAction} eq "Save" ) {
         $errors = errorCheck();

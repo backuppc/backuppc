@@ -1,4 +1,4 @@
-=encoding ISO8859-1
+=encoding UTF-8
 
 =head1 BackupPC Introduction
 
@@ -920,14 +920,14 @@ module is installed.
 =item XML::RSS
 
 To support the RSS feature you will need to install XML::RSS, also from
-L<http://www.cpan.org>. There is not need to install this module if you don't
+L<http://www.cpan.org>. There is no need to install this module if you don't
 plan on using RSS. You can run "perldoc XML::RSS" to see if this module is
 installed.
 
 =item JSON::XS
 
 To support the JSON formatted metrics you will need to install JSON::XS, also
-from L<http://www.cpan.org>. There is not need to install this module if you
+from L<http://www.cpan.org>. There is no need to install this module if you
 don't plan on using JSON formatted metrics. You can run "perldoc JSON::XS" to
 see if this module is installed.
 
@@ -3803,13 +3803,13 @@ improvements (most of the releases have been in this category).
 
 =head1 Author
 
-Craig Barratt  <cbarratt@users.sourceforge.net>
+Craig Barratt
 
 See L<https://backuppc.github.io/backuppc/BackupPC.html>.
 
 =head1 Copyright
 
-Copyright (C) 2001-2020 Craig Barratt
+Copyright (C) 2001-2025 Craig Barratt
 
 =head1 Credits
 

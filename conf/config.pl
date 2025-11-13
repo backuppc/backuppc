@@ -26,16 +26,32 @@
 #   groups can be overridden by the per-PC config.pl file.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2015  Craig Barratt
+#   Copyright (C) 2001-2025  Craig Barratt
 #
 #   2025.10.01: Added '--ignore-errors' to default rsync options. ==GWH==
 #
 #   See https://backuppc.github.io/backuppc
 #
 #========================================================================
+
+# Note for users of BackupPC version 4.4.1rc1:
+# Because this file is effectively a fragment of Perl script, if you
+# have share, directory and/or file names with UTF-8 encodings then
+# theoretically because these are stored in this file as quoted Perl
+# literals, and literals are supposed to be 8-bit clean, you should
+# not need to do anything here - even if in addition to using the
+# BackupPC Web interface you also use a text editor to maintain it.
+# However there is always that slight possibility that things don't
+# behave as documented.  In that case it might help to uncomment the
+# line below, to tell Perl that this file is UTF-8 encoded.
+# use utf8;
+# If you do run into UTF-8 issues, please report your findings to the
+# BackupPC Users' Mailing List.  Note that the configuration editor in
+# the Web interface for BackupPC version 4.4.0 will not work correctly
+# if you enter UTF-8 encoded share, directory and/or file names.
 
 ###########################################################################
 # General server configuration
@@ -2053,7 +2069,7 @@ $Conf{EMailOutlookBackupSubj} = undef;
 $Conf{EMailOutlookBackupMesg} = undef;
 
 #
-# Additional email headers.  This sets to charset to
+# Additional email headers.  This sets the charset to
 # utf8.
 #
 $Conf{EMailHeaders} = <<EOF;

@@ -559,7 +559,7 @@ sub action
                 }
             }
 
-            #delete($In{"v_flds_$var"});
+            #delete($In{"v_flds_$var"});			# 2025.10.31: ??? === GWH ==
         }
 
         ($newConf, $override) = inputParse($bpc, $userHost);
@@ -949,9 +949,11 @@ EOF
 
     foreach my $paramInfo ( @{$ConfigMenu{$menu}{param}} ) {
 
+        string_is_utf8( \$paramInfo );
         my $param    = $paramInfo->{name};
         my $disabled = shift(@mask);
 
+        string_is_utf8( \$param );
         next if ( $disabled || $menuDisable{$menu}{top} );
         if ( ref($paramInfo->{visible}) eq "CODE" && !&{$paramInfo->{visible}}($newConf, $bpc) ) {
             next;
@@ -1132,6 +1134,7 @@ sub fieldHiddenBuild
 
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {
             my $fld = $order[$fldNum];
+            string_is_utf8( \$fld );
             if ( defined($type->{child}) ) {
                 $childType = $type->{child}{$fld};
             } else {
@@ -1336,6 +1339,7 @@ EOF
 
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {
             my $fld = $order[$fldNum];
+            string_is_utf8( \$fld );
             $content .= <<EOF;
 <tr><td class="border hasButtons">$fld
 EOF
@@ -1392,6 +1396,7 @@ EOF
 
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {
             my $fld = $order[$fldNum];
+            string_is_utf8( \$fld );
             if ( defined($type->{child}) ) {
                 $childType = $type->{child}{$fld};
             } else {
@@ -1520,6 +1525,7 @@ sub fieldErrorCheck
         }
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {
             my $fld = $order[$fldNum];
+            string_is_utf8( \$fld );
             if ( defined($type->{child}) ) {
                 $childType = $type->{child}{$fld};
             } else {
@@ -1605,6 +1611,7 @@ sub fieldInputParse
 {
     my($type, $varName, $value) = @_;
 
+    string_is_utf8( \$varName );
     $type = {type => $type} if ( ref($type) ne "HASH" );
 
     if ( $type->{type} eq "list" ) {
@@ -1617,12 +1624,7 @@ sub fieldInputParse
             # Not strictly necessary if the buttons have been disabled as above. == GWH ==
             if ( !$type->{maxElements} or ($i < $type->{maxElements}) )
             {
-                #print( STDERR "EditConfig.pm: Pushing value [$val] to [$varName] array\n" );
                 push(@$$value, $val);
-            }
-            else
-            {
-                print( STDERR "EditConfig.pm: Refusing to push element index [$i] to [$varName] array\n" );
             }
         }
         $$value = undef if ( $type->{undefIfEmpty} && @$$value == 0 );
@@ -1644,6 +1646,7 @@ sub fieldInputParse
 
         for ( my $fldNum = 0 ; $fldNum < @order ; $fldNum++ ) {
             my $fld = $order[$fldNum];
+            string_is_utf8( \$fld );
             my $val;
             if ( defined($type->{child}) ) {
                 $childType = $type->{child}{$fld};
@@ -1652,7 +1655,7 @@ sub fieldInputParse
             }
             $ret ||= fieldInputParse($childType, "${varName}_zZ_$fldNum", \$val);
             last if ( $ret );
-            $$value->{$fld} = $val;
+            $$value->{"$fld"} = $val;
         }
         return $ret;
     } else {
@@ -1696,6 +1699,7 @@ sub fieldInputParse
                 }
             }
         } else {
+            string_is_utf8( \$varName );
             $$value = decode_utf8($In{"v_zZ_$varName"});
             $$value =~ s/\r\n/\n/g;
 
@@ -1809,5 +1813,96 @@ sub hostsDiffMesg
     }
     return ($mesg, $hostChange);
 }
+
+# Temporary test for UTF-8 encoded character string.  This version is Mk.IV.  Don't ask.
+#
+# Credit: https://www.perlmonks.org/?node_id=261242 but **note** that although it
+# handles 2- and 3-byte multi-byte characters, it doesn't handle 4-byte characters.
+# That needs fixing before we go into production.  We *could* probably just use
+# the utf8::valid() function, but being a careful soul I don't yet trust it.  == GWH ==
+#
+# The argument is a *reference* to a scalar which contains the string to be tested.
+#
+# Does nothing, and returns undef, if the argument is either (1) entirely ASCII or (2) not valid UTF-8.
+#
+# If the referenced scalar is found to be valid UTF-8, sets Perl's UTF8 flag on it and returns the percent-encoded string
+# which apart from its existence probably gets ignored.
+#
+sub string_is_utf8
+{
+    my $string_ref = shift;
+    # If it's pure ASCII, return 0.
+    if( $$string_ref !~ m/[^\x00-\x7f]/ )
+    {
+	return;
+    }
+    use bytes ;
+    my @bytes = unpack( "C*", $$string_ref );
+    my @c;
+
+# Tell us if string is valid UTF-8, and its length in *bytes* not characters (because, note, we have 'use bytes' set in the current scope).
+# my $isutf = utf8::valid( $$str_ref ) ;	# utf8::valid() returns true for pure ASCII, which is not what I want here.
+# printf( STDERR "String %s %s valid UTF-8, length = %d\n", $$string_ref, ($isutf) ? 'is' : 'is not', scalar @bytes );
+
+    my $widec = ""; # accumulate valid utf8 bytes here
+    my $width = 0;  # keep track of how many bytes to accumulate
+
+    for my $b ( @bytes )
+    {
+	if( $b & 0x80 ) { push( @c, sprintf("%%%02X",$b) ); } else { push( @c, chr($b) ); }
+	if (( $b & 0xf0 ) == 0xe0 or  # high 4 bits are 1110 
+	    ( $b & 0xe0 ) == 0xc0 )   # high 3 bits are 110
+	{
+	    # either condition represents the start of a multibyte-char
+	    if( $width )
+	    {
+#		warn "Bad byte sequence 1110 or 110 in follow-on character!\n";
+		return;
+	    }
+	    $width = (( $b & 0xe0 ) == 0xe0 ) ?  3 : 2;
+	    $widec .= chr( $b );
+	}
+	elsif (( $b & 0xc0 ) == 0x80 )  # high 2 bits are 10
+	{
+	    # this should be a continuation of a multibyte-char
+	    if( ! $width )
+	    {
+#		warn "Bad byte sequence 10 in first byte of UTF-8 character!\n";
+		return;
+	    }
+	    $widec .= chr( $b );
+	}
+	elsif (( $b & 0x80 ) == 0 )   # this is an ascii byte
+	{
+	    # cannot occur while assembling a multibyte-char
+	    if( $width )
+	    {
+#		warn "Bad byte sequence - follow-on byte is an ASCII character!\n" if ( $width );
+		return;
+	    }
+	    $width = 1;
+	    $widec = chr( $b );
+	}
+	else {
+#	    warn "Bad byte value!\n"; # all four high-bits set
+	    return;
+	}
+	if ( length( $widec ) == $width ) {
+	    $width = 0;
+	    $widec = "";
+	}
+    }
+    if( $width )
+    {
+#	warn "Incomplete multibyte character!\n";
+	return;
+    }
+
+    # here if the string is valid utf8 - set Perl's flag and return the string in percent-encoded form.
+#   warn "String is valid UTF-8.\n";
+    utf8::decode( $$string_ref );
+    return join '', @c ;
+}
+
 
 1;

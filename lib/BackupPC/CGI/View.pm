@@ -7,10 +7,10 @@
 #   This module implements the View action for the CGI interface.
 #
 # AUTHOR
-#   Craig Barratt  <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2003-2013  Craig Barratt
+#   Copyright (C) 2003-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -27,9 +27,10 @@
 #
 #========================================================================
 #
-# Version 4.0.0alpha3, released 1 Dec 2013.
+# 13 November 2025, for release with
+# Version 4.4.1.
 #
-# See http://backuppc.sourceforge.net.
+# See https://backuppc.github.io/backuppc
 #
 #========================================================================
 
@@ -46,7 +47,7 @@ sub action
     my $compress   = 0;
     my $fh;
     my $host      = $In{host};
-    my $num       = $In{num};
+    my $num       = ${EscHTML($In{num})};
     my $type      = $In{type};
     my $linkHosts = 0;
     my($file, $comment);

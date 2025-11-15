@@ -868,7 +868,7 @@ $Conf{BackupZeroFilesIsFatal} = 1;
 # The valid values are:
 #
 #   - 'smb':     backup and restore via smbclient and the SMB protocol.
-#                Easiest choice for WinXX.
+#                Easiest choice for WinXX but be aware of its limitations.
 #
 #   - 'rsync':   backup and restore via rsync (via rsh or ssh).
 #                Best choice for linux/unix.  Good choice also for WinXX.

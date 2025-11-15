@@ -756,16 +756,25 @@ L<http://www.cpan.org>.
 
 =item *
 
-The perl modules BackupPC::XS (version >= 0.50) is required, and several
-others, File::Listing, Archive::Zip, XML::RSS, JSON::XS, Net::FTP,
-Net::FTP::RetrHandle, Net::FTP::AutoReconnect are recommended.
+The perl module BackupPC::XS (version >= 0.62) , Time::ParseDate, CGI
+and SCGI are required.  Several others, Archive::Zip, File::Listing,
+JSON::XS, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect and
+XML::RSS are recommended.
 
-Try "perldoc BackupPC::XS" and "perldoc Archive::Zip" to see if you have these
-modules.  If not, fetch them from L<http://www.cpan.org> and see the
-instructions below for how to build and install them.
+Try "perldoc BackupPC::XS" and e.g. "perldoc Archive::Zip" to see if
+you have these modules.  If not, check if your distribution has them
+packaged.  It's probably easiest if you can get them from there, and
+the distribution will then look after any updates which come along
+later. If your distribution doesn't have them packaged, fetch them
+from their homes at L<https://github.com/backuppc/backuppc-xs> and
+L<http://www.cpan.org> respectively.  See the instructions within the
+downloaded package or below for how to build and install them.
 
-The CGI Perl module is required for the http/cgi user interface. CGI was a core
-module, but from version 5.22 Perl no longer ships with it.
+The CGI Perl module is required for the http/cgi user interface. CGI
+was a core module, but from version 5.22 Perl no longer ships with it
+and you may need to install it as well.  The SCGI module is needed in
+cases where you're using the SCGI 'shim' between BackupPC and Apache.
+You can disable the use of SCGIU in the BackupPC configuration file.
 
 =item *
 
@@ -2361,7 +2370,7 @@ the existing 3.x backups will still use hardlinks for storage, and until those
 3.x backups eventually expire, hardlinks will still be used for 3.x backups.
 
 BackupPC_migrateV3toV4 is an optional utility that can migrate existing 3.x
-backups to 4.x stoage format, eliminating hardlinks.  This allows you to
+backups to 4.x storage format, eliminating hardlinks.  This allows you to
 eliminate the old V3 pool and you can then set $Conf{PoolV3Enabled} to 0.
 
     BackupPC_migrateV3toV4 -a [-m] [-p] [-v]
@@ -2494,7 +2503,7 @@ setting in the main configuration. If you deselect "override" then the setting
 is removed from the host-specific configuration, and the main configuration
 file is displayed.
 
-User's can edit their host-specific configuration if enabled via
+Users can edit their host-specific configuration if enabled via
 $Conf{CgiUserConfigEditEnable}.  The specific subset of configuration settings
 that a user can edit is specified with $Conf{CgiUserConfigEdit}.  It is
 recommended to make this list short as possible (you probably don't want your

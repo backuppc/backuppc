@@ -7,11 +7,11 @@
 #   This script builds a distribution.  Arguments
 #   specify the release date and version:
 #
-#      makeDist [--nolangCheck] [--nosyntaxCheck] [--releasedate 'DD MMM YYYY'] --version X.Y.Z
+#      makeDist [--nolangCheck] [--nosyntaxCheck] [--releasedate 'DD MMM YYYY'] [--verbose] --version X.Y.Z
 #
 #   Example:
 #
-#      makeDist --releasedate '1 Dec 2013' --version 4.0.0alpha3
+#      makeDist --releasedate  '13 Nov 2025' --version 4.4.1rc1
 #
 #   makeDist merges the version number, release date and turns all the
 #   library paths etc back into the symbolic form (eg: __INSTALLDIR__)
@@ -24,15 +24,15 @@
 #   By default makeDist does a syntax check on all the source files.
 #   If you want to skip that you can use the --nosyntaxCheck option, eg:
 #
-#       makeDist --nolangCheck --nosyntaxCheck --releasedate '1 Dec 2013' --version 4.0.0alpha3
+#       makeDist --nolangCheck --nosyntaxCheck --releasedate '13 Nov 2025' --version 4.4.1rc1
 #
 #   The distribution is in the file name: dist/BackupPC-$Version.tar.gz.
 #
 # AUTHOR
-#   Craig Barratt <cbarratt@users.sourceforge.net>
+#   Craig Barratt
 #
 # COPYRIGHT
-#   Copyright (C) 2001-2015  Craig Barratt
+#   Copyright (C) 2001-2025  Craig Barratt
 #
 #   This program is free software: you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
@@ -151,11 +151,12 @@ my @PerlSrc = qw(
 my %opts;
 $opts{langCheck}   = 1;
 $opts{syntaxCheck} = 1;
-if (   !GetOptions(\%opts, "langCheck!", "syntaxCheck!", "version=s", "releasedate=s",)
+$opts{verbose}     = 0;
+if (   !GetOptions(\%opts, "langCheck!", "syntaxCheck!", "verbose!", "version=s", "releasedate=s",)
     || @ARGV != 0
     || !defined($opts{version}) ) {
     print STDERR <<EOF;
-usage: $0 [--nolangCheck] [--nosyntaxCheck] [--releasedate 'DD MMM YYYY'] --version X.Y.Z
+usage: $0 [--nolangCheck] [--nosyntaxCheck] [--releasedate 'DD MMM YYYY'] [--verbose] --version X.Y.Z
 EOF
     exit(1);
 }
@@ -211,16 +212,22 @@ $ConfVars->{BlackoutHourEnd}   = 2;
 $ConfVars->{BlackoutWeekDays}  = 2;
 $ConfVars->{RsyncLogLevel}     = 2;
 
+# 2025.11.16: Added '--verbose' option.  == GWH ==
+my $silent = '2> /dev/null';
+my $chatty = '';
+my $output;
+if( $opts{'verbose'} ) { $output = $chatty; } else { $output = $silent; }
+
 if ( $opts{syntaxCheck} ) {
-    system("perl -Ilib -c conf/config.pl 2> /dev/null")
-      && die("$0: conf/config.pl contains an error (or someone killed me)\n");
-    system("perl -Ilib -c configure.pl 2> /dev/null")
-      && die("$0: configure.pl contains an error (or someone killed me)\n");
+    system("perl -Ilib -c conf/config.pl $output")
+      && die("$0: conf/config.pl does not compile (or someone killed me)\n");
+    system("perl -Ilib -c configure.pl $output")
+      && die("$0: configure.pl does not compile (or someone killed me)\n");
 }
 foreach my $file ( @PerlSrc ) {
     if ( $opts{syntaxCheck} ) {
-        system("perl -Ilib -c $file 2> /dev/null")
-          && die("$0: $file contains an error (or someone killed me)\n");
+        system("perl -Ilib -c $file $output")
+          && die("$0: $file does not compile (or someone killed me)\n");
     }
     #
     # Skip checking of bundled libraries not explicitly part of

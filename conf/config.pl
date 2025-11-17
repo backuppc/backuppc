@@ -1758,11 +1758,6 @@ $Conf{PingMaxMsec} = 20;
 # new compression level will take effect only for new files that are
 # newly compressed and added to the pool.
 #
-# If compression was off and you are enabling compression for the first
-# time you can use the BackupPC_compressPool utility to compress the
-# pool.  This avoids having the pool grow to accommodate both compressed
-# and uncompressed backups.  See the documentation for more information.
-#
 $Conf{CompressLevel} = 3;
 
 #

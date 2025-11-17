@@ -90,8 +90,8 @@ BackupPC is Open Source software hosted by GitHub.
 
 =head2 BackupPC 4.0
 
-This is the first release of 4.0, which is a significant rewrite of BackupPC.
-This section provides a short overview of the changes and features in 4.0.
+This was the first release of version 4, a significant rewrite of BackupPC.
+This section provides a short overview of the changes and features.
 
 Here's a short summary of what has changed in V4:
 
@@ -393,13 +393,18 @@ BackupPC_fsck cannot run when BackupPC is running.
 
 =item *
 
-When BackupPC_refCountUpdate updates the overall reference counts, it removes
-pool files that have a reference count of zero.  To avoid race conditions, it
-uses a two-phase process.  It first flags files that have zero reference counts
-using one of the file attributes.  The next time it runs (typically 24 hours
-later), any flagged files that still have zero reference count are then
-removed.  The rest of the code knows not to use flagged pool files to avoid
-race conditions.
+When BackupPC_refCountUpdate updates the overall reference counts, it
+removes pool files that have a reference count of zero and whose mtime
+is more than seven days in the past.  To avoid race conditions, it
+uses a two-phase process.  It first flags files that have zero
+reference counts using one of the file attributes.  The next time it
+runs (typically 24 hours later, but of course this depends on the
+configuration and perhaps operational things), any flagged files that
+still have zero reference count and qualifying mtime are then removed.
+The rest of the code knows not to use flagged pool files to avoid race
+conditions.  If $Conf{XferLogLevel} >= 3, or if transfer errors occur,
+then BackupPC_refCountUpdate will log the number of files skipped for
+deletion and the number of blocks occupied by those files in total.
 
 =item *
 
@@ -819,7 +824,7 @@ the rrdtool executable.
 
 =head2 What type of storage space do I need?
 
-Starting with 4.0.0, BackupPC no longer uses hardlinks for storage of
+Starting with version 4, BackupPC no longer uses hardlinks for storage of
 deduplicated files.  However, hardlinks are still used temporarily in a few
 places for doing atomic renames, with a fallback doing a file copy if the
 hardlink fails, and files are moved (renamed) across various paths that turn
@@ -876,21 +881,22 @@ inodes when the file system is built.  Use "df -i" to see your inode usage.
 =head2 Step 1: Getting BackupPC
 
 Many linux distributions now include BackupPC, so installing BackupPC via your
-package manager is the best approach.
+package manager is usually the best approach.
 
-For example, for Debian, supported by Axel Beckert, Jonathan Wiltshire and
-former Ludovic Drolez, can be found at L<http://packages.debian.org/backuppc>
-and is included in the current stable Debian release.  On Debian, BackupPC can
-be installed with the command:
+For example the Debian package, supported by Axel Beckert, Tobias
+Frost, Jonathan Wiltshire and formerly Ludovic Drolez, can be found at
+L<http://packages.debian.org/backuppc> and is included in the current
+stable Debian release.  On Debian, the command:
 
     apt-get install backuppc
 
-You should also install rsync-bpc; the BackupPC package might include it
-already, but if not:
+not only installs backuppc-rsync and libbackuppc-xs-perl (these are
+essential to a working BackupPC installation) but also installs Apache
+and numerous supporting packages which, although they are not strictly
+necessary to run BackupPC, make it much easier to control and monitor
+the backup system until you become familiar with it.
 
-    apt-get install rsync-bpc
-
-If those commands work, you can skip to Step 3.
+Assuming the apt-get command works OK, you can skip to Step 3.
 
 Alternatively, manually fetching and installing BackupPC is easy. Start by
 downloading the latest version from
@@ -3837,8 +3843,8 @@ support fr.pm updates for each new version.
 
 Josh Marshall implemented the Archive feature in v2.1.0.
 
-Axel Beckert, Jonathan Wiltshire and former Ludovic Drolez supporting the
-BackupPC Debian package.
+Axel Beckert, Jonathan Wiltshire and Tobias Frost support the Debian
+BackupPC package.
 
 Javier Gonzalez provided the Spanish translation, es.pm for v2.0.0.
 

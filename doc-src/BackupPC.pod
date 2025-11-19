@@ -3,7 +3,8 @@
 =head1 BackupPC Introduction
 
 This documentation describes BackupPC version __VERSION__, released on
-__RELEASEDATE__.
+__RELEASEDATE__.  A copy of this document is contained in the BackupPC
+distribution.  It B<may> be more recent than what you are reading now.
 
 =head2 Overview
 
@@ -761,7 +762,7 @@ L<http://www.cpan.org>.
 
 =item *
 
-The perl module BackupPC::XS (version >= 0.62) , Time::ParseDate, CGI
+The perl module BackupPC::XS (version >= 0.63) , Time::ParseDate, CGI
 and SCGI are required.  Several others, Archive::Zip, File::Listing,
 JSON::XS, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect and
 XML::RSS are recommended.

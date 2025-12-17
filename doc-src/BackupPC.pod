@@ -9,7 +9,7 @@ distribution.  It B<may> be more recent than what you are reading now.
 =head2 Overview
 
 BackupPC is a high-performance, enterprise-grade system for backing up Unix,
-Linux, WinXX, and MacOSX PCs, desktops and laptops to a server's disk. BackupPC
+Linux, WinXX, and macOS PCs, desktops and laptops to a server's disk. BackupPC
 is highly configurable and easy to install and maintain.
 
 Given the ever decreasing cost of disks and raid systems, it is now practical
@@ -49,7 +49,7 @@ Portuguese-Brazilian, Chinese, Polish, Czech, Japanese, Ukrainian, and Russian.
 =item *
 
 No client-side software is needed. On WinXX the standard smb protocol is used
-to extract backup data. On linux, unix or MacOSX clients, rsync, tar (over
+to extract backup data. On linux, unix or macOS clients, rsync, tar (over
 ssh/rsh/nfs) or ftp is used to extract backup data.  Alternatively, rsync can
 also be used on WinXX (using cygwin), since rsync provides for efficient
 transfers and allows incremental backups to detect almost all changes.
@@ -1210,7 +1210,7 @@ Here's a simple example of a hosts file:
 
 Four methods for getting backup data from a client are supported: smb, tar,
 rsync and ftp.  Smb or rsync are the preferred methods for WinXX clients and
-rsync or tar are the preferred methods for linux/unix/MacOSX clients.
+rsync or tar are the preferred methods for linux/unix/macOS clients.
 
 The transfer method is set using the $Conf{XferMethod} configuration setting.
 If you have a mixed environment (ie: you will use smb for some clients and tar
@@ -1470,12 +1470,20 @@ There are two common versions of ssh: v1 and v2. Here are some instructions for
 one way to setup ssh.  (Check which version of SSH you have by typing "ssh" or
 "man ssh".)
 
-=item MacOSX
+=item macOS
 
 In general this should be similar to Linux/Unix machines. In versions 10.4 and
-later, the native MacOSX tar works, and also supports resource forks.  xtar is
-another option, and rsync works too (although the MacOSX-supplied rsync has an
-extension for extended attributes that is not compatible with standard rsync).
+later, the native macOS tar works, and also supports resource forks.  Another
+option is xtar.  For many years Apple supplied an old version of rsync because
+of licensing issues (later versions of rsync moved from GPL 2.x to GPL3.x) and
+although it was patched for various issues it was still based on 2006 code.
+With the release of Sequoia in June 2024 Apple replaced rsync with openrsync,
+an alternative which like the older patched rsync from Apple is not entirely
+compatible with what one might call 'standard' rsync.  It's possible for the
+rsync used by BackupPC to work with openrsync but you will need to modify some
+of the options in the BackupPC configuration.  At least remove '--protect-args'
+because this option is not supported by any Apple-supplied version of rsync.
+A better option on macOS would probably be to install a recent, genuine rsync.
 
 =item SSH Setup
 

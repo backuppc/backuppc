@@ -240,6 +240,10 @@ $Conf{BackupPCNightlyPeriod} = 1;
 #        stay accurate after a few day, in case the relative
 #        upgrades miss a file)
 #
+# Note that it will take at least $Conf{BackupPCNightlyPeriod} nights
+# to update the size for the whole pool.
+# $Conf{PoolSizeNightlyUpdatePeriod} can only be used to increase that duration.
+#
 $Conf{PoolSizeNightlyUpdatePeriod} = 16;
 
 #

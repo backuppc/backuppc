@@ -865,11 +865,17 @@ sub updateTotalRefCnt
             # So decide when to do a full pool size scan.  $refCntFile goes from 0..127,
             # phase ($opts{P}) is 0..15 and $Conf{PoolSizeNightlyUpdatePeriod} is
             # 0, 1, 2, 4, 8, 16.
+            # When $Conf{BackupPCNightlyPeriod} > 1 $refCntFile will only cover a subset
+            # each day. We repeat our subset $Conf{BackupPCNightlyPeriod} times to cover
+            # the whole pool.
+            # If $Conf{BackupPCNightlyPeriod} is longer then $Conf{PoolSizeNightlyUpdatePeriod},
+            # we will take $Conf{BackupPCNightlyPeriod} anyway to traverse the whole pool.
             #
             my $fullPoolScan;
             if ( $Conf{PoolSizeNightlyUpdatePeriod} > 0 && defined($opts{P}) ) {
-                $fullPoolScan = (int($refCntFile / 8) % $Conf{PoolSizeNightlyUpdatePeriod}) ==
-                  ($opts{P} % $Conf{PoolSizeNightlyUpdatePeriod});
+                my $perNight = int( $Conf{PoolSizeNightUpdatePeriod} / $Conf{BackupPCNightlyPeriod} );
+                $fullPoolScan = ($perNight == 0) ||
+                  (int($refCntFile / 8) % $perNight) == ( ($opts{P} / $Conf{BackupPCNightlyPeriod}) % $perNight);
             }
 
             #            print("BackupPC_refCountUpdate: computing full $poolName size for $refCntFile (phase = $opts{P},"

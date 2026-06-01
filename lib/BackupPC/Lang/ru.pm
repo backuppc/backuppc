@@ -1131,6 +1131,7 @@ $Lang{Config_file}   = "Config file";
 # $Lang{Hosts_file} = "Hosts file";
 $Lang{Current_queues} = "Сводка по Очередям";
 $Lang{Documentation}  = "Руководство";
+$Lang{Check}          = "Проверка";
 
 #$Lang{Host_or_User_name} = "<small>Host or User name:</small>";
 $Lang{Go}            = "Найти";

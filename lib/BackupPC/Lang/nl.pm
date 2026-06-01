@@ -1142,6 +1142,7 @@ $Lang{Config_file}   = "Configuratiebest.";
 # $Lang{Hosts_file} = "Hosts-bestand";
 $Lang{Current_queues} = "Huidige wachtrij";
 $Lang{Documentation}  = "Documentatie";
+$Lang{Check}          = "Verificatie";
 
 #$Lang{Host_or_User_name} = "<small>Machine of gebruikersnaam:</small>";
 $Lang{Go}            = "Start";

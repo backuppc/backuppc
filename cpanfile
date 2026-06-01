@@ -4,3 +4,4 @@ requires 'CGI';
 requires 'File::Listing';
 requires 'Time::ParseDate';
 requires 'SCGI';
+requires 'Statistics::Descriptive';

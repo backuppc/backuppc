@@ -1094,6 +1094,7 @@ $Lang{Config_file}   = "配置文件";
 # $Lang{Hosts_file} = "Hosts file";
 $Lang{Current_queues} = "当前队列";
 $Lang{Documentation}  = "文档资料";
+$Lang{Check}          = "核对";
 
 #$Lang{Host_or_User_name} = "<small>Host or User name:</small>";
 $Lang{Go}            = "确定";

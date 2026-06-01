@@ -1129,6 +1129,7 @@ $Lang{Config_file}   = "Config file";
 # $Lang{Hosts_file} = "Hosts file";
 $Lang{Current_queues} = "Current queues";
 $Lang{Documentation}  = "Documentation";
+$Lang{Check}          = "Check";
 
 #$Lang{Host_or_User_name} = "<small>Host or User name:</small>";
 $Lang{Go}            = "Go";

@@ -1140,6 +1140,7 @@ $Lang{Config_file}   = "Konfigurationsdatei";
 # $Lang{Hosts_file} = "Hosts Datei";
 $Lang{Current_queues} = "Warteschlangen";
 $Lang{Documentation}  = "Dokumentation";
+$Lang{Check}          = "Überprüfung";
 
 #$Lang{Host_or_User_name} = "<small>Computer oder Benutzer Name:</small>";
 $Lang{Go}            = "gehe zu";

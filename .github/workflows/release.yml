@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '4.*'
+
+permissions:
+  contents: write   # required to create the release and upload the asset
+
+jobs:
+  release:
+    name: Build and publish BackupPC ${{ github.ref_name }}
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: ${{ github.ref_name }}
+
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@v4
+
+      - name: Install system build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cpanminus libperl-dev zlib1g-dev
+
+      - name: Install Perl modules
+        run: |
+          sudo cpanm --quiet --installdeps --notest .
+
+      - name: Build distribution tarball
+        run: |
+          ./makeDist --version "$VERSION"
+          test -f "dist/BackupPC-${VERSION}.tar.gz"
+
+      - name: Extract ChangeLog section for ${{ github.ref_name }}
+        run: |
+          notes=$(awk -v ver="$VERSION" '
+            BEGIN { gsub(/\./, "\\.", ver); state = 0 }
+            state == 0 { if ($0 ~ "^# Version (Version )?" ver "([,[:space:]]|$)") state = 1; next }
+            state == 1 { if ($0 ~ /^#-+$/) { state = 2; next } ; state = 2 }
+            state == 2 { if ($0 ~ /^#-+$/) exit; print }
+          ' ChangeLog | sed '/./,$!d')
+
+          if [ -z "$notes" ]; then
+            echo "::error::No '# Version $VERSION' section found in ChangeLog" >&2
+            exit 1
+          fi
+          printf '%s\n' "$notes" > RELEASE_NOTES.md
+          cat RELEASE_NOTES.md
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          case "$VERSION" in
+            *alpha*|*beta*|*rc*) prerelease=--prerelease ;;
+            *)                   prerelease= ;;
+          esac
+
+          gh release create "$VERSION" \
+            --title "BackupPC $VERSION release" \
+            --notes-file RELEASE_NOTES.md \
+            --verify-tag \
+            $prerelease \
+            "dist/BackupPC-${VERSION}.tar.gz"

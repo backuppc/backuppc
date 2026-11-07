@@ -1516,7 +1516,9 @@ $Conf{FtpPassive} = 1;
 #    implicit  TLS from the start of the connection (usually port 990;
 #              if $Conf{FtpPort} is undefined, 990 is used).
 #
-# TLS requires the perl module IO::Socket::SSL and a recent Net::FTP
+# TLS requires the perl module IO::Socket::SSL (version >= 2.007; e.g.,
+# the package libio-socket-ssl-perl on Debian/Ubuntu, perl-IO-Socket-SSL
+# on RedHat/Fedora, or perl-io-socket-ssl on Alpine) and a recent Net::FTP
 # (libnet 3.x).  The data connections are also encrypted.
 #
 # This setting is used only if $Conf{XferMethod} = 'ftp'.

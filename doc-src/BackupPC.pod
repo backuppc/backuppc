@@ -764,8 +764,8 @@ L<http://www.cpan.org>.
 
 The perl module BackupPC::XS (version >= 0.63) , Time::ParseDate, CGI
 and SCGI are required.  Several others, Archive::Zip, File::Listing,
-JSON::XS, Net::FTP, Net::FTP::RetrHandle, Net::FTP::AutoReconnect and
-XML::RSS are recommended.
+JSON::XS, IO::Socket::SSL, Net::FTP, Net::FTP::RetrHandle,
+Net::FTP::AutoReconnect and XML::RSS are recommended.
 
 Try "perldoc BackupPC::XS" and e.g. "perldoc Archive::Zip" to see if
 you have these modules.  If not, check if your distribution has them
@@ -965,6 +965,15 @@ install only File::Listing from L<http://www.cpan.org>. You can run "perldoc
 File::Listing" to see if this module is installed. Net::FTP is a standard
 module. Net::FTP::RetrHandle and Net::FTP::AutoReconnect included in BackupPC
 distribution.
+
+=item IO::Socket::SSL
+
+IO::Socket::SSL (version >= 2.007) is needed only to use FTP over TLS
+(FTPS), i.e., when $Conf{FtpTLS} is set to "explicit" or "implicit".  It
+also requires a Net::FTP from libnet 3.x.  Many distributions package it
+separately, e.g., "apt-get install libio-socket-ssl-perl" (Debian/Ubuntu),
+"yum install perl-IO-Socket-SSL" (RedHat/Fedora) or
+"apk add perl-io-socket-ssl" (Alpine).
 
 =back
 

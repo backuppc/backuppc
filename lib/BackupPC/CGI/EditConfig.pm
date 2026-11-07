@@ -268,6 +268,14 @@ our %ConfigMenu = (
                 visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },
             {
+                name    => "FtpTLS",
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
+            },
+            {
+                name    => "FtpTLSVerify",
+                visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
+            },
+            {
                 name    => "FtpBlockSize",
                 visible => sub { return $_[0]->{XferMethod} eq "ftp"; }
             },

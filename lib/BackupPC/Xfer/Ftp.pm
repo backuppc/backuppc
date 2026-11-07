@@ -193,6 +193,28 @@ sub start
     $t->logWrite("Connected to $args->{Host}\n", 2);
 
     #
+    # For explicit FTPS, upgrade the control connection to TLS before
+    # sending any credentials.  Implicit FTPS is already encrypted.
+    #
+    if ( ($conf->{FtpTLS} || "none") eq "explicit" ) {
+        my $ok;
+        eval { $ok = $t->{ftp}->starttls(); };
+        if ( !$ok ) {
+            my $err = $@ || $t->{ftp}->message();
+            $err =~ s/\s+$//;
+            if ( defined($IO::Socket::SSL::SSL_ERROR) && length("$IO::Socket::SSL::SSL_ERROR") ) {
+                $err .= " (TLS handshake failed: $IO::Socket::SSL::SSL_ERROR)";
+            }
+            $t->{_errStr} = "Can't start TLS on ftp connection to $args->{Host}: $err";
+            $t->{xferErrCnt}++;
+            return;
+        }
+        $t->logWrite("TLS (explicit FTPS) negotiated with $args->{Host}\n", 2);
+    } elsif ( ($conf->{FtpTLS} || "none") eq "implicit" ) {
+        $t->logWrite("TLS (implicit FTPS) in use with $args->{Host}\n", 2);
+    }
+
+    #
     # Log in to the ftp server and set appropriate path information.
     #
     undef $@;
@@ -555,13 +577,30 @@ sub getFTPArgs
 {
     my($t) = @_;
     my $conf = $t->{conf};
+    my $tls  = $conf->{FtpTLS} || "none";
+
+    my %tlsArgs;
+    if ( $tls ne "none" ) {
+        #
+        # Implicit FTPS uses SSL => 1 in Net::FTP.  For explicit FTPS the
+        # SSL_* arguments are still needed in new() (they are reused for
+        # the data connections); starttls() is called after connecting.
+        #
+        %tlsArgs = (
+            SSL_verify_mode => (defined($conf->{FtpTLSVerify}) ? $conf->{FtpTLSVerify} : 1) ? 1 : 0,
+            SSL_verifycn_name => $t->{host},
+            SSL_hostname      => $t->{host},
+        );
+        $tlsArgs{SSL} = 1 if ( $tls eq "implicit" );
+    }
 
     return {
+        %tlsArgs,
         Host         => $t->{hostIP} || $t->{host},
         Firewall     => undef,                                                      # not used
         FirewallType => undef,                                                      # not used
         BlockSize    => $conf->{FtpBlockSize} || 10240,
-        Port         => $conf->{FtpPort}      || 21,
+        Port         => $conf->{FtpPort}      || (($conf->{FtpTLS} || "") eq "implicit" ? 990 : 21),
         Timeout      => defined($conf->{FtpTimeout}) ? $conf->{FtpTimeout} : 120,
         Debug        => $t->{logLevel} >= 5          ? 1                   : 0,
         Passive      => (defined($conf->{FtpPassive}) ? $conf->{FtpPassive} : 1),

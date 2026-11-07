@@ -1508,6 +1508,33 @@ $Conf{FtpPasswd} = '';
 $Conf{FtpPassive} = 1;
 
 #
+# Whether to use TLS (FTPS).  Allowed values are:
+#
+#    none      plain, unencrypted FTP (default);
+#    explicit  connect on the normal FTP port, then upgrade the connection
+#              with AUTH TLS (FTPES) before logging in;
+#    implicit  TLS from the start of the connection (usually port 990;
+#              if $Conf{FtpPort} is undefined, 990 is used).
+#
+# TLS requires the perl module IO::Socket::SSL and a recent Net::FTP
+# (libnet 3.x).  The data connections are also encrypted.
+#
+# This setting is used only if $Conf{XferMethod} = 'ftp'.
+#
+$Conf{FtpTLS} = 'none';
+
+#
+# Whether to verify the server's TLS certificate (and that it matches the
+# client's host name) when $Conf{FtpTLS} is 'explicit' or 'implicit'.
+# Set to 0 only for servers with self-signed certificates that you cannot
+# otherwise trust, since it disables protection against man-in-the-middle
+# attacks.
+#
+# This setting is used only if $Conf{XferMethod} = 'ftp'.
+#
+$Conf{FtpTLSVerify} = 1;
+
+#
 # Transfer block size. This sets the size of the amounts of data in
 # each frame. While undefined, this value takes the default value.
 #
@@ -2361,6 +2388,8 @@ $Conf{CgiUserConfigEdit} = {
     FtpRestoreEnabled         => 1,
     FtpShareName              => 1,
     FtpTimeout                => 1,
+    FtpTLS                    => 1,
+    FtpTLSVerify              => 1,
     FtpUserName               => 1,
     FullAgeMax                => 1,
     FullKeepCnt               => 1,

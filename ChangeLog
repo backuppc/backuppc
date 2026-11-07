@@ -27,6 +27,9 @@
 
 Maintenance release.
 
+Added support for FTP over TLS (FTPS, explicit and implicit) via new
+config settings $Conf{FtpTLS} and $Conf{FtpTLSVerify}.
+
 Merged pull requests #41, #46, #47 for rsync-bpc
 Merged pull requests #500, #501, #521, #527, #537, #548 for backuppc
 
